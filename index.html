@@ -23,7 +23,7 @@
         .header {
             background: #131318;
             border-bottom: 1px solid #2a2a35;
-            padding: 20px 40px;
+            padding: 24px 40px;
             display: flex;
             align-items: center;
             gap: 20px;
@@ -37,34 +37,34 @@
         }
 
         .logo-icon {
-            width: 36px;
-            height: 36px;
+            width: 48px;
+            height: 48px;
             background: #F97316;
-            border-radius: 6px;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 700;
             color: #0c0c0f;
             font-family: 'Space Grotesk', sans-serif;
-            font-size: 18px;
+            font-size: 22px;
         }
 
         .logo-text {
             display: flex;
             flex-direction: column;
-            gap: 2px;
+            gap: 3px;
         }
 
         .logo-brand {
             font-family: 'Space Grotesk', sans-serif;
-            font-size: 18px;
+            font-size: 24px;
             font-weight: 700;
             color: #e8e8f0;
         }
 
         .logo-subtitle {
-            font-size: 11px;
+            font-size: 13px;
             color: #F97316;
             letter-spacing: 1px;
         }
@@ -162,7 +162,7 @@
         }
 
         .data-table th {
-            padding: 14px 20px;
+            padding: 16px 20px;
             text-align: left;
             font-family: 'Space Grotesk', sans-serif;
             font-size: 13px;
@@ -173,9 +173,9 @@
         }
 
         .data-table td {
-            padding: 14px 20px;
+            padding: 16px 20px;
             border-top: 1px solid #2a2a35;
-            font-size: 15px;
+            font-size: 16px;
         }
 
         .data-table tbody tr:hover {
@@ -196,6 +196,15 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            width: 220px;
+            white-space: nowrap;
+        }
+
+        /* Constrain team/player name columns so bar/value columns get the space */
+        .data-table th:nth-child(2),
+        .data-table td:nth-child(2) {
+            width: 220px;
+            white-space: nowrap;
         }
 
         .team-badge {
@@ -215,8 +224,8 @@
         }
 
         .bar-label {
-            width: 56px;
-            font-size: 13px;
+            width: 60px;
+            font-size: 14px;
             color: #6b6b7b;
             text-align: right;
         }
@@ -289,7 +298,7 @@
 
         .sparkline-team {
             font-family: 'Space Grotesk', sans-serif;
-            font-size: 15px;
+            font-size: 16px;
             font-weight: 600;
             color: #e8e8f0;
             margin-bottom: 10px;
@@ -304,7 +313,7 @@
         }
 
         .sparkline-change {
-            font-size: 13px;
+            font-size: 14px;
             margin-top: 8px;
             font-weight: 600;
         }
@@ -325,7 +334,7 @@
         }
 
         .matchweek-table th {
-            padding: 14px 20px;
+            padding: 16px 20px;
             text-align: left;
             font-family: 'Space Grotesk', sans-serif;
             font-size: 13px;
@@ -338,8 +347,8 @@
         }
 
         .matchweek-table td {
-            padding: 14px 20px;
-            font-size: 15px;
+            padding: 16px 20px;
+            font-size: 16px;
             border-top: 1px solid #2a2a35;
         }
 
@@ -366,6 +375,8 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            width: 220px;
+            white-space: nowrap;
         }
 
         .fixture-stat {
@@ -418,20 +429,20 @@
         }
 
         .heatmap-table th {
-            padding: 14px 10px;
+            padding: 16px 12px;
             text-align: center;
             font-family: 'Space Grotesk', sans-serif;
-            font-size: 12px;
+            font-size: 13px;
             font-weight: 600;
             text-transform: uppercase;
             color: #8b8b99;
         }
 
         .heatmap-table td {
-            padding: 10px;
+            padding: 12px;
             text-align: center;
             border: 1px solid #2a2a35;
-            font-size: 14px;
+            font-size: 15px;
             font-weight: 600;
         }
 
@@ -455,6 +466,8 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            width: 220px;
+            white-space: nowrap;
         }
 
         /* Player heatmap cells */
@@ -512,10 +525,10 @@
         }
 
         .final-table th {
-            padding: 12px 16px;
+            padding: 14px 16px;
             text-align: left;
             font-family: 'Space Grotesk', sans-serif;
-            font-size: 12px;
+            font-size: 13px;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -527,9 +540,9 @@
         }
 
         .final-table td {
-            padding: 12px 16px;
+            padding: 14px 16px;
             border-top: 1px solid #1e1e28;
-            font-size: 15px;
+            font-size: 16px;
             vertical-align: middle;
         }
 
@@ -580,10 +593,10 @@
         }
 
         .final-rank {
-            width: 40px;
+            width: 44px;
             text-align: center;
             color: #6b6b7b;
-            font-size: 15px;
+            font-size: 16px;
             font-weight: 600;
         }
 
@@ -598,28 +611,30 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            width: 220px;
+            white-space: nowrap;
         }
 
         .final-stat {
             text-align: right;
             color: #6b6b7b;
-            width: 52px;
-            font-size: 14px;
+            width: 56px;
+            font-size: 15px;
         }
 
         .final-points {
             text-align: right;
             font-weight: 700;
             color: #ffffff;
-            width: 54px;
-            font-size: 16px;
+            width: 58px;
+            font-size: 18px;
         }
 
         .final-left {
             text-align: right;
             color: #6b6b7b;
-            width: 48px;
-            font-size: 14px;
+            width: 52px;
+            font-size: 15px;
         }
 
         /* Projected pts bar cell */
@@ -661,20 +676,20 @@
         }
 
         .proj-bar-num {
-            font-size: 15px;
+            font-size: 16px;
             font-weight: 600;
             color: #F97316;
             white-space: nowrap;
-            min-width: 36px;
+            min-width: 40px;
             text-align: right;
         }
 
         .final-range {
             text-align: right;
             color: #4a4a5a;
-            font-size: 13px;
+            font-size: 14px;
             white-space: nowrap;
-            width: 76px;
+            width: 80px;
         }
 
         /* Player table */
@@ -690,7 +705,7 @@
         }
 
         .player-table th {
-            padding: 14px 16px;
+            padding: 16px 16px;
             text-align: left;
             font-family: 'Space Grotesk', sans-serif;
             font-size: 13px;
@@ -701,9 +716,9 @@
         }
 
         .player-table td {
-            padding: 12px 16px;
+            padding: 14px 16px;
             border-top: 1px solid #2a2a35;
-            font-size: 14px;
+            font-size: 15px;
         }
 
         .player-table tbody tr:hover {
@@ -714,6 +729,8 @@
             font-family: 'Space Grotesk', sans-serif;
             font-weight: 500;
             color: #e8e8f0;
+            width: 180px;
+            white-space: nowrap;
         }
 
         .player-team {
@@ -722,6 +739,8 @@
             display: flex;
             align-items: center;
             gap: 7px;
+            width: 160px;
+            white-space: nowrap;
         }
 
         .player-stat {
@@ -831,7 +850,7 @@
     <div class="header">
         <div class="logo">
             <div class="logo-icon">
-                <svg viewBox="0 0 28 28" fill="none" style="width:20px;height:20px"><rect x="3" y="18" width="5" height="8" rx="1.5" fill="white"/><rect x="11" y="11" width="5" height="15" rx="1.5" fill="white"/><rect x="19" y="5" width="5" height="21" rx="1.5" fill="white"/></svg>
+                <svg viewBox="0 0 28 28" fill="none" style="width:28px;height:28px"><rect x="3" y="18" width="5" height="8" rx="1.5" fill="white"/><rect x="11" y="11" width="5" height="15" rx="1.5" fill="white"/><rect x="19" y="5" width="5" height="21" rx="1.5" fill="white"/></svg>
             </div>
             <div class="logo-text">
                 <div class="logo-brand"><span style="color:#F97316">Apex</span>FootyData</div>
