@@ -819,6 +819,13 @@
         }
 
         /* Responsive */
+        /* ── Horizontal scroll for all table containers ─────────────── */
+        .subtab-content,
+        #matchweekContainer {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
         @media (max-width: 1200px) {
             .sparkline-grid {
                 grid-template-columns: repeat(3, 1fr);
@@ -829,25 +836,73 @@
             .header {
                 padding: 16px 20px;
             }
-
             .tab-content {
-                padding: 20px;
+                padding: 16px;
             }
-
             .sparkline-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
-
             .bar-container {
                 flex-wrap: wrap;
             }
-
             .tab-nav {
                 overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
             }
-
             .tab-button {
-                padding: 12px 16px;
+                padding: 10px 14px;
+                font-size: 12px;
+                white-space: nowrap;
+            }
+            .subtab-button {
+                padding: 8px 12px;
+                font-size: 11px;
+                white-space: nowrap;
+            }
+            /* Matchweek */
+            .matchweek-table td,
+            .matchweek-table th {
+                padding: 12px 10px;
+                font-size: 13px;
+            }
+            .fixture-team-cell {
+                width: 140px;
+                font-size: 13px;
+                gap: 6px;
+            }
+            .matchweek-table th:nth-child(1),
+            .matchweek-table td:nth-child(1) { width: 140px; }
+            .fixture-win-pill {
+                padding: 4px 8px;
+                font-size: 13px;
+            }
+            .fixture-stat { font-size: 13px; }
+            /* Heatmap */
+            .heatmap-table th,
+            .heatmap-table td {
+                padding: 10px 8px;
+                font-size: 12px;
+            }
+            .heatmap-team {
+                min-width: 110px;
+                font-size: 12px;
+            }
+            /* Player tables */
+            .player-table th,
+            .player-table td {
+                padding: 10px 8px;
+                font-size: 12px;
+            }
+            /* Final table */
+            .final-table th,
+            .final-table td {
+                padding: 10px 8px;
+                font-size: 12px;
+            }
+            /* Accuracy / data tables */
+            .data-table th,
+            .data-table td {
+                padding: 10px 8px;
                 font-size: 12px;
             }
         }
@@ -856,36 +911,60 @@
             .sparkline-grid {
                 grid-template-columns: 1fr;
             }
-
             .header {
                 flex-direction: column;
                 align-items: flex-start;
+                gap: 8px;
             }
-
-            .data-table,
-            .heatmap-table,
-            .final-table,
-            .player-table,
-            .matchweek-table {
+            .tab-content {
+                padding: 10px;
+            }
+            .tab-button {
+                padding: 10px 12px;
                 font-size: 11px;
             }
-
-            .data-table th,
-            .heatmap-table th,
-            .final-table th,
-            .player-table th,
+            /* Matchweek */
+            .matchweek-table td,
             .matchweek-table th {
-                padding: 8px 10px;
-                font-size: 10px;
+                padding: 10px 8px;
+                font-size: 12px;
             }
-
-            .data-table td,
-            .heatmap-table td,
-            .final-table td,
+            .fixture-team-cell {
+                width: 120px;
+                font-size: 12px;
+                gap: 4px;
+            }
+            .matchweek-table th:nth-child(1),
+            .matchweek-table td:nth-child(1) { width: 120px; }
+            .fixture-win-pill {
+                padding: 3px 7px;
+                font-size: 12px;
+            }
+            .fixture-stat { font-size: 12px; }
+            /* Heatmap */
+            .heatmap-table { table-layout: auto; }
+            .heatmap-table th,
+            .heatmap-table td {
+                padding: 8px 6px;
+                font-size: 11px;
+            }
+            .heatmap-team {
+                min-width: 90px;
+                font-size: 11px;
+            }
+            .heatmap-cell { min-width: 42px; }
+            /* Player / final / data tables */
+            .player-table th,
             .player-table td,
-            .matchweek-table td {
-                padding: 8px 10px;
+            .final-table th,
+            .final-table td,
+            .data-table th,
+            .data-table td {
+                padding: 8px 6px;
+                font-size: 11px;
             }
+            /* Team badge images — smaller on mobile */
+            .team-badge { width: 18px; height: 18px; }
         }
     </style>
 </head>
