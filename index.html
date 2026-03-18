@@ -325,12 +325,12 @@
             color: #f87171;
         }
 
-        /* Matchweek compact table */
+        /* Matchweek compact table — auto width so columns fit content tightly */
         .matchweek-table {
-            width: 100%;
+            width: auto;
+            min-width: 600px;
             border-collapse: collapse;
             margin-bottom: 20px;
-            table-layout: fixed;
         }
 
         .matchweek-table th {
@@ -543,20 +543,7 @@
             color: #6b6b7b;
         }
 
-        /* Final table: rank + team + stats fixed, bar col fills remaining space */
-        .final-table th:nth-child(1),
-        .final-table td:nth-child(1) { width: 52px; }
-        .final-table th:nth-child(2),
-        .final-table td:nth-child(2) { width: 240px; }
-        .final-table th:nth-child(3),
-        .final-table td:nth-child(3) { width: 60px; }
-        .final-table th:nth-child(4),
-        .final-table td:nth-child(4) { width: 64px; }
-        .final-table th:nth-child(5),
-        .final-table td:nth-child(5) { width: 58px; }
-        /* Column 6 (bar) gets auto / remaining space */
-        .final-table th:nth-child(7),
-        .final-table td:nth-child(7) { width: 86px; }
+        /* Final table column widths set directly on th elements in HTML */
 
         .final-table td {
             padding: 16px 16px;
@@ -777,6 +764,40 @@
             color: #F97316;
         }
 
+        /* Next GW table — separate class to avoid player-table column conflicts */
+        .nextgw-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            table-layout: fixed;
+        }
+        .nextgw-table thead { background: #18181f; border-bottom: 1px solid #2a2a35; }
+        .nextgw-table th {
+            padding: 18px 16px;
+            text-align: left;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #8b8b99;
+        }
+        .nextgw-table td {
+            padding: 16px 16px;
+            border-top: 1px solid #2a2a35;
+            font-size: 17px;
+            vertical-align: middle;
+        }
+        .nextgw-table tbody tr:hover { background: #1e1e28; }
+        .ngw-fixture {
+            color: #8b8b99;
+            font-size: 14px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .ngw-blank { color: #2a2a35; font-size: 14px; font-style: italic; }
+
         /* Placeholder */
         .placeholder {
             background: #131318;
@@ -924,6 +945,7 @@
         <div class="subtab-content">
             <div class="sparkline-grid" id="sparklineGrid"></div>
         </div>
+
     </div>
 
     <!-- TAB 2: Matchweek -->
@@ -998,15 +1020,15 @@
 
         <!-- Sub-tab: Next GW -->
         <div class="subtab-content">
-            <table class="player-table">
+            <table class="nextgw-table">
                 <thead>
                     <tr>
-                        <th>Player</th>
-                        <th>Team</th>
-                        <th>Fixture (GW31)</th>
-                        <th style="text-align: right;">xG</th>
-                        <th style="text-align: right;">xA</th>
-                        <th style="text-align: right;">xGI</th>
+                        <th style="width:175px">Player</th>
+                        <th style="width:185px">Team</th>
+                        <th style="width:240px">Fixture (GW31)</th>
+                        <th style="text-align:right">xG</th>
+                        <th style="text-align:right">xA</th>
+                        <th style="text-align:right">xGI</th>
                     </tr>
                 </thead>
                 <tbody id="playerNextGWTable"></tbody>
@@ -1062,13 +1084,12 @@
             <table class="final-table">
                 <thead>
                     <tr>
-                        <th class="final-rank">#</th>
-                        <th class="final-team">Team</th>
-                        <th class="final-stat" style="text-align:right">PLD</th>
-                        <th class="final-points" style="text-align:right">PTS</th>
-                        <th class="final-left" style="text-align:right">LEFT</th>
+                        <th class="final-rank" style="width:52px">#</th>
+                        <th class="final-team" style="width:240px">Team</th>
+                        <th class="final-stat" style="width:66px;text-align:right">PLD</th>
+                        <th class="final-points" style="width:74px;text-align:right">PTS</th>
+                        <th class="final-left" style="width:66px;text-align:right">LEFT</th>
                         <th class="th-bar">Projected</th>
-                        <th class="final-range" style="text-align:right">Range</th>
                     </tr>
                 </thead>
                 <tbody id="finalTableBody"></tbody>
@@ -1254,16 +1275,19 @@
         ];
 
         // Next GW — blank GW teams show — for all stats, sorted by xGI
+        // GW31 fixtures (from FIXTURES array): Bournemouth vs Man Utd, Brighton vs Liverpool,
+        // Fulham vs Burnley, Everton vs Chelsea, Leeds vs Brentford, Newcastle vs Sunderland,
+        // Aston Villa vs West Ham, Tottenham vs Nott'm Forest
         const PLAYER_NEXTGW = [
-            {name: "Ollie Watkins",      team: "Aston Villa",    xG: 0.62, xA: 0.17, xGI: 0.79, fixture: "Chelsea vs Aston Villa"},
-            {name: "Thiago",             team: "Brentford",      xG: 0.53, xA: 0.12, xGI: 0.65, fixture: "Brentford vs Everton"},
+            {name: "Ollie Watkins",      team: "Aston Villa",    xG: 0.62, xA: 0.17, xGI: 0.79, fixture: "Aston Villa vs West Ham"},
+            {name: "Thiago",             team: "Brentford",      xG: 0.53, xA: 0.12, xGI: 0.65, fixture: "Leeds vs Brentford"},
             {name: "Mohamed Salah",      team: "Liverpool",      xG: 0.33, xA: 0.31, xGI: 0.64, fixture: "Brighton vs Liverpool"},
-            {name: "Morgan Rogers",      team: "Aston Villa",    xG: 0.34, xA: 0.27, xGI: 0.61, fixture: "Chelsea vs Aston Villa"},
-            {name: "Morgan Gibbs-White", team: "Nott'm Forest",  xG: 0.32, xA: 0.25, xGI: 0.57, fixture: "Nott'm Forest vs Sunderland"},
-            {name: "João Pedro",         team: "Chelsea",        xG: 0.34, xA: 0.21, xGI: 0.55, fixture: "Chelsea vs Aston Villa"},
-            {name: "Jarrod Bowen",       team: "West Ham",       xG: 0.28, xA: 0.23, xGI: 0.51, fixture: "Tottenham vs West Ham"},
+            {name: "Morgan Rogers",      team: "Aston Villa",    xG: 0.34, xA: 0.27, xGI: 0.61, fixture: "Aston Villa vs West Ham"},
+            {name: "Morgan Gibbs-White", team: "Nott'm Forest",  xG: 0.32, xA: 0.25, xGI: 0.57, fixture: "Tottenham vs Nott'm Forest"},
+            {name: "João Pedro",         team: "Chelsea",        xG: 0.34, xA: 0.21, xGI: 0.55, fixture: "Everton vs Chelsea"},
+            {name: "Jarrod Bowen",       team: "West Ham",       xG: 0.28, xA: 0.23, xGI: 0.51, fixture: "Aston Villa vs West Ham"},
             {name: "Bruno Fernandes",    team: "Man Utd",        xG: 0.21, xA: 0.29, xGI: 0.50, fixture: "Bournemouth vs Man Utd"},
-            {name: "Kevin Schade",       team: "Brentford",      xG: 0.27, xA: 0.17, xGI: 0.44, fixture: "Brentford vs Everton"},
+            {name: "Kevin Schade",       team: "Brentford",      xG: 0.27, xA: 0.17, xGI: 0.44, fixture: "Leeds vs Brentford"},
             {name: "Erling Haaland",     team: "Man City",       xG: null, xA: null, xGI: null,  fixture: "Blank GW31"}
         ];
 
@@ -1353,18 +1377,20 @@
             document.getElementById('ratingsTable').innerHTML = html;
         }
 
-        // Render sparklines
+        // Render sparklines — show last 10 GWs for recent form
         function renderSparklines() {
             const html = Object.entries(TRENDS).map(([team, data]) => {
-                const lineColor = data.change >= 0 ? '#34d399' : '#f87171';
-                const svg = createSparklineSVG(data.values, lineColor);
-                const changeClass = data.change >= 0 ? 'change-positive' : 'change-negative';
-                const changeSign = data.change >= 0 ? '+' : '';
+                const recent = data.values.slice(-10);
+                const recentChange = recent[recent.length - 1] - recent[0];
+                const lineColor = recentChange >= 0 ? '#34d399' : '#f87171';
+                const svg = createSparklineSVG(recent, lineColor);
+                const changeClass = recentChange >= 0 ? 'change-positive' : 'change-negative';
+                const changeSign = recentChange >= 0 ? '+' : '';
                 return `
                     <div class="sparkline-card">
                         <div class="sparkline-team">${getTeamNameWithBadge(team)}</div>
                         ${svg}
-                        <div class="sparkline-change ${changeClass}">${changeSign}${(data.change * 100).toFixed(0)}%</div>
+                        <div class="sparkline-change ${changeClass}">${changeSign}${(recentChange * 100).toFixed(0)}%</div>
                     </div>
                 `;
             }).join('');
@@ -1374,22 +1400,33 @@
         function createSparklineSVG(values, color) {
             color = color || '#F97316';
             const w = 240, h = 40, padding = 5;
-            const minVal = Math.min(...values.filter(v => v !== null));
-            const maxVal = Math.max(...values.filter(v => v !== null));
+
+            // Strip consecutive duplicate values (blank GW placeholders) so only real game points are plotted
+            const deduped = values.filter((v, i) => i === 0 || v !== values[i - 1]);
+
+            const minVal = Math.min(...deduped);
+            const maxVal = Math.max(...deduped);
             const range = maxVal - minVal || 1;
 
-            let points = '';
-            let pathD = `M ${padding} ${h - padding}`;
+            const pts = deduped.map((v, i) => ({
+                x: padding + (i / (deduped.length - 1)) * (w - 2 * padding),
+                y: h - padding - ((v - minVal) / range) * (h - 2 * padding)
+            }));
 
-            values.forEach((v, i) => {
-                const x = padding + (i / (values.length - 1)) * (w - 2 * padding);
-                const y = h - padding - ((v - minVal) / range) * (h - 2 * padding);
-                if (i === 0) pathD = `M ${x} ${y}`;
-                else pathD += ` L ${x} ${y}`;
-                points += `${x},${y} `;
-            });
+            // Smooth curve: quadratic bezier through midpoints between each pair of real data points
+            let pathD = `M ${pts[0].x} ${pts[0].y}`;
+            for (let i = 0; i < pts.length - 1; i++) {
+                const mx = (pts[i].x + pts[i + 1].x) / 2;
+                const my = (pts[i].y + pts[i + 1].y) / 2;
+                if (i === 0) {
+                    pathD += ` Q ${pts[i].x},${pts[i].y} ${mx},${my}`;
+                } else {
+                    pathD += ` Q ${pts[i].x},${pts[i].y} ${mx},${my}`;
+                }
+            }
+            pathD += ` L ${pts[pts.length - 1].x} ${pts[pts.length - 1].y}`;
 
-            pathD += ` L ${w - padding} ${h - padding}`;
+            const fillPath = pathD + ` L ${pts[pts.length - 1].x} ${h} L ${pts[0].x} ${h} Z`;
 
             const gradId = 'grad-' + color.replace('#','');
             return `<svg class="sparkline-svg" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
@@ -1400,13 +1437,13 @@
                     </linearGradient>
                 </defs>
                 <path d="${pathD}" stroke="${color}" stroke-width="1.5" fill="none"/>
-                <path d="${pathD} L ${w - padding} ${h} L ${padding} ${h} Z" fill="url(#${gradId})"/>
+                <path d="${fillPath}" fill="url(#${gradId})"/>
             </svg>`;
         }
 
         // Render matchweek - compact table layout
         function renderMatchweek() {
-            let html = `<table class="matchweek-table"><thead><tr><th>FIXTURE</th><th>xG</th><th>CS%</th><th>WIN</th><th></th><th>DRAW</th></tr></thead><tbody>`;
+            let html = `<table class="matchweek-table"><thead><tr><th style="width:240px">FIXTURE</th><th style="width:110px;text-align:center">xG</th><th style="width:110px;text-align:center">CS%</th><th style="text-align:center">WIN</th><th style="width:110px;text-align:center"></th><th style="width:130px;text-align:center">DRAW</th></tr></thead><tbody>`;
 
             FIXTURES.forEach((f, idx) => {
                 const homeWinClass = f.homeWinDisplay > 40 ? 'high' : f.homeWinDisplay > 30 ? 'medium' : 'low';
@@ -1530,10 +1567,10 @@
                 return `<tr>
                     <td class="player-name">${p.name}</td>
                     <td class="player-team">${getTeamNameWithBadge(p.team)}</td>
-                    <td class="player-team" style="font-size:13px">${p.fixture}</td>
-                    <td class="hm-blank" style="text-align:right">${xgDisplay}</td>
-                    <td class="hm-blank" style="text-align:right">${xaDisplay}</td>
-                    <td class="${isBlank ? 'hm-blank' : 'heatmap-cell level'+giLevel}" style="text-align:right;border-radius:4px">${giDisplay}</td>
+                    <td class="${isBlank ? 'ngw-blank' : 'ngw-fixture'}">${p.fixture}</td>
+                    <td style="text-align:right;color:#8b8b99;font-size:16px">${xgDisplay}</td>
+                    <td style="text-align:right;color:#8b8b99;font-size:16px">${xaDisplay}</td>
+                    <td class="${isBlank ? 'hm-blank' : 'heatmap-cell level'+giLevel}" style="text-align:right;border-radius:4px;font-size:16px">${giDisplay}</td>
                 </tr>`;
             }).join('');
             document.getElementById('playerNextGWTable').innerHTML = html;
@@ -1606,7 +1643,6 @@
                             <span class="proj-bar-num">${t.projected.toFixed(1)}</span>
                         </div>
                     </td>
-                    <td class="final-range">${t.rMin}–${t.rMax}</td>
                 </tr>`;
             }).join('');
             document.getElementById('finalTableBody').innerHTML = html;
