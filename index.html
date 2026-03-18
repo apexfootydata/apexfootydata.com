@@ -1002,18 +1002,7 @@
         <!-- Sub-tab: Goals -->
         <div class="subtab-content active">
             <table class="player-table">
-                <thead>
-                    <tr>
-                        <th>Player</th>
-                        <th>Team</th>
-                        <th style="text-align: right;">GW31</th>
-                        <th style="text-align: right;">GW32</th>
-                        <th style="text-align: right;">GW33</th>
-                        <th style="text-align: right;">GW34</th>
-                        <th style="text-align: right;">GW35</th>
-                        <th style="text-align: right;">Total</th>
-                    </tr>
-                </thead>
+                <thead><tr id="playerGoalsHead"></tr></thead>
                 <tbody id="playerGoalsTable"></tbody>
             </table>
         </div>
@@ -1022,10 +1011,10 @@
         <div class="subtab-content">
             <table class="nextgw-table">
                 <thead>
-                    <tr>
+                    <tr id="playerNextGWHead">
                         <th style="width:175px">Player</th>
                         <th style="width:185px">Team</th>
-                        <th style="width:240px">Fixture (GW31)</th>
+                        <th style="width:240px" id="nextGWFixtureHeader">Fixture</th>
                         <th style="text-align:right">xG</th>
                         <th style="text-align:right">xA</th>
                         <th style="text-align:right">xGI</th>
@@ -1038,18 +1027,7 @@
         <!-- Sub-tab: Assists -->
         <div class="subtab-content">
             <table class="player-table">
-                <thead>
-                    <tr>
-                        <th>Player</th>
-                        <th>Team</th>
-                        <th style="text-align: right;">GW31</th>
-                        <th style="text-align: right;">GW32</th>
-                        <th style="text-align: right;">GW33</th>
-                        <th style="text-align: right;">GW34</th>
-                        <th style="text-align: right;">GW35</th>
-                        <th style="text-align: right;">Total</th>
-                    </tr>
-                </thead>
+                <thead><tr id="playerAssistsHead"></tr></thead>
                 <tbody id="playerAssistsTable"></tbody>
             </table>
         </div>
@@ -1057,18 +1035,7 @@
         <!-- Sub-tab: Goal Involvements -->
         <div class="subtab-content">
             <table class="player-table">
-                <thead>
-                    <tr>
-                        <th>Player</th>
-                        <th>Team</th>
-                        <th style="text-align: right;">GW31</th>
-                        <th style="text-align: right;">GW32</th>
-                        <th style="text-align: right;">GW33</th>
-                        <th style="text-align: right;">GW34</th>
-                        <th style="text-align: right;">GW35</th>
-                        <th style="text-align: right;">Total</th>
-                    </tr>
-                </thead>
+                <thead><tr id="playerGIHead"></tr></thead>
                 <tbody id="playerGITable"></tbody>
             </table>
         </div>
@@ -1104,6 +1071,7 @@
 
     <script>
         // Team badge mapping
+        // ██ SITE_DATA:TEAM_BADGES ██
         const TEAM_BADGES = {
             "Arsenal": "t3",
             "Aston Villa": "t7",
@@ -1115,17 +1083,21 @@
             "Crystal Palace": "t31",
             "Everton": "t11",
             "Fulham": "t54",
+            "Ipswich": "t40",
             "Leeds": "t2",
+            "Leicester": "t13",
             "Liverpool": "t14",
             "Man City": "t43",
             "Man Utd": "t1",
             "Newcastle": "t4",
             "Nott'm Forest": "t17",
+            "Southampton": "t20",
             "Sunderland": "t56",
             "Tottenham": "t6",
             "West Ham": "t21",
             "Wolves": "t39"
         };
+        // ██ SITE_DATA:END ██
 
         function getBadgeUrl(team) {
             const badgeId = TEAM_BADGES[team];
@@ -1144,190 +1116,217 @@
         }
 
         // Data
+        // ██ SITE_DATA:RATINGS ██
         const RATINGS = [
-            {rank: 1, team: "Arsenal", attack: 1.69, defence: 0.76, overall: 0.93},
-            {rank: 2, team: "Man City", attack: 1.73, defence: 1.07, overall: 0.66},
-            {rank: 3, team: "Liverpool", attack: 1.65, defence: 1.12, overall: 0.53},
-            {rank: 4, team: "Chelsea", attack: 1.68, defence: 1.23, overall: 0.45},
-            {rank: 5, team: "Man Utd", attack: 1.50, defence: 1.18, overall: 0.32},
-            {rank: 6, team: "Bournemouth", attack: 1.45, defence: 1.29, overall: 0.16},
-            {rank: 7, team: "Brentford", attack: 1.46, defence: 1.30, overall: 0.16},
-            {rank: 8, team: "Newcastle", attack: 1.43, defence: 1.27, overall: 0.15},
-            {rank: 9, team: "Brighton", attack: 1.30, defence: 1.25, overall: 0.05},
-            {rank: 10, team: "Aston Villa", attack: 1.28, defence: 1.25, overall: 0.03},
-            {rank: 11, team: "Crystal Palace", attack: 1.30, defence: 1.31, overall: -0.01},
-            {rank: 12, team: "Fulham", attack: 1.23, defence: 1.33, overall: -0.10},
-            {rank: 13, team: "Everton", attack: 1.09, defence: 1.21, overall: -0.12},
-            {rank: 14, team: "Leeds", attack: 1.10, defence: 1.34, overall: -0.24},
-            {rank: 15, team: "Tottenham", attack: 1.19, defence: 1.43, overall: -0.25},
-            {rank: 16, team: "Nott'm Forest", attack: 1.09, defence: 1.37, overall: -0.29},
-            {rank: 17, team: "West Ham", attack: 1.15, defence: 1.54, overall: -0.38},
-            {rank: 18, team: "Sunderland", attack: 0.85, defence: 1.28, overall: -0.42},
-            {rank: 19, team: "Wolves", attack: 0.90, defence: 1.43, overall: -0.53},
-            {rank: 20, team: "Burnley", attack: 0.85, defence: 1.67, overall: -0.82}
+            {rank: 1, team: "Arsenal", attack: 1.70, defence: 0.77, overall: 0.93},
+            {rank: 2, team: "Man City", attack: 1.73, defence: 1.06, overall: 0.67},
+            {rank: 3, team: "Liverpool", attack: 1.63, defence: 1.13, overall: 0.51},
+            {rank: 4, team: "Chelsea", attack: 1.66, defence: 1.22, overall: 0.44},
+            {rank: 5, team: "Man Utd", attack: 1.53, defence: 1.18, overall: 0.35},
+            {rank: 6, team: "Newcastle", attack: 1.42, defence: 1.25, overall: 0.17},
+            {rank: 7, team: "Brentford", attack: 1.48, defence: 1.34, overall: 0.15},
+            {rank: 8, team: "Bournemouth", attack: 1.43, defence: 1.30, overall: 0.13},
+            {rank: 9, team: "Brighton", attack: 1.30, defence: 1.23, overall: 0.06},
+            {rank: 10, team: "Aston Villa", attack: 1.29, defence: 1.26, overall: 0.03},
+            {rank: 11, team: "Crystal Palace", attack: 1.27, defence: 1.30, overall: -0.03},
+            {rank: 12, team: "Fulham", attack: 1.21, defence: 1.31, overall: -0.10},
+            {rank: 13, team: "Everton", attack: 1.10, defence: 1.21, overall: -0.11},
+            {rank: 14, team: "Tottenham", attack: 1.19, defence: 1.41, overall: -0.22},
+            {rank: 15, team: "Leeds", attack: 1.09, defence: 1.31, overall: -0.22},
+            {rank: 16, team: "Nott'm Forest", attack: 1.07, defence: 1.36, overall: -0.30},
+            {rank: 17, team: "West Ham", attack: 1.15, defence: 1.53, overall: -0.38},
+            {rank: 18, team: "Sunderland", attack: 0.84, defence: 1.27, overall: -0.44},
+            {rank: 19, team: "Wolves", attack: 0.93, defence: 1.45, overall: -0.52},
+            {rank: 20, team: "Burnley", attack: 0.85, defence: 1.66, overall: -0.82}
         ];
+        // ██ SITE_DATA:END ██
 
+        // ██ SITE_DATA:FIXTURES ██
         const FIXTURES = [
-            {home: "Bournemouth", homeRating: 1.61, homeWin: 21.7, homeWinDisplay: 38.6, away: "Man Utd", awayRating: 1.53, awayWin: 20.0, awayWinDisplay: 35.0, draw: 26.4},
-            {home: "Brighton", homeRating: 1.37, homeWin: 19.7, homeWinDisplay: 30.8, away: "Liverpool", awayRating: 1.63, awayWin: 25.3, awayWinDisplay: 42.2, draw: 27.0},
-            {home: "Fulham", homeRating: 1.93, homeWin: 41.2, homeWinDisplay: 61.5, away: "Burnley", awayRating: 0.89, awayWin: 14.5, awayWinDisplay: 14.6, draw: 23.9},
-            {home: "Everton", homeRating: 1.27, homeWin: 20.1, homeWinDisplay: 28.3, away: "Chelsea", awayRating: 1.61, awayWin: 28.2, awayWinDisplay: 44.1, draw: 27.5},
-            {home: "Leeds", homeRating: 1.36, homeWin: 21.2, homeWinDisplay: 31.7, away: "Brentford", awayRating: 1.55, awayWin: 25.7, awayWinDisplay: 40.6, draw: 27.6},
-            {home: "Newcastle", homeRating: 1.72, homeWin: 42.4, homeWinDisplay: 57.2, away: "Sunderland", awayRating: 0.86, awayWin: 17.9, awayWinDisplay: 16.4, draw: 26.5},
-            {home: "Aston Villa", homeRating: 1.86, homeWin: 32.1, homeWinDisplay: 53.6, away: "West Ham", awayRating: 1.14, awayWin: 15.6, awayWinDisplay: 21.1, draw: 25.3},
-            {home: "Tottenham", homeRating: 1.54, homeWin: 29.3, homeWinDisplay: 43.2, away: "Nott'm Forest", awayRating: 1.23, awayWin: 21.5, awayWinDisplay: 28.5, draw: 28.3}
+            {home: "Aston Villa", homeRating: 1.85, homeCS: 32.0, homeWin: 53.2, homeWinDisplay: 53.2, away: "West Ham", awayRating: 1.14, awayCS: 16.0, awayWin: 21.3, awayWinDisplay: 21.3, draw: 25.5},
+            {home: "Bournemouth", homeRating: 1.59, homeCS: 21.0, homeWin: 37.1, homeWinDisplay: 37.1, away: "Man Utd", awayRating: 1.57, awayCS: 20.0, awayWin: 36.3, awayWinDisplay: 36.3, draw: 26.6},
+            {home: "Brighton", homeRating: 1.38, homeCS: 20.0, homeWin: 31.3, homeWinDisplay: 31.3, away: "Liverpool", awayRating: 1.59, awayCS: 25.0, awayWin: 41.3, awayWinDisplay: 41.3, draw: 27.5},
+            {home: "Everton", homeRating: 1.26, homeCS: 20.0, homeWin: 28.4, homeWinDisplay: 28.4, away: "Chelsea", awayRating: 1.59, awayCS: 28.0, awayWin: 43.7, awayWinDisplay: 43.7, draw: 27.9},
+            {home: "Fulham", homeRating: 1.90, homeCS: 42.0, homeWin: 60.8, homeWinDisplay: 60.8, away: "Burnley", awayRating: 0.88, awayCS: 15.0, awayWin: 14.7, awayWinDisplay: 14.7, draw: 24.5},
+            {home: "Leeds", homeRating: 1.37, homeCS: 22.0, homeWin: 32.2, homeWinDisplay: 32.2, away: "Brentford", awayRating: 1.54, awayCS: 25.0, awayWin: 39.9, awayWinDisplay: 39.9, draw: 27.9},
+            {home: "Man City", homeRating: 2.10, homeCS: 35.0, homeWin: 60.9, homeWinDisplay: 60.9, away: "Crystal Palace", awayRating: 1.06, awayCS: 12.0, awayWin: 16.3, awayWinDisplay: 16.3, draw: 22.8},
+            {home: "Newcastle", homeRating: 1.71, homeCS: 44.0, homeWin: 57.4, homeWinDisplay: 57.4, away: "Sunderland", awayRating: 0.83, awayCS: 18.0, awayWin: 15.8, awayWinDisplay: 15.8, draw: 26.8},
+            {home: "Tottenham", homeRating: 1.53, homeCS: 30.0, homeWin: 43.7, homeWinDisplay: 43.7, away: "Nott'm Forest", awayRating: 1.19, awayCS: 22.0, awayWin: 27.5, awayWinDisplay: 27.5, draw: 28.8}
         ];
+        // ██ SITE_DATA:END ██
 
+        // ██ SITE_DATA:TEAM_PREDICTIONS ██
         const TEAM_PREDICTIONS = {
-            "Arsenal": [null, 64, 39, 62, 68],
-            "Aston Villa": [54, 38, 52, 33, 48],
-            "Bournemouth": [39, 13, 30, 51, 46],
-            "Brentford": [41, 49, 49, 27, 57],
-            "Brighton": [31, 52, 37, 34, 28],
-            "Burnley": [15, 20, 19, 11, 17],
-            "Chelsea": [44, 37, 45, 39, 61],
-            "Crystal Palace": [null, 37, 51, 20, 27],
-            "Everton": [28, 24, 27, 36, 24],
-            "Fulham": [62, 18, 25, 38, 11],
-            "Leeds": [32, 18, 48, 22, 56],
-            "Liverpool": [42, 58, 45, 56, 34],
-            "Man City": [null, 37, 32, 68, 49],
-            "Man Utd": [35, 56, 29, 48, 39],
-            "Newcastle": [57, 35, 44, 14, 45],
-            "Nott'm Forest": [28, 32, 54, 33, 16],
-            "Sunderland": [16, 32, 18, 34, 29],
-            "Tottenham": [43, 36, 34, 38, 25],
-            "West Ham": [21, 46, 23, 35, 19],
-            "Wolves": [null, 25, 22, 31, 36]
+            "Man City": [61, 38, 31, 70, 49, 58],
+            "Arsenal": [null, 65, 39, 63, 69, 66],
+            "Liverpool": [41, 58, 45, 57, 35, 46],
+            "Aston Villa": [53, 38, 53, 33, 48, 53],
+            "Man Utd": [36, 57, 29, 49, 39, 50],
+            "Chelsea": [44, 37, 45, 39, 62, 29],
+            "Brentford": [40, 49, 49, 26, 58, 19],
+            "Brighton": [31, 53, 37, 34, 28, 57],
+            "Newcastle": [57, 35, 44, 13, 45, 42],
+            "Tottenham": [44, 36, 34, 38, 25, 41],
+            "Bournemouth": [37, 13, 30, 51, 47, 36],
+            "Leeds": [32, 18, 48, 22, 56, 29],
+            "Crystal Palace": [16, 37, 52, 19, 27, 43],
+            "Nott'm Forest": [28, 32, 54, 33, 15, 29],
+            "Fulham": [61, 18, 25, 38, 10, 36],
+            "Everton": [28, 24, 26, 36, 23, 27],
+            "West Ham": [21, 46, 22, 35, 19, 12],
+            "Sunderland": [16, 32, 18, 33, 29, 21],
+            "Wolves": [null, 25, 22, 32, 37, 17],
+            "Burnley": [15, 19, 18, 10, 17, 20]
         };
+        // ██ SITE_DATA:END ██
 
+        // ██ SITE_DATA:TEAM_GOALS ██
         const TEAM_GOALS = {
-            "Arsenal":        [1.8, 1.6, 1.9, 1.6, 1.7],
-            "Aston Villa":    [1.2, 1.3, 1.1, 1.4, 1.2],
-            "Bournemouth":    [1.4, 1.3, 1.6, 1.3, 1.5],
-            "Brentford":      [1.3, 1.6, 1.4, 1.5, 1.3],
-            "Brighton":       [1.4, 1.2, 1.3, 1.2, 1.4],
-            "Burnley":        [0.8, 0.9, 0.7, 0.9, 0.8],
-            "Chelsea":        [1.7, 1.8, 1.5, 1.8, 1.5],
-            "Crystal Palace": [1.2, 1.3, 1.4, 1.1, 1.4],
-            "Everton":        [1.1, 1.0, 1.1, 1.0, 1.2],
-            "Fulham":         [1.2, 1.3, 1.1, 1.3, 1.1],
-            "Leeds":          [1.2, 1.0, 1.2, 1.0, 1.1],
-            "Liverpool":      [1.6, 1.8, 1.5, 1.7, 1.6],
-            "Man City":       [1.7, 1.6, 1.9, 1.5, 1.9],
-            "Man Utd":        [1.6, 1.5, 1.4, 1.6, 1.4],
-            "Newcastle":      [1.3, 1.5, 1.4, 1.3, 1.5],
-            "Nott'm Forest":  [1.1, 1.0, 1.2, 1.1, 1.0],
-            "Sunderland":     [0.7, 0.9, 0.8, 0.8, 0.9],
-            "Tottenham":      [1.2, 1.1, 1.2, 1.1, 1.3],
-            "West Ham":       [1.2, 1.0, 1.1, 1.2, 1.1],
-            "Wolves":         [0.9, 0.9, 0.8, 1.0, 0.8]
+            "Man City":       [2.10, 1.66, 1.25, 2.27, 1.66, 2.17],
+            "Liverpool":      [1.59, 2.01, 1.57, 1.99, 1.52, 1.87],
+            "Chelsea":        [1.59, 1.65, 1.84, 1.62, 2.12, 1.48],
+            "Man Utd":        [1.57, 1.88, 1.47, 1.92, 1.62, 1.54],
+            "Brentford":      [1.54, 1.70, 1.83, 1.39, 2.14, 1.24],
+            "Arsenal":        [null, 2.07, 1.42, 2.00, 2.09, 2.05],
+            "Aston Villa":    [1.85, 1.39, 1.54, 1.34, 1.71, 1.69],
+            "Brighton":       [1.38, 1.71, 1.45, 1.49, 1.29, 1.77],
+            "Newcastle":      [1.71, 1.46, 1.74, 0.87, 1.65, 1.53],
+            "Bournemouth":    [1.59, 0.87, 1.42, 1.76, 1.74, 1.48],
+            "Crystal Palace": [1.06, 1.49, 1.83, 1.13, 1.30, 1.45],
+            "Tottenham":      [1.53, 1.20, 1.39, 1.37, 1.19, 1.47],
+            "Fulham":         [1.90, 1.08, 1.28, 1.44, 0.74, 1.48],
+            "Leeds":          [1.37, 1.02, 1.49, 1.12, 1.70, 1.21],
+            "Nott'm Forest":  [1.19, 1.26, 1.67, 1.07, 1.03, 1.25],
+            "West Ham":       [1.14, 1.57, 1.18, 1.31, 1.21, 0.83],
+            "Everton":        [1.26, 1.16, 1.17, 1.33, 1.09, 1.13],
+            "Sunderland":     [0.83, 1.11, 0.84, 1.07, 0.96, 0.93],
+            "Burnley":        [0.88, 0.98, 0.91, 0.84, 0.88, 1.00],
+            "Wolves":         [null, 1.13, 0.96, 1.23, 1.11, 0.91]
         };
+        // ██ SITE_DATA:END ██
 
+        // ██ SITE_DATA:TEAM_CS ██
         const TEAM_CS = {
-            "Arsenal":        [44, 51, 42, 49, 47],
-            "Aston Villa":    [30, 27, 32, 26, 30],
-            "Bournemouth":    [28, 30, 24, 29, 26],
-            "Brentford":      [31, 25, 29, 27, 29],
-            "Brighton":       [26, 30, 29, 32, 27],
-            "Burnley":        [20, 18, 22, 17, 20],
-            "Chelsea":        [29, 27, 32, 28, 32],
-            "Crystal Palace": [29, 26, 25, 30, 25],
-            "Everton":        [28, 33, 30, 31, 27],
-            "Fulham":         [27, 25, 29, 24, 29],
-            "Leeds":          [24, 29, 25, 28, 26],
-            "Liverpool":      [34, 30, 36, 31, 33],
-            "Man City":       [34, 37, 32, 38, 31],
-            "Man Utd":        [28, 31, 33, 29, 34],
-            "Newcastle":      [31, 27, 28, 30, 26],
-            "Nott'm Forest":  [24, 27, 23, 25, 28],
-            "Sunderland":     [31, 26, 29, 28, 26],
-            "Tottenham":      [24, 25, 23, 26, 22],
-            "West Ham":       [20, 24, 21, 20, 23],
-            "Wolves":         [25, 23, 26, 22, 27]
+            "Arsenal":        [null, 42, 29, 42, 48, 44],
+            "Aston Villa":    [32, 28, 43, 24, 30, 37],
+            "Man City":       [35, 19, 24, 43, 34, 29],
+            "Liverpool":      [25, 34, 31, 32, 20, 23],
+            "Tottenham":      [30, 33, 24, 29, 18, 30],
+            "Brighton":       [20, 37, 25, 20, 19, 40],
+            "Newcastle":      [44, 22, 24, 14, 28, 29],
+            "Man Utd":        [20, 36, 16, 25, 22, 39],
+            "Sunderland":     [18, 30, 21, 34, 33, 21],
+            "Leeds":          [22, 15, 38, 17, 42, 23],
+            "Nott'm Forest":  [22, 25, 40, 34, 12, 22],
+            "Chelsea":        [28, 19, 23, 23, 36, 15],
+            "Brentford":      [25, 31, 28, 15, 30, 11],
+            "Bournemouth":    [21, 13, 18, 33, 27, 23],
+            "Fulham":         [42, 13, 16, 26, 12, 23],
+            "Crystal Palace": [12, 23, 31, 14, 18, 32],
+            "Everton":        [20, 18, 21, 27, 19, 23],
+            "Wolves":         [null, 21, 23, 25, 38, 17],
+            "West Ham":       [16, 32, 16, 26, 12, 13],
+            "Burnley":        [15, 18, 19, 10, 18, 18]
         };
+        // ██ SITE_DATA:END ██
 
-        // Blank GW31 teams: Man City, Arsenal, Crystal Palace, Wolves
+        // Blank GW31 teams: Arsenal, Wolves
+        // ██ SITE_DATA:PLAYER_ASSISTS ██
         const PLAYER_ASSISTS = [
-            {name: "Mohamed Salah",      team: "Liverpool",      gw: [0.31, 0.37, 0.27, 0.34, 0.28], total: 1.57},
-            {name: "Bruno Fernandes",    team: "Man Utd",        gw: [0.29, 0.33, 0.27, 0.34, 0.29], total: 1.52},
-            {name: "Morgan Gibbs-White", team: "Nott'm Forest",  gw: [0.25, 0.27, 0.33, 0.21, 0.21], total: 1.27},
-            {name: "João Pedro",         team: "Chelsea",        gw: [0.21, 0.23, 0.27, 0.21, 0.29], total: 1.21},
-            {name: "Jarrod Bowen",       team: "West Ham",       gw: [0.23, 0.29, 0.21, 0.25, 0.21], total: 1.19},
-            {name: "Morgan Rogers",      team: "Aston Villa",    gw: [0.27, 0.21, 0.24, 0.19, 0.25], total: 1.16},
-            {name: "Kevin Schade",       team: "Brentford",      gw: [0.17, 0.19, 0.21, 0.15, 0.23], total: 0.95},
-            {name: "Erling Haaland",     team: "Man City",       gw: [null, 0.17, 0.11, 0.19, 0.15], total: 0.62},
-            {name: "Ollie Watkins",      team: "Aston Villa",    gw: [0.17, 0.13, 0.15, 0.12, 0.16], total: 0.73},
-            {name: "Thiago",             team: "Brentford",      gw: [0.12, 0.14, 0.15, 0.11, 0.17], total: 0.69}
+            {name: "Morgan Rogers", team: "Aston Villa", gw: [0.45, 0.33, 0.37, 0.32, 0.41, 0.40], total: 2.26},
+            {name: "Mathis Cherki", team: "Man City", gw: [0.34, 0.27, 0.20, 0.36, 0.26, 0.35], total: 1.77},
+            {name: "Bruno Fernandes", team: "Man Utd", gw: [0.27, 0.33, 0.26, 0.33, 0.28, 0.27], total: 1.74},
+            {name: "Mohamed Salah", team: "Liverpool", gw: [0.26, 0.33, 0.25, 0.32, 0.25, 0.30], total: 1.71},
+            {name: "Jarrod Bowen", team: "West Ham", gw: [0.26, 0.35, 0.26, 0.29, 0.27, 0.18], total: 1.6},
+            {name: "Bukayo Saka", team: "Arsenal", gw: [null, 0.34, 0.24, 0.33, 0.35, 0.34], total: 1.6},
+            {name: "Dominik Szoboszlai", team: "Liverpool", gw: [0.23, 0.29, 0.22, 0.28, 0.22, 0.27], total: 1.5},
+            {name: "Anton Stach", team: "Leeds", gw: [0.26, 0.19, 0.28, 0.21, 0.32, 0.23], total: 1.5},
+            {name: "Morgan Gibbs-White", team: "Nott'm Forest", gw: [0.23, 0.25, 0.32, 0.21, 0.20, 0.24], total: 1.45},
+            {name: "Pedro Neto", team: "Chelsea", gw: [0.22, 0.23, 0.26, 0.23, 0.29, 0.21], total: 1.43}
         ];
+        // ██ SITE_DATA:END ██
 
+        // ██ SITE_DATA:PLAYER_GI ██
         const PLAYER_GI = [
-            {name: "Thiago",             team: "Brentford",      gw: [0.65, 0.72, 0.78, 0.59, 0.89], total: 3.63},
-            {name: "Ollie Watkins",      team: "Aston Villa",    gw: [0.79, 0.59, 0.67, 0.57, 0.73], total: 3.35},
-            {name: "Mohamed Salah",      team: "Liverpool",      gw: [0.64, 0.78, 0.59, 0.75, 0.59], total: 3.35},
-            {name: "Erling Haaland",     team: "Man City",       gw: [null, 0.80, 0.60, 1.01, 0.77], total: 3.18},
-            {name: "João Pedro",         team: "Chelsea",        gw: [0.55, 0.59, 0.67, 0.56, 0.74], total: 3.11},
-            {name: "Morgan Gibbs-White", team: "Nott'm Forest",  gw: [0.57, 0.61, 0.76, 0.50, 0.49], total: 2.93},
-            {name: "Jarrod Bowen",       team: "West Ham",       gw: [0.51, 0.66, 0.49, 0.57, 0.49], total: 2.72},
-            {name: "Bruno Fernandes",    team: "Man Utd",        gw: [0.50, 0.58, 0.47, 0.60, 0.51], total: 2.66},
-            {name: "Morgan Rogers",      team: "Aston Villa",    gw: [0.61, 0.47, 0.53, 0.44, 0.57], total: 2.62},
-            {name: "Kevin Schade",       team: "Brentford",      gw: [0.44, 0.49, 0.54, 0.40, 0.61], total: 2.48}
+            {name: "Erling Haaland", team: "Man City", gw: [1.02, 0.81, 0.62, 1.07, 0.80, 1.05], total: 5.37},
+            {name: "Thiago", team: "Brentford", gw: [0.64, 0.71, 0.76, 0.58, 0.88, 0.52], total: 4.09},
+            {name: "Ollie Watkins", team: "Aston Villa", gw: [0.79, 0.59, 0.66, 0.57, 0.73, 0.71], total: 4.05},
+            {name: "Morgan Rogers", team: "Aston Villa", gw: [0.79, 0.58, 0.65, 0.56, 0.72, 0.71], total: 4.01},
+            {name: "Mohamed Salah", team: "Liverpool", gw: [0.58, 0.73, 0.57, 0.73, 0.56, 0.69], total: 3.86},
+            {name: "Morgan Gibbs-White", team: "Nott'm Forest", gw: [0.55, 0.58, 0.76, 0.50, 0.48, 0.57], total: 3.43},
+            {name: "João Pedro", team: "Chelsea", gw: [0.52, 0.54, 0.60, 0.53, 0.69, 0.49], total: 3.38},
+            {name: "Jarrod Bowen", team: "West Ham", gw: [0.53, 0.72, 0.55, 0.61, 0.55, 0.39], total: 3.35},
+            {name: "Richarlison", team: "Tottenham", gw: [0.63, 0.46, 0.53, 0.52, 0.46, 0.56], total: 3.17},
+            {name: "Bruno Fernandes", team: "Man Utd", gw: [0.48, 0.58, 0.46, 0.59, 0.50, 0.48], total: 3.1}
         ];
+        // ██ SITE_DATA:END ██
 
         // Next GW — blank GW teams show — for all stats, sorted by xGI
         // GW31 fixtures (from FIXTURES array): Bournemouth vs Man Utd, Brighton vs Liverpool,
         // Fulham vs Burnley, Everton vs Chelsea, Leeds vs Brentford, Newcastle vs Sunderland,
         // Aston Villa vs West Ham, Tottenham vs Nott'm Forest
+        // ██ SITE_DATA:PLAYER_NEXTGW ██
         const PLAYER_NEXTGW = [
-            {name: "Ollie Watkins",      team: "Aston Villa",    xG: 0.62, xA: 0.17, xGI: 0.79, fixture: "Aston Villa vs West Ham"},
-            {name: "Thiago",             team: "Brentford",      xG: 0.53, xA: 0.12, xGI: 0.65, fixture: "Leeds vs Brentford"},
-            {name: "Mohamed Salah",      team: "Liverpool",      xG: 0.33, xA: 0.31, xGI: 0.64, fixture: "Brighton vs Liverpool"},
-            {name: "Morgan Rogers",      team: "Aston Villa",    xG: 0.34, xA: 0.27, xGI: 0.61, fixture: "Aston Villa vs West Ham"},
-            {name: "Morgan Gibbs-White", team: "Nott'm Forest",  xG: 0.32, xA: 0.25, xGI: 0.57, fixture: "Tottenham vs Nott'm Forest"},
-            {name: "João Pedro",         team: "Chelsea",        xG: 0.34, xA: 0.21, xGI: 0.55, fixture: "Everton vs Chelsea"},
-            {name: "Jarrod Bowen",       team: "West Ham",       xG: 0.28, xA: 0.23, xGI: 0.51, fixture: "Aston Villa vs West Ham"},
-            {name: "Bruno Fernandes",    team: "Man Utd",        xG: 0.21, xA: 0.29, xGI: 0.50, fixture: "Bournemouth vs Man Utd"},
-            {name: "Kevin Schade",       team: "Brentford",      xG: 0.27, xA: 0.17, xGI: 0.44, fixture: "Leeds vs Brentford"},
-            {name: "Erling Haaland",     team: "Man City",       xG: null, xA: null, xGI: null,  fixture: "Blank GW31"}
+            {name: "Erling Haaland", team: "Man City", xG: 0.79, xA: 0.23, xGI: 1.02, fixture: "Man City vs Crystal Palace"},
+            {name: "Ollie Watkins", team: "Aston Villa", xG: 0.62, xA: 0.17, xGI: 0.79, fixture: "Aston Villa vs West Ham"},
+            {name: "Morgan Rogers", team: "Aston Villa", xG: 0.34, xA: 0.45, xGI: 0.79, fixture: "Aston Villa vs West Ham"},
+            {name: "Harry Wilson", team: "Fulham", xG: 0.34, xA: 0.32, xGI: 0.66, fixture: "Fulham vs Burnley"},
+            {name: "Raúl Jiménez", team: "Fulham", xG: 0.49, xA: 0.16, xGI: 0.65, fixture: "Fulham vs Burnley"},
+            {name: "Thiago", team: "Brentford", xG: 0.54, xA: 0.10, xGI: 0.64, fixture: "Leeds vs Brentford"},
+            {name: "Richarlison", team: "Tottenham", xG: 0.47, xA: 0.16, xGI: 0.63, fixture: "Tottenham vs Nott'm Forest"},
+            {name: "Mohamed Salah", team: "Liverpool", xG: 0.33, xA: 0.26, xGI: 0.58, fixture: "Brighton vs Liverpool"},
+            {name: "Morgan Gibbs-White", team: "Nott'm Forest", xG: 0.32, xA: 0.23, xGI: 0.55, fixture: "Tottenham vs Nott'm Forest"},
+            {name: "Jarrod Bowen", team: "West Ham", xG: 0.28, xA: 0.26, xGI: 0.53, fixture: "Aston Villa vs West Ham"}
         ];
+        // ██ SITE_DATA:END ██
 
+        // ██ SITE_DATA:PLAYER_GOALS ██
         const PLAYER_GOALS = [
-            {name: "Thiago",             team: "Brentford",      gw: [0.53, 0.58, 0.63, 0.48, 0.72], total: 2.94},
-            {name: "Ollie Watkins",      team: "Aston Villa",    gw: [0.62, 0.46, 0.52, 0.45, 0.57], total: 2.62},
-            {name: "Erling Haaland",     team: "Man City",       gw: [null, 0.63, 0.49, 0.82, 0.62], total: 2.56},
-            {name: "Morgan Rogers", team: "Aston Villa", gw: [0.34, 0.26, 0.29, 0.25, 0.32], total: 1.46},
-            {name: "Mohamed Salah", team: "Liverpool", gw: [0.33, 0.41, 0.32, 0.41, 0.31], total: 1.78},
-            {name: "Kevin Schade", team: "Brentford", gw: [0.27, 0.30, 0.33, 0.25, 0.38], total: 1.53},
-            {name: "Jarrod Bowen", team: "West Ham", gw: [0.28, 0.37, 0.28, 0.32, 0.28], total: 1.53},
-            {name: "João Pedro", team: "Chelsea", gw: [0.34, 0.36, 0.40, 0.35, 0.45], total: 1.90},
-            {name: "Morgan Gibbs-White", team: "Nott'm Forest", gw: [0.32, 0.34, 0.43, 0.29, 0.28], total: 1.66},
-            {name: "Bruno Fernandes", team: "Man Utd", gw: [0.21, 0.25, 0.20, 0.26, 0.22], total: 1.14}
+            {name: "Erling Haaland", team: "Man City", gw: [0.79, 0.62, 0.48, 0.82, 0.62, 0.81], total: 4.15},
+            {name: "Thiago", team: "Brentford", gw: [0.54, 0.60, 0.65, 0.49, 0.74, 0.45], total: 3.48},
+            {name: "Ollie Watkins", team: "Aston Villa", gw: [0.62, 0.46, 0.52, 0.45, 0.57, 0.55], total: 3.16},
+            {name: "Richarlison", team: "Tottenham", gw: [0.47, 0.35, 0.40, 0.39, 0.34, 0.42], total: 2.38},
+            {name: "Hugo Ekitike", team: "Liverpool", gw: [0.34, 0.42, 0.33, 0.42, 0.32, 0.40], total: 2.22},
+            {name: "João Pedro", team: "Chelsea", gw: [0.34, 0.36, 0.39, 0.34, 0.45, 0.32], total: 2.2},
+            {name: "Mohamed Salah", team: "Liverpool", gw: [0.33, 0.41, 0.32, 0.40, 0.31, 0.38], total: 2.15},
+            {name: "Raúl Jiménez", team: "Fulham", gw: [0.49, 0.29, 0.34, 0.39, 0.20, 0.40], total: 2.11},
+            {name: "Danny Welbeck", team: "Brighton", gw: [0.32, 0.38, 0.33, 0.35, 0.30, 0.41], total: 2.09},
+            {name: "Dominic Calvert-Lewin", team: "Leeds", gw: [0.36, 0.27, 0.39, 0.30, 0.44, 0.32], total: 2.08}
         ];
+        // ██ SITE_DATA:END ██
 
+        // ██ SITE_DATA:FINAL_TABLE ██
         const FINAL_TABLE = [
-            {team: "Arsenal",        played: 31, points: 70, left: 7, projected: 84.9, rMin: 73, rMax:  91},
-            {team: "Man City",       played: 30, points: 61, left: 8, projected: 75.0, rMin: 61, rMax:  82},
-            {team: "Man Utd",        played: 29, points: 51, left: 9, projected: 65.0, rMin: 51, rMax:  73},
-            {team: "Aston Villa",    played: 29, points: 51, left: 9, projected: 64.0, rMin: 51, rMax:  72},
-            {team: "Liverpool",      played: 29, points: 48, left: 9, projected: 64.0, rMin: 49, rMax:  72},
-            {team: "Chelsea",        played: 30, points: 48, left: 8, projected: 61.0, rMin: 48, rMax:  68},
-            {team: "Brentford",      played: 29, points: 44, left: 9, projected: 58.0, rMin: 44, rMax:  66},
-            {team: "Newcastle",      played: 30, points: 42, left: 8, projected: 54.0, rMin: 42, rMax:  61},
-            {team: "Everton",        played: 30, points: 43, left: 8, projected: 52.0, rMin: 43, rMax:  59},
-            {team: "Bournemouth",    played: 30, points: 41, left: 8, projected: 52.0, rMin: 41, rMax:  59},
-            {team: "Brighton",       played: 30, points: 40, left: 8, projected: 52.0, rMin: 40, rMax:  59},
-            {team: "Fulham",         played: 29, points: 40, left: 9, projected: 51.0, rMin: 40, rMax:  59},
-            {team: "Crystal Palace", played: 29, points: 38, left: 9, projected: 49.0, rMin: 38, rMax:  57},
-            {team: "Sunderland",     played: 30, points: 40, left: 8, projected: 48.0, rMin: 40, rMax:  55},
-            {team: "Leeds",          played: 29, points: 31, left: 9, projected: 42.0, rMin: 31, rMax:  50},
-            {team: "Tottenham",      played: 29, points: 29, left: 9, projected: 40.0, rMin: 29, rMax:  48},
-            {team: "Nott'm Forest",  played: 29, points: 28, left: 9, projected: 39.0, rMin: 28, rMax:  47},
-            {team: "West Ham",       played: 30, points: 29, left: 8, projected: 38.0, rMin: 29, rMax:  45},
-            {team: "Burnley",        played: 30, points: 20, left: 8, projected: 26.0, rMin: 20, rMax:  33},
-            {team: "Wolves",         played: 30, points: 16, left: 8, projected: 25.0, rMin: 16, rMax:  32}
+            {team: "Arsenal", played: 31, points: 70, left: 7, projected: 84.8, rMin: 73, rMax: 91},
+            {team: "Man City", played: 30, points: 61, left: 8, projected: 75.3, rMin: 62, rMax: 85},
+            {team: "Man Utd", played: 30, points: 54, left: 8, projected: 66.8, rMin: 55, rMax: 78},
+            {team: "Aston Villa", played: 30, points: 51, left: 8, projected: 63.0, rMin: 52, rMax: 75},
+            {team: "Liverpool", played: 30, points: 49, left: 8, projected: 62.4, rMin: 50, rMax: 73},
+            {team: "Chelsea", played: 30, points: 48, left: 8, projected: 61.1, rMin: 49, rMax: 72},
+            {team: "Brentford", played: 30, points: 45, left: 8, projected: 56.4, rMin: 45, rMax: 69},
+            {team: "Newcastle", played: 30, points: 42, left: 8, projected: 54.1, rMin: 43, rMax: 66},
+            {team: "Everton", played: 30, points: 43, left: 8, projected: 52.6, rMin: 43, rMax: 65},
+            {team: "Bournemouth", played: 30, points: 41, left: 8, projected: 51.7, rMin: 41, rMax: 65},
+            {team: "Brighton", played: 30, points: 40, left: 8, projected: 51.6, rMin: 40, rMax: 64},
+            {team: "Fulham", played: 30, points: 41, left: 8, projected: 51.0, rMin: 41, rMax: 65},
+            {team: "Crystal Palace", played: 30, points: 39, left: 8, projected: 48.3, rMin: 39, rMax: 63},
+            {team: "Sunderland", played: 30, points: 40, left: 8, projected: 48.1, rMin: 40, rMax: 62},
+            {team: "Leeds", played: 30, points: 32, left: 8, projected: 42.5, rMin: 32, rMax: 54},
+            {team: "Tottenham", played: 30, points: 30, left: 8, projected: 40.5, rMin: 30, rMax: 54},
+            {team: "Nott'm Forest", played: 30, points: 29, left: 8, projected: 38.3, rMin: 29, rMax: 51},
+            {team: "West Ham", played: 30, points: 29, left: 8, projected: 37.4, rMin: 29, rMax: 50},
+            {team: "Burnley", played: 30, points: 20, left: 8, projected: 26.0, rMin: 20, rMax: 39},
+            {team: "Wolves", played: 31, points: 17, left: 7, projected: 25.0, rMin: 17, rMax: 38}
         ];
+        // ██ SITE_DATA:END ██
 
-        const TRENDS = {"Arsenal":{"values":[0.579,0.538,0.635,0.635,0.687,0.62,0.647,0.75,0.75,0.726,0.772,0.778,0.842,0.859,0.757,0.758,0.791,0.791,0.853,0.813,0.778,0.857,0.84,0.957,0.933,0.933,0.857,0.951,0.906,0.807],"change":0.23,"color":"#EF4444"},"Aston Villa":{"values":[0.167,0.1,0.085,0.085,-0.073,-0.068,-0.042,0.025,-0.037,-0.062,-0.111,-0.11,-0.128,-0.027,0.019,0.019,-0.018,0.013,-0.061,-0.029,0.011,0.019,-0.015,0.081,0.014,0.018,0.016,0.005,0.005,-0.115],"change":-0.28,"color":"#D1D5DB"},"Bournemouth":{"values":[0.221,0.221,0.279,0.361,0.379,0.298,0.303,0.153,0.153,0.161,0.068,0.225,0.242,0.197,0.222,0.222,0.221,0.221,0.238,0.205,0.169,0.194,0.303,0.257,0.3,0.233,0.123,0.123,0.228,0.248],"change":0.03,"color":"#F97316"},"Brentford":{"values":[0.298,0.256,0.247,0.224,0.23,0.195,0.195,0.161,0.316,0.354,0.335,0.466,0.581,0.437,0.307,0.307,0.237,0.237,0.236,0.309,0.409,0.374,0.381,0.261,0.157,0.157,0.202,0.202,0.169,0.169],"change":-0.13,"color":"#EF4444"},"Brighton":{"values":[0.147,0.165,0.165,0.168,0.108,0.127,0.127,0.138,0.138,0.076,0.189,0.092,0.092,0.071,0.087,0.043,0.02,0.02,-0.029,0.036,-0.05,-0.083,-0.036,-0.026,-0.026,-0.036,-0.05,-0.05,-0.028,0.019],"change":-0.13,"color":"#3B82F6"},"Burnley":{"values":[-0.644,-0.666,-0.625,-0.728,-0.82,-0.839,-0.839,-0.886,-0.886,-0.879,-0.916,-0.905,-0.993,-0.915,-0.864,-0.784,-0.8,-0.8,-0.756,-0.768,-0.832,-0.929,-0.92,-0.92,-0.848,-0.865,-0.885,-0.885,-0.868,-0.846],"change":-0.2,"color":"#C084FC"},"Chelsea":{"values":[0.333,0.327,0.459,0.516,0.46,0.335,0.335,0.277,0.277,0.241,0.39,0.581,0.581,0.42,0.354,0.397,0.275,0.275,0.175,0.216,0.273,0.262,0.279,0.309,0.425,0.495,0.54,0.54,0.485,0.569],"change":0.24,"color":"#3B82F6"},"Crystal Palace":{"values":[0.318,0.28,0.28,0.249,0.356,0.423,0.423,0.5,0.5,0.44,0.406,0.352,0.352,0.329,0.355,0.355,0.236,0.236,0.223,0.148,0.1,0.057,0.019,0.052,0.052,0.128,0.128,0.138,0.028,0.058],"change":-0.26,"color":"#3B82F6"},"Everton":{"values":[0.031,0.031,-0.06,-0.009,0.071,0.049,0.052,-0.043,-0.043,-0.076,-0.08,0.023,-0.157,-0.118,-0.061,-0.124,-0.2,-0.2,-0.177,-0.271,-0.205,-0.2,-0.2,-0.219,-0.221,-0.159,-0.159,-0.194,-0.087,-0.118],"change":-0.15,"color":"#3B82F6"},"Fulham":{"values":[-0.02,-0.046,-0.046,-0.123,-0.098,-0.056,-0.094,-0.169,-0.169,-0.222,-0.119,-0.059,-0.084,-0.129,-0.169,-0.179,-0.179,-0.104,-0.098,-0.171,-0.232,-0.315,-0.336,-0.319,-0.282,-0.295,-0.295,-0.254,-0.167,-0.2],"change":-0.18,"color":"#9CA3AF"},"Leeds":{"values":[1.313,-0.393,-0.15,-0.175,-0.115,-0.115,0.011,0.23,0.388,0.101,-0.112,-0.054,-0.144,-0.025,-0.043,0.033,0.133,0.133,0.12,0.043,0.156,0.156,0.194,-0.036,0.075,-0.05,-0.044,-0.044,-0.096,-0.096],"change":-1.41,"color":"#FBBF24"},"Liverpool":{"values":[0.864,0.864,0.864,0.737,0.777,0.67,0.67,0.668,0.627,0.525,0.544,0.477,0.477,0.507,0.486,0.491,0.452,0.452,0.462,0.532,0.477,0.597,0.434,0.55,0.55,0.547,0.547,0.586,0.625,0.625],"change":-0.24,"color":"#F87171"},"Man City":{"values":[0.512,0.57,0.53,0.53,0.482,0.579,0.579,0.61,0.61,0.596,0.638,0.586,0.603,0.614,0.665,0.665,0.713,0.713,0.71,0.637,0.679,0.495,0.488,0.483,0.483,0.508,0.563,0.563,0.581,0.653],"change":0.14,"color":"#93C5FD"},"Man Utd":{"values":[-0.053,-0.047,-0.047,0.094,0.063,0.068,0.068,0.122,0.109,0.154,0.111,0.076,0.18,0.134,0.172,0.356,0.377,0.291,0.267,0.3,0.393,0.505,0.431,0.409,0.462,0.402,0.402,0.421,0.494,0.452],"change":0.51,"color":"#EF4444"},"Newcastle":{"values":[0.548,0.567,0.567,0.537,0.543,0.486,0.385,0.525,0.525,0.554,0.471,0.296,0.351,0.37,0.357,0.357,0.384,0.368,0.404,0.451,0.425,0.419,0.423,0.25,0.319,0.338,0.227,0.227,0.145,0.098],"change":-0.45,"color":"#D1D5DB"},"Nott'm Forest":{"values":[-0.185,-0.15,-0.15,-0.128,-0.319,-0.319,-0.319,-0.472,-0.472,-0.458,-0.395,-0.275,-0.275,-0.287,-0.316,-0.316,-0.194,-0.244,-0.251,-0.262,-0.268,-0.382,-0.388,-0.396,-0.458,-0.258,-0.258,-0.316,-0.314,-0.37],"change":-0.18,"color":"#EF4444"},"Sunderland":{"values":[0.127,0.127,0.108,0.104,-0.223,-0.06,-0.06,-0.126,-0.126,-0.07,-0.146,-0.367,-0.38,-0.394,-0.496,-0.411,-0.342,-0.342,-0.44,-0.524,-0.637,-0.536,-0.587,-0.426,-0.44,-0.552,-0.552,-0.533,-0.497,-0.487],"change":-0.61,"color":"#EF4444"},"Tottenham":{"values":[-0.308,-0.223,-0.206,-0.293,-0.236,-0.233,-0.233,-0.259,-0.181,-0.133,-0.289,-0.242,-0.291,-0.314,-0.192,-0.192,-0.255,-0.255,-0.241,-0.158,-0.125,-0.174,-0.109,-0.129,-0.202,-0.229,-0.229,-0.364,-0.411,-0.415],"change":-0.11,"color":"#D1D5DB"},"West Ham":{"values":[-0.3,-0.288,-0.423,-0.423,-0.332,-0.406,-0.386,-0.473,-0.607,-0.655,-0.565,-0.599,-0.599,-0.621,-0.605,-0.605,-0.625,-0.625,-0.585,-0.649,-0.582,-0.485,-0.377,-0.4,-0.41,-0.353,-0.236,-0.236,-0.258,-0.259],"change":0.04,"color":"#C084FC"},"Wolves":{"values":[-0.225,-0.302,-0.355,-0.388,-0.404,-0.28,-0.28,-0.311,-0.311,-0.237,-0.309,-0.444,-0.444,-0.414,-0.414,-0.594,-0.569,-0.569,-0.529,-0.39,-0.411,-0.406,-0.405,-0.352,-0.465,-0.603,-0.657,-0.579,-0.62,-0.62],"change":-0.4,"color":"#F59E0B"}};
+        // ██ SITE_DATA:GW_LABELS ██
+        const GW_LABELS = ["GW31","GW32","GW33","GW34","GW35","GW36"];
+        // ██ SITE_DATA:END ██
+
+        // ██ SITE_DATA:TRENDS ██
+        const TRENDS = {"Arsenal":{"values":[0.646,0.657,0.7,0.704,0.679,0.665,0.773,0.776,0.726,0.737,0.74,0.74,0.746,0.757,0.786,0.721,0.722,0.784,0.833,0.938,0.98,1.007,1.033,1.016,1.048,1.014,1.008,1.033,1.036,1.047,0.892,0.976,0.979,0.975,0.949,1.039,1.003,0.9,0.881,0.85,0.873,0.905,1.012,0.99,1.049,1.019,0.996,0.969,0.987,0.925,0.906,0.894,0.881,0.842,0.827,0.828,0.796,0.782,0.416,0.607,0.639,0.716,0.655,0.701,0.725,0.755,0.734,0.737,0.732,0.768,0.77,0.733,0.754,0.795,0.818,0.802,0.887,0.84,0.843,0.9,0.87,0.865],"change":0.219,"color":"#EF4444"},"Aston Villa":{"values":[0.113,0.187,0.259,0.167,0.212,0.257,0.322,0.297,0.345,0.363,0.347,0.378,0.393,0.361,0.395,0.336,0.344,0.341,0.308,0.286,0.287,0.292,0.268,0.19,0.11,0.146,0.118,0.071,0.096,0.043,-0.1,0.004,0.063,0.115,0.142,0.074,0.031,0.035,0.071,0.085,0.101,0.123,0.169,0.121,0.171,0.101,0.136,0.088,0.032,-0.001,0.027,0.026,0.109,0.226,0.239,0.261,0.282,0.21,0.007,0.074,-0.034,-0.075,-0.082,-0.049,-0.053,-0.068,-0.06,-0.065,-0.025,-0.033,0.07,0.036,0.054,0.106,0.081,0.098,0.127,0.11,0.11,0.096,-0.002,-0.008],"change":-0.121,"color":"#D1D5DB"},"Bournemouth":{"values":[-0.479,-0.498,-0.52,-0.516,-0.526,-0.476,-0.575,-0.626,-0.681,-0.681,-0.688,-0.54,-0.481,-0.283,-0.277,-0.196,-0.194,-0.223,-0.23,-0.222,-0.185,-0.181,-0.173,-0.196,-0.188,-0.178,-0.104,-0.14,-0.166,-0.137,-0.036,0.057,0.11,0.115,0.117,0.082,0.075,0.174,0.13,0.175,0.196,0.183,0.341,0.292,0.31,0.347,0.409,0.475,0.457,0.326,0.343,0.327,0.291,0.268,0.288,0.276,0.266,0.286,0.185,0.279,0.344,0.368,0.362,0.309,0.335,0.257,0.227,0.178,0.133,0.181,0.156,0.143,0.117,0.13,0.146,0.213,0.202,0.194,0.194,0.14,0.162,0.147],"change":0.626,"color":"#F97316"},"Brentford":{"values":[0.309,0.424,0.425,0.362,0.352,0.267,0.278,0.276,0.303,0.36,0.33,0.331,0.327,0.278,0.247,0.173,0.174,0.161,0.095,0.127,0.083,0.052,0.049,0.016,0.043,0.019,0.081,0.051,0.078,0.029,-0.134,-0.09,-0.011,0.018,-0.081,-0.134,-0.028,-0.073,-0.056,-0.07,-0.089,-0.093,-0.12,-0.105,-0.122,-0.01,-0.044,-0.016,-0.019,0.024,-0.003,0.014,0.014,0.095,0.172,0.164,0.168,0.176,-0.127,-0.02,-0.065,-0.025,-0.079,-0.053,-0.062,0.059,0.11,0.145,0.235,0.269,0.17,0.113,0.113,0.239,0.231,0.203,0.178,0.196,0.197,0.17,0.156,0.144],"change":-0.165,"color":"#EF4444"},"Brighton":{"values":[0.625,0.626,0.496,0.533,0.604,0.58,0.516,0.501,0.527,0.496,0.472,0.382,0.341,0.302,0.273,0.312,0.313,0.279,0.197,0.184,0.245,0.26,0.225,0.201,0.122,0.086,0.018,0.064,0.064,0.054,0.016,0.084,0.16,0.122,0.107,0.042,0.071,0.092,0.054,0.079,0.124,0.133,0.072,-0.01,-0.006,0.005,0.052,0.022,-0.096,0.096,0.126,0.152,0.127,0.061,0.054,0.08,0.094,0.137,-0.032,0.025,0.047,0.052,0.035,0.094,0.119,0.112,0.043,0.13,0.14,0.112,0.055,0.046,0.011,0.006,-0.018,-0.0,-0.008,-0.019,-0.019,0.003,0.023,0.032],"change":-0.593,"color":"#3B82F6"},"Burnley":{"values":[-0.824,-0.853,-1.197,-1.259,-0.937,-0.744,-0.675,-0.76,-0.831,-0.811,-0.827,-0.823,-0.792,-0.642,-0.696,-0.644,-0.645,-0.649,-0.581,-0.588,-0.638,-0.702,-0.7,-0.635,-0.621,-0.582,-0.546,-0.604,-0.617,-0.631,-1.022,-0.602,-1.119,-1.051,-0.886,-1.055,-1.039,-1.038,-1.015,-1.039,-1.06,-1.027,-0.902,-0.867,-0.818,-0.858,-0.863,-0.879,-0.934,-0.897,-0.896,-0.869,-0.881,-0.869],"change":-0.045,"color":"#C084FC"},"Chelsea":{"values":[0.097,0.067,0.16,0.14,0.118,0.121,0.153,0.186,0.206,0.166,0.296,0.333,0.318,0.254,0.263,0.212,0.217,0.213,0.114,0.133,0.16,0.161,0.162,0.182,0.164,0.231,0.229,0.295,0.313,0.287,0.281,0.385,0.467,0.452,0.497,0.561,0.54,0.563,0.532,0.482,0.465,0.474,0.594,0.577,0.579,0.465,0.507,0.492,0.459,0.376,0.366,0.38,0.368,0.351,0.427,0.405,0.408,0.402,0.204,0.427,0.496,0.453,0.381,0.305,0.301,0.323,0.255,0.377,0.472,0.46,0.36,0.381,0.331,0.332,0.332,0.364,0.348,0.412,0.412,0.388,0.467,0.457],"change":0.36,"color":"#3B82F6"},"Crystal Palace":{"values":[-0.136,-0.166,-0.089,-0.085,-0.128,-0.173,-0.13,-0.152,-0.206,-0.212,-0.22,-0.232,-0.228,-0.223,-0.181,-0.173,-0.172,-0.24,-0.296,-0.319,-0.335,-0.278,-0.314,-0.294,-0.297,-0.264,-0.171,-0.117,-0.081,-0.025,-0.09,-0.104,-0.118,-0.128,-0.176,-0.202,-0.204,-0.22,-0.202,-0.162,-0.205,-0.219,-0.107,-0.023,-0.058,-0.045,-0.004,-0.031,0.002,0.148,0.147,0.147,0.105,0.057,0.088,0.169,0.168,0.191,0.114,0.173,0.259,0.276,0.308,0.346,0.315,0.375,0.362,0.372,0.363,0.338,0.301,0.269,0.201,0.109,0.07,0.039,0.052,0.053,0.053,0.037,0.032,0.013],"change":0.149,"color":"#3B82F6"},"Everton":{"values":[-0.219,-0.343,-0.326,-0.36,-0.353,-0.26,-0.232,-0.166,-0.186,-0.145,-0.127,-0.108,-0.131,-0.012,0.029,-0.047,-0.051,-0.053,-0.003,-0.005,0.015,0.007,-0.008,-0.036,-0.065,-0.124,-0.098,-0.098,-0.097,-0.107,-0.244,-0.269,-0.266,-0.327,-0.313,-0.326,-0.358,-0.33,-0.352,-0.321,-0.315,-0.308,-0.313,-0.28,-0.263,-0.354,-0.304,-0.277,-0.209,-0.136,-0.123,-0.122,-0.077,-0.05,-0.081,-0.058,-0.047,-0.023,-0.191,-0.187,-0.131,-0.06,-0.038,-0.059,-0.031,-0.083,-0.167,-0.155,-0.083,-0.118,-0.096,-0.122,-0.153,-0.205,-0.184,-0.197,-0.186,-0.161,-0.161,-0.182,-0.137,-0.131],"change":0.088,"color":"#3B82F6"},"Fulham":{"values":[-0.248,-0.414,-0.374,-0.37,-0.41,-0.387,-0.43,-0.402,-0.402,-0.354,-0.344,-0.376,-0.358,-0.162,-0.22,-0.273,-0.277,-0.28,-0.298,-0.315,-0.311,-0.296,-0.262,-0.205,-0.267,-0.202,-0.203,-0.172,-0.224,-0.231,-0.277,-0.196,-0.203,-0.147,-0.057,-0.007,0.102,0.099,0.11,0.122,0.155,0.061,0.052,0.092,0.074,0.081,0.135,0.126,0.151,0.149,0.12,0.117,0.158,0.117,0.109,0.086,0.084,0.076,-0.035,0.023,-0.036,-0.017,0.009,-0.022,-0.024,-0.055,-0.093,-0.031,-0.104,-0.019,-0.081,-0.111,-0.088,-0.113,-0.153,-0.165,-0.152,-0.16,-0.16,-0.14,-0.153,-0.15],"change":0.098,"color":"#9CA3AF"},"Leeds":{"values":[0.862,-0.481,-0.206,-0.199,-0.27,-0.091,-0.056,-0.066,-0.001,-0.206,-0.377,-0.349,-0.173,-0.091,0.004,0.034,0.084,0.1,-0.018,0.008,0.008,0.023,-0.036,-0.01],"change":-0.872,"color":"#FBBF24"},"Liverpool":{"values":[0.525,0.506,0.594,0.633,0.687,0.758,0.708,0.719,0.739,0.772,0.744,0.743,0.746,0.653,0.646,0.751,0.751,0.771,0.778,0.784,0.833,0.823,0.81,0.823,0.882,0.85,0.814,0.821,0.798,0.846,0.849,1.009,1.066,1.03,1.019,1.009,1.021,1.019,1.037,1.005,1.003,1.003,1.065,1.043,1.169,1.148,1.232,1.2,1.216,1.128,1.134,1.133,1.086,1.101,1.029,1.037,1.024,1.002,0.743,0.795,0.801,0.802,0.776,0.722,0.737,0.668,0.58,0.599,0.574,0.512,0.488,0.488,0.472,0.495,0.5,0.439,0.503,0.502,0.502,0.524,0.519,0.49],"change":-0.035,"color":"#F87171"},"Man City":{"values":[1.061,1.056,1.079,1.016,1.148,1.098,1.036,1.029,0.985,1.108,1.11,1.093,1.085,0.989,0.951,0.934,0.964,0.962,0.943,0.953,0.943,0.933,0.947,0.931,0.973,1.005,1.001,1.04,1.101,1.092,0.954,1.045,1.132,1.097,1.124,1.099,0.994,0.953,0.93,0.883,0.864,0.76,0.711,0.628,0.597,0.538,0.588,0.613,0.588,0.648,0.635,0.611,0.577,0.637,0.615,0.595,0.608,0.615,0.37,0.378,0.335,0.364,0.414,0.458,0.475,0.528,0.501,0.543,0.574,0.562,0.617,0.632,0.653,0.639,0.554,0.538,0.536,0.571,0.571,0.596,0.61,0.618],"change":-0.443,"color":"#93C5FD"},"Man Utd":{"values":[0.48,0.439,0.51,0.463,0.359,0.328,0.308,0.308,0.238,0.131,0.105,0.119,0.131,0.069,0.079,0.022,0.005,0.002,0.025,0.043,0.084,0.07,0.049,0.063,-0.059,-0.071,-0.064,-0.116,-0.119,-0.106,-0.298,-0.241,-0.212,-0.15,-0.107,-0.3,-0.258,-0.231,-0.244,-0.192,-0.197,-0.233,-0.193,-0.096,-0.099,-0.147,-0.171,-0.159,-0.198,-0.235,-0.214,-0.214,-0.146,-0.134,-0.175,-0.197,-0.197,-0.124,-0.218,-0.122,-0.076,-0.073,-0.007,-0.058,-0.008,0.068,0.096,0.085,0.082,0.117,0.202,0.203,0.176,0.19,0.27,0.294,0.279,0.27,0.27,0.294,0.319,0.327],"change":-0.153,"color":"#EF4444"},"Newcastle":{"values":[0.891,0.868,0.885,0.821,0.822,0.953,0.947,0.925,0.988,0.995,0.992,0.853,0.874,0.677,0.745,0.469,0.442,0.44,0.44,0.42,0.395,0.36,0.404,0.368,0.392,0.439,0.382,0.431,0.421,0.468,0.24,0.224,0.205,0.18,0.086,0.151,0.178,0.151,0.184,0.212,0.259,0.205,0.128,0.205,0.266,0.426,0.348,0.364,0.336,0.296,0.301,0.3,0.356,0.405,0.423,0.456,0.491,0.469,0.192,0.339,0.291,0.281,0.267,0.224,0.336,0.327,0.334,0.249,0.16,0.186,0.197,0.162,0.205,0.266,0.255,0.242,0.17,0.206,0.206,0.184,0.136,0.149],"change":-0.742,"color":"#9CA3AF"},"Nott'm Forest":{"values":[-0.276,-0.324,-0.311,-0.337,-0.404,-0.368,-0.372,-0.346,-0.322,-0.34,-0.322,-0.315,-0.283,-0.378,-0.381,-0.339,-0.339,-0.334,-0.342,-0.325,-0.268,-0.276,-0.263,-0.228,-0.207,-0.215,-0.171,-0.177,-0.178,-0.165,-0.197,-0.016,-0.025,0.025,0.036,-0.022,0.009,0.034,0.083,0.148,0.096,0.073,0.009,0.061,0.095,0.172,0.129,0.063,0.182,0.118,0.129,0.134,0.063,0.009,-0.05,-0.071,-0.041,-0.034,-0.16,-0.048,-0.186,-0.25,-0.3,-0.342,-0.441,-0.453,-0.451,-0.394,-0.306,-0.23,-0.321,-0.246,-0.273,-0.307,-0.336,-0.305,-0.31,-0.285,-0.284,-0.306,-0.298,-0.304],"change":-0.028,"color":"#EF4444"},"Southampton":{"values":[0.721,-0.345,-0.699,-1.038,-1.004,-0.895,-0.795,-0.933,-0.88,-0.907,-0.871,-0.86,-0.945,-1.089,-1.04,-1.252,-1.255,-1.285,-1.267,-1.382,-1.387,-1.345,-1.303,-1.291,-1.312,-1.284,-1.296,-1.277],"change":-1.998,"color":"#D1D5DB"},"Sunderland":{"values":[0.233,-0.201,-0.15,-0.235,-0.216,-0.123,-0.26,-0.186,-0.072,-0.066,-0.074,-0.216,-0.248,-0.199,-0.154,-0.344,-0.302,-0.37,-0.313,-0.358,-0.358,-0.384,-0.343,-0.36],"change":-0.593,"color":"#EF4444"},"Tottenham":{"values":[0.204,0.219,0.317,0.283,0.239,0.261,0.32,0.327,0.318,0.334,0.195,0.144,0.125,0.185,0.192,0.122,0.143,0.137,0.118,0.127,0.099,0.096,0.128,0.156,0.125,0.073,0.106,0.08,0.083,0.126,-0.031,0.122,0.152,0.159,0.247,0.43,0.399,0.384,0.35,0.345,0.234,0.363,0.256,0.33,0.234,0.174,0.131,0.072,0.076,0.059,0.043,0.045,0.059,0.028,0.016,-0.064,-0.082,-0.126,-0.307,-0.106,-0.221,-0.141,-0.122,-0.175,-0.167,-0.155,-0.111,-0.204,-0.18,-0.213,-0.123,-0.205,-0.194,-0.094,-0.154,-0.145,-0.141,-0.182,-0.182,-0.242,-0.294,-0.265],"change":-0.469,"color":"#D1D5DB"},"West Ham":{"values":[-0.028,-0.03,0.148,0.079,-0.024,-0.059,-0.081,-0.073,-0.111,-0.136,-0.109,-0.1,-0.12,-0.156,-0.143,-0.113,-0.113,-0.14,-0.161,-0.261,-0.311,-0.274,-0.259,-0.258,-0.286,-0.353,-0.408,-0.462,-0.417,-0.403,-0.574,-0.438,-0.445,-0.501,-0.555,-0.504,-0.401,-0.396,-0.389,-0.451,-0.463,-0.417,-0.501,-0.452,-0.446,-0.503,-0.565,-0.519,-0.483,-0.428,-0.437,-0.438,-0.428,-0.387,-0.369,-0.349,-0.377,-0.371,-0.488,-0.597,-0.45,-0.499,-0.556,-0.54,-0.557,-0.665,-0.713,-0.611,-0.584,-0.618,-0.579,-0.556,-0.581,-0.653,-0.598,-0.551,-0.53,-0.502,-0.502,-0.453,-0.403,-0.41],"change":-0.382,"color":"#C084FC"},"Wolves":{"values":[-0.351,-0.376,-0.342,-0.399,-0.48,-0.516,-0.455,-0.422,-0.373,-0.357,-0.403,-0.337,-0.366,-0.382,-0.391,-0.272,-0.271,-0.242,-0.237,-0.271,-0.228,-0.244,-0.286,-0.329,-0.319,-0.313,-0.374,-0.421,-0.457,-0.506,-0.458,-0.402,-0.365,-0.373,-0.421,-0.415,-0.513,-0.492,-0.458,-0.487,-0.513,-0.435,-0.51,-0.571,-0.53,-0.527,-0.546,-0.523,-0.46,-0.363,-0.374,-0.406,-0.376,-0.316,-0.289,-0.313,-0.311,-0.316,-0.53,-0.49,-0.541,-0.496,-0.481,-0.44,-0.431,-0.455,-0.475,-0.532,-0.621,-0.593,-0.706,-0.674,-0.673,-0.535,-0.522,-0.504,-0.487,-0.588,-0.591,-0.581,-0.549,-0.542],"change":-0.191,"color":"#F59E0B"}};
+        // ██ SITE_DATA:END ██
 
         // Tab switching
         function showTab(index) {
@@ -1444,18 +1443,21 @@
         // Render matchweek - compact table layout
         function renderMatchweek() {
             let html = `<table class="matchweek-table"><thead><tr><th style="width:240px">FIXTURE</th><th style="width:110px;text-align:center">xG</th><th style="width:110px;text-align:center">CS%</th><th style="text-align:center">WIN</th><th style="width:110px;text-align:center"></th><th style="width:130px;text-align:center">DRAW</th></tr></thead><tbody>`;
+            const gwLabel = (GW_LABELS && GW_LABELS[0]) || 'GW?';
 
             FIXTURES.forEach((f, idx) => {
                 const homeWinClass = f.homeWinDisplay > 40 ? 'high' : f.homeWinDisplay > 30 ? 'medium' : 'low';
                 const awayWinClass = f.awayWinDisplay > 40 ? 'high' : f.awayWinDisplay > 30 ? 'medium' : 'low';
+                const homeCS = (f.homeCS != null) ? f.homeCS.toFixed(1) + '%' : '—';
+                const awayCS = (f.awayCS != null) ? f.awayCS.toFixed(1) + '%' : '—';
 
                 // Home team row
                 html += `<tr class="matchweek-home-row">
                     <td class="fixture-team-cell">${getTeamNameWithBadge(f.home)}</td>
                     <td class="fixture-stat">${f.homeRating.toFixed(2)}</td>
-                    <td class="fixture-stat">21.7%</td>
+                    <td class="fixture-stat">${homeCS}</td>
                     <td class="fixture-stat"><span class="fixture-win-pill ${homeWinClass}">${f.homeWinDisplay.toFixed(1)}%</span></td>
-                    <td class="matchweek-vs-cell" rowspan="2">v<br/>(${['GW31', 'GW31', 'GW31', 'GW31', 'GW31', 'GW31', 'GW31', 'GW31'][idx]})</td>
+                    <td class="matchweek-vs-cell" rowspan="2">v<br/>(${gwLabel})</td>
                     <td class="fixture-stat fixture-draw" rowspan="2">${f.draw.toFixed(1)}%</td>
                 </tr>`;
 
@@ -1463,7 +1465,7 @@
                 html += `<tr class="matchweek-away-row">
                     <td class="fixture-team-cell">${getTeamNameWithBadge(f.away)}</td>
                     <td class="fixture-stat">${f.awayRating.toFixed(2)}</td>
-                    <td class="fixture-stat">20.0%</td>
+                    <td class="fixture-stat">${awayCS}</td>
                     <td class="fixture-stat"><span class="fixture-win-pill ${awayWinClass}">${f.awayWinDisplay.toFixed(1)}%</span></td>
                 </tr>`;
             });
@@ -1475,15 +1477,15 @@
         // Render team predictions
         function renderTeamPredictions() {
             const teams = Object.keys(TEAM_PREDICTIONS).sort();
-            const headerHtml = `<tr><th>Team</th><th style="text-align: center;">GW31</th><th style="text-align: center;">GW32</th><th style="text-align: center;">GW33</th><th style="text-align: center;">GW34</th><th style="text-align: center;">GW35</th></tr>`;
-            document.getElementById('teamPredHeadline').innerHTML = headerHtml;
+            const gwCols = GW_LABELS.map(l => `<th style="text-align:center">${l}</th>`).join('');
+            document.getElementById('teamPredHeadline').innerHTML = `<tr><th>Team</th>${gwCols}</tr>`;
 
             const bodyHtml = teams.map(team => {
                 const vals = TEAM_PREDICTIONS[team];
                 return `<tr><td class="heatmap-team">${getTeamNameWithBadge(team)}</td>` +
                     vals.map(v => {
+                        if (v === null || v === undefined) return `<td class="heatmap-cell">—</td>`;
                         let level = 0;
-                        if (v === null) return `<td class="heatmap-cell">—</td>`;
                         if (v >= 70) level = 4;
                         else if (v >= 55) level = 3;
                         else if (v >= 40) level = 2;
@@ -1498,18 +1500,19 @@
         // Render team goals predictions
         function renderTeamGoals() {
             const teams = Object.keys(TEAM_GOALS).sort();
-            const header = `<tr><th>Team</th><th style="text-align:center">GW31</th><th style="text-align:center">GW32</th><th style="text-align:center">GW33</th><th style="text-align:center">GW34</th><th style="text-align:center">GW35</th></tr>`;
-            document.getElementById('teamGoalsHeadline').innerHTML = header;
+            const gwCols = GW_LABELS.map(l => `<th style="text-align:center">${l}</th>`).join('');
+            document.getElementById('teamGoalsHeadline').innerHTML = `<tr><th>Team</th>${gwCols}</tr>`;
             const body = teams.map(team => {
                 const vals = TEAM_GOALS[team];
                 return `<tr><td class="heatmap-team">${getTeamNameWithBadge(team)}</td>` +
                     vals.map(v => {
+                        if (v === null || v === undefined) return `<td class="heatmap-cell">—</td>`;
                         let level = 0;
                         if (v >= 1.7) level = 4;
                         else if (v >= 1.4) level = 3;
                         else if (v >= 1.1) level = 2;
                         else if (v >= 0.8) level = 1;
-                        return `<td class="heatmap-cell level${level}">${v.toFixed(1)}</td>`;
+                        return `<td class="heatmap-cell level${level}">${v.toFixed(2)}</td>`;
                     }).join('') + `</tr>`;
             }).join('');
             document.getElementById('teamGoalsBody').innerHTML = body;
@@ -1518,12 +1521,13 @@
         // Render team clean sheet % predictions
         function renderTeamCS() {
             const teams = Object.keys(TEAM_CS).sort();
-            const header = `<tr><th>Team</th><th style="text-align:center">GW31</th><th style="text-align:center">GW32</th><th style="text-align:center">GW33</th><th style="text-align:center">GW34</th><th style="text-align:center">GW35</th></tr>`;
-            document.getElementById('teamCSHeadline').innerHTML = header;
+            const gwCols = GW_LABELS.map(l => `<th style="text-align:center">${l}</th>`).join('');
+            document.getElementById('teamCSHeadline').innerHTML = `<tr><th>Team</th>${gwCols}</tr>`;
             const body = teams.map(team => {
                 const vals = TEAM_CS[team];
                 return `<tr><td class="heatmap-team">${getTeamNameWithBadge(team)}</td>` +
                     vals.map(v => {
+                        if (v === null || v === undefined) return `<td class="heatmap-cell">—</td>`;
                         let level = 0;
                         if (v >= 38) level = 4;
                         else if (v >= 30) level = 3;
@@ -1535,8 +1539,15 @@
             document.getElementById('teamCSBody').innerHTML = body;
         }
 
+        // Shared: build player table header row HTML from GW_LABELS
+        function _playerTableHead() {
+            const gwCols = GW_LABELS.map(l => `<th style="text-align:right">${l}</th>`).join('');
+            return `<th>Player</th><th>Team</th>${gwCols}<th style="text-align:right">Total</th>`;
+        }
+
         // Render player goals with heatmap styling
         function renderPlayerGoals() {
+            document.getElementById('playerGoalsHead').innerHTML = _playerTableHead();
             const html = PLAYER_GOALS.map(p => {
                 return `<tr>
                     <td class="player-name">${p.name}</td>
@@ -1558,6 +1569,8 @@
 
         // Render Next GW player table
         function renderPlayerNextGW() {
+            const gwLabel = (GW_LABELS && GW_LABELS[0]) || 'Next GW';
+            document.getElementById('nextGWFixtureHeader').textContent = `Fixture (${gwLabel})`;
             const html = PLAYER_NEXTGW.map(p => {
                 const isBlank = p.xGI === null;
                 const xgDisplay = p.xG === null ? '—' : p.xG.toFixed(2);
@@ -1578,6 +1591,7 @@
 
         // Render assists heatmap
         function renderPlayerAssists() {
+            document.getElementById('playerAssistsHead').innerHTML = _playerTableHead();
             const html = PLAYER_ASSISTS.map(p => {
                 return `<tr>
                     <td class="player-name">${p.name}</td>
@@ -1595,6 +1609,7 @@
 
         // Render goal involvements heatmap
         function renderPlayerGI() {
+            document.getElementById('playerGIHead').innerHTML = _playerTableHead();
             const html = PLAYER_GI.map(p => {
                 return `<tr>
                     <td class="player-name">${p.name}</td>
