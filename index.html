@@ -1501,6 +1501,7 @@
                     <td class="player-name">${p.name}</td>
                     <td class="player-team">${p.team}</td>
                     ${p.gw.map(v => {
+                        if (v === null) return `<td class="hm-blank">—</td>`;
                         const level = v >= 0.30 ? 4 : v >= 0.22 ? 3 : v >= 0.15 ? 2 : v >= 0.10 ? 1 : 0;
                         return `<td class="heatmap-cell level${level}" style="text-align:right">${v.toFixed(2)}</td>`;
                     }).join('')}
@@ -1517,6 +1518,7 @@
                     <td class="player-name">${p.name}</td>
                     <td class="player-team">${p.team}</td>
                     ${p.gw.map(v => {
+                        if (v === null) return `<td class="hm-blank">—</td>`;
                         const level = v >= 0.80 ? 4 : v >= 0.60 ? 3 : v >= 0.45 ? 2 : v >= 0.30 ? 1 : 0;
                         return `<td class="heatmap-cell level${level}" style="text-align:right">${v.toFixed(2)}</td>`;
                     }).join('')}
