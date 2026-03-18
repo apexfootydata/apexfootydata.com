@@ -154,6 +154,7 @@
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 20px;
+            table-layout: fixed;
         }
 
         .data-table thead {
@@ -162,10 +163,10 @@
         }
 
         .data-table th {
-            padding: 16px 20px;
+            padding: 18px 20px;
             text-align: left;
             font-family: 'Space Grotesk', sans-serif;
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -173,9 +174,9 @@
         }
 
         .data-table td {
-            padding: 16px 20px;
+            padding: 18px 20px;
             border-top: 1px solid #2a2a35;
-            font-size: 16px;
+            font-size: 18px;
         }
 
         .data-table tbody tr:hover {
@@ -200,12 +201,10 @@
             white-space: nowrap;
         }
 
-        /* Constrain team/player name columns so bar/value columns get the space */
+        /* Fixed widths for data-table columns (rank + team fixed, bar cols fill rest) */
+        .data-table .rank { width: 52px; }
         .data-table th:nth-child(2),
-        .data-table td:nth-child(2) {
-            width: 220px;
-            white-space: nowrap;
-        }
+        .data-table td:nth-child(2) { width: 240px; }
 
         .team-badge {
             width: 20px;
@@ -224,8 +223,8 @@
         }
 
         .bar-label {
-            width: 60px;
-            font-size: 14px;
+            width: 64px;
+            font-size: 16px;
             color: #6b6b7b;
             text-align: right;
         }
@@ -298,7 +297,7 @@
 
         .sparkline-team {
             font-family: 'Space Grotesk', sans-serif;
-            font-size: 16px;
+            font-size: 17px;
             font-weight: 600;
             color: #e8e8f0;
             margin-bottom: 10px;
@@ -331,13 +330,14 @@
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 20px;
+            table-layout: fixed;
         }
 
         .matchweek-table th {
-            padding: 16px 20px;
+            padding: 18px 20px;
             text-align: left;
             font-family: 'Space Grotesk', sans-serif;
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -347,8 +347,8 @@
         }
 
         .matchweek-table td {
-            padding: 16px 20px;
-            font-size: 16px;
+            padding: 18px 20px;
+            font-size: 17px;
             border-top: 1px solid #2a2a35;
         }
 
@@ -375,14 +375,17 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            width: 220px;
-            white-space: nowrap;
+            width: 240px;
         }
+
+        /* Matchweek: fixture col fixed, stat cols fill remaining space */
+        .matchweek-table th:nth-child(1),
+        .matchweek-table td:nth-child(1) { width: 240px; }
 
         .fixture-stat {
             text-align: center;
             color: #8b8b99;
-            font-size: 15px;
+            font-size: 17px;
         }
 
         .fixture-draw {
@@ -392,9 +395,9 @@
 
         .fixture-win-pill {
             display: inline-block;
-            padding: 5px 12px;
+            padding: 6px 14px;
             border-radius: 12px;
-            font-size: 14px;
+            font-size: 16px;
             font-weight: 600;
             white-space: nowrap;
             text-align: center;
@@ -421,6 +424,7 @@
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 20px;
+            table-layout: fixed;
         }
 
         .heatmap-table thead {
@@ -429,20 +433,20 @@
         }
 
         .heatmap-table th {
-            padding: 16px 12px;
+            padding: 18px 12px;
             text-align: center;
             font-family: 'Space Grotesk', sans-serif;
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 600;
             text-transform: uppercase;
             color: #8b8b99;
         }
 
         .heatmap-table td {
-            padding: 12px;
+            padding: 14px 12px;
             text-align: center;
             border: 1px solid #2a2a35;
-            font-size: 15px;
+            font-size: 17px;
             font-weight: 600;
         }
 
@@ -466,9 +470,12 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            width: 220px;
-            white-space: nowrap;
+            width: 240px;
         }
+
+        /* Heatmap: team col fixed, GW cols fill remaining space equally */
+        .heatmap-table th:first-child,
+        .heatmap-table td:first-child { width: 240px; }
 
         /* Player heatmap cells */
         .hm-1 { background: rgba(249,115,22,0.08); color: #c8c8d0; }
@@ -517,6 +524,7 @@
         .final-table {
             width: 100%;
             border-collapse: collapse;
+            table-layout: fixed;
         }
 
         .final-table thead {
@@ -525,24 +533,35 @@
         }
 
         .final-table th {
-            padding: 14px 16px;
+            padding: 16px 16px;
             text-align: left;
             font-family: 'Space Grotesk', sans-serif;
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             color: #6b6b7b;
         }
 
-        .final-table th.th-bar {
-            width: 35%;
-        }
+        /* Final table: rank + team + stats fixed, bar col fills remaining space */
+        .final-table th:nth-child(1),
+        .final-table td:nth-child(1) { width: 52px; }
+        .final-table th:nth-child(2),
+        .final-table td:nth-child(2) { width: 240px; }
+        .final-table th:nth-child(3),
+        .final-table td:nth-child(3) { width: 60px; }
+        .final-table th:nth-child(4),
+        .final-table td:nth-child(4) { width: 64px; }
+        .final-table th:nth-child(5),
+        .final-table td:nth-child(5) { width: 58px; }
+        /* Column 6 (bar) gets auto / remaining space */
+        .final-table th:nth-child(7),
+        .final-table td:nth-child(7) { width: 86px; }
 
         .final-table td {
-            padding: 14px 16px;
+            padding: 16px 16px;
             border-top: 1px solid #1e1e28;
-            font-size: 16px;
+            font-size: 17px;
             vertical-align: middle;
         }
 
@@ -593,10 +612,10 @@
         }
 
         .final-rank {
-            width: 44px;
+            width: 52px;
             text-align: center;
             color: #6b6b7b;
-            font-size: 16px;
+            font-size: 17px;
             font-weight: 600;
         }
 
@@ -611,30 +630,29 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            width: 220px;
-            white-space: nowrap;
+            width: 240px;
         }
 
         .final-stat {
             text-align: right;
             color: #6b6b7b;
-            width: 56px;
-            font-size: 15px;
+            width: 60px;
+            font-size: 16px;
         }
 
         .final-points {
             text-align: right;
             font-weight: 700;
             color: #ffffff;
-            width: 58px;
-            font-size: 18px;
+            width: 64px;
+            font-size: 20px;
         }
 
         .final-left {
             text-align: right;
             color: #6b6b7b;
-            width: 52px;
-            font-size: 15px;
+            width: 58px;
+            font-size: 16px;
         }
 
         /* Projected pts bar cell */
@@ -676,20 +694,20 @@
         }
 
         .proj-bar-num {
-            font-size: 16px;
+            font-size: 17px;
             font-weight: 600;
             color: #F97316;
             white-space: nowrap;
-            min-width: 40px;
+            min-width: 42px;
             text-align: right;
         }
 
         .final-range {
             text-align: right;
             color: #4a4a5a;
-            font-size: 14px;
+            font-size: 15px;
             white-space: nowrap;
-            width: 80px;
+            width: 86px;
         }
 
         /* Player table */
@@ -697,6 +715,7 @@
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 20px;
+            table-layout: fixed;
         }
 
         .player-table thead {
@@ -705,10 +724,10 @@
         }
 
         .player-table th {
-            padding: 16px 16px;
+            padding: 18px 16px;
             text-align: left;
             font-family: 'Space Grotesk', sans-serif;
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -716,9 +735,9 @@
         }
 
         .player-table td {
-            padding: 14px 16px;
+            padding: 16px 16px;
             border-top: 1px solid #2a2a35;
-            font-size: 15px;
+            font-size: 17px;
         }
 
         .player-table tbody tr:hover {
@@ -729,19 +748,23 @@
             font-family: 'Space Grotesk', sans-serif;
             font-weight: 500;
             color: #e8e8f0;
-            width: 180px;
-            white-space: nowrap;
+            width: 190px;
         }
 
         .player-team {
             color: #6b6b7b;
-            font-size: 13px;
+            font-size: 14px;
             display: flex;
             align-items: center;
             gap: 7px;
-            width: 160px;
-            white-space: nowrap;
+            width: 175px;
         }
+
+        /* Player table: name + team fixed, GW cols fill remaining space equally */
+        .player-table th:nth-child(1),
+        .player-table td:nth-child(1) { width: 190px; }
+        .player-table th:nth-child(2),
+        .player-table td:nth-child(2) { width: 175px; }
 
         .player-stat {
             text-align: right;
