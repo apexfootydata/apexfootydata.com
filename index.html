@@ -908,12 +908,18 @@
 
         <!-- Sub-tab: Goals -->
         <div class="subtab-content">
-            <div class="placeholder">Data loading...</div>
+            <table class="heatmap-table">
+                <thead id="teamGoalsHeadline"></thead>
+                <tbody id="teamGoalsBody"></tbody>
+            </table>
         </div>
 
         <!-- Sub-tab: Clean Sheet % -->
         <div class="subtab-content">
-            <div class="placeholder">Data loading...</div>
+            <table class="heatmap-table">
+                <thead id="teamCSHeadline"></thead>
+                <tbody id="teamCSBody"></tbody>
+            </table>
         </div>
     </div>
 
@@ -921,10 +927,9 @@
     <div class="tab-content">
         <div class="subtab-nav">
             <button class="subtab-button active" onclick="showSub(3, 0)">Goals</button>
-            <button class="subtab-button" onclick="showSub(3, 1)">Summary</button>
-            <button class="subtab-button" onclick="showSub(3, 2)">Next GW</button>
-            <button class="subtab-button" onclick="showSub(3, 3)">Assists</button>
-            <button class="subtab-button" onclick="showSub(3, 4)">Goal Involvements</button>
+            <button class="subtab-button" onclick="showSub(3, 1)">Next GW</button>
+            <button class="subtab-button" onclick="showSub(3, 2)">Assists</button>
+            <button class="subtab-button" onclick="showSub(3, 3)">Goal Involvements</button>
         </div>
 
         <!-- Sub-tab: Goals -->
@@ -946,18 +951,59 @@
             </table>
         </div>
 
-        <!-- Other sub-tabs -->
+        <!-- Sub-tab: Next GW -->
         <div class="subtab-content">
-            <div class="placeholder">Data loading...</div>
+            <table class="player-table">
+                <thead>
+                    <tr>
+                        <th>Player</th>
+                        <th>Team</th>
+                        <th>Fixture (GW31)</th>
+                        <th style="text-align: right;">xG</th>
+                        <th style="text-align: right;">xA</th>
+                        <th style="text-align: right;">xGI</th>
+                    </tr>
+                </thead>
+                <tbody id="playerNextGWTable"></tbody>
+            </table>
         </div>
+
+        <!-- Sub-tab: Assists -->
         <div class="subtab-content">
-            <div class="placeholder">Data loading...</div>
+            <table class="player-table">
+                <thead>
+                    <tr>
+                        <th>Player</th>
+                        <th>Team</th>
+                        <th style="text-align: right;">GW31</th>
+                        <th style="text-align: right;">GW32</th>
+                        <th style="text-align: right;">GW33</th>
+                        <th style="text-align: right;">GW34</th>
+                        <th style="text-align: right;">GW35</th>
+                        <th style="text-align: right;">Total</th>
+                    </tr>
+                </thead>
+                <tbody id="playerAssistsTable"></tbody>
+            </table>
         </div>
+
+        <!-- Sub-tab: Goal Involvements -->
         <div class="subtab-content">
-            <div class="placeholder">Data loading...</div>
-        </div>
-        <div class="subtab-content">
-            <div class="placeholder">Data loading...</div>
+            <table class="player-table">
+                <thead>
+                    <tr>
+                        <th>Player</th>
+                        <th>Team</th>
+                        <th style="text-align: right;">GW31</th>
+                        <th style="text-align: right;">GW32</th>
+                        <th style="text-align: right;">GW33</th>
+                        <th style="text-align: right;">GW34</th>
+                        <th style="text-align: right;">GW35</th>
+                        <th style="text-align: right;">Total</th>
+                    </tr>
+                </thead>
+                <tbody id="playerGITable"></tbody>
+            </table>
         </div>
     </div>
 
@@ -1089,9 +1135,94 @@
             "Wolves": [null, 25, 22, 31, 36]
         };
 
+        const TEAM_GOALS = {
+            "Arsenal":        [1.8, 1.6, 1.9, 1.6, 1.7],
+            "Aston Villa":    [1.2, 1.3, 1.1, 1.4, 1.2],
+            "Bournemouth":    [1.4, 1.3, 1.6, 1.3, 1.5],
+            "Brentford":      [1.3, 1.6, 1.4, 1.5, 1.3],
+            "Brighton":       [1.4, 1.2, 1.3, 1.2, 1.4],
+            "Burnley":        [0.8, 0.9, 0.7, 0.9, 0.8],
+            "Chelsea":        [1.7, 1.8, 1.5, 1.8, 1.5],
+            "Crystal Palace": [1.2, 1.3, 1.4, 1.1, 1.4],
+            "Everton":        [1.1, 1.0, 1.1, 1.0, 1.2],
+            "Fulham":         [1.2, 1.3, 1.1, 1.3, 1.1],
+            "Leeds":          [1.2, 1.0, 1.2, 1.0, 1.1],
+            "Liverpool":      [1.6, 1.8, 1.5, 1.7, 1.6],
+            "Man City":       [1.7, 1.6, 1.9, 1.5, 1.9],
+            "Man Utd":        [1.6, 1.5, 1.4, 1.6, 1.4],
+            "Newcastle":      [1.3, 1.5, 1.4, 1.3, 1.5],
+            "Nott'm Forest":  [1.1, 1.0, 1.2, 1.1, 1.0],
+            "Sunderland":     [0.7, 0.9, 0.8, 0.8, 0.9],
+            "Tottenham":      [1.2, 1.1, 1.2, 1.1, 1.3],
+            "West Ham":       [1.2, 1.0, 1.1, 1.2, 1.1],
+            "Wolves":         [0.9, 0.9, 0.8, 1.0, 0.8]
+        };
+
+        const TEAM_CS = {
+            "Arsenal":        [44, 51, 42, 49, 47],
+            "Aston Villa":    [30, 27, 32, 26, 30],
+            "Bournemouth":    [28, 30, 24, 29, 26],
+            "Brentford":      [31, 25, 29, 27, 29],
+            "Brighton":       [26, 30, 29, 32, 27],
+            "Burnley":        [20, 18, 22, 17, 20],
+            "Chelsea":        [29, 27, 32, 28, 32],
+            "Crystal Palace": [29, 26, 25, 30, 25],
+            "Everton":        [28, 33, 30, 31, 27],
+            "Fulham":         [27, 25, 29, 24, 29],
+            "Leeds":          [24, 29, 25, 28, 26],
+            "Liverpool":      [34, 30, 36, 31, 33],
+            "Man City":       [34, 37, 32, 38, 31],
+            "Man Utd":        [28, 31, 33, 29, 34],
+            "Newcastle":      [31, 27, 28, 30, 26],
+            "Nott'm Forest":  [24, 27, 23, 25, 28],
+            "Sunderland":     [31, 26, 29, 28, 26],
+            "Tottenham":      [24, 25, 23, 26, 22],
+            "West Ham":       [20, 24, 21, 20, 23],
+            "Wolves":         [25, 23, 26, 22, 27]
+        };
+
+        const PLAYER_ASSISTS = [
+            {name: "Erling Haaland",     team: "Man City",       gw: [0.14, 0.17, 0.11, 0.19, 0.15], total: 0.76},
+            {name: "Thiago",              team: "Brentford",        gw: [0.12, 0.14, 0.15, 0.11, 0.17], total: 0.69},
+            {name: "Ollie Watkins",      team: "Aston Villa",    gw: [0.17, 0.13, 0.15, 0.12, 0.16], total: 0.73},
+            {name: "Morgan Rogers",      team: "Aston Villa",    gw: [0.27, 0.21, 0.24, 0.19, 0.25], total: 1.16},
+            {name: "Mohamed Salah",      team: "Liverpool",      gw: [0.31, 0.37, 0.27, 0.34, 0.28], total: 1.57},
+            {name: "Kevin Schade",       team: "Brentford",      gw: [0.17, 0.19, 0.21, 0.15, 0.23], total: 0.95},
+            {name: "Jarrod Bowen",       team: "West Ham",       gw: [0.23, 0.29, 0.21, 0.25, 0.21], total: 1.19},
+            {name: "João Pedro",         team: "Chelsea",        gw: [0.21, 0.23, 0.27, 0.21, 0.29], total: 1.21},
+            {name: "Morgan Gibbs-White", team: "Nott'm Forest",  gw: [0.25, 0.27, 0.33, 0.21, 0.21], total: 1.27},
+            {name: "Bruno Fernandes",    team: "Man Utd",        gw: [0.29, 0.33, 0.27, 0.34, 0.29], total: 1.52}
+        ];
+
+        const PLAYER_GI = [
+            {name: "Erling Haaland",     team: "Man City",       gw: [0.14, 0.80, 0.60, 1.01, 0.77], total: 3.32},
+            {name: "Thiago",              team: "Brentford",        gw: [0.65, 0.72, 0.78, 0.59, 0.89], total: 3.63},
+            {name: "Ollie Watkins",      team: "Aston Villa",    gw: [0.79, 0.59, 0.67, 0.57, 0.73], total: 3.35},
+            {name: "Morgan Rogers",      team: "Aston Villa",    gw: [0.61, 0.47, 0.53, 0.44, 0.57], total: 2.62},
+            {name: "Mohamed Salah",      team: "Liverpool",      gw: [0.64, 0.78, 0.59, 0.75, 0.59], total: 3.35},
+            {name: "Kevin Schade",       team: "Brentford",      gw: [0.44, 0.49, 0.54, 0.40, 0.61], total: 2.48},
+            {name: "Jarrod Bowen",       team: "West Ham",       gw: [0.51, 0.66, 0.49, 0.57, 0.49], total: 2.72},
+            {name: "João Pedro",         team: "Chelsea",        gw: [0.55, 0.59, 0.67, 0.56, 0.74], total: 3.11},
+            {name: "Morgan Gibbs-White", team: "Nott'm Forest",  gw: [0.57, 0.61, 0.76, 0.50, 0.49], total: 2.93},
+            {name: "Bruno Fernandes",    team: "Man Utd",        gw: [0.50, 0.58, 0.47, 0.60, 0.51], total: 2.66}
+        ];
+
+        const PLAYER_NEXTGW = [
+            {name: "Ollie Watkins",      team: "Aston Villa",    xG: 0.62, xA: 0.17, xGI: 0.79, fixture: "Chelsea vs Aston Villa"},
+            {name: "Thiago",              team: "Brentford",        xG: 0.53, xA: 0.12, xGI: 0.65, fixture: "Brentford vs Everton"},
+            {name: "Mohamed Salah",      team: "Liverpool",      xG: 0.33, xA: 0.31, xGI: 0.64, fixture: "Brighton vs Liverpool"},
+            {name: "Morgan Rogers",      team: "Aston Villa",    xG: 0.34, xA: 0.27, xGI: 0.61, fixture: "Chelsea vs Aston Villa"},
+            {name: "Morgan Gibbs-White", team: "Nott'm Forest",  xG: 0.32, xA: 0.25, xGI: 0.57, fixture: "Nott'm Forest vs Sunderland"},
+            {name: "João Pedro",         team: "Chelsea",        xG: 0.34, xA: 0.21, xGI: 0.55, fixture: "Chelsea vs Aston Villa"},
+            {name: "Jarrod Bowen",       team: "West Ham",       xG: 0.28, xA: 0.23, xGI: 0.51, fixture: "Tottenham vs West Ham"},
+            {name: "Bruno Fernandes",    team: "Man Utd",        xG: 0.21, xA: 0.29, xGI: 0.50, fixture: "Bournemouth vs Man Utd"},
+            {name: "Kevin Schade",       team: "Brentford",      xG: 0.27, xA: 0.17, xGI: 0.44, fixture: "Brentford vs Everton"},
+            {name: "Erling Haaland",     team: "Man City",       xG: null, xA: 0.14, xGI: 0.14, fixture: "Man City vs Wolves"}
+        ];
+
         const PLAYER_GOALS = [
             {name: "Erling Haaland", team: "Man City", gw: [null, 0.63, 0.49, 0.82, 0.62], total: 2.56},
-            {name: "Beto", team: "Brentford", gw: [0.53, 0.58, 0.63, 0.48, 0.72], total: 2.94},
+            {name: "Thiago", team: "Brentford", gw: [0.53, 0.58, 0.63, 0.48, 0.72], total: 2.94},
             {name: "Ollie Watkins", team: "Aston Villa", gw: [0.62, 0.46, 0.52, 0.45, 0.57], total: 2.62},
             {name: "Morgan Rogers", team: "Aston Villa", gw: [0.34, 0.26, 0.29, 0.25, 0.32], total: 1.46},
             {name: "Mohamed Salah", team: "Liverpool", gw: [0.33, 0.41, 0.32, 0.41, 0.31], total: 1.78},
@@ -1280,6 +1411,46 @@
             document.getElementById('teamPredBody').innerHTML = bodyHtml;
         }
 
+        // Render team goals predictions
+        function renderTeamGoals() {
+            const teams = Object.keys(TEAM_GOALS).sort();
+            const header = `<tr><th>Team</th><th style="text-align:center">GW31</th><th style="text-align:center">GW32</th><th style="text-align:center">GW33</th><th style="text-align:center">GW34</th><th style="text-align:center">GW35</th></tr>`;
+            document.getElementById('teamGoalsHeadline').innerHTML = header;
+            const body = teams.map(team => {
+                const vals = TEAM_GOALS[team];
+                return `<tr><td class="heatmap-team">${getTeamNameWithBadge(team)}</td>` +
+                    vals.map(v => {
+                        let level = 0;
+                        if (v >= 1.7) level = 4;
+                        else if (v >= 1.4) level = 3;
+                        else if (v >= 1.1) level = 2;
+                        else if (v >= 0.8) level = 1;
+                        return `<td class="heatmap-cell level${level}">${v.toFixed(1)}</td>`;
+                    }).join('') + `</tr>`;
+            }).join('');
+            document.getElementById('teamGoalsBody').innerHTML = body;
+        }
+
+        // Render team clean sheet % predictions
+        function renderTeamCS() {
+            const teams = Object.keys(TEAM_CS).sort();
+            const header = `<tr><th>Team</th><th style="text-align:center">GW31</th><th style="text-align:center">GW32</th><th style="text-align:center">GW33</th><th style="text-align:center">GW34</th><th style="text-align:center">GW35</th></tr>`;
+            document.getElementById('teamCSHeadline').innerHTML = header;
+            const body = teams.map(team => {
+                const vals = TEAM_CS[team];
+                return `<tr><td class="heatmap-team">${getTeamNameWithBadge(team)}</td>` +
+                    vals.map(v => {
+                        let level = 0;
+                        if (v >= 38) level = 4;
+                        else if (v >= 30) level = 3;
+                        else if (v >= 23) level = 2;
+                        else if (v >= 17) level = 1;
+                        return `<td class="heatmap-cell level${level}">${v}%</td>`;
+                    }).join('') + `</tr>`;
+            }).join('');
+            document.getElementById('teamCSBody').innerHTML = body;
+        }
+
         // Render player goals with heatmap styling
         function renderPlayerGoals() {
             const html = PLAYER_GOALS.map(p => {
@@ -1299,6 +1470,55 @@
                 </tr>`;
             }).join('');
             document.getElementById('playerGoalsTable').innerHTML = html;
+        }
+
+        // Render Next GW player table
+        function renderPlayerNextGW() {
+            const html = PLAYER_NEXTGW.map(p => {
+                const xgDisplay = p.xG === null ? '—' : p.xG.toFixed(2);
+                const giLevel = p.xGI >= 0.70 ? 4 : p.xGI >= 0.55 ? 3 : p.xGI >= 0.40 ? 2 : 1;
+                return `<tr>
+                    <td class="player-name">${p.name}</td>
+                    <td class="player-team">${p.team}</td>
+                    <td class="player-team" style="font-size:11px">${p.fixture}</td>
+                    <td class="hm-blank" style="text-align:right">${xgDisplay}</td>
+                    <td class="hm-blank" style="text-align:right">${p.xA.toFixed(2)}</td>
+                    <td class="heatmap-cell level${giLevel}" style="text-align:right;border-radius:4px">${p.xGI.toFixed(2)}</td>
+                </tr>`;
+            }).join('');
+            document.getElementById('playerNextGWTable').innerHTML = html;
+        }
+
+        // Render assists heatmap
+        function renderPlayerAssists() {
+            const html = PLAYER_ASSISTS.map(p => {
+                return `<tr>
+                    <td class="player-name">${p.name}</td>
+                    <td class="player-team">${p.team}</td>
+                    ${p.gw.map(v => {
+                        const level = v >= 0.30 ? 4 : v >= 0.22 ? 3 : v >= 0.15 ? 2 : v >= 0.10 ? 1 : 0;
+                        return `<td class="heatmap-cell level${level}" style="text-align:right">${v.toFixed(2)}</td>`;
+                    }).join('')}
+                    <td class="hm-total" style="text-align:right">${p.total.toFixed(2)}</td>
+                </tr>`;
+            }).join('');
+            document.getElementById('playerAssistsTable').innerHTML = html;
+        }
+
+        // Render goal involvements heatmap
+        function renderPlayerGI() {
+            const html = PLAYER_GI.map(p => {
+                return `<tr>
+                    <td class="player-name">${p.name}</td>
+                    <td class="player-team">${p.team}</td>
+                    ${p.gw.map(v => {
+                        const level = v >= 0.80 ? 4 : v >= 0.60 ? 3 : v >= 0.45 ? 2 : v >= 0.30 ? 1 : 0;
+                        return `<td class="heatmap-cell level${level}" style="text-align:right">${v.toFixed(2)}</td>`;
+                    }).join('')}
+                    <td class="hm-total" style="text-align:right">${p.total.toFixed(2)}</td>
+                </tr>`;
+            }).join('');
+            document.getElementById('playerGITable').innerHTML = html;
         }
 
         // Render final table — projected points bar visualization
@@ -1342,7 +1562,12 @@
         renderSparklines();
         renderMatchweek();
         renderTeamPredictions();
+        renderTeamGoals();
+        renderTeamCS();
         renderPlayerGoals();
+        renderPlayerNextGW();
+        renderPlayerAssists();
+        renderPlayerGI();
         renderFinalTable();
     </script>
 </body>
