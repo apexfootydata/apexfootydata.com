@@ -152,6 +152,7 @@
         /* Tables */
         .data-table {
             width: 100%;
+            min-width: 700px;
             border-collapse: collapse;
             margin-bottom: 20px;
             table-layout: fixed;
@@ -422,6 +423,7 @@
         /* Heatmap */
         .heatmap-table {
             width: 100%;
+            min-width: 1300px;
             border-collapse: collapse;
             margin-bottom: 20px;
             table-layout: fixed;
@@ -523,6 +525,7 @@
 
         .final-table {
             width: 100%;
+            min-width: 560px;
             border-collapse: collapse;
             table-layout: fixed;
         }
@@ -700,6 +703,7 @@
         /* Player table */
         .player-table {
             width: 100%;
+            min-width: 1200px;
             border-collapse: collapse;
             margin-bottom: 20px;
             table-layout: fixed;
@@ -767,6 +771,7 @@
         /* Next GW table — separate class to avoid player-table column conflicts */
         .nextgw-table {
             width: 100%;
+            min-width: 520px;
             border-collapse: collapse;
             margin-bottom: 20px;
             table-layout: fixed;
@@ -824,6 +829,12 @@
         #matchweekContainer {
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
+            max-width: 100%;
+        }
+        .subtab-nav {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            flex-wrap: nowrap;
         }
 
         @media (max-width: 1200px) {
@@ -834,10 +845,10 @@
 
         @media (max-width: 768px) {
             .header {
-                padding: 16px 20px;
+                padding: 12px 16px;
             }
             .tab-content {
-                padding: 16px;
+                padding: 12px;
             }
             .sparkline-grid {
                 grid-template-columns: repeat(2, 1fr);
@@ -880,13 +891,20 @@
             /* Heatmap */
             .heatmap-table th,
             .heatmap-table td {
-                padding: 10px 8px;
+                padding: 10px 7px;
                 font-size: 12px;
             }
+            .heatmap-table th:first-child,
+            .heatmap-table td:first-child { width: 160px; }
             .heatmap-team {
-                min-width: 110px;
+                width: 160px;
+                min-width: 160px;
                 font-size: 12px;
             }
+            /* Data table team col */
+            .data-table th:nth-child(2),
+            .data-table td:nth-child(2) { width: 180px; }
+            .team-name { width: 180px; }
             /* Player tables */
             .player-table th,
             .player-table td {
@@ -914,10 +932,11 @@
             .header {
                 flex-direction: column;
                 align-items: flex-start;
-                gap: 8px;
+                gap: 6px;
+                padding: 10px 12px;
             }
             .tab-content {
-                padding: 10px;
+                padding: 6px;
             }
             .tab-button {
                 padding: 10px 12px;
@@ -942,17 +961,20 @@
             }
             .fixture-stat { font-size: 12px; }
             /* Heatmap */
-            .heatmap-table { table-layout: auto; }
+            .heatmap-table { min-width: 900px; }
             .heatmap-table th,
             .heatmap-table td {
-                padding: 8px 6px;
+                padding: 8px 5px;
                 font-size: 11px;
             }
+            .heatmap-table th:first-child,
+            .heatmap-table td:first-child { width: 130px; }
             .heatmap-team {
-                min-width: 90px;
+                width: 130px;
+                min-width: 130px;
                 font-size: 11px;
             }
-            .heatmap-cell { min-width: 42px; }
+            .heatmap-cell { min-width: 36px; }
             /* Player / final / data tables */
             .player-table th,
             .player-table td,
