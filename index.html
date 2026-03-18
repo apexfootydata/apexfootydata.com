@@ -1,586 +1,1349 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ApexFootyData — Premier League Football Analytics</title>
-  <meta name="description" content="Premier League predictions, team ratings, player stats and simulated final table by ApexFootyData.">
-  <meta property="og:title" content="ApexFootyData — Premier League Football Analytics">
-  <meta property="og:description" content="Data-driven EPL predictions, strength ratings, and 10,000-sim projected table.">
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="https://apexfootydata.com">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="ApexFootyData — Premier League Football Analytics">
-  <meta name="twitter:description" content="Data-driven EPL predictions, strength ratings, and 10,000-sim projected table.">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23F97316'/><rect x='5' y='18' width='5' height='9' rx='2' fill='white'/><rect x='13' y='12' width='5' height='15' rx='2' fill='white'/><rect x='21' y='6' width='5' height='21' rx='2' fill='white'/></svg>">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ApexFootyData · Premier League Football Analytics</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: #f5f6f8;
-      color: #1e293b;
-      min-height: 100vh;
-    }
+        body {
+            background: #0c0c0f;
+            color: #c8c8d0;
+            font-family: 'JetBrains Mono', monospace;
+            line-height: 1.6;
+        }
 
-    /* ── Header ──────────────────────────────────────────── */
-    .site-header {
-      background: #fff;
-      border-bottom: 1px solid #e5e7eb;
-      padding: 16px 24px;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-    .header-inner {
-      max-width: 1100px;
-      margin: 0 auto;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      text-decoration: none;
-    }
-    .logo-icon {
-      width: 42px; height: 42px;
-      background: #F97316;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-    .logo-icon svg { width: 22px; height: 22px; }
-    .logo-text {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-    .brand-name {
-      font-size: 1.35rem;
-      font-weight: 900;
-      color: #1e293b;
-      letter-spacing: -0.5px;
-      line-height: 1;
-    }
-    .brand-name span { color: #F97316; }
-    .brand-sub {
-      font-size: 0.62rem;
-      font-weight: 600;
-      color: #94a3b8;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-    }
-    .header-links {
-      display: flex;
-      gap: 20px;
-      align-items: center;
-    }
-    .header-links a {
-      font-size: 0.82rem;
-      font-weight: 600;
-      color: #64748b;
-      text-decoration: none;
-      transition: color 0.15s;
-    }
-    .header-links a:hover { color: #F97316; }
+        /* Header */
+        .header {
+            background: #131318;
+            border-bottom: 1px solid #2a2a35;
+            padding: 20px 40px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
 
-    /* ── Hero ─────────────────────────────────────────────── */
-    .hero {
-      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-      padding: 48px 24px 40px;
-      text-align: center;
-    }
-    .hero h1 {
-      font-size: 2rem;
-      font-weight: 900;
-      color: #fff;
-      letter-spacing: -0.5px;
-      margin-bottom: 8px;
-    }
-    .hero h1 span { color: #F97316; }
-    .hero p {
-      font-size: 0.95rem;
-      color: #94a3b8;
-      max-width: 540px;
-      margin: 0 auto;
-      line-height: 1.5;
-    }
-    .gw-badge {
-      display: inline-block;
-      background: #F97316;
-      color: #fff;
-      font-size: 0.75rem;
-      font-weight: 700;
-      padding: 4px 14px;
-      border-radius: 20px;
-      margin-bottom: 12px;
-      letter-spacing: 0.5px;
-    }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+        }
 
-    /* ── Tab Navigation ──────────────────────────────────── */
-    .tab-nav {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 20px 24px 0;
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-    }
-    .tab-btn {
-      padding: 10px 20px;
-      border-radius: 10px 10px 0 0;
-      border: 1px solid #e5e7eb;
-      border-bottom: none;
-      cursor: pointer;
-      font-size: 0.82rem;
-      font-weight: 600;
-      font-family: inherit;
-      background: #fff;
-      color: #64748b;
-      transition: all 0.15s;
-      position: relative;
-      bottom: -1px;
-    }
-    .tab-btn:hover { color: #F97316; }
-    .tab-btn.active {
-      background: #fff;
-      color: #F97316;
-      border-color: #e5e7eb;
-      box-shadow: 0 -2px 0 #F97316 inset;
-    }
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background: #F97316;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: #0c0c0f;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 18px;
+        }
 
-    /* ── Tab Content ─────────────────────────────────────── */
-    .tab-content {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 0 24px 40px;
-    }
-    .tab-panel {
-      display: none;
-      background: #fff;
-      border: 1px solid #e5e7eb;
-      border-radius: 0 12px 12px 12px;
-      padding: 28px;
-      min-height: 500px;
-    }
-    .tab-panel.active { display: block; }
-    .tab-panel h2 {
-      font-size: 1.2rem;
-      font-weight: 800;
-      color: #1e293b;
-      margin-bottom: 6px;
-      letter-spacing: -0.3px;
-    }
-    .tab-panel .subtitle {
-      font-size: 0.82rem;
-      color: #94a3b8;
-      margin-bottom: 20px;
-    }
+        .logo-text {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
 
-    /* ── Datawrapper embed container ─────────────────────── */
-    .dw-embed {
-      width: 100%;
-      border: none;
-      min-height: 600px;
-    }
+        .logo-brand {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 18px;
+            font-weight: 700;
+            color: #e8e8f0;
+        }
 
-    /* Placeholder for charts not yet added */
-    .placeholder {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 400px;
-      background: #f8fafc;
-      border: 2px dashed #e2e8f0;
-      border-radius: 12px;
-      color: #94a3b8;
-      font-size: 0.9rem;
-      font-weight: 500;
-    }
+        .logo-subtitle {
+            font-size: 11px;
+            color: #F97316;
+            letter-spacing: 1px;
+        }
 
-    /* ── Footer ──────────────────────────────────────────── */
-    .site-footer {
-      background: #1e293b;
-      padding: 32px 24px;
-      text-align: center;
-    }
-    .footer-inner {
-      max-width: 1100px;
-      margin: 0 auto;
-    }
-    .footer-brand {
-      font-size: 1rem;
-      font-weight: 800;
-      color: #fff;
-      margin-bottom: 6px;
-    }
-    .footer-brand span { color: #F97316; }
-    .footer-sub {
-      font-size: 0.72rem;
-      color: #64748b;
-      margin-bottom: 16px;
-    }
-    .footer-links {
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-    }
-    .footer-links a {
-      font-size: 0.78rem;
-      color: #94a3b8;
-      text-decoration: none;
-    }
-    .footer-links a:hover { color: #F97316; }
+        /* Tabs */
+        .tab-nav {
+            display: flex;
+            border-bottom: 1px solid #2a2a35;
+            background: #131318;
+            overflow-x: auto;
+        }
 
-    /* ── Sub-tabs (within a panel) ─────────────────────────── */
-    .sub-tabs {
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-      margin-bottom: 18px;
-      padding-bottom: 14px;
-      border-bottom: 1px solid #f1f5f9;
-    }
-    .sub-btn {
-      padding: 7px 16px;
-      border-radius: 20px;
-      border: none;
-      cursor: pointer;
-      font-size: 0.78rem;
-      font-weight: 600;
-      font-family: inherit;
-      background: #f1f5f9;
-      color: #64748b;
-      transition: all 0.15s;
-    }
-    .sub-btn:hover { color: #F97316; background: #fff7ed; }
-    .sub-btn.active { background: #F97316; color: #fff; }
-    .sub-panel { display: none; }
-    .sub-panel.active { display: block; }
+        .tab-button {
+            padding: 16px 24px;
+            background: none;
+            border: none;
+            color: #6b6b7b;
+            cursor: pointer;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            border-bottom: 2px solid transparent;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
 
-    /* ── Sparkline cards ────────────────────────────────── */
-    .spark-card {
-      background: #1e293b;
-      border-radius: 10px;
-      padding: 14px 16px 10px;
-      overflow: hidden;
-    }
-    .spark-card-hdr {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 6px;
-    }
-    .spark-team {
-      font-size: 0.78rem;
-      font-weight: 700;
-      color: #fff;
-      line-height: 1.2;
-    }
-    .spark-chg {
-      font-size: 0.82rem;
-      font-weight: 700;
-      line-height: 1.2;
-    }
-    .spark-pos { color: #4ade80; }
-    .spark-neg { color: #f87171; }
-    .spark-svg-wrap {
-      height: 50px;
-      margin-bottom: 4px;
-    }
-    .spark-svg-wrap svg {
-      width: 100%;
-      height: 100%;
-    }
-    .spark-fill { opacity: 0.15; }
-    .spark-xlbl {
-      display: flex;
-      justify-content: space-between;
-      padding: 0 2px;
-    }
-    .spark-xlbl span {
-      font-size: 0.55rem;
-      color: #64748b;
-      font-weight: 500;
-    }
+        .tab-button:hover {
+            color: #c8c8d0;
+        }
 
-    /* ── Responsive ──────────────────────────────────────── */
-    @media (max-width: 768px) {
-      .site-header { padding: 12px 14px; }
-      .logo-icon { width: 34px; height: 34px; border-radius: 8px; }
-      .logo-icon svg { width: 18px; height: 18px; }
-      .brand-name { font-size: 1.1rem; }
-      .brand-sub { font-size: 0.55rem; }
-      .header-links { gap: 12px; }
-      .header-links a { font-size: 0.75rem; }
-      .hero { padding: 28px 16px 24px; }
-      .hero h1 { font-size: 1.4rem; }
-      .hero p { font-size: 0.82rem; }
-      .tab-nav { padding: 12px 12px 0; gap: 4px; }
-      .tab-btn { padding: 8px 12px; font-size: 0.72rem; }
-      .tab-content { padding: 0 12px 24px; }
-      .tab-panel { padding: 16px 12px; border-radius: 0 8px 8px 8px; }
-      .tab-panel h2 { font-size: 1rem; }
-      .dw-embed { min-height: 500px; }
-      .sub-tabs { gap: 4px; margin-bottom: 12px; padding-bottom: 10px; }
-      .sub-btn { padding: 5px 10px; font-size: 0.7rem; }
-      #trends-grid { grid-template-columns: repeat(3, 1fr) !important; }
-      .spark-svg-wrap { height: 40px; }
-    }
-    @media (max-width: 480px) {
-      .header-links { display: none; }
-      .hero h1 { font-size: 1.2rem; }
-      .tab-btn { padding: 6px 10px; font-size: 0.68rem; }
-      .tab-panel { padding: 12px 8px; }
-      #trends-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
-    }
-  </style>
+        .tab-button.active {
+            color: #F97316;
+            border-bottom-color: #F97316;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 40px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Sub-tabs */
+        .subtab-nav {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #2a2a35;
+            padding-bottom: 16px;
+        }
+
+        .subtab-button {
+            padding: 8px 16px;
+            background: transparent;
+            border: 1px solid #2a2a35;
+            color: #6b6b7b;
+            cursor: pointer;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .subtab-button:hover {
+            border-color: #F97316;
+            color: #F97316;
+        }
+
+        .subtab-button.active {
+            background: #F97316;
+            color: #0c0c0f;
+            border-color: #F97316;
+        }
+
+        .subtab-content {
+            display: none;
+        }
+
+        .subtab-content.active {
+            display: block;
+        }
+
+        /* Tables */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        .data-table thead {
+            background: #18181f;
+            border-bottom: 1px solid #2a2a35;
+        }
+
+        .data-table th {
+            padding: 12px 16px;
+            text-align: left;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #8b8b99;
+        }
+
+        .data-table td {
+            padding: 12px 16px;
+            border-top: 1px solid #2a2a35;
+            font-size: 13px;
+        }
+
+        .data-table tbody tr:hover {
+            background: #1e1e28;
+        }
+
+        .rank {
+            width: 40px;
+            text-align: center;
+            color: #8b8b99;
+            font-weight: 600;
+        }
+
+        .team-name {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 500;
+            color: #e8e8f0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .team-badge {
+            width: 16px;
+            height: 16px;
+            object-fit: contain;
+            vertical-align: middle;
+            flex-shrink: 0;
+        }
+
+        /* Bar charts */
+        .bar-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            height: 20px;
+        }
+
+        .bar-label {
+            width: 50px;
+            font-size: 11px;
+            color: #6b6b7b;
+            text-align: right;
+        }
+
+        .bar {
+            height: 8px;
+            background: #F97316;
+            border-radius: 1px;
+            min-width: 2px;
+        }
+
+        .bar.green {
+            background: #34d399;
+        }
+
+        .bar.red {
+            background: #f87171;
+        }
+
+        /* Win pill */
+        .win-pill {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .win-pill.high {
+            background: #F97316;
+            color: #0c0c0f;
+        }
+
+        .win-pill.medium {
+            background: transparent;
+            border: 1px solid #F97316;
+            color: #F97316;
+        }
+
+        .win-pill.low {
+            background: transparent;
+            color: #6b6b7b;
+        }
+
+        .win-pill.draw {
+            background: #18181f;
+            color: #c8c8d0;
+            border: 1px solid #2a2a35;
+        }
+
+        /* Sparkline grid */
+        .sparkline-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .sparkline-card {
+            background: #131318;
+            border: 1px solid #2a2a35;
+            padding: 16px;
+        }
+
+        .sparkline-card:hover {
+            background: #1e1e28;
+            border-color: #F97316;
+        }
+
+        .sparkline-team {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            color: #e8e8f0;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sparkline-svg {
+            width: 100%;
+            height: 40px;
+        }
+
+        .sparkline-change {
+            font-size: 11px;
+            margin-top: 8px;
+            font-weight: 600;
+        }
+
+        .change-positive {
+            color: #34d399;
+        }
+
+        .change-negative {
+            color: #f87171;
+        }
+
+        /* Matchweek compact table */
+        .matchweek-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        .matchweek-table th {
+            padding: 12px 16px;
+            text-align: left;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #8b8b99;
+            background: #18181f;
+            border-bottom: 1px solid #2a2a35;
+        }
+
+        .matchweek-table td {
+            padding: 12px 16px;
+            font-size: 13px;
+            border-top: 1px solid #2a2a35;
+        }
+
+        .matchweek-home-row {
+            background: #18181f;
+        }
+
+        .matchweek-away-row {
+            background: #131318;
+            border-bottom: 2px solid rgba(249, 115, 22, 0.35);
+        }
+
+        .matchweek-vs-cell {
+            text-align: center;
+            color: #6b6b7b;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .fixture-team-cell {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 500;
+            color: #e8e8f0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .fixture-stat {
+            text-align: center;
+            color: #8b8b99;
+            font-size: 13px;
+        }
+
+        .fixture-draw {
+            color: #F97316;
+            font-weight: 600;
+        }
+
+        .fixture-win-pill {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+            text-align: center;
+        }
+
+        .fixture-win-pill.high {
+            background: #F97316;
+            color: #0c0c0f;
+        }
+
+        .fixture-win-pill.medium {
+            background: transparent;
+            border: 1px solid #F97316;
+            color: #F97316;
+        }
+
+        .fixture-win-pill.low {
+            background: transparent;
+            color: #6b6b7b;
+        }
+
+        /* Heatmap */
+        .heatmap-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        .heatmap-table thead {
+            background: #18181f;
+            border-bottom: 1px solid #2a2a35;
+        }
+
+        .heatmap-table th {
+            padding: 12px 8px;
+            text-align: center;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #8b8b99;
+        }
+
+        .heatmap-table td {
+            padding: 8px;
+            text-align: center;
+            border: 1px solid #2a2a35;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .heatmap-cell {
+            background: #131318;
+            color: #c8c8d0;
+            border-radius: 2px;
+        }
+
+        .heatmap-cell.level0 { background: rgba(249, 115, 22, 0.08); }
+        .heatmap-cell.level1 { background: rgba(249, 115, 22, 0.18); }
+        .heatmap-cell.level2 { background: rgba(249, 115, 22, 0.32); }
+        .heatmap-cell.level3 { background: rgba(249, 115, 22, 0.50); }
+        .heatmap-cell.level4 { background: rgba(249, 115, 22, 0.72); color: #0c0c0f; }
+
+        .heatmap-team {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 500;
+            color: #e8e8f0;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Player heatmap cells */
+        .hm-1 { background: rgba(249,115,22,0.08); color: #c8c8d0; }
+        .hm-2 { background: rgba(249,115,22,0.18); color: #e8e8f0; }
+        .hm-3 { background: rgba(249,115,22,0.32); color: #f0f0f5; }
+        .hm-4 { background: rgba(249,115,22,0.50); color: #f0f0f5; }
+        .hm-5 { background: rgba(249,115,22,0.72); color: #f0f0f5; font-weight: 600; }
+        .hm-blank { background: #131318; color: #2a2a35; }
+        .hm-total { font-weight: 700; color: #F97316; }
+
+        /* Final table */
+        /* Final Table - Projected Points Bar Design */
+        .final-panel {
+            background: #131318;
+            border: 1px solid #2a2a35;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .final-panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            border-bottom: 1px solid #2a2a35;
+            background: #18181f;
+        }
+
+        .final-panel-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 15px;
+            font-weight: 600;
+            color: #e8e8f0;
+        }
+
+        .final-panel-badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            font-weight: 500;
+            color: #4a4a5a;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+
+        .final-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .final-table thead {
+            background: #18181f;
+            border-bottom: 1px solid #2a2a35;
+        }
+
+        .final-table th {
+            padding: 10px 14px;
+            text-align: left;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #6b6b7b;
+        }
+
+        .final-table th.th-bar {
+            width: 35%;
+        }
+
+        .final-table td {
+            padding: 10px 14px;
+            border-top: 1px solid #1e1e28;
+            font-size: 13px;
+            vertical-align: middle;
+        }
+
+        .final-table tbody tr {
+            background: transparent;
+            position: relative;
+        }
+
+        .final-table tbody tr:hover {
+            background: #1a1a22;
+        }
+
+        /* Position color accent — left border stripe */
+        .final-table tbody tr td:first-child {
+            position: relative;
+            padding-left: 18px;
+        }
+
+        .final-table tbody tr.cl-zone td:first-child::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: #34d399;
+        }
+
+        .final-table tbody tr.europa-zone td:first-child::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: #F97316;
+            opacity: 0.7;
+        }
+
+        .final-table tbody tr.relegation-zone td:first-child::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: #f87171;
+        }
+
+        .final-rank {
+            width: 36px;
+            text-align: center;
+            color: #6b6b7b;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .final-rank-cl { color: #34d399; }
+        .final-rank-europa { color: #F97316; }
+        .final-rank-rel { color: #f87171; }
+
+        .final-team {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 500;
+            color: #e8e8f0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .final-stat {
+            text-align: right;
+            color: #6b6b7b;
+            width: 48px;
+            font-size: 12px;
+        }
+
+        .final-points {
+            text-align: right;
+            font-weight: 700;
+            color: #ffffff;
+            width: 50px;
+            font-size: 14px;
+        }
+
+        .final-left {
+            text-align: right;
+            color: #6b6b7b;
+            width: 44px;
+            font-size: 12px;
+        }
+
+        /* Projected pts bar cell */
+        .final-bar-cell {
+            min-width: 200px;
+        }
+
+        .proj-bar-wrap {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .proj-bar-track {
+            flex: 1;
+            height: 8px;
+            background: #1e1e28;
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+            min-width: 80px;
+        }
+
+        .proj-bar-current {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            background: #2e2e3d;
+            border-radius: 4px 0 0 4px;
+        }
+
+        .proj-bar-ext {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            background: #F97316;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .proj-bar-num {
+            font-size: 13px;
+            font-weight: 600;
+            color: #F97316;
+            white-space: nowrap;
+            min-width: 32px;
+            text-align: right;
+        }
+
+        .final-range {
+            text-align: right;
+            color: #4a4a5a;
+            font-size: 11px;
+            white-space: nowrap;
+            width: 72px;
+        }
+
+        /* Player table */
+        .player-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        .player-table thead {
+            background: #18181f;
+            border-bottom: 1px solid #2a2a35;
+        }
+
+        .player-table th {
+            padding: 12px 16px;
+            text-align: left;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #8b8b99;
+        }
+
+        .player-table td {
+            padding: 12px 16px;
+            border-top: 1px solid #2a2a35;
+            font-size: 13px;
+        }
+
+        .player-table tbody tr:hover {
+            background: #1e1e28;
+        }
+
+        .player-name {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 500;
+            color: #e8e8f0;
+        }
+
+        .player-team {
+            color: #6b6b7b;
+            font-size: 12px;
+        }
+
+        .player-stat {
+            text-align: right;
+            color: #8b8b99;
+        }
+
+        .player-total {
+            text-align: right;
+            font-weight: 600;
+            color: #F97316;
+        }
+
+        /* Placeholder */
+        .placeholder {
+            background: #131318;
+            border: 1px solid #2a2a35;
+            padding: 40px;
+            text-align: center;
+            color: #6b6b7b;
+            font-style: italic;
+        }
+
+        /* Footer */
+        .footer {
+            border-top: 1px solid #2a2a35;
+            padding: 30px 40px;
+            text-align: center;
+            color: #6b6b7b;
+            font-size: 12px;
+            margin-top: 60px;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .sparkline-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 16px 20px;
+            }
+
+            .tab-content {
+                padding: 20px;
+            }
+
+            .sparkline-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .bar-container {
+                flex-wrap: wrap;
+            }
+
+            .tab-nav {
+                overflow-x: auto;
+            }
+
+            .tab-button {
+                padding: 12px 16px;
+                font-size: 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .sparkline-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .data-table,
+            .heatmap-table,
+            .final-table,
+            .player-table,
+            .matchweek-table {
+                font-size: 11px;
+            }
+
+            .data-table th,
+            .heatmap-table th,
+            .final-table th,
+            .player-table th,
+            .matchweek-table th {
+                padding: 8px 10px;
+                font-size: 10px;
+            }
+
+            .data-table td,
+            .heatmap-table td,
+            .final-table td,
+            .player-table td,
+            .matchweek-table td {
+                padding: 8px 10px;
+            }
+        }
+    </style>
 </head>
 <body>
-
-<!-- ═══ HEADER ═══════════════════════════════════════════════════ -->
-<header class="site-header">
-  <div class="header-inner">
-    <a href="/" class="logo">
-      <div class="logo-icon">
-        <svg viewBox="0 0 28 28" fill="none">
-          <rect x="3" y="18" width="5" height="8" rx="1.5" fill="white"/>
-          <rect x="11" y="11" width="5" height="15" rx="1.5" fill="white"/>
-          <rect x="19" y="5" width="5" height="21" rx="1.5" fill="white"/>
-        </svg>
-      </div>
-      <div class="logo-text">
-        <div class="brand-name"><span>Apex</span>FootyData</div>
-        <div class="brand-sub">Football Analytics</div>
-      </div>
-    </a>
-    <nav class="header-links">
-      <!-- Add links here when ready, e.g.: -->
-      <!-- <a href="https://substack.com/@apexfootydata">Newsletter</a> -->
-      <!-- <a href="https://twitter.com/apexfootydata">Twitter</a> -->
-    </nav>
-  </div>
-</header>
-
-<!-- ═══ HERO ═════════════════════════════════════════════════════ -->
-<section class="hero">
-  
-  <h1>Premier League <span>Predictions</span></h1>
-  <p>Data-driven match predictions, team strength ratings, and simulated final table powered by the ApexFootyData model.</p>
-</section>
-
-<!-- ═══ TABS ═════════════════════════════════════════════════════ -->
-<nav class="tab-nav">
-  <!--
-    HOW TO ADD/REMOVE TABS:
-    1. Add a <button> here with onclick="showTab('tab-ID')"
-    2. Add a matching <div id="tab-ID" class="tab-panel"> below
-    3. To remove a tab, just delete both the button and the panel div
-  -->
-  <button class="tab-btn active" onclick="showTab('tab-ratings')">Team Ratings</button>
-  <button class="tab-btn" onclick="showTab('tab-matchweek')">Matchweek</button>
-  <button class="tab-btn" onclick="showTab('tab-goals')">Team Predictions</button>
-  <button class="tab-btn" onclick="showTab('tab-players')">Player Predictions</button>
-  <button class="tab-btn" onclick="showTab('tab-table')">Final Table</button>
-</nav>
-
-<div class="tab-content">
-
-  <!-- ══ Team Strength Ratings (with sub-tabs) ══════════════ -->
-  <div id="tab-ratings" class="tab-panel active">
-    <div class="sub-tabs">
-      <button class="sub-btn active" onclick="showSub('ratings', 'current', this)">Current Ratings</button>
-      <button class="sub-btn" onclick="showSub('ratings', 'history', this)">History from 23/24</button>
-      <button class="sub-btn" onclick="showSub('ratings', 'trends', this)">Form Trends</button>
+    <!-- Header -->
+    <div class="header">
+        <div class="logo">
+            <div class="logo-icon">
+                <svg viewBox="0 0 28 28" fill="none" style="width:20px;height:20px"><rect x="3" y="18" width="5" height="8" rx="1.5" fill="white"/><rect x="11" y="11" width="5" height="15" rx="1.5" fill="white"/><rect x="19" y="5" width="5" height="21" rx="1.5" fill="white"/></svg>
+            </div>
+            <div class="logo-text">
+                <div class="logo-brand"><span style="color:#F97316">Apex</span>FootyData</div>
+                <div class="logo-subtitle">Football Analytics</div>
+            </div>
+        </div>
     </div>
-    <div id="ratings-current" class="sub-panel active">
-      <iframe class="dw-embed" src="https://datawrapper.dwcdn.net/kh5sA/" scrolling="no" frameborder="0"
-              style="width:0;min-width:100%!important" height="800"></iframe>
-    </div>
-    <div id="ratings-history" class="sub-panel">
-      <iframe class="dw-embed" src="https://datawrapper.dwcdn.net/TwINO/" scrolling="no" frameborder="0"
-              style="width:0;min-width:100%!important" height="600"></iframe>
-    </div>
-    <div id="ratings-trends" class="sub-panel">
-      <div style="margin-bottom:16px">
-        <h2>Team Strength Trends — 25/26 Season</h2>
-        <p class="subtitle">Change in team strength rating this season. Each panel uses an independent scale so you can see how each team is trending.</p>
-      </div>
-      <div id="trends-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px"></div>
-    </div>
-  </div>
 
-  <!-- ══ Matchweek Predictions ══════════════════════════════ -->
-  <div id="tab-matchweek" class="tab-panel">
-    <iframe class="dw-embed" src="https://datawrapper.dwcdn.net/1IkOn/" scrolling="no" frameborder="0"
-            style="width:0;min-width:100%!important" height="900"></iframe>
-  </div>
-
-  <!-- ══ Team Predictions (with sub-tabs) ═══════════════════ -->
-  <div id="tab-goals" class="tab-panel">
-    <div class="sub-tabs">
-      <button class="sub-btn active" onclick="showSub('goals', 'xg', this)">Expected Goals</button>
-      <button class="sub-btn" onclick="showSub('goals', 'cs', this)">Clean Sheet %</button>
-      <button class="sub-btn" onclick="showSub('goals', 'win', this)">Win %</button>
+    <!-- Main tabs -->
+    <div class="tab-nav">
+        <button class="tab-button active" onclick="showTab(0)">Team Ratings</button>
+        <button class="tab-button" onclick="showTab(1)">Matchweek</button>
+        <button class="tab-button" onclick="showTab(2)">Team Predictions</button>
+        <button class="tab-button" onclick="showTab(3)">Player Predictions</button>
+        <button class="tab-button" onclick="showTab(4)">Final Table</button>
     </div>
-    <div id="goals-xg" class="sub-panel active">
-      <iframe class="dw-embed" src="https://datawrapper.dwcdn.net/bpGoS/" scrolling="no" frameborder="0"
-              style="width:0;min-width:100%!important" height="800"></iframe>
+
+    <!-- TAB 1: Team Ratings -->
+    <div class="tab-content active">
+        <div class="subtab-nav">
+            <button class="subtab-button active" onclick="showSub(0, 0)">Current Ratings</button>
+            <button class="subtab-button" onclick="showSub(0, 1)">History from 23/24</button>
+            <button class="subtab-button" onclick="showSub(0, 2)">Form Trends</button>
+        </div>
+
+        <!-- Sub-tab: Current Ratings -->
+        <div class="subtab-content active">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th class="rank">Rank</th>
+                        <th>Team</th>
+                        <th>Attack</th>
+                        <th>Defence</th>
+                        <th>Overall</th>
+                    </tr>
+                </thead>
+                <tbody id="ratingsTable"></tbody>
+            </table>
+        </div>
+
+        <!-- Sub-tab: History from 23/24 -->
+        <div class="subtab-content">
+            <iframe src="https://datawrapper.dwcdn.net/TwINO/" scrolling="no" frameborder="0" style="width:0;min-width:100%!important;border:none;min-height:600px;background:#131318;border-radius:4px" height="600"></iframe>
+        </div>
+
+        <!-- Sub-tab: Form Trends -->
+        <div class="subtab-content">
+            <div class="sparkline-grid" id="sparklineGrid"></div>
+        </div>
     </div>
-    <div id="goals-cs" class="sub-panel">
-      <iframe class="dw-embed" src="https://datawrapper.dwcdn.net/LikTz/" scrolling="no" frameborder="0"
-              style="width:0;min-width:100%!important" height="800"></iframe>
+
+    <!-- TAB 2: Matchweek -->
+    <div class="tab-content">
+        <div class="subtab-nav">
+            <button class="subtab-button active" onclick="showSub(1, 0)">GW31 Fixtures</button>
+        </div>
+
+        <div class="subtab-content active" id="matchweekContainer"></div>
     </div>
-    <div id="goals-win" class="sub-panel">
-      <iframe class="dw-embed" src="https://datawrapper.dwcdn.net/WuxuS/" scrolling="no" frameborder="0"
-              style="width:0;min-width:100%!important" height="800"></iframe>
+
+    <!-- TAB 3: Team Predictions -->
+    <div class="tab-content">
+        <div class="subtab-nav">
+            <button class="subtab-button active" onclick="showSub(2, 0)">Win %</button>
+            <button class="subtab-button" onclick="showSub(2, 1)">Goals</button>
+            <button class="subtab-button" onclick="showSub(2, 2)">Clean Sheet %</button>
+        </div>
+
+        <!-- Sub-tab: Win % -->
+        <div class="subtab-content active">
+            <table class="heatmap-table">
+                <thead id="teamPredHeadline"></thead>
+                <tbody id="teamPredBody"></tbody>
+            </table>
+        </div>
+
+        <!-- Sub-tab: Goals -->
+        <div class="subtab-content">
+            <div class="placeholder">Data loading...</div>
+        </div>
+
+        <!-- Sub-tab: Clean Sheet % -->
+        <div class="subtab-content">
+            <div class="placeholder">Data loading...</div>
+        </div>
     </div>
-  </div>
 
-  <!-- ══ Player Predictions (with sub-tabs) ═════════════════ -->
-  <div id="tab-players" class="tab-panel">
-    <div class="sub-tabs">
-      <button class="sub-btn active" onclick="showSub('players', 'summary', this)">Summary</button>
-      <button class="sub-btn" onclick="showSub('players', 'nextgw', this)">Next GW</button>
-      <button class="sub-btn" onclick="showSub('players', 'goals', this)">Goals</button>
-      <button class="sub-btn" onclick="showSub('players', 'assists', this)">Assists</button>
-      <button class="sub-btn" onclick="showSub('players', 'gi', this)">Goal Involvements</button>
+    <!-- TAB 4: Player Predictions -->
+    <div class="tab-content">
+        <div class="subtab-nav">
+            <button class="subtab-button active" onclick="showSub(3, 0)">Goals</button>
+            <button class="subtab-button" onclick="showSub(3, 1)">Summary</button>
+            <button class="subtab-button" onclick="showSub(3, 2)">Next GW</button>
+            <button class="subtab-button" onclick="showSub(3, 3)">Assists</button>
+            <button class="subtab-button" onclick="showSub(3, 4)">Goal Involvements</button>
+        </div>
+
+        <!-- Sub-tab: Goals -->
+        <div class="subtab-content active">
+            <table class="player-table">
+                <thead>
+                    <tr>
+                        <th>Player</th>
+                        <th>Team</th>
+                        <th style="text-align: right;">GW31</th>
+                        <th style="text-align: right;">GW32</th>
+                        <th style="text-align: right;">GW33</th>
+                        <th style="text-align: right;">GW34</th>
+                        <th style="text-align: right;">GW35</th>
+                        <th style="text-align: right;">Total</th>
+                    </tr>
+                </thead>
+                <tbody id="playerGoalsTable"></tbody>
+            </table>
+        </div>
+
+        <!-- Other sub-tabs -->
+        <div class="subtab-content">
+            <div class="placeholder">Data loading...</div>
+        </div>
+        <div class="subtab-content">
+            <div class="placeholder">Data loading...</div>
+        </div>
+        <div class="subtab-content">
+            <div class="placeholder">Data loading...</div>
+        </div>
+        <div class="subtab-content">
+            <div class="placeholder">Data loading...</div>
+        </div>
     </div>
-    <div id="players-summary" class="sub-panel active">
-      <iframe class="dw-embed" src="https://datawrapper.dwcdn.net/W3HDI/" scrolling="no" frameborder="0"
-              style="width:0;min-width:100%!important" height="1400"></iframe>
+
+    <!-- TAB 5: Final Table -->
+    <div class="tab-content">
+        <div class="final-panel">
+            <div class="final-panel-header">
+                <span class="final-panel-title">Predicted Final Table</span>
+                <span class="final-panel-badge">10K Monte Carlo</span>
+            </div>
+            <table class="final-table">
+                <thead>
+                    <tr>
+                        <th class="final-rank">#</th>
+                        <th class="final-team">Team</th>
+                        <th class="final-stat" style="text-align:right">PLD</th>
+                        <th class="final-points" style="text-align:right">PTS</th>
+                        <th class="final-left" style="text-align:right">LEFT</th>
+                        <th class="th-bar">Projected</th>
+                        <th class="final-range" style="text-align:right">Range</th>
+                    </tr>
+                </thead>
+                <tbody id="finalTableBody"></tbody>
+            </table>
+        </div>
     </div>
-    <div id="players-nextgw" class="sub-panel">
-      <iframe class="dw-embed" src="https://datawrapper.dwcdn.net/Kh06Q/" scrolling="no" frameborder="0"
-              style="width:0;min-width:100%!important" height="1400"></iframe>
+
+    <!-- Footer -->
+    <div class="footer">
+        ApexFootyData · Premier League Football Analytics · apexfootydata.com
     </div>
-    <div id="players-goals" class="sub-panel">
-      <iframe class="dw-embed" src="https://datawrapper.dwcdn.net/6cgUr/" scrolling="no" frameborder="0"
-              style="width:0;min-width:100%!important" height="1400"></iframe>
-    </div>
-    <div id="players-assists" class="sub-panel">
-      <iframe class="dw-embed" src="https://datawrapper.dwcdn.net/dxrIo/" scrolling="no" frameborder="0"
-              style="width:0;min-width:100%!important" height="1400"></iframe>
-    </div>
-    <div id="players-gi" class="sub-panel">
-      <iframe class="dw-embed" src="https://datawrapper.dwcdn.net/aXH6M/" scrolling="no" frameborder="0"
-              style="width:0;min-width:100%!important" height="1400"></iframe>
-    </div>
-  </div>
 
-  <!-- ══ Predicted Final Table ══════════════════════════════ -->
-  <div id="tab-table" class="tab-panel">
-    <iframe class="dw-embed" src="https://datawrapper.dwcdn.net/nKLzF/" scrolling="no" frameborder="0"
-            style="width:0;min-width:100%!important" height="800"></iframe>
-  </div>
+    <script>
+        // Team badge mapping
+        const TEAM_BADGES = {
+            "Arsenal": "t3",
+            "Aston Villa": "t7",
+            "Bournemouth": "t91",
+            "Brentford": "t94",
+            "Brighton": "t36",
+            "Burnley": "t90",
+            "Chelsea": "t8",
+            "Crystal Palace": "t31",
+            "Everton": "t11",
+            "Fulham": "t54",
+            "Leeds": "t2",
+            "Liverpool": "t14",
+            "Man City": "t43",
+            "Man Utd": "t1",
+            "Newcastle": "t4",
+            "Nott'm Forest": "t17",
+            "Sunderland": "t56",
+            "Tottenham": "t6",
+            "West Ham": "t21",
+            "Wolves": "t39"
+        };
 
-</div>
+        function getBadgeUrl(team) {
+            const badgeId = TEAM_BADGES[team];
+            if (badgeId) {
+                return `https://resources.premierleague.com/premierleague/badges/${badgeId}.png`;
+            }
+            return "";
+        }
 
-<!-- ═══ FOOTER ═══════════════════════════════════════════════════ -->
-<footer class="site-footer">
-  <div class="footer-inner">
-    <div class="footer-brand"><span>Apex</span>FootyData</div>
-    <div class="footer-sub">Premier League Football Analytics</div>
-    <div class="footer-links">
-      <!-- Uncomment and update when ready:
-      <a href="https://substack.com/@apexfootydata">Newsletter</a>
-      <a href="https://twitter.com/apexfootydata">Twitter / X</a>
-      -->
-    </div>
-  </div>
-</footer>
+        function getTeamNameWithBadge(team) {
+            const badgeUrl = getBadgeUrl(team);
+            if (badgeUrl) {
+                return `<img src="${badgeUrl}" class="team-badge" alt="${team}" loading="lazy"> ${team}`;
+            }
+            return team;
+        }
 
-<!-- ═══ TAB SCRIPT ═══════════════════════════════════════════════ -->
-<script>
-function showTab(tabId) {
-  // Hide all panels
-  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-  // Deactivate all buttons
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  // Show selected panel
-  document.getElementById(tabId).classList.add('active');
-  // Activate clicked button
-  event.target.classList.add('active');
-}
+        // Data
+        const RATINGS = [
+            {rank: 1, team: "Arsenal", attack: 1.69, defence: 0.76, overall: 0.93},
+            {rank: 2, team: "Man City", attack: 1.73, defence: 1.07, overall: 0.66},
+            {rank: 3, team: "Liverpool", attack: 1.65, defence: 1.12, overall: 0.53},
+            {rank: 4, team: "Chelsea", attack: 1.68, defence: 1.23, overall: 0.45},
+            {rank: 5, team: "Man Utd", attack: 1.50, defence: 1.18, overall: 0.32},
+            {rank: 6, team: "Bournemouth", attack: 1.45, defence: 1.29, overall: 0.16},
+            {rank: 7, team: "Brentford", attack: 1.46, defence: 1.30, overall: 0.16},
+            {rank: 8, team: "Newcastle", attack: 1.43, defence: 1.27, overall: 0.15},
+            {rank: 9, team: "Brighton", attack: 1.30, defence: 1.25, overall: 0.05},
+            {rank: 10, team: "Aston Villa", attack: 1.28, defence: 1.25, overall: 0.03},
+            {rank: 11, team: "Crystal Palace", attack: 1.30, defence: 1.31, overall: -0.01},
+            {rank: 12, team: "Fulham", attack: 1.23, defence: 1.33, overall: -0.10},
+            {rank: 13, team: "Everton", attack: 1.09, defence: 1.21, overall: -0.12},
+            {rank: 14, team: "Leeds", attack: 1.10, defence: 1.34, overall: -0.24},
+            {rank: 15, team: "Tottenham", attack: 1.19, defence: 1.43, overall: -0.25},
+            {rank: 16, team: "Nott'm Forest", attack: 1.09, defence: 1.37, overall: -0.29},
+            {rank: 17, team: "West Ham", attack: 1.15, defence: 1.54, overall: -0.38},
+            {rank: 18, team: "Sunderland", attack: 0.85, defence: 1.28, overall: -0.42},
+            {rank: 19, team: "Wolves", attack: 0.90, defence: 1.43, overall: -0.53},
+            {rank: 20, team: "Burnley", attack: 0.85, defence: 1.67, overall: -0.82}
+        ];
 
-function showSub(group, subId, btn) {
-  // Hide all sub-panels within this group
-  var panel = btn.closest('.tab-panel');
-  panel.querySelectorAll('.sub-panel').forEach(p => p.classList.remove('active'));
-  panel.querySelectorAll('.sub-btn').forEach(b => b.classList.remove('active'));
-  // Show selected sub-panel
-  document.getElementById(group + '-' + subId).classList.add('active');
-  btn.classList.add('active');
-}
+        const FIXTURES = [
+            {home: "Bournemouth", homeRating: 1.61, homeWin: 21.7, homeWinDisplay: 38.6, away: "Man Utd", awayRating: 1.53, awayWin: 20.0, awayWinDisplay: 35.0, draw: 26.4},
+            {home: "Brighton", homeRating: 1.37, homeWin: 19.7, homeWinDisplay: 30.8, away: "Liverpool", awayRating: 1.63, awayWin: 25.3, awayWinDisplay: 42.2, draw: 27.0},
+            {home: "Fulham", homeRating: 1.93, homeWin: 41.2, homeWinDisplay: 61.5, away: "Burnley", awayRating: 0.89, awayWin: 14.5, awayWinDisplay: 14.6, draw: 23.9},
+            {home: "Everton", homeRating: 1.27, homeWin: 20.1, homeWinDisplay: 28.3, away: "Chelsea", awayRating: 1.61, awayWin: 28.2, awayWinDisplay: 44.1, draw: 27.5},
+            {home: "Leeds", homeRating: 1.36, homeWin: 21.2, homeWinDisplay: 31.7, away: "Brentford", awayRating: 1.55, awayWin: 25.7, awayWinDisplay: 40.6, draw: 27.6},
+            {home: "Newcastle", homeRating: 1.72, homeWin: 42.4, homeWinDisplay: 57.2, away: "Sunderland", awayRating: 0.86, awayWin: 17.9, awayWinDisplay: 16.4, draw: 26.5},
+            {home: "Aston Villa", homeRating: 1.86, homeWin: 32.1, homeWinDisplay: 53.6, away: "West Ham", awayRating: 1.14, awayWin: 15.6, awayWinDisplay: 21.1, draw: 25.3},
+            {home: "Tottenham", homeRating: 1.54, homeWin: 29.3, homeWinDisplay: 43.2, away: "Nott'm Forest", awayRating: 1.23, awayWin: 21.5, awayWinDisplay: 28.5, draw: 28.3}
+        ];
 
-// ── Build sparkline trend cards ─────────────────────────
-(function() {
-  var TRENDS = {"Arsenal":{"values":[0.579,0.538,0.635,0.635,0.687,0.62,0.647,0.75,0.75,0.726,0.772,0.778,0.842,0.859,0.757,0.758,0.791,0.791,0.853,0.813,0.778,0.857,0.84,0.957,0.933,0.933,0.857,0.951,0.906,0.807],"change":0.23,"color":"#EF4444"},"Aston Villa":{"values":[0.167,0.1,0.085,0.085,-0.073,-0.068,-0.042,0.025,-0.037,-0.062,-0.111,-0.11,-0.128,-0.027,0.019,0.019,-0.018,0.013,-0.061,-0.029,0.011,0.019,-0.015,0.081,0.014,0.018,0.016,0.005,0.005,-0.115],"change":-0.28,"color":"#D1D5DB"},"Bournemouth":{"values":[0.221,0.221,0.279,0.361,0.379,0.298,0.303,0.153,0.153,0.161,0.068,0.225,0.242,0.197,0.222,0.222,0.221,0.221,0.238,0.205,0.169,0.194,0.303,0.257,0.3,0.233,0.123,0.123,0.228,0.248],"change":0.03,"color":"#F97316"},"Brentford":{"values":[0.298,0.256,0.247,0.224,0.23,0.195,0.195,0.161,0.316,0.354,0.335,0.466,0.581,0.437,0.307,0.307,0.237,0.237,0.236,0.309,0.409,0.374,0.381,0.261,0.157,0.157,0.202,0.202,0.169,0.169],"change":-0.13,"color":"#EF4444"},"Brighton":{"values":[0.147,0.165,0.165,0.168,0.108,0.127,0.127,0.138,0.138,0.076,0.189,0.092,0.092,0.071,0.087,0.043,0.02,0.02,-0.029,0.036,-0.05,-0.083,-0.036,-0.026,-0.026,-0.036,-0.05,-0.05,-0.028,0.019],"change":-0.13,"color":"#3B82F6"},"Burnley":{"values":[-0.644,-0.666,-0.625,-0.728,-0.82,-0.839,-0.839,-0.886,-0.886,-0.879,-0.916,-0.905,-0.993,-0.915,-0.864,-0.784,-0.8,-0.8,-0.756,-0.768,-0.832,-0.929,-0.92,-0.92,-0.848,-0.865,-0.885,-0.885,-0.868,-0.846],"change":-0.2,"color":"#C084FC"},"Chelsea":{"values":[0.333,0.327,0.459,0.516,0.46,0.335,0.335,0.277,0.277,0.241,0.39,0.581,0.581,0.42,0.354,0.397,0.275,0.275,0.175,0.216,0.273,0.262,0.279,0.309,0.425,0.495,0.54,0.54,0.485,0.569],"change":0.24,"color":"#3B82F6"},"Crystal Palace":{"values":[0.318,0.28,0.28,0.249,0.356,0.423,0.423,0.5,0.5,0.44,0.406,0.352,0.352,0.329,0.355,0.355,0.236,0.236,0.223,0.148,0.1,0.057,0.019,0.052,0.052,0.128,0.128,0.138,0.028,0.058],"change":-0.26,"color":"#3B82F6"},"Everton":{"values":[0.031,0.031,-0.06,-0.009,0.071,0.049,0.052,-0.043,-0.043,-0.076,-0.08,0.023,-0.157,-0.118,-0.061,-0.124,-0.2,-0.2,-0.177,-0.271,-0.205,-0.2,-0.2,-0.219,-0.221,-0.159,-0.159,-0.194,-0.087,-0.118],"change":-0.15,"color":"#3B82F6"},"Fulham":{"values":[-0.02,-0.046,-0.046,-0.123,-0.098,-0.056,-0.094,-0.169,-0.169,-0.222,-0.119,-0.059,-0.084,-0.129,-0.169,-0.179,-0.179,-0.104,-0.098,-0.171,-0.232,-0.315,-0.336,-0.319,-0.282,-0.295,-0.295,-0.254,-0.167,-0.2],"change":-0.18,"color":"#9CA3AF"},"Leeds":{"values":[1.313,-0.393,-0.15,-0.175,-0.115,-0.115,0.011,0.23,0.388,0.101,-0.112,-0.054,-0.144,-0.025,-0.043,0.033,0.133,0.133,0.12,0.043,0.156,0.156,0.194,-0.036,0.075,-0.05,-0.044,-0.044,-0.096,-0.096],"change":-1.41,"color":"#FBBF24"},"Liverpool":{"values":[0.864,0.864,0.864,0.737,0.777,0.67,0.67,0.668,0.627,0.525,0.544,0.477,0.477,0.507,0.486,0.491,0.452,0.452,0.462,0.532,0.477,0.597,0.434,0.55,0.55,0.547,0.547,0.586,0.625,0.625],"change":-0.24,"color":"#F87171"},"Man City":{"values":[0.512,0.57,0.53,0.53,0.482,0.579,0.579,0.61,0.61,0.596,0.638,0.586,0.603,0.614,0.665,0.665,0.713,0.713,0.71,0.637,0.679,0.495,0.488,0.483,0.483,0.508,0.563,0.563,0.581,0.653],"change":0.14,"color":"#93C5FD"},"Man Utd":{"values":[-0.053,-0.047,-0.047,0.094,0.063,0.068,0.068,0.122,0.109,0.154,0.111,0.076,0.18,0.134,0.172,0.356,0.377,0.291,0.267,0.3,0.393,0.505,0.431,0.409,0.462,0.402,0.402,0.421,0.494,0.452],"change":0.51,"color":"#EF4444"},"Newcastle":{"values":[0.548,0.567,0.567,0.537,0.543,0.486,0.385,0.525,0.525,0.554,0.471,0.296,0.351,0.37,0.357,0.357,0.384,0.368,0.404,0.451,0.425,0.419,0.423,0.25,0.319,0.338,0.227,0.227,0.145,0.098],"change":-0.45,"color":"#D1D5DB"},"Nott\u2019m Forest":{"values":[-0.185,-0.15,-0.15,-0.128,-0.319,-0.319,-0.319,-0.472,-0.472,-0.458,-0.395,-0.275,-0.275,-0.287,-0.316,-0.316,-0.194,-0.244,-0.251,-0.262,-0.268,-0.382,-0.388,-0.396,-0.458,-0.258,-0.258,-0.316,-0.314,-0.37],"change":-0.18,"color":"#EF4444"},"Sunderland":{"values":[0.127,0.127,0.108,0.104,-0.223,-0.06,-0.06,-0.126,-0.126,-0.07,-0.146,-0.367,-0.38,-0.394,-0.496,-0.411,-0.342,-0.342,-0.44,-0.524,-0.637,-0.536,-0.587,-0.426,-0.44,-0.552,-0.552,-0.533,-0.497,-0.487],"change":-0.61,"color":"#EF4444"},"Tottenham":{"values":[-0.308,-0.223,-0.206,-0.293,-0.236,-0.233,-0.233,-0.259,-0.181,-0.133,-0.289,-0.242,-0.291,-0.314,-0.192,-0.192,-0.255,-0.255,-0.241,-0.158,-0.125,-0.174,-0.109,-0.129,-0.202,-0.229,-0.229,-0.364,-0.411,-0.415],"change":-0.11,"color":"#D1D5DB"},"West Ham":{"values":[-0.3,-0.288,-0.423,-0.423,-0.332,-0.406,-0.386,-0.473,-0.607,-0.655,-0.565,-0.599,-0.599,-0.621,-0.605,-0.605,-0.625,-0.625,-0.585,-0.649,-0.582,-0.485,-0.377,-0.4,-0.41,-0.353,-0.236,-0.236,-0.258,-0.259],"change":0.04,"color":"#C084FC"},"Wolves":{"values":[-0.225,-0.302,-0.355,-0.388,-0.404,-0.28,-0.28,-0.311,-0.311,-0.237,-0.309,-0.444,-0.444,-0.414,-0.414,-0.594,-0.569,-0.569,-0.529,-0.39,-0.411,-0.406,-0.405,-0.352,-0.465,-0.603,-0.657,-0.579,-0.62,-0.62],"change":-0.4,"color":"#F59E0B"}};
+        const TEAM_PREDICTIONS = {
+            "Arsenal": [null, 64, 39, 62, 68],
+            "Aston Villa": [54, 38, 52, 33, 48],
+            "Bournemouth": [39, 13, 30, 51, 46],
+            "Brentford": [41, 49, 49, 27, 57],
+            "Brighton": [31, 52, 37, 34, 28],
+            "Burnley": [15, 20, 19, 11, 17],
+            "Chelsea": [44, 37, 45, 39, 61],
+            "Crystal Palace": [null, 37, 51, 20, 27],
+            "Everton": [28, 24, 27, 36, 24],
+            "Fulham": [62, 18, 25, 38, 11],
+            "Leeds": [32, 18, 48, 22, 56],
+            "Liverpool": [42, 58, 45, 56, 34],
+            "Man City": [null, 37, 32, 68, 49],
+            "Man Utd": [35, 56, 29, 48, 39],
+            "Newcastle": [57, 35, 44, 14, 45],
+            "Nott'm Forest": [28, 32, 54, 33, 16],
+            "Sunderland": [16, 32, 18, 34, 29],
+            "Tottenham": [43, 36, 34, 38, 25],
+            "West Ham": [21, 46, 23, 35, 19],
+            "Wolves": [null, 25, 22, 31, 36]
+        };
 
-  var grid = document.getElementById('trends-grid');
-  if (!grid) return;
+        const PLAYER_GOALS = [
+            {name: "Erling Haaland", team: "Man City", gw: [null, 0.63, 0.49, 0.82, 0.62], total: 2.56},
+            {name: "Beto", team: "Brentford", gw: [0.53, 0.58, 0.63, 0.48, 0.72], total: 2.94},
+            {name: "Ollie Watkins", team: "Aston Villa", gw: [0.62, 0.46, 0.52, 0.45, 0.57], total: 2.62},
+            {name: "Morgan Rogers", team: "Aston Villa", gw: [0.34, 0.26, 0.29, 0.25, 0.32], total: 1.46},
+            {name: "Mohamed Salah", team: "Liverpool", gw: [0.33, 0.41, 0.32, 0.41, 0.31], total: 1.78},
+            {name: "Kevin Schade", team: "Brentford", gw: [0.27, 0.30, 0.33, 0.25, 0.38], total: 1.53},
+            {name: "Jarrod Bowen", team: "West Ham", gw: [0.28, 0.37, 0.28, 0.32, 0.28], total: 1.53},
+            {name: "João Pedro", team: "Chelsea", gw: [0.34, 0.36, 0.40, 0.35, 0.45], total: 1.90},
+            {name: "Morgan Gibbs-White", team: "Nott'm Forest", gw: [0.32, 0.34, 0.43, 0.29, 0.28], total: 1.66},
+            {name: "Bruno Fernandes", team: "Man Utd", gw: [0.21, 0.25, 0.20, 0.26, 0.22], total: 1.14}
+        ];
 
-  function sparkSVG(vals, col) {
-    var n = vals.length, W = 200, H = 50, PX = 2, PY = 6;
-    var mn = Math.min.apply(null, vals), mx = Math.max.apply(null, vals);
-    var rng = mx - mn || 0.01;
-    var pts = [];
-    for (var i = 0; i < n; i++) {
-      var x = PX + (i / (n - 1)) * (W - 2 * PX);
-      var y = PY + (1 - (vals[i] - mn) / rng) * (H - 2 * PY);
-      pts.push(x + ',' + y);
-    }
-    var lastX = PX + ((n-1)/(n-1))*(W-2*PX);
-    var firstX = PX;
-    var fillPts = pts.join(' ') + ' ' + lastX + ',' + H + ' ' + firstX + ',' + H;
-    var s = '<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none">';
-    s += '<polygon class="spark-fill" points="'+fillPts+'" fill="'+col+'"/>';
-    if (mn < 0 && mx > 0) {
-      var zy = Math.max(PY, Math.min(H-PY, PY + (1-(0-mn)/rng)*(H-2*PY)));
-      s += '<line x1="'+PX+'" y1="'+zy+'" x2="'+(W-PX)+'" y2="'+zy+'" stroke="#64748b" stroke-width="0.8" stroke-dasharray="4,3" opacity="0.5"/>';
-    }
-    s += '<polyline points="'+pts.join(' ')+'" fill="none" stroke="'+col+'" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>';
-    s += '</svg>';
-    return s;
-  }
+        const FINAL_TABLE = [
+            {pos: 1,  team: "Arsenal",        played: 31, points: 85, left: 7, projected: 93.2, rMin: 85, rMax: 100},
+            {pos: 2,  team: "Man City",        played: 30, points: 75, left: 8, projected: 84.7, rMin: 75, rMax:  94},
+            {pos: 3,  team: "Man Utd",         played: 29, points: 65, left: 9, projected: 73.1, rMin: 65, rMax:  83},
+            {pos: 4,  team: "Aston Villa",     played: 29, points: 64, left: 9, projected: 71.4, rMin: 62, rMax:  81},
+            {pos: 5,  team: "Liverpool",       played: 29, points: 64, left: 9, projected: 72.8, rMin: 64, rMax:  82},
+            {pos: 6,  team: "Chelsea",         played: 30, points: 61, left: 8, projected: 68.3, rMin: 61, rMax:  77},
+            {pos: 7,  team: "Brentford",       played: 29, points: 58, left: 9, projected: 65.9, rMin: 58, rMax:  74},
+            {pos: 8,  team: "Newcastle",       played: 30, points: 54, left: 8, projected: 60.4, rMin: 54, rMax:  68},
+            {pos: 9,  team: "Everton",         played: 30, points: 52, left: 8, projected: 58.1, rMin: 52, rMax:  65},
+            {pos: 10, team: "Bournemouth",     played: 30, points: 52, left: 8, projected: 57.6, rMin: 52, rMax:  64},
+            {pos: 11, team: "Brighton",        played: 30, points: 52, left: 8, projected: 56.9, rMin: 52, rMax:  63},
+            {pos: 12, team: "Fulham",          played: 29, points: 51, left: 9, projected: 57.2, rMin: 51, rMax:  65},
+            {pos: 13, team: "Crystal Palace",  played: 29, points: 49, left: 9, projected: 55.3, rMin: 49, rMax:  62},
+            {pos: 14, team: "Sunderland",      played: 30, points: 48, left: 8, projected: 53.8, rMin: 48, rMax:  60},
+            {pos: 15, team: "Leeds",           played: 29, points: 42, left: 9, projected: 47.4, rMin: 42, rMax:  55},
+            {pos: 16, team: "Tottenham",       played: 29, points: 40, left: 9, projected: 45.2, rMin: 40, rMax:  53},
+            {pos: 17, team: "Nott'm Forest",   played: 29, points: 39, left: 9, projected: 43.7, rMin: 39, rMax:  51},
+            {pos: 18, team: "West Ham",        played: 30, points: 38, left: 8, projected: 42.1, rMin: 38, rMax:  49},
+            {pos: 19, team: "Burnley",         played: 30, points: 26, left: 8, projected: 30.6, rMin: 26, rMax:  37},
+            {pos: 20, team: "Wolves",          played: 30, points: 25, left: 8, projected: 28.9, rMin: 25, rMax:  35}
+        ];
 
-  var teamNames = Object.keys(TRENDS).sort();
-  for (var t = 0; t < teamNames.length; t++) {
-    var name = teamNames[t];
-    var d = TRENDS[name];
-    var sign = d.change >= 0 ? '+' : '';
-    var cls = d.change >= 0 ? 'spark-pos' : 'spark-neg';
-    var card = document.createElement('div');
-    card.className = 'spark-card';
-    card.innerHTML =
-      '<div class="spark-card-hdr"><span class="spark-team">'+name+'</span><span class="spark-chg '+cls+'">'+sign+d.change.toFixed(2)+'</span></div>' +
-      '<div class="spark-svg-wrap">'+sparkSVG(d.values, d.color)+'</div>' +
-      '<div class="spark-xlbl"><span>GW1</span><span>GW10</span><span>GW20</span><span>GW29</span></div>';
-    grid.appendChild(card);
-  }
-})();
+        const TRENDS = {"Arsenal":{"values":[0.579,0.538,0.635,0.635,0.687,0.62,0.647,0.75,0.75,0.726,0.772,0.778,0.842,0.859,0.757,0.758,0.791,0.791,0.853,0.813,0.778,0.857,0.84,0.957,0.933,0.933,0.857,0.951,0.906,0.807],"change":0.23,"color":"#EF4444"},"Aston Villa":{"values":[0.167,0.1,0.085,0.085,-0.073,-0.068,-0.042,0.025,-0.037,-0.062,-0.111,-0.11,-0.128,-0.027,0.019,0.019,-0.018,0.013,-0.061,-0.029,0.011,0.019,-0.015,0.081,0.014,0.018,0.016,0.005,0.005,-0.115],"change":-0.28,"color":"#D1D5DB"},"Bournemouth":{"values":[0.221,0.221,0.279,0.361,0.379,0.298,0.303,0.153,0.153,0.161,0.068,0.225,0.242,0.197,0.222,0.222,0.221,0.221,0.238,0.205,0.169,0.194,0.303,0.257,0.3,0.233,0.123,0.123,0.228,0.248],"change":0.03,"color":"#F97316"},"Brentford":{"values":[0.298,0.256,0.247,0.224,0.23,0.195,0.195,0.161,0.316,0.354,0.335,0.466,0.581,0.437,0.307,0.307,0.237,0.237,0.236,0.309,0.409,0.374,0.381,0.261,0.157,0.157,0.202,0.202,0.169,0.169],"change":-0.13,"color":"#EF4444"},"Brighton":{"values":[0.147,0.165,0.165,0.168,0.108,0.127,0.127,0.138,0.138,0.076,0.189,0.092,0.092,0.071,0.087,0.043,0.02,0.02,-0.029,0.036,-0.05,-0.083,-0.036,-0.026,-0.026,-0.036,-0.05,-0.05,-0.028,0.019],"change":-0.13,"color":"#3B82F6"},"Burnley":{"values":[-0.644,-0.666,-0.625,-0.728,-0.82,-0.839,-0.839,-0.886,-0.886,-0.879,-0.916,-0.905,-0.993,-0.915,-0.864,-0.784,-0.8,-0.8,-0.756,-0.768,-0.832,-0.929,-0.92,-0.92,-0.848,-0.865,-0.885,-0.885,-0.868,-0.846],"change":-0.2,"color":"#C084FC"},"Chelsea":{"values":[0.333,0.327,0.459,0.516,0.46,0.335,0.335,0.277,0.277,0.241,0.39,0.581,0.581,0.42,0.354,0.397,0.275,0.275,0.175,0.216,0.273,0.262,0.279,0.309,0.425,0.495,0.54,0.54,0.485,0.569],"change":0.24,"color":"#3B82F6"},"Crystal Palace":{"values":[0.318,0.28,0.28,0.249,0.356,0.423,0.423,0.5,0.5,0.44,0.406,0.352,0.352,0.329,0.355,0.355,0.236,0.236,0.223,0.148,0.1,0.057,0.019,0.052,0.052,0.128,0.128,0.138,0.028,0.058],"change":-0.26,"color":"#3B82F6"},"Everton":{"values":[0.031,0.031,-0.06,-0.009,0.071,0.049,0.052,-0.043,-0.043,-0.076,-0.08,0.023,-0.157,-0.118,-0.061,-0.124,-0.2,-0.2,-0.177,-0.271,-0.205,-0.2,-0.2,-0.219,-0.221,-0.159,-0.159,-0.194,-0.087,-0.118],"change":-0.15,"color":"#3B82F6"},"Fulham":{"values":[-0.02,-0.046,-0.046,-0.123,-0.098,-0.056,-0.094,-0.169,-0.169,-0.222,-0.119,-0.059,-0.084,-0.129,-0.169,-0.179,-0.179,-0.104,-0.098,-0.171,-0.232,-0.315,-0.336,-0.319,-0.282,-0.295,-0.295,-0.254,-0.167,-0.2],"change":-0.18,"color":"#9CA3AF"},"Leeds":{"values":[1.313,-0.393,-0.15,-0.175,-0.115,-0.115,0.011,0.23,0.388,0.101,-0.112,-0.054,-0.144,-0.025,-0.043,0.033,0.133,0.133,0.12,0.043,0.156,0.156,0.194,-0.036,0.075,-0.05,-0.044,-0.044,-0.096,-0.096],"change":-1.41,"color":"#FBBF24"},"Liverpool":{"values":[0.864,0.864,0.864,0.737,0.777,0.67,0.67,0.668,0.627,0.525,0.544,0.477,0.477,0.507,0.486,0.491,0.452,0.452,0.462,0.532,0.477,0.597,0.434,0.55,0.55,0.547,0.547,0.586,0.625,0.625],"change":-0.24,"color":"#F87171"},"Man City":{"values":[0.512,0.57,0.53,0.53,0.482,0.579,0.579,0.61,0.61,0.596,0.638,0.586,0.603,0.614,0.665,0.665,0.713,0.713,0.71,0.637,0.679,0.495,0.488,0.483,0.483,0.508,0.563,0.563,0.581,0.653],"change":0.14,"color":"#93C5FD"},"Man Utd":{"values":[-0.053,-0.047,-0.047,0.094,0.063,0.068,0.068,0.122,0.109,0.154,0.111,0.076,0.18,0.134,0.172,0.356,0.377,0.291,0.267,0.3,0.393,0.505,0.431,0.409,0.462,0.402,0.402,0.421,0.494,0.452],"change":0.51,"color":"#EF4444"},"Newcastle":{"values":[0.548,0.567,0.567,0.537,0.543,0.486,0.385,0.525,0.525,0.554,0.471,0.296,0.351,0.37,0.357,0.357,0.384,0.368,0.404,0.451,0.425,0.419,0.423,0.25,0.319,0.338,0.227,0.227,0.145,0.098],"change":-0.45,"color":"#D1D5DB"},"Nott'm Forest":{"values":[-0.185,-0.15,-0.15,-0.128,-0.319,-0.319,-0.319,-0.472,-0.472,-0.458,-0.395,-0.275,-0.275,-0.287,-0.316,-0.316,-0.194,-0.244,-0.251,-0.262,-0.268,-0.382,-0.388,-0.396,-0.458,-0.258,-0.258,-0.316,-0.314,-0.37],"change":-0.18,"color":"#EF4444"},"Sunderland":{"values":[0.127,0.127,0.108,0.104,-0.223,-0.06,-0.06,-0.126,-0.126,-0.07,-0.146,-0.367,-0.38,-0.394,-0.496,-0.411,-0.342,-0.342,-0.44,-0.524,-0.637,-0.536,-0.587,-0.426,-0.44,-0.552,-0.552,-0.533,-0.497,-0.487],"change":-0.61,"color":"#EF4444"},"Tottenham":{"values":[-0.308,-0.223,-0.206,-0.293,-0.236,-0.233,-0.233,-0.259,-0.181,-0.133,-0.289,-0.242,-0.291,-0.314,-0.192,-0.192,-0.255,-0.255,-0.241,-0.158,-0.125,-0.174,-0.109,-0.129,-0.202,-0.229,-0.229,-0.364,-0.411,-0.415],"change":-0.11,"color":"#D1D5DB"},"West Ham":{"values":[-0.3,-0.288,-0.423,-0.423,-0.332,-0.406,-0.386,-0.473,-0.607,-0.655,-0.565,-0.599,-0.599,-0.621,-0.605,-0.605,-0.625,-0.625,-0.585,-0.649,-0.582,-0.485,-0.377,-0.4,-0.41,-0.353,-0.236,-0.236,-0.258,-0.259],"change":0.04,"color":"#C084FC"},"Wolves":{"values":[-0.225,-0.302,-0.355,-0.388,-0.404,-0.28,-0.28,-0.311,-0.311,-0.237,-0.309,-0.444,-0.444,-0.414,-0.414,-0.594,-0.569,-0.569,-0.529,-0.39,-0.411,-0.406,-0.405,-0.352,-0.465,-0.603,-0.657,-0.579,-0.62,-0.62],"change":-0.4,"color":"#F59E0B"}};
 
-// Auto-resize Datawrapper iframes
-window.addEventListener('message', function(e) {
-  if (typeof e.data === 'object' && e.data['datawrapper-height']) {
-    var heights = e.data['datawrapper-height'];
-    for (var chartId in heights) {
-      var iframes = document.querySelectorAll('iframe[src*="' + chartId + '"]');
-      iframes.forEach(function(iframe) {
-        iframe.style.height = heights[chartId] + 'px';
-      });
-    }
-  }
-});
-</script>
+        // Tab switching
+        function showTab(index) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-button').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-content')[index].classList.add('active');
+            document.querySelectorAll('.tab-button')[index].classList.add('active');
+        }
 
+        function showSub(tabIndex, subIndex) {
+            const contents = document.querySelectorAll('.tab-content')[tabIndex].querySelectorAll('.subtab-content');
+            const buttons = document.querySelectorAll('.tab-content')[tabIndex].querySelectorAll('.subtab-button');
+            contents.forEach(el => el.classList.remove('active'));
+            buttons.forEach(el => el.classList.remove('active'));
+            contents[subIndex].classList.add('active');
+            buttons[subIndex].classList.add('active');
+        }
+
+        // Render ratings
+        function renderRatings() {
+            const maxAttack = 1.73;
+            const maxDefence = 1.67;
+            const html = RATINGS.map(r => `
+                <tr>
+                    <td class="rank">${r.rank}</td>
+                    <td class="team-name">${getTeamNameWithBadge(r.team)}</td>
+                    <td>
+                        <div class="bar-container">
+                            <div class="bar" style="width: ${(r.attack / maxAttack * 100)}%"></div>
+                            <div class="bar-label">${r.attack.toFixed(2)}</div>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="bar-container">
+                            <div class="bar" style="width: ${(r.defence / maxDefence * 100)}%"></div>
+                            <div class="bar-label">${r.defence.toFixed(2)}</div>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="bar-container">
+                            <div class="bar ${r.overall >= 0 ? 'green' : 'red'}" style="width: ${Math.abs(r.overall / 1 * 50)}%"></div>
+                            <div class="bar-label">${r.overall >= 0 ? '+' : ''}${r.overall.toFixed(2)}</div>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+            document.getElementById('ratingsTable').innerHTML = html;
+        }
+
+        // Render sparklines
+        function renderSparklines() {
+            const html = Object.entries(TRENDS).map(([team, data]) => {
+                const lineColor = data.change >= 0 ? '#34d399' : '#f87171';
+                const svg = createSparklineSVG(data.values, lineColor);
+                const changeClass = data.change >= 0 ? 'change-positive' : 'change-negative';
+                const changeSign = data.change >= 0 ? '+' : '';
+                return `
+                    <div class="sparkline-card">
+                        <div class="sparkline-team">${getTeamNameWithBadge(team)}</div>
+                        ${svg}
+                        <div class="sparkline-change ${changeClass}">${changeSign}${(data.change * 100).toFixed(0)}%</div>
+                    </div>
+                `;
+            }).join('');
+            document.getElementById('sparklineGrid').innerHTML = html;
+        }
+
+        function createSparklineSVG(values, color) {
+            color = color || '#F97316';
+            const w = 240, h = 40, padding = 5;
+            const minVal = Math.min(...values.filter(v => v !== null));
+            const maxVal = Math.max(...values.filter(v => v !== null));
+            const range = maxVal - minVal || 1;
+
+            let points = '';
+            let pathD = `M ${padding} ${h - padding}`;
+
+            values.forEach((v, i) => {
+                const x = padding + (i / (values.length - 1)) * (w - 2 * padding);
+                const y = h - padding - ((v - minVal) / range) * (h - 2 * padding);
+                if (i === 0) pathD = `M ${x} ${y}`;
+                else pathD += ` L ${x} ${y}`;
+                points += `${x},${y} `;
+            });
+
+            pathD += ` L ${w - padding} ${h - padding}`;
+
+            const gradId = 'grad-' + color.replace('#','');
+            return `<svg class="sparkline-svg" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
+                <defs>
+                    <linearGradient id="${gradId}" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" style="stop-color:${color};stop-opacity:0.3" />
+                        <stop offset="100%" style="stop-color:${color};stop-opacity:0.05" />
+                    </linearGradient>
+                </defs>
+                <path d="${pathD}" stroke="${color}" stroke-width="1.5" fill="none"/>
+                <path d="${pathD} L ${w - padding} ${h} L ${padding} ${h} Z" fill="url(#${gradId})"/>
+            </svg>`;
+        }
+
+        // Render matchweek - compact table layout
+        function renderMatchweek() {
+            let html = `<table class="matchweek-table"><thead><tr><th>FIXTURE</th><th>xG</th><th>CS%</th><th>WIN</th><th></th><th>DRAW</th></tr></thead><tbody>`;
+
+            FIXTURES.forEach((f, idx) => {
+                const homeWinClass = f.homeWinDisplay > 40 ? 'high' : f.homeWinDisplay > 30 ? 'medium' : 'low';
+                const awayWinClass = f.awayWinDisplay > 40 ? 'high' : f.awayWinDisplay > 30 ? 'medium' : 'low';
+
+                // Home team row
+                html += `<tr class="matchweek-home-row">
+                    <td class="fixture-team-cell">${getTeamNameWithBadge(f.home)}</td>
+                    <td class="fixture-stat">${f.homeRating.toFixed(2)}</td>
+                    <td class="fixture-stat">21.7%</td>
+                    <td class="fixture-stat"><span class="fixture-win-pill ${homeWinClass}">${f.homeWinDisplay.toFixed(1)}%</span></td>
+                    <td class="matchweek-vs-cell" rowspan="2">v<br/>(${['GW31', 'GW31', 'GW31', 'GW31', 'GW31', 'GW31', 'GW31', 'GW31'][idx]})</td>
+                    <td class="fixture-stat fixture-draw" rowspan="2">${f.draw.toFixed(1)}%</td>
+                </tr>`;
+
+                // Away team row
+                html += `<tr class="matchweek-away-row">
+                    <td class="fixture-team-cell">${getTeamNameWithBadge(f.away)}</td>
+                    <td class="fixture-stat">${f.awayRating.toFixed(2)}</td>
+                    <td class="fixture-stat">20.0%</td>
+                    <td class="fixture-stat"><span class="fixture-win-pill ${awayWinClass}">${f.awayWinDisplay.toFixed(1)}%</span></td>
+                </tr>`;
+            });
+
+            html += `</tbody></table>`;
+            document.getElementById('matchweekContainer').innerHTML = html;
+        }
+
+        // Render team predictions
+        function renderTeamPredictions() {
+            const teams = Object.keys(TEAM_PREDICTIONS).sort();
+            const headerHtml = `<tr><th>Team</th><th style="text-align: center;">GW31</th><th style="text-align: center;">GW32</th><th style="text-align: center;">GW33</th><th style="text-align: center;">GW34</th><th style="text-align: center;">GW35</th></tr>`;
+            document.getElementById('teamPredHeadline').innerHTML = headerHtml;
+
+            const bodyHtml = teams.map(team => {
+                const vals = TEAM_PREDICTIONS[team];
+                return `<tr><td class="heatmap-team">${getTeamNameWithBadge(team)}</td>` +
+                    vals.map(v => {
+                        let level = 0;
+                        if (v === null) return `<td class="heatmap-cell">—</td>`;
+                        if (v >= 70) level = 4;
+                        else if (v >= 55) level = 3;
+                        else if (v >= 40) level = 2;
+                        else if (v >= 25) level = 1;
+                        return `<td class="heatmap-cell level${level}">${v}%</td>`;
+                    }).join('') +
+                    `</tr>`;
+            }).join('');
+            document.getElementById('teamPredBody').innerHTML = bodyHtml;
+        }
+
+        // Render player goals with heatmap styling
+        function renderPlayerGoals() {
+            const html = PLAYER_GOALS.map(p => {
+                return `<tr>
+                    <td class="player-name">${p.name}</td>
+                    <td class="player-team">${p.team}</td>
+                    ${p.gw.map(g => {
+                        if (g === null) return `<td class="hm-blank">—</td>`;
+                        let hmClass = 'hm-1';
+                        if (g >= 0.66) hmClass = 'hm-5';
+                        else if (g >= 0.51) hmClass = 'hm-4';
+                        else if (g >= 0.36) hmClass = 'hm-3';
+                        else if (g >= 0.21) hmClass = 'hm-2';
+                        return `<td class="${hmClass}">${g.toFixed(2)}</td>`;
+                    }).join('')}
+                    <td class="hm-total">${p.total.toFixed(2)}</td>
+                </tr>`;
+            }).join('');
+            document.getElementById('playerGoalsTable').innerHTML = html;
+        }
+
+        // Render final table — projected points bar visualization
+        function renderFinalTable() {
+            const MAX_PTS = 102; // scale bar against season max
+            const html = FINAL_TABLE.map(t => {
+                let zoneClass = '';
+                let rankClass = 'final-rank';
+                if (t.pos <= 4)       { zoneClass = 'cl-zone';         rankClass += ' final-rank-cl'; }
+                else if (t.pos <= 6)  { zoneClass = 'europa-zone';     rankClass += ' final-rank-europa'; }
+                else if (t.pos >= 18) { zoneClass = 'relegation-zone'; rankClass += ' final-rank-rel'; }
+
+                // Bar segments as % of MAX_PTS
+                const currentPct  = (t.points     / MAX_PTS * 100).toFixed(1);
+                const extPct      = ((t.projected - t.points) / MAX_PTS * 100).toFixed(1);
+                const extLeft     = currentPct;
+
+                return `<tr class="${zoneClass}">
+                    <td class="${rankClass}">${t.pos}</td>
+                    <td class="final-team">${getTeamNameWithBadge(t.team)}</td>
+                    <td class="final-stat" style="text-align:right">${t.played}</td>
+                    <td class="final-points" style="text-align:right">${t.points}</td>
+                    <td class="final-left" style="text-align:right">${t.left}</td>
+                    <td class="final-bar-cell">
+                        <div class="proj-bar-wrap">
+                            <div class="proj-bar-track">
+                                <div class="proj-bar-current" style="width:${currentPct}%"></div>
+                                <div class="proj-bar-ext" style="left:${extLeft}%;width:${extPct}%"></div>
+                            </div>
+                            <span class="proj-bar-num">${t.projected.toFixed(1)}</span>
+                        </div>
+                    </td>
+                    <td class="final-range">${t.rMin}–${t.rMax}</td>
+                </tr>`;
+            }).join('');
+            document.getElementById('finalTableBody').innerHTML = html;
+        }
+
+        // Initialize
+        renderRatings();
+        renderSparklines();
+        renderMatchweek();
+        renderTeamPredictions();
+        renderPlayerGoals();
+        renderFinalTable();
+    </script>
 </body>
 </html>
