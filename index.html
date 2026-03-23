@@ -1076,6 +1076,7 @@
 
         <!-- Sub-tab: Current Ratings -->
         <div class="subtab-content active">
+            <p style="color:#aaa;font-size:0.78rem;margin:0 0 10px 0;">Attack and Defence ratings are the model's strength parameters derived from goals scored and conceded across the season. Higher attack = more goals expected. Lower defence = fewer goals conceded. Overall = attack minus defence.</p>
             <table class="data-table">
                 <thead>
                     <tr>
@@ -1824,7 +1825,7 @@
 
         // Render matchweek - compact table layout
         function renderMatchweek() {
-            let html = `<table class="matchweek-table"><thead><tr><th style="width:240px">FIXTURE</th><th style="width:110px;text-align:center">PrG</th><th style="width:110px;text-align:center">CS%</th><th style="text-align:center">WIN</th><th style="width:110px;text-align:center"></th><th style="width:130px;text-align:center">DRAW</th></tr></thead><tbody>`;
+            let html = `<table class="matchweek-table"><thead><tr><th style="width:240px">FIXTURE</th><th style="width:110px;text-align:center;cursor:help" title="Model's predicted goals for this team in this fixture">Pred Goals</th><th style="width:110px;text-align:center">CS%</th><th style="text-align:center">WIN</th><th style="width:110px;text-align:center"></th><th style="width:130px;text-align:center">DRAW</th></tr></thead><tbody>`;
             const gwLabel = (GW_LABELS && GW_LABELS[0]) || 'GW?';
 
             FIXTURES.forEach((f, idx) => {
