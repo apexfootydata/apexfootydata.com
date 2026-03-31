@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Apex FPL Solver — GW32</title>
+<title>Apex FPL Solver — GW32 — 10 Apr 2026</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -892,7 +892,7 @@
   <!-- ═══ TOP BAR ═══ -->
   <div class="top-bar">
     <div class="logo">apex<span>fpl</span></div>
-    <div class="top-bar-meta">Solver · Monte Carlo (1000 sims) · 31 Mar 2026, 12:44<span class="build-badge">BUILD #124406</span></div>
+    <div class="top-bar-meta">Solver · Monte Carlo (1000 sims) · 31 Mar 2026, 13:06<span class="build-badge">BUILD #130646</span></div>
   </div>
 
   <!-- ═══ LOAD TEAM + SETTINGS (Review-style) ═══ -->
@@ -997,7 +997,7 @@
 
     <div class="stat-row">
       <div class="stat-card sc-coral">
-        <div class="sc-label">GW32</div>
+        <div class="sc-label">GW32 — 10 Apr 2026</div>
         <div class="sc-value" id="main-xp">53.3</div>
       </div>
       <div class="stat-card">
@@ -1485,7 +1485,7 @@
           <div style="border-top:1px solid var(--border);padding-top:20px;margin-top:8px">
             <h3 style="text-align:center;font-size:1rem;color:var(--text);font-weight:700;margin-bottom:16px">Solver Output</h3>
             <button class="solve-btn" id="run-solver-btn">
-              Solve<span class="sub">GW32 to GW37</span>
+              Solve<span class="sub">GW32 — 10 Apr 2026 to GW37</span>
             </button>
             <p style="text-align:center;color:var(--green);font-size:0.82rem;font-style:italic;margin-top:12px" id="solver-awaiting">Awaiting Solver Run</p>
           </div>
@@ -3769,7 +3769,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-  <div class="footer">Apex FPL Solver · 31 Mar 2026, 12:44</div>
+  <div class="footer">Apex FPL Solver · 31 Mar 2026, 13:06</div>
 </div>
 
 <script>
@@ -3789,7 +3789,7 @@ const POS_LABELS = {1:'GK',2:'DEF',3:'MID',4:'FWD'};
 const PREBAKED_XI    = [{"id":5,"name":"Gabriel","team":"Arsenal","pos":2,"cost":7.2,"xp":3.83},{"id":136,"name":"Thiago","team":"Brentford","pos":4,"cost":7.3,"xp":4.98},{"id":139,"name":"Verbruggen","team":"Brighton","pos":1,"cost":4.5,"xp":3.06},{"id":329,"name":"Wilson","team":"Fulham","pos":3,"cost":6.1,"xp":3.41},{"id":373,"name":"Virgil","team":"Liverpool","pos":2,"cost":6.3,"xp":4.27},{"id":387,"name":"Szoboszlai","team":"Liverpool","pos":3,"cost":7.0,"xp":6.0},{"id":661,"name":"Ekitik\u00e9","team":"Liverpool","pos":4,"cost":9.3,"xp":3.64},{"id":430,"name":"Haaland","team":"Manchester City","pos":4,"cost":14.4,"xp":5.21},{"id":119,"name":"Mbeumo","team":"Manchester United","pos":3,"cost":8.6,"xp":3.62},{"id":449,"name":"B.Fernandes","team":"Manchester United","pos":3,"cost":10.3,"xp":5.45},{"id":694,"name":"Mukiele","team":"Sunderland","pos":2,"cost":4.5,"xp":3.85}];
 const PREBAKED_BENCH = [{"id":470,"name":"D\u00fabravka","team":"Burnley","pos":1,"cost":4.0,"xp":2.64},{"id":660,"name":"Stach","team":"Leeds","pos":3,"cost":4.8,"xp":3.2},{"id":473,"name":"Hall","team":"Newcastle United","pos":2,"cost":5.4,"xp":2.71},{"id":317,"name":"Andersen","team":"Fulham","pos":2,"cost":4.6,"xp":2.34}];
 const CURRENT_GW = 32;
-const GW_DATE_LABEL = 'GW32';
+const GW_DATE_LABEL = 'GW32 — 10 Apr 2026';
 const GW_MAX = 38;
 
 // ── Chip instant-update values ──
@@ -4830,7 +4830,7 @@ function openSolverModal() {
   const solveBtn = document.getElementById('run-solver-btn');
   if (solveBtn) {
     solveBtn.textContent = '';
-    solveBtn.innerHTML = 'Solve<span class="sub">GW32 to GW37</span>';
+    solveBtn.innerHTML = 'Solve<span class="sub">GW32 — 10 Apr 2026 to GW37</span>';
     solveBtn.style.background = '';
     solveBtn.disabled = false;
   }
