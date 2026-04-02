@@ -810,7 +810,7 @@
   <!-- ═══ TOP BAR ═══ -->
   <div class="top-bar">
     <div class="logo">apex<span>fpl</span></div>
-    <div class="top-bar-meta">Solver · Monte Carlo (1000 sims) · 02 Apr 2026, 22:47</div>
+    <div class="top-bar-meta">Solver · Monte Carlo (1000 sims) · 02 Apr 2026, 22:58</div>
   </div>
 
   <!-- ═══ LOAD TEAM + SETTINGS (Review-style) ═══ -->
@@ -3956,7 +3956,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-  <div class="footer">Apex FPL Solver · 02 Apr 2026, 22:47</div>
+  <div class="footer">Apex FPL Solver · 02 Apr 2026, 22:58</div>
 </div>
 
 <script>
@@ -4242,8 +4242,12 @@ function selectGwPath(idx) {
     allCards[idx].style.outline = '2px solid #22c55e';
   }
 
-  // idx === -1 means "No Transfer" (roll)
-  if (idx < 0 || !PREBAKED_TRANSFERS[idx]) return;
+  // idx === -1 means "No Transfer" (roll) — close modal and return to landing page
+  if (idx < 0 || !PREBAKED_TRANSFERS[idx]) {
+    if (typeof closeSolverModal === 'function') closeSolverModal();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    return;
+  }
 
   const transfer = PREBAKED_TRANSFERS[idx];
   const swaps = transfer.swaps || [];
@@ -4324,6 +4328,10 @@ function selectGwPath(idx) {
   // ── Re-optimise XI after transfer ──────────────────────────────────
   // Collect all 15 players from the pitch, pick best XI, rearrange cards.
   _reoptimiseXI();
+
+  // Close modal and scroll to landing page so user sees the updated pitch
+  if (typeof closeSolverModal === 'function') closeSolverModal();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function _reoptimiseXI() {
