@@ -810,7 +810,7 @@
   <!-- ═══ TOP BAR ═══ -->
   <div class="top-bar">
     <div class="logo">apex<span>fpl</span></div>
-    <div class="top-bar-meta">Solver · Monte Carlo (1000 sims) · 02 Apr 2026, 22:58</div>
+    <div class="top-bar-meta">Solver · Monte Carlo (1000 sims) · 02 Apr 2026, 23:12</div>
   </div>
 
   <!-- ═══ LOAD TEAM + SETTINGS (Review-style) ═══ -->
@@ -3956,7 +3956,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-  <div class="footer">Apex FPL Solver · 02 Apr 2026, 22:58</div>
+  <div class="footer">Apex FPL Solver · 02 Apr 2026, 23:12</div>
 </div>
 
 <script>
@@ -4231,6 +4231,27 @@ function selectSolutionLine(idx) {
     updateDraftTable();
     updateSquadEvolution();
   }
+
+  // Apply GW32 transfer from this sequence to the prebaked pitch
+  const seq = ALL_SEQUENCES[idx];
+  if (seq && seq[0] && seq[0].action !== 'roll') {
+    const step = seq[0]; // GW32 step
+    // Sequence uses player names (out/in), match to PREBAKED_TRANSFERS by name
+    const matchIdx = PREBAKED_TRANSFERS.findIndex(t => {
+      const sw = (t.swaps || [])[0];
+      if (!sw) return false;
+      // Match by out_name/in_name (sequence stores "out"/"in" as display names)
+      return sw.out_name === step.out && sw.in_name === step['in'];
+    });
+    if (matchIdx >= 0) {
+      selectGwPath(matchIdx);
+      return; // selectGwPath already closes modal + scrolls
+    }
+  }
+
+  // Close modal and scroll to landing page
+  if (typeof closeSolverModal === 'function') closeSolverModal();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // ── GW Paths: Select applies transfer to pre-baked squad ──
