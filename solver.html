@@ -810,7 +810,7 @@
   <!-- ═══ TOP BAR ═══ -->
   <div class="top-bar">
     <div class="logo">apex<span>fpl</span></div>
-    <div class="top-bar-meta">Solver · Monte Carlo (1000 sims) · 02 Apr 2026, 21:47</div>
+    <div class="top-bar-meta">Solver · Monte Carlo (1000 sims) · 02 Apr 2026, 21:58</div>
   </div>
 
   <!-- ═══ LOAD TEAM + SETTINGS (Review-style) ═══ -->
@@ -3956,7 +3956,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-  <div class="footer">Apex FPL Solver · 02 Apr 2026, 21:47</div>
+  <div class="footer">Apex FPL Solver · 02 Apr 2026, 21:58</div>
 </div>
 
 <script>
@@ -6184,11 +6184,6 @@ function _applyWcSquad(btn) {
     return;
   }
 
-  // Also update solver state if available
-  if (window._solverState && window._solverState.setSquad) {
-    window._solverState.setSquad(players, bank);
-  }
-
   // ── Pick best XI from 15 WC players ──
   const sorted = [...players].sort((a, b) => (b.xp || 0) - (a.xp || 0));
   const xi = []; const bench = [];
@@ -6283,12 +6278,8 @@ function _applyWcSquad(btn) {
     btn.disabled = false;
   }, 3000);
 
-  // Scroll to landing page (prebaked pitch area)
-  setTimeout(() => {
-    const primaryView = document.getElementById('primary-view');
-    if (primaryView) primaryView.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    else window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, 100);
+  // Scroll to top of page — landing area with pitch + draft panel
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 document.addEventListener('click', function(e) {
