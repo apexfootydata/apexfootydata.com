@@ -810,7 +810,7 @@
   <!-- ═══ TOP BAR ═══ -->
   <div class="top-bar">
     <div class="logo">apex<span>fpl</span></div>
-    <div class="top-bar-meta">Solver · Monte Carlo (1000 sims) · 02 Apr 2026, 21:28</div>
+    <div class="top-bar-meta">Solver · Monte Carlo (1000 sims) · 02 Apr 2026, 21:47</div>
   </div>
 
   <!-- ═══ LOAD TEAM + SETTINGS (Review-style) ═══ -->
@@ -3956,7 +3956,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-  <div class="footer">Apex FPL Solver · 02 Apr 2026, 21:28</div>
+  <div class="footer">Apex FPL Solver · 02 Apr 2026, 21:47</div>
 </div>
 
 <script>
@@ -6184,7 +6184,93 @@ function _applyWcSquad(btn) {
     return;
   }
 
-  window._solverState.setSquad(players, bank);
+  // Also update solver state if available
+  if (window._solverState && window._solverState.setSquad) {
+    window._solverState.setSquad(players, bank);
+  }
+
+  // ── Pick best XI from 15 WC players ──
+  const sorted = [...players].sort((a, b) => (b.xp || 0) - (a.xp || 0));
+  const xi = []; const bench = [];
+  const posCount = {1:0, 2:0, 3:0, 4:0};
+  const minPos   = {1:1, 2:3, 3:0, 4:1};
+  const maxPos   = {1:1, 2:5, 3:5, 4:3};
+  for (const p of sorted) {
+    if (posCount[p.pos] < minPos[p.pos]) { xi.push(p); posCount[p.pos]++; }
+  }
+  for (const p of sorted) {
+    if (xi.includes(p)) continue;
+    if (xi.length >= 11) break;
+    if (posCount[p.pos] < maxPos[p.pos]) { xi.push(p); posCount[p.pos]++; }
+  }
+  for (const p of players) { if (!xi.includes(p)) bench.push(p); }
+
+  // Captain = highest xP in XI
+  const capId = xi.reduce((best, p) => (p.xp || 0) > (best.xp || 0) ? p : best, xi[0]).id;
+
+  // ── Update prebaked state arrays ──
+  _prebakedXI    = xi.map(p => ({id: p.id, name: p.name, team: p.team, pos: p.pos, cost: p.cost, xp: p.xp || 0, xp_per_gw: p.xp_per_gw || [p.xp || 0]}));
+  _prebakedBench = bench.map(p => ({id: p.id, name: p.name, team: p.team, pos: p.pos, cost: p.cost, xp: p.xp || 0, xp_per_gw: p.xp_per_gw || [p.xp || 0]}));
+
+  // ── Rebuild prebaked pitch HTML ──
+  function _wcCard(p, isCap, isBench) {
+    const isGk = p.pos === 1;
+    const shirt = shirtUrl(p.team, isGk);
+    const capMark = isCap ? '<div class="pc-cap">C</div>' : '';
+    const benchCls = isBench ? ' pc-bench' : '';
+    const jerseyHtml = shirt
+      ? '<img class="pc-kit" src="' + shirt + '" alt="' + p.team + '" loading="lazy">'
+      : '<div class="pc-jersey-fb" style="background:#374a65;color:#fff">' + p.team.substring(0,3).toUpperCase() + '</div>';
+    const arr = p.xp_per_gw || [p.xp || 0];
+    let gwBadges = '<span class="xp-total xp-val">' + (p.xp || 0).toFixed(1) + '</span>';
+    for (let gi = 1; gi < Math.min(arr.length, 4); gi++) {
+      gwBadges += '<span class="xp-future">' + (arr[gi] || 0).toFixed(1) + '</span>';
+    }
+    return '<div class="pc' + benchCls + '" data-pid="' + p.id + '" draggable="true">'
+      + capMark + jerseyHtml
+      + '<div class="pc-name">' + p.name + '</div>'
+      + '<div class="pc-meta"><span class="pc-xmins">90<small>mins</small></span><span class="pc-cost">£' + p.cost.toFixed(1) + '</span></div>'
+      + '<div class="pc-xp-bar">' + gwBadges + '</div>'
+      + '</div>';
+  }
+
+  const gks  = xi.filter(p => p.pos === 1);
+  const defs = xi.filter(p => p.pos === 2);
+  const mids = xi.filter(p => p.pos === 3);
+  const fwds = xi.filter(p => p.pos === 4);
+
+  let pitchHTML = '<div class="pitch-wrap" id="prebaked-pitch">'
+    + '<div class="pitch-row">' + fwds.map(p => _wcCard(p, p.id === capId, false)).join('') + '</div>'
+    + '<div class="pitch-row">' + mids.map(p => _wcCard(p, p.id === capId, false)).join('') + '</div>'
+    + '<div class="pitch-row">' + defs.map(p => _wcCard(p, p.id === capId, false)).join('') + '</div>'
+    + '<div class="pitch-row">' + gks.map(p => _wcCard(p, p.id === capId, false)).join('') + '</div>'
+    + '<div class="bench-row">';
+  const gkBench = bench.filter(p => p.pos === 1);
+  const outBench = bench.filter(p => p.pos !== 1);
+  pitchHTML += [...gkBench, ...outBench].map(p => _wcCard(p, false, true)).join('');
+  pitchHTML += '</div></div>';
+
+  // Replace the pitch in #my-team-pitch
+  const myTeamPitch = document.getElementById('my-team-pitch');
+  if (myTeamPitch) {
+    myTeamPitch.innerHTML = pitchHTML;
+    // Re-init drag-drop on new cards
+    if (typeof initPrebakedDragDrop === 'function') initPrebakedDragDrop();
+  }
+
+  // Update total xP display
+  let totalXp = xi.reduce((s, p) => s + (p.xp || 0), 0);
+  // Add captain bonus (double the captain's xP = add it once more)
+  const capP = xi.find(p => p.id === capId);
+  if (capP) totalXp += (capP.xp || 0);
+  const mainXp = document.getElementById('main-xp');
+  if (mainXp) mainXp.textContent = totalXp.toFixed(1);
+
+  // Update section header
+  const sectionHeader = document.querySelector('#primary-view .section-header .section-sub');
+  if (sectionHeader && capP) {
+    sectionHeader.textContent = 'Captain: ' + capP.name + ' · WC Squad · £' + bank.toFixed(1) + 'm ITB';
+  }
 
   btn.textContent = 'Squad loaded ✓';
   btn.style.background = 'linear-gradient(135deg,#22c55e,#16a34a)';
@@ -6197,12 +6283,12 @@ function _applyWcSquad(btn) {
     btn.disabled = false;
   }, 3000);
 
-  // Scroll to top after rendering completes (delay to beat any layout-triggered scrolls)
+  // Scroll to landing page (prebaked pitch area)
   setTimeout(() => {
     const primaryView = document.getElementById('primary-view');
     if (primaryView) primaryView.scrollIntoView({ behavior: 'smooth', block: 'start' });
     else window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, 300);
+  }, 100);
 }
 
 document.addEventListener('click', function(e) {
