@@ -858,7 +858,7 @@
         <div class="logo-subtitle">FPL Solver</div>
       </div>
     </div>
-    <div class="top-bar-meta">Monte Carlo · 1000 sims · 03 Apr 2026, 22:26</div>
+    <div class="top-bar-meta">Monte Carlo · 1000 sims · 03 Apr 2026, 22:39</div>
   </div>
 
   <!-- ═══ LOAD TEAM + SETTINGS (Review-style) ═══ -->
@@ -3957,7 +3957,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-  <div class="footer">Apex FPL Solver · 03 Apr 2026, 22:26</div>
+  <div class="footer">Apex FPL Solver · 03 Apr 2026, 22:39</div>
 </div>
 
 <script>
@@ -4385,6 +4385,8 @@ function _getVal(id)  { return (document.getElementById(id) || {}).value || ''; 
 function _getText(id) { return (document.getElementById(id) || {}).textContent || ''; }
 
 function savePlan() {
+  // Capture prebaked chip section HTML (WC/BB/FH squads rendered by Python)
+  const _secHtml = (id) => { const el = document.getElementById(id); return el ? el.innerHTML : ''; };
   const plan = {
     // Chip selections
     chipWc: _getVal('chip-wc'), chipBb: _getVal('chip-bb'),
@@ -4399,6 +4401,10 @@ function savePlan() {
     xi:    _prebakedXI.map(p => ({...p})),
     bench: _prebakedBench.map(p => ({...p})),
     capId: (_prebakedXI.reduce((b, p) => (p.xp||0) > (b.xp||0) ? p : b, _prebakedXI[0]||{}).id || null),
+    // Prebaked chip squad sections (full HTML)
+    wcSectionHtml: _secHtml('prebaked-wc-section'),
+    bbSectionHtml: _secHtml('prebaked-bb-section'),
+    fhSectionHtml: _secHtml('prebaked-fh-section'),
     savedAt: new Date().toISOString(),
   };
   try {
@@ -4503,11 +4509,20 @@ function loadSavedPlan() {
     setTimeout(() => _buildAndSetPitch(plan.xi, plan.bench, plan.capId), 300);
   }
 
-  // Fire chip handlers
+  // Restore prebaked chip squad sections (WC/BB/FH HTML)
+  [['prebaked-wc-section', plan.wcSectionHtml],
+   ['prebaked-bb-section', plan.bbSectionHtml],
+   ['prebaked-fh-section', plan.fhSectionHtml]].forEach(([id, html]) => {
+    const sec = document.getElementById(id);
+    if (sec && html) sec.innerHTML = html;
+  });
+
+  // Fire chip handlers — shows/hides sections based on chip selections
   if (plan.chipWc || plan.chipFh) onWcFhChange();
   if (plan.chipBb || plan.chipTc) { if (typeof onChipChange === 'function') onChipChange(); }
+  _syncPrebakedSections();
 
-  // Show Clear Plan button
+  // Show Clear Saved Plan button
   _updateClearBtn(true);
 }
 
