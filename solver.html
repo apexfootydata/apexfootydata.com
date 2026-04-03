@@ -854,7 +854,7 @@
         <div class="logo-subtitle">FPL Solver</div>
       </div>
     </div>
-    <div class="top-bar-meta">Monte Carlo · 1000 sims · 03 Apr 2026, 16:58</div>
+    <div class="top-bar-meta">Monte Carlo · 1000 sims · 03 Apr 2026, 17:18</div>
   </div>
 
   <!-- ═══ LOAD TEAM + SETTINGS (Review-style) ═══ -->
@@ -3989,7 +3989,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-  <div class="footer">Apex FPL Solver · 03 Apr 2026, 16:58</div>
+  <div class="footer">Apex FPL Solver · 03 Apr 2026, 17:18</div>
 </div>
 
 <script>
@@ -4021,6 +4021,7 @@ const BASE_CAP_XP = 7.05;
 // Index 0 = CURRENT_GW, index 1 = CURRENT_GW+1, etc.
 // GW0 uses exact pitch value (actual FPL captain + actual XI). Future GWs use greedy XI + captain bonus.
 const GW_XP_PROJECTIONS = [61.41, 74.57, 58.95, 62.78, 70.09, 65.18, 65.18];
+const GW_COLS = 6;  // matches header column count (= ROLLING_HORIZON)
 const ROLLING_DECAY = [1.0, 0.85, 0.7224999999999999, 0.6141249999999999, 0.5220062499999999, 0.44370531249999995];
 
 // ── Serialized solution lines for Draft Management ──
@@ -4158,8 +4159,7 @@ function updateDraftTable() {
     let totalXp = 0;
     let evalXp = 0;
 
-    for (let gw = CURRENT_GW; gw <= GW_MAX; gw++) {
-      const gwOff = gw - CURRENT_GW;
+    for (let gwOff = 0; gwOff < GW_COLS; gwOff++) {
       const xp = gwOff < GW_XP_PROJECTIONS.length ? GW_XP_PROJECTIONS[gwOff] : 0;
       const decay = gwOff < ROLLING_DECAY.length ? ROLLING_DECAY[gwOff] : ROLLING_DECAY[ROLLING_DECAY.length - 1];
       totalXp += xp;
@@ -4170,9 +4170,8 @@ function updateDraftTable() {
 
     // Transfer indicator row
     let ftCells = '';
-    for (let gw = CURRENT_GW; gw <= GW_MAX; gw++) {
-      const gwOff = gw - CURRENT_GW;
-      const step = seq[gwOff];
+    for (let ftOff = 0; ftOff < GW_COLS; ftOff++) {
+      const step = seq[ftOff];
       let indicator = '–';
       let color = 'var(--muted)';
       if (step) {
@@ -6397,7 +6396,7 @@ function shirtUrl(team, isGk) {
 
 // ── Wildcard / Free Hit Squad Optimizer (client-side) ──────────────────────
 // horizon=1: Free Hit (single-GW xP). horizon>1: Wildcard (rolling EV).
-const ROLLING_DECAY = [1.0000, 0.8500, 0.7225, 0.6141, 0.5220, 0.4437];
+// ROLLING_DECAY already declared above (line ~6835) — reuse it here.
 
 function _playerEV(p, horizon) {
   if (horizon <= 1) return p.xp || 0;
