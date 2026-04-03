@@ -854,7 +854,7 @@
         <div class="logo-subtitle">FPL Solver</div>
       </div>
     </div>
-    <div class="top-bar-meta">Monte Carlo · 1000 sims · 03 Apr 2026, 14:25</div>
+    <div class="top-bar-meta">Monte Carlo · 1000 sims · 03 Apr 2026, 15:05</div>
   </div>
 
   <!-- ═══ LOAD TEAM + SETTINGS (Review-style) ═══ -->
@@ -3998,7 +3998,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-  <div class="footer">Apex FPL Solver · 03 Apr 2026, 14:25</div>
+  <div class="footer">Apex FPL Solver · 03 Apr 2026, 15:05</div>
 </div>
 
 <script>
@@ -4045,11 +4045,14 @@ const DRAFTS = {};
 let activeDraftKey = 'A';
 
 function initDrafts() {
-  // Create draft A from the current best solution line (or base squad)
-  if (ALL_SEQUENCES.length > 0) {
-    DRAFTS['A'] = { label: 'A', sequence: ALL_SEQUENCES[0], squad: MY_SQUAD_DATA.map(p => ({...p})) };
-  } else {
-    DRAFTS['A'] = { label: 'A', sequence: [], squad: MY_SQUAD_DATA.map(p => ({...p})) };
+  // Auto-populate A, B, C from the top 3 solver sequences (like Review's 3 alternatives)
+  const labels = ['A', 'B', 'C'];
+  for (let i = 0; i < labels.length; i++) {
+    DRAFTS[labels[i]] = {
+      label: labels[i],
+      sequence: ALL_SEQUENCES[i] || [],
+      squad: MY_SQUAD_DATA.map(p => ({...p})),
+    };
   }
   activeDraftKey = 'A';
   renderDraftButtons();
