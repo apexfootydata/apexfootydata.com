@@ -858,7 +858,7 @@
         <div class="logo-subtitle">FPL Solver</div>
       </div>
     </div>
-    <div class="top-bar-meta">Monte Carlo · 1000 sims · 03 Apr 2026, 22:39</div>
+    <div class="top-bar-meta">Monte Carlo · 1000 sims · 03 Apr 2026, 22:57</div>
   </div>
 
   <!-- ═══ LOAD TEAM + SETTINGS (Review-style) ═══ -->
@@ -2121,6 +2121,14 @@
       <span style="color:#22c55e;font-weight:700;font-size:0.95rem">65.5 xP</span>
     </div>
   </div>
+</div><div style="text-align:center;margin-top:12px;margin-bottom:8px">
+  <button id="fh-select-team-btn" data-ids="67,373,317,569,449,450,47,329,515,136,691,314,683,694,64" data-bank="10.8" data-gw="34"
+    style="background:linear-gradient(135deg,#8b5cf6,#6d28d9);color:#fff;border:none;border-radius:8px;padding:10px 24px;font-size:0.85rem;font-weight:700;cursor:pointer;font-family:var(--font);letter-spacing:0.02em;transition:transform 0.15s,box-shadow 0.15s"
+    onmouseover="this.style.transform='scale(1.03)';this.style.boxShadow='0 4px 12px rgba(139,92,246,0.4)'"
+    onmouseout="this.style.transform='';this.style.boxShadow=''">
+    Select as my team
+  </button>
+  <p style="font-size:0.68rem;color:var(--muted);margin-top:6px">Loads this FH squad — GW34 tab will show these players</p>
 </div></div>
 </div>
           </div>
@@ -3957,7 +3965,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-  <div class="footer">Apex FPL Solver · 03 Apr 2026, 22:39</div>
+  <div class="footer">Apex FPL Solver · 03 Apr 2026, 22:57</div>
 </div>
 
 <script>
@@ -4405,6 +4413,15 @@ function savePlan() {
     wcSectionHtml: _secHtml('prebaked-wc-section'),
     bbSectionHtml: _secHtml('prebaked-bb-section'),
     fhSectionHtml: _secHtml('prebaked-fh-section'),
+    // FH squad data (for GW tab pitch swapping)
+    fhXI:    _fhXI ? _fhXI.map(p => ({...p})) : null,
+    fhBench: _fhBench ? _fhBench.map(p => ({...p})) : null,
+    fhCapId: _fhCapId,
+    fhGw:    _fhGw,
+    // Main/WC squad snapshot (for swapping back from FH)
+    mainXI:    _mainXI ? _mainXI.map(p => ({...p})) : null,
+    mainBench: _mainBench ? _mainBench.map(p => ({...p})) : null,
+    mainCapId: _mainCapId,
     savedAt: new Date().toISOString(),
   };
   try {
@@ -4516,6 +4533,19 @@ function loadSavedPlan() {
     const sec = document.getElementById(id);
     if (sec && html) sec.innerHTML = html;
   });
+
+  // Restore FH squad data (for GW tab pitch swapping)
+  if (plan.fhXI && plan.fhBench) {
+    _fhXI    = plan.fhXI.map(p => ({...p}));
+    _fhBench = plan.fhBench.map(p => ({...p}));
+    _fhCapId = plan.fhCapId;
+    _fhGw    = plan.fhGw || 0;
+  }
+  if (plan.mainXI && plan.mainBench) {
+    _mainXI    = plan.mainXI.map(p => ({...p}));
+    _mainBench = plan.mainBench.map(p => ({...p}));
+    _mainCapId = plan.mainCapId;
+  }
 
   // Fire chip handlers — shows/hides sections based on chip selections
   if (plan.chipWc || plan.chipFh) onWcFhChange();
@@ -6255,6 +6285,91 @@ document.addEventListener('click', function(e) {
   // _applyWcSquad updates prebaked pitch directly — no solver state needed
   _applyWcSquad(btn);
 });
+
+// ── "Select as my team" for FH squad ─────────────────────────────────────────
+// Stores FH squad separately. GW tab selector swaps pitch between WC/FH squads.
+let _fhXI    = null;
+let _fhBench = null;
+let _fhCapId = null;
+let _fhGw    = 0;
+// Snapshot of WC/main squad (saved before FH swap so we can swap back)
+let _mainXI    = null;
+let _mainBench = null;
+let _mainCapId = null;
+
+function _applyFhSquad(btn) {
+  const ids  = btn.dataset.ids.split(',').map(Number);
+  const bank = parseFloat(btn.dataset.bank) || 0;
+  const fhGw = parseInt(btn.dataset.gw) || 0;
+
+  const players = [];
+  for (const id of ids) {
+    const ap = APEX_POOL_MAP[id];
+    if (ap) players.push({...ap});
+    else console.warn('[FH Select] Player ID ' + id + ' not in APEX_POOL_MAP');
+  }
+  if (players.length < 15) {
+    alert('Could not find all 15 FH players in pool (' + players.length + ' found).');
+    return;
+  }
+
+  const xi    = players.slice(0, 11);
+  const bench = players.slice(11);
+  const capId = xi.reduce((b, p) => (p.xp||0) > (b.xp||0) ? p : b, xi[0]).id;
+
+  // Store FH squad for GW tab swapping
+  _fhXI    = xi.map(p => ({id:p.id, name:p.name, team:p.team, pos:p.pos, cost:p.cost, xp:p.xp||0, xp_per_gw:p.xp_per_gw||[p.xp||0]}));
+  _fhBench = bench.map(p => ({id:p.id, name:p.name, team:p.team, pos:p.pos, cost:p.cost, xp:p.xp||0, xp_per_gw:p.xp_per_gw||[p.xp||0]}));
+  _fhCapId = capId;
+  _fhGw    = fhGw;
+
+  // Snapshot current main squad (WC squad) so we can swap back
+  if (!_mainXI) {
+    _mainXI    = _prebakedXI.map(p => ({...p}));
+    _mainBench = _prebakedBench.map(p => ({...p}));
+    _mainCapId = _prebakedXI.reduce((b, p) => (p.xp||0) > (b.xp||0) ? p : b, _prebakedXI[0]||{}).id || null;
+  }
+
+  btn.textContent = 'FH squad loaded ✓';
+  btn.style.background = 'linear-gradient(135deg,#22c55e,#16a34a)';
+  btn.disabled = true;
+  setTimeout(() => {
+    btn.textContent = 'Select as my team';
+    btn.style.background = 'linear-gradient(135deg,#8b5cf6,#6d28d9)';
+    btn.disabled = false;
+  }, 3000);
+
+  _showPlanToast('FH squad saved — switch to GW' + fhGw + ' tab to view', '#8b5cf6');
+}
+
+document.addEventListener('click', function(e) {
+  const btn = e.target.closest('#fh-select-team-btn');
+  if (!btn) return;
+  _applyFhSquad(btn);
+});
+
+// ── GW tab: swap pitch between WC/main squad and FH squad ────────────────────
+// Patches the existing GW tab click handler to swap pitch when FH GW is selected.
+(function _patchGwTabs() {
+  document.addEventListener('click', function(e) {
+    const tab = e.target.closest('.gw-tab');
+    if (!tab || !_fhXI) return;
+    const selectedGw = parseInt(tab.dataset.gw || tab.textContent.replace(/\D/g, ''));
+    if (!selectedGw) return;
+
+    if (selectedGw === _fhGw) {
+      // Swap to FH squad
+      _prebakedXI    = _fhXI.map(p => ({...p}));
+      _prebakedBench = _fhBench.map(p => ({...p}));
+      _buildAndSetPitch(_fhXI, _fhBench, _fhCapId);
+    } else if (_mainXI) {
+      // Swap back to WC/main squad
+      _prebakedXI    = _mainXI.map(p => ({...p}));
+      _prebakedBench = _mainBench.map(p => ({...p}));
+      _buildAndSetPitch(_mainXI, _mainBench, _mainCapId);
+    }
+  });
+})();
 
 // ── Global shirt helpers (needed by WC optimizer which runs outside Load Team scope) ──
 const _SHIRT_CODES = {"Arsenal": 3, "Aston Villa": 7, "Bournemouth": 91, "Brentford": 94, "Brighton": 36, "Burnley": 90, "Chelsea": 8, "Crystal Palace": 31, "Everton": 11, "Fulham": 54, "Ipswich Town": 40, "Leeds": 2, "Leicester City": 13, "Liverpool": 14, "Manchester City": 43, "Manchester United": 1, "Newcastle United": 4, "Nottingham Forest": 17, "Southampton": 20, "Sunderland": 56, "Tottenham": 6, "West Ham": 21, "Wolverhampton Wanderers": 39};
