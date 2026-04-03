@@ -854,7 +854,7 @@
         <div class="logo-subtitle">FPL Solver</div>
       </div>
     </div>
-    <div class="top-bar-meta">Monte Carlo · 1000 sims · 03 Apr 2026, 14:14</div>
+    <div class="top-bar-meta">Monte Carlo · 1000 sims · 03 Apr 2026, 14:25</div>
   </div>
 
   <!-- ═══ LOAD TEAM + SETTINGS (Review-style) ═══ -->
@@ -3998,7 +3998,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-  <div class="footer">Apex FPL Solver · 03 Apr 2026, 14:14</div>
+  <div class="footer">Apex FPL Solver · 03 Apr 2026, 14:25</div>
 </div>
 
 <script>
@@ -4029,7 +4029,7 @@ const BASE_CAP_XP = 7.05;
 // ── Per-GW xP projections for Draft Management (mirrors Team Projections widget) ──
 // Index 0 = CURRENT_GW, index 1 = CURRENT_GW+1, etc.
 // GW0 uses exact pitch value (actual FPL captain + actual XI). Future GWs use greedy XI + captain bonus.
-const GW_XP_PROJECTIONS = [61.41, 79.67, 58.95, 63.22, 76.31, 65.18, 65.18];
+const GW_XP_PROJECTIONS = [61.41, 74.57, 58.95, 62.78, 70.09, 65.18, 65.18];
 
 // ── Serialized solution lines for Draft Management ──
 const ALL_SEQUENCES = [[{"gw_offset":0,"action":"transfer","out":"Ekitik\u00e9","in":"Bowen","gain":2.29,"ft_before":1,"ft_after":0,"squad_ev":58.33,"xi_xp":63.95,"bank":3.2},{"gw_offset":1,"action":"transfer","out":"Mbeumo","in":"Palmer","gain":5.47,"ft_before":1,"ft_after":0,"squad_ev":81.04,"xi_xp":90.92,"bank":1.2},{"gw_offset":2,"action":"transfer","out":"Palmer","in":"Cunha","gain":5.22,"ft_before":1,"ft_after":0,"squad_ev":47.95,"xi_xp":55.12,"bank":3.8},{"gw_offset":3,"action":"transfer","out":"Hall","in":"O'Reilly","gain":1.64,"ft_before":1,"ft_after":0,"squad_ev":61.43,"xi_xp":67.41,"bank":4.2},{"gw_offset":4,"action":"transfer","out":"Szoboszlai","in":"Semenyo","gain":3.61,"ft_before":1,"ft_after":0,"squad_ev":74.86,"xi_xp":86.16,"bank":3.0},{"gw_offset":5,"action":"roll","out":null,"in":null,"gain":0.0,"ft_before":1,"ft_after":2,"squad_ev":62.68,"xi_xp":68.48,"bank":3.0}],[{"gw_offset":0,"action":"transfer","out":"Gabriel","in":"O'Reilly","gain":1.39,"ft_before":1,"ft_after":0,"squad_ev":57.51,"xi_xp":63.12,"bank":3.7},{"gw_offset":1,"action":"transfer","out":"Mbeumo","in":"Palmer","gain":5.53,"ft_before":1,"ft_after":0,"squad_ev":78.36,"xi_xp":88.29,"bank":1.7},{"gw_offset":2,"action":"transfer","out":"Palmer","in":"Cunha","gain":5.22,"ft_before":1,"ft_after":0,"squad_ev":52.57,"xi_xp":59.74,"bank":4.3},{"gw_offset":3,"action":"transfer","out":"Wilson","in":"Rogers","gain":1.77,"ft_before":1,"ft_after":0,"squad_ev":61.47,"xi_xp":67.45,"bank":2.9},{"gw_offset":4,"action":"transfer","out":"Szoboszlai","in":"Semenyo","gain":3.61,"ft_before":1,"ft_after":0,"squad_ev":75.03,"xi_xp":86.36,"bank":1.7},{"gw_offset":5,"action":"roll","out":null,"in":null,"gain":0.0,"ft_before":1,"ft_after":2,"squad_ev":61.66,"xi_xp":67.53,"bank":1.7}],[{"gw_offset":0,"action":"transfer","out":"Hall","in":"O'Reilly","gain":1.66,"ft_before":1,"ft_after":0,"squad_ev":57.41,"xi_xp":63.02,"bank":1.9},{"gw_offset":1,"action":"transfer","out":"Ekitik\u00e9","in":"Bowen","gain":5.39,"ft_before":1,"ft_after":0,"squad_ev":78.75,"xi_xp":88.65,"bank":3.6},{"gw_offset":2,"action":"transfer","out":"O'Reilly","in":"Romero","gain":4.89,"ft_before":1,"ft_after":0,"squad_ev":52.05,"xi_xp":59.21,"bank":3.6},{"gw_offset":3,"action":"roll","out":null,"in":null,"gain":0.0,"ft_before":1,"ft_after":2,"squad_ev":59.91,"xi_xp":65.9,"bank":3.6},{"gw_offset":4,"action":"double_transfer","out":"Mukiele + Mbeumo","in":"O'Reilly + Semenyo","gain":8.33,"ft_before":2,"ft_after":0,"squad_ev":74.69,"xi_xp":85.98,"bank":3.5},{"gw_offset":5,"action":"transfer","out":"Semenyo","in":"Palmer","gain":1.78,"ft_before":1,"ft_after":0,"squad_ev":63.64,"xi_xp":69.43,"bank":1.1}]];
