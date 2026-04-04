@@ -858,7 +858,7 @@
         <div class="logo-subtitle">FPL Solver</div>
       </div>
     </div>
-    <div class="top-bar-meta">Monte Carlo · 1000 sims · 04 Apr 2026, 09:39</div>
+    <div class="top-bar-meta">Monte Carlo · 1000 sims · 04 Apr 2026, 09:56</div>
   </div>
 
   <!-- ═══ LOAD TEAM + SETTINGS (Review-style) ═══ -->
@@ -3964,7 +3964,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-  <div class="footer">Apex FPL Solver · 04 Apr 2026, 09:39</div>
+  <div class="footer">Apex FPL Solver · 04 Apr 2026, 09:56</div>
 </div>
 
 <script>
@@ -6326,6 +6326,8 @@ let _mainCapId = null;
 
 // ── GW tab: swap pitch between WC/main squad and FH squad ────────────────────
 // Patches the existing GW tab click handler to swap pitch when FH GW is selected.
+let _pitchShowingFh = false;  // tracks whether FH squad is currently on pitch
+
 (function _patchGwTabs() {
   document.addEventListener('click', function(e) {
     const tab = e.target.closest('.gw-tab');
@@ -6333,36 +6335,34 @@ let _mainCapId = null;
     const selectedGw = parseInt(tab.dataset.gw || tab.textContent.replace(/\D/g, ''));
     if (!selectedGw) return;
 
-    let swappedXI = null, swappedCapId = null;
-
-    if (selectedGw === _fhGw) {
-      // Swap to FH squad
+    if (selectedGw === _fhGw && !_pitchShowingFh) {
+      // Switching TO FH squad — rebuild pitch with FH players
       _prebakedXI    = _fhXI.map(p => ({...p}));
       _prebakedBench = _fhBench.map(p => ({...p}));
       _buildAndSetPitch(_fhXI, _fhBench, _fhCapId);
-      swappedXI = _fhXI; swappedCapId = _fhCapId;
-    } else if (_mainXI) {
-      // Swap back to WC/main squad
-      _prebakedXI    = _mainXI.map(p => ({...p}));
-      _prebakedBench = _mainBench.map(p => ({...p}));
-      _buildAndSetPitch(_mainXI, _mainBench, _mainCapId);
-      swappedXI = _mainXI; swappedCapId = _mainCapId;
-    }
+      _pitchShowingFh = true;
 
-    // Update xPts header from the swapped squad's own xP values
-    if (swappedXI) {
-      let total = swappedXI.reduce((s, p) => s + (p.xp || 0), 0);
-      const capP = swappedXI.find(p => p.id === swappedCapId);
+      // Update xPts header from FH squad's own xP values
+      let total = _fhXI.reduce((s, p) => s + (p.xp || 0), 0);
+      const capP = _fhXI.find(p => p.id === _fhCapId);
       if (capP) total += (capP.xp || 0);
       const mainXp = document.getElementById('main-xp');
       if (mainXp) mainXp.textContent = total.toFixed(1);
-      // Update GW label in stat card
       const gwLabel = document.querySelector('.stat-card.sc-coral .sc-label');
       if (gwLabel) gwLabel.textContent = 'GW' + selectedGw;
-      // Flag so the main GW handler skips its xP recalc (we already set the correct value)
+      // Block main handler — FH pitch has different players, main handler would read wrong pool data
       window._fhPitchSwapped = true;
       setTimeout(() => { window._fhPitchSwapped = false; }, 100);
+
+    } else if (selectedGw !== _fhGw && _pitchShowingFh && _mainXI) {
+      // Switching BACK from FH to WC squad — rebuild pitch, let main handler update xP for selected GW
+      _prebakedXI    = _mainXI.map(p => ({...p}));
+      _prebakedBench = _mainBench.map(p => ({...p}));
+      _buildAndSetPitch(_mainXI, _mainBench, _mainCapId);
+      _pitchShowingFh = false;
+      // Do NOT block main handler — let it recalculate xP for the correct GW offset
     }
+    // If selectedGw !== _fhGw and pitch already shows WC → do nothing, main handler handles it
   });
 })();
 
