@@ -858,7 +858,7 @@
         <div class="logo-subtitle">FPL Solver</div>
       </div>
     </div>
-    <div class="top-bar-meta">Monte Carlo · 1000 sims · 04 Apr 2026, 13:22</div>
+    <div class="top-bar-meta">Monte Carlo · 1000 sims · 04 Apr 2026, 13:31</div>
   </div>
 
   <!-- ═══ LOAD TEAM + SETTINGS (Review-style) ═══ -->
@@ -3964,7 +3964,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-  <div class="footer">Apex FPL Solver · 04 Apr 2026, 13:22</div>
+  <div class="footer">Apex FPL Solver · 04 Apr 2026, 13:31</div>
 </div>
 
 <script>
@@ -4315,9 +4315,29 @@ function onChipChange() {
   });
   _syncPrebakedSections();
 
-  // Re-trigger active GW tab to refresh BB highlight on bench
-  const activeGwTab = document.querySelector('.gw-tab.active');
-  if (activeGwTab) activeGwTab.click();
+  // ── BB: auto-switch to BB gameweek tab so highlight + total update ──
+  if (bbGw > 0) {
+    const bbTab = [...document.querySelectorAll('.gw-tab')].find(
+      t => parseInt(t.dataset.gw || t.textContent.replace(/\D/g, ''), 10) === bbGw
+    );
+    if (bbTab) bbTab.click();
+  } else {
+    // BB deselected — clear any highlight on current view
+    const myPitch = document.getElementById('my-team-pitch') || document.getElementById('dyn-pitch');
+    if (myPitch) {
+      const benchRow = myPitch.querySelector('.bench-row');
+      if (benchRow) {
+        benchRow.style.background = '';
+        benchRow.style.borderRadius = '';
+        benchRow.style.padding = '';
+        const badge = benchRow.parentNode?.querySelector('.bb-active-badge');
+        if (badge) badge.remove();
+      }
+    }
+    // Re-click active tab to recalculate total without BB
+    const activeTab = document.querySelector('.gw-tab.active');
+    if (activeTab) activeTab.click();
+  }
 }
 
 // ── WC/FH chip toggle — show/hide pre-baked optimised squads ──
