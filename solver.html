@@ -858,7 +858,7 @@
         <div class="logo-subtitle">FPL Solver</div>
       </div>
     </div>
-    <div class="top-bar-meta">Monte Carlo · 1000 sims · 04 Apr 2026, 13:31</div>
+    <div class="top-bar-meta">Monte Carlo · 1000 sims · 04 Apr 2026, 14:20</div>
   </div>
 
   <!-- ═══ LOAD TEAM + SETTINGS (Review-style) ═══ -->
@@ -1361,7 +1361,7 @@
           <div style="margin-bottom:20px">
             <div class="setting-row">
               <span class="label">TRANSFER DEPTH</span>
-              <span class="value" id="sa-depth-label">GW32-34 (3)</span>
+              <span class="value" id="sa-depth-label">GW32-37 (6)</span>
             </div>
             <div style="padding:0 4px 8px">
               <input type="range" id="sa-depth-slider" min="1" max="6" value="6" style="width:100%;accent-color:var(--accent);cursor:pointer">
@@ -3964,7 +3964,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-  <div class="footer">Apex FPL Solver · 04 Apr 2026, 13:31</div>
+  <div class="footer">Apex FPL Solver · 04 Apr 2026, 14:20</div>
 </div>
 
 <script>
@@ -6671,6 +6671,11 @@ function runClientSolver() {
       const subText = depth === 1 ? GW_DATE_LABEL + ' only' : GW_DATE_LABEL + ' to GW' + endGw;
       solveBtn.innerHTML = 'Solve<span class="sub">' + subText + '</span>';
     }
+    // Keep SA slider in sync
+    const saSlider = document.getElementById('sa-depth-slider');
+    const saLabel  = document.getElementById('sa-depth-label');
+    if (saSlider) saSlider.value = depth;
+    if (saLabel)  saLabel.textContent = depth === 1 ? 'GW' + CURRENT_GW + ' only (1)' : 'GW' + CURRENT_GW + '-' + endGw + ' (' + depth + ')';
     // Also update horizon tables in results
     document.querySelectorAll('.horizon-table').forEach(el => el.style.display = 'none');
     const target = document.getElementById('horizon-table-' + depth);
@@ -6920,6 +6925,29 @@ function runClientSolver() {
       // ── 8. Re-attach drag-drop listeners ──
       initPrebakedDragDrop();
     });
+  });
+})();
+
+// ── SA Depth slider handler ──
+(function() {
+  const saSlider = document.getElementById('sa-depth-slider');
+  const saLabel  = document.getElementById('sa-depth-label');
+  if (!saSlider || !saLabel) return;
+  saSlider.addEventListener('input', function() {
+    const depth = parseInt(this.value, 10);
+    const endGw = CURRENT_GW + depth - 1;
+    saLabel.textContent = depth === 1 ? 'GW' + CURRENT_GW + ' only (1)' : 'GW' + CURRENT_GW + '-' + endGw + ' (' + depth + ')';
+    // Keep Multi-Period slider in sync
+    const mpSlider = document.getElementById('depth-slider');
+    const mpLabel  = document.getElementById('depth-label');
+    if (mpSlider) mpSlider.value = depth;
+    if (mpLabel)  mpLabel.textContent = saLabel.textContent;
+    // Update Solve button to match
+    const solveBtn = document.getElementById('run-solver-btn');
+    if (solveBtn) {
+      const subText = depth === 1 ? GW_DATE_LABEL + ' only' : GW_DATE_LABEL + ' to GW' + endGw;
+      solveBtn.innerHTML = 'Solve<span class="sub">' + subText + '</span>';
+    }
   });
 })();
 </script>
