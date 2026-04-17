@@ -800,9 +800,7 @@
         .ngw-fixture {
             color: #8b8b99;
             font-size: 14px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+            line-height: 1.35;
         }
         .ngw-blank { color: #2a2a35; font-size: 14px; font-style: italic; }
 
@@ -1529,22 +1527,22 @@
         // Aston Villa vs West Ham, Tottenham vs Nott'm Forest
         // ██ SITE_DATA:PLAYER_NEXTGW ██
         const PLAYER_NEXTGW = [
-            {name: "Erling Haaland", team: "Man City", xG: 1.40, xA: 0.33, xGI: 1.73, fixture: "Burnley vs Man City / Man City vs Arsenal"},
-            {name: "Cole Palmer", team: "Chelsea", xG: 0.92, xA: 0.27, xGI: 1.19, fixture: "Brighton vs Chelsea / Chelsea vs Man Utd"},
-            {name: "Enzo Fernández", team: "Chelsea", xG: 0.66, xA: 0.46, xGI: 1.12, fixture: "Brighton vs Chelsea / Chelsea vs Man Utd"},
-            {name: "Dominic Calvert-Lewin", team: "Leeds", xG: 0.91, xA: 0.14, xGI: 1.05, fixture: "Bournemouth vs Leeds / Leeds vs Wolves"},
-            {name: "João Pedro", team: "Chelsea", xG: 0.54, xA: 0.41, xGI: 0.95, fixture: "Brighton vs Chelsea / Chelsea vs Man Utd"},
-            {name: "Marcus Tavernier", team: "Bournemouth", xG: 0.54, xA: 0.40, xGI: 0.93, fixture: "Bournemouth vs Leeds / Newcastle vs Bournemouth"},
-            {name: "Danny Welbeck", team: "Brighton", xG: 0.65, xA: 0.11, xGI: 0.76, fixture: "Brighton vs Chelsea / Tottenham vs Brighton"},
-            {name: "Antoine Semenyo", team: "Man City", xG: 0.54, xA: 0.20, xGI: 0.74, fixture: "Burnley vs Man City / Man City vs Arsenal"},
-            {name: "Zian Flemming", team: "Burnley", xG: 0.69, xA: 0.03, xGI: 0.72, fixture: "Burnley vs Man City / Nott'm Forest vs Burnley"},
-            {name: "Adrien Truffert", team: "Bournemouth", xG: 0.08, xA: 0.64, xGI: 0.72, fixture: "Bournemouth vs Leeds / Newcastle vs Bournemouth"},
-            {name: "Brenden Aaronson", team: "Leeds", xG: 0.29, xA: 0.41, xGI: 0.70, fixture: "Bournemouth vs Leeds / Leeds vs Wolves"},
-            {name: "Evanilson", team: "Bournemouth", xG: 0.47, xA: 0.17, xGI: 0.64, fixture: "Bournemouth vs Leeds / Newcastle vs Bournemouth"},
-            {name: "Lukas Nmecha", team: "Leeds", xG: 0.55, xA: 0.08, xGI: 0.63, fixture: "Bournemouth vs Leeds / Leeds vs Wolves"},
+            {name: "Erling Haaland", team: "Man City", xG: 1.40, xA: 0.33, xGI: 1.73, fixture: "Man City vs Arsenal / Burnley vs Man City"},
+            {name: "Cole Palmer", team: "Chelsea", xG: 0.92, xA: 0.27, xGI: 1.19, fixture: "Chelsea vs Man Utd / Brighton vs Chelsea"},
+            {name: "Enzo Fernández", team: "Chelsea", xG: 0.66, xA: 0.46, xGI: 1.12, fixture: "Chelsea vs Man Utd / Brighton vs Chelsea"},
+            {name: "Dominic Calvert-Lewin", team: "Leeds", xG: 0.91, xA: 0.14, xGI: 1.05, fixture: "Leeds vs Wolves / Bournemouth vs Leeds"},
+            {name: "João Pedro", team: "Chelsea", xG: 0.54, xA: 0.41, xGI: 0.95, fixture: "Chelsea vs Man Utd / Brighton vs Chelsea"},
+            {name: "Marcus Tavernier", team: "Bournemouth", xG: 0.54, xA: 0.40, xGI: 0.93, fixture: "Newcastle vs Bournemouth / Bournemouth vs Leeds"},
+            {name: "Danny Welbeck", team: "Brighton", xG: 0.65, xA: 0.11, xGI: 0.76, fixture: "Tottenham vs Brighton / Brighton vs Chelsea"},
+            {name: "Antoine Semenyo", team: "Man City", xG: 0.54, xA: 0.20, xGI: 0.74, fixture: "Man City vs Arsenal / Burnley vs Man City"},
+            {name: "Zian Flemming", team: "Burnley", xG: 0.69, xA: 0.03, xGI: 0.72, fixture: "Nott'm Forest vs Burnley / Burnley vs Man City"},
+            {name: "Adrien Truffert", team: "Bournemouth", xG: 0.08, xA: 0.64, xGI: 0.72, fixture: "Newcastle vs Bournemouth / Bournemouth vs Leeds"},
+            {name: "Brenden Aaronson", team: "Leeds", xG: 0.29, xA: 0.41, xGI: 0.70, fixture: "Leeds vs Wolves / Bournemouth vs Leeds"},
+            {name: "Evanilson", team: "Bournemouth", xG: 0.47, xA: 0.17, xGI: 0.64, fixture: "Newcastle vs Bournemouth / Bournemouth vs Leeds"},
+            {name: "Lukas Nmecha", team: "Leeds", xG: 0.55, xA: 0.08, xGI: 0.63, fixture: "Leeds vs Wolves / Bournemouth vs Leeds"},
             {name: "Morgan Gibbs-White", team: "Nott'm Forest", xG: 0.33, xA: 0.28, xGI: 0.60, fixture: "Nott'm Forest vs Burnley"},
             {name: "Anthony Gordon", team: "Newcastle", xG: 0.42, xA: 0.18, xGI: 0.60, fixture: "Newcastle vs Bournemouth"},
-            {name: "Jaidon Anthony", team: "Burnley", xG: 0.35, xA: 0.20, xGI: 0.55, fixture: "Burnley vs Man City / Nott'm Forest vs Burnley"},
+            {name: "Jaidon Anthony", team: "Burnley", xG: 0.35, xA: 0.20, xGI: 0.55, fixture: "Nott'm Forest vs Burnley / Burnley vs Man City"},
             {name: "Kevin Schade", team: "Brentford", xG: 0.36, xA: 0.16, xGI: 0.53, fixture: "Brentford vs Fulham"},
             {name: "Morgan Rogers", team: "Aston Villa", xG: 0.23, xA: 0.29, xGI: 0.53, fixture: "Aston Villa vs Sunderland"},
             {name: "Thiago", team: "Brentford", xG: 0.43, xA: 0.09, xGI: 0.53, fixture: "Brentford vs Fulham"},
@@ -1552,43 +1550,43 @@
             {name: "Mohamed Salah", team: "Liverpool", xG: 0.29, xA: 0.21, xGI: 0.50, fixture: "Everton vs Liverpool"},
             {name: "Dominik Szoboszlai", team: "Liverpool", xG: 0.20, xA: 0.30, xGI: 0.49, fixture: "Everton vs Liverpool"},
             {name: "Jarrod Bowen", team: "West Ham", xG: 0.20, xA: 0.28, xGI: 0.49, fixture: "Crystal Palace vs West Ham"},
-            {name: "Eli Junior Kroupi", team: "Bournemouth", xG: 0.42, xA: 0.06, xGI: 0.48, fixture: "Bournemouth vs Leeds / Newcastle vs Bournemouth"},
-            {name: "Mathis Cherki", team: "Man City", xG: 0.10, xA: 0.38, xGI: 0.47, fixture: "Burnley vs Man City / Man City vs Arsenal"},
+            {name: "Eli Junior Kroupi", team: "Bournemouth", xG: 0.42, xA: 0.06, xGI: 0.48, fixture: "Newcastle vs Bournemouth / Bournemouth vs Leeds"},
+            {name: "Mathis Cherki", team: "Man City", xG: 0.10, xA: 0.38, xGI: 0.47, fixture: "Man City vs Arsenal / Burnley vs Man City"},
             {name: "Bruno Fernandes", team: "Man Utd", xG: 0.19, xA: 0.27, xGI: 0.47, fixture: "Chelsea vs Man Utd"},
-            {name: "Pedro Neto", team: "Chelsea", xG: 0.15, xA: 0.31, xGI: 0.46, fixture: "Brighton vs Chelsea / Chelsea vs Man Utd"},
-            {name: "Jack Hinshelwood", team: "Brighton", xG: 0.27, xA: 0.20, xGI: 0.46, fixture: "Brighton vs Chelsea / Tottenham vs Brighton"},
-            {name: "Alex Scott", team: "Bournemouth", xG: 0.26, xA: 0.20, xGI: 0.46, fixture: "Bournemouth vs Leeds / Newcastle vs Bournemouth"},
+            {name: "Pedro Neto", team: "Chelsea", xG: 0.15, xA: 0.31, xGI: 0.46, fixture: "Chelsea vs Man Utd / Brighton vs Chelsea"},
+            {name: "Jack Hinshelwood", team: "Brighton", xG: 0.27, xA: 0.20, xGI: 0.46, fixture: "Tottenham vs Brighton / Brighton vs Chelsea"},
+            {name: "Alex Scott", team: "Bournemouth", xG: 0.26, xA: 0.20, xGI: 0.46, fixture: "Newcastle vs Bournemouth / Bournemouth vs Leeds"},
             {name: "Bryan Mbeumo", team: "Man Utd", xG: 0.29, xA: 0.16, xGI: 0.45, fixture: "Chelsea vs Man Utd"},
-            {name: "Nico O&#039;Reilly", team: "Man City", xG: 0.26, xA: 0.19, xGI: 0.45, fixture: "Burnley vs Man City / Man City vs Arsenal"},
-            {name: "Pascal Groß", team: "Brighton", xG: 0.10, xA: 0.34, xGI: 0.44, fixture: "Brighton vs Chelsea / Tottenham vs Brighton"},
-            {name: "Jéremy Doku", team: "Man City", xG: 0.13, xA: 0.30, xGI: 0.43, fixture: "Burnley vs Man City / Man City vs Arsenal"},
-            {name: "Mats Wieffer", team: "Brighton", xG: 0.17, xA: 0.26, xGI: 0.43, fixture: "Brighton vs Chelsea / Tottenham vs Brighton"},
-            {name: "Diego Gómez", team: "Brighton", xG: 0.21, xA: 0.21, xGI: 0.43, fixture: "Brighton vs Chelsea / Tottenham vs Brighton"},
+            {name: "Nico O&#039;Reilly", team: "Man City", xG: 0.26, xA: 0.19, xGI: 0.45, fixture: "Man City vs Arsenal / Burnley vs Man City"},
+            {name: "Pascal Groß", team: "Brighton", xG: 0.10, xA: 0.34, xGI: 0.44, fixture: "Tottenham vs Brighton / Brighton vs Chelsea"},
+            {name: "Jéremy Doku", team: "Man City", xG: 0.13, xA: 0.30, xGI: 0.43, fixture: "Man City vs Arsenal / Burnley vs Man City"},
+            {name: "Mats Wieffer", team: "Brighton", xG: 0.17, xA: 0.26, xGI: 0.43, fixture: "Tottenham vs Brighton / Brighton vs Chelsea"},
+            {name: "Diego Gómez", team: "Brighton", xG: 0.21, xA: 0.21, xGI: 0.43, fixture: "Tottenham vs Brighton / Brighton vs Chelsea"},
             {name: "Dango Ouattara", team: "Brentford", xG: 0.23, xA: 0.20, xGI: 0.42, fixture: "Brentford vs Fulham"},
             {name: "Kiernan Dewsbury-Hall", team: "Everton", xG: 0.19, xA: 0.23, xGI: 0.42, fixture: "Everton vs Liverpool"},
             {name: "Harvey Barnes", team: "Newcastle", xG: 0.28, xA: 0.13, xGI: 0.42, fixture: "Newcastle vs Bournemouth"},
             {name: "Harry Wilson", team: "Fulham", xG: 0.24, xA: 0.17, xGI: 0.41, fixture: "Brentford vs Fulham"},
             {name: "Ismaila Sarr", team: "Crystal Palace", xG: 0.30, xA: 0.10, xGI: 0.41, fixture: "Crystal Palace vs West Ham"},
-            {name: "Yankuba Minteh", team: "Brighton", xG: 0.15, xA: 0.25, xGI: 0.40, fixture: "Brighton vs Chelsea / Tottenham vs Brighton"},
-            {name: "David Brooks", team: "Bournemouth", xG: 0.24, xA: 0.16, xGI: 0.40, fixture: "Bournemouth vs Leeds / Newcastle vs Bournemouth"},
-            {name: "Noah Okafor", team: "Leeds", xG: 0.32, xA: 0.08, xGI: 0.39, fixture: "Bournemouth vs Leeds / Leeds vs Wolves"},
+            {name: "Yankuba Minteh", team: "Brighton", xG: 0.15, xA: 0.25, xGI: 0.40, fixture: "Tottenham vs Brighton / Brighton vs Chelsea"},
+            {name: "David Brooks", team: "Bournemouth", xG: 0.24, xA: 0.16, xGI: 0.40, fixture: "Newcastle vs Bournemouth / Bournemouth vs Leeds"},
+            {name: "Noah Okafor", team: "Leeds", xG: 0.32, xA: 0.08, xGI: 0.39, fixture: "Leeds vs Wolves / Bournemouth vs Leeds"},
             {name: "Florian Wirtz", team: "Liverpool", xG: 0.22, xA: 0.17, xGI: 0.39, fixture: "Everton vs Liverpool"},
-            {name: "Omar Marmoush", team: "Man City", xG: 0.30, xA: 0.09, xGI: 0.39, fixture: "Burnley vs Man City / Man City vs Arsenal"},
+            {name: "Omar Marmoush", team: "Man City", xG: 0.30, xA: 0.09, xGI: 0.39, fixture: "Man City vs Arsenal / Burnley vs Man City"},
             {name: "Mikkel Damsgaard", team: "Brentford", xG: 0.13, xA: 0.25, xGI: 0.38, fixture: "Brentford vs Fulham"},
-            {name: "Marc Cucurella", team: "Chelsea", xG: 0.09, xA: 0.29, xGI: 0.38, fixture: "Brighton vs Chelsea / Chelsea vs Man Utd"},
+            {name: "Marc Cucurella", team: "Chelsea", xG: 0.09, xA: 0.29, xGI: 0.38, fixture: "Chelsea vs Man Utd / Brighton vs Chelsea"},
             {name: "Valentín Castellanos", team: "West Ham", xG: 0.32, xA: 0.06, xGI: 0.38, fixture: "Crystal Palace vs West Ham"},
             {name: "Matheus Cunha", team: "Man Utd", xG: 0.22, xA: 0.15, xGI: 0.38, fixture: "Chelsea vs Man Utd"},
             {name: "Elliot Anderson", team: "Nott'm Forest", xG: 0.11, xA: 0.27, xGI: 0.38, fixture: "Nott'm Forest vs Burnley"},
-            {name: "Bernardo Silva", team: "Man City", xG: 0.09, xA: 0.28, xGI: 0.37, fixture: "Burnley vs Man City / Man City vs Arsenal"},
-            {name: "Marcos Senesi", team: "Bournemouth", xG: 0.06, xA: 0.32, xGI: 0.37, fixture: "Bournemouth vs Leeds / Newcastle vs Bournemouth"},
+            {name: "Bernardo Silva", team: "Man City", xG: 0.09, xA: 0.28, xGI: 0.37, fixture: "Man City vs Arsenal / Burnley vs Man City"},
+            {name: "Marcos Senesi", team: "Bournemouth", xG: 0.06, xA: 0.32, xGI: 0.37, fixture: "Newcastle vs Bournemouth / Bournemouth vs Leeds"},
             {name: "Iliman Ndiaye", team: "Everton", xG: 0.20, xA: 0.17, xGI: 0.37, fixture: "Everton vs Liverpool"},
-            {name: "Kaoru Mitoma", team: "Brighton", xG: 0.17, xA: 0.20, xGI: 0.37, fixture: "Brighton vs Chelsea / Tottenham vs Brighton"},
+            {name: "Kaoru Mitoma", team: "Brighton", xG: 0.17, xA: 0.20, xGI: 0.37, fixture: "Tottenham vs Brighton / Brighton vs Chelsea"},
             {name: "Enzo Le Fée", team: "Sunderland", xG: 0.16, xA: 0.20, xGI: 0.36, fixture: "Aston Villa vs Sunderland"},
-            {name: "Jayden Bogle", team: "Leeds", xG: 0.16, xA: 0.19, xGI: 0.35, fixture: "Bournemouth vs Leeds / Leeds vs Wolves"},
+            {name: "Jayden Bogle", team: "Leeds", xG: 0.16, xA: 0.19, xGI: 0.35, fixture: "Leeds vs Wolves / Bournemouth vs Leeds"},
             {name: "Jean-Philippe Mateta", team: "Crystal Palace", xG: 0.31, xA: 0.03, xGI: 0.35, fixture: "Crystal Palace vs West Ham"},
-            {name: "Amine Adli", team: "Bournemouth", xG: 0.21, xA: 0.13, xGI: 0.34, fixture: "Bournemouth vs Leeds / Newcastle vs Bournemouth"},
-            {name: "James Ward-Prowse", team: "Burnley", xG: 0.02, xA: 0.32, xGI: 0.34, fixture: "Burnley vs Man City / Nott'm Forest vs Burnley"},
-            {name: "Marcus Edwards", team: "Burnley", xG: 0.17, xA: 0.18, xGI: 0.34, fixture: "Burnley vs Man City / Nott'm Forest vs Burnley"}
+            {name: "Amine Adli", team: "Bournemouth", xG: 0.21, xA: 0.13, xGI: 0.34, fixture: "Newcastle vs Bournemouth / Bournemouth vs Leeds"},
+            {name: "James Ward-Prowse", team: "Burnley", xG: 0.02, xA: 0.32, xGI: 0.34, fixture: "Nott'm Forest vs Burnley / Burnley vs Man City"},
+            {name: "Marcus Edwards", team: "Burnley", xG: 0.17, xA: 0.18, xGI: 0.34, fixture: "Nott'm Forest vs Burnley / Burnley vs Man City"}
         ];
         // ██ SITE_DATA:END ██
 
@@ -2029,7 +2027,7 @@
                 return `<tr>
                     <td class="player-name">${p.name}</td>
                     <td class="player-team">${getTeamNameWithBadge(p.team)}</td>
-                    <td class="${isBlank ? 'ngw-blank' : 'ngw-fixture'}">${p.fixture}</td>
+                    <td class="${isBlank ? 'ngw-blank' : 'ngw-fixture'}">${p.fixture.replace(' / ', '<br>')}</td>
                     <td style="text-align:right;color:#8b8b99;font-size:16px">${xgDisplay}</td>
                     <td style="text-align:right;color:#8b8b99;font-size:16px">${xaDisplay}</td>
                     <td class="${isBlank ? 'hm-blank' : 'heatmap-cell level'+giLevel}" style="text-align:right;border-radius:4px;font-size:16px">${giDisplay}</td>
