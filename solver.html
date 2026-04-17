@@ -79,14 +79,26 @@
     width: 100%;
     text-align: center;
   }
+  .card-brand {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 22px; font-weight: 400;
+    line-height: 1; margin-bottom: 20px;
+  }
+  .card-brand .apex { color: #F97316; font-weight: 500; }
+  .card-brand .rest { color: #e8e8f0; font-weight: 800; }
   h1 {
     font-family: 'Space Grotesk', sans-serif;
-    font-size: 28px; font-weight: 700;
-    color: #e8e8f0; margin-bottom: 12px;
+    font-size: 40px; font-weight: 700;
+    color: #e8e8f0; margin-bottom: 20px;
+    letter-spacing: -0.01em;
   }
   .sub {
     color: #8a8a95; font-size: 14px;
     margin-bottom: 32px;
+  }
+  .status {
+    color: #F97316; font-size: 13px; font-weight: 600;
+    min-height: 1.4em; margin-top: 14px;
   }
   input {
     width: 100%;
@@ -166,12 +178,14 @@
 
 <main>
   <div class="card">
+    <div class="card-brand"><span class="apex">Apex</span><span class="rest">FootyData</span></div>
     <h1>FPL Solver</h1>
-    <p class="sub">Enter your FPL Team ID to run the Apex solver against your squad — chip planner, Free Hit picks, Wildcard rolling horizon, and confidence resampler. All client-side.</p>
+    <p class="sub">Enter your FPL Team ID to get started.</p>
     <input id="fpl-id" type="text" inputmode="numeric" pattern="[0-9]*"
            placeholder="Your FPL Team ID" autofocus autocomplete="off" maxlength="10">
     <button id="go" onclick="run()">Solve My Team</button>
     <div class="err" id="err"></div>
+    <div class="status" id="status"></div>
     <div class="hint">
       Don't know your ID? Log in at fantasy.premierleague.com,
       click <em>Points</em>, and check the URL —
@@ -183,13 +197,15 @@
 <footer>apexfootydata.com · data-driven football analytics</footer>
 
 <script>
-  const input = document.getElementById('fpl-id');
-  const errEl = document.getElementById('err');
+  const input    = document.getElementById('fpl-id');
+  const errEl    = document.getElementById('err');
+  const statusEl = document.getElementById('status');
+  const goBtn    = document.getElementById('go');
 
   input.addEventListener('keydown', e => {
     if (e.key === 'Enter') run();
   });
-  input.addEventListener('input', () => { errEl.textContent = ''; });
+  input.addEventListener('input', () => { errEl.textContent = ''; statusEl.textContent = ''; });
 
   function run() {
     const raw = input.value.trim();
@@ -197,6 +213,9 @@
     if (!/^\d+$/.test(raw)) { errEl.textContent = 'Team ID must be numeric.'; input.focus(); return; }
     const id = parseInt(raw, 10);
     if (id < 1 || id > 20000000) { errEl.textContent = 'That doesn\'t look like a valid Team ID.'; input.focus(); return; }
+    errEl.textContent = '';
+    statusEl.textContent = `Building solver for team ${id}... (30–60 seconds)`;
+    goBtn.disabled = true;
     window.location.href = `/solver_app.html?id=${id}`;
   }
 </script>
