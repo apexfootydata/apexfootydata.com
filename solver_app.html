@@ -4579,21 +4579,29 @@ body {
       });
     }
 
-    _prog('simulating', 90);
-    const ranked = _simulateLeague(managersOut, nSims, cv, seed);
-
-    // Convert chip_assignments offsets → absolute GWs for the frontend
+    // Convert chip_assignments offsets → absolute-GW label-keyed form BEFORE the
+    // sim so both `ranked` (via _simulateLeague passthrough) AND `manager_base`
+    // (used by refreshLeagueLive) carry the same stable shape. Previously we
+    // only converted `ranked`, so post-refresh standings reverted to the raw
+    // [offset, value] shape → UI rendered "freehit any +undefined".
     const LABEL = { wildcard: 'WC', freehit: 'FH', bboost: 'BB', '3xc': 'TC' };
-    for (const m of ranked) {
+    for (const m of managersOut) {
       const ca = m.chip_assignments || {};
       const caGw = {};
       for (const [chip, pair] of Object.entries(ca)) {
-        const off = pair[0]; const val = pair[1];
-        const gw = (off != null) ? (startGw + off) : null;
-        caGw[LABEL[chip] || chip.toUpperCase()] = { gw, value: Math.round(val * 10) / 10 };
+        if (Array.isArray(pair)) {
+          const off = pair[0]; const val = pair[1];
+          const gw = (off != null) ? (startGw + off) : null;
+          caGw[LABEL[chip] || chip.toUpperCase()] = { gw, value: Math.round(val * 10) / 10 };
+        } else {
+          caGw[chip] = pair;  // already converted (idempotent)
+        }
       }
       m.chip_assignments = caGw;
     }
+
+    _prog('simulating', 90);
+    const ranked = _simulateLeague(managersOut, nSims, cv, seed);
 
     // Stash state needed for live-refresh path (refreshLeagueLive). We serialise
     // only what's needed to re-project — not the full per-manager history.
@@ -4794,7 +4802,7 @@ body {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1776538397-GW34-815b4b3b";
+const BUILD_VERSION = "1776539012-GW34-815b4b3b";
 window.APEX_BUILD = BUILD_VERSION;
 
 let FPL_ID = null;
@@ -7440,7 +7448,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW34</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1776538397-GW34-815b4b3b</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1776539012-GW34-815b4b3b</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
