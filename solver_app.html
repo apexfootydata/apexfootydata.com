@@ -4809,7 +4809,7 @@ body {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1776547214-GW34-815b4b3b";
+const BUILD_VERSION = "1776549458-GW34-815b4b3b";
 window.APEX_BUILD = BUILD_VERSION;
 
 let FPL_ID = null;
@@ -5451,7 +5451,15 @@ function _seqMatchesActiveChips(seq) {
 
 // ──────────── TEAM VIEW ────────────
 let activeGwIdx = 0;
-const _gwTotals = GW_XI_BASE.map((base, i) => base + (GW_CAP_XP[i] || 0));
+let _gwTotals = GW_XI_BASE.map((base, i) => base + (GW_CAP_XP[i] || 0));
+
+// Rebuild _gwTotals from current GW_XI_BASE + GW_CAP_XP arrays. Must be called
+// after hydration (public solver path) — otherwise _gwTotals stays at the
+// page-load values ([0,0,0,0,0] for the public build) and the "Next N GWs"
+// header sums to 0 until the user clicks through every tab.
+function _rebuildGwTotals() {
+  _gwTotals = GW_XI_BASE.map((base, i) => base + (GW_CAP_XP[i] || 0));
+}
 
 // Per-GW deltas from baseline (start at 0, updated on swap)
 // _xiDelta[i]    = xP change to XI sum when players are swapped
@@ -7455,7 +7463,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW34</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1776547214-GW34-815b4b3b</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1776549458-GW34-815b4b3b</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
@@ -7685,8 +7693,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     var evHist = picks.entry_history || {};
     var bankVal = (evHist.bank || 0) / 10.0;
+    // FPL's entry_history.value is the TOTAL (squad selling + bank). To display
+    // "squad value" matching the FPL app exactly we must subtract the bank.
     var apiValue = (evHist.value || 0) / 10.0;
-    var sellingValue = apiValue > 0 ? apiValue :
+    var sellingValue = apiValue > 0 ? (apiValue - bankVal) :
         newSquad.reduce(function (s, p) { return s + (p.cost || 0); }, 0);
 
     // Derive chip availability from history.chips (each chip is one-use-per-half).
@@ -7740,6 +7750,12 @@ document.addEventListener('DOMContentLoaded', () => {
     GW_XI_BASE = newXi;
     GW_CAP_XP = newCap;
     GW_BENCH = newBench;
+    // Rebuild _gwTotals so the "Next N GWs" header sums the freshly-hydrated
+    // values (not the baked [0,0,0,0,0] the public build ships with).
+    if (typeof _rebuildGwTotals === 'function') {
+      _rebuildGwTotals();
+      if (typeof updateRollingTotal === 'function') updateRollingTotal();
+    }
 
     setStatus('Ready.', 92);
   }
