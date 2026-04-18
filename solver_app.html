@@ -5078,7 +5078,19 @@ function initTeamView() {
     // Both side-effects must fire: pill tags (visual) + total recompute (BB adds
     // bench xP, TC adds a second captain bonus). Previously only tags updated,
     // so BB/TC selections didn't change the top-panel GW xP figure.
-    sel.onchange = function () { updatePillChipTags(); updateChipTotal(); };
+    // NOTE: this programmatic assignment overrides the inline onchange="" attr.
+    // WC/FH also need _syncTopPitchToChipState so the top pitch swaps to the
+    // chip squad when the selected GW matches the active pill — without this,
+    // picking FH=34 while on GW34 shows the held squad (0.0 xP on BGW players).
+    if (chip === 'wc' || chip === 'fh') {
+      sel.onchange = function () {
+        updatePillChipTags();
+        updateChipTotal();
+        _syncTopPitchToChipState();
+      };
+    } else {
+      sel.onchange = function () { updatePillChipTags(); updateChipTotal(); };
+    }
   });
 
   // Activate the previously-active pill (falls back to first pill if somehow OOB)
