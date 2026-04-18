@@ -5103,16 +5103,10 @@ function computeTransfers(gwIdx) {
   const budget = TEAM_META.budget || 0;
   const transfers = [];
 
-  // Read planned FH GW. Priority: explicit dropdown choice → planner's best
-  // sequence → none. Falling back to the planner's best means new users see
-  // chip-aware recommendations without having to manually set the dropdown.
-  let fhGwPlanned = parseInt(document.getElementById('sel-fh')?.value || 0);
-  if (!fhGwPlanned && typeof CHIP_PLANNER !== 'undefined'
-      && CHIP_PLANNER && CHIP_PLANNER.best_sequence) {
-    const fhStep = (CHIP_PLANNER.best_sequence.breakdown || [])
-                     .find(b => b.chip === 'FH');
-    if (fhStep) fhGwPlanned = parseInt(fhStep.gw) || 0;
-  }
+  // Read planned FH GW from the chip dropdown (0 = not planned).
+  // Only EXPLICIT user selections change the transfer math — no hidden
+  // assumptions. If the user hasn't picked FH, we sum the full horizon.
+  const fhGwPlanned = parseInt(document.getElementById('sel-fh')?.value || 0);
   const fhIdxPlanned = fhGwPlanned ? TEAM_META.gw_range.indexOf(fhGwPlanned) : -1;
 
   // Build the list of horizon indices to sum over (skip FH GW if planned)
