@@ -4626,6 +4626,11 @@ body {
         chips_remaining: m.chips_remaining,
         missing_from_pool: m.missing_from_pool,
         projected_remaining: m.projected_remaining,
+        // Element IDs only — _buildCorrelationMatrix reads p.element to compute
+        // squad overlap between managers. Without this, the refresh path would
+        // see empty squads and build an identity correlation matrix, producing
+        // a different win% from the initial run on identical inputs.
+        picks: (m.picks || []).map(p => ({ element: +p.element })),
       })),
     } : null;
 
@@ -4715,6 +4720,8 @@ body {
         chip_assignments: mb.chip_assignments,
         inflight_xp,
         inflight_gw: ls.inflight_gw,
+        // Required for _buildCorrelationMatrix to compute squad overlap.
+        picks: mb.picks || [],
       };
     });
 
@@ -4802,7 +4809,7 @@ body {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1776539012-GW34-815b4b3b";
+const BUILD_VERSION = "1776547214-GW34-815b4b3b";
 window.APEX_BUILD = BUILD_VERSION;
 
 let FPL_ID = null;
@@ -7448,7 +7455,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW34</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1776539012-GW34-815b4b3b</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1776547214-GW34-815b4b3b</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
