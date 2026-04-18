@@ -1948,7 +1948,7 @@ body {
       <div class="chip-grid">
         <div class="chip-field">
           <label>Wildcard</label>
-          <select name="wc_gw" id="sel-wc" onchange="updateChipTotal()">
+          <select name="wc_gw" id="sel-wc" onchange="_onChipGwChanged()">
             <option value="0">—</option>
           </select>
         </div>
@@ -1966,7 +1966,7 @@ body {
         </div>
         <div class="chip-field">
           <label>Free Hit</label>
-          <select name="fh_gw" id="sel-fh" onchange="updateChipTotal()">
+          <select name="fh_gw" id="sel-fh" onchange="_onChipGwChanged()">
             <option value="0">—</option>
           </select>
         </div>
@@ -5545,30 +5545,48 @@ function setBaseGw(btn) {
   updateShirtXp();
   reorderXiBench();
   updateChipTotal();
+  // Auto-swap the top pitch when the new pill is a planned FH/WC GW.
+  _syncTopPitchToChipState();
+}
 
-  // Auto-swap the top pitch when the new pill is a planned FH/WC GW:
-  //   • Top pitch  → shows the FH/WC squad (the team actually playing)
-  //   • Stats card → reflects that squad's xPts (not the held 15 scoring 0)
-  // State is saved per-GW via _applyFullSquad → _savedGwSquads, so switching
-  // away restores the held squad (reorderXiBench handles that branch).
-  // Without this, GW34 FH pill shows the held squad at BGW34 = 0.0 which
-  // looks broken to the user.
+// Keep the top pitch aligned with the currently-selected FH/WC chip for
+// the active GW:
+//   • If FH or WC is selected on this GW → show that squad (no held-player 0.0s)
+//   • If neither chip applies here → restore the held squad
+// Called from:
+//   • setBaseGw (pill click)
+//   • _onChipGwChanged (FH/WC dropdown change)
+// Split from updateChipTotal to avoid recursion (_applyFullSquad calls
+// updateChipTotal internally).
+function _syncTopPitchToChipState() {
   try {
     const activeGw = TEAM_META.gw_range[activeGwIdx];
     const fhGw = parseInt(document.getElementById('sel-fh')?.value || 0);
     const wcGw = parseInt(document.getElementById('sel-wc')?.value || 0);
-    const alreadySaved = !!_savedGwSquads[activeGwIdx];
+    const fhMatches = fhGw && fhGw === activeGw
+      && typeof FH_SQUADS !== 'undefined'
+      && FH_SQUADS[String(fhGw)] && FH_SQUADS[String(fhGw)].length;
+    const wcMatches = wcGw && wcGw === activeGw
+      && typeof WC_SQUADS !== 'undefined'
+      && WC_SQUADS[String(wcGw)] && WC_SQUADS[String(wcGw)].length;
 
-    if (!alreadySaved && fhGw && fhGw === activeGw
-        && typeof FH_SQUADS !== 'undefined') {
-      const sq = FH_SQUADS[String(fhGw)];
-      if (sq && sq.length) _applyFullSquad(sq, activeGwIdx);
-    } else if (!alreadySaved && wcGw && wcGw === activeGw
-               && typeof WC_SQUADS !== 'undefined') {
-      const sq = WC_SQUADS[String(wcGw)];
-      if (sq && sq.length) _applyFullSquad(sq, activeGwIdx);
+    if (fhMatches) {
+      _applyFullSquad(FH_SQUADS[String(fhGw)], activeGwIdx);
+    } else if (wcMatches) {
+      _applyFullSquad(WC_SQUADS[String(wcGw)], activeGwIdx);
+    } else if (_savedGwSquads[activeGwIdx]) {
+      // No chip applies to this GW anymore — restore the held squad.
+      delete _savedGwSquads[activeGwIdx];
+      reorderXiBench();
+      updateChipTotal();
     }
-  } catch (e) { /* non-fatal: old handler already updated the squad */ }
+  } catch (e) { /* non-fatal */ }
+}
+
+// FH/WC dropdown onchange handler. Recompute totals + re-sync the pitch.
+function _onChipGwChanged() {
+  updateChipTotal();
+  _syncTopPitchToChipState();
 }
 
 function updateShirtXp() {
