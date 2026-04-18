@@ -5322,31 +5322,22 @@ function runSolve() {
     return;
   }
 
-  // Solve dispatch:
-  //  • FH selected → navigate to FH GW, show FH squad
-  //  • WC selected → navigate to WC GW, show WC squad
-  //  • Neither     → show chip-aware transfer recs for the active GW
-  // Note: Solve AUTO-navigates to the chip GW. The dropdown onchange itself
-  // does nothing (no squad swap) — per Marcus's 2026-04-17 feedback. Solve is
-  // the single action that produces/applies the squad.
+  // Solve dispatch (2026-04-17 final rules per Marcus):
+  //  • Respect the active pill. Solve operates on the GW the user is viewing.
+  //  • If active GW is a planned FH/WC GW → show that chip squad panel.
+  //  • Otherwise → show chip-aware transfer recs for the active GW.
+  //  • If a chip is planned for a DIFFERENT GW → status line hints at which
+  //    pill to click (does NOT auto-navigate — that broke GW35+ solving when
+  //    WC was pre-planned for GW35 and Solve kept jumping back).
+  //  • Never auto-apply the squad to the top pitch — Apply button is opt-in.
   const activeGw = TEAM_META.gw_range[activeGwIdx];
 
-  // ── FH selected → jump to FH GW and show FH squad ──
-  // FH takes priority over WC when both are set (it's the more immediate
-  // "this week only" move; WC is the broader squad rebuild).
-  if (fhGw) {
+  // ── FH planned on THIS GW → show FH squad panel ──
+  if (fhGw && activeGw === fhGw) {
     const fhSquad = FH_SQUADS[String(fhGw)];
     if (fhSquad && fhSquad.length) {
-      const fhIdx = TEAM_META.gw_range.indexOf(fhGw);
-      const solveIdx = fhIdx >= 0 ? fhIdx : activeGwIdx;
-      // Navigate the top pitch to the FH GW so the pill matches what's shown.
-      if (fhIdx >= 0 && fhIdx !== activeGwIdx) {
-        const fhPill = document.querySelector(`.gw-pill[data-idx="${fhIdx}"]`);
-        if (fhPill) setBaseGw(fhPill);
-      }
-      _showChipSquadPanel('FH', fhGw, fhSquad, solveIdx);
+      _showChipSquadPanel('FH', fhGw, fhSquad, activeGwIdx);
       status.textContent = `FH GW${fhGw} squad loaded`;
-      // Kick off Model Confidence for this FH GW (on-demand, ~30-50s)
       fetchAndRenderConfidence(fhGw, 'model-confidence-wrap-squad');
       return;
     }
@@ -5354,17 +5345,11 @@ function runSolve() {
     return;
   }
 
-  // ── WC selected → jump to WC GW and show WC squad ──
-  if (wcGw) {
+  // ── WC planned on THIS GW → show WC squad panel ──
+  if (wcGw && activeGw === wcGw) {
     const wcSquad = WC_SQUADS[String(wcGw)];
     if (wcSquad && wcSquad.length) {
-      const wcIdx = TEAM_META.gw_range.indexOf(wcGw);
-      const solveIdx = wcIdx >= 0 ? wcIdx : activeGwIdx;
-      if (wcIdx >= 0 && wcIdx !== activeGwIdx) {
-        const wcPill = document.querySelector(`.gw-pill[data-idx="${wcIdx}"]`);
-        if (wcPill) setBaseGw(wcPill);
-      }
-      _showChipSquadPanel('WC', wcGw, wcSquad, solveIdx);
+      _showChipSquadPanel('WC', wcGw, wcSquad, activeGwIdx);
       status.textContent = `WC GW${wcGw} squad loaded`;
       return;
     }
@@ -5376,9 +5361,18 @@ function runSolve() {
   const recs = computeTransfers(activeGwIdx);
   renderTransfers(recs);
   section.style.display = 'block';
-  status.textContent = recs.length
-    ? `${recs.length} transfer${recs.length !== 1 ? 's' : ''} found`
-    : 'No transfers recommended this week';
+  // Build status: transfer count + (optional) hint if a chip is planned on
+  // a different GW than the one currently active.
+  let _statusBits = [];
+  _statusBits.push(recs.length
+    ? `${recs.length} transfer${recs.length !== 1 ? 's' : ''} for GW${activeGw}`
+    : `No transfers recommended for GW${activeGw}`);
+  if (fhGw && fhGw !== activeGw) {
+    _statusBits.push(`FH planned for GW${fhGw} — click GW${fhGw} pill to see the FH squad`);
+  } else if (wcGw && wcGw !== activeGw) {
+    _statusBits.push(`WC planned for GW${wcGw} — click GW${wcGw} pill to see the WC squad`);
+  }
+  status.textContent = _statusBits.join('  ·  ');
 }
 
 // ──── Chip Squad Panel (WC / FH) ────
