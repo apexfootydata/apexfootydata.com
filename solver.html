@@ -216,8 +216,16 @@
     errEl.textContent = '';
     statusEl.textContent = `Building solver for team ${id}... (30–60 seconds)`;
     goBtn.disabled = true;
+    // Persist for cross-page re-use (rank milestones, future pages).
+    try { localStorage.setItem('apex_fpl_id', String(id)); } catch (_) {}
     window.location.href = `/solver_app.html?id=${id}`;
   }
+
+  // Pre-fill if the user has been here before.
+  try {
+    var _saved = localStorage.getItem('apex_fpl_id');
+    if (_saved && /^\d+$/.test(_saved)) input.value = _saved;
+  } catch (_) {}
 </script>
 
 <!-- Cloudflare Web Analytics -->
