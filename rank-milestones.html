@@ -163,6 +163,21 @@
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
+  /* Sliding progress bar — same pattern as league-sim loader */
+  .apex-slide-track {
+    height: 4px; background: rgba(255,255,255,.06); border-radius: 2px;
+    overflow: hidden; margin-top: 10px;
+  }
+  .apex-slide-bar {
+    height: 100%; width: 40%; background: var(--accent);
+    border-radius: 2px; animation: apex-slide 1.6s ease-in-out infinite;
+  }
+  @keyframes apex-slide {
+    0%   { transform: translateX(-100%); }
+    50%  { transform: translateX(200%); }
+    100% { transform: translateX(-100%); }
+  }
+
   .hidden { display: none !important; }
 
   .stale-banner {
@@ -200,6 +215,9 @@
       <button id="go-btn" class="primary">Run</button>
     </div>
     <div class="status" id="status"></div>
+    <div id="slide-track" class="apex-slide-track hidden" style="margin-top:12px;">
+      <div class="apex-slide-bar"></div>
+    </div>
   </div>
 
   <div id="result" class="hidden">
@@ -250,7 +268,7 @@
 <script>
 // Build-time baked globals (mirrors solver_app.html).
 // BUILD_VERSION stamp for stale-cache detection.
-const BUILD_VERSION = "1776632080-GW34-a5e2115a";
+const BUILD_VERSION = "1776633520-GW34-a5e2115a";
 window.APEX_BUILD = BUILD_VERSION;
 
 // Pool + team meta — same shape the solver HTML ships.
@@ -3381,6 +3399,11 @@ const _IS_LOCAL = (
     var el = document.getElementById('status');
     el.className = 'status' + (cls ? ' ' + cls : '');
     el.innerHTML = (cls === 'loading' ? '<span class="spinner"></span>' : '') + msg;
+    var track = document.getElementById('slide-track');
+    if (track) {
+      if (cls === 'loading') track.classList.remove('hidden');
+      else                   track.classList.add('hidden');
+    }
   }
 
   function fmt(n) { return (n || 0).toLocaleString(); }
@@ -3497,4 +3520,98 @@ const _IS_LOCAL = (
           '<div class="rm-finish-sub">you ' + fmt(yourPts) + ' · ' + gapStr + '</div>' +
         '</td>' +
         '<td class="rm-pct-cell">' +
-          '<div class="rm
+          '<div class="rm-pct" style="color:' + col + '">' + pct.toFixed(1) + '%</div>' +
+          '<div class="rm-pct-bar-wrap"><div class="rm-pct-bar" style="width:' + barWidth + '%;background:' + col + ';"></div></div>' +
+        '</td>';
+      tbody.appendChild(tr);
+    });
+
+    var dock = document.getElementById('chip-dock');
+    var body = document.getElementById('chip-dock-body');
+    body.innerHTML = '';
+    var chipMeta = [{key:'fh'}, {key:'bb'}, {key:'tc'}, {key:'wc'}];
+    var chipEv = data.chip_ev || {};
+    var chipItems = [];
+    chipMeta.forEach(function(c) {
+      var d = chipEv[c.key] || {};
+      if (!d.available || !(d.ev > 0)) return;
+      var gwStr = d.best_gw ? 'GW' + d.best_gw : '—';
+      chipItems.push(
+        '<span class="rm-chip ' + _chipClass(c.key) + '">' + _chipLabel(c.key) + '</span> ' +
+        gwStr + ' · <span style="color:var(--accent);font-weight:700;">+' + d.ev.toFixed(1) + '</span> pts'
+      );
+    });
+    if (chipItems.length) {
+      body.innerHTML = '<div style="font-size:.92rem;line-height:2.2;">' +
+        chipItems.join(' &nbsp;·&nbsp; ') + '</div>';
+      dock.classList.remove('hidden');
+    } else {
+      dock.classList.add('hidden');
+    }
+
+    document.getElementById('result').classList.remove('hidden');
+  }
+
+  async function run() {
+    var idEl = document.getElementById('fpl-id');
+    var btn = document.getElementById('go-btn');
+    var id = idEl.value.trim();
+    if (!id || isNaN(id)) {
+      idEl.focus();
+      return;
+    }
+    btn.disabled = true;
+    setStatus('Fetching squad + running 10,000 sims…', 'loading');
+    document.getElementById('result').classList.add('hidden');
+
+    var url = new URL(location.href);
+    url.searchParams.set('id', id);
+    history.replaceState(null, '', url);
+
+    try {
+      // Wait for GLPK so chip EV can run. Non-fatal if it fails — rank_milestones.js
+      // short-circuits to 0 EV when solveFreeHit / solveWildcard are absent.
+      if (window._apexGlpkReady) {
+        try { await window._apexGlpkReady; } catch (_) {}
+      }
+      const data = await window.ApexSolver.runRankMilestones(+id, { nSims: 10000 });
+      setStatus('Done — ' + data.elapsed_sec + 's', '');
+      render(data);
+    } catch (e) {
+      console.error('[rank_milestones]', e);
+      setStatus('Error: ' + (e && e.message || e), 'error');
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  // Stale-pool banner. Compares baked start_gw vs live FPL is_next.
+  async function staleCheck() {
+    try {
+      if (_IS_LOCAL) return;
+      const baked = (TEAM_META && TEAM_META.start_gw) || 0;
+      if (!baked) return;
+      const bs = await window.ApexSolver.fetchBootstrap();
+      const events = (bs && bs.events) || [];
+      let liveGw = 0;
+      for (const ev of events) { if (ev.is_next) { liveGw = ev.id; break; } }
+      if (!liveGw) {
+        for (const ev of events) { if (ev.is_current && ev.finished) { liveGw = ev.id + 1; break; } }
+      }
+      if (!liveGw) return;
+      if (liveGw !== baked) {
+        const banner = document.getElementById('stale-banner');
+        banner.innerHTML = '<strong>Heads up:</strong> this page was built for GW' + baked +
+          ' but FPL is on GW' + liveGw + '. Projections may be off until a refresh ships.';
+        banner.classList.remove('hidden');
+      }
+    } catch (e) { /* non-fatal */ }
+  }
+  staleCheck();
+
+  // Auto-run if ?id=<fpl> was provided (shareable URL). Otherwise wait for input.
+  if (qparam('id', '')) run();
+})();
+</script>
+</body>
+</html>
