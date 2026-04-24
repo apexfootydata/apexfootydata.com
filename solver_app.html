@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="34" data-built-at="2026-04-24T12:10:12">
+<meta name="apex-gw" content="34" data-built-at="2026-04-24T12:26:38">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Apex Solver · ApexFootyData</title>
@@ -4871,7 +4871,7 @@ body {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1777029011-GW34-f26ed24c";
+const BUILD_VERSION = "1777029998-GW34-f26ed24c";
 window.APEX_BUILD = BUILD_VERSION;
 
 let FPL_ID = null;
@@ -7600,7 +7600,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW34</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1777029011-GW34-f26ed24c</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1777029998-GW34-f26ed24c</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
@@ -7750,6 +7750,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     setStatus('Looking up manager\u2026', 20);
     var entry = await fetchFpl('/entry/' + id + '/');
+    try {
+      console.log('[entry-diag] last_deadline_bank=' + (entry.last_deadline_bank != null ? entry.last_deadline_bank : 'MISSING') +
+                  ' last_deadline_value=' + (entry.last_deadline_value != null ? entry.last_deadline_value : 'MISSING') +
+                  ' last_deadline_total_transfers=' + (entry.last_deadline_total_transfers != null ? entry.last_deadline_total_transfers : 'MISSING'));
+      if (entry.last_deadline_value != null && entry.last_deadline_bank != null) {
+        console.log('[entry-diag] implied deadline SP sum = ' +
+                    (entry.last_deadline_value - entry.last_deadline_bank) +
+                    ' (£' + ((entry.last_deadline_value - entry.last_deadline_bank) / 10).toFixed(1) + 'm)');
+        console.log('[entry-diag] deadline Budget = £' + (entry.last_deadline_value / 10).toFixed(1) +
+                    'm, deadline bank = £' + (entry.last_deadline_bank / 10).toFixed(1) + 'm');
+      }
+    } catch (_eDiag) {}
 
     var startGw = TEAM_META.start_gw;
 
