@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="34" data-built-at="2026-04-24T12:26:38">
+<meta name="apex-gw" content="34" data-built-at="2026-04-24T12:50:45">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Apex Solver · ApexFootyData</title>
@@ -4871,7 +4871,7 @@ body {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1777029998-GW34-f26ed24c";
+const BUILD_VERSION = "1777031445-GW34-f26ed24c";
 window.APEX_BUILD = BUILD_VERSION;
 
 let FPL_ID = null;
@@ -7600,7 +7600,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW34</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1777029998-GW34-f26ed24c</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1777031445-GW34-f26ed24c</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
@@ -7750,18 +7750,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     setStatus('Looking up manager\u2026', 20);
     var entry = await fetchFpl('/entry/' + id + '/');
-    try {
-      console.log('[entry-diag] last_deadline_bank=' + (entry.last_deadline_bank != null ? entry.last_deadline_bank : 'MISSING') +
-                  ' last_deadline_value=' + (entry.last_deadline_value != null ? entry.last_deadline_value : 'MISSING') +
-                  ' last_deadline_total_transfers=' + (entry.last_deadline_total_transfers != null ? entry.last_deadline_total_transfers : 'MISSING'));
-      if (entry.last_deadline_value != null && entry.last_deadline_bank != null) {
-        console.log('[entry-diag] implied deadline SP sum = ' +
-                    (entry.last_deadline_value - entry.last_deadline_bank) +
-                    ' (£' + ((entry.last_deadline_value - entry.last_deadline_bank) / 10).toFixed(1) + 'm)');
-        console.log('[entry-diag] deadline Budget = £' + (entry.last_deadline_value / 10).toFixed(1) +
-                    'm, deadline bank = £' + (entry.last_deadline_bank / 10).toFixed(1) + 'm');
-      }
-    } catch (_eDiag) {}
 
     var startGw = TEAM_META.start_gw;
 
@@ -8019,64 +8007,21 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       var _priceMap = {};
       var _changeMap = {};
-      var _nameMap = {};
       (_bs.elements || []).forEach(function (el) {
         _priceMap[el.id]  = el.now_cost || 0;
         _changeMap[el.id] = el.cost_change_start || 0;
-        _nameMap[el.id]   = el.web_name || String(el.id);
       });
-      // DIAG (2026-04-24): dump raw /transfers/ records for every CURRENT
-      // owned pick. This bypasses _purchaseMap construction entirely — we
-      // see every element_in_cost / element_out_cost FPL actually returned,
-      // so any replay bug that produced pp=142 for a player truly bought
-      // at 144 or 145 becomes obvious.
-      try {
-        var _ownedIds = {};
-        (picks.picks || []).forEach(function (pk) { _ownedIds[pk.element] = true; });
-        console.log('[xfer-diag] === RAW /transfers/ RECORDS FOR CURRENT OWNED PICKS ===');
-        console.log('[xfer-diag] total /transfers/ rows returned by FPL: ' + _xferChrono.length);
-        Object.keys(_ownedIds).forEach(function (pidStr) {
-          var pid = Number(pidStr);
-          var rows = _xferChrono.filter(function (t) {
-            return t.element_in === pid || t.element_out === pid;
-          });
-          var nm = _nameMap[pid] || pid;
-          if (rows.length === 0) {
-            console.log('[xfer-diag] ' + nm + ' id=' + pid +
-                        ' now=' + (_priceMap[pid] || '?') +
-                        ' ccs=' + (_changeMap[pid] || 0) +
-                        ' — NO TRANSFER RECORDS (initial squad, pp approx via ccs)');
-          } else {
-            console.log('[xfer-diag] ' + nm + ' id=' + pid +
-                        ' now=' + (_priceMap[pid] || '?') +
-                        ' ccs=' + (_changeMap[pid] || 0) +
-                        ' — ' + rows.length + ' transfer row(s):');
-            rows.forEach(function (t) {
-              var dir = (t.element_in === pid) ? 'IN ' : 'OUT';
-              var costField = (t.element_in === pid) ? t.element_in_cost : t.element_out_cost;
-              console.log('[xfer-diag]   ' + dir + ' GW' + (t.event || '?') +
-                          ' in_cost=' + (t.element_in_cost != null ? t.element_in_cost : '?') +
-                          ' out_cost=' + (t.element_out_cost != null ? t.element_out_cost : '?') +
-                          ' time=' + (t.time || '?'));
-            });
-          }
-        });
-      } catch (_xferDiagE) {}
       var _derivedTotalTenths = 0;
       var _pickCount = 0;
-      var _spDiagRows = [];
       (picks.picks || []).forEach(function (pk) {
         var pid = pk.element;
         if (!(pid in _priceMap)) return;  // rare: pick not in bootstrap
         var now_t = _priceMap[pid];
         var pp_t;
-        var _source;
         if (Object.prototype.hasOwnProperty.call(_purchaseMap, pid)) {
           pp_t = _purchaseMap[pid];
-          _source = 'XFER';
         } else {
           pp_t = Math.max(now_t - (_changeMap[pid] || 0), 0) || now_t;
-          _source = 'INIT';
         }
         var sp_t = (now_t > pp_t)
           ? pp_t + Math.floor((now_t - pp_t) / 2)   // half profit, floor
@@ -8084,37 +8029,7 @@ document.addEventListener('DOMContentLoaded', () => {
         liveSellingPrices[pid] = sp_t / 10.0;
         _derivedTotalTenths   += sp_t;
         _pickCount++;
-        _spDiagRows.push({
-          name: _nameMap[pid] || pid,
-          id: pid,
-          now: now_t,
-          cost_change_start: _changeMap[pid] || 0,
-          pp: pp_t,
-          src: _source,
-          sp: sp_t,
-          spread: now_t - pp_t,
-        });
       });
-      // DIAG (2026-04-24): surface per-player SP inputs so the £0.2m gap
-      // vs FPL's live Team Value can be pinpointed to the off player(s).
-      try {
-        console.log('[sp-diag] === LIVE SP BREAKDOWN (' + _spDiagRows.length + ' picks) ===');
-        console.log('[sp-diag] format: name id=X now=tenths ccs=tenths pp=tenths src=XFER|INIT sp=tenths');
-        _spDiagRows.forEach(function (r) {
-          console.log('[sp-diag] ' + r.name + ' id=' + r.id +
-                      ' now=' + r.now + ' ccs=' + r.cost_change_start +
-                      ' pp=' + r.pp + ' src=' + r.src + ' sp=' + r.sp +
-                      (r.now > r.pp ? ' (ROSE +' + (r.now - r.pp) + ')' :
-                       r.now < r.pp ? ' (FELL ' + (r.now - r.pp) + ')' : ' (FLAT)'));
-        });
-        console.log('[sp-diag] sum SP tenths=' + _derivedTotalTenths +
-                    ' (£' + (_derivedTotalTenths / 10).toFixed(1) + 'm)');
-        console.log('[sp-diag] snapshot entry_history.value=' + (evHist.value || 0) +
-                    ' entry_history.bank=' + (evHist.bank || 0) +
-                    ' (derived snapshot SP sum=' + ((evHist.value || 0) - (evHist.bank || 0)) + ')');
-        console.log('[sp-diag] TRANSFERS count=' + (_xferChrono || []).length +
-                    ' purchaseMap size=' + Object.keys(_purchaseMap).length);
-      } catch (_diagE) {}
       if (_pickCount >= 15) {
         var _liveSellingValue = _derivedTotalTenths / 10.0;
         var _budgetDelta = Math.round((_liveSellingValue - sellingValue) * 10) / 10;
