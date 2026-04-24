@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="34" data-built-at="2026-04-24T11:04:29">
+<meta name="apex-gw" content="34" data-built-at="2026-04-24T11:10:33">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Apex Solver · ApexFootyData</title>
@@ -4871,7 +4871,7 @@ body {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1777025069-GW34-f26ed24c";
+const BUILD_VERSION = "1777025433-GW34-f26ed24c";
 window.APEX_BUILD = BUILD_VERSION;
 
 let FPL_ID = null;
@@ -6342,21 +6342,19 @@ function _renderPitchFromState() {
   };
   const _budgetTotal = TEAM_META.budget || (TEAM_META.squad_value + TEAM_META.bank);
   const _pitchCost   = [..._xiPlayers, ..._benchPlayers].reduce((s, p) => s + _effCost(p), 0);
-  // DIAG (2026-04-24): per-player pricing breakdown so bank-gap vs FPL is traceable.
-  // Remove once pitch badge matches FPL "In the bank" consistently.
+  // DIAG (2026-04-24): per-player pricing breakdown on every render so bank-gap
+  // vs FPL is traceable, incl. after FH/WC applies. Remove once stable.
   try {
-    if (!window._apexPitchDiagShown) {
-      window._apexPitchDiagShown = true;
-      var _spKeys = Object.keys(_spMap).length;
-      console.log('[pitch-diag] budget=' + _budgetTotal + ' SPmap keys=' + _spKeys);
-      [..._xiPlayers, ..._benchPlayers].forEach(function (p) {
-        var spVal = _spMap[String(p.id)];
-        var eff = _effCost(p);
-        var owned = (spVal != null) ? 'SP' : 'CP';
-        console.log('[pitch-diag] ' + (p.web_name || p.name || p.id) + ' id=' + p.id + ' cost=' + p.cost + ' sp=' + (spVal == null ? '-' : spVal) + ' eff=' + eff + ' (' + owned + ')');
-      });
-      console.log('[pitch-diag] pitchCost=' + _pitchCost.toFixed(2) + ' budget=' + _budgetTotal + ' bank=' + (_budgetTotal - _pitchCost).toFixed(2));
-    }
+    var _diagTag = window._lastChipSquad ? '[pitch-diag CHIP]' : '[pitch-diag BASE]';
+    var _spKeys = Object.keys(_spMap).length;
+    console.log(_diagTag + ' budget=' + _budgetTotal + ' SPmap keys=' + _spKeys);
+    [..._xiPlayers, ..._benchPlayers].forEach(function (p) {
+      var spVal = _spMap[String(p.id)];
+      var eff = _effCost(p);
+      var owned = (spVal != null) ? 'SP' : 'CP';
+      console.log(_diagTag + ' ' + (p.web_name || p.name || p.id) + ' id=' + p.id + ' cost=' + p.cost + ' sp=' + (spVal == null ? '-' : spVal) + ' eff=' + eff + ' (' + owned + ')');
+    });
+    console.log(_diagTag + ' pitchCost=' + _pitchCost.toFixed(2) + ' budget=' + _budgetTotal + ' bank=' + (_budgetTotal - _pitchCost).toFixed(2));
   } catch (_diagErr) {}
   const _pitchBankRaw = _budgetTotal - _pitchCost;
   const _pitchBank   = Math.abs(_pitchBankRaw) < 0.15 ? 0 : _pitchBankRaw;
@@ -7602,7 +7600,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW34</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1777025069-GW34-f26ed24c</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1777025433-GW34-f26ed24c</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
