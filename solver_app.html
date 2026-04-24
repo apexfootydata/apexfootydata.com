@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="35" data-built-at="2026-04-24T22:17:07">
+<meta name="apex-gw" content="35" data-built-at="2026-04-24T23:25:20">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Apex Solver · ApexFootyData</title>
@@ -2471,11 +2471,10 @@ body {
     </div>
 
     <div id="league-footnote" style="display:none;margin-top:10px;font-size:.85rem;color:var(--muted);line-height:1.55;opacity:.7;">
-      Projections apply a per-manager realism dampener: each rival's Apex
-      forward xP is scaled by (their historical pace) &divide; (their Apex
-      forward pace incl. chip EV), bounded [0.70, 1.00]. Chip gains are
-      already analytical ILPs, so are not dampened. Keeps this page
-      consistent with the Rank Milestones projection engine.
+      <strong>How this works.</strong> Each rival's projected finish blends
+      their team's expected points with how consistently they've delivered
+      this season. Any chips they still have are factored in. Same engine
+      as the Rank Predictor.
     </div>
   </main>
 </div>
@@ -4874,7 +4873,7 @@ body {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1777065427-GW35-6401c99f";
+const BUILD_VERSION = "1777069520-GW35-6401c99f";
 window.APEX_BUILD = BUILD_VERSION;
 
 let FPL_ID = null;
@@ -7629,7 +7628,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW35</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1777065427-GW35-6401c99f</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1777069520-GW35-6401c99f</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
