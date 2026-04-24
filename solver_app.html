@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="34" data-built-at="2026-04-24T13:23:02">
+<meta name="apex-gw" content="34" data-built-at="2026-04-24T14:12:31">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Apex Solver · ApexFootyData</title>
@@ -4874,7 +4874,7 @@ body {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1777033382-GW34-f26ed24c";
+const BUILD_VERSION = "1777036350-GW34-f26ed24c";
 window.APEX_BUILD = BUILD_VERSION;
 
 let FPL_ID = null;
@@ -7294,9 +7294,19 @@ function _poolFillSlot(playerId) {
     return;
   }
 
-  // Budget check
+  // Budget check — MUST mirror the pitch-bank badge (_effCost).
+  // Owned/kept players cost their selling price (SP), not now_cost. Using
+  // now_cost here while the badge uses SP causes affordable swaps to be
+  // wrongly rejected when owned players have risen in price.
+  const _spMap = TEAM_META.selling_prices || {};
+  const _effCost = (p) => {
+    if (!p) return 0;
+    const sp = _spMap[String(p.id)];
+    if (sp != null && sp > 0) return sp;
+    return p.cost || 0;
+  };
   const budgetCap = TEAM_META.budget || (TEAM_META.squad_value + TEAM_META.bank);
-  const currentCost = fullSquad.reduce((s, p) => s + (p.cost || 0), 0);
+  const currentCost = fullSquad.reduce((s, p) => s + _effCost(p), 0);
   const newCost = currentCost + (inPlayer.cost || 0);
   if (newCost > budgetCap + 0.01) {
     _showPoolBanner(`Can't afford ${inPlayer.web_name} (£${inPlayer.cost.toFixed(1)}m). Budget: £${budgetCap.toFixed(1)}m, used: £${newCost.toFixed(1)}m.`, 'error');
@@ -7403,9 +7413,17 @@ function _poolFiltered() {
 
   // "Affordable only" = can replace the worst same-position player in my
   // current 15-man squad without exceeding budget cap.
+  // Owned/kept players cost their SP (not now_cost) — must mirror pitch-bank.
+  const _spMap = TEAM_META.selling_prices || {};
+  const _effCost = (p) => {
+    if (!p) return 0;
+    const sp = _spMap[String(p.id)];
+    if (sp != null && sp > 0) return sp;
+    return p.cost || 0;
+  };
   const budgetCap = TEAM_META.budget || (TEAM_META.squad_value + TEAM_META.bank);
   const fullSquad = [..._xiPlayers, ..._benchPlayers];
-  const currentCost = fullSquad.reduce((s, p) => s + (p.cost || 0), 0);
+  const currentCost = fullSquad.reduce((s, p) => s + _effCost(p), 0);
 
   return POOL_DATA.filter(p => {
     if (_poolPos !== 'ALL' && p.element_type !== _poolPos) return false;
@@ -7423,7 +7441,8 @@ function _poolFiltered() {
         if (!samePos.length) return false;
         const _tot = q => (q.xp_per_gw || []).reduce((s,x) => s+x, 0);
         const worst = samePos.reduce((w, q) => _tot(q) < _tot(w) ? q : w, samePos[0]);
-        const newCost = currentCost - (worst.cost || 0) + (p.cost || 0);
+        // Selling price for the kept player leaving the squad, now_cost for the incoming buy.
+        const newCost = currentCost - _effCost(worst) + (p.cost || 0);
         if (newCost > budgetCap + 0.01) return false;
       }
     }
@@ -7535,10 +7554,17 @@ function _poolAddPlayer(playerId) {
   const _tot = q => (q.xp_per_gw || []).reduce((s,x) => s+x, 0);
   const out = samePos.reduce((w, p) => _tot(p) < _tot(w) ? p : w, samePos[0]);
 
-  // Budget check vs TEAM_META.budget cap
+  // Budget check vs TEAM_META.budget cap — mirror pitch-bank (SP for owned).
+  const _spMap = TEAM_META.selling_prices || {};
+  const _effCost = (p) => {
+    if (!p) return 0;
+    const sp = _spMap[String(p.id)];
+    if (sp != null && sp > 0) return sp;
+    return p.cost || 0;
+  };
   const budgetCap = TEAM_META.budget || (TEAM_META.squad_value + TEAM_META.bank);
-  const currentCost = fullSquad.reduce((s, p) => s + (p.cost || 0), 0);
-  const newCost = currentCost - (out.cost || 0) + (inPlayer.cost || 0);
+  const currentCost = fullSquad.reduce((s, p) => s + _effCost(p), 0);
+  const newCost = currentCost - _effCost(out) + (inPlayer.cost || 0);
   if (newCost > budgetCap + 0.01) {
     alert(`Can't afford ${inPlayer.web_name}. Swapping ${out.web_name} (£${out.cost.toFixed(1)}m) for ${inPlayer.web_name} (£${inPlayer.cost.toFixed(1)}m) would cost £${newCost.toFixed(1)}m — budget cap is £${budgetCap.toFixed(1)}m.`);
     return;
@@ -7603,7 +7629,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW34</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1777033382-GW34-f26ed24c</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1777036350-GW34-f26ed24c</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
