@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="35" data-built-at="2026-04-28T12:05:21">
+<meta name="apex-gw" content="35" data-built-at="2026-04-28T12:16:01">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Apex Solver · ApexFootyData</title>
@@ -5006,7 +5006,7 @@ body {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1777374321-GW35-69ee4cd2";
+const BUILD_VERSION = "1777374961-GW35-69ee4cd2";
 window.APEX_BUILD = BUILD_VERSION;
 
 let FPL_ID = null;
@@ -6218,19 +6218,38 @@ function runSolve() {
   }
 
   // ── Any other GW → compute & show transfer recs for active GW ──
+  // Plus: if a chip is set for a DIFFERENT GW, ALSO surface that chip's
+  // squad panel directly (added 2026-04-28). The pitch stays on the active
+  // GW (no auto-apply) but the user gets the FH/WC recommendation visible
+  // without needing to click the chip's pill first. Apply Squad button
+  // remains the only thing that swaps the pitch.
   const recs = computeTransfers(activeGwIdx);
   renderTransfers(recs);
   section.style.display = 'block';
-  // Build status: transfer count + (optional) hint if a chip is planned on
-  // a different GW than the one currently active.
+
+  // Surface chip squad panel when chip is set on a different GW
+  if (fhGw && fhGw !== activeGw && FH_SQUADS[String(fhGw)] && FH_SQUADS[String(fhGw)].length) {
+    const fhIdx = TEAM_META.gw_range.indexOf(fhGw);
+    if (fhIdx >= 0) {
+      _showChipSquadPanel('FH', fhGw, FH_SQUADS[String(fhGw)], fhIdx);
+      fetchAndRenderConfidence(fhGw, 'model-confidence-wrap-squad');
+    }
+  } else if (wcGw && wcGw !== activeGw && WC_SQUADS[String(wcGw)] && WC_SQUADS[String(wcGw)].length) {
+    const wcIdx = TEAM_META.gw_range.indexOf(wcGw);
+    if (wcIdx >= 0) {
+      _showChipSquadPanel('WC', wcGw, WC_SQUADS[String(wcGw)], wcIdx);
+    }
+  }
+
+  // Build status: transfer count + chip context
   let _statusBits = [];
   _statusBits.push(recs.length
     ? `${recs.length} transfer${recs.length !== 1 ? 's' : ''} for GW${activeGw}`
     : `No transfers recommended for GW${activeGw}`);
   if (fhGw && fhGw !== activeGw) {
-    _statusBits.push(`FH planned for GW${fhGw} — click GW${fhGw} pill to see the FH squad`);
+    _statusBits.push(`FH GW${fhGw} squad shown below`);
   } else if (wcGw && wcGw !== activeGw) {
-    _statusBits.push(`WC planned for GW${wcGw} — click GW${wcGw} pill to see the WC squad`);
+    _statusBits.push(`WC GW${wcGw} squad shown below`);
   }
   status.textContent = _statusBits.join('  ·  ');
 }
@@ -7867,7 +7886,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW35</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1777374321-GW35-69ee4cd2</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1777374961-GW35-69ee4cd2</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
