@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://apexfootydata.github.io/apexfootydata.com/sitemap.xml
