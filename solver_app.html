@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="35" data-built-at="2026-04-28T21:57:41">
+<meta name="apex-gw" content="35" data-built-at="2026-04-28T23:41:25">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -5040,7 +5040,7 @@ body {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1777409860-GW35-e79b3e04";
+const BUILD_VERSION = "1777416085-GW35-e79b3e04";
 window.APEX_BUILD = BUILD_VERSION;
 
 let FPL_ID = null;
@@ -6840,17 +6840,17 @@ function setBaseGw(btn) {
   // Update top FT cell — when on GW(N), display reflects effective FTs
   // for that GW (base + rolled-from-previous, capped at 2).
   if (typeof _updateFTDisplay === 'function') _updateFTDisplay();
-  // ──── Refresh transfers panel for the new active GW (added 2026-04-28) ────
-  // If the transfers section is currently visible, recompute + re-render
-  // for the GW we just navigated to. Each GW has its own transfer plan
-  // state, so switching pills should give a clean slate (with that GW's
-  // recommendations + that GW's transfer count). Without this the panel
-  // shows stale GW(N-1) recs after pill change.
+  // ──── Hide transfers panel on pill change (revised 2026-04-28) ────
+  // Each GW is its own "session". When the user switches pills, hide the
+  // recs panel + status bar — they re-appear when Solve is pressed for
+  // the new GW. Marcus rejected auto-refresh on pill change because it
+  // showed stale GW36 recs immediately after rolling FT on GW35, before
+  // the user explicitly asked for them.
   try {
     const _tSec = document.getElementById('transfers-section');
-    if (_tSec && _tSec.style.display !== 'none' && typeof renderTransfers === 'function') {
-      renderTransfers(computeTransfers(activeGwIdx));
-    }
+    if (_tSec) { _tSec.style.display = 'none'; }
+    const _stat = document.getElementById('solve-status');
+    if (_stat) _stat.textContent = '';
   } catch (_e) { /* non-fatal */ }
   // REVERTED 2026-04-17 (Marcus feedback, second round): pill click must NOT
   // auto-apply the FH/WC squad to the top pitch. The Solve button is the
@@ -8289,7 +8289,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW35</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1777409860-GW35-e79b3e04</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1777416085-GW35-e79b3e04</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
