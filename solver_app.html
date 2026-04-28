@@ -1,10 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="35" data-built-at="2026-04-28T14:44:52">
+<meta name="apex-gw" content="35" data-built-at="2026-04-28T18:07:54">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Apex Solver · ApexFootyData</title>
+<title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
+<meta name="description" content="Plan FPL transfers, chips, and Free Hit squads. Live xG-based projections, mini-league simulator, rank predictor. Free FPL tool used by 100+ managers.">
+<meta name="keywords" content="FPL solver, FPL chip planner, FPL Free Hit, FPL Wildcard, FPL transfer planner, FPL DGW, Fantasy Premier League tools">
+<link rel="canonical" href="https://apexfootydata.github.io/apexfootydata.com/solver_app.html">
+<meta name="robots" content="index, follow">
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="ApexFootyData">
+<meta property="og:title" content="Apex FPL Solver — Chip Planner &amp; Free Hit Optimiser">
+<meta property="og:description" content="Plan FPL transfers and chips with live xG projections. Free Hit ILP, Wildcard solver, mini-league simulator.">
+<meta property="og:url" content="https://apexfootydata.github.io/apexfootydata.com/solver_app.html">
+<meta property="og:image" content="https://apexfootydata.github.io/apexfootydata.com/og-image.png">
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Apex FPL Solver — Chip Planner &amp; Free Hit Optimiser">
+<meta name="twitter:description" content="Plan FPL transfers + chips with live xG. Mini-league sim + rank predictor.">
+<meta name="twitter:image" content="https://apexfootydata.github.io/apexfootydata.com/og-image.png">
+<!-- JSON-LD -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Apex FPL Solver",
+  "url": "https://apexfootydata.github.io/apexfootydata.com/solver_app.html",
+  "description": "Fantasy Premier League solver with chip planner, Free Hit optimiser, transfer recommender, mini-league simulator, and rank predictor. Powered by Dixon-Coles + xG.",
+  "applicationCategory": "SportsApplication",
+  "operatingSystem": "Web Browser",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "GBP" }
+}
+</script>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 /* Apex FPL UI v3 — black / white / orange */
@@ -5011,7 +5040,7 @@ body {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1777383892-GW35-69ee4cd2";
+const BUILD_VERSION = "1777396074-GW35-69ee4cd2";
 window.APEX_BUILD = BUILD_VERSION;
 
 let FPL_ID = null;
@@ -8260,7 +8289,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW35</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1777383892-GW35-69ee4cd2</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1777396074-GW35-69ee4cd2</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
