@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="35" data-built-at="2026-04-28T11:30:36">
+<meta name="apex-gw" content="35" data-built-at="2026-04-28T12:05:21">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Apex Solver · ApexFootyData</title>
@@ -5006,7 +5006,7 @@ body {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1777372236-GW35-69ee4cd2";
+const BUILD_VERSION = "1777374321-GW35-69ee4cd2";
 window.APEX_BUILD = BUILD_VERSION;
 
 let FPL_ID = null;
@@ -5944,13 +5944,83 @@ function computeTransfers(gwIdx) {
         in_xp: Math.round(bestInTotal * 10) / 10,
         gain: Math.round((bestInTotal - outTotal) * 100) / 100,
         gw0_gain: Math.round((inGw0 - outGw0) * 100) / 100,
+        is_dgw_priority: false,
       });
     }
   }
-  transfers.sort((a, b) => b.gain - a.gain);
-  // All rows are alternative FT choices, not stacked hits. Filter out
-  // near-zero gains (< 0.5 xP total) — they're not real upgrades.
-  return transfers.filter(t => t.gain >= 0.5).slice(0, 6);
+
+  // ──── DGW Priority pass (added 2026-04-28) ────
+  // When the active GW has DGW teams, the rolling-horizon recommender often
+  // misses Palace/MCI-style swaps because the DGW boost (~+3 to single-GW xP)
+  // is offset by their weaker single GW37/38 fixtures vs consistent
+  // non-DGW alternatives like Gibbs-White / Gabriel.
+  //
+  // For each squad slot, find the best DGW-team candidate ranked by
+  // SINGLE-GW gain (active GW only). Surfaces "transfer in for DGW spike,
+  // revert next week" plays that the rolling sum hides. Lower threshold
+  // (0.3 single-GW gain) because these are short-term boosts.
+  if (dgwSet.size > 0) {
+    for (const outP of SQUAD_DATA) {
+      const pos = outP.element_type || 3;
+      const outIsDgw = dgwSet.has(outP.team || '');
+      if (outIsDgw) continue;  // already on a DGW asset, skip
+      const outTeam = outP.team || '';
+      const outCost = outP.cost || 0;
+      const outGw0  = _xpAt(outP, gwIdx);
+
+      let bestDgwIn = null;
+      let bestDgwInGw0 = -Infinity;
+      for (const inP of POOL_DATA) {
+        if (inP.element_type !== pos) continue;
+        if (squadIds.has(inP.id)) continue;
+        if (!dgwSet.has(inP.team || '')) continue;     // must be DGW
+        if ((inP.cost || 99) > outCost + (TEAM_META.bank || 0) + 0.05) continue;
+        const inTeam = inP.team || '';
+        if (inTeam !== outTeam) {
+          const inTeamCount = teamCounts[inTeam] || 0;
+          if (inTeamCount >= 3) continue;
+        }
+        const inGw0 = _xpAt(inP, gwIdx);
+        if (inGw0 > bestDgwInGw0) {
+          bestDgwInGw0 = inGw0;
+          bestDgwIn = inP;
+        }
+      }
+      if (bestDgwIn && bestDgwInGw0 - outGw0 > 0.3) {
+        // Skip if we already have this exact swap from the rolling pass
+        const dup = transfers.some(t =>
+          t.out_id === outP.id && t.in_id === bestDgwIn.id
+        );
+        if (dup) continue;
+        const inTotal = _sumXp(bestDgwIn);
+        const outTotal = _sumXp(outP);
+        transfers.push({
+          out_id: outP.id, out_name: outP.web_name || '?', out_team: outP.team || '',
+          out_pos: POS_NAMES[pos] || '?', out_cost: outP.cost || 0,
+          out_xp: Math.round(outTotal * 10) / 10,
+          in_id: bestDgwIn.id, in_name: bestDgwIn.web_name || '?', in_team: bestDgwIn.team || '',
+          in_pos: POS_NAMES[pos] || '?', in_cost: bestDgwIn.cost || 0,
+          in_xp: Math.round(inTotal * 10) / 10,
+          gain: Math.round((inTotal - outTotal) * 100) / 100,
+          gw0_gain: Math.round((bestDgwInGw0 - outGw0) * 100) / 100,
+          is_dgw_priority: true,
+        });
+      }
+    }
+  }
+
+  // Sort: DGW-priority first by single-GW gain, then rolling rows by rolling gain
+  transfers.sort((a, b) => {
+    if (a.is_dgw_priority !== b.is_dgw_priority)
+      return a.is_dgw_priority ? -1 : 1;
+    return a.is_dgw_priority
+      ? b.gw0_gain - a.gw0_gain
+      : b.gain - a.gain;
+  });
+  // Filter: rolling rows need ≥ 0.5 total gain; DGW rows need ≥ 0.3 single-GW gain.
+  return transfers.filter(t =>
+    t.is_dgw_priority ? t.gw0_gain >= 0.3 : t.gain >= 0.5
+  ).slice(0, 8);
 }
 
 // ──── Transfer Recommendations ────
@@ -6026,7 +6096,14 @@ function renderTransfers(recs) {
           </div>
         </div>
         <div class="transfer-meta">
-          <span class="gain">+${t.gain.toFixed(2)} xPts</span>
+          ${t.is_dgw_priority
+            ? `<span class="gain" style="color:#fb923c;">+${t.gw0_gain.toFixed(2)} GW${TEAM_META.gw_range[activeGwIdx]}</span>`
+            : `<span class="gain">+${t.gain.toFixed(2)} xPts</span>`
+          }
+          ${t.is_dgw_priority
+            ? `<span style="background:#fb923c;color:#000;font-size:.62rem;font-weight:700;padding:2px 6px;border-radius:4px;letter-spacing:0.4px;">🔥 DGW SPIKE</span>`
+            : ''
+          }
           ${hitCost}
           <span class="${badgeCls}" style="${badgeStyle}font-size:.68rem;font-weight:700;padding:2px 8px;border-radius:4px;">${badgeLabel}</span>
           <button onclick="_applyTransferRec(${t.in_id}, ${t.out_id})"
@@ -7790,7 +7867,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW35</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1777372236-GW35-69ee4cd2</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1777374321-GW35-69ee4cd2</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
