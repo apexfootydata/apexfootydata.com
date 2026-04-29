@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="35" data-built-at="2026-04-29T11:40:13">
+<meta name="apex-gw" content="35" data-built-at="2026-04-29T12:11:51">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -5040,7 +5040,7 @@ body {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1777459213-GW35-30c420e6";
+const BUILD_VERSION = "1777461111-GW35-30c420e6";
 window.APEX_BUILD = BUILD_VERSION;
 
 let FPL_ID = null;
@@ -6612,28 +6612,31 @@ function runSolve() {
   renderTransfers(recs);
   section.style.display = 'block';
 
-  // Surface chip squad panel when chip is set on a different GW
-  if (fhGw && fhGw !== activeGw && FH_SQUADS[String(fhGw)] && FH_SQUADS[String(fhGw)].length) {
+  // Surface chip squad panel when chip is set on a FUTURE GW.
+  // Past chip GWs are filtered out — the squad has already been applied
+  // (or the chance has passed); re-showing it here just buries the transfer
+  // recs the user actually pressed Solve for. (2026-04-29 fix per Marcus)
+  if (fhGw && fhGw > activeGw && FH_SQUADS[String(fhGw)] && FH_SQUADS[String(fhGw)].length) {
     const fhIdx = TEAM_META.gw_range.indexOf(fhGw);
     if (fhIdx >= 0) {
       _showChipSquadPanel('FH', fhGw, FH_SQUADS[String(fhGw)], fhIdx);
       fetchAndRenderConfidence(fhGw, 'model-confidence-wrap-squad');
     }
-  } else if (wcGw && wcGw !== activeGw && WC_SQUADS[String(wcGw)] && WC_SQUADS[String(wcGw)].length) {
+  } else if (wcGw && wcGw > activeGw && WC_SQUADS[String(wcGw)] && WC_SQUADS[String(wcGw)].length) {
     const wcIdx = TEAM_META.gw_range.indexOf(wcGw);
     if (wcIdx >= 0) {
       _showChipSquadPanel('WC', wcGw, WC_SQUADS[String(wcGw)], wcIdx);
     }
   }
 
-  // Build status: transfer count + chip context
+  // Build status: transfer count + chip context (only mention chips on FUTURE GWs)
   let _statusBits = [];
   _statusBits.push(recs.length
     ? `${recs.length} transfer${recs.length !== 1 ? 's' : ''} for GW${activeGw}`
     : `No transfers recommended for GW${activeGw}`);
-  if (fhGw && fhGw !== activeGw) {
+  if (fhGw && fhGw > activeGw) {
     _statusBits.push(`FH GW${fhGw} squad shown below`);
-  } else if (wcGw && wcGw !== activeGw) {
+  } else if (wcGw && wcGw > activeGw) {
     _statusBits.push(`WC GW${wcGw} squad shown below`);
   }
   status.textContent = _statusBits.join('  ·  ');
@@ -6883,6 +6886,11 @@ function setBaseGw(btn) {
     if (_tSec) { _tSec.style.display = 'none'; }
     const _stat = document.getElementById('solve-status');
     if (_stat) _stat.textContent = '';
+    // Also hide the chip squad banner — it's tied to the previous GW's Solve.
+    // Without this, the orange "WC GW35 — balanced squad" banner persists when
+    // the user navigates to GW36 and looks misleading next to GW36 transfers.
+    const _bnr = document.getElementById('solve-banner');
+    if (_bnr) { _bnr.style.display = 'none'; _bnr.textContent = ''; }
   } catch (_e) { /* non-fatal */ }
   // REVERTED 2026-04-17 (Marcus feedback, second round): pill click must NOT
   // auto-apply the FH/WC squad to the top pitch. The Solve button is the
@@ -8321,7 +8329,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW35</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1777459213-GW35-30c420e6</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1777461111-GW35-30c420e6</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
