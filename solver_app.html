@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="35" data-built-at="2026-04-29T14:13:10">
+<meta name="apex-gw" content="35" data-built-at="2026-04-29T14:41:39">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -170,7 +170,10 @@ body {
 }
 
 .container {
-  max-width: 1100px;
+  /* Match topbar's 1400px max-width so header + content align on wide screens.
+     Pre-fix the topbar extended ~150px wider on each side than content,
+     making the page look off-centre even though content was centred. */
+  max-width: 1400px;
   margin: 0 auto;
   padding: 40px 28px;
 }
@@ -5074,7 +5077,7 @@ body {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1777468390-GW35-177bb267";
+const BUILD_VERSION = "1777470098-GW35-177bb267";
 window.APEX_BUILD = BUILD_VERSION;
 
 let FPL_ID = null;
@@ -8368,7 +8371,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW35</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1777468390-GW35-177bb267</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1777470098-GW35-177bb267</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
