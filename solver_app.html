@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="35" data-built-at="2026-04-29T22:00:15">
+<meta name="apex-gw" content="35" data-built-at="2026-04-29T22:22:23">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -3246,6 +3246,12 @@ body {
 .lg-row-you:hover { background:rgba(249,115,22,.1); }
 .lg-name { font-weight:700;font-size:1.05rem;color:var(--fg); }
 .lg-team { font-size:.88rem;color:var(--muted);margin-top:2px; }
+.lg-overall-rank {
+  display:inline-block;font-family:'JetBrains Mono',ui-monospace,monospace;
+  font-size:.72rem;font-weight:700;color:#a1a1aa;
+  background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);
+  border-radius:4px;padding:1px 6px;margin-left:6px;letter-spacing:0;vertical-align:1px;
+}
 .lg-you-tag {
   display:inline-block;background:var(--accent,#f97316);color:#000;
   border-radius:4px;padding:2px 7px;font-size:.72rem;font-weight:800;
@@ -4857,9 +4863,13 @@ body {
     let total = 0;
     let frozenPreInflightTotal = 0;
     let inflightHitCost = 0;
+    let overallRank = 0;
     const cur = hist.current || [];
     if (cur.length > 0) {
       total = +(cur[cur.length - 1].total_points || 0);
+      // overall_rank from the latest GW row — used by the mini-league table to
+      // show each manager's overall FPL rank next to their team name.
+      overallRank = +(cur[cur.length - 1].overall_rank || 0);
       // Frozen pre-inflight total = total_points after the previous GW.
       // When the latest hist row is an in-flight GW, that row's total_points
       // is laggy/cached on FPL's side (1–3 minute delay vs live actuals).
@@ -4916,6 +4926,7 @@ body {
     return {
       entry_id: entryId,
       total,
+      overall_rank: overallRank,
       frozen_pre_inflight_total: frozenPreInflightTotal,
       inflight_hit_cost: inflightHitCost,
       picks,
@@ -5602,6 +5613,7 @@ body {
         entry_id: ms.entry_id,
         player_name: ms.player_name,
         entry_name:  ms.entry_name,
+        overall_rank: ms.state.overall_rank || 0,
         total: _displayedTotal,
         total_lagged: _mgrTotal,
         frozen_pre_inflight_total: _frozenPre,
@@ -5665,6 +5677,7 @@ body {
         entry_id: m.entry_id,
         player_name: m.player_name,
         entry_name: m.entry_name,
+        overall_rank: m.overall_rank,
         total: m.total,
         // Frozen post-last-finished total — refresh path adds live_now to this
         // for fresh PTS, bypassing standings.total cache lag.
@@ -5890,7 +5903,7 @@ body {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1777496415-GW35-df7203b9";
+const BUILD_VERSION = "1777497743-GW35-df7203b9";
 window.APEX_BUILD = BUILD_VERSION;
 
 let FPL_ID = null;
@@ -6356,11 +6369,16 @@ function renderLeagueTable(data) {
     const p10 = Math.round(m.projected_final_p10 || 0);
     const p90 = Math.round(m.projected_final_p90 || 0);
 
+    // Overall FPL rank — shown next to the team name as a small mono badge.
+    const _ovr = m.overall_rank || 0;
+    const _ovrHtml = _ovr > 0
+      ? `<span class="lg-overall-rank">#${_ovr.toLocaleString()}</span>`
+      : '';
     tr.innerHTML = `
       <td class="${rankCls}">${rank}</td>
       <td>
         <div class="lg-name">${m.player_name || '—'}${youTag}</div>
-        <div class="lg-team">${m.entry_name || ''}</div>
+        <div class="lg-team">${m.entry_name || ''} ${_ovrHtml}</div>
       </td>
       <td class="lg-pts">${(m.current_total || 0).toLocaleString()}</td>
       <td class="lg-proj">
@@ -9346,7 +9364,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW35</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1777496415-GW35-df7203b9</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1777497743-GW35-df7203b9</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
