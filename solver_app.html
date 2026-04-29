@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="35" data-built-at="2026-04-29T17:07:37">
+<meta name="apex-gw" content="35" data-built-at="2026-04-29T17:15:31">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -580,21 +580,27 @@ body {
   transition: border-color 0.25s, box-shadow 0.25s;
 }
 .bench-row .shirt-img { opacity: 0.65; }
-/* BB ACTIVE — bright green border + soft glow signals all 4 bench players will score */
+/* BB ACTIVE — bright green border that pulses in sync with the TC shirt
+   glow and the WC/FH whole-pitch pulse (1.6s cadence, dim → bright lime). */
 .bench-row.bench-bb-active {
   border: 2px solid #22c55e;
-  box-shadow: 0 0 0 1px rgba(34,197,94,0.35),
-              0 0 18px 2px rgba(34,197,94,0.45),
-              inset 0 0 12px rgba(34,197,94,0.12);
-  animation: benchBbPulse 2.4s ease-in-out infinite;
+  animation: chipPulse 1.6s ease-in-out infinite;
 }
-@keyframes benchBbPulse {
+/* WC / FH ACTIVE — same pulse on the whole pitch border. Stronger glow
+   than BB because the entire squad is the chip squad. */
+.pitch.pitch-chip-active {
+  border: 2px solid #22c55e;
+  animation: chipPulse 1.6s ease-in-out infinite;
+}
+/* Shared keyframes — green dim → bright lime, matches the TC shirt outline
+   pulse so all chip activations feel like one design language. */
+@keyframes chipPulse {
   0%, 100% { box-shadow: 0 0 0 1px rgba(34,197,94,0.35),
-                          0 0 18px 2px rgba(34,197,94,0.45),
-                          inset 0 0 12px rgba(34,197,94,0.12); }
-  50%      { box-shadow: 0 0 0 1px rgba(34,197,94,0.55),
-                          0 0 26px 4px rgba(34,197,94,0.65),
-                          inset 0 0 14px rgba(34,197,94,0.18); }
+                         0 0 14px 2px rgba(34,197,94,0.45),
+                         inset 0 0 12px rgba(34,197,94,0.10); }
+  50%      { box-shadow: 0 0 0 2px rgba(74,222,128,0.65),
+                         0 0 28px 6px rgba(74,222,128,0.75),
+                         inset 0 0 18px rgba(74,222,128,0.22); }
 }
 
 /* ── Drag & Drop ─────────────────────────────────────────────────────────── */
@@ -5141,7 +5147,7 @@ body {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1777478856-GW35-177bb267";
+const BUILD_VERSION = "1777479331-GW35-177bb267";
 window.APEX_BUILD = BUILD_VERSION;
 
 let FPL_ID = null;
@@ -7177,15 +7183,25 @@ function _renderPitchFromState() {
   const mids = _xiPlayers.filter(p => p.element_type === 3);
   const fwds = _xiPlayers.filter(p => p.element_type === 4);
 
-  // BB label
+  // Chip-active detection for the active GW. WC/FH light up the WHOLE pitch
+  // (border pulses green) — the squad on the pitch IS the chip squad. BB
+  // lights up only the bench strip (XI is unaffected by BB). All three use
+  // the same green pulse for visual cohesion.
   const bbGw = document.getElementById('sel-bb')?.value;
+  const wcGw = document.getElementById('sel-wc')?.value;
+  const fhGw = document.getElementById('sel-fh')?.value;
   const gwNow = TEAM_META.gw_range[activeGwIdx];
   const bbActive = bbGw && parseInt(bbGw) === gwNow;
+  const wcActive = wcGw && parseInt(wcGw) === gwNow;
+  const fhActive = fhGw && parseInt(fhGw) === gwNow;
   const benchLabel = bbActive
     ? 'Bench <span class="chip-active-badge bb-active">BB ACTIVE</span>'
     : 'Bench';
 
-  let html = '<div class="pitch">';
+  // Compose pitch class so the green pulse fires when WC or FH targets the
+  // active GW. Both chips share `pitch-chip-active` styling.
+  const _pitchCls = (wcActive || fhActive) ? 'pitch pitch-chip-active' : 'pitch';
+  let html = `<div class="${_pitchCls}">`;
   // Recompute squad value + bank from the LIVE pitch state so the badge reflects
   // whatever squad is currently on the pitch (base / WC / FH), not the stale
   // pre-chip TEAM_META. Budget = total spendable pot = current squad_value + bank.
@@ -8498,7 +8514,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW35</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1777478856-GW35-177bb267</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1777479331-GW35-177bb267</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
