@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="35" data-built-at="2026-04-29T17:05:24">
+<meta name="apex-gw" content="35" data-built-at="2026-04-29T17:07:37">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -452,6 +452,18 @@ body {
   height: 96px;
   display: block;
   filter: drop-shadow(0 1px 3px rgba(0,0,0,0.22));
+}
+/* Triple Captain active — pulsing green glow hugging the shirt OUTLINE
+   (via drop-shadow filter, so the halo follows the jersey shape rather than
+   sitting on a rectangular border). Applied to BOTH captain and vice-captain
+   when TC is selected for the active GW. (replaces old "3×" corner badge) */
+.shirt-wrap.tc-active .svg-shirt {
+  filter: drop-shadow(0 0 0 #22c55e) drop-shadow(0 0 6px #22c55e) drop-shadow(0 0 12px rgba(34,197,94,0.55));
+  animation: tcShirtPulse 1.6s ease-in-out infinite;
+}
+@keyframes tcShirtPulse {
+  0%, 100% { filter: drop-shadow(0 0 0 #22c55e) drop-shadow(0 0 6px #22c55e) drop-shadow(0 0 12px rgba(34,197,94,0.55)); }
+  50%      { filter: drop-shadow(0 0 0 #4ade80) drop-shadow(0 0 10px #4ade80) drop-shadow(0 0 20px rgba(74,222,128,0.85)); }
 }
 .shirt-dots {
   position: absolute;
@@ -5129,7 +5141,7 @@ body {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1777478724-GW35-177bb267";
+const BUILD_VERSION = "1777478856-GW35-177bb267";
 window.APEX_BUILD = BUILD_VERSION;
 
 let FPL_ID = null;
@@ -7133,20 +7145,23 @@ function _shirtHtml(p, isXi) {
   if (_xpCs > 0.5) dots += '<span class="dot dot-cs" title="clean sheet threat"></span>';
   if (_xpSv > 0.5) dots += '<span class="dot dot-sv" title="save threat"></span>';
   let badges = '';
+  // TC-active detection: when Triple Captain is selected for THIS GW, both
+  // captain and vice get a pulsing green shirt-wrap outline (replaces the
+  // old crowded "3×" badge that fought with the X button).
+  const _tcGw = document.getElementById('sel-tc')?.value;
+  const _gwAbs = TEAM_META.gw_range[activeGwIdx];
+  const _tcOnThisGw = _tcGw && parseInt(_tcGw) === _gwAbs;
   if (isCap) {
     badges += '<span class="shirt-badge cap-badge">C</span>';
-    const tcGw = document.getElementById('sel-tc')?.value;
-    const gw   = TEAM_META.gw_range[activeGwIdx];
-    if (tcGw && parseInt(tcGw) === gw)
-      badges += '<span class="shirt-badge tc-active-badge">3×</span>';
   } else if (isVc && isXi) {
     badges += '<span class="shirt-badge vc-badge">V</span>';
   }
+  const _tcGlow = (_tcOnThisGw && (isCap || (isVc && isXi))) ? ' tc-active' : '';
   const cls = ['shirt', isCap ? 'cap' : '', !isXi ? 'bench-shirt' : ''].filter(Boolean).join(' ');
   const removeBtn = `<button class="pp-remove-btn" onclick="event.stopPropagation(); _poolRemovePlayer(${p.id})" title="Remove ${p.web_name}">✕</button>`;
   return `<div class="${cls}" draggable="true" data-pid="${p.id}" data-xi="${isXi ? 1 : 0}" data-xp="${xp}" data-pos="${p.element_type}" data-cost="${p.cost}">` +
     removeBtn +
-    `<div class="shirt-wrap">${shirt}${badges}` +
+    `<div class="shirt-wrap${_tcGlow}">${shirt}${badges}` +
       (dots ? `<span class="shirt-dots">${dots}</span>` : '') +
     `</div>` +
     `<div class="shirt-xp">${xp}</div>` +
@@ -8483,7 +8498,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW35</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1777478724-GW35-177bb267</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1777478856-GW35-177bb267</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
