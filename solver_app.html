@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="35" data-built-at="2026-04-29T17:15:31">
+<meta name="apex-gw" content="35" data-built-at="2026-04-29T17:23:47">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -260,6 +260,17 @@ body {
   padding: 20px 28px;
   min-width: 140px;
   box-shadow: var(--card-shadow);
+  animation: ambientGreenPulse 3.2s ease-in-out infinite;
+}
+/* Ambient green pulse — slower and subtler than the chip-active pulse.
+   Keeps stat cards / chip-usage panel feeling "alive" without screaming.
+   (Trial — kill the animation rule on these selectors to revert.) */
+@keyframes ambientGreenPulse {
+  0%, 100% { border-color: var(--border-light);
+             box-shadow: var(--card-shadow); }
+  50%      { border-color: rgba(34,197,94,0.55);
+             box-shadow: 0 0 0 1px rgba(34,197,94,0.15),
+                         0 4px 18px rgba(34,197,94,0.18); }
 }
 .proj-label {
   font-size: 0.78rem;
@@ -842,6 +853,7 @@ body {
   margin-top: 4px;
   margin-bottom: 18px;
   box-shadow: var(--card-shadow);
+  animation: ambientGreenPulse 3.2s ease-in-out infinite;
 }
 .chip-usage-title {
   font-size: 1.1rem;
@@ -5147,7 +5159,7 @@ body {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1777479331-GW35-177bb267";
+const BUILD_VERSION = "1777479827-GW35-177bb267";
 window.APEX_BUILD = BUILD_VERSION;
 
 let FPL_ID = null;
@@ -8514,7 +8526,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW35</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1777479331-GW35-177bb267</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1777479827-GW35-177bb267</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
