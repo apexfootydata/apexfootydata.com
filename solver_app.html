@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="35" data-built-at="2026-04-29T22:22:23">
+<meta name="apex-gw" content="35" data-built-at="2026-04-29T22:46:25">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -5414,6 +5414,7 @@ body {
         entry_id: managers[i].entry_id,
         player_name: managers[i].player_name || '',
         entry_name:  managers[i].entry_name  || '',
+        overall_rank: managers[i].overall_rank || 0,
         // PTS column = FPL's `total` from /leagues-classic/{id}/standings/.
         // This field IS live — it equals summary_overall_points which already
         // includes in-progress GW points. Adding live_now would double-count.
@@ -5903,7 +5904,7 @@ body {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1777497743-GW35-df7203b9";
+const BUILD_VERSION = "1777499185-GW35-df7203b9";
 window.APEX_BUILD = BUILD_VERSION;
 
 let FPL_ID = null;
@@ -9364,7 +9365,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW35</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1777497743-GW35-df7203b9</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1777499185-GW35-df7203b9</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
