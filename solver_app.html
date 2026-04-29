@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="35" data-built-at="2026-04-29T13:49:37">
+<meta name="apex-gw" content="35" data-built-at="2026-04-29T14:13:10">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -5074,7 +5074,7 @@ body {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1777466977-GW35-177bb267";
+const BUILD_VERSION = "1777468390-GW35-177bb267";
 window.APEX_BUILD = BUILD_VERSION;
 
 let FPL_ID = null;
@@ -6067,7 +6067,13 @@ function computeTransfers(gwIdx) {
   const nGws = TEAM_META.gw_range.length;
   const dgwTeams = (TEAM_META.dgw_teams_by_gw || {})[String(gw)] || [];
   const dgwSet = new Set(dgwTeams);
-  const squadIds = new Set(SQUAD_DATA.map(p => p.id));
+  // Use the LIVE squad (WC/FH-applied if any), not SQUAD_DATA.
+  // Pre-WC squad has no Palace; post-WC-apply squad does. If we used
+  // SQUAD_DATA here, the recommender would re-suggest Palace players that
+  // are already in the WC squad — wasting an FT on a player we already own.
+  // (fixed 2026-04-29 per Marcus)
+  const _liveFullSquad = [..._xiPlayers, ..._benchPlayers];
+  const squadIds = new Set(_liveFullSquad.map(p => p.id));
   const budget = TEAM_META.budget || 0;
   const transfers = [];
 
@@ -6085,12 +6091,11 @@ function computeTransfers(gwIdx) {
   }
   const _sumXp = (p) => horizonIdxs.reduce((a, i) => a + _xpAt(p, i), 0);
 
-  // Pre-build team counts for the 3-per-team cap. We count from the
-  // CURRENT squad; for each candidate swap, we'll check (count - outP's
-  // contribution + 1) ≤ 3, i.e. block any incoming player whose team
-  // already has 3 squad members and the outgoing player isn't one of them.
+  // Pre-build team counts for the 3-per-team cap from the LIVE squad too,
+  // not SQUAD_DATA — otherwise post-WC the cap math is anchored to the
+  // pre-WC team distribution and rejects/permits the wrong swaps.
   const teamCounts = {};
-  for (const p of SQUAD_DATA) {
+  for (const p of _liveFullSquad) {
     const t = p.team || '';
     teamCounts[t] = (teamCounts[t] || 0) + 1;
   }
@@ -8363,7 +8368,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW35</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1777466977-GW35-177bb267</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1777468390-GW35-177bb267</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
