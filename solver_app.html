@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="35" data-built-at="2026-04-29T18:46:19">
+<meta name="apex-gw" content="35" data-built-at="2026-04-29T19:06:58">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -1984,251 +1984,6 @@ body {
   .pp-remove-btn { width: 16px; height: 16px; font-size: 0.5rem; line-height: 16px; }
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   SCOREBOARD top panel (2026-04-29 — Variant C "Match Day")
-   Replaces the old .team-header + .proj-row + .chip-usage-panel block.
-   ═══════════════════════════════════════════════════════════════════════════ */
-.scoreboard {
-  background: var(--bg2);
-  border: 1px solid var(--border-light);
-  border-radius: var(--card-radius);
-  padding: 0;
-  margin: 18px 0 14px;
-  overflow: hidden;
-}
-.sb-ribbon {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 18px;
-  border-bottom: 1px solid rgba(255,255,255,0.05);
-  background: rgba(0,0,0,0.25);
-  flex-wrap: wrap;
-  gap: 10px;
-}
-.sb-ribbon-left {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-family: 'JetBrains Mono', ui-monospace, monospace;
-  font-size: 0.72rem;
-  letter-spacing: 0.06em;
-}
-.sb-live-dot {
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  background: #ef4444;
-  animation: sbLivePulse 1.4s ease-in-out infinite;
-}
-@keyframes sbLivePulse {
-  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(239,68,68,0.7); }
-  50%      { opacity: 0.55; box-shadow: 0 0 0 4px rgba(239,68,68,0); }
-}
-.sb-live-label {
-  color: #ef4444;
-  font-weight: 700;
-  text-transform: uppercase;
-}
-.sb-deadline {
-  color: var(--muted);
-  font-weight: 500;
-  margin-left: 4px;
-}
-.sb-ribbon-stats {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-family: 'JetBrains Mono', ui-monospace, monospace;
-  font-size: 0.78rem;
-  color: var(--muted);
-}
-.sb-stat-mini { white-space: nowrap; }
-.sb-stat-mini strong { color: var(--text); font-weight: 700; }
-.sb-stat-label {
-  font-size: 0.6rem;
-  letter-spacing: 0.1em;
-  color: #71717a;
-  text-transform: uppercase;
-  margin-right: 3px;
-}
-.sb-stat-divider {
-  width: 1px; height: 14px;
-  background: rgba(255,255,255,0.1);
-}
-
-.sb-hero {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  gap: 24px;
-  align-items: center;
-  padding: 26px 28px;
-}
-.sb-hero-label {
-  font-size: 0.62rem;
-  color: #71717a;
-  letter-spacing: 0.12em;
-  font-weight: 700;
-  text-transform: uppercase;
-  margin-bottom: 6px;
-}
-.sb-hero-label-centre { text-align: center; }
-.sb-hero-left { text-align: right; }
-.sb-team-name {
-  font-size: 1.75rem;
-  font-weight: 700;
-  letter-spacing: -0.015em;
-  margin: 0;
-  color: var(--text);
-}
-.sb-rank-line {
-  font-size: 0.78rem;
-  color: var(--muted);
-  margin-top: 4px;
-  font-family: 'JetBrains Mono', ui-monospace, monospace;
-  letter-spacing: 0.02em;
-}
-.sb-dot { color: #52525b; margin: 0 4px; }
-.sb-rank-pre { color: #71717a; font-size: 0.68rem; letter-spacing: 0.08em; }
-
-.sb-hero-centre {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 0 24px;
-}
-.sb-hero-num {
-  font-family: 'JetBrains Mono', ui-monospace, monospace;
-  font-size: 4rem;
-  font-weight: 700;
-  line-height: 1;
-  letter-spacing: -0.04em;
-  background: linear-gradient(180deg, #fafafa 0%, #d4d4d8 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  color: #fafafa;
-}
-.sb-hero-sub {
-  font-size: 0.7rem;
-  color: #71717a;
-  letter-spacing: 0.08em;
-  font-weight: 600;
-  text-transform: uppercase;
-  margin-top: 4px;
-}
-
-.sb-hero-right { text-align: left; }
-.sb-form-bars {
-  display: flex;
-  gap: 4px;
-  align-items: end;
-  height: 32px;
-  margin-top: 4px;
-}
-.sb-form-bar {
-  width: 7px;
-  background: #52525b;
-  border-radius: 1px;
-  transition: background 0.2s;
-}
-.sb-form-bar.sb-form-bar-strong { background: #4ade80; }
-.sb-form-bar.sb-form-bar-current { background: #f97316; }
-.sb-form-num {
-  font-family: 'JetBrains Mono', ui-monospace, monospace;
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: var(--text);
-  margin-top: 8px;
-}
-.sb-form-num-sub {
-  font-size: 0.7rem;
-  color: var(--muted);
-  font-weight: 500;
-  letter-spacing: 0.02em;
-}
-
-/* Bottom row: GW pills + chip rail */
-.sb-bottom-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 18px;
-  margin: 0 0 18px;
-  flex-wrap: wrap;
-}
-.sb-gw-pills {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-.sb-chip-rail {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-.sb-chip-rail-label {
-  font-size: 0.6rem;
-  color: #71717a;
-  letter-spacing: 0.1em;
-  font-weight: 700;
-  text-transform: uppercase;
-  margin-right: 4px;
-}
-.sb-chip-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 8px;
-  padding: 4px 8px 4px 4px;
-  cursor: pointer;
-  transition: border-color 0.15s, background 0.15s;
-}
-.sb-chip-pill:hover { border-color: rgba(249,115,22,0.4); background: rgba(249,115,22,0.06); }
-.sb-chip-tag {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 22px; height: 20px;
-  border-radius: 4px;
-  font-family: 'JetBrains Mono', ui-monospace, monospace;
-  font-size: 0.6rem;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  background: rgba(255,255,255,0.06);
-  color: var(--muted);
-}
-.sb-chip-wc .sb-chip-tag { background: rgba(168,85,247,0.2); color: #c4b5fd; }
-.sb-chip-bb .sb-chip-tag { background: rgba(34,197,94,0.18); color: #86efac; }
-.sb-chip-tc .sb-chip-tag { background: rgba(251,191,36,0.18); color: #fcd34d; }
-.sb-chip-fh .sb-chip-tag { background: rgba(59,130,246,0.18); color: #93c5fd; }
-.sb-chip-pill select {
-  background: transparent;
-  border: none;
-  color: var(--text);
-  font-family: 'JetBrains Mono', ui-monospace, monospace;
-  font-size: 0.78rem;
-  font-weight: 700;
-  padding: 4px 4px;
-  cursor: pointer;
-  appearance: none;
-  -webkit-appearance: none;
-  outline: none;
-  min-width: 56px;
-}
-
-/* Mobile compaction */
-@media (max-width: 760px) {
-  .sb-hero { grid-template-columns: 1fr; gap: 14px; padding: 18px 16px; text-align: center; }
-  .sb-hero-left, .sb-hero-right { text-align: center; }
-  .sb-hero-num { font-size: 3rem; }
-  .sb-form-bars { justify-content: center; }
-  .sb-ribbon { padding: 8px 12px; flex-direction: column; align-items: flex-start; }
-  .sb-bottom-row { flex-direction: column; align-items: stretch; }
-}
-
 </style>
 </head>
 <body>
@@ -2283,72 +2038,64 @@ body {
 
 <div id="view-team" class="view-container" style="display:none;">
   <main class="container">
-    <section class="scoreboard">
-      <div class="sb-ribbon">
-        <div class="sb-ribbon-left">
-          <span class="sb-live-dot"></span>
-          <span class="sb-live-label">LIVE · GW<span id="sb-live-gw">35</span></span>
-          <span class="sb-deadline" id="sb-deadline"></span>
+    <section class="team-header">
+      <h1 id="team-name">My Team</h1>
+      <p class="muted"><span id="manager"></span> · Rank <span id="overall-rank">0</span></p>
+      <div class="proj-row">
+        <div class="proj-box">
+          <div class="proj-label" id="gw-xp-label">GW35 xPts</div>
+          <div class="proj-value" id="gw-xp-val">0</div>
         </div>
-        <div class="sb-ribbon-stats">
-          <span class="sb-stat-mini"><span class="sb-stat-label">FT</span> <strong id="free-transfers-val">1</strong>/2</span>
-          <span class="sb-stat-divider"></span>
-          <span class="sb-stat-mini"><span class="sb-stat-label">ITB</span> <strong id="bank-val">£2.4m</strong></span>
-          <span class="sb-stat-divider"></span>
-          <span class="sb-stat-mini"><span class="sb-stat-label">VAL</span> <strong id="squad-value-val">£102.2m</strong></span>
+        <div class="proj-box">
+          <div class="proj-label">Next 4 GWs</div>
+          <div class="proj-value" id="rolling-val">0</div>
         </div>
-      </div>
-
-      <div class="sb-hero">
-        <div class="sb-hero-left">
-          <div class="sb-hero-label">Manager</div>
-          <h1 id="team-name" class="sb-team-name">Xhaka Khan</h1>
-          <div class="sb-rank-line"><span id="manager"></span> <span class="sb-dot">·</span> <span class="sb-rank-pre">RANK</span> <span id="overall-rank">0</span></div>
+        <div class="proj-box">
+          <div class="proj-label">Bank</div>
+          <div class="proj-value" id="bank-val">£0.0m</div>
         </div>
-
-        <div class="sb-hero-centre">
-          <div class="sb-hero-label sb-hero-label-centre">Projected</div>
-          <div class="sb-hero-num" id="gw-xp-val">0</div>
-          <div class="sb-hero-sub" id="gw-xp-label">xPts · GW35</div>
+        <div class="proj-box">
+          <div class="proj-label">Free Transfers</div>
+          <div class="proj-value" id="free-transfers-val">1</div>
         </div>
-
-        <div class="sb-hero-right">
-          <div class="sb-hero-label">Horizon</div>
-          <div class="sb-form-bars" id="sb-form-bars"></div>
-          <div class="sb-form-num"><span id="rolling-val">0</span> <span class="sb-form-num-sub">over next 4 GWs</span></div>
+        <div class="proj-box">
+          <div class="proj-label">Squad Value</div>
+          <div class="proj-value" id="squad-value-val">£0.0m</div>
         </div>
       </div>
     </section>
 
-    <div class="sb-bottom-row">
-      <div class="gw-pill-row sb-gw-pills" id="gw-pills"></div>
+    
+    <div class="gw-pill-row" id="gw-pills"></div>
 
-      <div class="sb-chip-rail">
-        <span class="sb-chip-rail-label">Chips</span>
-        <label class="sb-chip-pill sb-chip-wc">
-          <span class="sb-chip-tag">WC</span>
+    
+    <div class="chip-usage-panel">
+      <div class="chip-usage-title"><span class="chip-icon">⚡</span> Chip Usage</div>
+      <div class="chip-grid">
+        <div class="chip-field">
+          <label>Wildcard</label>
           <select name="wc_gw" id="sel-wc" onchange="_onChipGwChanged()">
             <option value="0">—</option>
           </select>
-        </label>
-        <label class="sb-chip-pill sb-chip-bb">
-          <span class="sb-chip-tag">BB</span>
+        </div>
+        <div class="chip-field">
+          <label>Bench Boost</label>
           <select name="bb_gw" id="sel-bb" onchange="updateChipTotal()">
             <option value="0">—</option>
           </select>
-        </label>
-        <label class="sb-chip-pill sb-chip-tc">
-          <span class="sb-chip-tag">TC</span>
+        </div>
+        <div class="chip-field">
+          <label>Triple Captain</label>
           <select name="tc_gw" id="sel-tc" onchange="updateChipTotal()">
             <option value="0">—</option>
           </select>
-        </label>
-        <label class="sb-chip-pill sb-chip-fh">
-          <span class="sb-chip-tag">FH</span>
+        </div>
+        <div class="chip-field">
+          <label>Free Hit</label>
           <select name="fh_gw" id="sel-fh" onchange="_onChipGwChanged()">
             <option value="0">—</option>
           </select>
-        </label>
+        </div>
       </div>
     </div>
 
@@ -5530,7 +5277,7 @@ body {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1777484779-GW35-672f34c5";
+const BUILD_VERSION = "1777486018-GW35-672f34c5";
 window.APEX_BUILD = BUILD_VERSION;
 
 let FPL_ID = null;
@@ -6509,42 +6256,6 @@ function _syncTeamHeaderFromMeta() {
   set('bank-val',          '£' + (tm.bank != null ? tm.bank.toFixed(1) : '0.0') + 'm');
   set('free-transfers-val',tm.free_transfers != null ? tm.free_transfers : 1);
   set('squad-value-val',   '£' + (tm.squad_value != null ? tm.squad_value.toFixed(1) : '0.0') + 'm');
-  // Scoreboard form bars — show one bar per GW in the horizon, height scaled
-  // to that GW's projected XI xPts (GW_XI_BASE). Latest GW gets the orange
-  // "current" highlight, prior GWs colored by relative strength.
-  try {
-    const bars = document.getElementById('sb-form-bars');
-    if (bars && Array.isArray(GW_XI_BASE) && GW_XI_BASE.length > 0) {
-      const vals = GW_XI_BASE.map(v => +v || 0);
-      const maxVal = Math.max(...vals, 1);
-      const html = vals.map((v, i) => {
-        const h = Math.max(6, Math.round((v / maxVal) * 30));
-        const cls = (i === activeGwIdx) ? 'sb-form-bar sb-form-bar-current'
-                  : (v >= 0.7 * maxVal ? 'sb-form-bar sb-form-bar-strong' : 'sb-form-bar');
-        return `<div class="${cls}" style="height:${h}px" title="GW${(tm.gw_range||[])[i]||''}: ${v.toFixed(1)} xP"></div>`;
-      }).join('');
-      bars.innerHTML = html;
-    }
-  } catch (_e) { /* non-fatal */ }
-  // Live ribbon: deadline text + GW number
-  try {
-    const gwLbl = document.getElementById('sb-live-gw');
-    if (gwLbl && tm.gw_range && tm.gw_range.length) gwLbl.textContent = tm.gw_range[activeGwIdx] || tm.gw_range[0];
-    const dl = document.getElementById('sb-deadline');
-    if (dl && tm.deadline_time) {
-      const d = new Date(tm.deadline_time);
-      if (!isNaN(d.getTime())) {
-        const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-        const hh = d.getHours().toString().padStart(2,'0');
-        const mm = d.getMinutes().toString().padStart(2,'0');
-        dl.textContent = `Deadline ${days[d.getDay()]} ${hh}:${mm}`;
-      } else {
-        dl.textContent = '';
-      }
-    } else if (dl) {
-      dl.textContent = '';
-    }
-  } catch (_e) { /* non-fatal */ }
 }
 
 function initTeamView() {
@@ -8967,7 +8678,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW35</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1777484779-GW35-672f34c5</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1777486018-GW35-672f34c5</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
