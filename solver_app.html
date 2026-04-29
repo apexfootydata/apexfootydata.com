@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="35" data-built-at="2026-04-29T16:15:25">
+<meta name="apex-gw" content="35" data-built-at="2026-04-29T16:25:52">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -444,6 +444,9 @@ body {
 }
 .pitch-row:last-child { margin-bottom: 0; }
 
+/* Solio-style shirt cards (2026-04-29). Stylised SVG shirts replace official
+   kit PNGs; new vertical order is shirt → xP (green) → black name pill →
+   light-grey fixture. Stat dots overlay the shirt top-right. */
 .shirt {
   text-align: center;
   width: 100px;
@@ -452,80 +455,104 @@ body {
 }
 .shirt-wrap {
   position: relative;
-  width: 84px;
-  margin: 0 auto 4px;
+  width: 64px;
+  margin: 0 auto 2px;
 }
-.shirt-img {
-  width: 84px;
-  height: auto;
+.svg-shirt {
+  width: 64px;
+  height: 64px;
   display: block;
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.18));
 }
+.shirt-dots {
+  position: absolute;
+  top: 0;
+  right: -10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.shirt-dots .dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  display: block;
+  border: 1.5px solid #ffffff;
+  box-shadow: 0 0 0 0.5px rgba(0,0,0,0.25);
+}
+.dot-g  { background: #ec4899; }
+.dot-a  { background: #a855f7; }
+.dot-cs { background: #6366f1; }
+.dot-sv { background: #3b82f6; }
 .shirt-fallback {
-  width: 84px;
-  height: 78px;
+  width: 64px;
+  height: 64px;
   background: var(--accent);
   border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  font-size: 0.65rem;
+  font-size: 0.62rem;
   color: #000;
 }
 .shirt-badge {
   position: absolute;
-  top: -4px;
-  right: -4px;
-  font-size: 0.7rem;
+  top: -2px;
+  left: -8px;
+  font-size: 0.72rem;
   font-weight: 800;
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1.5px solid #000;
+  background: #ffffff;
+  border: 1.5px solid #18181b;
+  color: #18181b;
 }
-.cap-badge { background: #fbbf24; color: #000; }
-.vc-badge  { background: rgba(220,220,220,0.9); color: #000; }
+.cap-badge { background: #fbbf24; color: #18181b; border-color: #18181b; }
+.vc-badge  { background: #f4f4f5; color: #52525b; border-color: #71717a; }
 
-.shirt-name {
-  font-size: 0.82rem;
+.shirt-xp {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 1rem;
   font-weight: 700;
-  color: #fff;
-  text-shadow: 0 1px 4px rgba(0,0,0,0.9);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 98px;
+  color: #16a34a;
+  margin-top: 2px;
   letter-spacing: 0.01em;
 }
-.shirt-xp {
-  font-size: 0.86rem;
-  font-weight: 800;
-  color: #4ade80;
-  margin-top: 2px;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.5);
-}
-.shirt-cost {
-  font-size: 0.66rem;
-  color: rgba(255,255,255,0.55);
-  margin-top: 1px;
-}
-/* Upcoming fixture line — e.g. "FUL (H)" or "BUR (H) / AVL (A)" for DGWs.
-   Sits between the player name and the xP number. */
-.shirt-fix {
-  font-size: 0.66rem;
-  font-weight: 600;
-  color: rgba(255,255,255,0.72);
-  text-shadow: 0 1px 3px rgba(0,0,0,0.7);
-  margin-top: 1px;
+.shirt-name {
+  display: inline-block;
+  background: #18181b;
+  color: #fafafa;
+  border-radius: 6px;
+  padding: 3px 9px;
+  font-size: 0.74rem;
+  font-weight: 700;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 110px;
+  max-width: 96px;
+  letter-spacing: 0.02em;
+  margin-top: 2px;
 }
+.shirt-fix {
+  font-size: 0.66rem;
+  font-weight: 500;
+  color: #71717a;
+  letter-spacing: 0.04em;
+  margin-top: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100px;
+}
+/* Bench shirts: dimmed name pill, muted xP */
+.bench-shirt .shirt-name { background: #71717a; color: #fafafa; }
+.bench-shirt .shirt-xp   { color: #71717a; font-weight: 600; }
+.bench-shirt .svg-shirt  { opacity: 0.85; }
 
 /* Bench */
 .bench-label {
@@ -5089,7 +5116,7 @@ body {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1777475725-GW35-177bb267";
+const BUILD_VERSION = "1777476352-GW35-177bb267";
 window.APEX_BUILD = BUILD_VERSION;
 
 let FPL_ID = null;
@@ -5910,6 +5937,53 @@ function shirtUrl(team, isGk) {
   if (!code) return "";
   const suffix = isGk ? `shirt_${code}_1-110.webp` : `shirt_${code}-110.webp`;
   return `https://fantasy.premierleague.com/dist/img/shirts/standard/${suffix}`;
+}
+
+// Team kit colours for the stylised SVG shirt (Solio-style pitch view).
+// primary = main fill, secondary = stripe/accent, pattern = "stripes" | "split" | "solid".
+const TEAM_KITS = {
+  'Arsenal': { p: '#ef0107', s: '#ffffff', pat: 'solid' },
+  'Aston Villa': { p: '#7a003c', s: '#95bfe5', pat: 'split' },
+  'Bournemouth': { p: '#da291c', s: '#000000', pat: 'stripes' },
+  'Brentford': { p: '#e30613', s: '#ffffff', pat: 'stripes' },
+  'Brighton': { p: '#0057b8', s: '#ffffff', pat: 'stripes' },
+  'Burnley': { p: '#6c1d45', s: '#99d6ea', pat: 'solid' },
+  'Chelsea': { p: '#034694', s: '#ffffff', pat: 'solid' },
+  'Crystal Palace': { p: '#a51c30', s: '#1a428a', pat: 'split' },
+  'Everton': { p: '#003399', s: '#ffffff', pat: 'solid' },
+  'Fulham': { p: '#ffffff', s: '#000000', pat: 'solid' },
+  'Leeds': { p: '#ffffff', s: '#1d428a', pat: 'solid' },
+  'Liverpool': { p: '#c8102e', s: '#ffffff', pat: 'solid' },
+  'Manchester City': { p: '#6cabdd', s: '#ffffff', pat: 'solid' },
+  'Manchester United': { p: '#da291c', s: '#000000', pat: 'solid' },
+  'Newcastle United': { p: '#241f20', s: '#ffffff', pat: 'stripes' },
+  'Nottingham Forest': { p: '#dd0000', s: '#ffffff', pat: 'solid' },
+  'Sunderland': { p: '#ff0000', s: '#ffffff', pat: 'stripes' },
+  'Tottenham': { p: '#ffffff', s: '#132257', pat: 'solid' },
+  'West Ham': { p: '#7a263a', s: '#1bb1e7', pat: 'solid' },
+  'Wolverhampton Wanderers': { p: '#fdb913', s: '#000000', pat: 'solid' },
+};
+
+function svgShirt(team, isGk) {
+  const kit = TEAM_KITS[team] || { p: '#888888', s: '#ffffff', pat: 'solid' };
+  // GKs override to a contrasting yellow to stand apart from outfield kits.
+  const main = isGk ? '#facc15' : kit.p;
+  const accent = isGk ? '#000000' : kit.s;
+  // Base jersey path — same shape used across all kits.
+  const base = `<path d="M16 9 L23 6 L25 12 Q32 14 39 12 L41 6 L48 9 L52 23 L44 25 L44 54 L20 54 L20 25 L12 23 Z" fill="${main}" stroke="rgba(0,0,0,0.45)" stroke-width="0.7" stroke-linejoin="round"/>`;
+  let detail = '';
+  if (!isGk) {
+    if (kit.pat === 'stripes') {
+      // Two vertical stripes for striped kits (e.g. Newcastle, Brighton)
+      detail = `<rect x="26" y="6" width="3" height="48" fill="${accent}"/><rect x="35" y="6" width="3" height="48" fill="${accent}"/>`;
+    } else if (kit.pat === 'split') {
+      // Diagonal split (Palace / Villa style)
+      detail = `<path d="M16 9 L23 6 L25 12 Q32 14 32 14 L32 54 L20 54 L20 25 L12 23 Z" fill="${accent}" opacity="0.85"/>`;
+    }
+  }
+  // Subtle ball / crest indent
+  const crest = `<circle cx="32" cy="30" r="2.5" fill="${accent}" opacity="0.35"/>`;
+  return `<svg viewBox="0 0 64 64" class="svg-shirt" xmlns="http://www.w3.org/2000/svg">${base}${detail}${crest}</svg>`;
 }
 
 function _xpAt(player, gwIdx) {
@@ -7025,17 +7099,27 @@ function _isValidFormation(xi) {
 function _shirtHtml(p, isXi) {
   const isCap = p.id === _capId;
   const isVc  = p.id === _vcId;
-  const src = shirtUrl(p.team, p.element_type === 1);
   const xp  = _xpAt(p, activeGwIdx).toFixed(1);
-  // Look up this player's fixture for the active GW (e.g. "FUL (H)" or
-  // "BUR (H) / AVL (A)" on a DGW). Empty string for BGW or missing data.
+  // Fixture lookup — same as before.
   const _gw = (TEAM_META && TEAM_META.gw_range) ? TEAM_META.gw_range[activeGwIdx] : null;
   const _fixDict = (typeof FIXTURES_BY_GW_TEAM !== 'undefined' && _gw)
     ? (FIXTURES_BY_GW_TEAM[_gw] || {}) : {};
   const _fixLabel = _fixDict[p.team] || '';
-  const img = src
-    ? `<img src="${src}" class="shirt-img" alt="${p.team}">`
-    : `<div class="shirt-fallback">${p.web_name.substring(0,3).toUpperCase()}</div>`;
+  // Solio-style stylised SVG shirt — replaces the official kit PNG. Lightweight,
+  // brand-consistent, and renders identically across every kit refresh.
+  const shirt = svgShirt(p.team, p.element_type === 1);
+  // Stat icon dots — small coloured circles top-right of the shirt indicating
+  // expected scoring contributions for this GW. Threshold-driven so high-EV
+  // attackers get goal/assist dots, defenders get a CS dot if cs_prob is healthy.
+  let dots = '';
+  const _xpG = +(p.xp_goals  || 0);
+  const _xpA = +(p.xp_assists || 0);
+  const _xpCs = +(p.xp_cs    || 0);
+  const _xpSv = +(p.xp_saves || 0);
+  if (_xpG  > 0.4) dots += '<span class="dot dot-g"  title="goal threat"></span>';
+  if (_xpA  > 0.3) dots += '<span class="dot dot-a"  title="assist threat"></span>';
+  if (_xpCs > 0.5) dots += '<span class="dot dot-cs" title="clean sheet threat"></span>';
+  if (_xpSv > 0.5) dots += '<span class="dot dot-sv" title="save threat"></span>';
   let badges = '';
   if (isCap) {
     badges += '<span class="shirt-badge cap-badge">C</span>';
@@ -7050,11 +7134,13 @@ function _shirtHtml(p, isXi) {
   const removeBtn = `<button class="pp-remove-btn" onclick="event.stopPropagation(); _poolRemovePlayer(${p.id})" title="Remove ${p.web_name}">✕</button>`;
   return `<div class="${cls}" draggable="true" data-pid="${p.id}" data-xi="${isXi ? 1 : 0}" data-xp="${xp}" data-pos="${p.element_type}" data-cost="${p.cost}">` +
     removeBtn +
-    `<div class="shirt-wrap">${img}${badges}</div>` +
+    `<div class="shirt-wrap">${shirt}${badges}` +
+      (dots ? `<span class="shirt-dots">${dots}</span>` : '') +
+    `</div>` +
+    `<div class="shirt-xp">${xp}</div>` +
     `<div class="shirt-name">${p.web_name}</div>` +
     (_fixLabel ? `<div class="shirt-fix">${_fixLabel}</div>` : '') +
-    `<div class="shirt-xp">${xp}</div>` +
-    `<div class="shirt-cost">£${p.cost.toFixed(1)}m</div></div>`;
+    `</div>`;
 }
 
 function _renderPitchFromState() {
@@ -8383,7 +8469,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW35</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1777475725-GW35-177bb267</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1777476352-GW35-177bb267</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
