@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="35" data-built-at="2026-04-29T19:44:51">
+<meta name="apex-gw" content="35" data-built-at="2026-04-29T21:14:40">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -2117,12 +2117,8 @@ body {
   text-decoration: line-through;
 }
 
-.va-stats-row {
-  display: grid;
-  grid-template-columns: 1.6fr 1fr 1fr 1fr 1fr;
-  gap: 16px;
-  margin-bottom: 28px;
-}
+/* Hero row — single dominant card. Sparkline anchored right; text left. */
+.va-hero-row { margin-bottom: 14px; }
 .va-card {
   background: rgba(255,255,255,0.025);
   border: 1px solid rgba(255,255,255,0.08);
@@ -2134,8 +2130,21 @@ body {
 .va-card-hero {
   background: linear-gradient(135deg, rgba(249,115,22,0.18) 0%, rgba(249,115,22,0.04) 100%);
   border: 1px solid rgba(249,115,22,0.4);
-  padding: 26px 28px;
+  padding: 30px 36px;
 }
+.va-hero-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+.va-hero-text { flex: 1; }
+.va-hero-spark {
+  flex-shrink: 0;
+  width: 240px;
+  height: 80px;
+}
+.va-hero-spark svg { width: 100%; height: 100%; display: block; }
 .va-card-accent {
   position: absolute;
   top: 0; right: 0; bottom: 0;
@@ -2160,8 +2169,9 @@ body {
   letter-spacing: -0.02em;
 }
 .va-card-value-hero {
-  font-size: 3.5rem;
+  font-size: 4.2rem;
   font-weight: 700;
+  letter-spacing: -0.03em;
 }
 .va-card-value-sub {
   font-size: 0.8rem;
@@ -2170,10 +2180,70 @@ body {
   margin-left: 4px;
 }
 .va-card-sub {
-  font-size: 0.75rem;
+  font-size: 0.78rem;
   color: #a1a1aa;
-  margin-top: 8px;
+  margin-top: 10px;
   font-weight: 500;
+}
+
+/* Supporting stat strip — labelled values in a single row, hairline dividers. */
+.va-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 14px 24px;
+  margin-bottom: 22px;
+}
+.va-strip-cell {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+.va-strip-label {
+  font-size: 0.72rem;
+  color: #71717a;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.va-strip-val {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #e8e8e8;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+.va-strip-val-sub {
+  font-size: 0.78rem;
+  color: #71717a;
+  font-weight: 600;
+}
+.va-strip-divider {
+  width: 1px;
+  height: 22px;
+  background: rgba(255,255,255,0.08);
+}
+
+/* Brand signature — orange under-bar on team name. */
+.va-team-name-underline {
+  position: relative;
+  display: inline-block;
+  padding-bottom: 6px;
+}
+.va-team-name-underline::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 64px;
+  height: 3px;
+  background: #f97316;
+  border-radius: 2px;
 }
 
 .va-chip-panel {
@@ -2239,16 +2309,19 @@ body {
 
 @media (max-width: 900px) {
   .va-header { flex-direction: column; align-items: stretch; }
-  .va-stats-row { grid-template-columns: 1fr 1fr 1fr; }
-  .va-card-hero { grid-column: 1 / -1; }
+  .va-hero-inner { flex-direction: column; align-items: stretch; gap: 16px; }
+  .va-hero-spark { width: 100%; height: 64px; }
+  .va-strip { flex-wrap: wrap; padding: 14px 0; gap: 12px; }
+  .va-strip-divider { display: none; }
+  .va-strip-cell { flex: 1 1 calc(50% - 8px); min-width: 0; }
   .va-chip-grid { grid-template-columns: repeat(2, 1fr); }
 }
 @media (max-width: 600px) {
   .va-team-name { font-size: 1.6rem; }
   .va-avatar { width: 56px; height: 56px; font-size: 1.3rem; }
-  .va-stats-row { grid-template-columns: 1fr 1fr; }
-  .va-card-value-hero { font-size: 2.8rem; }
+  .va-card-value-hero { font-size: 3rem; }
   .va-card-value { font-size: 1.5rem; }
+  .va-strip-val { font-size: 1rem; }
 }
 
 </style>
@@ -2325,7 +2398,7 @@ body {
           </svg>
         </div>
         <div class="va-id-text">
-          <h1 id="team-name" class="va-team-name">Xhaka Khan</h1>
+          <h1 id="team-name" class="va-team-name va-team-name-underline">Xhaka Khan</h1>
           <div class="va-id-meta">
             <span id="manager"></span>
             <span class="va-dot"></span>
@@ -2336,28 +2409,39 @@ body {
       </div>
     </section>
 
-    <section class="va-stats-row">
+    <section class="va-hero-row">
       <div class="va-card va-card-hero">
         <div class="va-card-accent"></div>
-        <div class="va-card-label" id="gw-xp-label">GW35 PROJECTED</div>
-        <div class="va-card-value va-card-value-hero" id="gw-xp-val">0</div>
-        <div class="va-card-sub">xPts this gameweek</div>
+        <div class="va-hero-inner">
+          <div class="va-hero-text">
+            <div class="va-card-label" id="gw-xp-label">GW35 PROJECTED</div>
+            <div class="va-card-value va-card-value-hero" id="gw-xp-val">0</div>
+            <div class="va-card-sub">xPts this gameweek</div>
+          </div>
+          <div class="va-hero-spark" id="va-hero-spark" aria-label="Projected xPts trajectory"></div>
+        </div>
       </div>
-      <div class="va-card">
-        <div class="va-card-label">Next 4 GWs</div>
-        <div class="va-card-value" id="rolling-val">0</div>
+    </section>
+
+    <section class="va-strip">
+      <div class="va-strip-cell">
+        <span class="va-strip-label">Next 4 GWs</span>
+        <span class="va-strip-val" id="rolling-val">0</span>
       </div>
-      <div class="va-card">
-        <div class="va-card-label">Bank</div>
-        <div class="va-card-value" id="bank-val">£2.4m</div>
+      <div class="va-strip-divider"></div>
+      <div class="va-strip-cell">
+        <span class="va-strip-label">Bank</span>
+        <span class="va-strip-val" id="bank-val">£2.4m</span>
       </div>
-      <div class="va-card">
-        <div class="va-card-label">Free Transfers</div>
-        <div class="va-card-value" id="free-transfers-val">1<span class="va-card-value-sub">/2</span></div>
+      <div class="va-strip-divider"></div>
+      <div class="va-strip-cell">
+        <span class="va-strip-label">Free Transfers</span>
+        <span class="va-strip-val" id="free-transfers-val">1<span class="va-strip-val-sub">/2</span></span>
       </div>
-      <div class="va-card">
-        <div class="va-card-label">Squad Value</div>
-        <div class="va-card-value" id="squad-value-val">£102.2m</div>
+      <div class="va-strip-divider"></div>
+      <div class="va-strip-cell">
+        <span class="va-strip-label">Squad Value</span>
+        <span class="va-strip-val" id="squad-value-val">£102.2m</span>
       </div>
     </section>
 
@@ -5571,7 +5655,7 @@ body {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1777488291-GW35-672f34c5";
+const BUILD_VERSION = "1777493680-GW35-672f34c5";
 window.APEX_BUILD = BUILD_VERSION;
 
 let FPL_ID = null;
@@ -6541,6 +6625,37 @@ function updatePillChipTags() {
 // the static HTML is whatever was baked from Marcus's last run — publicBoot
 // rewrites TEAM_META from the URL's ?id=<fpl> but the DOM text stays stale
 // until this function runs. Safe to call on both paths.
+// Hero sparkline — bars representing projected xPts per GW in the horizon.
+// Current GW gets the orange highlight so the user sees "where I am vs trajectory".
+// Called on init AND on every pill change so the highlight follows activeGwIdx.
+function _renderHeroSparkline() {
+  try {
+    const tm = TEAM_META || {};
+    const sp = document.getElementById('va-hero-spark');
+    if (!sp || !Array.isArray(GW_XI_BASE) || GW_XI_BASE.length === 0) return;
+    const vals = GW_XI_BASE.map((v, i) => (v || 0) + ((GW_CAP_XP || [])[i] || 0));
+    const maxV = Math.max(...vals, 1);
+    const range = (tm.gw_range || []);
+    let html = '<svg viewBox="0 0 120 60" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMaxYMid meet">';
+    const barW = 16;
+    const gap  = 6;
+    const totalW = vals.length * barW + (vals.length - 1) * gap;
+    const startX = 120 - totalW;
+    vals.forEach((v, i) => {
+      const h = Math.max(4, Math.round((v / maxV) * 46));
+      const x = startX + i * (barW + gap);
+      const y = 56 - h;
+      const isCurrent = (i === activeGwIdx);
+      const fill = isCurrent ? '#f97316' : 'rgba(255,255,255,0.22)';
+      html += `<rect x="${x}" y="${y}" width="${barW}" height="${h}" rx="2" fill="${fill}"/>`;
+      const lbl = (range[i] != null) ? `GW${range[i]}` : '';
+      html += `<text x="${x + barW / 2}" y="58" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-family="'JetBrains Mono',monospace" font-size="6" font-weight="600">${lbl}</text>`;
+    });
+    html += '</svg>';
+    sp.innerHTML = html;
+  } catch (_e) {}
+}
+
 function _syncTeamHeaderFromMeta() {
   const tm = TEAM_META || {};
   const set = (id, val) => { const el = document.getElementById(id); if (el && val !== undefined && val !== null) el.textContent = val; };
@@ -6555,6 +6670,7 @@ function _syncTeamHeaderFromMeta() {
   }
   set('squad-value-val',   '£' + (tm.squad_value != null ? tm.squad_value.toFixed(1) : '0.0') + 'm');
   // Avatar is now a Premier League roundel SVG (set in markup); no JS needed.
+  _renderHeroSparkline();
 }
 
 function initTeamView() {
@@ -7467,6 +7583,7 @@ function setBaseGw(btn) {
   document.querySelectorAll('.gw-pill').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   activeGwIdx = parseInt(btn.dataset.idx);
+  if (typeof _renderHeroSparkline === 'function') _renderHeroSparkline();
   updateShirtXp();
   reorderXiBench();
   updateChipTotal();
@@ -8979,7 +9096,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW35</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1777488291-GW35-672f34c5</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1777493680-GW35-672f34c5</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
