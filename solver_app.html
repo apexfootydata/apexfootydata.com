@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="35" data-built-at="2026-04-30T21:25:44">
+<meta name="apex-gw" content="35" data-built-at="2026-04-30T21:31:23">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -2203,42 +2203,42 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  padding: 14px 24px;
-  margin-bottom: 22px;
+  gap: 14px;
+  padding: 22px 28px;
+  margin-bottom: 26px;
 }
 .va-strip-cell {
   display: flex;
   align-items: baseline;
-  gap: 10px;
+  gap: 14px;
   flex: 1;
   min-width: 0;
 }
 .va-strip-label {
-  font-size: 0.72rem;
+  font-size: 0.82rem;
   color: #71717a;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
   font-weight: 700;
   text-transform: uppercase;
   white-space: nowrap;
 }
 .va-strip-val {
   font-family: 'JetBrains Mono', ui-monospace, monospace;
-  font-size: 1.1rem;
+  font-size: 1.55rem;
   font-weight: 700;
   color: #e8e8e8;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.015em;
   white-space: nowrap;
 }
 .va-strip-val-sub {
-  font-size: 0.78rem;
+  font-size: 0.95rem;
   color: #71717a;
   font-weight: 600;
 }
 .va-strip-divider {
   width: 1px;
-  height: 22px;
-  background: rgba(255,255,255,0.08);
+  height: 32px;
+  background: rgba(255,255,255,0.1);
 }
 
 /* Brand signature — orange under-bar on team name. */
@@ -2349,7 +2349,7 @@ body {
   .va-header { flex-direction: column; align-items: stretch; }
   .va-hero-inner { flex-direction: column; align-items: stretch; gap: 16px; }
   .va-hero-spark { width: 100%; height: 64px; }
-  .va-strip { flex-wrap: wrap; padding: 14px 0; gap: 12px; }
+  .va-strip { flex-wrap: wrap; padding: 18px 0; gap: 16px; }
   .va-strip-divider { display: none; }
   .va-strip-cell { flex: 1 1 calc(50% - 8px); min-width: 0; }
   .va-chip-grid { grid-template-columns: repeat(2, 1fr); }
@@ -2359,7 +2359,8 @@ body {
   .va-avatar { width: 56px; height: 56px; font-size: 1.3rem; }
   .va-card-value-hero { font-size: 3rem; }
   .va-card-value { font-size: 1.5rem; }
-  .va-strip-val { font-size: 1rem; }
+  .va-strip-val { font-size: 1.3rem; }
+  .va-strip-label { font-size: 0.74rem; }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -6517,7 +6518,7 @@ body {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1777580744-GW35-0e7c87c0";
+const BUILD_VERSION = "1777581083-GW35-0e7c87c0";
 window.APEX_BUILD = BUILD_VERSION;
 
 let FPL_ID = null;
@@ -10707,7 +10708,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW35</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1777580744-GW35-0e7c87c0</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1777581083-GW35-0e7c87c0</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
