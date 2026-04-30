@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="35" data-built-at="2026-04-30T19:42:08">
+<meta name="apex-gw" content="35" data-built-at="2026-04-30T19:58:31">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -6430,7 +6430,7 @@ body {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1777574528-GW35-500b19cc";
+const BUILD_VERSION = "1777575511-GW35-500b19cc";
 window.APEX_BUILD = BUILD_VERSION;
 
 let FPL_ID = null;
@@ -8872,6 +8872,49 @@ function _buildSummaryCard() {
   return div;
 }
 
+// Commit a path-planner selection to the live solver state.
+// Writes _savedGwSquads[gwIdx] so pill-switching to that GW renders the
+// planned squad. When gwIdx == activeGwIdx, also updates _xiPlayers /
+// _benchPlayers / _capId / _vcId so the pitch reflects the swap as soon
+// as the user clicks Back to Squad. (Bug fix 2026-04-30: previously the
+// planner's selections only mutated _pathPlanner.workingSquad and never
+// touched live state, so transfers vanished when the user returned to
+// the squad view.)
+function _ppCommitToLive(gwIdx, newSquad) {
+  const result = pickBestXi(newSquad, gwIdx);
+  const xi    = result.xi;
+  const bench = _orderBench(result.bench);
+  const capId = result.cap ? result.cap.id : null;
+  const vcId  = result.vc  ? result.vc.id  : null;
+  const xiSum = xi.reduce((s, p) => s + _xpAt(p, gwIdx), 0);
+  const capXp = result.cap ? _xpAt(result.cap, gwIdx) : 0;
+
+  // Save state for pill-switch restoration
+  _savedGwSquads[gwIdx] = {
+    xi:    [...xi],
+    bench: [...bench],
+    capId, vcId,
+    xiDelta:     xiSum - (GW_XI_BASE[gwIdx] || 0),
+    capDelta:    capXp - (GW_CAP_XP[gwIdx]  || 0),
+    jsBaseCapXp: capXp,
+  };
+
+  // Per-GW delta arrays — read by the pitch summary at top
+  _xiDelta[gwIdx]    = _savedGwSquads[gwIdx].xiDelta;
+  _capDelta[gwIdx]   = _savedGwSquads[gwIdx].capDelta;
+  _benchDelta[gwIdx] = 0;
+
+  // If this IS the active GW, mirror to live state so the pitch shows the
+  // swap immediately on view exit (no need to pill-click to refresh).
+  if (gwIdx === activeGwIdx) {
+    _xiPlayers    = xi;
+    _benchPlayers = bench;
+    _capId        = capId;
+    _vcId         = vcId;
+    _jsBaseCapXp  = capXp;
+  }
+}
+
 // User picks an option for the active GW
 function _selectPathOption(gwIdx, optionIdx) {
   if (gwIdx !== _pathPlanner.currentGwIdx) return;  // not the active card
@@ -8894,16 +8937,23 @@ function _selectPathOption(gwIdx, optionIdx) {
     evGain: opt.evGain,
     gwXp: result.total,
     bankAfter: opt.newBank,
-    ftAfter: opt.type === 'none' ? Math.min(2, _pathPlanner.workingFt + 1) : _pathPlanner.workingFt,  // FT used = 1 if transfer, +1 carry if not
+    ftAfter: opt.type === 'none' ? Math.min(2, _pathPlanner.workingFt + 1) : _pathPlanner.workingFt,
   });
 
   _pathPlanner.workingSquad = opt.newSquad;
   _pathPlanner.workingBank = opt.newBank;
   _pathPlanner.workingFt = opt.type === 'none'
-    ? Math.min(2, _pathPlanner.workingFt + 1)  // +1 for next GW
-    : Math.min(2, (_pathPlanner.workingFt - 1) + 1);  // used 1, +1 carry = same
+    ? Math.min(2, _pathPlanner.workingFt + 1)
+    : Math.min(2, (_pathPlanner.workingFt - 1) + 1);
   _pathPlanner.totalXp += result.total;
   _pathPlanner.currentGwIdx++;
+
+  // ── Propagate the chosen squad to live solver state ──
+  // For type='one': commit the post-transfer squad to that GW.
+  // For type='none': commit the unchanged squad (idempotent — keeps any
+  // prior state at that GW intact for the user but ensures _savedGwSquads
+  // has a coherent entry).
+  _ppCommitToLive(gwIdx, opt.newSquad);
 
   _renderPathCards();
 }
@@ -8935,6 +8985,13 @@ function confirmPathPlan() {
 function exitPathPlanner() {
   _pathPlanner.active = false;
   switchView('team');
+  // Force pitch refresh — the user may have committed transfers via
+  // _ppCommitToLive while in the planner. updateChipTotal recomputes the
+  // top-of-pitch xP totals; reorderXiBench re-renders the formation.
+  try {
+    if (typeof reorderXiBench === 'function') reorderXiBench();
+    if (typeof updateChipTotal === 'function') updateChipTotal();
+  } catch (e) { /* non-critical */ }
 }
 
 
@@ -10492,7 +10549,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW35</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1777574528-GW35-500b19cc</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1777575511-GW35-500b19cc</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
