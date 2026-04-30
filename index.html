@@ -1199,12 +1199,13 @@
 
     <!-- TAB 1: Team Ratings -->
     <div class="tab-content active">
-        <!-- Hero stat — model moat -->
+        <!-- Hero stat — model moat. Numbers are baked from accuracy_history.json
+             by apex_v1_site_inject._update_hero_stats() — DO NOT hardcode. -->
         <div class="hero-stat-card">
             <div>
                 <div class="hero-stat-label">Apex v1 — Season 2025/26</div>
                 <div class="hero-stat-value">
-                    Beat Pinnacle <span class="num">23</span> of <span class="num">28</span> weeks<span class="hero-stat-divider">·</span>+<span class="num">0.07</span> goals/match edge
+                    Beat Pinnacle <span class="num" data-stat="wins">24</span> of <span class="num" data-stat="total">29</span> weeks<span class="hero-stat-divider">·</span>+<span class="num" data-stat="edge">0.07</span> goals/match edge
                 </div>
             </div>
         </div>
