@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="35" data-built-at="2026-04-30T21:08:19">
+<meta name="apex-gw" content="35" data-built-at="2026-04-30T21:20:29">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -6517,7 +6517,7 @@ body {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1777579699-GW35-cc5f4440";
+const BUILD_VERSION = "1777580429-GW35-cc5f4440";
 window.APEX_BUILD = BUILD_VERSION;
 
 let FPL_ID = null;
@@ -10005,11 +10005,11 @@ function fetchAndRenderConfidence(gw, wrapId, chipType) {
         let raw;
         if (chipType === 'WC' && typeof window.ApexSolver.runConfidenceWC === 'function') {
           raw = await window.ApexSolver.runConfidenceWC(POOL_DATA, gwIdx, {
-            nSamples: 2000, cv: 0.30, seed: 42,
+            nSamples: 1500, cv: 0.30, seed: 42,
           });
         } else {
           raw = await window.ApexSolver.runConfidenceFH(POOL_DATA, gwIdx, {
-            nSamples: 2000, cv: 0.30, seed: 42,
+            nSamples: 1500, cv: 0.30, seed: 42,
           });
         }
         const data = Object.assign({}, raw, {
@@ -10707,7 +10707,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW35</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1777579699-GW35-cc5f4440</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1777580429-GW35-cc5f4440</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
