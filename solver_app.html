@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="35" data-built-at="2026-04-30T19:58:31">
+<meta name="apex-gw" content="35" data-built-at="2026-04-30T20:14:30">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -6430,7 +6430,7 @@ body {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1777575511-GW35-500b19cc";
+const BUILD_VERSION = "1777576470-GW35-500b19cc";
 window.APEX_BUILD = BUILD_VERSION;
 
 let FPL_ID = null;
@@ -8632,6 +8632,16 @@ function _openPathPlanner(chipType, chipGw, chipSquad, chipGwIdx) {
   const bankRaw = budgetCap - chipCost;
   _pathPlanner.workingBank = Math.abs(bankRaw) < 0.15 ? 0 : Math.max(0, bankRaw);
 
+  // Clear stale _savedGwSquads entries from any previous planner session
+  // so re-opening doesn't leave ghost selections from earlier walks. We only
+  // clear from the chip GW forward — anything before chipGwIdx is the user's
+  // historical pill state which we shouldn't touch. (Audit fix 2026-04-30 /
+  // _savedGwSquads leak bug.)
+  const _hzEndOpen = TEAM_META.gw_range.length;
+  for (let _i = chipGwIdx; _i < _hzEndOpen; _i++) {
+    delete _savedGwSquads[_i];
+  }
+
   // Cumulative xP starts with the chip GW's xP from the chip squad
   const chipBestXi = _ppBestXiTotal(chipSquad, chipGwIdx);
   _pathPlanner.totalXp = chipBestXi.total;
@@ -8676,6 +8686,13 @@ function _openPathPlannerFromCurrent(startGwIdx) {
   _pathPlanner.totalXp           = 0;
   _pathPlanner.totalHits         = 0;
   _pathPlanner.selections        = [];   // no locked chip card
+
+  // Clear stale _savedGwSquads entries from any previous planner session.
+  // (Audit fix 2026-04-30 — leak between planner sessions.)
+  const _hzEndOpenC = TEAM_META.gw_range.length;
+  for (let _i = startGwIdx; _i < _hzEndOpenC; _i++) {
+    delete _savedGwSquads[_i];
+  }
 
   switchView('path-planner');
   _renderPathCards();
@@ -8959,18 +8976,37 @@ function _selectPathOption(gwIdx, optionIdx) {
 }
 
 // Commit the planned path to the live squad.
-// V1: applies the CHIP squad to the chip GW; WC propagation handles
-//      the forward GWs (every future pill mirrors the chip squad). The
-//      per-GW transfer choices in the planner are advisory for now —
-//      they're a roadmap the user can act on manually via the regular
-//      transfer-rec UI in subsequent visits.
-// V2 (deferred): write each post-transfer squad into _savedGwSquads[gwIdx]
-//      so the pitch reflects each GW's planned squad as the user pill-walks.
+//
+// Each Select inside the planner has already called _ppCommitToLive for the
+// GW it decided, so by the time we reach this point _savedGwSquads is mostly
+// populated. This function fills in the gaps:
+//   • For CHIP flow: writes the chip squad to the chip GW itself (the locked
+//     starter card — it doesn't go through _selectPathOption and therefore
+//     wasn't committed by the walk).
+//   • For PARTIAL walks (user exited Apply before the final card): every
+//     un-decided GW from currentGwIdx forward gets committed with the last
+//     working squad as fallback so future pill-clicks render coherently.
+//
+// IMPORTANT: we deliberately do NOT call _applyFullSquad here — it triggers
+// WC propagation that overwrites every future _savedGwSquads[i] with the
+// chip squad, wiping the per-GW transfer choices the user just made (audit
+// finding 2026-04-30 / CRITICAL bug #1).
 function confirmPathPlan() {
-  if (_pathPlanner.initialChipSquad && _pathPlanner.initialChipSquad.length === 15) {
-    window._lastChipType = _pathPlanner.startChipType;
-    _applyFullSquad(_pathPlanner.initialChipSquad, _pathPlanner.startGwIdx);
+  // Commit chip squad to chip GW (chip flow only — non-chip flow's first
+  // GW was committed by _selectPathOption like any other).
+  if (_pathPlanner.startChipType && _pathPlanner.initialChipSquad
+      && _pathPlanner.initialChipSquad.length === 15) {
+    _ppCommitToLive(_pathPlanner.startGwIdx, _pathPlanner.initialChipSquad);
   }
+
+  // Backfill any GWs the user didn't decide with the current working squad.
+  // This handles the "user clicked Apply before walking the whole horizon"
+  // case so the pitch is coherent across all pills, not blank on un-decided GWs.
+  const horizonEnd = TEAM_META.gw_range.length;
+  for (let i = _pathPlanner.currentGwIdx; i < horizonEnd; i++) {
+    _ppCommitToLive(i, _pathPlanner.workingSquad);
+  }
+
   exitPathPlanner();
   // Pulse the pitch to confirm the swap landed
   try {
@@ -10549,7 +10585,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW35</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1777575511-GW35-500b19cc</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1777576470-GW35-500b19cc</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
