@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="35" data-built-at="2026-04-30T17:53:19">
+<meta name="apex-gw" content="35" data-built-at="2026-04-30T18:46:16">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -2512,6 +2512,156 @@ body {
   .cs-card-grid { grid-template-columns: 1fr; gap: 10px; }
 }
 
+/* ─── Chip Review (WC / FH dedicated takeover) ─────────────────────────────
+   Sticky top bar pins Back + Apply CTAs at all times so the user can
+   commit/cancel without scrolling. Same brand language as solver chrome. */
+
+.cr-sticky-bar {
+  position: sticky;
+  top: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 28px;
+  background: rgba(20, 20, 20, 0.92);
+  backdrop-filter: saturate(140%) blur(12px);
+  -webkit-backdrop-filter: saturate(140%) blur(12px);
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+.cr-back-btn,
+.cr-apply-btn {
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-weight: 700;
+  font-size: 0.92rem;
+  cursor: pointer;
+  font-family: 'Space Grotesk', sans-serif;
+  letter-spacing: 0.01em;
+  transition: transform 0.12s, box-shadow 0.18s, background 0.15s;
+  white-space: nowrap;
+}
+.cr-back-btn {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--fg);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+.cr-back-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  transform: translateY(-1px);
+}
+.cr-apply-btn {
+  background: #22c55e;
+  color: #0c0c0f;
+  border: none;
+  box-shadow: 0 4px 18px rgba(34, 197, 94, 0.32);
+}
+.cr-apply-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 24px rgba(34, 197, 94, 0.45);
+}
+.cr-apply-btn:active { transform: translateY(0); }
+.cr-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+.cr-meta .cr-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--fg);
+  letter-spacing: -0.01em;
+}
+.cr-meta .cr-cost-label,
+.cr-meta .cr-bank-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+.cr-meta .cr-cost,
+.cr-meta .cr-bank {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  color: var(--fg);
+}
+.cr-meta .cr-divider { color: rgba(255, 255, 255, 0.18); }
+
+/* Hero summary card — gives the WHY (chip uplift) before the WHAT (squad). */
+.cr-hero-card {
+  background: linear-gradient(135deg, rgba(249,115,22,0.10) 0%, rgba(249,115,22,0.025) 100%);
+  border: 1px solid rgba(249,115,22,0.28);
+  border-radius: 12px;
+  padding: 22px 28px;
+  margin: 22px 0 26px;
+  position: relative;
+  overflow: hidden;
+}
+.cr-hero-card::after {
+  content: "";
+  position: absolute;
+  top: 16px;
+  bottom: 16px;
+  right: 0;
+  width: 4px;
+  background: #F97316;
+  border-radius: 2px 0 0 2px;
+}
+.cr-hero-label {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #F97316;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.cr-hero-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 2.4rem;
+  font-weight: 700;
+  color: #F97316;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+.cr-hero-value .cr-hero-unit {
+  font-size: 1rem;
+  color: var(--fg);
+  font-weight: 600;
+  margin-left: 6px;
+}
+.cr-hero-sub {
+  margin-top: 8px;
+  font-size: 0.85rem;
+  color: var(--muted);
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+/* Mobile: stack the sticky bar vertically so neither button gets cut off */
+@media (max-width: 760px) {
+  .cr-sticky-bar {
+    padding: 12px 16px;
+    gap: 10px;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .cr-meta {
+    order: 2;
+    justify-content: center;
+    font-size: 0.8rem;
+  }
+  .cr-back-btn { order: 1; align-self: flex-start; }
+  .cr-apply-btn { order: 3; }
+  .cr-hero-card { padding: 18px 20px; margin: 18px 0 22px; }
+  .cr-hero-value { font-size: 1.9rem; }
+}
+
 </style>
 </head>
 <body>
@@ -3108,6 +3258,40 @@ body {
     <div class="opt-footnote">
       Total xPts = your baseline squad projection + chip gains. WC measured over remaining horizon from that GW. BB after WC uses the WC squad bench. Re-run after each gameweek for updated projections.
     </div>
+  </main>
+</div>
+
+
+<!-- ============ CHIP REVIEW VIEW (WC / FH dedicated takeover) ============ -->
+<!-- Triggered when user presses Solve while viewing the chip's GW pill.
+     Sticky top bar surfaces Back + Apply CTAs at all times so the user
+     can decide without scrolling through the squad recommendation. -->
+<div id="view-chip-review" class="view-container" style="display:none;">
+  <div class="cr-sticky-bar">
+    <button class="cr-back-btn" type="button" onclick="cancelChipReview()">← Back to Squad</button>
+    <div class="cr-meta">
+      <span class="cr-title" id="cr-title">Chip Review</span>
+      <span class="cr-divider">·</span>
+      <span class="cr-cost-label">Squad value</span>
+      <span class="cr-cost" id="cr-squad-cost">£0.0m</span>
+      <span class="cr-divider">·</span>
+      <span class="cr-bank-label">Bank</span>
+      <span class="cr-bank" id="cr-bank-left">£0.0m</span>
+    </div>
+    <button class="cr-apply-btn" type="button" onclick="confirmChipReview()">✓ Apply Squad to Plan</button>
+  </div>
+  <main class="container">
+    <div class="cr-hero-card">
+      <div class="cr-hero-label" id="cr-hero-label">CHIP HIT vs CURRENT XI</div>
+      <div class="cr-hero-value">+<span id="cr-hero-pts">0.0</span><span class="cr-hero-unit"> xPts</span></div>
+      <div class="cr-hero-sub" id="cr-hero-sub">over the planning horizon</div>
+    </div>
+
+    <!-- Model Confidence wrap — populated by fetchAndRenderConfidence -->
+    <div id="model-confidence-wrap-review"></div>
+
+    <!-- Recommended squad panel — populated by _showChipSquadPanel -->
+    <div id="chip-review-squad-section"></div>
   </main>
 </div>
 
@@ -5925,7 +6109,7 @@ body {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1777567998-GW35-500b19cc";
+const BUILD_VERSION = "1777571176-GW35-500b19cc";
 window.APEX_BUILD = BUILD_VERSION;
 
 let FPL_ID = null;
@@ -6107,7 +6291,10 @@ function switchView(view) {
   }
   document.querySelectorAll('.view-container').forEach(v => v.style.display = 'none');
   document.getElementById(`view-${view}`).style.display = 'block';
-  document.getElementById('topbar').style.display = view === 'landing' ? 'none' : 'flex';
+  // Hide topbar nav for landing (pre-auth) AND chip-review (focused-decision
+  // takeover — the sticky bar inside the view owns the top edge).
+  document.getElementById('topbar').style.display =
+    (view === 'landing' || view === 'chip-review') ? 'none' : 'flex';
   currentView = view;
   if (view === 'team')         { initTeamView(); initPoolView(); }
   if (view === 'chip-select')  initChipSelectView();
@@ -7578,28 +7765,24 @@ function runSolve() {
   //  • Never auto-apply the squad to the top pitch — Apply button is opt-in.
   const activeGw = TEAM_META.gw_range[activeGwIdx];
 
-  // ── FH planned on THIS GW → show FH squad panel ──
+  // ── FH planned on THIS GW → open dedicated chip-review view ──
   if (fhGw && activeGw === fhGw) {
     const fhSquad = FH_SQUADS[String(fhGw)];
     if (fhSquad && fhSquad.length) {
-      _showChipSquadPanel('FH', fhGw, fhSquad, activeGwIdx);
+      _openChipReview('FH', fhGw, fhSquad, activeGwIdx);
       status.textContent = `FH GW${fhGw} squad loaded`;
-      fetchAndRenderConfidence(fhGw, 'model-confidence-wrap-squad');
       return;
     }
     status.textContent = 'No FH squad computed for GW' + fhGw;
     return;
   }
 
-  // ── WC planned on THIS GW → show WC squad panel ──
+  // ── WC planned on THIS GW → open dedicated chip-review view ──
   if (wcGw && activeGw === wcGw) {
     const wcSquad = WC_SQUADS[String(wcGw)];
     if (wcSquad && wcSquad.length) {
-      _showChipSquadPanel('WC', wcGw, wcSquad, activeGwIdx);
+      _openChipReview('WC', wcGw, wcSquad, activeGwIdx);
       status.textContent = `WC GW${wcGw} squad loaded`;
-      // Fire WC confidence resampling — WC value is in 4-GW lock-in stability,
-      // so the chip-aware confidence is arguably more useful than FH's.
-      fetchAndRenderConfidence(wcGw, 'model-confidence-wrap-squad', 'WC');
       return;
     }
     status.textContent = 'No WC squad computed for GW' + wcGw;
@@ -7649,13 +7832,18 @@ function runSolve() {
 // ──── Chip Squad Panel (WC / FH) ────
 // Store squad reference on window so onclick handlers avoid inlined JSON
 // (large JSON with double-quotes in HTML attributes breaks onclick parsing)
-function _showChipSquadPanel(chipType, gw, squad, gwIdx, alreadyApplied) {
+function _showChipSquadPanel(chipType, gw, squad, gwIdx, alreadyApplied, targetId) {
   window._lastChipSquad = squad;
   window._lastChipGwIdx = gwIdx;
   // Store chip type so _applyFullSquad knows whether to propagate the squad
   // forward across pills (WC = permanent change → propagate; FH = one week)
   window._lastChipType = chipType;
-  const section  = document.getElementById('transfers-section');
+  // Optional targetId lets the dedicated chip-review view receive the same
+  // panel content. In that mode the sticky top bar owns the Apply CTA, so we
+  // suppress the inline button below to avoid duplicating the action.
+  const sectionId    = targetId || 'transfers-section';
+  const section      = document.getElementById(sectionId);
+  const inReviewView = sectionId === 'chip-review-squad-section';
   const banner   = document.getElementById('solve-banner');
   const result   = pickBestXi(squad, gwIdx);
   const xiXp     = result.xi.reduce((s, p) => s + _xpAt(p, gwIdx), 0);
@@ -7696,12 +7884,12 @@ function _showChipSquadPanel(chipType, gw, squad, gwIdx, alreadyApplied) {
     <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-top:8px;">
       <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid var(--border);">
         <div style="font-weight:700;font-size:.95rem;">${chipType} Recommended Squad — GW${gw}</div>
-        ${alreadyApplied
+        ${inReviewView ? '' : (alreadyApplied
           ? `<span style="background:rgba(34,197,94,.15);color:#22c55e;border:1px solid #22c55e55;border-radius:7px;padding:8px 18px;font-weight:700;font-size:.85rem;">✓ Squad Applied</span>`
           : `<button onclick="_applyFullSquad(window._lastChipSquad, window._lastChipGwIdx)"
               style="background:#22c55e;color:#000;border:none;border-radius:7px;padding:8px 18px;font-weight:700;font-size:.85rem;cursor:pointer;">
               ✓ Apply Squad to Plan
-             </button>`
+             </button>`)
         }
       </div>
       <div style="display:flex;gap:20px;padding:10px 16px;border-bottom:1px solid var(--border);background:rgba(255,255,255,.02);font-size:.8rem;">
@@ -7761,6 +7949,106 @@ function _showChipSquadPanel(chipType, gw, squad, gwIdx, alreadyApplied) {
   html += '</div></div>';
   section.innerHTML = html;
   section.style.display = 'block';
+}
+
+// ──── Chip Review View Orchestration ────
+//
+// Triggered when user presses Solve while viewing the chip's GW pill.
+// Replaces the inline panel with a full-screen takeover that surfaces:
+//   • Sticky top bar (Back ← / Apply ✓) — visible at all times
+//   • Hero "+X xPts" card showing chip uplift over baseline
+//   • Model Confidence quadrants
+//   • Recommended squad panel
+// The Solve flow for OTHER cases (chip on a future GW, transfer recs on a
+// non-chip GW) keeps the existing inline behaviour — full takeover would
+// strip context the user needs.
+
+function _openChipReview(chipType, gw, squad, gwIdx) {
+  window._lastChipSquad = squad;
+  window._lastChipGwIdx = gwIdx;
+  window._lastChipType  = chipType;
+
+  // Switch to the dedicated review view (hides squad / topbar GW pills etc.)
+  switchView('chip-review');
+
+  // ── Sticky bar — title, squad cost, bank ──
+  const _spMap = (TEAM_META && TEAM_META.selling_prices) || {};
+  const _eff = (p) => {
+    if (!p) return 0;
+    const sp = _spMap[String(p.id)];
+    if (sp != null && sp > 0) return sp;
+    return p.cost || 0;
+  };
+  const _squadCost   = squad.reduce((s, p) => s + _eff(p), 0);
+  const _budgetCap   = (TEAM_META && (TEAM_META.budget || ((TEAM_META.squad_value || 0) + (TEAM_META.bank || 0)))) || 0;
+  const _bankRaw     = _budgetCap - _squadCost;
+  const _bankLeft    = Math.abs(_bankRaw) < 0.15 ? 0 : Math.max(0, _bankRaw);
+
+  const _titleEl    = document.getElementById('cr-title');
+  const _costEl     = document.getElementById('cr-squad-cost');
+  const _bankEl     = document.getElementById('cr-bank-left');
+  if (_titleEl) _titleEl.textContent = (chipType === 'WC' ? 'Wildcard' : 'Free Hit') + ' GW' + gw;
+  if (_costEl)  _costEl.textContent  = '£' + _squadCost.toFixed(1) + 'm';
+  if (_bankEl) {
+    _bankEl.textContent = '£' + _bankLeft.toFixed(1) + 'm';
+    _bankEl.style.color = _bankLeft >= 1.0 ? '#4ade80' : '';
+  }
+
+  // ── Hero card — chip uplift xPts over baseline ──
+  // CHIP_PLANNER.{wc,fh}_ev[gw] holds the dict of per-GW uplifts. Falls back
+  // to "+X.X" if the planner hasn't loaded yet (lazy mode pre-fetch).
+  let _uplift = null;
+  try {
+    const _evMap = chipType === 'WC' ? (CHIP_PLANNER && CHIP_PLANNER.wc_ev)
+                                      : (CHIP_PLANNER && CHIP_PLANNER.fh_ev);
+    if (_evMap) _uplift = parseFloat(_evMap[String(gw)] || _evMap[gw]);
+  } catch (e) { /* fall through */ }
+
+  const _heroLabel = document.getElementById('cr-hero-label');
+  const _heroPts   = document.getElementById('cr-hero-pts');
+  const _heroSub   = document.getElementById('cr-hero-sub');
+  if (_heroLabel) _heroLabel.textContent = chipType === 'WC'
+    ? 'WILDCARD UPLIFT vs CURRENT XI'
+    : 'FREE HIT UPLIFT vs CURRENT XI';
+  if (_heroPts)   _heroPts.textContent   = (_uplift != null && !isNaN(_uplift))
+    ? _uplift.toFixed(1)
+    : '—';
+  if (_heroSub)   _heroSub.textContent   = chipType === 'WC'
+    ? 'measured over the next ' + (TEAM_META.gw_range.length || 4) + ' gameweeks · permanent squad change'
+    : 'measured for GW' + gw + ' only · one-week squad swap';
+
+  // ── Render confidence into the review-view wrap ──
+  fetchAndRenderConfidence(gw, 'model-confidence-wrap-review', chipType);
+
+  // ── Render squad panel into chip-review-squad-section ──
+  // Suppress the inline Apply CTA — sticky bar owns it in this view.
+  _showChipSquadPanel(chipType, gw, squad, gwIdx, false, 'chip-review-squad-section');
+
+  // Scroll to top so the sticky bar + hero are immediately visible
+  if (typeof window !== 'undefined' && window.scrollTo) window.scrollTo(0, 0);
+}
+
+function confirmChipReview() {
+  const squad = window._lastChipSquad;
+  const gwIdx = window._lastChipGwIdx;
+  if (squad && typeof gwIdx === 'number') {
+    _applyFullSquad(squad, gwIdx);
+  }
+  switchView('team');
+  // Brief confirmation pulse so the user sees the swap landed.
+  // Reuses the existing chip-pulse system — gives the same visual feedback
+  // as activating WC/FH from the pitch directly.
+  try {
+    const pitch = document.querySelector('.pitch, .pitch-area, #pitch');
+    if (pitch) {
+      pitch.classList.add('chip-pulse-active');
+      setTimeout(() => pitch.classList.remove('chip-pulse-active'), 1800);
+    }
+  } catch (e) { /* non-critical visual flourish */ }
+}
+
+function cancelChipReview() {
+  switchView('team');
 }
 
 // Saved chip squad state per GW index (so squad persists when switching pills)
@@ -9386,7 +9674,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW35</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1777567998-GW35-500b19cc</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1777571176-GW35-500b19cc</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
