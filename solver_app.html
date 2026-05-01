@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="35" data-built-at="2026-05-01T11:48:28">
+<meta name="apex-gw" content="35" data-built-at="2026-05-01T12:13:26">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -3182,8 +3182,8 @@ body {
       </div>
       <div class="va-strip-divider"></div>
       <div class="va-strip-cell">
-        <span class="va-strip-label">Sellable Value</span>
-        <span class="va-strip-val" id="squad-value-val">£102.3m</span>
+        <span class="va-strip-label">Initial Bank</span>
+        <span class="va-strip-val" id="squad-value-val">£104.7m</span>
       </div>
     </section>
 
@@ -3676,7 +3676,7 @@ body {
     <div class="cr-meta">
       <span class="cr-title" id="cr-title">Chip Review</span>
       <span class="cr-divider">·</span>
-      <span class="cr-cost-label">Sellable value</span>
+      <span class="cr-cost-label">Squad value</span>
       <span class="cr-cost" id="cr-squad-cost">£0.0m</span>
       <span class="cr-divider">·</span>
       <span class="cr-bank-label">Bank</span>
@@ -6544,7 +6544,7 @@ body {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1777632508-GW35-17f8747c";
+const BUILD_VERSION = "1777634006-GW35-17f8747c";
 window.APEX_BUILD = BUILD_VERSION;
 
 let FPL_ID = null;
@@ -7600,7 +7600,16 @@ function _syncTeamHeaderFromMeta() {
   if (ftEl && tm.free_transfers != null) {
     ftEl.innerHTML = `${tm.free_transfers}<span class="va-card-value-sub">/2</span>`;
   }
-  set('squad-value-val',   '£' + (tm.squad_value != null ? tm.squad_value.toFixed(1) : '0.0') + 'm');
+  // "Initial Bank" — display the FPL deadline snapshot (entry_history.value)
+  // which is what FPL Review and the FPL app header show. The live-recomputed
+  // budget (squad_value + bank) is still used for transfer-budget validation
+  // internally, but the headline display matches Review for visual parity.
+  const _ibSnapshot = (tm.initial_bank != null && tm.initial_bank > 0)
+    ? tm.initial_bank
+    : ((tm.squad_value != null && tm.bank != null)
+        ? (tm.squad_value + tm.bank)
+        : (tm.budget != null ? tm.budget : (tm.squad_value || 0)));
+  set('squad-value-val',   '£' + _ibSnapshot.toFixed(1) + 'm');
   // Avatar is now a Premier League roundel SVG (set in markup); no JS needed.
   _renderHeroSparkline();
 }
@@ -8358,7 +8367,7 @@ function _showChipSquadPanel(chipType, gw, squad, gwIdx, alreadyApplied, targetI
         }
       </div>
       <div style="display:flex;gap:20px;padding:10px 16px;border-bottom:1px solid var(--border);background:rgba(255,255,255,.02);font-size:.8rem;">
-        <div><span style="color:var(--muted);">Sellable value</span> <span style="font-weight:700;color:var(--fg);">£${_squadCost.toFixed(1)}m</span></div>
+        <div><span style="color:var(--muted);">Squad value</span> <span style="font-weight:700;color:var(--fg);">£${_squadCost.toFixed(1)}m</span></div>
         <div><span style="color:var(--muted);">In the bank</span> <span style="font-weight:700;color:${_bankLeft >= 1.0 ? '#4ade80' : 'var(--fg)'};">£${_bankLeft.toFixed(1)}m</span></div>
       </div>
       <div style="padding:12px 16px;">
@@ -9741,7 +9750,7 @@ function _renderPitchFromState() {
   const _pitchBankRaw = _budgetTotal - _pitchCost;
   const _pitchBank   = Math.abs(_pitchBankRaw) < 0.15 ? 0 : _pitchBankRaw;
   const _bankColor   = _pitchBank < -0.05 ? '#ef4444' : 'inherit';
-  html += `<div class="pitch-cost-badge"><div class="pcb-row"><span class="pcb-label">Sellable value</span><span class="pcb-val">£${_pitchCost.toFixed(1)}m</span></div><div class="pcb-row"><span class="pcb-label">In the bank</span><span class="pcb-val" style="color:${_bankColor}">£${_pitchBank.toFixed(1)}m</span></div></div>`;
+  html += `<div class="pitch-cost-badge"><div class="pcb-row"><span class="pcb-label">Squad value</span><span class="pcb-val">£${_pitchCost.toFixed(1)}m</span></div><div class="pcb-row"><span class="pcb-label">In the bank</span><span class="pcb-val" style="color:${_bankColor}">£${_pitchBank.toFixed(1)}m</span></div></div>`;
   // Brand wordmark bottom-right of the pitch — same scale as the site header.
   html += `<div class="pitch-brand-mark"><span class="pbm-apex">Apex</span><span class="pbm-rest">FootyData</span></div>`;
   // Pitch markings (absolute-positioned, pointer-events:none)
@@ -10631,6 +10640,9 @@ function _poolRemovePlayer(pid) {
   // Update bank — freed up the removed player's price
   TEAM_META.bank += (player.cost || 0);
   TEAM_META.squad_value -= (player.cost || 0);
+  // Refresh top strip so Initial Bank + Bank reflect the mutation in real time
+  // (mirrors FPL Review's "bank updates on transfer" behaviour).
+  if (typeof _syncTeamHeaderFromMeta === 'function') _syncTeamHeaderFromMeta();
 
   // Auto-filter pool to same position
   _poolPos = player.element_type;
@@ -10659,6 +10671,7 @@ function _poolResetSlot() {
   // squad", so the money owed to the squad is the original's cost.
   TEAM_META.bank -= (restoreTarget.cost || 0);
   TEAM_META.squad_value += (restoreTarget.cost || 0);
+  if (typeof _syncTeamHeaderFromMeta === 'function') _syncTeamHeaderFromMeta();
 
   // Re-add the original player back to XI or bench
   if (restoreToXi) {
@@ -10728,6 +10741,7 @@ function _poolFillSlot(playerId) {
   // Fill the slot — update bank (new player costs money)
   TEAM_META.bank -= (inPlayer.cost || 0);
   TEAM_META.squad_value += (inPlayer.cost || 0);
+  if (typeof _syncTeamHeaderFromMeta === 'function') _syncTeamHeaderFromMeta();
 
   if (_poolRemovedFromXi) {
     _xiPlayers.push(inPlayer);
@@ -11033,7 +11047,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW35</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1777632508-GW35-17f8747c</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1777634006-GW35-17f8747c</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
@@ -11518,6 +11532,13 @@ document.addEventListener('DOMContentLoaded', () => {
       free_transfers: ft,
       squad_value: Math.round(sellingValue * 10) / 10,
       budget: Math.round((sellingValue + bankVal) * 10) / 10,
+      // FPL's entry_history.value snapshot — what FPL Review and the FPL app
+      // header display as "team value". Includes bank already. Set per Marcus
+      // 2026-04-30 so the top-strip "Initial Bank" reads the same number as
+      // Review for the same FPL ID. The live-recomputed `budget` field above
+      // is still used internally for FH/WC transfer-budget validation — only
+      // the headline display switched to the snapshot.
+      initial_bank: Math.round(apiValue * 10) / 10,
       selling_prices: _mergedSpMap,
     });
     CHIP_PLANNER = Object.assign({}, CHIP_PLANNER, {
