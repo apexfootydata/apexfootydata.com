@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="35" data-built-at="2026-05-01T10:45:21">
+<meta name="apex-gw" content="35" data-built-at="2026-05-01T11:48:28">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -3182,7 +3182,7 @@ body {
       </div>
       <div class="va-strip-divider"></div>
       <div class="va-strip-cell">
-        <span class="va-strip-label">Squad Value</span>
+        <span class="va-strip-label">Sellable Value</span>
         <span class="va-strip-val" id="squad-value-val">£102.3m</span>
       </div>
     </section>
@@ -3676,7 +3676,7 @@ body {
     <div class="cr-meta">
       <span class="cr-title" id="cr-title">Chip Review</span>
       <span class="cr-divider">·</span>
-      <span class="cr-cost-label">Squad value</span>
+      <span class="cr-cost-label">Sellable value</span>
       <span class="cr-cost" id="cr-squad-cost">£0.0m</span>
       <span class="cr-divider">·</span>
       <span class="cr-bank-label">Bank</span>
@@ -6544,7 +6544,7 @@ body {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1777628721-GW35-17f8747c";
+const BUILD_VERSION = "1777632508-GW35-17f8747c";
 window.APEX_BUILD = BUILD_VERSION;
 
 let FPL_ID = null;
@@ -8358,7 +8358,7 @@ function _showChipSquadPanel(chipType, gw, squad, gwIdx, alreadyApplied, targetI
         }
       </div>
       <div style="display:flex;gap:20px;padding:10px 16px;border-bottom:1px solid var(--border);background:rgba(255,255,255,.02);font-size:.8rem;">
-        <div><span style="color:var(--muted);">Squad value</span> <span style="font-weight:700;color:var(--fg);">£${_squadCost.toFixed(1)}m</span></div>
+        <div><span style="color:var(--muted);">Sellable value</span> <span style="font-weight:700;color:var(--fg);">£${_squadCost.toFixed(1)}m</span></div>
         <div><span style="color:var(--muted);">In the bank</span> <span style="font-weight:700;color:${_bankLeft >= 1.0 ? '#4ade80' : 'var(--fg)'};">£${_bankLeft.toFixed(1)}m</span></div>
       </div>
       <div style="padding:12px 16px;">
@@ -8646,12 +8646,27 @@ function _ppEffCost(p) {
   return p.cost || 0;
 }
 
-// Sum xP for a player across [fromIdx, end-of-horizon).
+// DGW premium — same constant the WC/FH ILP uses (assets/apex_solver.js).
+// Applied to a player's xP for any GW listed in their dgw_gw_idxs. Reflects
+// the squad-wide synergy bonus from doubling up on a DGW team beyond the
+// raw doubled appearance value already in xp_per_gw.
+const _PP_DGW_PREMIUM = 1.10;
+
+// Sum xP for a player across [fromIdx, end-of-horizon), applying the DGW
+// premium for any GW the player is in a doubling fixture. Mirrors the WC
+// ILP's _computeRollingEV math so the path planner ranks DGW assets the
+// same way as the chip solver. (Bug fix per Marcus 2026-04-30: Palace DGW
+// assets weren't surfacing in path planner because horizon EV was raw xP
+// only — no premium — so they lost to MCI/Liverpool SGW alternatives.)
 function _ppHorizonXp(player, fromIdx) {
   const arr = player.xp_per_gw || [];
+  const dgwIdxs = Array.isArray(player.dgw_gw_idxs) ? player.dgw_gw_idxs : [];
   let s = 0;
   for (let i = fromIdx; i < arr.length; i++) {
-    if (typeof arr[i] === 'number') s += arr[i];
+    if (typeof arr[i] !== 'number') continue;
+    let gwXp = arr[i];
+    if (dgwIdxs.indexOf(i) !== -1) gwXp *= _PP_DGW_PREMIUM;
+    s += gwXp;
   }
   return s;
 }
@@ -9726,7 +9741,7 @@ function _renderPitchFromState() {
   const _pitchBankRaw = _budgetTotal - _pitchCost;
   const _pitchBank   = Math.abs(_pitchBankRaw) < 0.15 ? 0 : _pitchBankRaw;
   const _bankColor   = _pitchBank < -0.05 ? '#ef4444' : 'inherit';
-  html += `<div class="pitch-cost-badge"><div class="pcb-row"><span class="pcb-label">Squad value</span><span class="pcb-val">£${_pitchCost.toFixed(1)}m</span></div><div class="pcb-row"><span class="pcb-label">In the bank</span><span class="pcb-val" style="color:${_bankColor}">£${_pitchBank.toFixed(1)}m</span></div></div>`;
+  html += `<div class="pitch-cost-badge"><div class="pcb-row"><span class="pcb-label">Sellable value</span><span class="pcb-val">£${_pitchCost.toFixed(1)}m</span></div><div class="pcb-row"><span class="pcb-label">In the bank</span><span class="pcb-val" style="color:${_bankColor}">£${_pitchBank.toFixed(1)}m</span></div></div>`;
   // Brand wordmark bottom-right of the pitch — same scale as the site header.
   html += `<div class="pitch-brand-mark"><span class="pbm-apex">Apex</span><span class="pbm-rest">FootyData</span></div>`;
   // Pitch markings (absolute-positioned, pointer-events:none)
@@ -11018,7 +11033,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW35</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1777628721-GW35-17f8747c</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1777632508-GW35-17f8747c</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
