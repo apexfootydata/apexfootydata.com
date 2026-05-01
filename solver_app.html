@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="35" data-built-at="2026-05-01T10:35:25">
+<meta name="apex-gw" content="35" data-built-at="2026-05-01T10:45:21">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -2913,6 +2913,24 @@ body {
 .pp-ev-positive .pp-ev-num { color: #4ade80; }
 .pp-ev-negative .pp-ev-num { color: #f87171; }
 .pp-ev-neutral  .pp-ev-num { color: var(--muted); }
+
+/* Hit badge — sits above the EV total when a 2-transfer takes a hit.
+   Red styling so it's impossible to miss. */
+.pp-ev-hit-badge {
+  display: inline-block;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #fca5a5;
+  background: rgba(248, 113, 113, 0.12);
+  border: 1px solid rgba(248, 113, 113, 0.32);
+  padding: 3px 8px;
+  border-radius: 4px;
+  margin-bottom: 4px;
+  white-space: nowrap;
+}
 
 .pp-option-select {
   background: var(--accent);
@@ -6526,7 +6544,7 @@ body {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1777628125-GW35-17f8747c";
+const BUILD_VERSION = "1777628721-GW35-17f8747c";
 window.APEX_BUILD = BUILD_VERSION;
 
 let FPL_ID = null;
@@ -9213,14 +9231,18 @@ function _buildActiveCard(gwIdx) {
            <div class="pp-ev-label">${futureNote}</div>
          </div>`;
     } else if (opt.type === 'two' && opt.hitCost > 0) {
+      // Surface the hit prominently — both as a red badge above the breakdown
+      // AND in the sub-line so the user can never miss it. (Bug fix per
+      // Marcus's "does the user see the hit?" question — V3 had stripped this.)
       evDisplay = `<div class="pp-option-ev ${evClass}">
+           <div class="pp-ev-hit-badge">−${opt.hitCost} hit (2 transfers, 1 FT)</div>
            <div class="pp-ev-num">${_signed(lookahead)}</div>
-           <div class="pp-ev-label">now ${_signed(localNet)} · future ${_signed(future)}</div>
+           <div class="pp-ev-label">now ${_signed(localNet)} (after hit) · future ${_signed(future)}</div>
          </div>`;
     } else if (opt.type === 'two') {
       evDisplay = `<div class="pp-option-ev ${evClass}">
            <div class="pp-ev-num">${_signed(lookahead)}</div>
-           <div class="pp-ev-label">now ${_signed(opt.evGain)} · future ${_signed(future)} · 2 FT</div>
+           <div class="pp-ev-label">now ${_signed(opt.evGain)} · future ${_signed(future)} · 2 FT used</div>
          </div>`;
     } else {
       evDisplay = `<div class="pp-option-ev ${evClass}">
@@ -10996,7 +11018,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW35</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1777628125-GW35-17f8747c</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1777628721-GW35-17f8747c</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
