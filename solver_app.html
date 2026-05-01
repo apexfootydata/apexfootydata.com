@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="35" data-built-at="2026-05-01T10:19:30">
+<meta name="apex-gw" content="35" data-built-at="2026-05-01T10:35:25">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -6526,7 +6526,7 @@ body {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1777627170-GW35-17f8747c";
+const BUILD_VERSION = "1777628125-GW35-17f8747c";
 window.APEX_BUILD = BUILD_VERSION;
 
 let FPL_ID = null;
@@ -8915,7 +8915,43 @@ function _ppComputeOptionsLocal(workingSquad, gwIdx, bank, workingFt) {
       newSquad, newBank,
     });
   }
-  // Skip 2-transfer enum in recursion — tractable cost vs marginal benefit.
+
+  // 2-transfer enumeration in recursion (V3.1 fix per Marcus's DGW question).
+  // Without this, the recursive lookahead couldn't see "save FT now, then
+  // double-transfer at GW(N+1) to load up on a DGW team" — exactly the
+  // play that should make No Transfer rank #1 in DGW-prep weeks. Limited
+  // to top 2 combos to keep total recursion bounded; 5^4 = 625 evals max.
+  const hit2 = Math.max(0, 2 - workingFt) * 4;
+  const twoOptsR = [];
+  for (let i = 0; i < uniquePerOut.length; i++) {
+    for (let j = i + 1; j < uniquePerOut.length; j++) {
+      const a = uniquePerOut[i], b = uniquePerOut[j];
+      if (a.in.id === b.in.id) continue;
+      const cBank = bank + a.outSell + b.outSell - a.inCost - b.inCost;
+      if (cBank < -0.01) continue;
+      const newSquad = workingSquad.map(p => {
+        if (p.id === a.out.id) return a.in;
+        if (p.id === b.out.id) return b.in;
+        return p;
+      });
+      const tc = {};
+      let ok = true;
+      for (const p of newSquad) { tc[p.team] = (tc[p.team] || 0) + 1; if (tc[p.team] > 3) { ok = false; break; } }
+      if (!ok) continue;
+      const evGain = a.evGain + b.evGain;
+      const netEv  = evGain - hit2;
+      if (netEv <= 0.05) continue;
+      twoOptsR.push({
+        type: 'two', out: a.out, in: a.in, out2: b.out, in2: b.in,
+        evGain, netEv, hitCost: hit2,
+        horizonAfter: baseHorizonXp + evGain,
+        newSquad, newBank: cBank,
+      });
+    }
+  }
+  twoOptsR.sort((a, b) => b.netEv - a.netEv);
+  for (const opt of twoOptsR.slice(0, 2)) options.push(opt);
+
   options.sort((a, b) => (b.netEv != null ? b.netEv : b.evGain)
                        - (a.netEv != null ? a.netEv : a.evGain));
   return options;
@@ -10960,7 +10996,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW35</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1777627170-GW35-17f8747c</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1777628125-GW35-17f8747c</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
