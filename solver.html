@@ -171,6 +171,14 @@
     border-top: 1px solid #2a2a35;
   }
 </style>
+<!-- Google Analytics 4 -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-67ZMNH4RRQ"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-67ZMNH4RRQ');
+</script>
 </head>
 <body>
 
@@ -240,12 +248,4 @@
   try {
     var _saved = localStorage.getItem('apex_fpl_id');
     if (_saved && /^\d+$/.test(_saved)) input.value = _saved;
-  } catch (_) {}
-</script>
-
-<!-- Cloudflare Web Analytics -->
-<script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "890700f621df42909deca8500a0df182"}'></script>
-<!-- End Cloudflare Web Analytics -->
-
-</body>
-</html>
+  } catch (_
