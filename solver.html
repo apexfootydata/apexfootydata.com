@@ -171,13 +171,69 @@
     border-top: 1px solid #2a2a35;
   }
 </style>
-<!-- Google Analytics 4 -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-67ZMNH4RRQ"></script>
+<!-- Cookie consent + conditional Google Analytics 4 loader -->
 <script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-67ZMNH4RRQ');
+(function() {
+  var GA4_ID = 'G-67ZMNH4RRQ';
+  var consent = null;
+  try { consent = localStorage.getItem('apex_consent'); } catch(_) {}
+
+  function loadGA4() {
+    var s = document.createElement('script');
+    s.async = true;
+    s.src = 'https://www.googletagmanager.com/gtag/js?id=' + GA4_ID;
+    document.head.appendChild(s);
+    window.dataLayer = window.dataLayer || [];
+    window.gtag = function() { window.dataLayer.push(arguments); };
+    window.gtag('js', new Date());
+    window.gtag('config', GA4_ID);
+  }
+
+  function showBanner() {
+    var style = 'position:fixed;left:16px;right:16px;bottom:16px;z-index:99998;'
+              + 'background:#131318;border:1px solid #2a2a35;border-radius:12px;'
+              + 'padding:14px 18px;color:#c8c8d0;font-family:Space Grotesk,sans-serif;'
+              + 'font-size:.92rem;display:flex;align-items:center;gap:14px;'
+              + 'flex-wrap:wrap;box-shadow:0 8px 24px rgba(0,0,0,.35);max-width:760px;'
+              + 'margin:0 auto;';
+    var btnA = 'background:#F97316;color:#0c0c0f;border:none;padding:8px 16px;'
+             + 'border-radius:6px;font-weight:700;cursor:pointer;font-family:inherit;'
+             + 'font-size:.85rem;letter-spacing:.3px;';
+    var btnD = 'background:transparent;color:#9ca3af;border:1px solid #2a2a35;'
+             + 'padding:8px 16px;border-radius:6px;font-weight:600;cursor:pointer;'
+             + 'font-family:inherit;font-size:.85rem;';
+    var div = document.createElement('div');
+    div.id = 'apex-cookie-banner';
+    div.setAttribute('style', style);
+    div.innerHTML = '<span style="flex:1;min-width:200px;line-height:1.45;">'
+        + 'We use cookies for analytics to understand how the site is used. '
+        + 'No personal data sold or shared.</span>'
+        + '<div style="display:flex;gap:8px;">'
+        + '<button id="apex-cookie-accept" style="' + btnA + '">Accept</button>'
+        + '<button id="apex-cookie-decline" style="' + btnD + '">Decline</button>'
+        + '</div>';
+    document.body.appendChild(div);
+    document.getElementById('apex-cookie-accept').onclick = function() {
+      try { localStorage.setItem('apex_consent', 'accepted'); } catch(_) {}
+      div.remove();
+      loadGA4();
+    };
+    document.getElementById('apex-cookie-decline').onclick = function() {
+      try { localStorage.setItem('apex_consent', 'declined'); } catch(_) {}
+      div.remove();
+    };
+  }
+
+  if (consent === 'accepted') {
+    loadGA4();
+  } else if (consent !== 'declined') {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', showBanner);
+    } else {
+      showBanner();
+    }
+  }
+})();
 </script>
 </head>
 <body>
