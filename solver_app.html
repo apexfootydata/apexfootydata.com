@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="36" data-built-at="2026-05-05T12:15:57">
+<meta name="apex-gw" content="36" data-built-at="2026-05-05T12:25:48">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -5903,24 +5903,29 @@ body.compare-review .va-card-hero::before {
   function _computeManagerRealismFactor(userCurrentPts, lastFinishedGw,
                                           remainingMean, remainingGwsCount,
                                           chipBonusRemaining) {
+    // 2026-05-05 (FIX B) — denominator is BASE-only. Old logic divided by
+    // (base + chips), which made chip-holders look like they SHOULD pace
+    // higher → factor came in lower → their base got dampened more than a
+    // chipless manager with the same squad. Net effect in mini-league sim:
+    // having a chip remaining could LOWER your win %. Now factor depends
+    // only on base xP — chip-holders no longer double-penalised.
     chipBonusRemaining = chipBonusRemaining || 0;
     if (lastFinishedGw < 5 || remainingGwsCount < 1 || remainingMean <= 0) {
       return { factor: _LS_REALISM_FACTOR_FALLBACK, method: 'fallback_too_early' };
     }
     const effectiveGws = lastFinishedGw + 0.5;  // in-progress GW ~half-scored
     const userHistPace = userCurrentPts / effectiveGws;
-    const apexFwdCeilingTotal = remainingMean + chipBonusRemaining;
-    const apexFwdPace = apexFwdCeilingTotal / remainingGwsCount;
-    if (apexFwdPace <= 0) {
+    const apexFwdBasePace = remainingMean / remainingGwsCount;
+    if (apexFwdBasePace <= 0) {
       return { factor: _LS_REALISM_FACTOR_FALLBACK, method: 'fallback_zero_fwd' };
     }
-    const rawFactor = userHistPace / apexFwdPace;
+    const rawFactor = userHistPace / apexFwdBasePace;
     const bounded = Math.max(_LS_REALISM_FACTOR_MIN, Math.min(_LS_REALISM_FACTOR_MAX, rawFactor));
     return {
       factor: bounded,
       method: 'per_user',
       user_hist_pace: Math.round(userHistPace * 100) / 100,
-      apex_fwd_pace_incl_chips: Math.round(apexFwdPace * 100) / 100,
+      apex_fwd_base_pace: Math.round(apexFwdBasePace * 100) / 100,
       raw_factor: Math.round(rawFactor * 1000) / 1000,
       bounded_factor: Math.round(bounded * 1000) / 1000,
     };
@@ -6691,7 +6696,7 @@ body.compare-review .va-card-hero::before {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1777979757-GW36-5e10b912";
+const BUILD_VERSION = "1777980348-GW36-5e10b912";
 window.APEX_BUILD = BUILD_VERSION;
 
 let FPL_ID = null;
@@ -11585,7 +11590,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW36</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1777979757-GW36-5e10b912</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1777980348-GW36-5e10b912</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
