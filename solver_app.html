@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="36" data-built-at="2026-05-08T12:55:52">
+<meta name="apex-gw" content="36" data-built-at="2026-05-08T13:38:46">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -6810,7 +6810,7 @@ body.compare-review .va-card-hero::before {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1778241352-GW36-df6f6648";
+const BUILD_VERSION = "1778243926-GW36-df6f6648";
 window.APEX_BUILD = BUILD_VERSION;
 
 let FPL_ID = null;
@@ -10509,10 +10509,11 @@ function _lockExpiredOverrides() {
   return changed;
 }
 
-// True if THIS swap (out player + this GW) already has a LOCKED override.
-// Prevents the user clicking "I disagree" again on a swap that's been locked.
+// True if THIS swap (out player + this GW) already has a LOCKED, non-retracted
+// override. Prevents the user clicking "I disagree" again on a locked swap.
+// Retracted overrides don't block — user has already taken the call back.
 function _isSwapLocked(outId, gw) {
-  return _loadOverrides().some(o => o.locked && o.out_id === outId && o.gw === gw);
+  return _loadOverrides().some(o => o.locked && !o.retracted && o.out_id === outId && o.gw === gw);
 }
 
 function _saveOverride(record) {
@@ -10595,6 +10596,119 @@ function _editOverride(ts) {
   _showOverrideModal(o.out_id, o.apex_in_id, o.apex_in_xp, o.out_xp, o.apex_gain);
 }
 window._editOverride = _editOverride;
+
+// Squad-mutation helper used by override commit + revert (added 2026-05-08).
+// Atomically swaps `outId` (must be in current XI/bench) for `inId` (must be
+// in POOL_DATA, not already in squad). Validates position, budget (using SP
+// for owned), and 3-per-team cap. Re-picks XI, updates deltas, re-renders
+// pitch. Returns {ok: true, ...} or {ok: false, error: str}.
+function _overrideSwapInSquad(outId, inId) {
+  const inPlayer = POOL_DATA.find(p => p.id === inId);
+  if (!inPlayer) return {ok: false, error: 'Replacement player not found in pool'};
+  const fromXi    = _xiPlayers.find(p => p.id === outId);
+  const fromBench = _benchPlayers.find(p => p.id === outId);
+  const outPlayer = fromXi || fromBench;
+  if (!outPlayer) return {ok: false, error: 'Outgoing player no longer in your squad'};
+  if (inPlayer.element_type !== outPlayer.element_type) {
+    return {ok: false, error: 'Position mismatch'};
+  }
+  const fullSquad = [..._xiPlayers, ..._benchPlayers];
+  if (fullSquad.some(p => p.id === inId)) {
+    return {ok: false, error: `${inPlayer.web_name} already in squad`};
+  }
+  // Budget check — owned use SP, incoming uses now_cost (mirrors pitch badge).
+  const _spMap = TEAM_META.selling_prices || {};
+  const _effCost = (p) => {
+    if (!p) return 0;
+    const sp = _spMap[String(p.id)];
+    if (sp != null && sp > 0) return sp;
+    return p.cost || 0;
+  };
+  const budgetCap   = TEAM_META.budget || (TEAM_META.squad_value + TEAM_META.bank);
+  const outSP       = _effCost(outPlayer);
+  const inCost      = inPlayer.cost || 0;
+  const currentCost = fullSquad.reduce((s, p) => s + _effCost(p), 0);
+  const newCost     = currentCost - outSP + inCost;
+  if (newCost > budgetCap + 0.01) {
+    return {ok: false, error: `Over budget — need £${(newCost - budgetCap).toFixed(1)}m more`};
+  }
+  // 3-per-team check (after removing outPlayer).
+  const sameClubAfter = fullSquad.filter(p => p.id !== outId && p.team === inPlayer.team).length;
+  if (sameClubAfter >= 3) {
+    return {ok: false, error: `3 ${inPlayer.team} players already in squad`};
+  }
+  // Mutate the relevant array.
+  if (fromXi) {
+    _xiPlayers = _xiPlayers.filter(p => p.id !== outId);
+    _xiPlayers.push(inPlayer);
+  } else {
+    _benchPlayers = _benchPlayers.filter(p => p.id !== outId);
+    _benchPlayers.push(inPlayer);
+  }
+  // Bank delta: refund outSP, charge inCost.
+  TEAM_META.bank        += outSP - inCost;
+  TEAM_META.squad_value += inCost - outSP;
+  if (typeof _syncTeamHeaderFromMeta === 'function') _syncTeamHeaderFromMeta();
+  // Re-pick best XI from the 15 — captain/vice may shift.
+  if (typeof pickBestXi === 'function') {
+    const all15  = [..._xiPlayers, ..._benchPlayers];
+    const result = pickBestXi(all15, activeGwIdx);
+    _xiPlayers   = result.xi;
+    _benchPlayers = (typeof _orderBench === 'function') ? _orderBench(result.bench) : result.bench;
+    if (result.cap) _capId = result.cap.id;
+    if (result.vc)  _vcId  = result.vc.id;
+    const newXiSum = _xiPlayers.reduce((s, p) => s + _xpAt(p, activeGwIdx), 0);
+    const newCapXp = result.cap ? _xpAt(result.cap, activeGwIdx) : 0;
+    if (typeof _xiDelta !== 'undefined' && Array.isArray(_xiDelta)) {
+      _xiDelta[activeGwIdx]  = newXiSum - (GW_XI_BASE[activeGwIdx]  || 0);
+    }
+    if (typeof _capDelta !== 'undefined' && Array.isArray(_capDelta)) {
+      _capDelta[activeGwIdx] = newCapXp - (GW_CAP_XP[activeGwIdx] || 0);
+    }
+    if (typeof _jsBaseCapXp !== 'undefined') _jsBaseCapXp = newCapXp;
+  }
+  if (typeof _renderPitchFromState === 'function') _renderPitchFromState();
+  if (typeof updateChipTotal === 'function') updateChipTotal();
+  if (typeof renderPoolTable === 'function') renderPoolTable();
+  return {ok: true, fromXi: !!fromXi, outPlayer, inPlayer};
+}
+window._overrideSwapInSquad = _overrideSwapInSquad;
+
+// Revert an override: swap user_in back to out, mark record retracted.
+// Used by the Revert button in the scoreboard. Locked records cannot be
+// reverted (their swap may already be reflected in the persisted FPL squad
+// at the deadline). Retracted records stay in localStorage but are excluded
+// from W-L tally and from future settlement.
+function _revertOverride(ts) {
+  const all = _loadOverrides();
+  const idx = all.findIndex(o => o.ts === ts);
+  if (idx < 0) return;
+  const o = all[idx];
+  if (o.locked) {
+    alert('Locked overrides cannot be reverted — the deadline has passed.');
+    return;
+  }
+  if (o.retracted) {
+    alert('This override has already been retracted.');
+    return;
+  }
+  if (!confirm(`Revert ${o.user_in_name} → ${o.out_name}? Your scoreboard will mark this call as retracted (won't count toward W-L).`)) return;
+  // Try the inverse swap. Swap helper handles "not in squad" gracefully —
+  // user may have done other swaps since, in which case we just mark
+  // retracted without touching the squad.
+  const swap = _overrideSwapInSquad(o.user_in_id, o.out_id);
+  if (!swap.ok) {
+    // Soft-fail: warn but still mark retracted, so user can clean up the
+    // scoreboard entry even when the swap can't be reversed automatically.
+    if (!confirm(`Couldn't auto-revert: ${swap.error}. Mark this call as retracted anyway?`)) return;
+  }
+  all[idx].retracted = true;
+  all[idx].retracted_ts = Date.now();
+  try { localStorage.setItem(_OVERRIDES_KEY, JSON.stringify(all)); } catch (_) {}
+  _renderOverrideBadge();
+  if (document.getElementById('override-board-backdrop')) _showOverrideScoreboard();
+}
+window._revertOverride = _revertOverride;
 
 function _showOverrideModal(outId, apexInId, apexInXp, outXp, apexGain) {
   const outP    = POOL_DATA.find(p => p.id === outId)
@@ -10720,6 +10834,20 @@ function _showOverrideModal(outId, apexInId, apexInXp, outXp, apexGain) {
     const userRolling  = _rolling(sel);
     const apexRolling2 = _rolling(POOL_DATA.find(p => p.id === apexId));
     const outRolling2  = _rolling(outP);
+    // Override v3 (2026-05-08) — actually swap the player in the squad.
+    // If `out` is currently in _xiPlayers/_benchPlayers, do the swap. If
+    // not (e.g. transfer-rec context where neither out nor user_in is in
+    // the squad yet), we just record the call without mutating.
+    const _outInSquad = [..._xiPlayers, ..._benchPlayers].some(p => p.id === oid);
+    let _swapped = false;
+    if (_outInSquad) {
+      const swap = _overrideSwapInSquad(oid, sel.id);
+      if (!swap.ok) {
+        alert(`Couldn't swap: ${swap.error}`);
+        return; // abort — don't save the record either, keep state clean
+      }
+      _swapped = true;
+    }
     _saveOverride({
       ts:               Date.now(),
       gw:               TEAM_META.gw_range[activeGwIdx],
@@ -10741,15 +10869,20 @@ function _showOverrideModal(outId, apexInId, apexInXp, outXp, apexGain) {
       // ev_delta on the 3-GW horizon — same dimension Apex optimised on.
       ev_delta:         (userRolling - outRolling2) - (apexRolling2 - outRolling2),
       settled:          false,
+      retracted:        false,
+      swapped:          _swapped,  // true = squad mutated, false = record-only
     });
     document.getElementById('override-modal-backdrop')?.remove();
     _cleanupWindowGlobals();
-    // Lightweight confirmation
+    // Confirmation copy reflects whether we mutated the squad.
     const note = document.createElement('div');
-    note.textContent = `Saved your call: ${sel.web_name} instead of ${(POOL_DATA.find(p=>p.id===apexId)?.web_name || 'Apex pick')}.`;
-    note.style.cssText = 'position:fixed;top:24px;left:50%;transform:translateX(-50%);background:#131318;color:#e8e8f0;border:1px solid #2a2a35;padding:10px 16px;border-radius:8px;font-family:JetBrains Mono,monospace;font-size:.8rem;z-index:99999;box-shadow:0 12px 32px rgba(0,0,0,.4);';
+    const _apexName = (POOL_DATA.find(p=>p.id===apexId)?.web_name || 'Apex pick');
+    note.textContent = _swapped
+      ? `Swapped: ${outP.web_name} → ${sel.web_name}. Tap My Calls bottom-left to revert.`
+      : `Saved your call: ${sel.web_name} instead of ${_apexName}.`;
+    note.style.cssText = 'position:fixed;top:24px;left:50%;transform:translateX(-50%);background:#131318;color:#e8e8f0;border:1px solid #2a2a35;padding:10px 16px;border-radius:8px;font-family:JetBrains Mono,monospace;font-size:.8rem;z-index:99999;box-shadow:0 12px 32px rgba(0,0,0,.4);max-width:90vw;text-align:center;';
     document.body.appendChild(note);
-    setTimeout(() => note.remove(), 3500);
+    setTimeout(() => note.remove(), 4500);
   };
 
   // Build modal shell (reuses why-modal-* CSS)
@@ -10770,7 +10903,7 @@ function _renderOverrideBadge() {
   // Lock any overrides whose GW deadline has now passed. Run BEFORE reading
   // the array so the badge reflects fresh lock state.
   _lockExpiredOverrides();
-  const overrides = _loadOverrides();
+  const overrides = _loadOverrides().filter(o => !o.retracted);  // exclude retracted from W-L
   const settled = overrides.filter(o => o.settled);
   const wins = settled.filter(o => (o.actual_delta || 0) > 0).length;
   const losses = settled.length - wins;
@@ -10840,15 +10973,28 @@ function _showOverrideScoreboard() {
     ? '<div style="padding:24px;text-align:center;color:#6b6b7b;font-size:.85rem;">No overrides yet. Click "I disagree" on any transfer recommendation to start tracking your gut vs Apex.</div>'
     : overrides.slice().reverse().map(o => {
         const colour = o.settled ? ((o.actual_delta || 0) >= 0 ? '#22c55e' : '#f87171') : '#9ca3af';
-        const status = o.settled
-          ? `${(o.actual_delta || 0) >= 0 ? '+' : ''}${(o.actual_delta || 0).toFixed(1)} pts`
-          : (o.locked ? 'locked · awaiting GW result' : 'editable until deadline');
-        const lockTag = o.locked
-          ? `<span style="background:rgba(249,115,22,0.18);color:#f97316;font-size:.6rem;font-weight:700;padding:2px 6px;border-radius:4px;letter-spacing:.05em;margin-left:6px;">🔒 LOCKED</span>`
-          : `<span style="color:#fb923c;font-size:.62rem;margin-left:6px;">editable</span>`;
-        const actionsHtml = o.locked
-          ? '' // Locked rows cannot be edited or removed.
+        const status = o.retracted
+          ? 'retracted · doesn\'t count'
+          : (o.settled
+              ? `${(o.actual_delta || 0) >= 0 ? '+' : ''}${(o.actual_delta || 0).toFixed(1)} pts`
+              : (o.locked ? 'locked · awaiting GW result' : 'editable until deadline'));
+        const lockTag = o.retracted
+          ? `<span style="background:rgba(107,114,126,0.18);color:#9ca3af;font-size:.6rem;font-weight:700;padding:2px 6px;border-radius:4px;letter-spacing:.05em;margin-left:6px;">↶ RETRACTED</span>`
+          : (o.locked
+              ? `<span style="background:rgba(249,115,22,0.18);color:#f97316;font-size:.6rem;font-weight:700;padding:2px 6px;border-radius:4px;letter-spacing:.05em;margin-left:6px;">🔒 LOCKED</span>`
+              : `<span style="color:#fb923c;font-size:.62rem;margin-left:6px;">editable</span>`);
+        // Revert button shown only for unlocked, non-retracted, swapped
+        // records — i.e. cases where there's an actual squad mutation to undo.
+        const revertBtnHtml = (!o.locked && !o.retracted && o.swapped)
+          ? `<button onclick="window._revertOverride(${o.ts})"
+              style="flex:1;background:transparent;color:#fbbf24;border:1px solid rgba(251,191,36,0.4);border-radius:5px;padding:5px 10px;font-family:'Space Grotesk',sans-serif;font-size:.7rem;font-weight:600;cursor:pointer;text-transform:uppercase;letter-spacing:0.05em;">
+              ↶ Revert
+            </button>`
+          : '';
+        const actionsHtml = (o.locked || o.retracted)
+          ? '' // Locked or retracted rows have no actions.
           : `<div style="display:flex;gap:8px;margin-top:8px;">
+              ${revertBtnHtml}
               <button onclick="window._editOverride(${o.ts})"
                 style="flex:1;background:transparent;color:#9ca3af;border:1px solid #2a2a35;border-radius:5px;padding:5px 10px;font-family:'Space Grotesk',sans-serif;font-size:.7rem;font-weight:600;cursor:pointer;text-transform:uppercase;letter-spacing:0.05em;">
                 Edit
@@ -10858,8 +11004,14 @@ function _showOverrideScoreboard() {
                 Remove
               </button>
             </div>`;
+        // Same-player heuristic: when apex_in_id == out_id (squad-level
+        // override), the modal saved Apex's "pick" as keep-this-player. Show
+        // friendlier copy in that case.
+        const _apexLine = (o.apex_in_id === o.out_id)
+          ? `Apex says: <strong style="color:#f97316;">keep ${o.out_name}</strong>`
+          : `Apex picked <strong style="color:#f97316;">${o.apex_in_name}</strong> (+${(o.apex_gain||0).toFixed(1)})`;
         return `
-          <div style="padding:10px 12px;border-top:1px solid rgba(255,255,255,0.05);font-size:.8rem;${o.locked ? '' : 'opacity:0.85;'}">
+          <div style="padding:10px 12px;border-top:1px solid rgba(255,255,255,0.05);font-size:.8rem;${(o.locked || o.retracted) ? '' : 'opacity:0.85;'}${o.retracted ? 'opacity:0.5;' : ''}">
             <div style="display:flex;justify-content:space-between;color:#6b6b7b;font-size:.7rem;margin-bottom:4px;">
               <span>GW${o.gw}${lockTag}</span><span style="color:${colour};font-weight:600;">${status}</span>
             </div>
@@ -10867,7 +11019,7 @@ function _showOverrideScoreboard() {
               Out: <strong>${o.out_name}</strong>
             </div>
             <div style="color:#9ca3af;margin-top:2px;">
-              Apex picked <strong style="color:#f97316;">${o.apex_in_name}</strong> (+${(o.apex_gain||0).toFixed(1)})
+              ${_apexLine}
             </div>
             <div style="color:#9ca3af;">
               You picked <strong style="color:#e8e8f0;">${o.user_in_name}</strong> (+${(o.user_gain||0).toFixed(1)})
@@ -10877,14 +11029,16 @@ function _showOverrideScoreboard() {
           </div>`;
       }).join('');
 
-  const settled = overrides.filter(o => o.settled);
+  const active = overrides.filter(o => !o.retracted);
+  const retractedCount = overrides.length - active.length;
+  const settled = active.filter(o => o.settled);
   const wins = settled.filter(o => (o.actual_delta || 0) > 0).length;
   const totalDelta = settled.reduce((s, o) => s + (o.actual_delta || 0), 0);
 
   backdrop.innerHTML = `
     <div class="why-modal-card" onclick="event.stopPropagation()" style="max-width:440px;max-height:80vh;display:flex;flex-direction:column;">
       <h3>My Calls vs Apex</h3>
-      <div class="why-sub">${overrides.length} override${overrides.length === 1 ? '' : 's'} ·
+      <div class="why-sub">${active.length} active${retractedCount ? ` · ${retractedCount} retracted` : ''} ·
         ${settled.length} settled (${wins}W-${settled.length - wins}L) ·
         ${settled.length ? `net ${totalDelta >= 0 ? '+' : ''}${totalDelta.toFixed(1)} pts` : 'no settled yet'}
       </div>
@@ -12337,7 +12491,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW36</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1778241352-GW36-df6f6648</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1778243926-GW36-df6f6648</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
