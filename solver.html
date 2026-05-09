@@ -496,6 +496,75 @@
     .shirt-name { max-width: 56px !important; font-size: 0.66rem !important; }
     .shirt-xp { font-size: 0.86rem !important; }
 }
+
+/* ============================================================================
+ * Site footer — injected on every page by apex_mobile.js (idempotent).
+ * Two rows: brand + tagline/moat-stat | utility links. Collapses to single
+ * column on mobile.
+ * ========================================================================== */
+.apex-footer {
+    border-top: 1px solid #2a2a35;
+    background: #0c0c0f;
+    color: #6b6b7b;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.82rem;
+    padding: 22px 28px 24px;
+    margin-top: 48px;
+}
+.apex-footer-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+.apex-footer-row + .apex-footer-row { margin-top: 8px; }
+.apex-footer-brand {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.apex-footer-wordmark { font-weight: 600; font-size: 0.95rem; line-height: 1; }
+.apex-footer-apex { color: #F97316; font-weight: 500; }
+.apex-footer-rest { color: #c8c8d0; font-weight: 700; }
+.apex-footer-tagline {
+    color: #8a8a95;
+    font-size: 0.74rem;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+}
+.apex-footer-tagline .ftr-stat {
+    color: #F97316;
+    font-weight: 600;
+}
+.apex-footer-links { display: flex; gap: 18px; align-items: center; }
+.apex-footer-links a {
+    color: #8a8a95;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.15s;
+}
+.apex-footer-links a:hover { color: #F97316; }
+.apex-footer-copy { color: #4a4a55; font-size: 0.72rem; }
+.apex-footer-legal { display: flex; gap: 12px; }
+.apex-footer-legal a {
+    color: #6b6b7b;
+    text-decoration: none;
+    font-size: 0.72rem;
+}
+.apex-footer-legal a:hover { color: #c8c8d0; }
+.apex-footer-legal-sep { color: #2a2a35; }
+
+@media (max-width: 600px) {
+    .apex-footer { padding: 18px 16px 22px; margin-top: 32px; }
+    .apex-footer-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    .apex-footer-tagline { font-size: 0.7rem; }
+    .apex-footer-links { gap: 16px; }
+}
 </style>
 <script>
 /* ============================================================================
@@ -582,6 +651,92 @@
     }
 
     window.__apexMobileRewrap = wrapAll;
+})();
+
+// ── Site footer injection (idempotent) ────────────────────────────────────
+// Builds and inserts a brand-stat-utility footer at the END of <body>.
+// Pulls the moat stat from the hero card's data-stat spans if present;
+// falls back to the static tagline otherwise. Re-runs are no-ops.
+(function () {
+    'use strict';
+    var FOOTER_ID = 'apex-site-footer';
+
+    function makeFooter() {
+        if (document.getElementById(FOOTER_ID)) return;
+        if (!document.body) return;
+
+        // Try to pull moat stat from index hero (if on this page)
+        var wins = document.querySelector('[data-stat="wins"]');
+        var total = document.querySelector('[data-stat="total"]');
+        var edge = document.querySelector('[data-stat="edge"]');
+        var moatHTML = '';
+        if (wins && total && wins.textContent && total.textContent) {
+            moatHTML = 'Beat Pinnacle <span class="ftr-stat">' +
+                wins.textContent.trim() + ' of ' + total.textContent.trim() +
+                '</span> weeks';
+            if (edge && edge.textContent) {
+                moatHTML += ' &middot; +<span class="ftr-stat">' +
+                    edge.textContent.trim() + '</span> g/match';
+            }
+        } else {
+            moatHTML = 'data-driven football analytics';
+        }
+
+        var f = document.createElement('footer');
+        f.id = FOOTER_ID;
+        f.className = 'apex-footer';
+        f.innerHTML =
+            '<div class="apex-footer-row">' +
+                '<div class="apex-footer-brand">' +
+                    '<span class="apex-footer-wordmark">' +
+                        '<span class="apex-footer-apex">Apex</span>' +
+                        '<span class="apex-footer-rest">FootyData</span>' +
+                    '</span>' +
+                    '<span class="apex-footer-tagline">' + moatHTML + '</span>' +
+                '</div>' +
+                '<div class="apex-footer-links">' +
+                    '<a href="https://x.com/apexfootycom" target="_blank" rel="noopener">X / Twitter</a>' +
+                    '<a href="mailto:contact@apexfootydata.com">Email</a>' +
+                '</div>' +
+            '</div>' +
+            '<div class="apex-footer-row">' +
+                '<span class="apex-footer-copy">&copy; 2026 ApexFootyData</span>' +
+                '<span class="apex-footer-legal">' +
+                    '<a href="mailto:contact@apexfootydata.com">Contact</a>' +
+                    '<span class="apex-footer-legal-sep">&middot;</span>' +
+                    '<a href="#" onclick="alert(\'Privacy: ApexFootyData uses Cloudflare Analytics and Google Analytics 4 for traffic measurement only. No personal data sold or shared. Cookie consent collected on first visit. Contact: contact@apexfootydata.com to request data deletion.\'); return false;">Privacy</a>' +
+                '</span>' +
+            '</div>';
+        document.body.appendChild(f);
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', makeFooter);
+    } else {
+        makeFooter();
+    }
+    // Also run after a tick — moat-stat spans may be filled in by inject scripts after DCL.
+    setTimeout(makeFooter, 600);
+    setTimeout(function() {
+        // Update the tagline if moat stats arrived after first render
+        var f = document.getElementById(FOOTER_ID);
+        if (!f) return;
+        var tagline = f.querySelector('.apex-footer-tagline');
+        if (!tagline) return;
+        var wins = document.querySelector('[data-stat="wins"]');
+        var total = document.querySelector('[data-stat="total"]');
+        var edge = document.querySelector('[data-stat="edge"]');
+        if (wins && total && wins.textContent.trim() && total.textContent.trim() &&
+            tagline.textContent.indexOf('Beat Pinnacle') === -1) {
+            var html = 'Beat Pinnacle <span class="ftr-stat">' +
+                wins.textContent.trim() + ' of ' + total.textContent.trim() +
+                '</span> weeks';
+            if (edge && edge.textContent.trim()) {
+                html += ' &middot; +<span class="ftr-stat">' + edge.textContent.trim() + '</span> g/match';
+            }
+            tagline.innerHTML = html;
+        }
+    }, 1500);
 })();
 </script>
 <!-- ## APEX_MOBILE_FIX:END ## -->
