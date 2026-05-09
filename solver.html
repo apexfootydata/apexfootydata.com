@@ -565,6 +565,16 @@
     .apex-footer-tagline { font-size: 0.7rem; }
     .apex-footer-links { gap: 16px; }
 }
+
+/* ============================================================================
+ * Rank Predictor offline (2026-05-09): hide nav links to /rank-milestones
+ * across solver/site until Marcus re-enables. Removing this block restores
+ * the link without code changes.
+ * ========================================================================== */
+a[href*="rank-milestones"],
+a[href*="rank_milestones"] {
+    display: none !important;
+}
 </style>
 <script>
 /* ============================================================================
