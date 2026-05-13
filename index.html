@@ -7,8 +7,8 @@
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
     <title>ApexFootyData — Premier League xG Predictions, Team Ratings &amp; FPL Tools</title>
-    <meta name="description" content="Premier League predictions powered by Dixon-Coles + xG. Beat Pinnacle 23/28 weeks in 2025/26. Free Hit solver, rank predictor, mini-league simulator. Updated weekly.">
-    <meta name="keywords" content="Premier League predictions, FPL solver, xG model, Dixon-Coles, FPL Free Hit, FPL rank predictor, FPL mini-league, football prediction model, Pinnacle beating model">
+    <meta name="description" content="Premier League predictions powered by Dixon-Coles + xG. Free FPL solver, Free Hit optimiser, mini-league simulator. Updated weekly.">
+    <meta name="keywords" content="Premier League predictions, FPL solver, xG model, Dixon-Coles, FPL Free Hit, FPL mini-league, football prediction model">
     <meta name="author" content="ApexFootyData">
     <link rel="canonical" href="https://apexfootydata.com/">
     <meta name="robots" content="index, follow">
@@ -16,14 +16,14 @@
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="ApexFootyData">
     <meta property="og:title" content="ApexFootyData — Premier League xG Predictions &amp; FPL Tools">
-    <meta property="og:description" content="xG-based match predictions that have beaten Pinnacle's closing odds 23 of 28 weeks. Free Hit solver, rank predictor, mini-league simulator.">
+    <meta property="og:description" content="xG-based Premier League match predictions, Free Hit solver, and mini-league simulator. Free FPL tool.">
     <meta property="og:url" content="https://apexfootydata.com/">
     <meta property="og:image" content="https://apexfootydata.com/og-image.png">
     <meta property="og:image:alt" content="ApexFootyData — Premier League predictions">
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="ApexFootyData — PL Predictions &amp; FPL Tools">
-    <meta name="twitter:description" content="Premier League xG predictions. 23/28 weeks beating Pinnacle in 2025/26. Free FPL solver + rank predictor.">
+    <meta name="twitter:description" content="Premier League xG predictions. Free FPL solver, Free Hit optimiser, mini-league sim.">
     <meta name="twitter:image" content="https://apexfootydata.com/og-image.png">
     <!-- JSON-LD structured data -->
     <script type="application/ld+json">
@@ -1263,15 +1263,7 @@
 
     <!-- TAB 1: Team Ratings -->
     <div class="tab-content active">
-        <!-- Hero stat — model moat. Numbers are baked from accuracy_history.json
-             by apex_v1_site_inject._update_hero_stats() — DO NOT hardcode. -->
-        <div class="hero-stat-card">
-            <div>
-                <div class="hero-stat-label">Apex v1 — Season 2025/26</div>
-                <div class="hero-stat-value">
-                    Beat Pinnacle <span class="num" data-stat="wins">26</span> of <span class="num" data-stat="total">31</span> weeks<span class="hero-stat-divider">·</span>+<span class="num" data-stat="edge">0.068</span> goals/match edge
-                </div>
-            </div>
+        <!-- HERO_STAT_REMOVED 2026-05-09 — Marcus paused public Pinnacle claim. Restore from git if reinstating. -->
         </div>
         <div class="subtab-nav">
             <button class="subtab-button active" onclick="showSub(0, 0)">Current Ratings</button>
@@ -2621,6 +2613,13 @@ a[href*="rank-milestones"],
 a[href*="rank_milestones"] {
     display: none !important;
 }
+
+/* ============================================================================
+ * 2026-05-09: Marcus paused public-facing Pinnacle moat claim + Form Trends
+ * sub-tab. Hide both via CSS (reversible -- delete this block to restore).
+ * ========================================================================== */
+.hero-stat-card { display: none !important; }
+.subtab-button[onclick*="showSub(0, 1)"] { display: none !important; }
 </style>
 <script>
 /* ============================================================================
@@ -2721,22 +2720,8 @@ a[href*="rank_milestones"] {
         if (document.getElementById(FOOTER_ID)) return;
         if (!document.body) return;
 
-        // Try to pull moat stat from index hero (if on this page)
-        var wins = document.querySelector('[data-stat="wins"]');
-        var total = document.querySelector('[data-stat="total"]');
-        var edge = document.querySelector('[data-stat="edge"]');
-        var moatHTML = '';
-        if (wins && total && wins.textContent && total.textContent) {
-            moatHTML = 'Beat Pinnacle <span class="ftr-stat">' +
-                wins.textContent.trim() + ' of ' + total.textContent.trim() +
-                '</span> weeks';
-            if (edge && edge.textContent) {
-                moatHTML += ' &middot; +<span class="ftr-stat">' +
-                    edge.textContent.trim() + '</span> g/match';
-            }
-        } else {
-            moatHTML = 'data-driven football analytics';
-        }
+        // 2026-05-09: moat claim hidden -- static tagline only.
+        var moatHTML = 'data-driven football analytics';
 
         var f = document.createElement('footer');
         f.id = FOOTER_ID;
@@ -2773,26 +2758,7 @@ a[href*="rank_milestones"] {
     }
     // Also run after a tick — moat-stat spans may be filled in by inject scripts after DCL.
     setTimeout(makeFooter, 600);
-    setTimeout(function() {
-        // Update the tagline if moat stats arrived after first render
-        var f = document.getElementById(FOOTER_ID);
-        if (!f) return;
-        var tagline = f.querySelector('.apex-footer-tagline');
-        if (!tagline) return;
-        var wins = document.querySelector('[data-stat="wins"]');
-        var total = document.querySelector('[data-stat="total"]');
-        var edge = document.querySelector('[data-stat="edge"]');
-        if (wins && total && wins.textContent.trim() && total.textContent.trim() &&
-            tagline.textContent.indexOf('Beat Pinnacle') === -1) {
-            var html = 'Beat Pinnacle <span class="ftr-stat">' +
-                wins.textContent.trim() + ' of ' + total.textContent.trim() +
-                '</span> weeks';
-            if (edge && edge.textContent.trim()) {
-                html += ' &middot; +<span class="ftr-stat">' + edge.textContent.trim() + '</span> g/match';
-            }
-            tagline.innerHTML = html;
-        }
-    }, 1500);
+    // 2026-05-09: deferred moat-stat update disabled (claim hidden).
 })();
 </script>
 <!-- ## APEX_MOBILE_FIX:END ## -->
