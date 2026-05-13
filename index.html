@@ -1263,7 +1263,16 @@
 
     <!-- TAB 1: Team Ratings -->
     <div class="tab-content active">
-        <!-- HERO_STAT_REMOVED 2026-05-09 — Marcus paused public Pinnacle claim. Restore from git if reinstating. -->
+        <!-- Hero stat — currently hidden via CSS (apex_mobile.css) per Marcus 2026-05-09.
+             Markup retained so DOM structure stays valid AND so site_inject can
+             still populate data-stat spans (numbers only, no claim text). -->
+        <div class="hero-stat-card">
+            <div>
+                <div class="hero-stat-label">Apex v1 — Season 2025/26</div>
+                <div class="hero-stat-value">
+                    <span class="num" data-stat="wins"></span><span class="num" data-stat="total"></span><span class="num" data-stat="edge"></span>
+                </div>
+            </div>
         </div>
         <div class="subtab-nav">
             <button class="subtab-button active" onclick="showSub(0, 0)">Current Ratings</button>
