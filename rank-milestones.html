@@ -331,9 +331,21 @@ a[href*="solver_app"] {
         padding-left: 6px !important;
         padding-right: 4px !important;
     }
-    /* Hide the bar visualisation — keep the number next to it */
-    .data-table .bar-container {
+    /* Hide the colored bar visualisation, keep just the .bar-label number.
+       The .bar-container holds BOTH the orange bar AND the .bar-label text;
+       hiding the container kills the number too — wrong. Hide just .bar. */
+    .data-table .bar-container .bar {
         display: none !important;
+    }
+    .data-table .bar-container {
+        position: static !important;
+        background: transparent !important;
+        padding: 0 !important;
+    }
+    .data-table .bar-label {
+        position: static !important;
+        display: inline !important;
+        font-size: 0.82rem !important;
     }
     /* Compact numeric columns */
     .data-table th:nth-child(n+3),
