@@ -3,314 +3,76 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="icon" type="image/x-icon" href="favicon.ico">
-<link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
-<title>ApexFootyData · FPL Solver</title>
+<meta name="apex-gw" content="37">
+<meta name="robots" content="noindex">
+<title>FPL Solver - Coming Back for 2026/27 - ApexFootyData</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
+  * { margin:0; padding:0; box-sizing:border-box; }
   body {
-    background: #0c0c0f;
-    color: #c8c8d0;
-    font-family: 'JetBrains Mono', monospace;
-    line-height: 1.6;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
+    background:#0c0c0f; color:#c8c8d0;
+    font-family:'JetBrains Mono', monospace;
+    min-height:100vh; display:flex; flex-direction:column;
   }
-
-  /* Header — matches index.html */
   .header {
-    background: #131318;
-    border-bottom: 1px solid #2a2a35;
-    padding: 24px 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 20px;
-    max-width: 1400px;
-    margin-left: auto;
-    margin-right: auto;
+    background:#131318; border-bottom:1px solid #2a2a35;
+    padding:24px 28px; text-align:center;
   }
-  .logo { display: flex; align-items: center; gap: 12px; text-decoration: none; }
-  .logo-text { display: flex; flex-direction: column; gap: 3px; }
   .logo-brand {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 24px; font-weight: 700; color: #9ca3af; line-height: 1;
+    font-family:'Space Grotesk', sans-serif;
+    font-size:24px; font-weight:700; color:#9ca3af;
   }
-  .logo-subtitle {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 10px; font-weight: 600;
-    color: #F97316; letter-spacing: 2.5px;
-    text-transform: uppercase; margin-top: 2px;
-  }
-
-  /* Nav — matches the main site's tab strip */
-  .tab-nav {
-    display: flex;
-    justify-content: center;
-    border-bottom: 1px solid #2a2a35;
-    background: #131318;
-    overflow-x: auto;
-    max-width: 1400px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-  @media (max-width: 768px) {
-    .tab-nav { justify-content: flex-start; }
-    .header { padding: 12px 16px; }
-  }
-  @media (max-width: 480px) {
-    .header { flex-direction: column; align-items: center; gap: 6px; padding: 10px 12px; }
-  }
-  .tab-button {
-    padding: 16px 24px; background: none; border: none;
-    color: #6b6b7b; cursor: pointer;
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 14px; font-weight: 500;
-    border-bottom: 2px solid transparent;
-    text-decoration: none;
-    white-space: nowrap;
-    transition: all 0.2s;
-  }
-  .tab-button:hover { color: #c8c8d0; }
-  .tab-button.active { color: #F97316; border-bottom-color: #F97316; }
-
-  /* Card */
+  .logo-brand .apex { color:#F97316; font-weight:500; }
   main {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 40px 20px;
+    flex:1; display:flex; align-items:center; justify-content:center;
+    padding:40px 20px;
   }
   .card {
-    background: #131318;
-    border: 1px solid #2a2a35;
-    border-radius: 12px;
-    padding: 48px 40px;
-    max-width: 480px;
-    width: 100%;
-    text-align: center;
+    background:#131318; border:1px solid #2a2a35;
+    border-radius:12px; padding:48px 40px;
+    max-width:600px; width:100%; text-align:center;
   }
-  .card-brand {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 26px; font-weight: 400;
-    line-height: 1; margin-bottom: 22px;
-    letter-spacing: -0.01em;
-  }
-  .card-brand .apex { color: #F97316; font-weight: 500; }
-  .card-brand .rest { color: #9ca3af; font-weight: 800; }
   h1 {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 36px; font-weight: 700;
-    color: #e8e8f0; margin-bottom: 18px;
-    letter-spacing: -0.01em;
+    font-family:'Space Grotesk', sans-serif;
+    font-size:30px; font-weight:700;
+    color:#e8e8f0; margin-bottom:18px;
+    letter-spacing:-0.01em;
   }
-  .sub {
-    color: #8a8a95; font-size: 14px;
-    margin-bottom: 32px;
+  .badge {
+    display:inline-block;
+    background:rgba(249,115,22,0.12); color:#F97316;
+    padding:6px 14px; border-radius:999px;
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:600; font-size:0.78rem;
+    letter-spacing:0.04em; text-transform:uppercase;
+    margin-bottom:24px;
   }
-  .status {
-    color: #F97316; font-size: 13px; font-weight: 600;
-    min-height: 1.4em; margin-top: 14px;
+  p { color:#8a8a95; font-size:14px; line-height:1.7; margin-bottom:14px; }
+  p.tight { color:#6b6b7b; font-size:13px; margin-top:14px; }
+  .cta {
+    display:inline-block; margin-top:22px;
+    background:#F97316; color:#0c0c0f;
+    text-decoration:none;
+    padding:12px 22px; border-radius:8px;
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:700; font-size:14px;
+    text-transform:uppercase; letter-spacing:0.05em;
   }
-  input {
-    width: 100%;
-    background: #0c0c0f;
-    border: 1px solid #2a2a35;
-    border-radius: 8px;
-    color: #e8e8f0;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 18px;
-    padding: 14px 18px;
-    text-align: center;
-    outline: none;
-    margin-bottom: 16px;
-    transition: border-color 0.2s;
-  }
-  input:focus { border-color: #F97316; }
-  input::placeholder { color: #4a4a55; }
-
-  button {
-    width: 100%;
-    background: #F97316;
-    color: #0c0c0f;
-    border: none;
-    border-radius: 8px;
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 15px;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    padding: 14px 24px;
-    cursor: pointer;
-    transition: background 0.2s;
-    text-transform: uppercase;
-  }
-  button:hover { background: #fb923c; }
-  button:disabled { opacity: 0.5; cursor: not-allowed; }
-
-  .err {
-    color: #f87171; font-size: 13px;
-    min-height: 1.4em; margin-top: 12px;
-  }
-
-  .hint {
-    color: #6b6b7b; font-size: 12px;
-    margin-top: 24px; line-height: 1.7;
-  }
-  .hint a { color: #F97316; text-decoration: none; }
-  .hint a:hover { text-decoration: underline; }
-
-  footer {
-    padding: 20px 40px;
-    text-align: center;
-    color: #4a4a55;
-    font-size: 11px;
-    border-top: 1px solid #2a2a35;
-  }
+  .cta:hover { background:#fb923c; }
 </style>
-<!-- Cookie consent + conditional Google Analytics 4 loader -->
-<script>
-(function() {
-  var GA4_ID = 'G-67ZMNH4RRQ';
-  var consent = null;
-  try { consent = localStorage.getItem('apex_consent'); } catch(_) {}
-
-  function loadGA4() {
-    var s = document.createElement('script');
-    s.async = true;
-    s.src = 'https://www.googletagmanager.com/gtag/js?id=' + GA4_ID;
-    document.head.appendChild(s);
-    window.dataLayer = window.dataLayer || [];
-    window.gtag = function() { window.dataLayer.push(arguments); };
-    window.gtag('js', new Date());
-    window.gtag('config', GA4_ID);
-  }
-
-  function showBanner() {
-    var style = 'position:fixed;left:16px;right:16px;bottom:16px;z-index:99998;'
-              + 'background:#131318;border:1px solid #2a2a35;border-radius:12px;'
-              + 'padding:14px 18px;color:#c8c8d0;font-family:Space Grotesk,sans-serif;'
-              + 'font-size:.92rem;display:flex;align-items:center;gap:14px;'
-              + 'flex-wrap:wrap;box-shadow:0 8px 24px rgba(0,0,0,.35);max-width:760px;'
-              + 'margin:0 auto;';
-    var btnA = 'background:#F97316;color:#0c0c0f;border:none;padding:8px 16px;'
-             + 'border-radius:6px;font-weight:700;cursor:pointer;font-family:inherit;'
-             + 'font-size:.85rem;letter-spacing:.3px;';
-    var btnD = 'background:transparent;color:#9ca3af;border:1px solid #2a2a35;'
-             + 'padding:8px 16px;border-radius:6px;font-weight:600;cursor:pointer;'
-             + 'font-family:inherit;font-size:.85rem;';
-    var div = document.createElement('div');
-    div.id = 'apex-cookie-banner';
-    div.setAttribute('style', style);
-    div.innerHTML = '<span style="flex:1;min-width:200px;line-height:1.45;">'
-        + 'We use cookies for analytics to understand how the site is used. '
-        + 'No personal data sold or shared.</span>'
-        + '<div style="display:flex;gap:8px;">'
-        + '<button id="apex-cookie-accept" style="' + btnA + '">Accept</button>'
-        + '<button id="apex-cookie-decline" style="' + btnD + '">Decline</button>'
-        + '</div>';
-    document.body.appendChild(div);
-    document.getElementById('apex-cookie-accept').onclick = function() {
-      try { localStorage.setItem('apex_consent', 'accepted'); } catch(_) {}
-      div.remove();
-      loadGA4();
-    };
-    document.getElementById('apex-cookie-decline').onclick = function() {
-      try { localStorage.setItem('apex_consent', 'declined'); } catch(_) {}
-      div.remove();
-    };
-  }
-
-  if (consent === 'accepted') {
-    loadGA4();
-  } else if (consent !== 'declined') {
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', showBanner);
-    } else {
-      showBanner();
-    }
-  }
-})();
-</script>
 </head>
 <body>
-
 <div class="header">
-  <a href="/" class="logo">
-    <div class="logo-text">
-      <div class="logo-brand"><span style="font-weight:500;color:#F97316">Apex</span><span style="font-weight:800;color:#9ca3af">FootyData</span></div>
-    </div>
-  </a>
+  <div class="logo-brand"><span class="apex">Apex</span><span style="font-weight:800;color:#9ca3af">FootyData</span></div>
 </div>
-
-<div class="tab-nav">
-  <a class="tab-button" href="/#tab0">Team Ratings</a>
-  <a class="tab-button" href="/#tab1">Matchweek Predictions</a>
-  <a class="tab-button" href="/#tab2">Team Predictions</a>
-  <a class="tab-button" href="/#tab3">Player Predictions</a>
-  <a class="tab-button" href="/#tab4">Simulated Final Table</a>
-  <a class="tab-button active" href="/solver.html">FPL Solver</a>
-</div>
-
 <main>
   <div class="card">
-    <div class="card-brand"><span class="apex">Apex</span><span class="rest">FootyData</span></div>
-    <h1>FPL Solver</h1>
-    <p class="sub">Enter your FPL Team ID to get started.</p>
-    <input id="fpl-id" type="text" inputmode="numeric" pattern="[0-9]*"
-           placeholder="Your FPL Team ID" autofocus autocomplete="off" maxlength="10">
-    <button id="go" onclick="run()">Solve My Team</button>
-    <div class="err" id="err"></div>
-    <div class="status" id="status"></div>
-    <div class="hint">
-      Don't know your ID? Log in at fantasy.premierleague.com,
-      click <em>Points</em>, and check the URL —
-      it's the number after <code>/entry/</code>.
-    </div>
+    <span class="badge">Offseason rebuild</span>
+    <h1>The FPL Solver is being rebuilt for 2026/27</h1>
+    <p>We're rebuilding the solver from the ground up. Goal: a fully self-sufficient model with no external data dependencies.</p><p>Team ratings, weekly predictions and accuracy tracking remain live.</p>
+    <a class="cta" href="/">Back to ApexFootyData</a>
   </div>
 </main>
-
-<footer>apexfootydata.com · data-driven football analytics</footer>
-
-<script>
-  const input    = document.getElementById('fpl-id');
-  const errEl    = document.getElementById('err');
-  const statusEl = document.getElementById('status');
-  const goBtn    = document.getElementById('go');
-
-  input.addEventListener('keydown', e => {
-    if (e.key === 'Enter') run();
-  });
-  input.addEventListener('input', () => { errEl.textContent = ''; statusEl.textContent = ''; });
-
-  function run() {
-    const raw = input.value.trim();
-    if (!raw) { errEl.textContent = 'Enter your FPL Team ID to continue.'; input.focus(); return; }
-    if (!/^\d+$/.test(raw)) { errEl.textContent = 'Team ID must be numeric.'; input.focus(); return; }
-    const id = parseInt(raw, 10);
-    if (id < 1 || id > 20000000) { errEl.textContent = 'That doesn\'t look like a valid Team ID.'; input.focus(); return; }
-    errEl.textContent = '';
-    statusEl.textContent = `Building solver for team ${id}... (30–60 seconds)`;
-    goBtn.disabled = true;
-    // Persist for cross-page re-use (rank milestones, future pages).
-    try { localStorage.setItem('apex_fpl_id', String(id)); } catch (_) {}
-    window.location.href = `/solver_app.html?id=${id}`;
-  }
-
-  // Pre-fill if the user has been here before.
-  try {
-    var _saved = localStorage.getItem('apex_fpl_id');
-    if (_saved && /^\d+$/.test(_saved)) input.value = _saved;
-  } catch (_) {}
-</script>
-
-<!-- Cloudflare Web Analytics -->
-<script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "890700f621df42909deca8500a0df182"}'></script>
-<!-- End Cloudflare Web Analytics -->
-
 <!-- ## APEX_MOBILE_FIX:START ## -->
 <style>
 /* ============================================================================
@@ -565,23 +327,24 @@
     .apex-footer-tagline { font-size: 0.7rem; }
     .apex-footer-links { gap: 16px; }
 }
-
-/* ============================================================================
- * Rank Predictor offline (2026-05-09): hide nav links to /rank-milestones
- * across solver/site until Marcus re-enables. Removing this block restores
- * the link without code changes.
- * ========================================================================== */
-a[href*="rank-milestones"],
-a[href*="rank_milestones"] {
-    display: none !important;
-}
-
 /* ============================================================================
  * 2026-05-09: Marcus paused public-facing Pinnacle moat claim + Form Trends
  * sub-tab. Hide both via CSS (reversible -- delete this block to restore).
  * ========================================================================== */
 .hero-stat-card { display: none !important; }
 .subtab-button[onclick*="showSub(0, 1)"] { display: none !important; }
+
+/* ============================================================================
+ * Public tools offline (2026-05-13): hide all nav links to /rank-milestones
+ * and /solver/solver_app across solver/site until Marcus re-enables. Removing
+ * this block restores the links without code changes.
+ * ========================================================================== */
+a[href*="rank-milestones"],
+a[href*="rank_milestones"],
+a[href$="solver.html"],
+a[href*="solver_app"] {
+    display: none !important;
+}
 </style>
 <script>
 /* ============================================================================
