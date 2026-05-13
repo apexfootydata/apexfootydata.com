@@ -575,6 +575,13 @@ a[href*="rank-milestones"],
 a[href*="rank_milestones"] {
     display: none !important;
 }
+
+/* ============================================================================
+ * 2026-05-09: Marcus paused public-facing Pinnacle moat claim + Form Trends
+ * sub-tab. Hide both via CSS (reversible -- delete this block to restore).
+ * ========================================================================== */
+.hero-stat-card { display: none !important; }
+.subtab-button[onclick*="showSub(0, 1)"] { display: none !important; }
 </style>
 <script>
 /* ============================================================================
@@ -675,22 +682,8 @@ a[href*="rank_milestones"] {
         if (document.getElementById(FOOTER_ID)) return;
         if (!document.body) return;
 
-        // Try to pull moat stat from index hero (if on this page)
-        var wins = document.querySelector('[data-stat="wins"]');
-        var total = document.querySelector('[data-stat="total"]');
-        var edge = document.querySelector('[data-stat="edge"]');
-        var moatHTML = '';
-        if (wins && total && wins.textContent && total.textContent) {
-            moatHTML = 'Beat Pinnacle <span class="ftr-stat">' +
-                wins.textContent.trim() + ' of ' + total.textContent.trim() +
-                '</span> weeks';
-            if (edge && edge.textContent) {
-                moatHTML += ' &middot; +<span class="ftr-stat">' +
-                    edge.textContent.trim() + '</span> g/match';
-            }
-        } else {
-            moatHTML = 'data-driven football analytics';
-        }
+        // 2026-05-09: moat claim hidden -- static tagline only.
+        var moatHTML = 'data-driven football analytics';
 
         var f = document.createElement('footer');
         f.id = FOOTER_ID;
@@ -727,26 +720,7 @@ a[href*="rank_milestones"] {
     }
     // Also run after a tick — moat-stat spans may be filled in by inject scripts after DCL.
     setTimeout(makeFooter, 600);
-    setTimeout(function() {
-        // Update the tagline if moat stats arrived after first render
-        var f = document.getElementById(FOOTER_ID);
-        if (!f) return;
-        var tagline = f.querySelector('.apex-footer-tagline');
-        if (!tagline) return;
-        var wins = document.querySelector('[data-stat="wins"]');
-        var total = document.querySelector('[data-stat="total"]');
-        var edge = document.querySelector('[data-stat="edge"]');
-        if (wins && total && wins.textContent.trim() && total.textContent.trim() &&
-            tagline.textContent.indexOf('Beat Pinnacle') === -1) {
-            var html = 'Beat Pinnacle <span class="ftr-stat">' +
-                wins.textContent.trim() + ' of ' + total.textContent.trim() +
-                '</span> weeks';
-            if (edge && edge.textContent.trim()) {
-                html += ' &middot; +<span class="ftr-stat">' + edge.textContent.trim() + '</span> g/match';
-            }
-            tagline.innerHTML = html;
-        }
-    }, 1500);
+    // 2026-05-09: deferred moat-stat update disabled (claim hidden).
 })();
 </script>
 <!-- ## APEX_MOBILE_FIX:END ## -->
