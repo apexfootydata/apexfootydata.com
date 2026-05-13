@@ -2629,6 +2629,53 @@ a[href$="solver.html"],
 a[href*="solver_app"] {
     display: none !important;
 }
+
+/* ============================================================================
+ * Team Ratings table — fit cleanly in 390px viewport.
+ * Hide the bar visualisations (they squish to 5px tick on mobile), shrink
+ * the team-name column, keep just the numbers. All 5 columns visible.
+ * ========================================================================== */
+@media (max-width: 480px) {
+    /* Shrink the TEAM column — badge + name only */
+    .data-table td.team-name,
+    .data-table th:nth-child(2) {
+        max-width: 110px !important;
+    }
+    .data-table .team-badge {
+        width: 18px !important;
+        height: 18px !important;
+        margin-right: 4px !important;
+    }
+    .data-table td.team-name {
+        font-size: 0.78rem !important;
+        padding-left: 6px !important;
+        padding-right: 4px !important;
+    }
+    /* Hide the bar visualisation — keep the number next to it */
+    .data-table .bar-container {
+        display: none !important;
+    }
+    /* Compact numeric columns */
+    .data-table th:nth-child(n+3),
+    .data-table td:nth-child(n+3) {
+        padding-left: 4px !important;
+        padding-right: 4px !important;
+        font-size: 0.82rem !important;
+        text-align: right !important;
+    }
+    /* Rank column tighter */
+    .data-table th.rank,
+    .data-table td.rank {
+        padding-left: 6px !important;
+        padding-right: 4px !important;
+        font-size: 0.78rem !important;
+    }
+    /* Header cells */
+    .data-table thead th {
+        font-size: 0.7rem !important;
+        letter-spacing: 0.02em !important;
+    }
+}
 </style>
 <script>
 /* ============================================================================
