@@ -2631,14 +2631,32 @@ a[href*="rank_milestones"] {
 
 /* ============================================================================
  * Team Ratings table — fit cleanly in 390px viewport.
- * Hide the bar visualisations (they squish to 5px tick on mobile), shrink
- * the team-name column, keep just the numbers. All 5 columns visible.
+ * 5 columns: Rank | Team | Attack | Defence | Overall. Use fixed table layout
+ * with explicit column widths so headers don't overlap and numbers don't
+ * collide. Abbreviate headers to ATT/DEF/OVR on mobile.
  * ========================================================================== */
 @media (max-width: 480px) {
-    /* Shrink the TEAM column — badge + name only */
+    /* Force fixed layout so columns honour explicit widths instead of
+       auto-shrinking the data cells to nothing. */
+    .data-table {
+        table-layout: fixed !important;
+        width: 100% !important;
+    }
+
+    /* Column widths — total ~360px fits inside 390px viewport with padding.
+       Rank=28, Team=120, ATT=64, DEF=64, OVR=72 */
+    .data-table th.rank,
+    .data-table td.rank {
+        width: 28px !important;
+        padding-left: 4px !important;
+        padding-right: 2px !important;
+        font-size: 0.78rem !important;
+        text-align: left !important;
+    }
     .data-table td.team-name,
     .data-table th:nth-child(2) {
-        max-width: 110px !important;
+        width: auto !important;
+        max-width: none !important;
     }
     .data-table .team-badge {
         width: 18px !important;
@@ -2646,70 +2664,48 @@ a[href*="rank_milestones"] {
         margin-right: 4px !important;
     }
     .data-table td.team-name {
-        font-size: 0.78rem !important;
-        padding-left: 6px !important;
-        padding-right: 4px !important;
-    }
-    /* Team Ratings table: keep the orange/coloured bars but make them
-       small (4px tall, stacked below the number) so the cell stays narrow
-       enough to fit all 5 columns in a 390px viewport.
-       Other tabs untouched per Marcus 2026-05-13. */
-    .data-table .bar-container {
-        position: relative !important;
-        display: flex !important;
-        flex-direction: column !important;
-        align-items: stretch !important;
-        gap: 2px !important;
-        background: transparent !important;
-        padding: 4px 2px !important;
-        min-width: 0 !important;
-        height: auto !important;
-    }
-    .data-table .bar-label {
-        position: static !important;
-        display: block !important;
-        order: -1 !important;
-        font-size: 0.78rem !important;
-        text-align: right !important;
-        padding-right: 2px !important;
-        font-family: 'JetBrains Mono', ui-monospace, monospace;
-    }
-    .data-table .bar-container .bar {
-        display: block !important;
-        position: static !important;
-        height: 3px !important;
-        border-radius: 1px !important;
-        opacity: 0.85 !important;
-    }
-    /* Header rows: tighter so all 5 columns fit */
-    .data-table thead th {
-        font-size: 0.62rem !important;
-        letter-spacing: 0.02em !important;
-        padding-left: 2px !important;
-        padding-right: 2px !important;
-        white-space: nowrap !important;
-    }
-    /* Compact numeric columns */
-    .data-table th:nth-child(n+3),
-    .data-table td:nth-child(n+3) {
+        font-size: 0.8rem !important;
         padding-left: 4px !important;
         padding-right: 4px !important;
-        font-size: 0.82rem !important;
-        text-align: right !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
     }
-    /* Rank column tighter */
-    .data-table th.rank,
-    .data-table td.rank {
-        padding-left: 6px !important;
-        padding-right: 4px !important;
-        font-size: 0.78rem !important;
+    .data-table th:nth-child(3),
+    .data-table td:nth-child(3),
+    .data-table th:nth-child(4),
+    .data-table td:nth-child(4) {
+        width: 60px !important;
     }
-    /* Header cells */
+    .data-table th:nth-child(5),
+    .data-table td:nth-child(5) {
+        width: 68px !important;
+    }
+
+    /* Header cells: abbreviated, monospace-aligned, no collision */
     .data-table thead th {
-        font-size: 0.7rem !important;
-        letter-spacing: 0.02em !important;
+        font-size: 0.62rem !important;
+        letter-spacing: 0.04em !important;
+        padding: 8px 4px !important;
+        white-space: nowrap !important;
+        text-align: right !important;
+        overflow: hidden !important;
     }
-}
+    .data-table thead th:nth-child(1),
+    .data-table thead th:nth-child(2) {
+        text-align: left !important;
+    }
+    /* Replace long header text with abbreviations on mobile.
+       Hide the original text and inject short labels via ::after. */
+    .data-table thead th:nth-child(3),
+    .data-table thead th:nth-child(4),
+    .data-table thead th:nth-child(5) {
+        font-size: 0 !important;
+        position: relative !important;
+    }
+    .data-table thead th:nth-child(3)::after { content: "ATT"; font-size: 11px; letter-spacing: 0.05em; }
+    .data-table thead th:nth-child(4)::after { content: "DEF"; font-size: 11px; letter-spacing: 0.05em; }
+    .data-table thead th:nth-c
 </style>
 <script>
 /* ============================================================================
