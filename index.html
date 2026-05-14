@@ -1349,37 +1349,13 @@
     <div class="tab-content">
         <p style="margin:0 0 10px 0;font-size:0.78rem;font-style:italic;opacity:0.6;">⚠ Predictions assume the player starts — adjust accordingly for rotation or injury doubts.</p>
         <div class="subtab-nav">
-            <button class="subtab-button active" onclick="showSub(3, 0)">Current Game Week</button>
-            <button class="subtab-button" onclick="showSub(3, 1)">Goals</button>
-            <button class="subtab-button" onclick="showSub(3, 2)">Assists</button>
-            <button class="subtab-button" onclick="showSub(3, 3)">Goal Involvements</button>
-        </div>
-
-        <!-- Sub-tab: Next GW -->
-        <div class="subtab-content active">
-            <table class="nextgw-table">
-                <thead>
-                    <tr id="playerNextGWHead">
-                        <th style="width:160px">Player</th>
-                        <th style="width:155px">Team</th>
-                        <th style="width:290px" id="nextGWFixtureHeader">Fixture</th>
-                        <th style="text-align:right">xG</th>
-                        <th style="text-align:right">xA</th>
-                        <th style="text-align:right">xGI</th>
-                        <th style="text-align:right;cursor:help" title="Probability of scoring ≥1 goal this GW (Poisson: 1 − e^−xG)">Score%</th>
-                    </tr>
-                </thead>
-                <tbody id="playerNextGWTable"></tbody>
-            </table>
-            <div class="pagination-bar" id="paginationNextGW">
-                <button class="pg-btn" onclick="changePlayerPage('nextgw',-1)">&#8249;</button>
-                <span class="pg-info" id="pgInfoNextGW"></span>
-                <button class="pg-btn" onclick="changePlayerPage('nextgw',1)">&#8250;</button>
-            </div>
+            <button class="subtab-button active" onclick="showSub(3, 0)">Goals</button>
+            <button class="subtab-button" onclick="showSub(3, 1)">Assists</button>
+            <button class="subtab-button" onclick="showSub(3, 2)">Goal Involvements</button>
         </div>
 
         <!-- Sub-tab: Goals -->
-        <div class="subtab-content">
+        <div class="subtab-content active">
             <table class="player-table">
                 <thead><tr id="playerGoalsHead"></tr></thead>
                 <tbody id="playerGoalsTable"></tbody>
@@ -1931,14 +1907,14 @@
             contents[subIndex].classList.add('active');
             buttons[subIndex].classList.add('active');
             // Reset player pagination on tab switch (tab 3 = Player Predictions)
+            // 2026-05-14: Current Game Week sub-tab removed (duplicated solver content).
             if (tabIndex === 3) {
-                const tabMap = { 0:'nextgw', 1:'goals', 2:'assists', 3:'gi' };
+                const tabMap = { 0:'goals', 1:'assists', 2:'gi' };
                 const key = tabMap[subIndex];
                 if (key) { _pgState[key] = 0; }
-                if (subIndex === 0) renderPlayerNextGW();
-                if (subIndex === 1) renderPlayerGoals();
-                if (subIndex === 2) renderPlayerAssists();
-                if (subIndex === 3) renderPlayerGI();
+                if (subIndex === 0) renderPlayerGoals();
+                if (subIndex === 1) renderPlayerAssists();
+                if (subIndex === 2) renderPlayerGI();
             }
         }
 
@@ -2342,7 +2318,6 @@
         renderTeamGoals();
         renderTeamCS();
         renderPlayerGoals();
-        renderPlayerNextGW();
         renderPlayerAssists();
         renderPlayerGI();
         renderFinalTable();
@@ -2631,20 +2606,15 @@ a[href*="rank_milestones"] {
 
 /* ============================================================================
  * Team Ratings table — fit cleanly in 390px viewport.
- * 5 columns: Rank | Team | Attack | Defence | Overall. Use fixed table layout
- * with explicit column widths so headers don't overlap and numbers don't
- * collide. Abbreviate headers to ATT/DEF/OVR on mobile.
+ * Scoped to .data-table only (Player Predictions uses .player-table, Matchweek
+ * uses .matchweek-table, Team Predictions uses .heatmap-table / .nextgw-table,
+ * Final Table uses .final-table — all left untouched here).
  * ========================================================================== */
 @media (max-width: 480px) {
-    /* Force fixed layout so columns honour explicit widths instead of
-       auto-shrinking the data cells to nothing. */
     .data-table {
         table-layout: fixed !important;
         width: 100% !important;
     }
-
-    /* Column widths — total ~360px fits inside 390px viewport with padding.
-       Rank=28, Team=120, ATT=64, DEF=64, OVR=72 */
     .data-table th.rank,
     .data-table td.rank {
         width: 28px !important;
@@ -2681,8 +2651,6 @@ a[href*="rank_milestones"] {
     .data-table td:nth-child(5) {
         width: 68px !important;
     }
-
-    /* Header cells: abbreviated, monospace-aligned, no collision */
     .data-table thead th {
         font-size: 0.62rem !important;
         letter-spacing: 0.04em !important;
@@ -2695,8 +2663,6 @@ a[href*="rank_milestones"] {
     .data-table thead th:nth-child(2) {
         text-align: left !important;
     }
-    /* Header text abbreviation handled by apex_mobile.js (rewrites th.textContent
-       to ATT/DEF/OVR on viewports <=480px). Keep CSS just for sizing. */
     .data-table thead th:nth-child(3),
     .data-table thead th:nth-child(4),
     .data-table thead th:nth-child(5) {
@@ -2704,11 +2670,24 @@ a[href*="rank_milestones"] {
         letter-spacing: 0.05em !important;
         text-align: right !important;
     }
-
-    /* Numeric cell padding — give each value breathing room */
     .data-table td:nth-child(n+3) {
         padding-left: 4px !important;
-        padding-right: 6px !imp
+        padding-right: 6px !important;
+        font-size: 0.82rem !important;
+        text-align: right !important;
+        vertical-align: middle !important;
+    }
+    .data-table .bar-container {
+        position: relative !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 3px !important;
+        background: transparent !important;
+        padding: 4px 0 !important;
+        min-width: 0 !important;
+        width: 100% !important;
+        height: auto !important;
 </style>
 <script>
 /* ============================================================================
