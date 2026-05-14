@@ -367,21 +367,44 @@ a[href*="solver_app"] {
         padding-left: 6px !important;
         padding-right: 4px !important;
     }
-    /* Hide the colored bar visualisation, keep just the .bar-label number.
-       The .bar-container holds BOTH the orange bar AND the .bar-label text;
-       hiding the container kills the number too — wrong. Hide just .bar. */
-    .data-table .bar-container .bar {
-        display: none !important;
-    }
+    /* Team Ratings table: keep the orange/coloured bars but make them
+       small (4px tall, stacked below the number) so the cell stays narrow
+       enough to fit all 5 columns in a 390px viewport.
+       Other tabs untouched per Marcus 2026-05-13. */
     .data-table .bar-container {
-        position: static !important;
+        position: relative !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 2px !important;
         background: transparent !important;
-        padding: 0 !important;
+        padding: 4px 2px !important;
+        min-width: 0 !important;
+        height: auto !important;
     }
     .data-table .bar-label {
         position: static !important;
-        display: inline !important;
-        font-size: 0.82rem !important;
+        display: block !important;
+        order: -1 !important;
+        font-size: 0.78rem !important;
+        text-align: right !important;
+        padding-right: 2px !important;
+        font-family: 'JetBrains Mono', ui-monospace, monospace;
+    }
+    .data-table .bar-container .bar {
+        display: block !important;
+        position: static !important;
+        height: 3px !important;
+        border-radius: 1px !important;
+        opacity: 0.85 !important;
+    }
+    /* Header rows: tighter so all 5 columns fit */
+    .data-table thead th {
+        font-size: 0.62rem !important;
+        letter-spacing: 0.02em !important;
+        padding-left: 2px !important;
+        padding-right: 2px !important;
+        white-space: nowrap !important;
     }
     /* Compact numeric columns */
     .data-table th:nth-child(n+3),
