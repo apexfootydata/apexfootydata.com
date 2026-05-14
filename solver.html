@@ -531,17 +531,20 @@ a[href*="rank_milestones"] {
     .data-table thead th:nth-child(2) {
         text-align: left !important;
     }
-    /* Replace long header text with abbreviations on mobile.
-       Hide the original text and inject short labels via ::after. */
+    /* Header text abbreviation handled by apex_mobile.js (rewrites th.textContent
+       to ATT/DEF/OVR on viewports <=480px). Keep CSS just for sizing. */
     .data-table thead th:nth-child(3),
     .data-table thead th:nth-child(4),
     .data-table thead th:nth-child(5) {
-        font-size: 0 !important;
-        position: relative !important;
+        font-size: 11px !important;
+        letter-spacing: 0.05em !important;
+        text-align: right !important;
     }
-    .data-table thead th:nth-child(3)::after { content: "ATT"; font-size: 11px; letter-spacing: 0.05em; }
-    .data-table thead th:nth-child(4)::after { content: "DEF"; font-size: 11px; letter-spacing: 0.05em; }
-    .data-table thead th:nth-c
+
+    /* Numeric cell padding — give each value breathing room */
+    .data-table td:nth-child(n+3) {
+        padding-left: 4px !important;
+        padding-right: 6px !imp
 </style>
 <script>
 /* ============================================================================
