@@ -448,10 +448,9 @@
     .apex-footer-links { gap: 16px; }
 }
 /* ============================================================================
- * 2026-05-09: Marcus paused public-facing Pinnacle moat claim + Form Trends
- * sub-tab. Hide both via CSS (reversible -- delete this block to restore).
+ * 2026-05-09: Marcus paused Form Trends sub-tab.
+ * 2026-05-15: Hero stat card restored — Pinnacle moat now 29/35 weeks · +0.074.
  * ========================================================================== */
-.hero-stat-card { display: none !important; }
 .subtab-button[onclick*="showSub(0, 1)"] { display: none !important; }
 
 /* ============================================================================
@@ -551,57 +550,7 @@ a[href*="rank_milestones"] {
         height: auto !important;
         box-sizing: border-box !important;
     }
-    .data-table .bar-label {
-        position: static !important;
-        display: block !important;
-        order: -1 !important;
-        font-size: 0.82rem !important;
-        text-align: right !important;
-        padding-right: 4px !important;
-        font-family: 'JetBrains Mono', ui-monospace, monospace !important;
-        white-space: nowrap !important;
-        line-height: 1.1 !important;
-    }
-    .data-table .bar-container .bar {
-        display: block !important;
-        position: static !important;
-        height: 3px !important;
-        border-radius: 1px !important;
-        opacity: 0.9 !important;
-        max-width: 100% !important;
-    }
-}
-
-/* ============================================================================
- * Wide tables (Player Predictions, Matchweek, Team Predictions, Final Table) —
- * force natural width on mobile so they overflow their container and the
- * auto-wrap JS triggers horizontal scroll instead of squashing columns.
- * ========================================================================== */
-@media (max-width: 480px) {
-    .player-table,
-    .nextgw-table,
-    .matchweek-table,
-    .heatmap-table,
-    .final-table {
-        width: max-content !important;
-        min-width: 100% !important;
-        table-layout: auto !important;
-    }
-    /* Tighter cell padding for these wide tables on mobile */
-    .player-table th, .player-table td,
-    .nextgw-table th, .nextgw-table td,
-    .matchweek-table th, .matchweek-table td,
-    .final-table th, .final-table td {
-        padding: 8px 8px !important;
-        font-size: 12px !important;
-        white-space: nowrap !important;
-    }
-    /* Heatmap cells stay compact */
-    .heatmap-table th, .heatmap-table td {
-        padding: 8px 6px !important;
-        font-size: 11px !important;
-    }
-}
+    .data-table .bar-l
 </style>
 <script>
 /* ============================================================================
@@ -741,63 +690,6 @@ a[href*="rank_milestones"] {
     // Also run after a tick — moat-stat spans may be filled in by inject scripts after DCL.
     setTimeout(makeFooter, 600);
     // 2026-05-09: deferred moat-stat update disabled (claim hidden).
-})();
-
-// ── Mobile: abbreviate Team Ratings headers (2026-05-14) ──────────────────
-// CSS pseudo-element trick was unreliable (OVR going missing). Rewrite the
-// actual th text on narrow viewports. Idempotent — keeps original in data-*
-// so it can be restored if window widens.
-(function () {
-    'use strict';
-    var ABBREV = { 'ATTACK': 'ATT', 'DEFENCE': 'DEF', 'DEFENSE': 'DEF', 'OVERALL': 'OVR' };
-    var ATTR_ORIG = 'data-apex-orig-th';
-
-    function shouldAbbrev() { return window.innerWidth <= 480; }
-
-    function applyHeaderAbbrev() {
-        var tables = document.querySelectorAll('table.data-table');
-        for (var i = 0; i < tables.length; i++) {
-            var ths = tables[i].querySelectorAll('thead th');
-            for (var j = 0; j < ths.length; j++) {
-                var th = ths[j];
-                var txt = (th.textContent || '').trim().toUpperCase();
-                if (shouldAbbrev()) {
-                    if (ABBREV[txt] && !th.hasAttribute(ATTR_ORIG)) {
-                        th.setAttribute(ATTR_ORIG, th.textContent);
-                        th.textContent = ABBREV[txt];
-                    }
-                } else if (th.hasAttribute(ATTR_ORIG)) {
-                    th.textContent = th.getAttribute(ATTR_ORIG);
-                    th.removeAttribute(ATTR_ORIG);
-                }
-            }
-        }
-    }
-
-    function boot() {
-        applyHeaderAbbrev();
-        setTimeout(applyHeaderAbbrev, 500);
-        setTimeout(applyHeaderAbbrev, 1500);
-        window.addEventListener('resize', applyHeaderAbbrev);
-        if (window.MutationObserver) {
-            var pending = false;
-            var mo = new MutationObserver(function () {
-                if (pending) return;
-                pending = true;
-                requestAnimationFrame(function () {
-                    pending = false;
-                    applyHeaderAbbrev();
-                });
-            });
-            mo.observe(document.body, { childList: true, subtree: true });
-        }
-    }
-
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', boot);
-    } else {
-        boot();
-    }
 })();
 </script>
 <!-- ## APEX_MOBILE_FIX:END ## -->
