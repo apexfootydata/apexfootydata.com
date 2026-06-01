@@ -44,7 +44,7 @@
       ]
     }
     </script>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -561,11 +561,21 @@
         }
 
         /* ── GW Predictions card layout — Phase 1 redesign (2026-06-01) ── */
-        .mw-source-line {
-            font-size: 13px;
-            color: #8b8b99;
+        .mw-page-title {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 42px;
+            font-weight: 800;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+            color: #0f172a;
             margin: 0 0 14px;
-            font-family: 'Space Grotesk', sans-serif;
+        }
+        .mw-source-line {
+            font-size: 15px;
+            color: #475569;
+            margin: 0 0 14px;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 500;
         }
         .mw-source-line .mw-source-date {
             font-family: 'JetBrains Mono', monospace;
@@ -708,6 +718,7 @@
 
         @media (max-width: 720px) {
             .mw-cards { grid-template-columns: 1fr; }
+            .mw-page-title { font-size: 30px; }
         }
         @media (max-width: 480px) {
             .mw-datestripe { width: 44px; padding-right: 6px; }
@@ -717,6 +728,7 @@
             .mw-goal-cell { font-size: 12px; padding: 3px 1px; }
             .mw-cs-cell { font-size: 11px; padding: 3px 1px; }
             .mw-win-cell { font-size: 11px; padding: 3px 1px; }
+            .mw-page-title { font-size: 24px; }
         }
 
         /* Heatmap */
@@ -2341,7 +2353,8 @@
             const todayDd = String(today.getDate()).padStart(2,'0');
             const todayMm = String(today.getMonth()+1).padStart(2,'0');
             const todayYy = String(today.getFullYear()).slice(-2);
-            const sourceLine = `
+            const headerBlock = `
+                <h1 class="mw-page-title">Premier League ${gwLabel}: projected goals, clean sheet &amp; win odds</h1>
                 <div class="mw-source-line">
                     <span class="mw-source-date">${todayDd}.${todayMm}.${todayYy}</span>
                     <span class="mw-source-sep">·</span>
@@ -2351,8 +2364,9 @@
                 </div>
                 <div class="mw-meta-bar">
                     <span>${gwLabel} · Premier League</span>
-                    <span>Scoreline odds via Poisson on Apex lambdas</span>
+                    <span>Win odds via Poisson on Apex lambdas</span>
                 </div>`;
+            const sourceLine = headerBlock;
 
             if (!FIXTURES || FIXTURES.length === 0) {
                 container.innerHTML = sourceLine + `
