@@ -560,6 +560,158 @@
             color: #6b6b7b;
         }
 
+        /* ── GW Predictions card layout — Phase 1 redesign (2026-06-01) ── */
+        .mw-source-line {
+            font-size: 13px;
+            color: #8b8b99;
+            margin: 0 0 14px;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        .mw-source-line .mw-source-date {
+            font-family: 'JetBrains Mono', monospace;
+            color: #b8b8c0;
+        }
+        .mw-source-line .mw-source-moat {
+            color: #97C459;
+            font-weight: 500;
+        }
+        .mw-source-line .mw-source-sep {
+            color: #4a4a55;
+            margin: 0 8px;
+        }
+        .mw-meta-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 0 0 16px;
+            font-size: 12px;
+            color: #6b6b7b;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .mw-cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin: 0 0 20px;
+        }
+        .mw-card {
+            background: #18181f;
+            border: 1px solid #2a2a35;
+            border-radius: 12px;
+            padding: 12px;
+            display: flex;
+            gap: 10px;
+        }
+        .mw-datestripe {
+            width: 56px;
+            flex-shrink: 0;
+            text-align: center;
+            padding-right: 8px;
+            border-right: 1px solid #2a2a35;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .mw-datestripe-dow { font-size: 10px; color: #6b6b7b; letter-spacing: 0.5px; }
+        .mw-datestripe-date { font-size: 15px; font-weight: 500; color: #e8e8f0; margin: 2px 0; }
+        .mw-datestripe-time { font-size: 10px; color: #8b8b99; }
+        .mw-datestripe-slot {
+            margin-top: 8px;
+            background: #13131a;
+            border-radius: 999px;
+            padding: 2px 6px;
+            font-size: 9px;
+            color: #8b8b99;
+            letter-spacing: 0.5px;
+            display: inline-block;
+        }
+        .mw-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+        .mw-head {
+            font-size: 9px;
+            color: #6b6b7b;
+            letter-spacing: 0.5px;
+            font-family: 'JetBrains Mono', monospace;
+            display: grid;
+            grid-template-columns: 1fr 56px 50px 96px;
+            gap: 6px;
+        }
+        .mw-head > span { text-align: center; }
+        .mw-row {
+            display: grid;
+            grid-template-columns: 1fr 56px 50px 96px;
+            gap: 6px;
+            align-items: center;
+        }
+        .mw-team {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            min-width: 0;
+        }
+        .mw-team-stripe { width: 4px; height: 22px; border-radius: 2px; flex-shrink: 0; }
+        .mw-team-name {
+            font-size: 13px;
+            font-weight: 500;
+            color: #e8e8f0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .mw-goal-cell, .mw-cs-cell {
+            border-radius: 6px;
+            padding: 4px 2px;
+            text-align: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 500;
+        }
+        .mw-goal-cell { font-size: 14px; }
+        .mw-cs-cell { font-size: 13px; }
+        .mw-tint-g3 { background: #639922; color: #FFFFFF; }
+        .mw-tint-g2 { background: #97C459; color: #173404; }
+        .mw-tint-g1 { background: #C0DD97; color: #173404; }
+        .mw-tint-y  { background: #FAC775; color: #412402; }
+        .mw-tint-r1 { background: #F09595; color: #501313; }
+        .mw-tint-r2 { background: #E24B4A; color: #FFFFFF; }
+        .mw-scores { display: flex; flex-direction: column; gap: 2px; }
+        .mw-score-row { display: flex; align-items: center; gap: 4px; }
+        .mw-score-pill {
+            background: rgba(127, 119, 221, 0.22);
+            color: #d8d3ff;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            padding: 1px 5px;
+            border-radius: 3px;
+            font-weight: 500;
+        }
+        .mw-score-pct {
+            font-size: 10px;
+            color: #8b8b99;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .mw-empty {
+            background: #18181f;
+            border: 1px dashed #2a2a35;
+            border-radius: 12px;
+            padding: 30px 20px;
+            text-align: center;
+            color: #8b8b99;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        .mw-empty h3 { color: #e8e8f0; margin: 0 0 6px; font-size: 18px; font-weight: 500; }
+        .mw-empty p { margin: 0; font-size: 14px; }
+
+        @media (max-width: 720px) {
+            .mw-cards { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 480px) {
+            .mw-datestripe { width: 44px; padding-right: 6px; }
+            .mw-card { padding: 10px; gap: 8px; }
+            .mw-head, .mw-row { grid-template-columns: 1fr 44px 38px 82px; gap: 4px; }
+            .mw-team-name { font-size: 12px; }
+            .mw-goal-cell { font-size: 12px; padding: 3px 1px; }
+            .mw-cs-cell { font-size: 11px; padding: 3px 1px; }
+            .mw-score-pill { font-size: 9px; padding: 1px 4px; }
+            .mw-score-pct { font-size: 9px; }
+        }
+
         /* Heatmap */
         .heatmap-table {
             width: 100%;
@@ -2003,38 +2155,150 @@
             </svg>`;
         }
 
-        // Render matchweek - compact table layout
+        // ── GW Predictions card layout — Phase 1 redesign (2026-06-01) ──
+        const MW_TEAM_COLORS = {
+            "Arsenal":"#EF0107","Aston Villa":"#670E36","Bournemouth":"#DA291C",
+            "Brentford":"#E30613","Brighton":"#0057B8","Burnley":"#6C1D45",
+            "Chelsea":"#034694","Crystal Palace":"#1B458F","Everton":"#003399",
+            "Fulham":"#CC0000","Leeds":"#FFCD00","Liverpool":"#C8102E",
+            "Man City":"#6CABDD","Man Utd":"#DA291C","Newcastle":"#241F20",
+            "Nott'm Forest":"#DD0000","Sunderland":"#EB172B","Tottenham":"#132257",
+            "West Ham":"#7A263A","Wolves":"#FDB913"
+        };
+        function _mwPmf(k, lam) {
+            if (lam <= 0) return k === 0 ? 1 : 0;
+            let v = Math.exp(-lam);
+            for (let i = 1; i <= k; i++) v *= lam / i;
+            return v;
+        }
+        function _mwTop3Scores(hLam, aLam) {
+            const scores = [];
+            for (let h = 0; h <= 6; h++) {
+                for (let a = 0; a <= 6; a++) {
+                    scores.push([h, a, _mwPmf(h, hLam) * _mwPmf(a, aLam) * 100]);
+                }
+            }
+            scores.sort((x, y) => y[2] - x[2]);
+            return scores.slice(0, 3);
+        }
+        function _mwGoalTier(lam) {
+            if (lam >= 1.8) return 'mw-tint-g3';
+            if (lam >= 1.4) return 'mw-tint-g2';
+            if (lam >= 1.1) return 'mw-tint-g1';
+            if (lam >= 0.9) return 'mw-tint-y';
+            if (lam >= 0.6) return 'mw-tint-r1';
+            return 'mw-tint-r2';
+        }
+        function _mwCsTier(cs) {
+            if (cs >= 45) return 'mw-tint-g3';
+            if (cs >= 32) return 'mw-tint-g2';
+            if (cs >= 22) return 'mw-tint-g1';
+            if (cs >= 15) return 'mw-tint-y';
+            if (cs >= 10) return 'mw-tint-r1';
+            return 'mw-tint-r2';
+        }
+        function _mwDateParts(iso) {
+            if (!iso) return null;
+            const d = new Date(iso);
+            if (isNaN(d.getTime())) return null;
+            const DAYS = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+            const dow = DAYS[d.getDay()];
+            const dd = String(d.getDate()).padStart(2, '0');
+            const mm = String(d.getMonth() + 1).padStart(2, '0');
+            const hh = String(d.getHours()).padStart(2, '0');
+            const mn = String(d.getMinutes()).padStart(2, '0');
+            return {dow: dow, date: dd + '.' + mm, time: hh + ':' + mn, ts: d.getTime()};
+        }
+        function _mwAssignSlots(fixtures) {
+            const slotsByTs = {};
+            const tsList = [];
+            fixtures.forEach(f => {
+                const p = _mwDateParts(f.kickoff);
+                if (!p) return;
+                if (!(p.ts in slotsByTs)) { slotsByTs[p.ts] = null; tsList.push(p.ts); }
+            });
+            tsList.sort((a, b) => a - b);
+            tsList.forEach((ts, i) => { slotsByTs[ts] = String.fromCharCode(65 + i); });
+            return slotsByTs;
+        }
+
+        // Render matchweek — card layout (Phase 1)
         function renderMatchweek() {
-            let html = `<table class="matchweek-table"><thead><tr><th style="width:240px">FIXTURE</th><th style="width:110px;text-align:center;cursor:help" title="Model's predicted goals for this team in this fixture">Pred Goals</th><th style="width:110px;text-align:center">CS%</th><th style="text-align:center">WIN</th><th style="width:110px;text-align:center"></th><th style="width:130px;text-align:center">DRAW</th></tr></thead><tbody>`;
+            const container = document.getElementById('matchweekContainer');
             const gwLabel = (GW_LABELS && GW_LABELS[0]) || 'GW?';
 
-            FIXTURES.forEach((f, idx) => {
-                const homeWinClass = f.homeWinDisplay > 40 ? 'high' : f.homeWinDisplay > 30 ? 'medium' : 'low';
-                const awayWinClass = f.awayWinDisplay > 40 ? 'high' : f.awayWinDisplay > 30 ? 'medium' : 'low';
-                const homeCS = (f.homeCS != null) ? f.homeCS.toFixed(1) + '%' : '—';
-                const awayCS = (f.awayCS != null) ? f.awayCS.toFixed(1) + '%' : '—';
+            const today = new Date();
+            const todayDd = String(today.getDate()).padStart(2,'0');
+            const todayMm = String(today.getMonth()+1).padStart(2,'0');
+            const todayYy = String(today.getFullYear()).slice(-2);
+            const sourceLine = `
+                <div class="mw-source-line">
+                    <span class="mw-source-date">${todayDd}.${todayMm}.${todayYy}</span>
+                    <span class="mw-source-sep">·</span>
+                    <span>Apex xG model</span>
+                    <span class="mw-source-sep">·</span>
+                    <span class="mw-source-moat">Beat Pinnacle 31 of 36 weeks · 2025/26</span>
+                </div>
+                <div class="mw-meta-bar">
+                    <span>${gwLabel} · Premier League</span>
+                    <span>Scoreline odds via Poisson on Apex lambdas</span>
+                </div>`;
 
-                // Home team row
-                html += `<tr class="matchweek-home-row">
-                    <td class="fixture-team-cell">${getTeamNameWithBadge(f.home)}</td>
-                    <td class="fixture-stat">${f.homeRating.toFixed(2)}</td>
-                    <td class="fixture-stat">${homeCS}</td>
-                    <td class="fixture-stat"><span class="fixture-win-pill ${homeWinClass}">${f.homeWinDisplay.toFixed(1)}%</span></td>
-                    <td class="matchweek-vs-cell" rowspan="2">v<br/>(${gwLabel})</td>
-                    <td class="fixture-stat fixture-draw" rowspan="2">${f.draw.toFixed(1)}%</td>
-                </tr>`;
+            if (!FIXTURES || FIXTURES.length === 0) {
+                container.innerHTML = sourceLine + `
+                    <div class="mw-empty">
+                        <h3>Off-season</h3>
+                        <p>2025/26 has finished. Fresh GW1 predictions land when 2026/27 fixtures release in mid-June.</p>
+                    </div>`;
+                return;
+            }
 
-                // Away team row
-                html += `<tr class="matchweek-away-row">
-                    <td class="fixture-team-cell">${getTeamNameWithBadge(f.away)}</td>
-                    <td class="fixture-stat">${f.awayRating.toFixed(2)}</td>
-                    <td class="fixture-stat">${awayCS}</td>
-                    <td class="fixture-stat"><span class="fixture-win-pill ${awayWinClass}">${f.awayWinDisplay.toFixed(1)}%</span></td>
-                </tr>`;
-            });
+            const slots = _mwAssignSlots(FIXTURES);
+            const cards = FIXTURES.map((f) => {
+                const dp = _mwDateParts(f.kickoff);
+                const slot = (dp && slots[dp.ts]) || '';
+                const dateStripe = dp
+                    ? `<div class="mw-datestripe">
+                           <div class="mw-datestripe-dow">${dp.dow}</div>
+                           <div class="mw-datestripe-date">${dp.date}</div>
+                           <div class="mw-datestripe-time">${dp.time}</div>
+                           <div class="mw-datestripe-slot">${gwLabel}${slot ? '·'+slot : ''}</div>
+                       </div>`
+                    : `<div class="mw-datestripe">
+                           <div class="mw-datestripe-dow">${gwLabel}</div>
+                       </div>`;
+                const top3 = _mwTop3Scores(f.homeRating, f.awayRating);
+                const homeScores = top3.slice(0, 2);
+                const awayScores = top3.slice(1, 3);
+                const hLam = f.homeRating, aLam = f.awayRating;
+                const hCS = (f.homeCS != null) ? f.homeCS : 0;
+                const aCS = (f.awayCS != null) ? f.awayCS : 0;
+                const hColor = MW_TEAM_COLORS[f.home] || '#8b8b99';
+                const aColor = MW_TEAM_COLORS[f.away] || '#8b8b99';
+                const scoreRow = (scores) => scores.map(s =>
+                    `<div class="mw-score-row"><span class="mw-score-pill">${s[0]}-${s[1]}</span><span class="mw-score-pct">${Math.round(s[2])}%</span></div>`
+                ).join('');
+                return `<div class="mw-card">
+                    ${dateStripe}
+                    <div class="mw-body">
+                        <div class="mw-head"><span></span><span>GOALS</span><span>CS%</span><span>SCORES</span></div>
+                        <div class="mw-row">
+                            <div class="mw-team"><span class="mw-team-stripe" style="background:${hColor}"></span><span class="mw-team-name">${f.home}</span></div>
+                            <div class="mw-goal-cell ${_mwGoalTier(hLam)}">${hLam.toFixed(2)}</div>
+                            <div class="mw-cs-cell ${_mwCsTier(hCS)}">${Math.round(hCS)}%</div>
+                            <div class="mw-scores">${scoreRow(homeScores)}</div>
+                        </div>
+                        <div class="mw-row">
+                            <div class="mw-team"><span class="mw-team-stripe" style="background:${aColor}"></span><span class="mw-team-name">${f.away}</span></div>
+                            <div class="mw-goal-cell ${_mwGoalTier(aLam)}">${aLam.toFixed(2)}</div>
+                            <div class="mw-cs-cell ${_mwCsTier(aCS)}">${Math.round(aCS)}%</div>
+                            <div class="mw-scores">${scoreRow(awayScores)}</div>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
 
-            html += `</tbody></table>`;
-            document.getElementById('matchweekContainer').innerHTML = html;
+            container.innerHTML = sourceLine + `<div class="mw-cards">${cards}</div>`;
         }
 
         // Render team predictions
