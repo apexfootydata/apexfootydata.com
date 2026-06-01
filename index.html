@@ -1352,10 +1352,10 @@
             font-family: 'Plus Jakarta Sans', sans-serif !important;
             font-size: 15px !important;
         }
-        /* Default text inside the app uses Plus Jakarta Sans;
-           numbers + monospace contexts keep JetBrains Mono via explicit class */
-        body, body *:not(code):not(pre):not(.font-mono):not(.mw-datestripe):not(.mw-datestripe *):not(.mw-goal-cell):not(.mw-cs-cell):not(.mw-win-cell):not(.mw-head):not(.mw-source-date):not(.mw-datestripe-slot):not(.brand-watermark):not(.brand-watermark *):not(.brand-badge):not(.brand-badge *) {
-            font-family: 'Plus Jakarta Sans', sans-serif;
+        /* Plus Jakarta Sans EVERYWHERE — Marcus rule 2026-06-01.
+           Only the brand-badge SVG and code/pre are exempt. */
+        html, body, body *:not(code):not(pre):not(.brand-watermark):not(.brand-watermark *):not(.brand-badge):not(.brand-badge *):not(svg):not(svg *) {
+            font-family: 'Plus Jakarta Sans', sans-serif !important;
         }
         /* Header / nav / footer chrome */
         header, .header, .top-bar { background: #ffffff !important; border-color: #e5e7eb !important; }
@@ -1398,9 +1398,24 @@
             font-family: 'Plus Jakarta Sans', sans-serif !important;
         }
         .hero-stat-card { padding: 22px 28px !important; border-radius: 14px !important; }
-        .hero-stat-card .hero-label { font-size: 13px !important; font-weight: 600 !important; letter-spacing: 0.05em !important; color: #F97316 !important; }
-        .hero-stat-card .hero-number, .hero-stat-card span[data-stat] { font-size: 28px !important; font-weight: 800 !important; color: #0f172a !important; }
+        .hero-stat-card .hero-label, .hero-stat-card .hero-stat-label { font-size: 13px !important; font-weight: 700 !important; letter-spacing: 0.1em !important; color: #F97316 !important; }
+        .hero-stat-card .hero-stat-value { font-size: 22px !important; font-weight: 700 !important; color: #0f172a !important; font-family: 'Plus Jakarta Sans', sans-serif !important; }
+        .hero-stat-card .hero-stat-value .num, .hero-stat-card span[data-stat] { font-size: 30px !important; font-weight: 800 !important; color: #F97316 !important; }
+        .hero-stat-card .hero-stat-divider { color: #cbd5e1 !important; margin: 0 14px !important; }
+        .hero-stat-card .hero-number { font-size: 30px !important; font-weight: 800 !important; color: #0f172a !important; }
         .hero-stat-card .hero-moat, .hero-stat-card .hero-headline { font-size: 22px !important; font-weight: 700 !important; color: #0f172a !important; }
+
+        /* Defensive — any dim-on-dark hex baked inline gets pulled into visible range on white */
+        [style*="color: #f5f5f7"], [style*="color:#f5f5f7"],
+        [style*="color: #e8e8f0"], [style*="color:#e8e8f0"],
+        [style*="color: #c8c8d0"], [style*="color:#c8c8d0"] {
+            color: #0f172a !important;
+        }
+        [style*="color: #8b8b99"], [style*="color:#8b8b99"],
+        [style*="color: #6b6b7b"], [style*="color:#6b6b7b"],
+        [style*="color: #4b4b58"], [style*="color:#4b4b58"] {
+            color: #475569 !important;
+        }
         .tab-content p, .tab-content > div > p {
             font-family: 'Plus Jakarta Sans', sans-serif !important;
             font-size: 15px !important;
@@ -1421,31 +1436,47 @@
             background: #f3f4f6 !important;
             border-color: #e5e7eb !important;
             font-family: 'Plus Jakarta Sans', sans-serif !important;
-            font-size: 13px !important;
+            font-size: 14px !important;
             font-weight: 700 !important;
-            letter-spacing: 0.04em !important;
-            padding: 14px 16px !important;
+            letter-spacing: 0.05em !important;
+            padding: 16px 18px !important;
+            text-transform: uppercase !important;
         }
         td {
             color: #0f172a !important;
             background: #ffffff !important;
             border-color: #f1f5f9 !important;
-            font-size: 15px !important;
-            padding: 14px 16px !important;
+            font-size: 17px !important;
+            padding: 16px 18px !important;
         }
-        /* Numeric / stat cells keep JetBrains Mono for tabular alignment */
+        /* Numeric / stat cells — bumped to matchweek-card scale, Plus Jakarta */
         td.heatmap-cell, td.fixture-stat, td.player-stat, td.rating-stat,
         td[class*="numeric"], td[class*="-stat"], td[data-stat] {
-            font-family: 'JetBrains Mono', monospace !important;
-            font-size: 16px !important;
-            font-weight: 500 !important;
+            font-family: 'Plus Jakarta Sans', sans-serif !important;
+            font-size: 19px !important;
+            font-weight: 700 !important;
+            font-variant-numeric: tabular-nums !important;
         }
-        /* Team name cells get the brand font */
+        /* Team name cells — Plus Jakarta Sans matchweek scale */
         td.heatmap-team, td.fixture-team-cell, td.player-name-cell, td.rating-team-cell {
             font-family: 'Plus Jakarta Sans', sans-serif !important;
-            font-size: 16px !important;
+            font-size: 18px !important;
             font-weight: 600 !important;
         }
+        /* Heatmap cells — color-coded, larger numbers like Matchweek goal cells */
+        .heatmap-table td.heatmap-cell { padding: 14px 10px !important; }
+        .heatmap-table th { padding: 14px 10px !important; font-size: 12px !important; }
+        /* Player table — generous row height, big numbers */
+        .player-table th, .player-table td { padding: 14px 14px !important; }
+        .player-table td.player-stat { font-size: 18px !important; }
+        .player-table td.player-name-cell { font-size: 17px !important; }
+        /* Data table (Team Ratings) — same scale */
+        .data-table th, .data-table td { padding: 16px 18px !important; }
+        .data-table td { font-size: 18px !important; }
+        .data-table td:nth-child(2) { font-family: 'Plus Jakarta Sans', sans-serif !important; font-size: 18px !important; font-weight: 600 !important; }
+        /* Bar charts inside Team Ratings — bigger labels */
+        .bar-label { font-size: 18px !important; font-family: 'JetBrains Mono', monospace !important; color: #0f172a !important; font-weight: 500 !important; }
+        .rating-bar-bg { height: 12px !important; border-radius: 6px !important; }
         tr:hover td { background: #f9fafb !important; }
         .matchweek-home-row td { background: #ffffff !important; }
         .matchweek-away-row td { background: #fafafa !important; }
@@ -1505,6 +1536,40 @@
         ::-webkit-scrollbar-track { background: #f3f4f6 !important; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1 !important; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8 !important; }
+
+        /* ── Team badges visible on white — fix for Liverpool/Newcastle/etc ── */
+        .team-badge {
+            width: 28px !important;
+            height: 28px !important;
+            background: #f3f4f6 !important;
+            border-radius: 50% !important;
+            padding: 2px !important;
+            box-shadow: 0 0 0 1px #e5e7eb !important;
+        }
+
+        /* ── Final Table bigger ── */
+        .final-table th, .final-table td { padding: 16px 18px !important; font-size: 16px !important; }
+        .final-table th { font-size: 13px !important; font-weight: 700 !important; letter-spacing: 0.06em !important; }
+        .final-table td:first-child { font-size: 18px !important; font-weight: 700 !important; color: #475569 !important; }
+        .final-table .team-cell, .final-table td:nth-child(2) {
+            font-family: 'Plus Jakarta Sans', sans-serif !important;
+            font-size: 17px !important;
+            font-weight: 600 !important;
+        }
+        .final-table .projected, .final-table td:last-child {
+            font-family: 'JetBrains Mono', monospace !important;
+            font-size: 18px !important;
+            font-weight: 600 !important;
+            color: #F97316 !important;
+        }
+        .final-table .pld-cell, .final-table .pts-cell, .final-table td:nth-child(n+3):nth-child(-n+5) {
+            font-family: 'JetBrains Mono', monospace !important;
+            font-size: 17px !important;
+        }
+        .final-table thead, .final-table thead th {
+            background: #f3f4f6 !important;
+            color: #475569 !important;
+        }
     </style>
     <!-- Cookie consent + conditional Google Analytics 4 loader -->
     <script>
