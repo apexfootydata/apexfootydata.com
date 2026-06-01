@@ -630,15 +630,23 @@
             letter-spacing: 0.5px;
             font-family: 'JetBrains Mono', monospace;
             display: grid;
-            grid-template-columns: 1fr 56px 50px 96px;
+            grid-template-columns: 1fr 56px 50px 64px;
             gap: 6px;
         }
         .mw-head > span { text-align: center; }
         .mw-row {
             display: grid;
-            grid-template-columns: 1fr 56px 50px 96px;
+            grid-template-columns: 1fr 56px 50px 64px;
             gap: 6px;
             align-items: center;
+        }
+        .mw-win-cell {
+            border-radius: 6px;
+            padding: 4px 2px;
+            text-align: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 500;
+            font-size: 13px;
         }
         .mw-team {
             display: flex;
@@ -704,12 +712,11 @@
         @media (max-width: 480px) {
             .mw-datestripe { width: 44px; padding-right: 6px; }
             .mw-card { padding: 10px; gap: 8px; }
-            .mw-head, .mw-row { grid-template-columns: 1fr 44px 38px 82px; gap: 4px; }
+            .mw-head, .mw-row { grid-template-columns: 1fr 44px 38px 52px; gap: 4px; }
             .mw-team-name { font-size: 12px; }
             .mw-goal-cell { font-size: 12px; padding: 3px 1px; }
             .mw-cs-cell { font-size: 11px; padding: 3px 1px; }
-            .mw-score-pill { font-size: 9px; padding: 1px 4px; }
-            .mw-score-pct { font-size: 9px; }
+            .mw-win-cell { font-size: 11px; padding: 3px 1px; }
         }
 
         /* Heatmap */
@@ -2292,6 +2299,14 @@
             if (cs >= 10) return 'mw-tint-r1';
             return 'mw-tint-r2';
         }
+        function _mwWinTier(p) {
+            if (p >= 55) return 'mw-tint-g3';
+            if (p >= 45) return 'mw-tint-g2';
+            if (p >= 35) return 'mw-tint-g1';
+            if (p >= 25) return 'mw-tint-y';
+            if (p >= 15) return 'mw-tint-r1';
+            return 'mw-tint-r2';
+        }
         function _mwDateParts(iso) {
             if (!iso) return null;
             const d = new Date(iso);
@@ -2362,32 +2377,28 @@
                     : `<div class="mw-datestripe">
                            <div class="mw-datestripe-dow">${gwLabel}</div>
                        </div>`;
-                const top3 = _mwTop3Scores(f.homeRating, f.awayRating);
-                const homeScores = top3.slice(0, 2);
-                const awayScores = top3.slice(1, 3);
                 const hLam = f.homeRating, aLam = f.awayRating;
                 const hCS = (f.homeCS != null) ? f.homeCS : 0;
                 const aCS = (f.awayCS != null) ? f.awayCS : 0;
+                const hWin = (f.homeWinDisplay != null) ? f.homeWinDisplay : (f.homeWin || 0);
+                const aWin = (f.awayWinDisplay != null) ? f.awayWinDisplay : (f.awayWin || 0);
                 const hColor = MW_TEAM_COLORS[f.home] || '#8b8b99';
                 const aColor = MW_TEAM_COLORS[f.away] || '#8b8b99';
-                const scoreRow = (scores) => scores.map(s =>
-                    `<div class="mw-score-row"><span class="mw-score-pill">${s[0]}-${s[1]}</span><span class="mw-score-pct">${Math.round(s[2])}%</span></div>`
-                ).join('');
                 return `<div class="mw-card">
                     ${dateStripe}
                     <div class="mw-body">
-                        <div class="mw-head"><span></span><span>GOALS</span><span>CS%</span><span>SCORES</span></div>
+                        <div class="mw-head"><span></span><span>GOALS</span><span>CS%</span><span>WIN%</span></div>
                         <div class="mw-row">
                             <div class="mw-team"><span class="mw-team-stripe" style="background:${hColor}"></span><span class="mw-team-name">${f.home}</span></div>
                             <div class="mw-goal-cell ${_mwGoalTier(hLam)}">${hLam.toFixed(2)}</div>
                             <div class="mw-cs-cell ${_mwCsTier(hCS)}">${Math.round(hCS)}%</div>
-                            <div class="mw-scores">${scoreRow(homeScores)}</div>
+                            <div class="mw-win-cell ${_mwWinTier(hWin)}">${Math.round(hWin)}%</div>
                         </div>
                         <div class="mw-row">
                             <div class="mw-team"><span class="mw-team-stripe" style="background:${aColor}"></span><span class="mw-team-name">${f.away}</span></div>
                             <div class="mw-goal-cell ${_mwGoalTier(aLam)}">${aLam.toFixed(2)}</div>
                             <div class="mw-cs-cell ${_mwCsTier(aCS)}">${Math.round(aCS)}%</div>
-                            <div class="mw-scores">${scoreRow(awayScores)}</div>
+                            <div class="mw-win-cell ${_mwWinTier(aWin)}">${Math.round(aWin)}%</div>
                         </div>
                     </div>
                 </div>`;
