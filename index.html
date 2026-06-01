@@ -1349,22 +1349,103 @@
         body {
             background: #fafafa !important;
             color: #0f172a !important;
+            font-family: 'Plus Jakarta Sans', sans-serif !important;
+            font-size: 15px !important;
+        }
+        /* Default text inside the app uses Plus Jakarta Sans;
+           numbers + monospace contexts keep JetBrains Mono via explicit class */
+        body, body *:not(code):not(pre):not(.font-mono):not(.mw-datestripe):not(.mw-datestripe *):not(.mw-goal-cell):not(.mw-cs-cell):not(.mw-win-cell):not(.mw-head):not(.mw-source-date):not(.mw-datestripe-slot):not(.brand-watermark):not(.brand-watermark *):not(.brand-badge):not(.brand-badge *) {
+            font-family: 'Plus Jakarta Sans', sans-serif;
         }
         /* Header / nav / footer chrome */
         header, .header, .top-bar { background: #ffffff !important; border-color: #e5e7eb !important; }
         .tab-nav, .tab-bar { background: #ffffff !important; border-bottom: 1px solid #e5e7eb !important; }
-        .tab-button { color: #475569 !important; background: transparent !important; }
+        .tab-button {
+            color: #475569 !important;
+            background: transparent !important;
+            font-family: 'Plus Jakarta Sans', sans-serif !important;
+            font-size: 18px !important;
+            font-weight: 700 !important;
+            padding: 20px 28px !important;
+            letter-spacing: -0.01em !important;
+        }
         .tab-button:hover { color: #0f172a !important; }
-        .tab-button.active { color: #0f172a !important; }
-        .subtab-button { color: #475569 !important; background: #f3f4f6 !important; border: 1px solid #e5e7eb !important; }
-        .subtab-button.active { background: #F97316 !important; color: #0c0c0f !important; border-color: #F97316 !important; }
+        .tab-button.active { color: #F97316 !important; border-bottom-color: #F97316 !important; }
+        .logo-brand {
+            font-family: 'Plus Jakarta Sans', sans-serif !important;
+            font-size: 32px !important;
+            font-weight: 800 !important;
+            letter-spacing: -0.02em !important;
+        }
+        .logo-brand span { font-family: inherit !important; }
+        .subtab-button {
+            color: #475569 !important;
+            background: #f3f4f6 !important;
+            border: 1px solid #e5e7eb !important;
+            font-family: 'Plus Jakarta Sans', sans-serif !important;
+            font-size: 16px !important;
+            font-weight: 600 !important;
+            padding: 12px 22px !important;
+            letter-spacing: -0.01em !important;
+        }
+        .subtab-button.active {
+            background: #F97316 !important;
+            color: #0c0c0f !important;
+            border-color: #F97316 !important;
+            font-weight: 700 !important;
+        }
+        .hero-stat-card, .hero-stat-card * {
+            font-family: 'Plus Jakarta Sans', sans-serif !important;
+        }
+        .hero-stat-card { padding: 22px 28px !important; border-radius: 14px !important; }
+        .hero-stat-card .hero-label { font-size: 13px !important; font-weight: 600 !important; letter-spacing: 0.05em !important; color: #F97316 !important; }
+        .hero-stat-card .hero-number, .hero-stat-card span[data-stat] { font-size: 28px !important; font-weight: 800 !important; color: #0f172a !important; }
+        .hero-stat-card .hero-moat, .hero-stat-card .hero-headline { font-size: 22px !important; font-weight: 700 !important; color: #0f172a !important; }
+        .tab-content p, .tab-content > div > p {
+            font-family: 'Plus Jakarta Sans', sans-serif !important;
+            font-size: 15px !important;
+            color: #475569 !important;
+            line-height: 1.5 !important;
+        }
+        button:not(.tab-button):not(.subtab-button) {
+            font-family: 'Plus Jakarta Sans', sans-serif !important;
+            font-weight: 600 !important;
+        }
         footer, .footer { background: #ffffff !important; color: #475569 !important; border-top: 1px solid #e5e7eb !important; }
 
         /* Tables — Team Ratings, Heatmaps, Player Tables, Final Table */
         table { background: transparent !important; }
         thead, .table-header { background: #f3f4f6 !important; }
-        th { color: #475569 !important; background: #f3f4f6 !important; border-color: #e5e7eb !important; }
-        td { color: #0f172a !important; background: #ffffff !important; border-color: #f1f5f9 !important; }
+        th {
+            color: #475569 !important;
+            background: #f3f4f6 !important;
+            border-color: #e5e7eb !important;
+            font-family: 'Plus Jakarta Sans', sans-serif !important;
+            font-size: 13px !important;
+            font-weight: 700 !important;
+            letter-spacing: 0.04em !important;
+            padding: 14px 16px !important;
+        }
+        td {
+            color: #0f172a !important;
+            background: #ffffff !important;
+            border-color: #f1f5f9 !important;
+            font-size: 15px !important;
+            padding: 14px 16px !important;
+        }
+        /* Numeric / stat cells keep JetBrains Mono for tabular alignment */
+        td.heatmap-cell, td.fixture-stat, td.player-stat, td.rating-stat,
+        td[class*="numeric"], td[class*="-stat"], td[data-stat] {
+            font-family: 'JetBrains Mono', monospace !important;
+            font-size: 16px !important;
+            font-weight: 500 !important;
+        }
+        /* Team name cells get the brand font */
+        td.heatmap-team, td.fixture-team-cell, td.player-name-cell, td.rating-team-cell {
+            font-family: 'Plus Jakarta Sans', sans-serif !important;
+            font-size: 16px !important;
+            font-weight: 600 !important;
+        }
         tr:hover td { background: #f9fafb !important; }
         .matchweek-home-row td { background: #ffffff !important; }
         .matchweek-away-row td { background: #fafafa !important; }
