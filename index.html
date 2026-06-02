@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="35" data-built-at="2026-04-29T05:31:06">
+<meta name="apex-gw" content="38" data-built-at="2026-06-02T18:00:00">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
     <title>ApexFootyData — Premier League xG Predictions, Team Ratings &amp; FPL Tools</title>
-    <meta name="description" content="Premier League predictions powered by Dixon-Coles + xG. Beat Pinnacle 23/28 weeks in 2025/26. Free Hit solver, rank predictor, mini-league simulator. Updated weekly.">
+    <meta name="description" content="Premier League predictions powered by Dixon-Coles + xG. Beat Pinnacle 30 of 35 weeks in 2025/26 (+0.082 goals/match edge). Free Hit solver, rank predictor, mini-league simulator.">
     <meta name="keywords" content="Premier League predictions, FPL solver, xG model, Dixon-Coles, FPL Free Hit, FPL rank predictor, FPL mini-league, football prediction model, Pinnacle beating model">
     <meta name="author" content="ApexFootyData">
     <link rel="canonical" href="https://apexfootydata.com/">
@@ -16,14 +16,14 @@
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="ApexFootyData">
     <meta property="og:title" content="ApexFootyData — Premier League xG Predictions &amp; FPL Tools">
-    <meta property="og:description" content="xG-based match predictions that have beaten Pinnacle's closing odds 23 of 28 weeks. Free Hit solver, rank predictor, mini-league simulator.">
+    <meta property="og:description" content="xG-based match predictions that have beaten Pinnacle's closing odds 30 of 35 weeks (+0.082 goals/match edge). Free Hit solver, rank predictor, mini-league simulator.">
     <meta property="og:url" content="https://apexfootydata.com/">
     <meta property="og:image" content="https://apexfootydata.com/og-image.png">
     <meta property="og:image:alt" content="ApexFootyData — Premier League predictions">
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="ApexFootyData — PL Predictions &amp; FPL Tools">
-    <meta name="twitter:description" content="Premier League xG predictions. 23/28 weeks beating Pinnacle in 2025/26. Free FPL solver + rank predictor.">
+    <meta name="twitter:description" content="Premier League xG predictions. 30 of 35 weeks beating Pinnacle in 2025/26. Free FPL solver + rank predictor.">
     <meta name="twitter:image" content="https://apexfootydata.com/og-image.png">
     <!-- JSON-LD structured data -->
     <script type="application/ld+json">
@@ -1254,6 +1254,26 @@
         </div>
     </div>
 
+    <!-- Hero — moat above the fold -->
+    <section class="hero-moat" style="background:#ffffff;border-bottom:1px solid #e5e7eb;padding:36px 24px 32px;text-align:center;font-family:'Plus Jakarta Sans',sans-serif;">
+        <div style="max-width:920px;margin:0 auto;">
+            <div style="display:inline-flex;align-items:center;gap:8px;background:#fff7ed;color:#9a3412;font-size:12px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;padding:6px 12px;border-radius:999px;margin-bottom:18px;">
+                <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#F97316;"></span>
+                <span>2025/26 Premier League · Season Complete</span>
+            </div>
+            <h1 style="font-size:38px;font-weight:800;color:#0f172a;letter-spacing:-0.02em;line-height:1.15;margin:0 0 14px;">
+                Beat Pinnacle in <span style="color:#F97316;">30 of 35</span> Premier League weeks.
+            </h1>
+            <p style="font-size:18px;font-weight:500;color:#475569;line-height:1.55;margin:0 0 20px;max-width:680px;margin-left:auto;margin-right:auto;">
+                Apex's xG model beat the sharpest closing line in football by <strong style="color:#0f172a;">+0.082 goals per match</strong> on average. Free FPL solver, rank predictor, and weekly match predictions powered by the same engine. Back in August for 2026/27.
+            </p>
+            <div style="display:inline-flex;gap:10px;flex-wrap:wrap;justify-content:center;">
+                <a href="solver.html" style="background:#F97316;color:#fff;font-weight:700;font-size:15px;padding:13px 22px;border-radius:10px;text-decoration:none;letter-spacing:0.01em;">Open FPL Solver →</a>
+                <a href="#matchweek" onclick="showTab(1);return false;" style="background:#fff;color:#0f172a;font-weight:700;font-size:15px;padding:13px 22px;border-radius:10px;text-decoration:none;border:1px solid #e5e7eb;">See GW38 predictions</a>
+            </div>
+        </div>
+    </section>
+
     <!-- Main tabs -->
     <div class="tab-nav">
         <button class="tab-button active" onclick="showTab(0)">Team Ratings</button>
@@ -1298,7 +1318,7 @@
     <!-- TAB 2: Matchweek -->
     <div class="tab-content">
         <div class="subtab-nav" style="justify-content:center;">
-            <button class="subtab-button active" onclick="showSub(1, 0)">GW35 Fixtures</button>
+            <button class="subtab-button active" onclick="showSub(1, 0)">GW38 Final</button>
         </div>
 
         <div class="subtab-content active" id="matchweekContainer"></div>
@@ -1849,7 +1869,7 @@
                     <span class="mw-source-sep">·</span>
                     <span>Apex xG model</span>
                     <span class="mw-source-sep">·</span>
-                    <span class="mw-source-moat">Beat Pinnacle 31 of 36 weeks · 2025/26</span>
+                    <span class="mw-source-moat">Beat Pinnacle 30 of 35 weeks · +0.082 goals/match · 2025/26</span>
                 </div>
                 <div class="mw-meta-bar">
                     <span>${gwLabel} · Premier League</span>
