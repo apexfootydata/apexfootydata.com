@@ -13730,9 +13730,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (offseason) {
-      var b = document.getElementById('offseason-banner');
-      if (b) b.style.display = 'block';
-      document.documentElement.classList.add('apex-offseason');
+      // 2026-06-02 Marcus override — keep solver_app fully functional in offseason
+      // so he can tinker with the design on the GW38 snapshot. No banner, no
+      // disabled CTA. Restore the if-block above when 2026/27 fixtures publish.
+      // var b = document.getElementById('offseason-banner');
+      // if (b) b.style.display = 'block';
+      // document.documentElement.classList.add('apex-offseason');
     }
   } catch (e) {
     // Detection is best-effort — never break the page if globals are absent.
