@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="38" data-built-at="2026-06-02T20:39:06">
+<meta name="apex-gw" content="38" data-built-at="2026-06-02T20:45:12">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -3274,7 +3274,7 @@ h1, h2, h3, h4, .va-hero h1, .card-title,
 
 /* Body copy + labels */
 p, .label, .muted, .sub, .hint, .va-stat-label, .pp-stat-label {
-  color: #475569 !important;
+  color: #6b7280 !important;
   font-weight: 500 !important;
 }
 .label, .va-stat-label {
@@ -3354,7 +3354,9 @@ button.secondary, .btn-secondary, .va-btn-secondary {
    Anything inside .pitch is OUT OF SCOPE for the white theme.
    Backgrounds, fonts, shirt SVGs, badges, markings all kept as-is. */
 .pitch, .pitch * { background: revert !important; color: revert !important; border-color: revert !important; }
-.pitch { background: #1f5f3a !important; }   /* re-pin pitch green */
+.pitch {
+  background: linear-gradient(180deg, #14622a 0%, #1a7833 30%, #1d8038 50%, #1a7833 70%, #14622a 100%) !important;
+}
 .pitch .shirt-name { color: revert !important; }
 .pitch .shirt-xp   { color: revert !important; }
 .pitch .shirt-fix  { color: revert !important; }
@@ -8143,7 +8145,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1780429146-GW38-4b428461";
+const BUILD_VERSION = "1780429512-GW38-4b428461";
 window.APEX_BUILD = BUILD_VERSION;
 
 let FPL_ID = 11051;
@@ -13824,7 +13826,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW38</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780429146-GW38-4b428461</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780429512-GW38-4b428461</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
