@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="39" data-built-at="2026-06-02T17:45:22">
+<meta name="apex-gw" content="39" data-built-at="2026-06-02T19:18:10">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -4511,7 +4511,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 
 
 
-<div id="view-landing" class="view-container" style="display:none;">
+<div id="view-landing" class="view-container">
   <section class="hero hero-landing">
     <h1 class="hero-headline"><span style="color:var(--accent);">Apex</span><span style="color:#9ca3af;">FootyData</span></h1>
     <p class="hero-sub">Enter your FPL Team ID to get started.</p>
@@ -4542,7 +4542,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 </div>
 
 
-<div id="view-team" class="view-container">
+<div id="view-team" class="view-container" style="display:none;">
   <main class="container">
     <section class="va-header">
       <div class="va-id">
@@ -8009,7 +8009,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1780418722-GW39-3c4a1fda";
+const BUILD_VERSION = "1780424290-GW39-3c4a1fda";
 window.APEX_BUILD = BUILD_VERSION;
 
 let FPL_ID = null;
@@ -13690,7 +13690,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW39</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780418722-GW39-3c4a1fda</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780424290-GW39-3c4a1fda</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
@@ -13730,12 +13730,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (offseason) {
-      // 2026-06-02 Marcus override — keep solver_app fully functional in offseason
-      // so he can tinker with the design on the GW38 snapshot. No banner, no
-      // disabled CTA. Restore the if-block above when 2026/27 fixtures publish.
-      // var b = document.getElementById('offseason-banner');
-      // if (b) b.style.display = 'block';
-      // document.documentElement.classList.add('apex-offseason');
+      var b = document.getElementById('offseason-banner');
+      if (b) b.style.display = 'block';
+      document.documentElement.classList.add('apex-offseason');
     }
   } catch (e) {
     // Detection is best-effort — never break the page if globals are absent.
@@ -13743,65 +13740,5 @@ document.addEventListener('DOMContentLoaded', () => {
 })();
 </script>
 
-
-<!-- 2026-06-02 Marcus: bypass the second landing form when ?id= is in URL.
-     If PUBLIC_BOOT hydrate fails or doesn't switch view, this auto-clicks
-     "View My Squad" so the user doesn't have to re-enter the ID. -->
-<script>
-(function autoBypassLanding() {
-  function go() {
-    var idFromUrl;
-    try { idFromUrl = new URLSearchParams(location.search).get('id'); } catch (e) { return; }
-    if (!idFromUrl || !/^\d+$/.test(idFromUrl)) return;
-    // Pre-fill the landing input so _landingGo() reads a value
-    var input = document.getElementById('fpl-id');
-    if (input && !input.value) input.value = idFromUrl;
-    // Wait for landing to settle, then click View My Squad if we're still on it
-    setTimeout(function () {
-      var landing = document.getElementById('view-landing');
-      if (!landing) return;
-      var visible = landing.offsetParent !== null && landing.style.display !== 'none';
-      if (!visible) return;
-      var btn = document.querySelector('button.landing-cta-secondary')
-             || document.querySelector('button.landing-cta-primary');
-      if (btn) {
-        console.log('[apex-bypass] auto-clicking', btn.className);
-        btn.click();
-      }
-    }, 2000);
-  }
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', go);
-  } else {
-    go();
-  }
-})();
-</script>
-
-
-<!-- 2026-06-02 Marcus: force view-team on every render to bypass any
-     fallback-to-landing logic during offseason. -->
-<script>
-(function forceTeamView() {
-  function force() {
-    try {
-      var landing = document.getElementById('view-landing');
-      var team    = document.getElementById('view-team');
-      if (landing) landing.style.display = 'none';
-      if (team)    team.style.display    = 'block';
-      var topbar = document.getElementById('topbar');
-      if (topbar) topbar.style.display = 'flex';
-    } catch (e) {}
-  }
-  // Run early and repeatedly so anything that hides view-team gets reverted
-  force();
-  document.addEventListener('DOMContentLoaded', force);
-  window.addEventListener('load', force);
-  setTimeout(force, 100);
-  setTimeout(force, 500);
-  setTimeout(force, 1500);
-  setTimeout(force, 3000);
-})();
-</script>
 </body>
 </html>
