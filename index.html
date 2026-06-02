@@ -1274,11 +1274,11 @@
         </div>
     </section>
 
-    <!-- Main tabs -->
+    <!-- Main tabs (offseason: Team Predictions hidden — per-GW projections meaningless mid-season-end) -->
     <div class="tab-nav">
         <button class="tab-button active" onclick="showTab(0)">Team Ratings</button>
         <button class="tab-button" onclick="showTab(1)">Matchweek Predictions</button>
-        <button class="tab-button" onclick="showTab(2)">Team Predictions</button>
+        <button class="tab-button" onclick="showTab(2)" style="display:none;">Team Predictions</button>
         <button class="tab-button" onclick="showTab(3)">Player Predictions</button>
         <button class="tab-button" onclick="showTab(4)">Simulated Final Table</button>
         <a class="tab-button" href="solver.html" style="text-decoration:none;display:inline-flex;align-items:center;">FPL Solver</a>
@@ -1359,16 +1359,16 @@
 
     <!-- TAB 4: Player Predictions -->
     <div class="tab-content">
-        <p style="margin:0 0 10px 0;font-size:0.78rem;font-style:italic;opacity:0.6;">⚠ Predictions assume the player starts — adjust accordingly for rotation or injury doubts.</p>
+        <p style="margin:0 0 10px 0;font-size:0.78rem;font-style:italic;opacity:0.6;">2025/26 season totals — final figures by player.</p>
         <div class="subtab-nav">
-            <button class="subtab-button active" onclick="showSub(3, 0)">Current Game Week</button>
-            <button class="subtab-button" onclick="showSub(3, 1)">Goals</button>
+            <button class="subtab-button" onclick="showSub(3, 0)" style="display:none;">Current Game Week</button>
+            <button class="subtab-button active" onclick="showSub(3, 1)">Goals</button>
             <button class="subtab-button" onclick="showSub(3, 2)">Assists</button>
             <button class="subtab-button" onclick="showSub(3, 3)">Goal Involvements</button>
         </div>
 
-        <!-- Sub-tab: Next GW -->
-        <div class="subtab-content active">
+        <!-- Sub-tab: Next GW (hidden offseason — no upcoming GW) -->
+        <div class="subtab-content" style="display:none;">
             <table class="nextgw-table">
                 <thead>
                     <tr id="playerNextGWHead">
@@ -1390,8 +1390,8 @@
             </div>
         </div>
 
-        <!-- Sub-tab: Goals -->
-        <div class="subtab-content">
+        <!-- Sub-tab: Goals (offseason default) -->
+        <div class="subtab-content active">
             <table class="player-table">
                 <thead><tr id="playerGoalsHead"></tr></thead>
                 <tbody id="playerGoalsTable"></tbody>
