@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="38" data-built-at="2026-06-02T20:45:12">
+<meta name="apex-gw" content="38" data-built-at="2026-06-02T20:56:46">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -3362,6 +3362,79 @@ button.secondary, .btn-secondary, .va-btn-secondary {
 .pitch .shirt-fix  { color: revert !important; }
 
 /* ═══ APEX_WHITE_THEME:END ═══ */
+
+
+/* ═══ APEX_BENCH_GREEN:START ═══ 2026-06-02 bench matches pitch ═══ */
+/* Bench area should match the pitch — darker green band below the pitch
+   so it reads as a continuation, not a separate panel. */
+.bench-row,
+.bench-area,
+.bench-container,
+.pitch-bench,
+.bench {
+  background: linear-gradient(180deg, #0f4e22 0%, #14622a 50%, #0f4e22 100%) !important;
+  border: none !important;
+  border-radius: var(--card-radius, 14px) !important;
+}
+
+/* Bench shirt names — keep readable on green background */
+.bench-row .shirt-name,
+.bench .shirt-name,
+.pitch-bench .shirt-name {
+  background: rgba(0, 0, 0, 0.65) !important;
+  color: #ffffff !important;
+}
+
+/* Bench fixture pills */
+.bench-row .shirt-fix,
+.bench .shirt-fix,
+.pitch-bench .shirt-fix {
+  color: #ffffff !important;
+  opacity: 0.85;
+}
+
+/* Bench xPts numbers */
+.bench-row .shirt-xp,
+.bench .shirt-xp,
+.pitch-bench .shirt-xp {
+  color: #ffffff !important;
+}
+
+/* BENCH label above the row */
+.bench-label,
+.bench-heading {
+  color: #0f172a !important;
+  font-weight: 800 !important;
+}
+/* ═══ APEX_BENCH_GREEN:END ═══ */
+
+/* ═══ APEX_OFFSEASON_KILL:START ═══ 2026-06-02 force-hide landing/banner forever ═══ */
+/* Hard kill — view-landing must NEVER show, regardless of JS. */
+#view-landing,
+#view-landing.view-container,
+.view-container#view-landing {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  height: 0 !important;
+  overflow: hidden !important;
+}
+
+/* Hard kill — offseason banner must NEVER show. */
+#offseason-banner,
+.offseason-banner,
+.offseason-banner-wrap {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  overflow: hidden !important;
+}
+
+/* Ensure team view is visible (PUBLIC_BOOT may try to hide it) */
+#view-team {
+  display: block !important;
+}
+/* ═══ APEX_OFFSEASON_KILL:END ═══ */
 
 </style>
 <!-- Cookie consent + conditional Google Analytics 4 loader -->
@@ -8145,7 +8218,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1780429512-GW38-4b428461";
+const BUILD_VERSION = "1780430206-GW38-4b428461";
 window.APEX_BUILD = BUILD_VERSION;
 
 let FPL_ID = 11051;
@@ -13826,7 +13899,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW38</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780429512-GW38-4b428461</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780430206-GW38-4b428461</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
