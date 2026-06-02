@@ -3268,6 +3268,138 @@ button { font-weight: 700 !important; }
 .pitch .pcb-val, .pitch .pbm-apex, .pitch .pbm-rest { color: #fff !important; }
 .pitch [class*="shirt"], .pitch [class*="kit"], .pitch svg, .pitch svg * { background: transparent !important; }
 
+
+/* ── CSS VARIABLE OVERRIDE — flip ALL --bg2/--bg3 surfaces to white in one go ── */
+:root, html, body {
+  --bg: #fafafa !important;
+  --bg2: #ffffff !important;
+  --bg3: #f3f4f6 !important;
+  --border: #e5e7eb !important;
+  --border-light: #f1f5f9 !important;
+  --muted: #475569 !important;
+  --fg: #0f172a !important;
+}
+
+/* Search/filter bar — force white even with inline style="background:var(--bg2)" */
+.pool-filters {
+  background: #ffffff !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 14px !important;
+  padding: 22px !important;
+}
+.pool-filters label, .pool-filters .filter-label {
+  color: #475569 !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+}
+.pool-filters input[type="text"], .pool-filters select {
+  background: #ffffff !important;
+  color: #0f172a !important;
+  border: 1px solid #cbd5e1 !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-size: 17px !important;
+  font-weight: 500 !important;
+  padding: 14px 16px !important;
+  border-radius: 10px !important;
+}
+.pool-filters input[type="checkbox"] + label,
+.pool-filters .affordable-toggle {
+  color: #475569 !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-size: 15px !important;
+  font-weight: 600 !important;
+}
+
+/* Position pill buttons (ALL / GK / DEF / MID / FWD) */
+.pos-btn, .pool-filters button, .pool-filters .pos-btn {
+  background: #ffffff !important;
+  color: #0f172a !important;
+  border: 1px solid #cbd5e1 !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  padding: 12px 18px !important;
+  border-radius: 10px !important;
+}
+.pos-btn.active, .pool-filters .pos-btn.active {
+  background: #F97316 !important;
+  color: #ffffff !important;
+  border-color: #F97316 !important;
+}
+
+/* Pagination bar "Next 100 rows hidden / Show more" — light */
+#pool-pager {
+  background: #ffffff !important;
+  color: #475569 !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  border-top: 1px solid #e5e7eb !important;
+  padding: 16px 20px !important;
+}
+#pool-pager button {
+  background: #ffffff !important;
+  color: #0f172a !important;
+  border: 1px solid #e5e7eb !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  padding: 10px 18px !important;
+  border-radius: 10px !important;
+}
+
+/* STAT STRIP NUMBERS — make 54.2 / £1.4m / 1 / £105.0m BIG and DARK */
+.va-strip-cell .va-card-value,
+.va-strip-cell [class*="value"],
+.va-strip-value {
+  color: #0f172a !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-size: 28px !important;
+  font-weight: 800 !important;
+  font-variant-numeric: tabular-nums !important;
+}
+.va-strip-label {
+  font-size: 14px !important;
+  font-weight: 700 !important;
+}
+
+/* CHIP PLAN labels (WILDCARD / BENCH BOOST / TRIPLE CAPTAIN / FREE HIT) */
+.chip-plan label, .va-chip-plan label, [class*="chip-label"] {
+  color: #475569 !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+}
+.chip-plan select, .va-chip-plan select {
+  font-size: 16px !important;
+  padding: 14px 16px !important;
+  border-radius: 10px !important;
+}
+
+/* Section titles */
+.section-title, h2, h3 {
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-size: 24px !important;
+  font-weight: 800 !important;
+  color: #0f172a !important;
+  letter-spacing: -0.02em !important;
+}
+/* "Tap X on any player above" instruction line */
+.section-sub, .pool-instructions, .tap-instruction {
+  color: #475569 !important;
+  font-size: 15px !important;
+  font-weight: 500 !important;
+}
+
+/* Footer (GW38 + build) — light */
+footer, .footer-bar { background: #ffffff !important; border-top: 1px solid #e5e7eb !important; color: #94a3b8 !important; }
+footer span, .footer-bar span { font-family: 'Plus Jakarta Sans', sans-serif !important; }
+
 </style>
 <!-- Cookie consent + conditional Google Analytics 4 loader -->
 <script>
