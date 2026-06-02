@@ -3400,6 +3400,52 @@ button { font-weight: 700 !important; }
 footer, .footer-bar { background: #ffffff !important; border-top: 1px solid #e5e7eb !important; color: #94a3b8 !important; }
 footer span, .footer-bar span { font-family: 'Plus Jakarta Sans', sans-serif !important; }
 
+
+/* Landing CTA cards — orange filled, white text (fallback for flash before redirect) */
+.cta-card, .landing-cta-primary, .landing-cta-secondary {
+  background: linear-gradient(135deg, #F97316 0%, #fb923c 100%) !important;
+  border: 1px solid #F97316 !important;
+  color: #ffffff !important;
+  padding: 28px 32px !important;
+  border-radius: 14px !important;
+}
+.cta-card .cta-title, .cta-title,
+.landing-cta-primary .cta-title, .landing-cta-secondary .cta-title {
+  color: #ffffff !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-size: 20px !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.01em !important;
+}
+.cta-card .cta-sub, .cta-sub {
+  color: rgba(255,255,255,0.9) !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+}
+.cta-card .cta-icon, .cta-icon {
+  color: #ffffff !important;
+  font-size: 28px !important;
+}
+
+/* Landing page input field — bigger, branded */
+input[type="text"][id*="team"], input[type="number"][id*="team"],
+input[placeholder*="FPL"], input[placeholder*="Team ID"] {
+  font-size: 24px !important;
+  font-weight: 700 !important;
+  padding: 18px 22px !important;
+  border-radius: 12px !important;
+  text-align: center !important;
+  border: 2px solid #F97316 !important;
+}
+
+/* Landing page "Enter your FPL Team ID" text + ApexFootyData wordmark */
+.landing-title, .landing-prompt, .landing-headline {
+  color: #0f172a !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-weight: 700 !important;
+}
+
 </style>
 <!-- Cookie consent + conditional Google Analytics 4 loader -->
 <script>
