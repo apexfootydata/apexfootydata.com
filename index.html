@@ -1278,7 +1278,7 @@
     <div class="tab-nav">
         <button class="tab-button active" onclick="showTab(0)">Team Ratings</button>
         <button class="tab-button" onclick="showTab(1)">Matchweek Predictions</button>
-        <button class="tab-button" onclick="showTab(2)" style="display:none;">Team Predictions</button>
+        <button class="tab-button" onclick="showTab(2)">Team Predictions</button>
         <button class="tab-button" onclick="showTab(3)">Player Predictions</button>
         <button class="tab-button" onclick="showTab(4)">Simulated Final Table</button>
         <a class="tab-button" href="solver.html" style="text-decoration:none;display:inline-flex;align-items:center;">FPL Solver</a>
@@ -2287,6 +2287,23 @@
         window.renderPlayerGI      = function(){ _offsRender(PLAYER_GI,      'playerGIHead',      'playerGITable',      'gi',      'paginationGI'); };
         window.renderPlayerNextGW  = function(){};
         window.changePlayerPage    = function(){};
+
+        // Team Predictions offseason — replace heatmap of per-GW %s with a clean team list.
+        // Numbers are meaningless without an upcoming GW; team names alone are still useful as the directory.
+        function _offsTeamList(headId, bodyId) {
+            var headEl = document.getElementById(headId);
+            var bodyEl = document.getElementById(bodyId);
+            if (headEl) headEl.innerHTML = '<tr><th style="text-align:left;padding:14px 18px;font-size:12px;font-weight:700;color:#64748b;letter-spacing:0.04em;text-transform:uppercase;background:#f8fafc;">Team</th></tr>';
+            if (bodyEl && typeof TEAM_PREDICTIONS !== 'undefined') {
+                var teams = Object.keys(TEAM_PREDICTIONS).sort();
+                bodyEl.innerHTML = teams.map(function(t){
+                    return '<tr style="border-bottom:1px solid #e5e7eb;"><td style="padding:14px 18px;font-weight:700;color:#0f172a;">' + getTeamNameWithBadge(t) + '</td></tr>';
+                }).join('');
+            }
+        }
+        window.renderTeamPredictions = function(){ _offsTeamList('teamPredHeadline', 'teamPredBody'); };
+        window.renderTeamGoals       = function(){ _offsTeamList('teamGoalsHeadline','teamGoalsBody'); };
+        window.renderTeamCS          = function(){ _offsTeamList('teamCSHeadline',   'teamCSBody'); };
 
         // Isolated init — one failure no longer cascades
         function safeRun(fn, name) { try { fn(); } catch (e) { console.warn('[render] '+name+' failed:', e); } }
