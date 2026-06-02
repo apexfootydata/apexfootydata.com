@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="38" data-built-at="2026-06-02T19:50:28">
+<meta name="apex-gw" content="38" data-built-at="2026-06-02T19:57:36">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -8143,7 +8143,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1780426228-GW38-4b428461";
+const BUILD_VERSION = "1780426656-GW38-4b428461";
 window.APEX_BUILD = BUILD_VERSION;
 
 let FPL_ID = null;
@@ -13824,7 +13824,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW38</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780426228-GW38-4b428461</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780426656-GW38-4b428461</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
@@ -13875,28 +13875,30 @@ document.addEventListener('DOMContentLoaded', () => {
 })();
 </script>
 
-<!-- 2026-06-02 Marcus: bypass landing screen on every render so the user
-     goes straight to view-team. Re-runs at multiple intervals to counter
-     anything that tries to revert. Remove when 2026/27 fixtures publish. -->
+<!-- 2026-06-02 Marcus: ensure the user lands on view-team and the team
+     view actually INITIALISES (calls initTeamView + initPoolView). Without
+     the init calls, switching display alone gives an empty shell. -->
 <script>
-(function forceTeamView() {
-  function force() {
+(function safetySwitchToTeam() {
+  function go() {
     try {
       var landing = document.getElementById('view-landing');
       var team    = document.getElementById('view-team');
-      if (landing) landing.style.display = 'none';
-      if (team)    team.style.display    = 'block';
-      var topbar = document.getElementById('topbar');
-      if (topbar) topbar.style.display = 'flex';
-    } catch (e) {}
+      // If we're already showing team, do nothing — PUBLIC_BOOT handled it.
+      if (team && team.offsetParent !== null) return;
+      // Otherwise switch + init.
+      if (typeof switchView === 'function') {
+        switchView('team');
+      } else {
+        if (landing) landing.style.display = 'none';
+        if (team)    team.style.display    = 'block';
+        if (typeof initTeamView === 'function') initTeamView();
+        if (typeof initPoolView === 'function') initPoolView();
+      }
+    } catch (e) { console.warn('[apex-safety] team switch failed', e); }
   }
-  force();
-  document.addEventListener('DOMContentLoaded', force);
-  window.addEventListener('load', force);
-  setTimeout(force, 100);
-  setTimeout(force, 500);
-  setTimeout(force, 1500);
-  setTimeout(force, 3000);
+  // Run AFTER PUBLIC_BOOT has had a chance to hydrate (3.5s is generous).
+  setTimeout(go, 3500);
 })();
 </script>
 
