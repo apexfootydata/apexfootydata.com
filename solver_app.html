@@ -13743,5 +13743,40 @@ document.addEventListener('DOMContentLoaded', () => {
 })();
 </script>
 
+
+<!-- 2026-06-02 Marcus: bypass the second landing form when ?id= is in URL.
+     If PUBLIC_BOOT hydrate fails or doesn't switch view, this auto-clicks
+     "View My Squad" so the user doesn't have to re-enter the ID. -->
+<script>
+(function autoBypassLanding() {
+  function go() {
+    var idFromUrl;
+    try { idFromUrl = new URLSearchParams(location.search).get('id'); } catch (e) { return; }
+    if (!idFromUrl || !/^\d+$/.test(idFromUrl)) return;
+    // Pre-fill the landing input so _landingGo() reads a value
+    var input = document.getElementById('fpl-id');
+    if (input && !input.value) input.value = idFromUrl;
+    // Wait for landing to settle, then click View My Squad if we're still on it
+    setTimeout(function () {
+      var landing = document.getElementById('view-landing');
+      if (!landing) return;
+      var visible = landing.offsetParent !== null && landing.style.display !== 'none';
+      if (!visible) return;
+      var btn = document.querySelector('button.landing-cta-secondary')
+             || document.querySelector('button.landing-cta-primary');
+      if (btn) {
+        console.log('[apex-bypass] auto-clicking', btn.className);
+        btn.click();
+      }
+    }, 2000);
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', go);
+  } else {
+    go();
+  }
+})();
+</script>
+
 </body>
 </html>
