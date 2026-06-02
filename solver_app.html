@@ -4459,6 +4459,29 @@ a[href*="rank_milestones"] {
 })();
 </script>
 <!-- ## APEX_MOBILE_FIX:END ## -->
+
+<!-- 2026-06-02 Marcus: bypass offseason landing for design tinkering -->
+<script>
+(function forceTeamView() {
+  function force() {
+    try {
+      var landing = document.getElementById('view-landing');
+      var team    = document.getElementById('view-team');
+      if (landing) landing.style.display = 'none';
+      if (team)    team.style.display    = 'block';
+      var topbar = document.getElementById('topbar');
+      if (topbar) topbar.style.display = 'flex';
+    } catch (e) {}
+  }
+  force();
+  document.addEventListener('DOMContentLoaded', force);
+  window.addEventListener('load', force);
+  setTimeout(force, 100);
+  setTimeout(force, 500);
+  setTimeout(force, 1500);
+  setTimeout(force, 3000);
+})();
+</script>
 </body>. Shows when the
      baked cache reports start_gw beyond the season (e.g. GW39 with zero
      fixtures), which is the signal that the season is over and there's
@@ -4511,7 +4534,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 
 
 
-<div id="view-landing" class="view-container">
+<div id="view-landing" class="view-container" style="display:none;">
   <section class="hero hero-landing">
     <h1 class="hero-headline"><span style="color:var(--accent);">Apex</span><span style="color:#9ca3af;">FootyData</span></h1>
     <p class="hero-sub">Enter your FPL Team ID to get started.</p>
@@ -4542,7 +4565,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 </div>
 
 
-<div id="view-team" class="view-container" style="display:none;">
+<div id="view-team" class="view-container">
   <main class="container">
     <section class="va-header">
       <div class="va-id">
@@ -13494,251 +13517,4 @@ function _poolFiltered() {
     if (search && !p.web_name.toLowerCase().includes(search)) return false;
     if (affOnly) {
       if (_poolRemovedPlayer) {
-        // Slot is open — budget freed by the removed player
-        const newCost = currentCost + (p.cost || 0);
-        if (newCost > budgetCap + 0.01) return false;
-      } else if (fullSquad.length === 15) {
-        // Normal mode — worst same-position player in squad
-        const samePos = fullSquad.filter(q => q.element_type === p.element_type);
-        if (!samePos.length) return false;
-        const _tot = q => (q.xp_per_gw || []).reduce((s,x) => s+x, 0);
-        const worst = samePos.reduce((w, q) => _tot(q) < _tot(w) ? q : w, samePos[0]);
-        // Selling price for the kept player leaving the squad, now_cost for the incoming buy.
-        const newCost = currentCost - _effCost(worst) + (p.cost || 0);
-        if (newCost > budgetCap + 0.01) return false;
-      }
-    }
-    return true;
-  });
-}
-
-function _poolSort(rows) {
-  const key = _poolSortKey;
-  const dir = _poolSortDir === 'desc' ? -1 : 1;
-  return rows.slice().sort((a, b) => {
-    let av, bv;
-    if (key === 'pos')            { av = a.element_type; bv = b.element_type; }
-    else if (key.startsWith('gw_')) {
-      const idx = parseInt(key.slice(3));
-      av = (a.xp_per_gw && a.xp_per_gw[idx]) || 0;
-      bv = (b.xp_per_gw && b.xp_per_gw[idx]) || 0;
-    }
-    else                          { av = a[key] || 0;   bv = b[key] || 0; }
-    if (typeof av === 'string')   return av.localeCompare(bv) * dir;
-    return (av - bv) * dir;
-  });
-}
-
-function renderPoolTable() {
-  const tbody = document.getElementById('pool-tbody');
-  const pager = document.getElementById('pool-pager');
-  const count = document.getElementById('pool-count');
-  if (!tbody) return;
-
-  const filtered = _poolSort(_poolFiltered());
-  const squadIds = new Set([..._xiPlayers, ..._benchPlayers].map(p => p.id));
-  const rows = filtered.slice(0, _poolRowLimit);
-
-  tbody.innerHTML = '';
-  rows.forEach(p => {
-    const tr = document.createElement('tr');
-    tr.className = 'pool-row';
-    const inSquad = squadIds.has(p.id);
-    const shirtImg = `<span style="display:inline-flex;align-items:center;vertical-align:middle;margin-right:8px;">${svgShirt(p.team, p.element_type === 1, 26)}</span>`;
-    const gwCells = (p.xp_per_gw || []).map(x =>
-      `<td class="pool-xp" style="text-align:right;color:${x >= 4 ? '#4ade80' : x >= 2 ? 'var(--fg)' : 'var(--muted)'};">${x.toFixed(1)}</td>`
-    ).join('');
-    tr.innerHTML = `
-      <td><span style="display:inline-flex;align-items:center;">${shirtImg}<strong>${p.web_name}</strong></span></td>
-      <td style="color:var(--muted);">${p.team}</td>
-      <td style="color:var(--muted);font-size:.72rem;font-weight:700;">${POOL_POS_LABELS[p.element_type] || '?'}</td>
-      <td class="pool-xp">£${p.cost.toFixed(1)}</td>
-      ${gwCells}
-      <td class="pool-xp pool-xp-total">${p.total_xp.toFixed(1)}</td>
-      <td style="text-align:right;padding-right:16px;">
-        ${_poolRemovedPlayer
-          ? (inSquad
-            ? `<button class="pool-add-btn in-squad" disabled>✓ Squad</button>`
-            : (p.element_type === _poolRemovedPlayer.element_type
-              ? `<button class="pool-add-btn pp-fill-btn" onclick="_poolFillSlot(${p.id})">+ Pick</button>`
-              : `<button class="pool-add-btn" disabled style="opacity:.3;">Wrong pos</button>`))
-          : `<button class="pool-add-btn ${inSquad ? 'in-squad' : ''}"
-              onclick="_poolAddPlayer(${p.id})"
-              ${inSquad ? 'disabled' : ''}>${inSquad ? '✓ Squad' : '+ Add'}</button>`
-        }
-      </td>
-    `;
-    tbody.appendChild(tr);
-  });
-
-  // Count + pager
-  const shown = rows.length;
-  const total = filtered.length;
-  count.textContent = `Showing ${shown} of ${total} players (${POOL_DATA.length} in pool).`;
-  pager.innerHTML = '';
-  if (total > shown) {
-    pager.innerHTML = `
-      <span>Next ${Math.min(100, total - shown)} rows hidden</span>
-      <button onclick="_poolRowLimit += 200; renderPoolTable();"
-        style="background:var(--accent,#f97316);color:#000;border:none;border-radius:6px;padding:6px 14px;font-size:.78rem;font-weight:700;cursor:pointer;">
-        Show more
-      </button>
-    `;
-  } else if (total === 0) {
-    pager.innerHTML = `<span style="text-align:center;width:100%;">No players match your filters.</span>`;
-  } else {
-    pager.innerHTML = `<span>All ${total} results shown.</span>`;
-  }
-}
-
-// Add a player from the pool to the current squad.
-// Rule: replace the worst same-position player (by rolling xP), but only if
-// the swap fits the budget cap. Keeps the squad at 15 players.
-function _poolAddPlayer(playerId) {
-  const inPlayer = POOL_DATA.find(p => p.id === playerId);
-  if (!inPlayer) return;
-
-  const fullSquad = [..._xiPlayers, ..._benchPlayers];
-  if (fullSquad.length !== 15) {
-    alert('Squad is not fully loaded yet — open the Squad tab first.');
-    return;
-  }
-  if (fullSquad.some(p => p.id === playerId)) return;
-
-  const samePos = fullSquad.filter(p => p.element_type === inPlayer.element_type);
-  if (!samePos.length) {
-    alert('No player of that position in your squad to swap out.');
-    return;
-  }
-  // Worst = lowest 6-GW total xP among same-pos players (matches what the
-  // user sees in the Total column of the pool table).
-  const _tot = q => (q.xp_per_gw || []).reduce((s,x) => s+x, 0);
-  const out = samePos.reduce((w, p) => _tot(p) < _tot(w) ? p : w, samePos[0]);
-
-  // Budget check vs TEAM_META.budget cap — mirror pitch-bank (SP for owned).
-  const _spMap = TEAM_META.selling_prices || {};
-  const _effCost = (p) => {
-    if (!p) return 0;
-    const sp = _spMap[String(p.id)];
-    if (sp != null && sp > 0) return sp;
-    return p.cost || 0;
-  };
-  const budgetCap = TEAM_META.budget || (TEAM_META.squad_value + TEAM_META.bank);
-  const currentCost = fullSquad.reduce((s, p) => s + _effCost(p), 0);
-  const newCost = currentCost - _effCost(out) + (inPlayer.cost || 0);
-  if (newCost > budgetCap + 0.01) {
-    alert(`Can't afford ${inPlayer.web_name}. Swapping ${out.web_name} (£${out.cost.toFixed(1)}m) for ${inPlayer.web_name} (£${inPlayer.cost.toFixed(1)}m) would cost £${newCost.toFixed(1)}m — budget cap is £${budgetCap.toFixed(1)}m.`);
-    return;
-  }
-
-  // 3-per-team limit
-  const sameClub = fullSquad.filter(p => p.team === inPlayer.team && p.id !== out.id).length;
-  if (sameClub >= 3) {
-    alert(`Can't add — you already have 3 ${inPlayer.team} players.`);
-    return;
-  }
-
-  // Apply: replace `out` with `inPlayer`, re-pick XI
-  const updated = fullSquad.map(p => p.id === out.id ? inPlayer : p);
-  const result  = pickBestXi(updated, activeGwIdx);
-  _xiPlayers    = result.xi;
-  _benchPlayers = _orderBench(result.bench);
-  _capId        = result.cap.id;
-  _vcId         = result.vc.id;
-
-  // Update deltas so team-view total reflects the new squad
-  const newXiSum = _xiPlayers.reduce((s, p) => s + _xpAt(p, activeGwIdx), 0);
-  const newCapXp = result.cap ? _xpAt(result.cap, activeGwIdx) : 0;
-  _xiDelta[activeGwIdx]  = newXiSum - (GW_XI_BASE[activeGwIdx] || 0);
-  _capDelta[activeGwIdx] = newCapXp - (GW_CAP_XP[activeGwIdx]  || 0);
-  _jsBaseCapXp = newCapXp;
-
-  _renderPitchFromState();
-  updateChipTotal();
-  renderPoolTable();  // refresh "In squad" badges
-
-  // Friendly confirmation
-  const banner = document.getElementById('solve-banner');
-  if (banner) {
-    banner.textContent = `✓ Added ${inPlayer.web_name} — dropped ${out.web_name}. £${newCost.toFixed(1)}m / £${budgetCap.toFixed(1)}m used.`;
-    banner.style.display = 'block';
-    banner.style.background = 'rgba(34,197,94,.12)';
-    banner.style.border = '1px solid rgba(34,197,94,.3)';
-    banner.style.color = '#4ade80';
-  }
-}
-
-
-// ──────────── INIT ────────────
-document.addEventListener('DOMContentLoaded', () => {
-  if (typeof _initCompareToggle === 'function') _initCompareToggle();
-  switchView('landing');
-  // Eager-fetch chip planner in the background so WC + sequences are ready
-  // (or nearly ready) by the time the user clicks the Chip Planner tab.
-  // The user never actively waits — the compute happens while they browse
-  // Squad view. If they click sooner, the promise is already in flight and
-  // _ensureChipPlannerLoaded() just awaits it.
-  if (typeof CHIP_PLANNER !== 'undefined' && CHIP_PLANNER && CHIP_PLANNER._lazy) {
-    setTimeout(() => {
-      if (typeof _ensureChipPlannerLoaded === 'function') {
-        _ensureChipPlannerLoaded().catch(() => {});
-      }
-    }, 800);
-  }
-});
-</script>
-
-<footer class="footer">
-  <span>GW39</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780424290-GW39-3c4a1fda</span>
-</footer>
-
-<!-- Cloudflare Web Analytics -->
-<script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "890700f621df42909deca8500a0df182"}'></script>
-<!-- End Cloudflare Web Analytics -->
-
-<!-- ── Offseason detection — toggles the banner inserted at top of body ─
-     Three signals, any one triggers offseason mode:
-       1) GW_LABELS empty or starts with a label parsing to >38
-       2) FIXTURES_BY_GW_TEAM has zero entries for the current GW
-       3) Pool JSON has zero players (cache built during offseason)
-     Auto-reverts in-season — once 2026/27 fixtures land in the cache,
-     start_gw resets to <= 38 and the banner stays hidden. No manual flip.
--->
-<script>
-(function () {
-  try {
-    var labels = (typeof GW_LABELS !== 'undefined' && GW_LABELS) ? GW_LABELS : [];
-    var offseason = false;
-
-    if (!labels.length) {
-      offseason = true;
-    } else {
-      var firstLabel = String(labels[0] || '');
-      var m = firstLabel.match(/GW(\d+)/i);
-      if (m && parseInt(m[1], 10) > 38) offseason = true;
-    }
-
-    if (!offseason && typeof FIXTURES_BY_GW_TEAM !== 'undefined' && FIXTURES_BY_GW_TEAM) {
-      var anyFx = false;
-      try {
-        Object.keys(FIXTURES_BY_GW_TEAM || {}).forEach(function (gw) {
-          if (FIXTURES_BY_GW_TEAM[gw] && Object.keys(FIXTURES_BY_GW_TEAM[gw]).length) anyFx = true;
-        });
-      } catch (e) {}
-      if (!anyFx) offseason = true;
-    }
-
-    if (offseason) {
-      var b = document.getElementById('offseason-banner');
-      if (b) b.style.display = 'block';
-      document.documentElement.classList.add('apex-offseason');
-    }
-  } catch (e) {
-    // Detection is best-effort — never break the page if globals are absent.
-  }
-})();
-</script>
-
-</body>
 </html>
