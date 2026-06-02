@@ -7,7 +7,7 @@
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
     <title>ApexFootyData — Premier League xG Predictions, Team Ratings &amp; FPL Tools</title>
-    <meta name="description" content="Premier League predictions powered by Dixon-Coles + xG. Beat Pinnacle 30 of 35 weeks in 2025/26 (+0.082 goals/match edge). Free Hit solver, rank predictor, mini-league simulator.">
+    <meta name="description" content="Premier League predictions powered by Dixon-Coles + xG. Beat Pinnacle 30 of 35 weeks in 2025/26 (+0.082 goals/match edge). Free Hit solver, rank predictor, mini-league simulator. Updated weekly.">
     <meta name="keywords" content="Premier League predictions, FPL solver, xG model, Dixon-Coles, FPL Free Hit, FPL rank predictor, FPL mini-league, football prediction model, Pinnacle beating model">
     <meta name="author" content="ApexFootyData">
     <link rel="canonical" href="https://apexfootydata.com/">
@@ -1623,11 +1623,51 @@
         // Blank GW35 teams: Bournemouth, Brighton, Burnley, Chelsea, Leeds, Man City
         // ██ SITE_DATA:PLAYER_ASSISTS ██
         const PLAYER_ASSISTS = [
+            {name:"B.Fernandes",team:"MUN",pos:"MID",goals:9,assists:24,gi:33,min:3065,xG:10.79,xA:12.28},
+            {name:"Cherki",team:"MCI",pos:"MID",goals:4,assists:13,gi:17,min:1772,xG:4.28,xA:8.87},
+            {name:"Bowen",team:"WHU",pos:"FWD",goals:9,assists:13,gi:22,min:3406,xG:7.22,xA:5.21},
+            {name:"Saka",team:"ARS",pos:"MID",goals:7,assists:10,gi:17,min:2218,xG:7.57,xA:7.16},
+            {name:"Rice",team:"ARS",pos:"MID",goals:4,assists:9,gi:13,min:3093,xG:3.15,xA:7.32},
+            {name:"João Pedro",team:"CHE",pos:"FWD",goals:15,assists:9,gi:24,min:2658,xG:14.91,xA:1.96},
+            {name:"Wilson",team:"FUL",pos:"MID",goals:10,assists:9,gi:19,min:2674,xG:5.88,xA:4.77},
+            {name:"Rogers",team:"AVL",pos:"MID",goals:10,assists:8,gi:18,min:3280,xG:6.84,xA:4.32},
+            {name:"O.Dango",team:"BRE",pos:"MID",goals:7,assists:8,gi:15,min:2271,xG:7.94,xA:4.12},
+            {name:"Minteh",team:"BHA",pos:"MID",goals:3,assists:8,gi:11,min:2389,xG:3.81,xA:5.06},
+            {name:"Aaronson",team:"LEE",pos:"MID",goals:4,assists:8,gi:12,min:2449,xG:4.53,xA:3.60},
+            {name:"Matheus N.",team:"MCI",pos:"DEF",goals:1,assists:8,gi:9,min:2861,xG:0.34,xA:2.23},
+            {name:"Doku",team:"MCI",pos:"MID",goals:5,assists:8,gi:13,min:1773,xG:2.87,xA:5.86},
+            {name:"Haaland",team:"MCI",pos:"FWD",goals:27,assists:8,gi:35,min:2953,xG:25.50,xA:2.67},
+            {name:"Ødegaard",team:"ARS",pos:"MID",goals:1,assists:7,gi:8,min:1363,xG:1.25,xA:3.65},
+            {name:"Digne",team:"AVL",pos:"DEF",goals:0,assists:7,gi:7,min:1842,xG:0.67,xA:3.28},
+            {name:"Evanilson",team:"BOU",pos:"FWD",goals:6,assists:7,gi:13,min:2741,xG:10.64,xA:1.48},
+            {name:"Neto",team:"CHE",pos:"MID",goals:5,assists:7,gi:12,min:2629,xG:4.59,xA:6.84},
+            {name:"Dewsbury-Hall",team:"EVE",pos:"MID",goals:8,assists:7,gi:15,min:2629,xG:4.35,xA:5.34},
+            {name:"Garner",team:"EVE",pos:"MID",goals:2,assists:7,gi:9,min:3413,xG:2.10,xA:6.18}
         ];
         // ██ SITE_DATA:END ██
 
         // ██ SITE_DATA:PLAYER_GI ██
         const PLAYER_GI = [
+            {name:"Haaland",team:"MCI",pos:"FWD",goals:27,assists:8,gi:35,min:2953,xG:25.50,xA:2.67},
+            {name:"B.Fernandes",team:"MUN",pos:"MID",goals:9,assists:24,gi:33,min:3065,xG:10.79,xA:12.28},
+            {name:"João Pedro",team:"CHE",pos:"FWD",goals:15,assists:9,gi:24,min:2658,xG:14.91,xA:1.96},
+            {name:"Thiago",team:"BRE",pos:"FWD",goals:22,assists:1,gi:23,min:3282,xG:20.60,xA:1.83},
+            {name:"Semenyo",team:"MCI",pos:"MID",goals:17,assists:6,gi:23,min:3200,xG:11.10,xA:3.12},
+            {name:"Bowen",team:"WHU",pos:"FWD",goals:9,assists:13,gi:22,min:3406,xG:7.22,xA:5.21},
+            {name:"Watkins",team:"AVL",pos:"FWD",goals:16,assists:4,gi:20,min:2833,xG:15.40,xA:1.18},
+            {name:"Wilson",team:"FUL",pos:"MID",goals:10,assists:9,gi:19,min:2674,xG:5.88,xA:4.77},
+            {name:"Gibbs-White",team:"NFO",pos:"MID",goals:15,assists:4,gi:19,min:3101,xG:10.81,xA:2.91},
+            {name:"Rogers",team:"AVL",pos:"MID",goals:10,assists:8,gi:18,min:3280,xG:6.84,xA:4.32},
+            {name:"Saka",team:"ARS",pos:"MID",goals:7,assists:10,gi:17,min:2218,xG:7.57,xA:7.16},
+            {name:"Cherki",team:"MCI",pos:"MID",goals:4,assists:13,gi:17,min:1772,xG:4.28,xA:8.87},
+            {name:"Calvert-Lewin",team:"LEE",pos:"FWD",goals:14,assists:2,gi:16,min:2721,xG:15.57,xA:1.06},
+            {name:"Bruno G.",team:"NEW",pos:"MID",goals:9,assists:7,gi:16,min:2456,xG:5.59,xA:4.96},
+            {name:"Gyökeres",team:"ARS",pos:"FWD",goals:14,assists:1,gi:15,min:2217,xG:12.26,xA:1.94},
+            {name:"O.Dango",team:"BRE",pos:"MID",goals:7,assists:8,gi:15,min:2271,xG:7.94,xA:4.12},
+            {name:"Enzo",team:"CHE",pos:"MID",goals:10,assists:5,gi:15,min:3114,xG:11.26,xA:7.26},
+            {name:"Dewsbury-Hall",team:"EVE",pos:"MID",goals:8,assists:7,gi:15,min:2629,xG:4.35,xA:5.34},
+            {name:"Ekitiké",team:"LIV",pos:"FWD",goals:11,assists:4,gi:15,min:1797,xG:10.10,xA:2.45},
+            {name:"Richarlison",team:"TOT",pos:"FWD",goals:11,assists:4,gi:15,min:1954,xG:8.64,xA:1.46}
         ];
         // ██ SITE_DATA:END ██
 
@@ -1642,31 +1682,52 @@
 
         // ██ SITE_DATA:PLAYER_GOALS ██
         const PLAYER_GOALS = [
+            {name:"Haaland",team:"MCI",pos:"FWD",goals:27,assists:8,gi:35,min:2953,xG:25.50,xA:2.67},
+            {name:"Thiago",team:"BRE",pos:"FWD",goals:22,assists:1,gi:23,min:3282,xG:20.60,xA:1.83},
+            {name:"Semenyo",team:"MCI",pos:"MID",goals:17,assists:6,gi:23,min:3200,xG:11.10,xA:3.12},
+            {name:"Watkins",team:"AVL",pos:"FWD",goals:16,assists:4,gi:20,min:2833,xG:15.40,xA:1.18},
+            {name:"João Pedro",team:"CHE",pos:"FWD",goals:15,assists:9,gi:24,min:2658,xG:14.91,xA:1.96},
+            {name:"Gibbs-White",team:"NFO",pos:"MID",goals:15,assists:4,gi:19,min:3101,xG:10.81,xA:2.91},
+            {name:"Gyökeres",team:"ARS",pos:"FWD",goals:14,assists:1,gi:15,min:2217,xG:12.26,xA:1.94},
+            {name:"Calvert-Lewin",team:"LEE",pos:"FWD",goals:14,assists:2,gi:16,min:2721,xG:15.57,xA:1.06},
+            {name:"Kroupi.Jr",team:"BOU",pos:"FWD",goals:13,assists:0,gi:13,min:1663,xG:8.31,xA:1.51},
+            {name:"Welbeck",team:"BHA",pos:"FWD",goals:13,assists:1,gi:14,min:2249,xG:12.36,xA:1.40},
+            {name:"Mateta",team:"CRY",pos:"FWD",goals:12,assists:0,gi:12,min:2210,xG:14.42,xA:1.32},
+            {name:"Flemming",team:"BUR",pos:"FWD",goals:11,assists:0,gi:11,min:1764,xG:7.94,xA:0.41},
+            {name:"Ekitiké",team:"LIV",pos:"FWD",goals:11,assists:4,gi:15,min:1797,xG:10.10,xA:2.45},
+            {name:"Mbeumo",team:"MUN",pos:"MID",goals:11,assists:3,gi:14,min:2611,xG:11.98,xA:4.99},
+            {name:"Šeško",team:"MUN",pos:"FWD",goals:11,assists:2,gi:13,min:1630,xG:9.21,xA:0.28},
+            {name:"Richarlison",team:"TOT",pos:"FWD",goals:11,assists:4,gi:15,min:1954,xG:8.64,xA:1.46},
+            {name:"Rogers",team:"AVL",pos:"MID",goals:10,assists:8,gi:18,min:3280,xG:6.84,xA:4.32},
+            {name:"Palmer",team:"CHE",pos:"MID",goals:10,assists:2,gi:12,min:1954,xG:10.55,xA:2.49},
+            {name:"Enzo",team:"CHE",pos:"MID",goals:10,assists:5,gi:15,min:3114,xG:11.26,xA:7.26},
+            {name:"Wilson",team:"FUL",pos:"MID",goals:10,assists:9,gi:19,min:2674,xG:5.88,xA:4.77}
         ];
         // ██ SITE_DATA:END ██
 
         // ██ SITE_DATA:FINAL_TABLE ██
+        // Actual 2025/26 Premier League final standings
         const FINAL_TABLE = [
-            {team: "Arsenal", played: 0, points: 0, left: 0, projected: 0.0, rMin: 0, rMax: 0},
-            {team: "Aston Villa", played: 0, points: 0, left: 0, projected: 0.0, rMin: 0, rMax: 0},
-            {team: "West Ham", played: 0, points: 0, left: 0, projected: 0.0, rMin: 0, rMax: 0},
-            {team: "Tottenham", played: 0, points: 0, left: 0, projected: 0.0, rMin: 0, rMax: 0},
-            {team: "Sunderland", played: 0, points: 0, left: 0, projected: 0.0, rMin: 0, rMax: 0},
-            {team: "Nott'm Forest", played: 0, points: 0, left: 0, projected: 0.0, rMin: 0, rMax: 0},
-            {team: "Newcastle", played: 0, points: 0, left: 0, projected: 0.0, rMin: 0, rMax: 0},
-            {team: "Man Utd", played: 0, points: 0, left: 0, projected: 0.0, rMin: 0, rMax: 0},
-            {team: "Man City", played: 0, points: 0, left: 0, projected: 0.0, rMin: 0, rMax: 0},
-            {team: "Liverpool", played: 0, points: 0, left: 0, projected: 0.0, rMin: 0, rMax: 0},
-            {team: "Leeds", played: 0, points: 0, left: 0, projected: 0.0, rMin: 0, rMax: 0},
-            {team: "Fulham", played: 0, points: 0, left: 0, projected: 0.0, rMin: 0, rMax: 0},
-            {team: "Everton", played: 0, points: 0, left: 0, projected: 0.0, rMin: 0, rMax: 0},
-            {team: "Crystal Palace", played: 0, points: 0, left: 0, projected: 0.0, rMin: 0, rMax: 0},
-            {team: "Chelsea", played: 0, points: 0, left: 0, projected: 0.0, rMin: 0, rMax: 0},
-            {team: "Burnley", played: 0, points: 0, left: 0, projected: 0.0, rMin: 0, rMax: 0},
-            {team: "Brighton", played: 0, points: 0, left: 0, projected: 0.0, rMin: 0, rMax: 0},
-            {team: "Brentford", played: 0, points: 0, left: 0, projected: 0.0, rMin: 0, rMax: 0},
-            {team: "Bournemouth", played: 0, points: 0, left: 0, projected: 0.0, rMin: 0, rMax: 0},
-            {team: "Wolves", played: 0, points: 0, left: 0, projected: 0.0, rMin: 0, rMax: 0}
+            {team: "Arsenal",         played: 38, points: 85, left: 0, projected: 85, rMin: 85, rMax: 85},
+            {team: "Man City",        played: 38, points: 78, left: 0, projected: 78, rMin: 78, rMax: 78},
+            {team: "Man Utd",         played: 38, points: 71, left: 0, projected: 71, rMin: 71, rMax: 71},
+            {team: "Aston Villa",     played: 38, points: 65, left: 0, projected: 65, rMin: 65, rMax: 65},
+            {team: "Liverpool",       played: 38, points: 60, left: 0, projected: 60, rMin: 60, rMax: 60},
+            {team: "Bournemouth",     played: 38, points: 57, left: 0, projected: 57, rMin: 57, rMax: 57},
+            {team: "Sunderland",      played: 38, points: 54, left: 0, projected: 54, rMin: 54, rMax: 54},
+            {team: "Brighton",        played: 38, points: 53, left: 0, projected: 53, rMin: 53, rMax: 53},
+            {team: "Brentford",       played: 38, points: 53, left: 0, projected: 53, rMin: 53, rMax: 53},
+            {team: "Chelsea",         played: 38, points: 52, left: 0, projected: 52, rMin: 52, rMax: 52},
+            {team: "Fulham",          played: 38, points: 52, left: 0, projected: 52, rMin: 52, rMax: 52},
+            {team: "Newcastle",       played: 38, points: 49, left: 0, projected: 49, rMin: 49, rMax: 49},
+            {team: "Everton",         played: 38, points: 49, left: 0, projected: 49, rMin: 49, rMax: 49},
+            {team: "Leeds",           played: 37, points: 47, left: 0, projected: 47, rMin: 47, rMax: 47},
+            {team: "Crystal Palace",  played: 38, points: 45, left: 0, projected: 45, rMin: 45, rMax: 45},
+            {team: "Nott\'m Forest",   played: 38, points: 44, left: 0, projected: 44, rMin: 44, rMax: 44},
+            {team: "Tottenham",       played: 38, points: 41, left: 0, projected: 41, rMin: 41, rMax: 41},
+            {team: "West Ham",        played: 37, points: 36, left: 0, projected: 36, rMin: 36, rMax: 36},
+            {team: "Burnley",         played: 38, points: 22, left: 0, projected: 22, rMin: 22, rMax: 22},
+            {team: "Wolves",          played: 38, points: 20, left: 0, projected: 20, rMin: 20, rMax: 20}
         ];
         // ██ SITE_DATA:END ██
 
@@ -1961,8 +2022,250 @@
             const gwCols = GW_LABELS.map(l => `<th style="text-align:center">${l}</th>`).join('');
             document.getElementById('teamGoalsHeadline').innerHTML = `<tr><th>Team</th>${gwCols}<th style="text-align:center">TOTAL</th></tr>`;
             const body = teams.map(team => {
-                const vals = TEAM_G
+                const vals = TEAM_GOALS[team];
+                const total = vals.reduce((acc, v) => acc + (v || 0), 0);
+                return `<tr><td class="heatmap-team">${getTeamNameWithBadge(team)}</td>` +
+                    vals.map(v => {
+                        if (v === null || v === undefined) return `<td class="heatmap-cell">—</td>`;
+                        let level = 0;
+                        if (v >= 1.7) level = 4;
+                        else if (v >= 1.4) level = 3;
+                        else if (v >= 1.1) level = 2;
+                        else if (v >= 0.8) level = 1;
+                        return `<td class="heatmap-cell level${level}">${v.toFixed(2)}</td>`;
+                    }).join('') +
+                    `<td class="heatmap-cell" style="font-weight:600">${total.toFixed(2)}</td></tr>`;
+            }).join('');
+            document.getElementById('teamGoalsBody').innerHTML = body;
+        }
 
+        // Render team clean sheet % predictions
+        function renderTeamCS() {
+            const teams = Object.keys(TEAM_CS).sort((a, b) => {
+                const sum = t => TEAM_CS[t].reduce((acc, v) => acc + (v || 0), 0);
+                return sum(b) - sum(a);
+            });
+            const gwCols = GW_LABELS.map(l => `<th style="text-align:center">${l}</th>`).join('');
+            document.getElementById('teamCSHeadline').innerHTML = `<tr><th>Team</th>${gwCols}<th style="text-align:center">TOTAL</th></tr>`;
+            const body = teams.map(team => {
+                const vals = TEAM_CS[team];
+                const total = vals.reduce((acc, v) => acc + (v || 0), 0);
+                return `<tr><td class="heatmap-team">${getTeamNameWithBadge(team)}</td>` +
+                    vals.map(v => {
+                        if (v === null || v === undefined) return `<td class="heatmap-cell">—</td>`;
+                        let level = 0;
+                        if (v >= 38) level = 4;
+                        else if (v >= 30) level = 3;
+                        else if (v >= 23) level = 2;
+                        else if (v >= 17) level = 1;
+                        return `<td class="heatmap-cell level${level}">${v}%</td>`;
+                    }).join('') +
+                    `<td class="heatmap-cell" style="font-weight:600">${total.toFixed(0)}%</td></tr>`;
+            }).join('');
+            document.getElementById('teamCSBody').innerHTML = body;
+        }
+
+        // ── Player table pagination ────────────────────────────────────────────
+        const PLAYER_ROWS_PER_PAGE = 10;
+        const _pgState = { goals: 0, assists: 0, gi: 0, nextgw: 0 };
+
+        function _pgTotal(arr) { return Math.ceil(arr.length / PLAYER_ROWS_PER_PAGE); }
+        function _pgSlice(arr, key) {
+            const p = _pgState[key];
+            return arr.slice(p * PLAYER_ROWS_PER_PAGE, (p + 1) * PLAYER_ROWS_PER_PAGE);
+        }
+        function _pgInfo(infoId, btnPrev, btnNext, arr, key) {
+            const total = _pgTotal(arr);
+            const cur   = _pgState[key] + 1;
+            document.getElementById(infoId).textContent = `Page ${cur} of ${total}`;
+            const prevBtn = document.querySelector(`#${btnPrev}`);
+            const nextBtn = document.querySelector(`#${btnNext}`);
+            if (prevBtn) prevBtn.disabled = cur <= 1;
+            if (nextBtn) nextBtn.disabled = cur >= total;
+        }
+        function _updatePagination(tab) {
+            const cfg = {
+                goals:  { infoId:'pgInfoGoals',   bar:'paginationGoals',   arr: PLAYER_GOALS },
+                assists:{ infoId:'pgInfoAssists',  bar:'paginationAssists', arr: PLAYER_ASSISTS },
+                gi:     { infoId:'pgInfoGI',       bar:'paginationGI',      arr: PLAYER_GI },
+                nextgw: { infoId:'pgInfoNextGW',   bar:'paginationNextGW',  arr: PLAYER_NEXTGW },
+            }[tab];
+            if (!cfg) return;
+            const total = _pgTotal(cfg.arr);
+            const cur   = _pgState[tab] + 1;
+            document.getElementById(cfg.infoId).textContent = `Page ${cur} of ${total}`;
+            const bar = document.getElementById(cfg.bar);
+            if (bar) {
+                const btns = bar.querySelectorAll('.pg-btn');
+                if (btns[0]) btns[0].disabled = cur <= 1;
+                if (btns[1]) btns[1].disabled = cur >= total;
+            }
+        }
+        function changePlayerPage(tab, dir) {
+            const lengths = { goals: PLAYER_GOALS.length, assists: PLAYER_ASSISTS.length,
+                              gi: PLAYER_GI.length, nextgw: PLAYER_NEXTGW.length };
+            const total = Math.ceil(lengths[tab] / PLAYER_ROWS_PER_PAGE);
+            _pgState[tab] = Math.max(0, Math.min(total - 1, _pgState[tab] + dir));
+            if (tab === 'goals')   renderPlayerGoals();
+            if (tab === 'assists') renderPlayerAssists();
+            if (tab === 'gi')      renderPlayerGI();
+            if (tab === 'nextgw')  renderPlayerNextGW();
+        }
+
+        // Shared: build player table header row HTML from GW_LABELS
+        function _playerTableHead() {
+            const gwCols = GW_LABELS.map(l => `<th style="text-align:right">${l}</th>`).join('');
+            return `<th>Player</th><th>Team</th>${gwCols}<th style="text-align:right">Total</th>`;
+        }
+
+        // Render player goals with heatmap styling
+        function renderPlayerGoals() {
+            document.getElementById('playerGoalsHead').innerHTML = _playerTableHead();
+            const page = _pgSlice(PLAYER_GOALS, 'goals');
+            const html = page.map(p => {
+                return `<tr>
+                    <td class="player-name">${p.name}</td>
+                    <td class="player-team">${getTeamNameWithBadge(p.team)}</td>
+                    ${p.gw.map(g => {
+                        if (g === null) return `<td class="hm-blank">—</td>`;
+                        let hmClass = 'hm-1';
+                        if (g >= 0.66) hmClass = 'hm-5';
+                        else if (g >= 0.51) hmClass = 'hm-4';
+                        else if (g >= 0.36) hmClass = 'hm-3';
+                        else if (g >= 0.21) hmClass = 'hm-2';
+                        return `<td class="${hmClass}">${g.toFixed(2)}</td>`;
+                    }).join('')}
+                    <td class="hm-total">${p.total.toFixed(2)}</td>
+                </tr>`;
+            }).join('');
+            document.getElementById('playerGoalsTable').innerHTML = html;
+            _updatePagination('goals');
+        }
+
+        // Render Next GW player table
+        function renderPlayerNextGW() {
+            const gwLabel = (GW_LABELS && GW_LABELS[0]) || 'Current Game Week';
+            document.getElementById('nextGWFixtureHeader').textContent = `Fixture (${gwLabel})`;
+            const page = _pgSlice(PLAYER_NEXTGW, 'nextgw');
+            const html = page.map(p => {
+                const isBlank = p.xGI === null;
+                const xgDisplay = p.xG === null ? '—' : p.xG.toFixed(2);
+                const xaDisplay = p.xA === null ? '—' : p.xA.toFixed(2);
+                const giDisplay = p.xGI === null ? '—' : p.xGI.toFixed(2);
+                const giLevel = isBlank ? 0 : p.xGI >= 0.70 ? 4 : p.xGI >= 0.55 ? 3 : p.xGI >= 0.40 ? 2 : 1;
+                // Score% = P(score ≥ 1 goal) using Poisson: 1 - e^(-xG)
+                const scorePct = isBlank || p.xG === null ? null : (1 - Math.exp(-p.xG));
+                const scorePctDisplay = scorePct === null ? '—' : Math.round(scorePct * 100) + '%';
+                const scoreLevel = scorePct === null ? 0 : scorePct >= 0.50 ? 4 : scorePct >= 0.37 ? 3 : scorePct >= 0.26 ? 2 : 1;
+                return `<tr>
+                    <td class="player-name">${p.name}</td>
+                    <td class="player-team">${getTeamNameWithBadge(p.team)}</td>
+                    <td class="${isBlank ? 'ngw-blank' : 'ngw-fixture'}">${p.fixture.replace(' / ', '<br>')}</td>
+                    <td style="text-align:right;color:#8b8b99;font-size:16px">${xgDisplay}</td>
+                    <td style="text-align:right;color:#8b8b99;font-size:16px">${xaDisplay}</td>
+                    <td class="${isBlank ? 'hm-blank' : 'heatmap-cell level'+giLevel}" style="text-align:right;border-radius:4px;font-size:16px">${giDisplay}</td>
+                    <td class="${isBlank ? 'hm-blank' : 'heatmap-cell level'+scoreLevel}" style="text-align:right;border-radius:4px;font-size:16px;font-weight:600">${scorePctDisplay}</td>
+                </tr>`;
+            }).join('');
+            document.getElementById('playerNextGWTable').innerHTML = html;
+            _updatePagination('nextgw');
+        }
+
+        // Render assists heatmap
+        function renderPlayerAssists() {
+            document.getElementById('playerAssistsHead').innerHTML = _playerTableHead();
+            const page = _pgSlice(PLAYER_ASSISTS, 'assists');
+            const html = page.map(p => {
+                return `<tr>
+                    <td class="player-name">${p.name}</td>
+                    <td class="player-team">${getTeamNameWithBadge(p.team)}</td>
+                    ${p.gw.map(v => {
+                        if (v === null) return `<td class="hm-blank">—</td>`;
+                        const level = v >= 0.30 ? 4 : v >= 0.22 ? 3 : v >= 0.15 ? 2 : v >= 0.10 ? 1 : 0;
+                        return `<td class="heatmap-cell level${level}" style="text-align:right">${v.toFixed(2)}</td>`;
+                    }).join('')}
+                    <td class="hm-total" style="text-align:right">${p.total.toFixed(2)}</td>
+                </tr>`;
+            }).join('');
+            document.getElementById('playerAssistsTable').innerHTML = html;
+            _updatePagination('assists');
+        }
+
+        // Render goal involvements heatmap
+        function renderPlayerGI() {
+            document.getElementById('playerGIHead').innerHTML = _playerTableHead();
+            const page = _pgSlice(PLAYER_GI, 'gi');
+            const html = page.map(p => {
+                return `<tr>
+                    <td class="player-name">${p.name}</td>
+                    <td class="player-team">${getTeamNameWithBadge(p.team)}</td>
+                    ${p.gw.map(v => {
+                        if (v === null) return `<td class="hm-blank">—</td>`;
+                        const level = v >= 0.80 ? 4 : v >= 0.60 ? 3 : v >= 0.45 ? 2 : v >= 0.30 ? 1 : 0;
+                        return `<td class="heatmap-cell level${level}" style="text-align:right">${v.toFixed(2)}</td>`;
+                    }).join('')}
+                    <td class="hm-total" style="text-align:right">${p.total.toFixed(2)}</td>
+                </tr>`;
+            }).join('');
+            document.getElementById('playerGITable').innerHTML = html;
+            _updatePagination('gi');
+        }
+
+        // Render final table — projected points bar visualization
+        function renderFinalTable() {
+            const MAX_PTS = 102;
+            // Sort by projected points descending — this IS the predicted final ranking
+            const sorted = [...FINAL_TABLE].sort((a, b) => b.projected - a.projected);
+
+            const html = sorted.map((t, i) => {
+                const rank = i + 1;
+                let zoneClass = '';
+                let rankClass = 'final-rank';
+                if (rank <= 4)       { zoneClass = 'cl-zone';         rankClass += ' final-rank-cl'; }
+                else if (rank <= 6)  { zoneClass = 'europa-zone';     rankClass += ' final-rank-europa'; }
+                else if (rank >= 18) { zoneClass = 'relegation-zone'; rankClass += ' final-rank-rel'; }
+
+                // Bar segments as % of MAX_PTS
+                const currentPct = (t.points / MAX_PTS * 100).toFixed(1);
+                const extPct     = ((t.projected - t.points) / MAX_PTS * 100).toFixed(1);
+
+                return `<tr class="${zoneClass}">
+                    <td class="${rankClass}">${rank}</td>
+                    <td class="final-team">${getTeamNameWithBadge(t.team)}</td>
+                    <td class="final-stat" style="text-align:right">${t.played}</td>
+                    <td class="final-points" style="text-align:right">${t.points}</td>
+                    <td class="final-left" style="text-align:right">${t.left}</td>
+                    <td class="final-bar-cell">
+                        <div class="proj-bar-wrap">
+                            <div class="proj-bar-track">
+                                <div class="proj-bar-current" style="width:${currentPct}%"></div>
+                                <div class="proj-bar-ext" style="left:${currentPct}%;width:${extPct}%"></div>
+                            </div>
+                            <span class="proj-bar-num">${t.projected.toFixed(1)}</span>
+                        </div>
+                    </td>
+                </tr>`;
+            }).join('');
+            document.getElementById('finalTableBody').innerHTML = html;
+        }
+
+        // Initialize
+        renderRatings();
+        renderSparklines();
+        renderMatchweek();
+        renderTeamPredictions();
+        renderTeamGoals();
+        renderTeamCS();
+        renderPlayerGoals();
+        renderPlayerNextGW();
+        renderPlayerAssists();
+        renderPlayerGI();
+        renderFinalTable();
+    </script>
+
+    <!-- Cloudflare Web Analytics -->
+    <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "890700f621df42909deca8500a0df182"}'></script>
+    <!-- End Cloudflare Web Analytics -->
 <!-- ## APEX_MOBILE_FIX:START ## -->
 <style>
 /* ============================================================================
@@ -2570,3 +2873,5 @@ a[href*="rank_milestones"] {
 })();
 </script>
 <!-- ## APEX_MOBILE_FIX:END ## -->
+</body>
+</html>
