@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="38" data-built-at="2026-06-02T20:56:46">
+<meta name="apex-gw" content="38" data-built-at="2026-06-02T21:27:19">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -3407,6 +3407,65 @@ button.secondary, .btn-secondary, .va-btn-secondary {
   font-weight: 800 !important;
 }
 /* ═══ APEX_BENCH_GREEN:END ═══ */
+
+
+/* ═══ APEX_PITCH_TEXT:START ═══ 2026-06-02 starting XI white text + stat value contrast ═══ */
+/* Starting XI text on the pitch — currently dark, needs to be WHITE because
+   it sits on the green pitch. The bench fix already handled the bench shirts;
+   this does the same for everything inside .pitch (the 11 starters). */
+.pitch .shirt-name,
+.pitch .shirt-fix,
+.pitch .shirt-xp {
+  color: #ffffff !important;
+}
+.pitch .shirt-name {
+  background: rgba(0, 0, 0, 0.65) !important;
+}
+/* Fixture pill below each shirt (BHA(A), BRE(H), etc.) */
+.pitch .shirt-fix {
+  color: #ffffff !important;
+  opacity: 0.85;
+  font-weight: 700 !important;
+}
+/* Captain / vice circle badges on the pitch */
+.pitch .shirt-badge {
+  color: #0f172a !important;
+  background: #fef3c7 !important;
+  border: 2px solid #ffffff !important;
+}
+
+/* Stat values in the hero row + va-strip — currently too light vs labels.
+   Make them dark + bold so they READ as the prominent number, not the label. */
+.va-stat-value,
+.va-strip-val,
+#bank-val,
+#squad-value-val,
+#free-transfers-val,
+[id$="-val"],
+.va-hero-value {
+  color: #0f172a !important;
+  font-weight: 800 !important;
+  opacity: 1 !important;
+}
+.va-stat-label,
+.va-strip-label {
+  color: #6b7280 !important;
+  font-weight: 700 !important;
+  font-size: 0.78rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.04em !important;
+}
+
+/* Hero GW38 XPTS number (the big 52.3) */
+.va-hero-stat,
+.va-hero-stat-value,
+.gw-xpts-value,
+.hero-xpts {
+  color: #0f172a !important;
+  font-weight: 800 !important;
+  opacity: 1 !important;
+}
+/* ═══ APEX_PITCH_TEXT:END ═══ */
 
 /* ═══ APEX_OFFSEASON_KILL:START ═══ 2026-06-02 force-hide landing/banner forever ═══ */
 /* Hard kill — view-landing must NEVER show, regardless of JS. */
@@ -8218,7 +8277,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1780430206-GW38-4b428461";
+const BUILD_VERSION = "1780432039-GW38-4b428461";
 window.APEX_BUILD = BUILD_VERSION;
 
 let FPL_ID = 11051;
@@ -13899,7 +13958,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW38</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780430206-GW38-4b428461</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780432039-GW38-4b428461</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
