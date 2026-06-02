@@ -2250,17 +2250,21 @@
         }
 
         // Initialize
-        renderRatings();
-        renderSparklines();
-        renderMatchweek();
-        renderTeamPredictions();
-        renderTeamGoals();
-        renderTeamCS();
-        renderPlayerGoals();
-        renderPlayerNextGW();
-        renderPlayerAssists();
-        renderPlayerGI();
-        renderFinalTable();
+        // Isolated init — one failure no longer cascades (was killing 5 renderers).
+        function safeRun(fn, name) {
+            try { fn(); } catch (e) { console.warn('[render] '+name+' failed:', e); }
+        }
+        safeRun(renderRatings,        'Ratings');
+        safeRun(renderSparklines,     'Sparklines');
+        safeRun(renderMatchweek,      'Matchweek');
+        safeRun(renderTeamPredictions,'TeamPredictions');
+        safeRun(renderTeamGoals,      'TeamGoals');
+        safeRun(renderTeamCS,         'TeamCS');
+        safeRun(renderPlayerGoals,    'PlayerGoals');
+        safeRun(renderPlayerNextGW,   'PlayerNextGW');
+        safeRun(renderPlayerAssists,  'PlayerAssists');
+        safeRun(renderPlayerGI,       'PlayerGI');
+        safeRun(renderFinalTable,     'FinalTable');
     </script>
 
     <!-- Cloudflare Web Analytics -->
