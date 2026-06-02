@@ -298,19 +298,10 @@
     const id = parseInt(raw, 10);
     if (id < 1 || id > 20000000) { errEl.textContent = 'That doesn\'t look like a valid Team ID.'; input.focus(); return; }
     errEl.textContent = '';
-    try { localStorage.setItem('apex_fpl_id', String(id)); } catch (_) {}
-    // 2026-06-02 OFFSEASON: don't redirect to solver_app.html (it shows a 2nd login).
-    // Show inline season-complete message instead. When 2026/27 fixtures publish,
-    // restore the original redirect: window.location.href = `/solver_app.html?id=${id}`;
+    statusEl.textContent = `Building solver for team ${id}...`;
     goBtn.disabled = true;
-    statusEl.innerHTML = '';
-    var msg = document.createElement('div');
-    msg.style.cssText = 'margin-top:20px;padding:18px 20px;background:#fff7ed;border:1px solid #fed7aa;border-radius:12px;text-align:left;';
-    msg.innerHTML =
-      '<div style="font-weight:800;color:#9a3412;font-size:15px;margin-bottom:6px;">✓ Team ID saved: ' + id + '</div>' +
-      '<div style="color:#475569;font-size:14px;line-height:1.5;">The 2025/26 season is complete. The solver returns in <strong>mid-August 2026</strong> when Premier League fixtures publish for 2026/27. Your ID has been remembered for next time.</div>' +
-      '<div style="margin-top:14px;"><a href="/" style="color:#F97316;font-weight:700;text-decoration:none;font-size:14px;">← Back to season summary</a></div>';
-    statusEl.parentNode.insertBefore(msg, statusEl.nextSibling);
+    try { localStorage.setItem('apex_fpl_id', String(id)); } catch (_) {}
+    window.location.href = `/solver_app.html?id=${id}`;
   }
   try {
     var _saved = localStorage.getItem('apex_fpl_id');
