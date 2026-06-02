@@ -4511,7 +4511,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 
 
 
-<div id="view-landing" class="view-container">
+<div id="view-landing" class="view-container" style="display:none;">
   <section class="hero hero-landing">
     <h1 class="hero-headline"><span style="color:var(--accent);">Apex</span><span style="color:#9ca3af;">FootyData</span></h1>
     <p class="hero-sub">Enter your FPL Team ID to get started.</p>
@@ -4542,7 +4542,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 </div>
 
 
-<div id="view-team" class="view-container" style="display:none;">
+<div id="view-team" class="view-container">
   <main class="container">
     <section class="va-header">
       <div class="va-id">
@@ -13778,5 +13778,30 @@ document.addEventListener('DOMContentLoaded', () => {
 })();
 </script>
 
+
+<!-- 2026-06-02 Marcus: force view-team on every render to bypass any
+     fallback-to-landing logic during offseason. -->
+<script>
+(function forceTeamView() {
+  function force() {
+    try {
+      var landing = document.getElementById('view-landing');
+      var team    = document.getElementById('view-team');
+      if (landing) landing.style.display = 'none';
+      if (team)    team.style.display    = 'block';
+      var topbar = document.getElementById('topbar');
+      if (topbar) topbar.style.display = 'flex';
+    } catch (e) {}
+  }
+  // Run early and repeatedly so anything that hides view-team gets reverted
+  force();
+  document.addEventListener('DOMContentLoaded', force);
+  window.addEventListener('load', force);
+  setTimeout(force, 100);
+  setTimeout(force, 500);
+  setTimeout(force, 1500);
+  setTimeout(force, 3000);
+})();
+</script>
 </body>
 </html>
