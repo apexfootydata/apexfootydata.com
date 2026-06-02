@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="38" data-built-at="2026-06-02T19:57:36">
+<meta name="apex-gw" content="38" data-built-at="2026-06-02T20:01:56">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -8143,7 +8143,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1780426656-GW38-4b428461";
+const BUILD_VERSION = "1780426916-GW38-4b428461";
 window.APEX_BUILD = BUILD_VERSION;
 
 let FPL_ID = null;
@@ -13824,7 +13824,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW38</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780426656-GW38-4b428461</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780426916-GW38-4b428461</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
@@ -13875,29 +13875,37 @@ document.addEventListener('DOMContentLoaded', () => {
 })();
 </script>
 
-<!-- 2026-06-02 Marcus: ensure the user lands on view-team and the team
-     view actually INITIALISES (calls initTeamView + initPoolView). Without
-     the init calls, switching display alone gives an empty shell. -->
+<!-- 2026-06-02 Marcus: forcibly call switchView('team') so initTeamView +
+     initPoolView populate the pitch/pool/chip dropdowns. Without these,
+     the page is just an empty shell. We do this even if PUBLIC_BOOT has
+     hydrated — switchView is idempotent and the second call ensures init
+     functions fire against whatever data is baked or hydrated. -->
 <script>
-(function safetySwitchToTeam() {
+(function safetyInitTeamView() {
   function go() {
     try {
+      // Ensure landing is hidden
       var landing = document.getElementById('view-landing');
-      var team    = document.getElementById('view-team');
-      // If we're already showing team, do nothing — PUBLIC_BOOT handled it.
-      if (team && team.offsetParent !== null) return;
-      // Otherwise switch + init.
+      if (landing) landing.style.display = 'none';
+      // Force switchView('team') — this triggers initTeamView + initPoolView.
       if (typeof switchView === 'function') {
         switchView('team');
       } else {
-        if (landing) landing.style.display = 'none';
-        if (team)    team.style.display    = 'block';
+        var team = document.getElementById('view-team');
+        if (team) team.style.display = 'block';
         if (typeof initTeamView === 'function') initTeamView();
         if (typeof initPoolView === 'function') initPoolView();
       }
-    } catch (e) { console.warn('[apex-safety] team switch failed', e); }
+      // Remove the public boot overlay if it's still hanging around
+      var ov = document.getElementById('apex-public-boot');
+      if (ov) ov.remove();
+      console.log('[apex-safety] team view initialised');
+    } catch (e) { console.warn('[apex-safety] init failed', e); }
   }
-  // Run AFTER PUBLIC_BOOT has had a chance to hydrate (3.5s is generous).
+  // Fire at 100ms (early) AND 3500ms (after hydrate completes).
+  // The 100ms ensures init runs even if hydrate stalls/fails forever.
+  // The 3500ms re-runs after PUBLIC_BOOT to pick up live-fetched data.
+  setTimeout(go, 100);
   setTimeout(go, 3500);
 })();
 </script>
