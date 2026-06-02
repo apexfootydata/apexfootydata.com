@@ -3446,6 +3446,63 @@ input[placeholder*="FPL"], input[placeholder*="Team ID"] {
   font-weight: 700 !important;
 }
 
+
+/* ── PALE GRAY RESCUE — kill every dim text colour the override hasn't caught ── */
+.va-strip-val,
+.va-strip-cell .va-strip-val,
+.va-strip-cell [class*="-val"] {
+  color: #0f172a !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-size: 26px !important;
+  font-weight: 800 !important;
+  font-variant-numeric: tabular-nums !important;
+}
+.va-strip-val-sub { color: #475569 !important; font-weight: 600 !important; }
+.va-strip-divider { background: #e5e7eb !important; }
+
+/* Chip plan tags + labels — bigger, dark */
+.va-chip-card-tag, .chip-tag, .chip-label, [class*="chip-card-tag"] {
+  color: #475569 !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.1em !important;
+  text-transform: uppercase !important;
+}
+
+/* Catch-all for the specific pale grays found in solver_app */
+[style*="color: #e8e8e8"], [style*="color:#e8e8e8"],
+[style*="color: #d4d4d8"], [style*="color:#d4d4d8"],
+[style*="color: #a8a8b3"], [style*="color:#a8a8b3"],
+[style*="color: #9ca3af"], [style*="color:#9ca3af"],
+[style*="color: #b3b3b3"], [style*="color:#b3b3b3"],
+[style*="color: #c4c4c4"], [style*="color:#c4c4c4"],
+[style*="color: #d1d5db"], [style*="color:#d1d5db"] {
+  color: #0f172a !important;
+}
+[style*="color: #a1a1aa"], [style*="color:#a1a1aa"],
+[style*="color: #71717a"], [style*="color:#71717a"],
+[style*="color: #8a8a8a"], [style*="color:#8a8a8a"],
+[style*="color: #6b7280"], [style*="color:#6b7280"] {
+  color: #475569 !important;
+}
+
+/* Class-based pale gray catches — common Tailwind/Tachyons-style classes that might appear */
+.text-zinc-300, .text-zinc-400, .text-gray-300, .text-gray-400, .text-neutral-300, .text-neutral-400 { color: #0f172a !important; }
+.text-zinc-500, .text-zinc-600, .text-gray-500, .text-gray-600, .text-neutral-500, .text-neutral-600 { color: #475569 !important; }
+
+/* Any element with color set via the --muted variable that's still pale */
+*[style*="color: var(--muted)"] { color: #475569 !important; }
+
+/* Hero card "Marcus Xhaka Khan • RANK 0" subtitle */
+.va-hero-text .meta, .va-hero-meta, .team-meta, .manager-meta {
+  color: #475569 !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-size: 16px !important;
+  font-weight: 600 !important;
+}
+.rank-value, [class*="rank-val"] { color: #0f172a !important; font-weight: 800 !important; }
+
 </style>
 <!-- Cookie consent + conditional Google Analytics 4 loader -->
 <script>
