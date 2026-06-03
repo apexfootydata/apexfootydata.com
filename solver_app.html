@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="38" data-built-at="2026-06-03T14:57:50">
+<meta name="apex-gw" content="38" data-built-at="2026-06-03T15:05:04">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -3631,9 +3631,8 @@ button.secondary, .btn-secondary, .va-btn-secondary {
 
 /* ═══ APEX_XMINS_BTN:START ═══ 2026-06-02 pencil button for xmins editor ═══ */
 /* xMins edit button — top-RIGHT corner of shirt SVG, mirroring the X remove
-   button (top-LEFT). 2026-06-03: was bottom:28px which broke when shirt SVG
-   was bumped 110→135px — drifted into the name-pill zone. Anchored from top
-   now so future size changes won't move it. */
+   button (top-LEFT). 2026-06-03 v2: hidden by default, appears on shirt hover
+   only. Was looking visually cluttered competing with the X button. */
 .pp-xmins-btn {
   position: absolute !important;
   top: -6px !important;
@@ -3641,6 +3640,9 @@ button.secondary, .btn-secondary, .va-btn-secondary {
   bottom: auto !important;
   width: 20px !important;
   height: 20px !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transition: opacity 0.18s ease !important;
   border-radius: 50% !important;
   background: rgba(15, 23, 42, 0.85) !important;
   color: #fff !important;
@@ -3663,6 +3665,13 @@ button.secondary, .btn-secondary, .va-btn-secondary {
   opacity: 1 !important;
   transform: scale(1.18) !important;
   background: #F97316 !important;
+}
+/* Reveal the ⏱ button when the user hovers anywhere on the shirt cell. */
+.pitch .shirt:hover .pp-xmins-btn,
+.bench-row .shirt:hover .pp-xmins-btn,
+.pitch-bench .shirt:hover .pp-xmins-btn {
+  opacity: 0.85 !important;
+  pointer-events: auto !important;
 }
 /* ═══ APEX_XMINS_BTN:END ═══ */
 
@@ -3788,23 +3797,28 @@ button.secondary, .btn-secondary, .va-btn-secondary {
 /* ═══ APEX_XM_UNDERLINE:START ═══ 2026-06-02 option-2 underline + wider shirts ═══ */
 
 /* ── Wider SVG shirts on the pitch ────────────────────────────────────── */
-/* Bumped 2026-06-03: 100x110 → 120x135 (+20%) to match official FPL visual weight. */
+/* Bumped 2026-06-03: 100x110 → 120x135 (+20%) to match official FPL visual weight.
+   ROOT CAUSE FIX 2026-06-03 v3: .shirt-wrap has fixed width:96px in base CSS.
+   When SVG inside grew to 120px it overflowed the wrapper anchored at wrapper's
+   left edge → every shirt visually shifted right of its xPts/name pill.
+   Must bump the wrapper to match the SVG width. */
+.pitch .shirt-wrap,
+.bench-row .shirt-wrap,
+.pitch-bench .shirt-wrap {
+  width: 120px !important;
+}
 .pitch .svg-shirt,
 .bench-row .svg-shirt,
 .pitch-bench .svg-shirt {
   width: 120px !important;
   height: 135px !important;
-  /* 2026-06-03 fix: centre SVG horizontally in shirt cell so xPts/name pill
-     don't visually drift right of the shirt. Base .svg-shirt is display:block
-     with no margin auto — the offset was hidden at 100×110 but visible at 120×135. */
   margin-left: auto !important;
   margin-right: auto !important;
 }
 .pitch .shirt,
 .bench-row .shirt {
-  min-width: 132px !important;
-  /* Make text content inside the shirt cell explicitly centred so xPts/name
-     pill line up with the SVG above. */
+  width: 140px !important;
+  min-width: 140px !important;
   text-align: center !important;
 }
 /* Tighten row gap so 5-wide MID row still fits cleanly */
@@ -9193,7 +9207,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1780495070-GW38-f5b85719";
+const BUILD_VERSION = "1780495504-GW38-f5b85719";
 window.APEX_BUILD = BUILD_VERSION;
 
 let FPL_ID = 11051;
@@ -15143,7 +15157,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW38</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780495070-GW38-f5b85719</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780495504-GW38-f5b85719</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
