@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="38" data-built-at="2026-06-03T09:53:42">
+<meta name="apex-gw" content="38" data-built-at="2026-06-03T09:58:40">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -3627,6 +3627,41 @@ button.secondary, .btn-secondary, .va-btn-secondary {
 }
 
 /* ═══ APEX_PITCH_DETAILS:END ═══ */
+
+
+/* ═══ APEX_XMINS_BTN:START ═══ 2026-06-02 pencil button for xmins editor ═══ */
+/* xMins edit button — bottom-RIGHT of each shirt (mirror of the ? why button).
+   Click → opens xMins editor modal. Always visible (not dev-gated). */
+.pp-xmins-btn {
+  position: absolute !important;
+  bottom: 28px !important;
+  right: 2px !important;
+  width: 18px !important;
+  height: 18px !important;
+  border-radius: 50% !important;
+  background: rgba(15, 23, 42, 0.85) !important;
+  color: #fff !important;
+  border: none !important;
+  font-size: 0.7rem !important;
+  font-weight: 700 !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  line-height: 18px !important;
+  text-align: center !important;
+  cursor: pointer !important;
+  z-index: 3 !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  opacity: 0.7 !important;
+  transition: opacity 0.15s, transform 0.15s;
+}
+.pp-xmins-btn:hover {
+  opacity: 1 !important;
+  transform: scale(1.18) !important;
+  background: #F97316 !important;
+}
+/* ═══ APEX_XMINS_BTN:END ═══ */
 
 /* ═══ APEX_OFFSEASON_KILL:START ═══ 2026-06-02 force-hide landing/banner forever ═══ */
 /* Hard kill — view-landing must NEVER show, regardless of JS. */
@@ -8439,7 +8474,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1780476822-GW38-f5b85719";
+const BUILD_VERSION = "1780477120-GW38-f5b85719";
 window.APEX_BUILD = BUILD_VERSION;
 
 let FPL_ID = 11051;
@@ -12745,8 +12780,13 @@ function _shirtHtml(p, isXi) {
   const whyBtn = _whyPanelEnabled()
     ? `<button class="pp-why-btn" onclick="event.stopPropagation(); window._showWhyPanel(${p.id})" title="Why this projection?">?</button>`
     : '';
+  // 2026-06-02 — explicit pencil button for editing xMins (clear UI target,
+  // beats users having to discover the xP number is clickable).
+  const xmEditBtn = `<button class="pp-xmins-btn"
+      onclick="event.stopPropagation(); event.preventDefault(); window._openXminsEditor(${p.id})"
+      title="Edit predicted minutes (xMins)">⏱</button>`;
   return `<div class="${cls}" draggable="true" data-pid="${p.id}" data-xi="${isXi ? 1 : 0}" data-xp="${xp}" data-pos="${p.element_type}" data-cost="${p.cost}">` +
-    removeBtn + whyBtn +
+    removeBtn + whyBtn + xmEditBtn +
     `<div class="shirt-wrap${_tcGlow}">${shirt}${badges}</div>` +
     `<div class="shirt-xp">${xp}</div>` +
     `<div class="shirt-name">${p.web_name}</div>` +
@@ -14279,21 +14319,8 @@ function _openXminsEditor(pid) {
   });
 }
 
-// Event delegation — works after every re-render.
-document.addEventListener('click', function (e) {
-  // Open editor when user clicks the xPts number on any shirt.
-  const shirt = e.target.closest('.shirt');
-  if (!shirt) return;
-  const xpEl = e.target.closest('.shirt-xp');
-  if (!xpEl) return;
-  // Skip pp-empty-slot and bench placeholders
-  if (shirt.classList.contains('pp-empty-slot')) return;
-  const pid = parseInt(shirt.getAttribute('data-pid'), 10);
-  if (!pid) return;
-  e.preventDefault();
-  e.stopPropagation();
-  _openXminsEditor(pid);
-});
+// Expose globally so the explicit ⏱ button on each shirt can call it via onclick.
+window._openXminsEditor = _openXminsEditor;
 
 // Apply any stored overrides at boot so the page loads with edits intact.
 // Wait a tick so SQUAD_DATA is populated by hydrate / public boot first.
@@ -14336,7 +14363,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW38</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780476822-GW38-f5b85719</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780477120-GW38-f5b85719</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
