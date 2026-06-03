@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="38" data-built-at="2026-06-03T11:07:14">
+<meta name="apex-gw" content="38" data-built-at="2026-06-03T11:13:38">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -3832,7 +3832,7 @@ button.secondary, .btn-secondary, .va-btn-secondary {
 /* ═══ APEX_XM_UNDERLINE:END ═══ */
 
 
-/* ═══ APEX_HERO_COMPACT:START ═══ 2026-06-02 Option-1 tight 3-row top ═══ */
+/* ═══ APEX_HERO_COMPACT:START ═══ 2026-06-02 Option-1 tight 3-row top (fixed class targets) ═══ */
 
 /* ── Row 1: hero card becomes a SINGLE horizontal strip ──────────────── */
 .va-hero-row { margin-bottom: 6px !important; }
@@ -3848,10 +3848,8 @@ button.secondary, .btn-secondary, .va-btn-secondary {
   justify-content: space-between !important;
   gap: 14px !important;
 }
-/* Hide the sparkline — eats horizontal space without helping */
 .va-hero-spark { display: none !important; }
 
-/* Team name/rank cluster on the LEFT */
 .va-team-header,
 .va-team-name-target,
 .va-team-name {
@@ -3867,7 +3865,6 @@ button.secondary, .btn-secondary, .va-btn-secondary {
   opacity: 0.7;
 }
 
-/* Hero number on the RIGHT — compact but still legible */
 .va-card-value-hero {
   font-size: 1.6rem !important;
   letter-spacing: -0.02em !important;
@@ -3884,7 +3881,7 @@ button.secondary, .btn-secondary, .va-btn-secondary {
   display: none !important;
 }
 
-/* ── Row 2: stat strip becomes thin inline pills ─────────────────────── */
+/* ── Row 2: stat strip thin inline pills ─────────────────────────────── */
 .va-strip {
   padding: 6px 16px !important;
   margin-bottom: 6px !important;
@@ -3908,28 +3905,31 @@ button.secondary, .btn-secondary, .va-btn-secondary {
   height: 16px !important;
 }
 
-/* ── Row 3: chip plan as one tight horizontal band ───────────────────── */
-.chip-plan-row,
-.va-chip-plan {
+/* ── Row 3: chip plan — CORRECT class targets ────────────────────────── */
+.va-chip-panel {
   padding: 6px 12px !important;
   margin-top: 4px !important;
+}
+.va-chip-panel-label {
+  display: none !important;
+}
+.va-chip-grid {
   gap: 6px !important;
-  flex-wrap: wrap !important;
 }
-.chip-plan-card {
+.va-chip-card {
   padding: 4px 10px !important;
-  min-width: 70px !important;
+  min-height: auto !important;
 }
-.chip-plan-card .chip-label {
+.va-chip-card-tag {
   font-size: 0.58rem !important;
-  margin-bottom: 0 !important;
+  letter-spacing: 0.04em !important;
 }
-.chip-plan-card select {
+.va-chip-card select {
   font-size: 0.78rem !important;
   padding: 2px 6px !important;
 }
-.chip-plan-title {
-  display: none !important;
+.va-chip-card-chev {
+  font-size: 0.7rem !important;
 }
 
 /* ── Squeeze the team-info "Restored Marcus Xhaka Khan RANK" block ───── */
@@ -8758,7 +8758,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1780481234-GW38-f5b85719";
+const BUILD_VERSION = "1780481618-GW38-f5b85719";
 window.APEX_BUILD = BUILD_VERSION;
 
 let FPL_ID = 11051;
@@ -14692,7 +14692,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW38</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780481234-GW38-f5b85719</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780481618-GW38-f5b85719</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
