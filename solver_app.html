@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="38" data-built-at="2026-06-03T09:43:02">
+<meta name="apex-gw" content="38" data-built-at="2026-06-03T09:53:42">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -3538,37 +3538,14 @@ button.secondary, .btn-secondary, .va-btn-secondary {
 /* ═══ APEX_POOL_TABLE_TYPOGRAPHY:END ═══ */
 
 
-/* ═══ APEX_PITCH_DETAILS:START ═══ 2026-06-02 xmins badge + white squad val + white pitch markings ═══ */
+/* ═══ APEX_PITCH_DETAILS:START ═══ 2026-06-02 white squad val + white pitch markings + hide brand ═══ */
 
-/* ── xMins badge on each shirt ─────────────────────────────────────────
-   Small minute counter below the player name pill. Colour-coded by
-   rotation risk so you can scan the pitch and spot bench risks instantly. */
-.pitch .shirt-xmins {
-  font-family: 'Plus Jakarta Sans', sans-serif !important;
-  font-size: 11px !important;
-  font-weight: 800 !important;
-  color: #ffffff !important;
-  text-align: center !important;
-  margin-top: 3px !important;
-  letter-spacing: 0.02em !important;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.5) !important;
-  opacity: 0.95 !important;
-}
-/* xMins colour-coding using data-xm attribute */
-.pitch .shirt-xmins[data-xm="0"], .pitch .shirt-xmins[data-xm="1"], .pitch .shirt-xmins[data-xm="2"], .pitch .shirt-xmins[data-xm="3"], .pitch .shirt-xmins[data-xm="4"],
-.pitch .shirt-xmins[data-xm="5"], .pitch .shirt-xmins[data-xm="6"], .pitch .shirt-xmins[data-xm="7"], .pitch .shirt-xmins[data-xm="8"], .pitch .shirt-xmins[data-xm="9"],
-.pitch .shirt-xmins[data-xm="10"], .pitch .shirt-xmins[data-xm="11"], .pitch .shirt-xmins[data-xm="12"], .pitch .shirt-xmins[data-xm="13"], .pitch .shirt-xmins[data-xm="14"],
-.pitch .shirt-xmins[data-xm^="1"][data-xm$="5"], .pitch .shirt-xmins[data-xm^="2"], .pitch .shirt-xmins[data-xm^="3"], .pitch .shirt-xmins[data-xm^="4"] {
-  /* < 45 mins → red (bench risk) */
-  color: #fca5a5 !important;
-}
-.pitch .shirt-xmins[data-xm^="5"], .pitch .shirt-xmins[data-xm^="6"] {
-  /* 50-69 mins → amber (rotation risk) */
-  color: #fcd34d !important;
-}
-.pitch .shirt-xmins[data-xm^="7"], .pitch .shirt-xmins[data-xm^="8"], .pitch .shirt-xmins[data-xm^="9"] {
-  /* 70+ mins → bright green (nailed) */
-  color: #86efac !important;
+/* ── Hide the ApexFootyData watermark on pitch bottom-right ──────────── */
+.pitch-brand-mark,
+.pitch .pitch-brand-mark,
+.pitch [class*="brand-mark"],
+.pitch [class*="watermark"] {
+  display: none !important;
 }
 
 /* ── Squad value badge — white text ──────────────────────────────────── */
@@ -3596,7 +3573,6 @@ button.secondary, .btn-secondary, .va-btn-secondary {
 }
 
 /* ── White realistic pitch markings ──────────────────────────────────── */
-/* Goal posts at top */
 .pitch-goal-top {
   background: transparent !important;
   border: 3px solid #ffffff !important;
@@ -3605,7 +3581,6 @@ button.secondary, .btn-secondary, .va-btn-secondary {
   box-shadow: 0 1px 2px rgba(0,0,0,0.2) !important;
   opacity: 0.9 !important;
 }
-/* 18-yard box (penalty box) */
 .pitch-penalty-top {
   background: transparent !important;
   border: 2px solid #ffffff !important;
@@ -3613,14 +3588,12 @@ button.secondary, .btn-secondary, .va-btn-secondary {
   border-radius: 0 !important;
   opacity: 0.85 !important;
 }
-/* 6-yard box (smaller box inside penalty area — add if exists) */
 .pitch-6yard-top {
   background: transparent !important;
   border: 2px solid #ffffff !important;
   border-top: none !important;
   opacity: 0.85 !important;
 }
-/* Penalty spot */
 .pitch-penalty-spot {
   background: #ffffff !important;
   width: 5px !important;
@@ -3628,14 +3601,12 @@ button.secondary, .btn-secondary, .va-btn-secondary {
   border-radius: 50% !important;
   opacity: 0.95 !important;
 }
-/* Centre circle */
 .pitch-centre-circle {
   background: transparent !important;
   border: 2px solid #ffffff !important;
   border-radius: 50% !important;
   opacity: 0.85 !important;
 }
-/* Centre dot */
 .pitch-centre-dot {
   background: #ffffff !important;
   width: 5px !important;
@@ -3643,7 +3614,6 @@ button.secondary, .btn-secondary, .va-btn-secondary {
   border-radius: 50% !important;
   opacity: 0.95 !important;
 }
-/* Halfway line — add via pseudo-element if not already present */
 .pitch::before {
   content: '' !important;
   position: absolute !important;
@@ -8469,7 +8439,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1780476182-GW38-f5b85719";
+const BUILD_VERSION = "1780476822-GW38-f5b85719";
 window.APEX_BUILD = BUILD_VERSION;
 
 let FPL_ID = 11051;
@@ -12780,8 +12750,6 @@ function _shirtHtml(p, isXi) {
     `<div class="shirt-wrap${_tcGlow}">${shirt}${badges}</div>` +
     `<div class="shirt-xp">${xp}</div>` +
     `<div class="shirt-name">${p.web_name}</div>` +
-    // 2026-06-02 — xMins badge below name. Colour-coded by minutes risk.
-    ((p.xmins != null && p.xmins > 0) ? `<div class="shirt-xmins" data-xm="${Math.round(p.xmins)}">${Math.round(p.xmins)}'</div>` : '') +
     (_fixLabel ? `<div class="shirt-fix">${_fixLabel}</div>` : '') +
     `</div>`;
 }
@@ -12856,8 +12824,9 @@ function _renderPitchFromState() {
   const _pitchBank   = Math.abs(_pitchBankRaw) < 0.15 ? 0 : _pitchBankRaw;
   const _bankColor   = _pitchBank < -0.05 ? '#ef4444' : 'inherit';
   html += `<div class="pitch-cost-badge"><div class="pcb-row"><span class="pcb-label">Squad value</span><span class="pcb-val">£${_pitchCost.toFixed(1)}m</span></div><div class="pcb-row"><span class="pcb-label">In the bank</span><span class="pcb-val" style="color:${_bankColor}">£${_pitchBank.toFixed(1)}m</span></div></div>`;
-  // Brand wordmark bottom-right of the pitch — same scale as the site header.
-  html += `<div class="pitch-brand-mark"><span class="pbm-apex">Apex</span><span class="pbm-rest">FootyData</span></div>`;
+  // 2026-06-02 Marcus removed pitch brand mark per design preference.
+  // (CSS hide in APEX_PITCH_DETAILS block also covers cached builds.)
+  // html += `<div class="pitch-brand-mark"><span class="pbm-apex">Apex</span><span class="pbm-rest">FootyData</span></div>`;
   // Pitch markings (absolute-positioned, pointer-events:none)
   html += `<div class="pitch-mark pitch-goal-top"></div>
            <div class="pitch-mark pitch-penalty-top"></div>
@@ -14132,6 +14101,220 @@ function _poolAddPlayer(playerId) {
 }
 
 
+// ══════════════════════════════════════════════════════════════════════════
+// EDITABLE xMins MODULE — 2026-06-02
+// Click any shirt's xPts number on the pitch → modal with current xMins →
+// type a new value (0-90) → that player's xPts recomputes instantly, captain
+// auto-picks again, chip totals refresh. Persists in localStorage so reloads
+// keep your overrides. Reset button on the modal reverts to model value.
+// ══════════════════════════════════════════════════════════════════════════
+const _XMINS_OVERRIDE_KEY = 'apex_xmins_overrides_v1';
+let _xminsOverrides = {};
+try {
+  const _saved = localStorage.getItem(_XMINS_OVERRIDE_KEY);
+  if (_saved) _xminsOverrides = JSON.parse(_saved) || {};
+} catch (_) {}
+
+function _saveXminsOverrides() {
+  try { localStorage.setItem(_XMINS_OVERRIDE_KEY, JSON.stringify(_xminsOverrides)); } catch (_) {}
+}
+
+// Look up baseline (model) xMins for a player from POOL_DATA.
+function _baselineXmins(pid) {
+  if (typeof POOL_DATA === 'undefined' || !Array.isArray(POOL_DATA)) return null;
+  const pp = POOL_DATA.find(x => x.id === pid);
+  return pp ? +(pp.xp_minutes || 0) : null;
+}
+
+// Effective xMins = user override if set, else baseline.
+function _effectiveXmins(pid) {
+  if (Object.prototype.hasOwnProperty.call(_xminsOverrides, String(pid))) {
+    return +_xminsOverrides[String(pid)];
+  }
+  return _baselineXmins(pid);
+}
+
+// Re-compute xPts for a player given a NEW xMins value, by scaling the
+// component breakdown baked into POOL_DATA. Returns null if components are
+// missing. Components present: xp_app, xp_goals, xp_assists, xp_cs,
+// xp_saves, xp_bonus. (Set in generate_solver_html.py line ~911.)
+function _recomputeXpForNewXmins(pid, newXmins) {
+  if (typeof POOL_DATA === 'undefined') return null;
+  const pp = POOL_DATA.find(x => x.id === pid);
+  if (!pp) return null;
+  const baseXmins = +pp.xp_minutes || 0;
+  if (baseXmins <= 0) return null;
+  const xm = Math.max(0, Math.min(90, +newXmins || 0));
+  // p_play_60 and p_play_any from the new xMins (used in production formulas).
+  const p60_new  = Math.min(xm / 60, 1);
+  const pany_new = Math.min(xm / 45, 1);
+  // Appearance points: 2 for >=60, 1 for >=1, with smooth interpolation
+  // via the same formula the server uses: 2 * p60 + max(pany - p60, 0).
+  const xp_app_new = 2 * p60_new + Math.max(pany_new - p60_new, 0);
+  // Goals / assists / saves / bonus scale linearly with minutes (xm / 90).
+  const minRatio = xm / 90;
+  const xp_goals_new   = (+pp.xp_goals   || 0) * minRatio;
+  const xp_assists_new = (+pp.xp_assists || 0) * minRatio;
+  const xp_saves_new   = (+pp.xp_saves   || 0) * minRatio;
+  const xp_bonus_new   = (+pp.xp_bonus   || 0) * minRatio;
+  // Clean sheet pts scale with p_play_60 (must be on pitch at 60+ to count).
+  const baseP60 = Math.min(baseXmins / 60, 1);
+  const xp_cs_new = baseP60 > 0
+    ? ((+pp.xp_cs || 0) * (p60_new / baseP60))
+    : (+pp.xp_cs || 0);
+  return xp_app_new + xp_goals_new + xp_assists_new + xp_cs_new + xp_saves_new + xp_bonus_new;
+}
+
+// Apply all current overrides to SQUAD_DATA so xp_per_gw[0] reflects the
+// user's edits. Then re-render the pitch + recompute captain.
+function _applyXminsOverridesAndRender() {
+  if (typeof SQUAD_DATA === 'undefined' || !Array.isArray(SQUAD_DATA)) return;
+  SQUAD_DATA.forEach(p => {
+    const ov = _xminsOverrides[String(p.id)];
+    if (ov == null) return;
+    const newXp = _recomputeXpForNewXmins(p.id, ov);
+    if (newXp == null) return;
+    p.xp = +newXp.toFixed(2);
+    if (Array.isArray(p.xp_per_gw) && p.xp_per_gw.length > 0) {
+      p.xp_per_gw[0] = +newXp.toFixed(2);
+    }
+    p.xmins = +ov;
+  });
+  // Re-pick XI + captain so the user's overrides flow into selection.
+  if (typeof pickBestXi === 'function' && typeof _xiPlayers !== 'undefined' && typeof _benchPlayers !== 'undefined') {
+    try {
+      const full = [..._xiPlayers, ..._benchPlayers];
+      if (full.length === 15) {
+        const res = pickBestXi(full, activeGwIdx || 0);
+        _xiPlayers    = res.xi;
+        _benchPlayers = _orderBench(res.bench);
+        _capId        = res.cap.id;
+        _vcId         = res.vc.id;
+      }
+    } catch (e) { console.warn('[xmins-override] pickBestXi failed', e); }
+  }
+  if (typeof _renderPitchFromState === 'function') _renderPitchFromState();
+  if (typeof updateChipTotal === 'function') updateChipTotal();
+}
+
+// Build a modal for editing one player's xMins.
+function _openXminsEditor(pid) {
+  const sq = (typeof SQUAD_DATA !== 'undefined') ? SQUAD_DATA.find(p => p.id === pid) : null;
+  if (!sq) return;
+  const base   = _baselineXmins(pid);
+  const cur    = _effectiveXmins(pid);
+  const isOverridden = Object.prototype.hasOwnProperty.call(_xminsOverrides, String(pid));
+
+  // Strip any prior modal.
+  const prior = document.getElementById('apex-xmins-modal');
+  if (prior) prior.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'apex-xmins-modal';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:10000;display:flex;align-items:center;justify-content:center;font-family:"Plus Jakarta Sans",sans-serif;';
+  overlay.innerHTML = `
+    <div style="background:#ffffff;border-radius:14px;padding:28px;max-width:380px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+        <h3 style="margin:0;color:#0f172a;font-size:20px;font-weight:800;letter-spacing:-0.02em;">Edit xMins</h3>
+        <button id="xmins-close" style="background:none;border:none;font-size:24px;color:#94a3b8;cursor:pointer;line-height:1;padding:0;">×</button>
+      </div>
+      <div style="margin-bottom:18px;">
+        <div style="font-size:16px;font-weight:800;color:#0f172a;">${sq.web_name}</div>
+        <div style="font-size:13px;color:#64748b;font-weight:600;margin-top:2px;">${sq.team || ''}</div>
+      </div>
+      <div style="margin-bottom:8px;">
+        <label style="font-size:12px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:#64748b;">Predicted minutes</label>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;">
+        <input id="xmins-input" type="number" min="0" max="90" step="1" value="${Math.round(cur)}"
+          style="font-family:'Plus Jakarta Sans',sans-serif;font-size:28px;font-weight:800;color:#0f172a;border:2px solid #e5e7eb;border-radius:10px;padding:10px 14px;width:100px;text-align:center;outline:none;" />
+        <span style="font-size:18px;color:#64748b;font-weight:600;">/ 90 min</span>
+      </div>
+      <input id="xmins-slider" type="range" min="0" max="90" step="1" value="${Math.round(cur)}"
+        style="width:100%;accent-color:#F97316;margin-bottom:10px;" />
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:#94a3b8;font-weight:600;margin-bottom:18px;">
+        <span>0 (out)</span><span>45 (cameo)</span><span>90 (full)</span>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:#f8fafc;border-radius:10px;margin-bottom:18px;font-size:13px;">
+        <span style="color:#64748b;font-weight:600;">Model says</span>
+        <span style="color:#0f172a;font-weight:800;font-variant-numeric:tabular-nums;">${Math.round(base || 0)} min</span>
+      </div>
+      <div style="display:flex;gap:10px;">
+        <button id="xmins-reset" style="flex:1;background:#ffffff;color:#475569;border:1px solid #e5e7eb;border-radius:10px;padding:12px;font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:700;cursor:pointer;${isOverridden ? '' : 'opacity:0.5;pointer-events:none;'}">↺ Reset</button>
+        <button id="xmins-save" style="flex:2;background:#F97316;color:#ffffff;border:none;border-radius:10px;padding:12px;font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:800;cursor:pointer;letter-spacing:0.02em;">✓ Save & recompute</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+
+  const input  = document.getElementById('xmins-input');
+  const slider = document.getElementById('xmins-slider');
+  input.focus();
+  input.select();
+
+  // Two-way sync slider <-> input
+  input.addEventListener('input',  () => { slider.value = input.value; });
+  slider.addEventListener('input', () => { input.value  = slider.value; });
+
+  function close() { overlay.remove(); }
+  document.getElementById('xmins-close').onclick = close;
+  overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+  document.getElementById('xmins-reset').onclick = () => {
+    delete _xminsOverrides[String(pid)];
+    _saveXminsOverrides();
+    _applyXminsOverridesAndRender();
+    close();
+  };
+  document.getElementById('xmins-save').onclick = () => {
+    const v = Math.max(0, Math.min(90, parseInt(input.value, 10) || 0));
+    _xminsOverrides[String(pid)] = v;
+    _saveXminsOverrides();
+    _applyXminsOverridesAndRender();
+    close();
+  };
+  // Press Enter to save
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('xmins-save').click();
+    if (e.key === 'Escape') close();
+  });
+}
+
+// Event delegation — works after every re-render.
+document.addEventListener('click', function (e) {
+  // Open editor when user clicks the xPts number on any shirt.
+  const shirt = e.target.closest('.shirt');
+  if (!shirt) return;
+  const xpEl = e.target.closest('.shirt-xp');
+  if (!xpEl) return;
+  // Skip pp-empty-slot and bench placeholders
+  if (shirt.classList.contains('pp-empty-slot')) return;
+  const pid = parseInt(shirt.getAttribute('data-pid'), 10);
+  if (!pid) return;
+  e.preventDefault();
+  e.stopPropagation();
+  _openXminsEditor(pid);
+});
+
+// Apply any stored overrides at boot so the page loads with edits intact.
+// Wait a tick so SQUAD_DATA is populated by hydrate / public boot first.
+setTimeout(() => {
+  if (Object.keys(_xminsOverrides).length > 0) {
+    _applyXminsOverridesAndRender();
+  }
+}, 1500);
+
+// Style hint on the shirt-xp so users learn it's clickable.
+(function () {
+  const css = document.createElement('style');
+  css.textContent = `
+    .pitch .shirt-xp { cursor: pointer; transition: transform 0.15s, color 0.15s; }
+    .pitch .shirt-xp:hover { transform: scale(1.08); }
+    .pitch .shirt-xp:hover::after { content: ' ✎'; font-size: 0.65em; opacity: 0.7; }
+  `;
+  document.head.appendChild(css);
+})();
+
+
 // ──────────── INIT ────────────
 document.addEventListener('DOMContentLoaded', () => {
   if (typeof _initCompareToggle === 'function') _initCompareToggle();
@@ -14153,7 +14336,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW38</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780476182-GW38-f5b85719</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780476822-GW38-f5b85719</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
