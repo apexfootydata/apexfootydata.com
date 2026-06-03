@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="38" data-built-at="2026-06-03T11:55:17">
+<meta name="apex-gw" content="38" data-built-at="2026-06-03T12:00:28">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -3948,274 +3948,167 @@ button.secondary, .btn-secondary, .va-btn-secondary {
 /* ═══ APEX_HERO_COMPACT:END ═══ */
 
 
-/* ═══ APEX_MW_CHROME:START ═══ 2026-06-02 borrow matchweek-card chrome ═══ */
+/* ═══ APEX_MW_CHROME:START ═══ 2026-06-02 matchweek chrome — XL sizing ═══ */
 
-/* ── Page bg matches matchweek (light grey) ──────────────────────────── */
+/* ── Page bg ────────────────────────────────────────────────────────── */
 body, html {
   background: #f4f5f7 !important;
   color: #0f172a !important;
   font-family: 'Plus Jakarta Sans', sans-serif !important;
 }
 
-/* ── Top nav strip — white, subtle border ─────────────────────────────── */
 .topbar, .va-topbar, header.topbar {
   background: #ffffff !important;
   border-bottom: 1px solid #e5e7eb !important;
 }
 
-/* ── Hero card — white with soft shadow, matchweek-style ──────────────── */
+/* ── Team header (top: "Restored / Marcus / RANK") — XL ──────────────── */
+.va-team-name-target,
+.va-team-name {
+  font-size: 40px !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.025em !important;
+  color: #0f172a !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+}
+.va-rank-label,
+.va-rank-num,
+.va-rank-target {
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  color: #64748b !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+}
+
+/* ── Hero card — XL inside same card confines ────────────────────────── */
 .va-card-hero {
   background: #ffffff !important;
   border: 1px solid #e5e7eb !important;
   border-radius: 14px !important;
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 12px rgba(15, 23, 42, 0.04) !important;
-  padding: 16px 22px !important;
+  padding: 22px 28px !important;
 }
-.va-card-hero .va-card-label {
-  color: #94a3b8 !important;
-  font-family: 'Plus Jakarta Sans', sans-serif !important;
-  font-size: 11px !important;
-  font-weight: 700 !important;
-  text-transform: uppercase !important;
-  letter-spacing: 0.06em !important;
-  margin-bottom: 0 !important;
-}
-.va-card-value-hero {
-  color: #0f172a !important;
-  font-family: 'Plus Jakarta Sans', sans-serif !important;
-  font-size: 32px !important;
-  font-weight: 800 !important;
-  letter-spacing: -0.02em !important;
-}
-
-/* Team name and rank above the hero — matchweek title treatment */
-.va-team-name-target,
-.va-team-name {
-  color: #0f172a !important;
-  font-family: 'Plus Jakarta Sans', sans-serif !important;
-  font-size: 24px !important;
-  font-weight: 800 !important;
-  letter-spacing: -0.02em !important;
-}
-.va-rank-label,
-.va-rank-num,
-.va-rank-target {
-  color: #94a3b8 !important;
-  font-family: 'Plus Jakarta Sans', sans-serif !important;
-  font-size: 13px !important;
-  font-weight: 500 !important;
-}
-
-/* ── Stat strip — white card, matchweek treatment ─────────────────────── */
-.va-strip {
-  background: #ffffff !important;
-  border: 1px solid #e5e7eb !important;
-  border-radius: 14px !important;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04) !important;
-  padding: 12px 22px !important;
-}
-.va-strip-label {
-  color: #94a3b8 !important;
-  font-family: 'Plus Jakarta Sans', sans-serif !important;
-  font-size: 11px !important;
-  font-weight: 700 !important;
-  text-transform: uppercase !important;
-  letter-spacing: 0.06em !important;
-}
-.va-strip-val {
-  color: #0f172a !important;
-  font-family: 'Plus Jakarta Sans', sans-serif !important;
-  font-size: 16px !important;
-  font-weight: 700 !important;
-}
-.va-strip-divider {
-  background: #e5e7eb !important;
-}
-
-/* ── Chip plan — white card, tight cards inside ───────────────────────── */
-.va-chip-panel {
-  background: #ffffff !important;
-  border: 1px solid #e5e7eb !important;
-  border-radius: 14px !important;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04) !important;
-  padding: 12px 16px !important;
-}
-.va-chip-card {
-  background: #f8fafc !important;
-  border: 1px solid #e5e7eb !important;
-  border-radius: 10px !important;
-  padding: 8px 12px !important;
-}
-.va-chip-card-tag {
-  color: #64748b !important;
-  font-family: 'Plus Jakarta Sans', sans-serif !important;
-  font-size: 10px !important;
-  font-weight: 700 !important;
-  letter-spacing: 0.05em !important;
-}
-.va-chip-card select {
-  color: #0f172a !important;
-  font-family: 'Plus Jakarta Sans', sans-serif !important;
-  font-weight: 600 !important;
-  background: transparent !important;
-  border: none !important;
-}
-
-/* ── GW pill (orange "GW38" button) — matchweek-style orange pill ─────── */
-.va-gw-pill, .gw-pill.active {
-  background: #F97316 !important;
-  color: #ffffff !important;
-  font-family: 'Plus Jakarta Sans', sans-serif !important;
-  font-weight: 700 !important;
-  border-radius: 999px !important;
-}
-
-/* ── Solve / Reset buttons — matchweek-style ──────────────────────────── */
-.va-solve-btn, button.solve-btn, #transfer-solver-btn {
-  background: #F97316 !important;
-  color: #ffffff !important;
-  border: none !important;
-  border-radius: 10px !important;
-  font-family: 'Plus Jakarta Sans', sans-serif !important;
-  font-weight: 700 !important;
-  padding: 10px 18px !important;
-}
-.va-reset-btn, button.reset-btn {
-  background: #ffffff !important;
-  color: #475569 !important;
-  border: 1px solid #e5e7eb !important;
-  border-radius: 10px !important;
-  font-family: 'Plus Jakarta Sans', sans-serif !important;
-  font-weight: 600 !important;
-}
-
-
-/* ── Kill the orange accent strip on the right of hero card ───────────── */
 .va-card-accent { display: none !important; }
-
-/* ── Color the hero xPts number like a matchweek value pill (g3 tint) ── */
-.va-card-value-hero {
-  background: #639922 !important;
-  color: #ffffff !important;
-  padding: 6px 16px !important;
-  border-radius: 10px !important;
-  display: inline-block !important;
-  font-family: 'Plus Jakarta Sans', sans-serif !important;
-  font-size: 28px !important;
-}
-
-/* ── Make the hero card layout breathe (horizontal flex with label left, value right) ── */
-.va-hero-inner {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: space-between !important;
-  gap: 18px !important;
-  flex-direction: row !important;
-}
-.va-hero-text {
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 4px !important;
-}
-
-/* ── Stat values get a subtle tier pill treatment too ─────────────────── */
-.va-strip-val {
-  padding: 4px 10px !important;
-  background: #f3f4f6 !important;
-  border-radius: 8px !important;
-  display: inline-block !important;
-}
-
-
-/* ── Make hero label + number bigger and inline (compact green pill, not stretched) ── */
 .va-hero-inner {
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
   gap: 24px !important;
   flex-direction: row !important;
-  padding: 8px 4px !important;
-}
-.va-card-hero {
-  padding: 20px 28px !important;
 }
 .va-card-hero .va-card-label {
-  font-size: 14px !important;
-  font-weight: 800 !important;
-  letter-spacing: 0.04em !important;
   color: #64748b !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-size: 16px !important;
+  font-weight: 800 !important;
   text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  margin-bottom: 0 !important;
+  display: block !important;
 }
 .va-card-value-hero {
   background: #639922 !important;
   color: #ffffff !important;
-  padding: 10px 26px !important;
-  border-radius: 12px !important;
+  padding: 14px 32px !important;
+  border-radius: 14px !important;
   display: inline-block !important;
-  font-size: 38px !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-size: 56px !important;
   font-weight: 800 !important;
-  letter-spacing: -0.02em !important;
+  letter-spacing: -0.025em !important;
+  line-height: 1 !important;
   width: auto !important;
-  min-width: 0 !important;
   flex: 0 0 auto !important;
 }
 
-/* ── Stat strip — bigger values, no pill backgrounds (cleaner, more substantial) ── */
+/* ── Stat strip — bigger values ──────────────────────────────────────── */
 .va-strip {
-  padding: 18px 28px !important;
+  background: #ffffff !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 14px !important;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04) !important;
+  padding: 22px 30px !important;
 }
 .va-strip-cell {
   flex: 1 1 0 !important;
-  gap: 8px !important;
+  gap: 10px !important;
 }
 .va-strip-label {
-  font-size: 13px !important;
-  font-weight: 800 !important;
   color: #64748b !important;
-  letter-spacing: 0.04em !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 800 !important;
   text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
 }
 .va-strip-val {
   background: transparent !important;
-  padding: 0 !important;
-  font-size: 22px !important;
-  font-weight: 800 !important;
   color: #0f172a !important;
-  letter-spacing: -0.01em !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-size: 28px !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.015em !important;
+  padding: 0 !important;
   border-radius: 0 !important;
   display: inline !important;
 }
-
-/* ── Team header at top — bigger, more substantial ── */
-.va-team-name-target,
-.va-team-name {
-  font-size: 32px !important;
-  font-weight: 800 !important;
-  letter-spacing: -0.02em !important;
-  color: #0f172a !important;
-}
-.va-rank-label,
-.va-rank-num,
-.va-rank-target {
-  font-size: 15px !important;
-  font-weight: 600 !important;
-  color: #64748b !important;
+.va-strip-divider {
+  background: #e5e7eb !important;
+  height: 28px !important;
 }
 
-/* ── GW pill — bigger, more substantial ── */
+/* ── GW pill — XL ─────────────────────────────────────────────────────── */
 .va-gw-pill, .gw-pill.active {
-  font-size: 16px !important;
-  padding: 10px 22px !important;
+  background: #F97316 !important;
+  color: #ffffff !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
   font-weight: 800 !important;
+  border-radius: 999px !important;
+  font-size: 20px !important;
+  padding: 14px 32px !important;
 }
 
-/* ── Chip pill text — bigger inside the segmented toggle ── */
+/* ── Chip plan panel ──────────────────────────────────────────────────── */
+.va-chip-panel {
+  padding: 12px 16px !important;
+}
 .va-chip-card {
-  padding: 12px 20px !important;
+  padding: 14px 22px !important;
 }
 .va-chip-card-tag {
-  font-size: 14px !important;
+  color: #64748b !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-size: 15px !important;
   font-weight: 700 !important;
+  letter-spacing: 0.02em !important;
+}
+.va-chip-card select {
+  color: #F97316 !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-size: 15px !important;
+  font-weight: 800 !important;
+}
+
+/* ── Solve / Reset buttons — XL ──────────────────────────────────────── */
+.va-solve-btn, button.solve-btn, #transfer-solver-btn {
+  background: #F97316 !important;
+  color: #ffffff !important;
+  border: none !important;
+  border-radius: 12px !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-weight: 800 !important;
+  font-size: 16px !important;
+  padding: 14px 26px !important;
+}
+.va-reset-btn, button.reset-btn {
+  background: #ffffff !important;
+  color: #475569 !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 12px !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-weight: 700 !important;
+  font-size: 15px !important;
+  padding: 13px 22px !important;
 }
 
 /* ═══ APEX_MW_CHROME:END ═══ */
@@ -9129,7 +9022,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1780484116-GW38-f5b85719";
+const BUILD_VERSION = "1780484428-GW38-f5b85719";
 window.APEX_BUILD = BUILD_VERSION;
 
 let FPL_ID = 11051;
@@ -9145,7 +9038,7 @@ const _APEX_WC_SQUADS_BACKUP = JSON.parse(JSON.stringify(WC_SQUADS));
 const _APEX_FH_SQUADS_BACKUP = JSON.parse(JSON.stringify(FH_SQUADS));
 const REVIEW_WC_SQUADS = {};
 const REVIEW_FH_SQUADS = {};
-let TEAM_META = {"team_name": "Restored", "manager": "Marcus Xhaka Khan", "overall_rank": 236258, "bank": 1.2, "free_transfers": 1, "squad_value": 103.5, "budget": 102.8, "start_gw": 38, "gw_range": [38], "gw_labels": ["GW38"], "dgw_teams_by_gw": {}, "bgw_teams_by_gw": {}, "selling_prices": {"139": 4.5, "77": 4.1, "5": 6.8, "151": 4.6, "449": 9.8, "84": 5.3, "235": 10.3, "381": 14.0, "624": 7.8, "666": 9.0, "691": 5.6, "341": 4.0, "343": 4.2, "417": 6.5, "411": 5.1}, "deadlines_by_gw": {"1": 1755279000, "2": 1755883800, "3": 1756548000, "4": 1757757600, "5": 1758362400, "6": 1758967200, "7": 1759512600, "8": 1760781600, "9": 1761327000, "10": 1762003800, "11": 1762599600, "12": 1763809200, "13": 1764423000, "14": 1764698400, "15": 1765018800, "16": 1765632600, "17": 1766228400, "18": 1766773800, "19": 1767117600, "20": 1767438000, "21": 1767724200, "22": 1768647600, "23": 1769252400, "24": 1769866200, "25": 1770402600, "26": 1770746400, "27": 1771680600, "28": 1772217000, "29": 1772560800, "30": 1773495000, "31": 1774031400, "32": 1775842200, "33": 1776506400, "34": 1777051800, "35": 1777656600, "36": 1778320800, "37": 1778866200, "38": 1779629400}};
+let TEAM_META = {"team_name": "Xhaka Khan", "manager": "- Xhaka Khan", "overall_rank": 236258, "bank": 1.2, "free_transfers": 1, "squad_value": 103.5, "budget": 102.8, "start_gw": 38, "gw_range": [38], "gw_labels": ["GW38"], "dgw_teams_by_gw": {}, "bgw_teams_by_gw": {}, "selling_prices": {"139": 4.5, "77": 4.1, "5": 6.8, "151": 4.6, "449": 9.8, "84": 5.3, "235": 10.3, "381": 14.0, "624": 7.8, "666": 9.0, "691": 5.6, "341": 4.0, "343": 4.2, "417": 6.5, "411": 5.1}, "deadlines_by_gw": {"1": 1755279000, "2": 1755883800, "3": 1756548000, "4": 1757757600, "5": 1758362400, "6": 1758967200, "7": 1759512600, "8": 1760781600, "9": 1761327000, "10": 1762003800, "11": 1762599600, "12": 1763809200, "13": 1764423000, "14": 1764698400, "15": 1765018800, "16": 1765632600, "17": 1766228400, "18": 1766773800, "19": 1767117600, "20": 1767438000, "21": 1767724200, "22": 1768647600, "23": 1769252400, "24": 1769866200, "25": 1770402600, "26": 1770746400, "27": 1771680600, "28": 1772217000, "29": 1772560800, "30": 1773495000, "31": 1774031400, "32": 1775842200, "33": 1776506400, "34": 1777051800, "35": 1777656600, "36": 1778320800, "37": 1778866200, "38": 1779629400}};
 let CHIP_PLANNER = {"has_wc": true, "has_fh": true, "has_bb": true, "has_tc": true, "sequences": [{"seq_str": "WC38", "total_xp": 65.4, "breakdown": [{"chip": "WC", "gw": 38}], "num_chips": 1, "gain": 12.5}, {"seq_str": "FH38", "total_xp": 65.4, "breakdown": [{"chip": "FH", "gw": 38}], "num_chips": 1, "gain": 12.5}, {"seq_str": "BB38", "total_xp": 63.4, "breakdown": [{"chip": "BB", "gw": 38}], "num_chips": 1, "gain": 10.5}, {"seq_str": "TC38", "total_xp": 59.4, "breakdown": [{"chip": "TC", "gw": 38}], "num_chips": 1, "gain": 6.5}], "best_sequence": {"seq_str": "WC38", "total_xp": 65.4, "breakdown": [{"chip": "WC", "gw": 38}], "num_chips": 1, "gain": 12.5}, "baseline_total_xp": 52.9, "bb_ev": {"38": 10.39}, "tc_ev": {"38": 6.48}, "wc_ev": {"38": 17.9}, "fh_ev": {"38": 12.5}, "rotation_risk": {}, "_lazy": false};
 let LEAGUE_SIM_META = {"start_gw": 38, "horizon_gws": 1, "fpl_id": 11051};
 // FR xP data for browser-side Rank Milestones (assets/rank_milestones.js).
@@ -15063,7 +14956,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW38</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780484116-GW38-f5b85719</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780484428-GW38-f5b85719</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
