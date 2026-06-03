@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="38" data-built-at="2026-06-03T14:53:32">
+<meta name="apex-gw" content="38" data-built-at="2026-06-03T14:57:50">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -3794,10 +3794,18 @@ button.secondary, .btn-secondary, .va-btn-secondary {
 .pitch-bench .svg-shirt {
   width: 120px !important;
   height: 135px !important;
+  /* 2026-06-03 fix: centre SVG horizontally in shirt cell so xPts/name pill
+     don't visually drift right of the shirt. Base .svg-shirt is display:block
+     with no margin auto — the offset was hidden at 100×110 but visible at 120×135. */
+  margin-left: auto !important;
+  margin-right: auto !important;
 }
 .pitch .shirt,
 .bench-row .shirt {
   min-width: 132px !important;
+  /* Make text content inside the shirt cell explicitly centred so xPts/name
+     pill line up with the SVG above. */
+  text-align: center !important;
 }
 /* Tighten row gap so 5-wide MID row still fits cleanly */
 .pitch .pitch-row {
@@ -9185,7 +9193,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1780494811-GW38-f5b85719";
+const BUILD_VERSION = "1780495070-GW38-f5b85719";
 window.APEX_BUILD = BUILD_VERSION;
 
 let FPL_ID = 11051;
@@ -15135,7 +15143,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW38</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780494811-GW38-f5b85719</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780495070-GW38-f5b85719</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
