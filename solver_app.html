@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="38" data-built-at="2026-06-03T10:38:14">
+<meta name="apex-gw" content="38" data-built-at="2026-06-03T10:47:29">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -3830,6 +3830,113 @@ button.secondary, .btn-secondary, .va-btn-secondary {
 }
 
 /* ═══ APEX_XM_UNDERLINE:END ═══ */
+
+
+/* ═══ APEX_HERO_COMPACT:START ═══ 2026-06-02 compress top section to 2 tight rows ═══ */
+
+/* ── Compress the hero card (was 200px tall, now ~90px) ──────────────── */
+.va-card-hero {
+  padding: 14px 22px !important;
+}
+.va-hero-row {
+  margin-bottom: 10px !important;
+}
+.va-hero-inner {
+  gap: 16px !important;
+}
+.va-card-value-hero {
+  font-size: 2.2rem !important;  /* was 4.2rem */
+  letter-spacing: -0.025em !important;
+}
+.va-card-hero .va-card-label {
+  margin-bottom: 4px !important;
+  font-size: 0.68rem !important;
+}
+.va-card-sub {
+  margin-top: 4px !important;
+  font-size: 0.72rem !important;
+}
+/* Drop the sparkline width — gives the hero text more room without bloat */
+.va-hero-spark {
+  width: 160px !important;
+  height: 50px !important;
+}
+
+/* ── Tighten the stat strip (Next 1 GWs / Bank / FT / Budget) ────────── */
+.va-strip {
+  padding: 12px 22px !important;
+  margin-bottom: 14px !important;
+  gap: 10px !important;
+}
+.va-strip-cell {
+  gap: 8px !important;
+}
+.va-strip-label {
+  font-size: 0.72rem !important;
+}
+.va-strip-val {
+  font-size: 1.15rem !important;  /* was 1.55rem */
+}
+
+/* ── Compress the team header + rank above the hero ──────────────────── */
+.va-team-header,
+.va-team-name-target,
+.va-team-name {
+  margin-bottom: 6px !important;
+}
+.va-team-name-target,
+.va-team-name {
+  font-size: 1.6rem !important;  /* big "Restored" text */
+  line-height: 1.1 !important;
+}
+.va-rank-label,
+.va-rank-num,
+.va-rank-target {
+  font-size: 0.82rem !important;
+}
+/* The top-section container — shrink overall vertical padding */
+.va-container,
+.va-top-section,
+.va-meta-row {
+  padding-top: 8px !important;
+  padding-bottom: 8px !important;
+}
+
+/* ── Compress the GW pill row + chip plan into a single tight row ────── */
+.va-gw-pill-row {
+  margin: 8px 0 !important;
+}
+.chip-plan-row,
+.va-chip-plan {
+  padding: 10px 14px !important;
+  margin-top: 8px !important;
+  gap: 8px !important;
+}
+.chip-plan-card {
+  padding: 8px 12px !important;
+}
+.chip-plan-card .chip-label {
+  font-size: 0.66rem !important;
+  margin-bottom: 2px !important;
+}
+.chip-plan-card select {
+  font-size: 0.86rem !important;
+  padding: 4px 8px !important;
+}
+
+/* ── Tighten chip-plan title above the dropdowns ─────────────────────── */
+.chip-plan-title {
+  font-size: 0.7rem !important;
+  margin-bottom: 6px !important;
+}
+
+/* ── Reduce gap above the pitch so we save more vertical space ───────── */
+.pitch-wrap,
+.va-pitch-wrap {
+  margin-top: 4px !important;
+}
+
+/* ═══ APEX_HERO_COMPACT:END ═══ */
 
 /* ═══ APEX_OFFSEASON_KILL:START ═══ 2026-06-02 force-hide landing/banner forever ═══ */
 /* Hard kill — view-landing must NEVER show, regardless of JS. */
@@ -8642,7 +8749,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1780479494-GW38-f5b85719";
+const BUILD_VERSION = "1780480049-GW38-f5b85719";
 window.APEX_BUILD = BUILD_VERSION;
 
 let FPL_ID = 11051;
@@ -14576,7 +14683,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW38</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780479494-GW38-f5b85719</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780480049-GW38-f5b85719</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
