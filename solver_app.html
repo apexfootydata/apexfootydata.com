@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="38" data-built-at="2026-06-03T10:11:17">
+<meta name="apex-gw" content="38" data-built-at="2026-06-03T10:26:56">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -3679,6 +3679,145 @@ button.secondary, .btn-secondary, .va-btn-secondary {
   opacity: 0.9 !important;
 }
 /* ═══ APEX_BENCH_LABEL:END ═══ */
+
+
+/* ═══ APEX_SHIRT_POLISH:START ═══ 2026-06-02 depth + xMins ring + bigger xPts ═══ */
+
+/* ── A: depth on SVG shirts — lift them off the pitch ─────────────────── */
+.pitch .svg-shirt,
+.bench-row .svg-shirt,
+.pitch-bench .svg-shirt {
+  filter:
+    drop-shadow(0 4px 8px rgba(0, 0, 0, 0.32))
+    drop-shadow(0 1px 2px rgba(0, 0, 0, 0.22)) !important;
+  transition: filter 0.2s, transform 0.2s !important;
+}
+.pitch .shirt:hover .svg-shirt,
+.bench-row .shirt:hover .svg-shirt {
+  filter:
+    drop-shadow(0 6px 12px rgba(0, 0, 0, 0.38))
+    drop-shadow(0 2px 3px rgba(0, 0, 0, 0.26)) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* ── D: signature xMins ring around each shirt-wrap ───────────────────── */
+.pitch .shirt .shirt-wrap,
+.bench-row .shirt .shirt-wrap {
+  position: relative !important;
+}
+.pitch .shirt[data-xm-tier] .shirt-wrap::after,
+.bench-row .shirt[data-xm-tier] .shirt-wrap::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  pointer-events: none;
+  z-index: 0;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.pitch .shirt[data-xm-tier="high"] .shirt-wrap::after,
+.bench-row .shirt[data-xm-tier="high"] .shirt-wrap::after {
+  border-color: rgba(74, 222, 128, 0.7);
+  box-shadow: 0 0 12px rgba(74, 222, 128, 0.25);
+}
+.pitch .shirt[data-xm-tier="mid"] .shirt-wrap::after,
+.bench-row .shirt[data-xm-tier="mid"] .shirt-wrap::after {
+  border-color: rgba(251, 191, 36, 0.7);
+  box-shadow: 0 0 12px rgba(251, 191, 36, 0.22);
+}
+.pitch .shirt[data-xm-tier="low"] .shirt-wrap::after,
+.bench-row .shirt[data-xm-tier="low"] .shirt-wrap::after {
+  border-color: rgba(239, 68, 68, 0.75);
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.25);
+}
+.pitch .shirt[data-xm-tier="out"] .shirt-wrap::after,
+.bench-row .shirt[data-xm-tier="out"] .shirt-wrap::after {
+  border-color: rgba(220, 38, 38, 0.85);
+  border-style: dashed;
+  box-shadow: 0 0 14px rgba(220, 38, 38, 0.3);
+}
+
+/* ── E: polished xPts — bigger, weightier, anchored ───────────────────── */
+.pitch .shirt-xp,
+.bench-row .shirt-xp,
+.pitch-bench .shirt-xp {
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-size: 26px !important;
+  font-weight: 900 !important;
+  letter-spacing: -0.025em !important;
+  color: #ffffff !important;
+  text-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.55),
+    0 1px 1px rgba(0, 0, 0, 0.35) !important;
+  margin-top: 6px !important;
+  line-height: 1 !important;
+}
+
+/* ── Captain badge upgrade — gold gradient + glow (subtle premium signal) */
+.pitch .shirt .shirt-badge.cap-badge,
+.bench-row .shirt .shirt-badge.cap-badge {
+  background: linear-gradient(180deg, #fde047 0%, #f59e0b 100%) !important;
+  color: #422006 !important;
+  border: 2px solid #ffffff !important;
+  box-shadow:
+    0 0 14px rgba(251, 191, 36, 0.55),
+    0 2px 6px rgba(0, 0, 0, 0.25) !important;
+  font-weight: 900 !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  letter-spacing: -0.02em !important;
+}
+.pitch .shirt .shirt-badge.vc-badge,
+.bench-row .shirt .shirt-badge.vc-badge {
+  background: #ffffff !important;
+  color: #0f172a !important;
+  border: 2px solid #fde047 !important;
+  font-weight: 900 !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+}
+
+/* Brighter pitch gradient — Solio-style luminosity */
+.pitch {
+  background: linear-gradient(
+    180deg,
+    #1a7a3a 0%,
+    #208c44 28%,
+    #259a4d 50%,
+    #208c44 72%,
+    #1a7a3a 100%
+  ) !important;
+}
+
+/* Name pill — slightly larger, cleaner */
+.pitch .shirt-name,
+.bench-row .shirt-name {
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  padding: 4px 11px !important;
+  border-radius: 999px !important;
+  margin-top: 5px !important;
+  letter-spacing: -0.01em !important;
+}
+
+/* Fixture text — uppercase, refined */
+.pitch .shirt-fix,
+.bench-row .shirt-fix {
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.06em !important;
+  text-transform: uppercase !important;
+  margin-top: 4px !important;
+  color: rgba(255, 255, 255, 0.78) !important;
+}
+
+/* Slightly more vertical breathing room between rows */
+.pitch .pitch-row {
+  margin-bottom: 22px !important;
+}
+
+/* ═══ APEX_SHIRT_POLISH:END ═══ */
 
 /* ═══ APEX_OFFSEASON_KILL:START ═══ 2026-06-02 force-hide landing/banner forever ═══ */
 /* Hard kill — view-landing must NEVER show, regardless of JS. */
@@ -8491,7 +8630,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1780477877-GW38-f5b85719";
+const BUILD_VERSION = "1780478816-GW38-f5b85719";
 window.APEX_BUILD = BUILD_VERSION;
 
 let FPL_ID = 11051;
@@ -12802,7 +12941,14 @@ function _shirtHtml(p, isXi) {
   const xmEditBtn = `<button class="pp-xmins-btn"
       onclick="event.stopPropagation(); event.preventDefault(); window._openXminsEditor(${p.id})"
       title="Edit predicted minutes (xMins)">⏱</button>`;
-  return `<div class="${cls}" draggable="true" data-pid="${p.id}" data-xi="${isXi ? 1 : 0}" data-xp="${xp}" data-pos="${p.element_type}" data-cost="${p.cost}">` +
+  // 2026-06-02 — derive xMins tier (high/mid/low/out) so CSS can paint a
+  // signature data-driven ring around each shirt. No one else has this.
+  const _xmRaw = +(p.xmins || 0);
+  let _xmTier = 'high';
+  if (_xmRaw < 1)       _xmTier = 'out';
+  else if (_xmRaw < 45) _xmTier = 'low';
+  else if (_xmRaw < 70) _xmTier = 'mid';
+  return `<div class="${cls}" draggable="true" data-pid="${p.id}" data-xi="${isXi ? 1 : 0}" data-xp="${xp}" data-pos="${p.element_type}" data-cost="${p.cost}" data-xm-tier="${_xmTier}">` +
     removeBtn + whyBtn + xmEditBtn +
     `<div class="shirt-wrap${_tcGlow}">${shirt}${badges}</div>` +
     `<div class="shirt-xp">${xp}</div>` +
@@ -14223,9 +14369,11 @@ function _recomputeXpForNewXmins(pid, newXmins) {
 }
 
 // Apply all current overrides to SQUAD_DATA so xp_per_gw[0] reflects the
-// user's edits. Then re-render the pitch + recompute captain.
+// user's edits. Then re-render the pitch + recompute captain + UPDATE the
+// hero xPts total at top of pitch (was a bug: total wasn't refreshing).
 function _applyXminsOverridesAndRender() {
   if (typeof SQUAD_DATA === 'undefined' || !Array.isArray(SQUAD_DATA)) return;
+  // Update player xPs in SQUAD_DATA
   SQUAD_DATA.forEach(p => {
     const ov = _xminsOverrides[String(p.id)];
     if (ov == null) return;
@@ -14237,6 +14385,16 @@ function _applyXminsOverridesAndRender() {
     }
     p.xmins = +ov;
   });
+  // Mirror updates back into _xiPlayers / _benchPlayers (they hold references
+  // to player objects so xp may already be updated, but if pickBestXi rebinds
+  // from POOL_DATA the reference may differ. Sync defensively.)
+  const _idMap = new Map(SQUAD_DATA.map(p => [p.id, p]));
+  if (Array.isArray(_xiPlayers)) {
+    _xiPlayers = _xiPlayers.map(p => _idMap.get(p.id) || p);
+  }
+  if (Array.isArray(_benchPlayers)) {
+    _benchPlayers = _benchPlayers.map(p => _idMap.get(p.id) || p);
+  }
   // Re-pick XI + captain so the user's overrides flow into selection.
   if (typeof pickBestXi === 'function' && typeof _xiPlayers !== 'undefined' && typeof _benchPlayers !== 'undefined') {
     try {
@@ -14247,11 +14405,30 @@ function _applyXminsOverridesAndRender() {
         _benchPlayers = _orderBench(res.bench);
         _capId        = res.cap.id;
         _vcId         = res.vc.id;
+        // ── BUG FIX (2026-06-02) — update the hero xPts total at top of pitch.
+        // Same pattern _poolAddPlayer uses (line ~8127). Without this the
+        // top number stays at the pre-override baseline even though the
+        // per-shirt numbers update correctly.
+        const _xpAtFn = (typeof _xpAt === 'function') ? _xpAt : (p, idx) => (p.xp_per_gw && p.xp_per_gw[idx]) || 0;
+        const newXiSum = _xiPlayers.reduce((s, p) => s + _xpAtFn(p, activeGwIdx || 0), 0);
+        const newCapXp = res.cap ? _xpAtFn(res.cap, activeGwIdx || 0) : 0;
+        if (typeof _xiDelta !== 'undefined' && _xiDelta) {
+          _xiDelta[activeGwIdx || 0]  = newXiSum - (GW_XI_BASE[activeGwIdx || 0] || 0);
+        }
+        if (typeof _capDelta !== 'undefined' && _capDelta) {
+          _capDelta[activeGwIdx || 0] = newCapXp - (GW_CAP_XP[activeGwIdx || 0] || 0);
+        }
+        if (typeof _jsBaseCapXp !== 'undefined') {
+          _jsBaseCapXp = newCapXp;
+        }
       }
     } catch (e) { console.warn('[xmins-override] pickBestXi failed', e); }
   }
   if (typeof _renderPitchFromState === 'function') _renderPitchFromState();
   if (typeof updateChipTotal === 'function') updateChipTotal();
+  // Also re-render the pool table so per-player baselines reflect overrides
+  // (handy if user looks at the pool right after editing).
+  if (typeof renderPoolTable === 'function') renderPoolTable();
 }
 
 // Build a modal for editing one player's xMins.
@@ -14380,7 +14557,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW38</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780477877-GW38-f5b85719</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780478816-GW38-f5b85719</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
