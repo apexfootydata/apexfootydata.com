@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="38" data-built-at="2026-06-03T12:09:40">
+<meta name="apex-gw" content="38" data-built-at="2026-06-03T12:16:33">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -9177,7 +9177,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1780484980-GW38-f5b85719";
+const BUILD_VERSION = "1780485393-GW38-f5b85719";
 window.APEX_BUILD = BUILD_VERSION;
 
 let FPL_ID = 11051;
@@ -13773,8 +13773,24 @@ function getTotal(idx, bbGw, tcGw) {
   // Use pre-computed Python baselines + per-GW deltas from any manual swaps.
   // This preserves Python ILP precision for the baseline while still reflecting
   // drag/drop changes via the delta arrays (updated in _swapPlayers / setCap).
-  const base  = (GW_XI_BASE[idx] || 0) + (_xiDelta[idx] || 0);
-  const capXp = (GW_CAP_XP[idx]  || 0) + (_capDelta[idx]  || 0);
+  //
+  // 2026-06-02 — xMins-override aware. When the user has overridden any
+  // player's xMins via the ⏱ editor, the deltas above can get reset by
+  // other render paths (init, chip warm-up) and the hero snaps back to the
+  // baked baseline. Workaround: if any override is active, sum the XI's
+  // current xp_per_gw values directly. This is the authoritative live xP.
+  let base, capXp;
+  const _hasOverrides = (typeof _xminsOverrides !== 'undefined') &&
+                        Object.keys(_xminsOverrides || {}).length > 0;
+  if (_hasOverrides && Array.isArray(_xiPlayers) && _xiPlayers.length === 11) {
+    const _xpA = (p) => (p && p.xp_per_gw && p.xp_per_gw[idx]) || (p && p.xp) || 0;
+    base = _xiPlayers.reduce((s, p) => s + _xpA(p), 0);
+    const _capObj = _xiPlayers.find(p => p && p.id === _capId);
+    capXp = _capObj ? _xpA(_capObj) : ((GW_CAP_XP[idx] || 0) + (_capDelta[idx] || 0));
+  } else {
+    base  = (GW_XI_BASE[idx] || 0) + (_xiDelta[idx] || 0);
+    capXp = (GW_CAP_XP[idx]  || 0) + (_capDelta[idx]  || 0);
+  }
   const bench = (GW_BENCH[idx]   || 0) + (_benchDelta[idx] || 0);
   const gw    = TEAM_META.gw_range[idx];
   let total = base + capXp;                         // standard: GW_XI_BASE + GW_CAP_XP
@@ -15111,7 +15127,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW38</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780484980-GW38-f5b85719</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780485393-GW38-f5b85719</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
