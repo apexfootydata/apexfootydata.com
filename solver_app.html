@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="38" data-built-at="2026-06-03T14:45:55">
+<meta name="apex-gw" content="38" data-built-at="2026-06-03T14:53:32">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -3630,14 +3630,17 @@ button.secondary, .btn-secondary, .va-btn-secondary {
 
 
 /* ═══ APEX_XMINS_BTN:START ═══ 2026-06-02 pencil button for xmins editor ═══ */
-/* xMins edit button — bottom-RIGHT of each shirt (mirror of the ? why button).
-   Click → opens xMins editor modal. Always visible (not dev-gated). */
+/* xMins edit button — top-RIGHT corner of shirt SVG, mirroring the X remove
+   button (top-LEFT). 2026-06-03: was bottom:28px which broke when shirt SVG
+   was bumped 110→135px — drifted into the name-pill zone. Anchored from top
+   now so future size changes won't move it. */
 .pp-xmins-btn {
   position: absolute !important;
-  bottom: 28px !important;
-  right: 2px !important;
-  width: 18px !important;
-  height: 18px !important;
+  top: -6px !important;
+  right: -6px !important;
+  bottom: auto !important;
+  width: 20px !important;
+  height: 20px !important;
   border-radius: 50% !important;
   background: rgba(15, 23, 42, 0.85) !important;
   color: #fff !important;
@@ -3645,10 +3648,10 @@ button.secondary, .btn-secondary, .va-btn-secondary {
   font-size: 0.7rem !important;
   font-weight: 700 !important;
   font-family: 'Plus Jakarta Sans', sans-serif !important;
-  line-height: 18px !important;
+  line-height: 20px !important;
   text-align: center !important;
   cursor: pointer !important;
-  z-index: 3 !important;
+  z-index: 5 !important;
   padding: 0 !important;
   display: flex !important;
   align-items: center !important;
@@ -9182,7 +9185,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1780494355-GW38-f5b85719";
+const BUILD_VERSION = "1780494811-GW38-f5b85719";
 window.APEX_BUILD = BUILD_VERSION;
 
 let FPL_ID = 11051;
@@ -15132,7 +15135,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW38</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780494355-GW38-f5b85719</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780494811-GW38-f5b85719</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
