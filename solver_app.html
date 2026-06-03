@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="38" data-built-at="2026-06-03T11:16:03">
+<meta name="apex-gw" content="38" data-built-at="2026-06-03T11:39:28">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -4089,7 +4089,142 @@ body, html {
   font-weight: 600 !important;
 }
 
+
+/* ── Kill the orange accent strip on the right of hero card ───────────── */
+.va-card-accent { display: none !important; }
+
+/* ── Color the hero xPts number like a matchweek value pill (g3 tint) ── */
+.va-card-value-hero {
+  background: #639922 !important;
+  color: #ffffff !important;
+  padding: 6px 16px !important;
+  border-radius: 10px !important;
+  display: inline-block !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-size: 28px !important;
+}
+
+/* ── Make the hero card layout breathe (horizontal flex with label left, value right) ── */
+.va-hero-inner {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 18px !important;
+  flex-direction: row !important;
+}
+.va-hero-text {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 4px !important;
+}
+
+/* ── Stat values get a subtle tier pill treatment too ─────────────────── */
+.va-strip-val {
+  padding: 4px 10px !important;
+  background: #f3f4f6 !important;
+  border-radius: 8px !important;
+  display: inline-block !important;
+}
+
 /* ═══ APEX_MW_CHROME:END ═══ */
+
+
+/* ═══ APEX_CHIP_SEGMENTED:START ═══ 2026-06-02 FPL Joe-style segmented toggle ═══ */
+
+/* ── Container becomes a tight segmented control ──────────────────────── */
+.va-chip-panel {
+  background: #f1f5f9 !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 12px !important;
+  padding: 4px !important;
+  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.04) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0 !important;
+  width: auto !important;
+}
+.va-chip-panel-label {
+  display: none !important;
+}
+
+/* ── Each chip becomes a pill segment ─────────────────────────────────── */
+.va-chip-grid {
+  display: flex !important;
+  gap: 2px !important;
+  flex-wrap: nowrap !important;
+}
+.va-chip-card {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 8px !important;
+  padding: 8px 14px !important;
+  min-width: 0 !important;
+  cursor: pointer !important;
+  transition: background 0.15s, box-shadow 0.15s !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+}
+.va-chip-card:hover {
+  background: rgba(255, 255, 255, 0.6) !important;
+}
+
+/* Inactive state — flat slate text on transparent */
+.va-chip-card-tag {
+  color: #64748b !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.02em !important;
+  text-transform: none !important;
+  white-space: nowrap !important;
+}
+
+/* Active state — when the select has a value, the card lifts (white pill + shadow + dark text) */
+/* We can't directly select on the inner <select> value with pure CSS, so use :has()
+   (supported in modern browsers) and fall back to the existing JS-toggled class. */
+.va-chip-card:has(select option:checked:not([value="0"])),
+.va-chip-card.has-selection,
+.va-chip-card.active-pill {
+  background: #ffffff !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.1), 0 1px 2px rgba(15, 23, 42, 0.06) !important;
+}
+.va-chip-card:has(select option:checked:not([value="0"])) .va-chip-card-tag,
+.va-chip-card.has-selection .va-chip-card-tag,
+.va-chip-card.active-pill .va-chip-card-tag {
+  color: #0f172a !important;
+  font-weight: 800 !important;
+}
+
+/* The inner <select> is the dropdown — shrink it so the pill stays clean */
+.va-chip-card select {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  color: #F97316 !important;
+  cursor: pointer !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  width: auto !important;
+  min-width: 28px !important;
+  outline: none !important;
+}
+.va-chip-card select option {
+  background: #ffffff !important;
+  color: #0f172a !important;
+}
+
+/* Hide the chevron since we have appearance:none on the select */
+.va-chip-card-chev {
+  display: none !important;
+}
+
+/* ═══ APEX_CHIP_SEGMENTED:END ═══ */
 
 /* ═══ APEX_OFFSEASON_KILL:START ═══ 2026-06-02 force-hide landing/banner forever ═══ */
 /* Hard kill — view-landing must NEVER show, regardless of JS. */
@@ -8902,7 +9037,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1780481763-GW38-f5b85719";
+const BUILD_VERSION = "1780483168-GW38-f5b85719";
 window.APEX_BUILD = BUILD_VERSION;
 
 let FPL_ID = 11051;
@@ -14836,7 +14971,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW38</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780481763-GW38-f5b85719</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780483168-GW38-f5b85719</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
