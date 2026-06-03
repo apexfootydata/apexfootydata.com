@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="38" data-built-at="2026-06-03T11:39:28">
+<meta name="apex-gw" content="38" data-built-at="2026-06-03T11:50:52">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -4124,6 +4124,98 @@ body, html {
   background: #f3f4f6 !important;
   border-radius: 8px !important;
   display: inline-block !important;
+}
+
+
+/* ── Make hero label + number bigger and inline (compact green pill, not stretched) ── */
+.va-hero-inner {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 24px !important;
+  flex-direction: row !important;
+  padding: 8px 4px !important;
+}
+.va-card-hero {
+  padding: 20px 28px !important;
+}
+.va-card-hero .va-card-label {
+  font-size: 14px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.04em !important;
+  color: #64748b !important;
+  text-transform: uppercase !important;
+}
+.va-card-value-hero {
+  background: #639922 !important;
+  color: #ffffff !important;
+  padding: 10px 26px !important;
+  border-radius: 12px !important;
+  display: inline-block !important;
+  font-size: 38px !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.02em !important;
+  width: auto !important;
+  min-width: 0 !important;
+  flex: 0 0 auto !important;
+}
+
+/* ── Stat strip — bigger values, no pill backgrounds (cleaner, more substantial) ── */
+.va-strip {
+  padding: 18px 28px !important;
+}
+.va-strip-cell {
+  flex: 1 1 0 !important;
+  gap: 8px !important;
+}
+.va-strip-label {
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  color: #64748b !important;
+  letter-spacing: 0.04em !important;
+  text-transform: uppercase !important;
+}
+.va-strip-val {
+  background: transparent !important;
+  padding: 0 !important;
+  font-size: 22px !important;
+  font-weight: 800 !important;
+  color: #0f172a !important;
+  letter-spacing: -0.01em !important;
+  border-radius: 0 !important;
+  display: inline !important;
+}
+
+/* ── Team header at top — bigger, more substantial ── */
+.va-team-name-target,
+.va-team-name {
+  font-size: 32px !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.02em !important;
+  color: #0f172a !important;
+}
+.va-rank-label,
+.va-rank-num,
+.va-rank-target {
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  color: #64748b !important;
+}
+
+/* ── GW pill — bigger, more substantial ── */
+.va-gw-pill, .gw-pill.active {
+  font-size: 16px !important;
+  padding: 10px 22px !important;
+  font-weight: 800 !important;
+}
+
+/* ── Chip pill text — bigger inside the segmented toggle ── */
+.va-chip-card {
+  padding: 12px 20px !important;
+}
+.va-chip-card-tag {
+  font-size: 14px !important;
+  font-weight: 700 !important;
 }
 
 /* ═══ APEX_MW_CHROME:END ═══ */
@@ -9037,7 +9129,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1780483168-GW38-f5b85719";
+const BUILD_VERSION = "1780483852-GW38-f5b85719";
 window.APEX_BUILD = BUILD_VERSION;
 
 let FPL_ID = 11051;
@@ -14971,7 +15063,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW38</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780483168-GW38-f5b85719</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780483852-GW38-f5b85719</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
