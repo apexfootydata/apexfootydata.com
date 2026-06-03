@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="38" data-built-at="2026-06-03T10:53:26">
+<meta name="apex-gw" content="38" data-built-at="2026-06-03T11:07:14">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -3832,108 +3832,117 @@ button.secondary, .btn-secondary, .va-btn-secondary {
 /* ═══ APEX_XM_UNDERLINE:END ═══ */
 
 
-/* ═══ APEX_HERO_COMPACT:START ═══ 2026-06-02 compress top section to 2 tight rows ═══ */
+/* ═══ APEX_HERO_COMPACT:START ═══ 2026-06-02 Option-1 tight 3-row top ═══ */
 
-/* ── Compress the hero card (was 200px tall, now ~90px) ──────────────── */
+/* ── Row 1: hero card becomes a SINGLE horizontal strip ──────────────── */
+.va-hero-row { margin-bottom: 6px !important; }
 .va-card-hero {
-  padding: 14px 22px !important;
-}
-.va-hero-row {
-  margin-bottom: 10px !important;
+  padding: 10px 18px !important;
+  background: linear-gradient(135deg, rgba(249,115,22,0.10) 0%, rgba(249,115,22,0.02) 100%) !important;
+  border: 1px solid rgba(249,115,22,0.25) !important;
+  border-radius: 12px !important;
 }
 .va-hero-inner {
-  gap: 16px !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 14px !important;
 }
-.va-card-value-hero {
-  font-size: 2.2rem !important;  /* was 4.2rem */
-  letter-spacing: -0.025em !important;
-}
-.va-card-hero .va-card-label {
-  margin-bottom: 4px !important;
-  font-size: 0.68rem !important;
-}
-.va-card-sub {
-  margin-top: 4px !important;
-  font-size: 0.72rem !important;
-}
-/* Drop the sparkline width — gives the hero text more room without bloat */
-.va-hero-spark {
-  width: 160px !important;
-  height: 50px !important;
-}
+/* Hide the sparkline — eats horizontal space without helping */
+.va-hero-spark { display: none !important; }
 
-/* ── Tighten the stat strip (Next 1 GWs / Bank / FT / Budget) ────────── */
-.va-strip {
-  padding: 12px 22px !important;
-  margin-bottom: 14px !important;
-  gap: 10px !important;
-}
-.va-strip-cell {
-  gap: 8px !important;
-}
-.va-strip-label {
-  font-size: 0.72rem !important;
-}
-.va-strip-val {
-  font-size: 1.15rem !important;  /* was 1.55rem */
-}
-
-/* ── Compress the team header + rank above the hero ──────────────────── */
+/* Team name/rank cluster on the LEFT */
 .va-team-header,
 .va-team-name-target,
 .va-team-name {
-  margin-bottom: 6px !important;
-}
-.va-team-name-target,
-.va-team-name {
-  font-size: 1.6rem !important;  /* big "Restored" text */
-  line-height: 1.1 !important;
+  font-size: 1.0rem !important;
+  margin-bottom: 0 !important;
+  line-height: 1.15 !important;
+  display: inline-block !important;
 }
 .va-rank-label,
 .va-rank-num,
 .va-rank-target {
-  font-size: 0.82rem !important;
-}
-/* The top-section container — shrink overall vertical padding */
-.va-container,
-.va-top-section,
-.va-meta-row {
-  padding-top: 8px !important;
-  padding-bottom: 8px !important;
+  font-size: 0.72rem !important;
+  opacity: 0.7;
 }
 
-/* ── Compress the GW pill row + chip plan into a single tight row ────── */
-.va-gw-pill-row {
-  margin: 8px 0 !important;
+/* Hero number on the RIGHT — compact but still legible */
+.va-card-value-hero {
+  font-size: 1.6rem !important;
+  letter-spacing: -0.02em !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-weight: 800 !important;
 }
+.va-card-hero .va-card-label {
+  font-size: 0.62rem !important;
+  margin-bottom: 0 !important;
+  display: inline-block !important;
+  margin-right: 6px !important;
+}
+.va-card-sub {
+  display: none !important;
+}
+
+/* ── Row 2: stat strip becomes thin inline pills ─────────────────────── */
+.va-strip {
+  padding: 6px 16px !important;
+  margin-bottom: 6px !important;
+  gap: 6px !important;
+  flex-wrap: wrap !important;
+}
+.va-strip-cell {
+  gap: 4px !important;
+  flex: 0 1 auto !important;
+}
+.va-strip-label {
+  font-size: 0.62rem !important;
+  letter-spacing: 0.04em !important;
+}
+.va-strip-val {
+  font-size: 0.92rem !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-weight: 700 !important;
+}
+.va-strip-divider {
+  height: 16px !important;
+}
+
+/* ── Row 3: chip plan as one tight horizontal band ───────────────────── */
 .chip-plan-row,
 .va-chip-plan {
-  padding: 10px 14px !important;
-  margin-top: 8px !important;
-  gap: 8px !important;
+  padding: 6px 12px !important;
+  margin-top: 4px !important;
+  gap: 6px !important;
+  flex-wrap: wrap !important;
 }
 .chip-plan-card {
-  padding: 8px 12px !important;
+  padding: 4px 10px !important;
+  min-width: 70px !important;
 }
 .chip-plan-card .chip-label {
-  font-size: 0.66rem !important;
-  margin-bottom: 2px !important;
+  font-size: 0.58rem !important;
+  margin-bottom: 0 !important;
 }
 .chip-plan-card select {
-  font-size: 0.86rem !important;
-  padding: 4px 8px !important;
+  font-size: 0.78rem !important;
+  padding: 2px 6px !important;
 }
-
-/* ── Tighten chip-plan title above the dropdowns ─────────────────────── */
 .chip-plan-title {
-  font-size: 0.7rem !important;
-  margin-bottom: 6px !important;
+  display: none !important;
 }
 
-/* ── Reduce gap above the pitch so we save more vertical space ───────── */
+/* ── Squeeze the team-info "Restored Marcus Xhaka Khan RANK" block ───── */
+.va-meta-row,
+.va-team-row {
+  padding: 4px 0 !important;
+  font-size: 0.85rem !important;
+}
+
+/* ── Closer to the pitch ─────────────────────────────────────────────── */
 .pitch-wrap,
 .va-pitch-wrap {
-  margin-top: 4px !important;
+  margin-top: 0 !important;
 }
 
 /* ═══ APEX_HERO_COMPACT:END ═══ */
@@ -8749,7 +8758,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1780480406-GW38-f5b85719";
+const BUILD_VERSION = "1780481234-GW38-f5b85719";
 window.APEX_BUILD = BUILD_VERSION;
 
 let FPL_ID = 11051;
@@ -14683,7 +14692,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW38</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780480406-GW38-f5b85719</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780481234-GW38-f5b85719</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
