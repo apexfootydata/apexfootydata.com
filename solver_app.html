@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="38" data-built-at="2026-06-03T10:26:56">
+<meta name="apex-gw" content="38" data-built-at="2026-06-03T10:38:14">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -3681,7 +3681,7 @@ button.secondary, .btn-secondary, .va-btn-secondary {
 /* ═══ APEX_BENCH_LABEL:END ═══ */
 
 
-/* ═══ APEX_SHIRT_POLISH:START ═══ 2026-06-02 depth + xMins ring + bigger xPts ═══ */
+/* ═══ APEX_SHIRT_POLISH:START ═══ 2026-06-02 depth + bigger xPts + captain glow ═══ */
 
 /* ── A: depth on SVG shirts — lift them off the pitch ─────────────────── */
 .pitch .svg-shirt,
@@ -3700,44 +3700,6 @@ button.secondary, .btn-secondary, .va-btn-secondary {
   transform: translateY(-1px) !important;
 }
 
-/* ── D: signature xMins ring around each shirt-wrap ───────────────────── */
-.pitch .shirt .shirt-wrap,
-.bench-row .shirt .shirt-wrap {
-  position: relative !important;
-}
-.pitch .shirt[data-xm-tier] .shirt-wrap::after,
-.bench-row .shirt[data-xm-tier] .shirt-wrap::after {
-  content: '';
-  position: absolute;
-  inset: -6px;
-  border-radius: 50%;
-  border: 2px solid transparent;
-  pointer-events: none;
-  z-index: 0;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-.pitch .shirt[data-xm-tier="high"] .shirt-wrap::after,
-.bench-row .shirt[data-xm-tier="high"] .shirt-wrap::after {
-  border-color: rgba(74, 222, 128, 0.7);
-  box-shadow: 0 0 12px rgba(74, 222, 128, 0.25);
-}
-.pitch .shirt[data-xm-tier="mid"] .shirt-wrap::after,
-.bench-row .shirt[data-xm-tier="mid"] .shirt-wrap::after {
-  border-color: rgba(251, 191, 36, 0.7);
-  box-shadow: 0 0 12px rgba(251, 191, 36, 0.22);
-}
-.pitch .shirt[data-xm-tier="low"] .shirt-wrap::after,
-.bench-row .shirt[data-xm-tier="low"] .shirt-wrap::after {
-  border-color: rgba(239, 68, 68, 0.75);
-  box-shadow: 0 0 12px rgba(239, 68, 68, 0.25);
-}
-.pitch .shirt[data-xm-tier="out"] .shirt-wrap::after,
-.bench-row .shirt[data-xm-tier="out"] .shirt-wrap::after {
-  border-color: rgba(220, 38, 38, 0.85);
-  border-style: dashed;
-  box-shadow: 0 0 14px rgba(220, 38, 38, 0.3);
-}
-
 /* ── E: polished xPts — bigger, weightier, anchored ───────────────────── */
 .pitch .shirt-xp,
 .bench-row .shirt-xp,
@@ -3754,7 +3716,7 @@ button.secondary, .btn-secondary, .va-btn-secondary {
   line-height: 1 !important;
 }
 
-/* ── Captain badge upgrade — gold gradient + glow (subtle premium signal) */
+/* ── Captain badge upgrade — gold gradient + glow */
 .pitch .shirt .shirt-badge.cap-badge,
 .bench-row .shirt .shirt-badge.cap-badge {
   background: linear-gradient(180deg, #fde047 0%, #f59e0b 100%) !important;
@@ -3812,12 +3774,62 @@ button.secondary, .btn-secondary, .va-btn-secondary {
   color: rgba(255, 255, 255, 0.78) !important;
 }
 
-/* Slightly more vertical breathing room between rows */
+/* More vertical breathing room between pitch rows */
 .pitch .pitch-row {
   margin-bottom: 22px !important;
 }
 
 /* ═══ APEX_SHIRT_POLISH:END ═══ */
+
+
+/* ═══ APEX_XM_UNDERLINE:START ═══ 2026-06-02 option-2 underline + wider shirts ═══ */
+
+/* ── Wider SVG shirts on the pitch ────────────────────────────────────── */
+.pitch .svg-shirt,
+.bench-row .svg-shirt,
+.pitch-bench .svg-shirt {
+  width: 100px !important;
+  height: 110px !important;
+}
+.pitch .shirt,
+.bench-row .shirt {
+  min-width: 112px !important;
+}
+
+/* ── Option 2 — small coloured underline beneath the name pill ────────── */
+.shirt-xm-bar {
+  width: 38px !important;
+  height: 3px !important;
+  border-radius: 3px !important;
+  margin: 4px auto 0 !important;
+  display: block !important;
+  background: transparent !important;
+  transition: background 0.2s, box-shadow 0.2s !important;
+}
+.shirt-xm-bar[data-xm-tier="high"] {
+  background: #4ade80 !important;
+  box-shadow: 0 0 6px rgba(74, 222, 128, 0.55) !important;
+}
+.shirt-xm-bar[data-xm-tier="mid"] {
+  background: #fbbf24 !important;
+  box-shadow: 0 0 6px rgba(251, 191, 36, 0.55) !important;
+}
+.shirt-xm-bar[data-xm-tier="low"] {
+  background: #ef4444 !important;
+  box-shadow: 0 0 6px rgba(239, 68, 68, 0.55) !important;
+}
+.shirt-xm-bar[data-xm-tier="out"] {
+  background: #dc2626 !important;
+  box-shadow: 0 0 8px rgba(220, 38, 38, 0.65) !important;
+}
+
+/* Tighten fix margin since we now have the bar between name and fix */
+.pitch .shirt-fix,
+.bench-row .shirt-fix {
+  margin-top: 3px !important;
+}
+
+/* ═══ APEX_XM_UNDERLINE:END ═══ */
 
 /* ═══ APEX_OFFSEASON_KILL:START ═══ 2026-06-02 force-hide landing/banner forever ═══ */
 /* Hard kill — view-landing must NEVER show, regardless of JS. */
@@ -8630,7 +8642,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1780478816-GW38-f5b85719";
+const BUILD_VERSION = "1780479494-GW38-f5b85719";
 window.APEX_BUILD = BUILD_VERSION;
 
 let FPL_ID = 11051;
@@ -12948,12 +12960,19 @@ function _shirtHtml(p, isXi) {
   if (_xmRaw < 1)       _xmTier = 'out';
   else if (_xmRaw < 45) _xmTier = 'low';
   else if (_xmRaw < 70) _xmTier = 'mid';
+  // 2026-06-02 — Append xMins to the fixture line so the user can see the
+  // model's predicted minutes alongside the opponent. Updates live when
+  // the user overrides xMins via the ⏱ editor (p.xmins is mutated).
+  const _xmDisplay = (_xmRaw > 0) ? ` · ${Math.round(_xmRaw)}'` : '';
+  const _fixWithXm = _fixLabel ? `${_fixLabel}${_xmDisplay}` : '';
   return `<div class="${cls}" draggable="true" data-pid="${p.id}" data-xi="${isXi ? 1 : 0}" data-xp="${xp}" data-pos="${p.element_type}" data-cost="${p.cost}" data-xm-tier="${_xmTier}">` +
     removeBtn + whyBtn + xmEditBtn +
     `<div class="shirt-wrap${_tcGlow}">${shirt}${badges}</div>` +
     `<div class="shirt-xp">${xp}</div>` +
     `<div class="shirt-name">${p.web_name}</div>` +
-    (_fixLabel ? `<div class="shirt-fix">${_fixLabel}</div>` : '') +
+    // Option 2 — small coloured underline below the name, tier-coloured
+    `<div class="shirt-xm-bar" data-xm-tier="${_xmTier}"></div>` +
+    (_fixWithXm ? `<div class="shirt-fix">${_fixWithXm}</div>` : '') +
     `</div>`;
 }
 
@@ -14557,7 +14576,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW38</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780478816-GW38-f5b85719</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780479494-GW38-f5b85719</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
