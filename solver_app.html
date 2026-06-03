@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="38" data-built-at="2026-06-03T09:23:35">
+<meta name="apex-gw" content="38" data-built-at="2026-06-03T09:29:15">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -5014,6 +5014,7 @@ html.apex-offseason #view-landing .hero-sub::after {
                 <th data-key="web_name"   onclick="setPoolSort('web_name')"   style="padding:10px 12px;cursor:pointer;font-weight:700;text-transform:uppercase;letter-spacing:.04em;font-size:.7rem;color:var(--muted);">Player</th>
                 <th data-key="team"       onclick="setPoolSort('team')"       style="padding:10px 12px;cursor:pointer;font-weight:700;text-transform:uppercase;letter-spacing:.04em;font-size:.7rem;color:var(--muted);">Team</th>
                 <th data-key="pos"        onclick="setPoolSort('pos')"        style="padding:10px 12px;cursor:pointer;font-weight:700;text-transform:uppercase;letter-spacing:.04em;font-size:.7rem;color:var(--muted);">Pos</th>
+                <th data-key="xp_minutes" onclick="setPoolSort('xp_minutes')" style="padding:10px 12px;cursor:pointer;font-weight:700;text-transform:uppercase;letter-spacing:.04em;font-size:.7rem;color:var(--muted);text-align:right;" title="Expected minutes for this GW (ML-predicted)">xMins</th>
                 <th data-key="cost"       onclick="setPoolSort('cost')"       style="padding:10px 12px;cursor:pointer;font-weight:700;text-transform:uppercase;letter-spacing:.04em;font-size:.7rem;color:var(--muted);text-align:right;">£</th>
                 <!-- GW columns injected by JS -->
                 <th data-key="total_xp" onclick="setPoolSort('total_xp')" style="padding:10px 12px;cursor:pointer;font-weight:700;text-transform:uppercase;letter-spacing:.04em;font-size:.7rem;color:var(--accent,#f97316);text-align:right;">Total</th>
@@ -8277,7 +8278,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1780475015-GW38-44b15d97";
+const BUILD_VERSION = "1780475355-GW38-44b15d97";
 window.APEX_BUILD = BUILD_VERSION;
 
 let FPL_ID = 11051;
@@ -13820,6 +13821,7 @@ function renderPoolTable() {
       <td><span style="display:inline-flex;align-items:center;">${shirtImg}<strong>${p.web_name}</strong></span></td>
       <td style="color:var(--muted);">${p.team}</td>
       <td style="color:var(--muted);font-size:.72rem;font-weight:700;">${POOL_POS_LABELS[p.element_type] || '?'}</td>
+      <td class="pool-xp" style="color:${(p.xp_minutes || 0) >= 75 ? '#4ade80' : (p.xp_minutes || 0) >= 60 ? 'var(--fg)' : (p.xp_minutes || 0) >= 45 ? '#f59e0b' : '#ef4444'};font-variant-numeric:tabular-nums;">${Math.round(p.xp_minutes || 0)}</td>
       <td class="pool-xp">£${p.cost.toFixed(1)}</td>
       ${gwCells}
       <td class="pool-xp pool-xp-total">${p.total_xp.toFixed(1)}</td>
@@ -13958,7 +13960,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW38</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780475015-GW38-44b15d97</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780475355-GW38-44b15d97</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
