@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="38" data-built-at="2026-06-03T09:58:40">
+<meta name="apex-gw" content="38" data-built-at="2026-06-03T10:03:58">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -3662,6 +3662,98 @@ button.secondary, .btn-secondary, .va-btn-secondary {
   background: #F97316 !important;
 }
 /* ═══ APEX_XMINS_BTN:END ═══ */
+
+
+/* ═══ APEX_SHIRT_CARD:START ═══ 2026-06-02 Solio-style shirt cards on the pitch ═══ */
+/* Solio-style cards on the pitch — translucent white panels that contain
+   each shirt + its data (kit, xP, name pill, fixture, xMins). Soft shadow
+   so they float above the grass without losing the green pitch feel.
+   Layout stays vertical — kit on top, info stacks below. */
+
+.pitch .shirt {
+  background: rgba(255, 255, 255, 0.97) !important;
+  border-radius: 14px !important;
+  padding: 8px 8px 12px !important;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18), 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.4) !important;
+  min-width: 96px !important;
+  transition: transform 0.2s, box-shadow 0.2s !important;
+}
+.pitch .shirt:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.22), 0 2px 4px rgba(0, 0, 0, 0.12) !important;
+}
+
+/* Text inside the card — Plus Jakarta Sans, dark on white */
+.pitch .shirt .shirt-xp {
+  color: #0f172a !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-size: 18px !important;
+  font-weight: 800 !important;
+  margin-top: 4px !important;
+  text-align: center !important;
+  text-shadow: none !important;
+}
+.pitch .shirt .shirt-name {
+  background: #0f172a !important;
+  color: #ffffff !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  padding: 3px 10px !important;
+  border-radius: 999px !important;
+  display: inline-block !important;
+  margin-top: 4px !important;
+  letter-spacing: -0.005em !important;
+  max-width: 100% !important;
+  text-overflow: ellipsis !important;
+  overflow: hidden !important;
+  white-space: nowrap !important;
+}
+.pitch .shirt .shirt-fix {
+  color: #6b7280 !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.04em !important;
+  text-transform: uppercase !important;
+  margin-top: 3px !important;
+}
+
+/* Buttons (× remove, ? why, ⏱ xmins) need higher contrast on white card */
+.pitch .shirt .pp-remove-btn,
+.pitch .shirt .pp-why-btn,
+.pitch .shirt .pp-xmins-btn {
+  background: rgba(15, 23, 42, 0.85) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.4) !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15) !important;
+  z-index: 4 !important;
+}
+.pitch .shirt .pp-remove-btn:hover { background: #ef4444 !important; }
+.pitch .shirt .pp-why-btn:hover { background: #F97316 !important; }
+.pitch .shirt .pp-xmins-btn:hover { background: #F97316 !important; }
+
+/* Captain / vice badge — already exist; tighten to white card */
+.pitch .shirt .shirt-badge {
+  background: #fbbf24 !important;
+  color: #0f172a !important;
+  border: 2px solid #ffffff !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2) !important;
+  font-weight: 800 !important;
+}
+
+/* SVG shirt inside card — center it */
+.pitch .shirt .shirt-wrap {
+  margin: 0 auto !important;
+  display: block !important;
+}
+
+/* Tighten row gaps so cards don't crowd */
+.pitch .pitch-row {
+  gap: 18px !important;
+}
+/* ═══ APEX_SHIRT_CARD:END ═══ */
 
 /* ═══ APEX_OFFSEASON_KILL:START ═══ 2026-06-02 force-hide landing/banner forever ═══ */
 /* Hard kill — view-landing must NEVER show, regardless of JS. */
@@ -8474,7 +8566,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1780477120-GW38-f5b85719";
+const BUILD_VERSION = "1780477438-GW38-f5b85719";
 window.APEX_BUILD = BUILD_VERSION;
 
 let FPL_ID = 11051;
@@ -14363,7 +14455,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW38</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780477120-GW38-f5b85719</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780477438-GW38-f5b85719</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
