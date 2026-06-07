@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="38" data-built-at="2026-06-07T11:37:17">
+<meta name="apex-gw" content="38" data-built-at="2026-06-07T12:00:43">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -8051,7 +8051,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1780828637-GW38-9fe95f9a";
+const BUILD_VERSION = "1780830043-GW38-9fe95f9a";
 window.APEX_BUILD = BUILD_VERSION;
 
 let FPL_ID = 11051;
@@ -13749,22 +13749,98 @@ function _poolAddPlayer(playerId) {
 
 
 // ══════════════════════════════════════════════════════════════════════════
-// EDITABLE xMins MODULE — 2026-06-02
+// EDITABLE xMins MODULE — 2026-06-02 · storage v2 2026-06-07
 // Click any shirt's xPts number on the pitch → modal with current xMins →
 // type a new value (0-90) → that player's xPts recomputes instantly, captain
-// auto-picks again, chip totals refresh. Persists in localStorage so reloads
-// keep your overrides. Reset button on the modal reverts to model value.
+// auto-picks again, chip totals refresh. Reset button reverts to model value.
+//
+// STORAGE (v2): per-FPL-ID buckets, stamped with the planning GW.
+//   key   = 'apex_xmins_ov_v2:<fplId|anon>'
+//   value = { gw: <TEAM_META.start_gw>, ov: { pid: mins } }
+// Edits are GW-specific news judgements — when the solver rolls to a new GW
+// the stamp no longer matches and the bucket is purged (silently re-applying
+// "Haaland 90'" three weeks later would corrupt the solve). Buckets are keyed
+// to the FPL ID so two managers sharing a device don't trample each other.
+// Cross-DEVICE sync is an accounts-era feature (see PRICING_IDEAS.md).
+// Legacy v1 key (no GW stamp, no ID) is dropped on sight — can't be trusted.
 // ══════════════════════════════════════════════════════════════════════════
-const _XMINS_OVERRIDE_KEY = 'apex_xmins_overrides_v1';
-let _xminsOverrides = {};
+const _XMINS_OV_PREFIX = 'apex_xmins_ov_v2:';
+
+function _xmGw() {
+  return (typeof TEAM_META !== 'undefined' && TEAM_META && +TEAM_META.start_gw) || 0;
+}
+function _xmId() {
+  try {
+    const v = localStorage.getItem('apex_fpl_id');
+    if (v && /^\d+$/.test(v)) return v;
+  } catch (_) {}
+  return 'anon';
+}
+function _xmKey(id) { return _XMINS_OV_PREFIX + id; }
+
+function _loadXminsOverridesFor(id) {
+  try {
+    const raw = localStorage.getItem(_xmKey(id));
+    if (!raw) return {};
+    const obj = JSON.parse(raw) || {};
+    if (+obj.gw !== _xmGw()) {          // stale GW → expire the bucket
+      localStorage.removeItem(_xmKey(id));
+      return {};
+    }
+    return obj.ov || {};
+  } catch (_) { return {}; }
+}
+
+// Boot housekeeping: drop legacy v1 key + purge any bucket from an old GW.
+try { localStorage.removeItem('apex_xmins_overrides_v1'); } catch (_) {}
 try {
-  const _saved = localStorage.getItem(_XMINS_OVERRIDE_KEY);
-  if (_saved) _xminsOverrides = JSON.parse(_saved) || {};
+  for (let _ki = localStorage.length - 1; _ki >= 0; _ki--) {
+    const _k = localStorage.key(_ki);
+    if (!_k || _k.indexOf(_XMINS_OV_PREFIX) !== 0) continue;
+    try {
+      const _o = JSON.parse(localStorage.getItem(_k)) || {};
+      if (+_o.gw !== _xmGw()) localStorage.removeItem(_k);
+    } catch (_) { localStorage.removeItem(_k); }
+  }
 } catch (_) {}
 
+let _xmLoadedFor = _xmId();              // which bucket the in-memory set belongs to
+let _xminsOverrides = _loadXminsOverridesFor(_xmLoadedFor);
+
 function _saveXminsOverrides() {
-  try { localStorage.setItem(_XMINS_OVERRIDE_KEY, JSON.stringify(_xminsOverrides)); } catch (_) {}
+  try {
+    const key = _xmKey(_xmLoadedFor || _xmId());
+    if (Object.keys(_xminsOverrides).length === 0) {
+      localStorage.removeItem(key);
+      return;
+    }
+    localStorage.setItem(key, JSON.stringify({ gw: _xmGw(), ov: _xminsOverrides }));
+  } catch (_) {}
 }
+
+// Called by the public boot once the FPL ID is known (after hydration).
+// Re-binds the in-memory set to that ID's bucket:
+//   - saved edits for THIS ID (this GW) load back in,
+//   - anon edits made before the ID was known migrate across and win,
+//   - edits belonging to a DIFFERENT previous ID are dropped (no leaking
+//     one manager's minutes judgements into another manager's solve).
+function _xminsAdoptId(id) {
+  id = String(id);
+  try {
+    const idOv   = _loadXminsOverridesFor(id);
+    const anonOv = _loadXminsOverridesFor('anon');
+    const mine   = (_xmLoadedFor === id) ? _xminsOverrides : {};
+    _xminsOverrides = Object.assign({}, idOv, anonOv, mine);
+    _xmLoadedFor = id;
+    try { localStorage.removeItem(_xmKey('anon')); } catch (_) {}
+    _saveXminsOverrides();
+    if (Object.keys(_xminsOverrides).length > 0 &&
+        typeof _applyXminsOverridesAndRender === 'function') {
+      _applyXminsOverridesAndRender();
+    }
+  } catch (_) {}
+}
+window._xminsAdoptId = _xminsAdoptId;
 
 // Look up baseline (model) xMins for a player from POOL_DATA.
 function _baselineXmins(pid) {
@@ -14001,7 +14077,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW38</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780828637-GW38-9fe95f9a</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780830043-GW38-9fe95f9a</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
@@ -14159,6 +14235,9 @@ document.addEventListener('DOMContentLoaded', () => {
         var _vAllowed = { team: 1, 'chip-select': 1, league: 1 };
         var _vUse = _vAllowed[_vReq] ? _vReq : 'team';
         if (typeof switchView === 'function') switchView(_vUse);
+        // Re-bind saved xMins edits to this manager's bucket now the ID is
+        // known (hydration replaced SQUAD_DATA, so re-apply on top of it).
+        if (typeof window._xminsAdoptId === 'function') window._xminsAdoptId(fplId);
         // Surface the Apex/Review compare toggle if URL has ?compare=1.
         if (typeof _initCompareToggle === 'function') _initCompareToggle();
         setTimeout(function () {
