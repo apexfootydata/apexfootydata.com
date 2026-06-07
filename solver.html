@@ -1024,7 +1024,9 @@ a[href*="rank_milestones"] {
  * Target row width with 5 shirts: 5*64 + 4*4 = 336px (+ pitch padding) <= 360px.
  * ========================================================================== */
 @media (max-width: 480px) {
-    .pitch { padding: 22px 8px 14px !important; }
+    /* 2026-06-06: top padding clears the absolute cost badge so it no longer
+       overlaps the GK; was 22px. */
+    .pitch { padding: 78px 8px 14px !important; }
     .pitch-row { gap: 4px !important; margin-bottom: 12px !important; }
 
     /* doubled-class selectors out-rank the desktop XL rules
@@ -1044,8 +1046,13 @@ a[href*="rank_milestones"] {
         padding: 2px 6px !important;
     }
     .shirt-fix {
-        max-width: 64px !important;
+        max-width: 66px !important;
         font-size: 0.6rem !important;
+        /* 2026-06-06: wrap to two lines so the xMins ("· 85'") isn't
+           swallowed by the ellipsis on phones. */
+        white-space: normal !important;
+        line-height: 1.15 !important;
+        text-align: center !important;
     }
     .shirt-xp { font-size: 0.92rem !important; margin-top: 2px !important; }
 
