@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="38" data-built-at="2026-06-06T12:15:34">
+<meta name="apex-gw" content="38" data-built-at="2026-06-07T11:17:14">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -4493,1170 +4493,7 @@ body, html {
 <body>
 
 <!-- ── Offseason banner (auto-hidden in-season) ──────────────────────────
-     Toggled by the detection script just before 
-<script>
-// ══════════════════════════════════════════════════════════════════════
-//  PUBLIC BOOT — runs on apexfootydata.com/solver_app.html
-//  Hydrates SQUAD_DATA / TEAM_META / GW_XI_BASE from the FPL API, then
-//  hands off to switchView('team'). Claims DOMContentLoaded exclusively
-//  so the baked `switchView('landing')` handler no-ops via a guard flag.
-// ══════════════════════════════════════════════════════════════════════
-(function publicBoot() {
-  var params = new URLSearchParams(window.location.search);
-  var idRaw = params.get('id');
-  if (!idRaw || !/^\d+$/.test(idRaw)) {
-    // No ID in URL — send them to the landing form
-    window.location.replace('/solver.html');
-    return;
-  }
-  var fplId = parseInt(idRaw, 10);
-  window._apexPublicBootClaimed = true;
-  // Persist so sibling pages (rank milestones) don't prompt for ID again.
-  try { localStorage.setItem('apex_fpl_id', String(fplId)); } catch (_) {}
-
-  document.addEventListener('DOMContentLoaded', function () {
-    var overlay = document.createElement('div');
-    overlay.id = 'apex-public-boot';
-    overlay.style.cssText = 'position:fixed;inset:0;background:#0c0c0f;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:Space Grotesk,sans-serif;color:#e8e8f0;padding:20px;';
-    overlay.innerHTML =
-      '<div style="font-size:1.5rem;font-weight:700;margin-bottom:20px;letter-spacing:-.01em;">' +
-      '<span style="font-weight:500;">Apex</span><span style="font-weight:800;color:#9ca3af;">FootyData</span></div>' +
-      '<div id="apex-status" style="color:#F97316;font-size:.95rem;margin-bottom:16px;font-weight:600;">Loading your team&hellip;</div>' +
-      '<div style="width:300px;max-width:90vw;background:#1e2130;border:1px solid #2a2a35;border-radius:10px;overflow:hidden;height:10px;">' +
-      '<div id="apex-bar" style="height:100%;width:8%;background:#F97316;transition:width .4s ease;"></div></div>';
-    document.body.appendChild(overlay);
-
-    function setStatus(txt, pct) {
-      var s = document.getElementById('apex-status');
-      var b = document.getElementById('apex-bar');
-      if (s) s.textContent = txt;
-      if (b && pct != null) b.style.width = pct + '%';
-    }
-    function fail(msg) {
-      var s = document.getElementById('apex-status');
-      if (s) { s.textContent = msg; s.style.color = '#f87171'; }
-      var ov = document.getElementById('apex-public-boot');
-      if (ov && !ov.querySelector('.apex-back')) {
-        var back = document.createElement('a');
-        back.className = 'apex-back';
-        back.href = '/solver.html';
-        back.textContent = '\u2190 Back to solver';
-        back.style.cssText = 'margin-top:24px;color:#F97316;text-decoration:none;font-size:.9rem;';
-        ov.appendChild(back);
-      }
-    }
-
-    hydrateFromFPL(fplId, setStatus)
-      .then(function () {
-        setStatus('Rendering\u2026', 95);
-        return new Promise(function (r) { setTimeout(r, 40); });
-      })
-      .then(function () {
-        // Honour ?view= query param from sibling pages (e.g. Rank Predictor
-        // nav links pass view=team / chip-select / league). Fallback = team.
-        var _vReq = params.get('view') || 'team';
-        var _vAllowed = { team: 1, 'chip-select': 1, league: 1 };
-        var _vUse = _vAllowed[_vReq] ? _vReq : 'team';
-        if (typeof switchView === 'function') switchView(_vUse);
-        // Surface the Apex/Review compare toggle if URL has ?compare=1.
-        if (typeof _initCompareToggle === 'function') _initCompareToggle();
-        setTimeout(function () {
-          var ov = document.getElementById('apex-public-boot');
-          if (ov) ov.remove();
-        }, 250);
-        // Eager-warm chip planner so FH_SQUADS / WC_SQUADS are populated before
-        // the user clicks a chip GW pill. Without this, My Squad route + FH
-        // selected shows the user's own squad (with 0 xP on BGW teams) instead
-        // of the Free Hit XI. Chip Planner tab visit used to be the only trigger.
-        setTimeout(function () {
-          if (typeof _ensureChipPlannerLoaded !== 'function') return;
-          _ensureChipPlannerLoaded().then(function () {
-            console.log('[apex-public] Chip planner warmed — FH/WC squads populated');
-            // ── LIVE CHIP-SQUAD COST SYNC (public variant) ─────────────────
-            // On apexfootydata.com, FH_SQUADS / WC_SQUADS arrive empty and are
-            // populated by the chip-planner fetch — AFTER hydrate's in-place
-            // refresh pass already ran. POOL_DATA.cost is already live at this
-            // point (hydrate refreshed it), so sync chip-squad .cost from
-            // POOL_DATA by ID. Closes the pitch-bank £0.1–0.2m drift on Apply.
-            try {
-              var _poolById = {};
-              if (typeof POOL_DATA !== 'undefined' && Array.isArray(POOL_DATA)) {
-                POOL_DATA.forEach(function (pp) { if (pp && pp.id != null) _poolById[pp.id] = pp; });
-              }
-              var _chipSyncN = 0;
-              var _syncChipMap = function (mapObj) {
-                if (!mapObj) return;
-                Object.keys(mapObj).forEach(function (gwKey) {
-                  var arr = mapObj[gwKey];
-                  if (!Array.isArray(arr)) return;
-                  for (var _ci = 0; _ci < arr.length; _ci++) {
-                    var _sp = arr[_ci];
-                    if (!_sp || _sp.id == null) continue;
-                    var _pp = _poolById[_sp.id];
-                    if (!_pp || _pp.cost == null) continue;
-                    var _liveCost = Math.round((_pp.cost || 0) * 10) / 10;
-                    if (Math.abs((_sp.cost || 0) - _liveCost) > 0.001) {
-                      _chipSyncN++;
-                      _sp.cost = _liveCost;
-                    }
-                  }
-                });
-              };
-              _syncChipMap(typeof FH_SQUADS !== 'undefined' ? FH_SQUADS : null);
-              _syncChipMap(typeof WC_SQUADS !== 'undefined' ? WC_SQUADS : null);
-              console.log('[apex-public] Chip-squad cost sync: ' + _chipSyncN + ' updates from live POOL_DATA');
-            } catch (_syncErr) {
-              console.warn('[apex-public] Chip-squad cost sync failed — pitch badge may drift £0.1m:', _syncErr);
-            }
-            // ────────────────────────────────────────────────────────────────
-            // If user is still on a chip GW pill, re-run solve so the panel renders now.
-            try {
-              var fhSel = document.getElementById('sel-fh');
-              var wcSel = document.getElementById('sel-wc');
-              var fhGw  = fhSel ? parseInt(fhSel.value || 0) : 0;
-              var wcGw  = wcSel ? parseInt(wcSel.value || 0) : 0;
-              var activeGw = TEAM_META.gw_range[typeof activeGwIdx === 'number' ? activeGwIdx : 0];
-              if (typeof runSolve === 'function' && ((fhGw && activeGw === fhGw) || (wcGw && activeGw === wcGw))) {
-                runSolve();
-              }
-            } catch (e) { /* non-fatal */ }
-          }).catch(function (err) {
-            console.error('[apex-public] Chip planner warm-up failed:', err);
-          });
-        }, 800);
-      })
-      .catch(function (err) {
-        console.error('[apex-public] Boot failed:', err);
-        fail('Couldn\u2019t load team: ' + (err && err.message ? err.message : err));
-      });
-  });
-
-  async function hydrateFromFPL(id, setStatus) {
-    var proxy = (typeof FPL_CORS_PROXY === 'string' && FPL_CORS_PROXY) ? FPL_CORS_PROXY : '';
-    if (!proxy) throw new Error('FPL proxy not configured');
-
-    async function fetchFpl(path) {
-      var r = await fetch(proxy + path, { cache: 'no-store' });
-      if (!r.ok) throw new Error('FPL API ' + r.status + ' on ' + path);
-      return r.json();
-    }
-
-    setStatus('Looking up manager\u2026', 20);
-    var entry = await fetchFpl('/entry/' + id + '/');
-
-    var startGw = TEAM_META.start_gw;
-
-    setStatus('Fetching your squad\u2026', 40);
-    var picks = null;
-    var gwFetched = null;
-    for (var _i = 0; _i < 2; _i++) {
-      var gw = startGw - _i;
-      if (gw < 1) continue;
-      try {
-        picks = await fetchFpl('/entry/' + id + '/event/' + gw + '/picks/');
-        gwFetched = gw;
-        break;
-      } catch (e) { /* try previous GW */ }
-    }
-    if (!picks) throw new Error('Could not fetch picks for ID ' + id);
-
-    // ── FH OVERRIDE ─────────────────────────────────────────────────────
-    // If the picks we fetched have active_chip === 'freehit', that GW was
-    // played on Free Hit — squad is ephemeral. For ANY future-GW planning
-    // (whether startGw IS the FH GW or a later GW), we must re-fetch
-    // gwFetched-1 to get the user's real squad.
-    //
-    // Don't gate on `gwFetched === startGw`. When startGw advances past
-    // the FH GW (e.g. solver baked at GW34 after FH in GW33), the picks
-    // loop falls back to gwFetched=33 and the FH squad is what we'd
-    // otherwise return. That's the bug ID 316 hit.
-    //
-    // Wildcard does NOT trigger override (WC permanently replaces the
-    // squad). BB/TC don't change the 15.
-    var fhOverridden = false;
-    if (picks.active_chip === 'freehit' && gwFetched && gwFetched > 1) {
-      try {
-        var _preFh = await fetchFpl('/entry/' + id + '/event/' + (gwFetched - 1) + '/picks/');
-        if (_preFh && _preFh.active_chip !== 'freehit' && Array.isArray(_preFh.picks) && _preFh.picks.length) {
-          console.log('[hydrate] FH detected in GW' + gwFetched + ' — using GW' + (gwFetched - 1) + ' squad as baseline');
-          picks = _preFh;
-          gwFetched = gwFetched - 1;
-          fhOverridden = true;
-        } else {
-          console.warn('[hydrate] FH override: GW' + (gwFetched - 1) + ' picks unusable — keeping FH squad');
-        }
-      } catch (_e) {
-        console.warn('[hydrate] FH detected but pre-FH fetch failed:', _e);
-      }
-    }
-    // ────────────────────────────────────────────────────────────────────
-
-    setStatus('Reading your chip history\u2026', 60);
-    var history = await fetchFpl('/entry/' + id + '/history/');
-
-    // ── LIVE PRICE REFRESH ──────────────────────────────────────────────
-    // POOL_DATA.cost is baked at pipeline-build time. FPL updates prices
-    // overnight (~01:30 UK). If any FH/WC squad player has risen since the
-    // last pipeline run, the ILP would underestimate his cost and hand the
-    // user a squad that's £0.1m+ over FPL's real budget. Refresh now_cost
-    // from bootstrap so the ILP prices against what FPL will actually charge.
-    // Also reused by the stub-missing-picks block below.
-    var _bs = null;
-    var _bsElemById = null;
-    try {
-      _bs = await fetchFpl('/bootstrap-static/');
-      _bsElemById = {};
-      var _priceChanges = 0;
-      (_bs.elements || []).forEach(function (el) { _bsElemById[el.id] = el; });
-      for (var _pi = 0; _pi < POOL_DATA.length; _pi++) {
-        var _pp = POOL_DATA[_pi];
-        var _el = _bsElemById[_pp.id];
-        if (!_el) continue;
-        var _liveCost = Math.round(((_el.now_cost || 0) / 10) * 10) / 10;
-        if (Math.abs((_pp.cost || 0) - _liveCost) > 0.001) {
-          _priceChanges++;
-          _pp.cost = _liveCost;
-        }
-      }
-      if (_priceChanges > 0) {
-        console.log('[hydrate] Refreshed ' + _priceChanges + ' player prices from bootstrap (baked pool was stale)');
-      }
-      // Also refresh baked costs inside FH_SQUADS + WC_SQUADS — these are
-      // separate JSON arrays from POOL_DATA, frozen at pipeline-build time.
-      // Without this, "Apply Squad to Plan" drops players onto the pitch with
-      // stale .cost fields, so the pitch-bank badge drifts £0.1–0.2m vs FPL
-      // when any chip-squad pick has changed price overnight. Fix: for every
-      // player in every FH/WC baked squad, overwrite .cost with live now_cost.
-      var _chipCostUpdates = 0;
-      try {
-        var _refreshChipSquadMap = function (mapObj, label) {
-          if (!mapObj) return;
-          Object.keys(mapObj).forEach(function (gwKey) {
-            var arr = mapObj[gwKey];
-            if (!Array.isArray(arr)) return;
-            for (var _ci = 0; _ci < arr.length; _ci++) {
-              var _sp = arr[_ci];
-              if (!_sp || !_sp.id) continue;
-              var _el2 = _bsElemById[_sp.id];
-              if (!_el2) continue;
-              var _liveCost2 = Math.round(((_el2.now_cost || 0) / 10) * 10) / 10;
-              if (Math.abs((_sp.cost || 0) - _liveCost2) > 0.001) {
-                _chipCostUpdates++;
-                _sp.cost = _liveCost2;
-              }
-            }
-          });
-        };
-        _refreshChipSquadMap(typeof FH_SQUADS !== 'undefined' ? FH_SQUADS : null, 'FH');
-        _refreshChipSquadMap(typeof WC_SQUADS !== 'undefined' ? WC_SQUADS : null, 'WC');
-        if (_chipCostUpdates > 0) {
-          console.log('[hydrate] Refreshed ' + _chipCostUpdates + ' baked chip-squad costs (FH/WC) from bootstrap');
-        }
-      } catch (_chipErr) {
-        console.warn('[hydrate] Chip-squad cost refresh failed — pitch badge may drift £0.1m:', _chipErr);
-      }
-    } catch (_bsErr) {
-      console.warn('[hydrate] bootstrap price refresh failed — using baked pool costs:', _bsErr);
-    }
-    // ────────────────────────────────────────────────────────────────────
-
-    // Build SQUAD_DATA = POOL_DATA ∩ picks, with my_* annotations
-    var picksById = new Map((picks.picks || []).map(function (p) { return [p.element, p]; }));
-    var newSquad = [];
-    for (var pi = 0; pi < POOL_DATA.length; pi++) {
-      var pool = POOL_DATA[pi];
-      var pk = picksById.get(pool.id);
-      if (!pk) continue;
-      var merged = {};
-      for (var k in pool) merged[k] = pool[k];
-      merged.my_captain = !!pk.is_captain;
-      merged.my_vc = !!pk.is_vice_captain;
-      merged.my_starter = pk.position <= 11;
-      merged.my_bench_order = pk.position > 11 ? (pk.position - 11) : 0;
-      newSquad.push(merged);
-    }
-
-    // POOL_DATA filters out low-minute players, 3rd-choice GKs, etc. — any of
-    // the user's picks that aren't in the pool would silently disappear. That's
-    // how an owner of Darlow+Verbruggen+Struijk ended up with 12 players on
-    // screen (no GK, 1 bench). Fill the gap with bootstrap stubs so the squad
-    // is always complete; stubs have 0 xP (no Apex rating) but keep the display
-    // valid and the XI picker finds a GK.
-    var _matchedIds = new Set(newSquad.map(function (p) { return p.id; }));
-    var _missingPickIds = [];
-    picksById.forEach(function (_v, _k) { if (!_matchedIds.has(_k)) _missingPickIds.push(_k); });
-    if (_missingPickIds.length) {
-      try {
-        // Reuse bootstrap fetched during live-price refresh above; refetch if it failed.
-        if (!_bs) { _bs = await fetchFpl('/bootstrap-static/'); }
-        // FPL team short names → Apex POOL_DATA full names (must match exactly
-        // for shirt image URLs + team-filter logic elsewhere).
-        var _teamNameMap = {
-          'Man Utd': 'Manchester United',
-          'Man City': 'Manchester City',
-          "Nott'm Forest": 'Nottingham Forest',
-          'Spurs': 'Tottenham',
-          'Newcastle': 'Newcastle United',
-          'Wolves': 'Wolverhampton Wanderers'
-        };
-        var _teamsById = {};
-        (_bs.teams || []).forEach(function (t) {
-          _teamsById[t.id] = _teamNameMap[t.name] || t.name;
-        });
-        var _elemById = _bsElemById || {};
-        if (!_bsElemById) {
-          (_bs.elements || []).forEach(function (el) { _elemById[el.id] = el; });
-        }
-        var _horizon = (TEAM_META.gw_range || []).length || 5;
-        _missingPickIds.forEach(function (eid) {
-          var el = _elemById[eid];
-          if (!el) return;
-          var pk = picksById.get(eid);
-          newSquad.push({
-            id: eid,
-            web_name: el.web_name,
-            team: _teamsById[el.team] || String(el.team),
-            element_type: el.element_type,
-            cost: (el.now_cost || 0) / 10,
-            xp: 0,
-            xp_per_gw: new Array(_horizon).fill(0),
-            total_xp: 0,
-            rolling_xp: 0,
-            my_captain: !!pk.is_captain,
-            my_vc: !!pk.is_vice_captain,
-            my_starter: pk.position <= 11,
-            my_bench_order: pk.position > 11 ? (pk.position - 11) : 0,
-            _no_apex_rating: true
-          });
-        });
-        console.log('[hydrate] Added ' + _missingPickIds.length +
-                    ' bootstrap stubs for picks missing from POOL_DATA:',
-                    _missingPickIds);
-      } catch (e) {
-        console.warn('[hydrate] Failed to add stubs for missing picks:', e);
-      }
-    }
-
-    if (newSquad.length < 11) {
-      throw new Error('Only ' + newSquad.length + ' of 15 players matched the pool. Try again after the next pipeline run.');
-    }
-
-    // Chip-aware FT walk (mirrors apex_fpl_solver.fetch_fpl_team exactly)
-    var chipMap = {};
-    (history.chips || []).forEach(function (c) { chipMap[c.event] = c.name; });
-    var ft = 1;
-    var AFCON_TOPUP_GW = 16;
-    var pastGws = (history.current || []).filter(function (g) { return g.event <= startGw; });
-    for (var gi = 0; gi < pastGws.length; gi++) {
-      var g = pastGws[gi];
-      var made = g.event_transfers || 0;
-      var cost = g.event_transfers_cost || 0;
-      var chip = chipMap[g.event] || '';
-      if (g.event === AFCON_TOPUP_GW) ft = 5;
-      if (chip === 'wildcard' || chip === 'freehit') continue;
-      var hits = Math.floor(cost / 4);
-      if (hits > 0) ft = 1;
-      else if (made === 0) ft = Math.min(ft + 1, 5);
-      else ft = Math.max(Math.min(ft - made + 1, 5), 1);
-    }
-
-    var evHist = picks.entry_history || {};
-    var bankVal = (evHist.bank || 0) / 10.0;
-    // FPL's entry_history.value is the TOTAL (squad selling + bank). To display
-    // "squad value" matching the FPL app exactly we must subtract the bank.
-    var apiValue = (evHist.value || 0) / 10.0;
-    var sellingValue = apiValue > 0 ? (apiValue - bankVal) :
-        newSquad.reduce(function (s, p) { return s + (p.cost || 0); }, 0);
-
-    // ── LIVE BUDGET RECOMPUTE ─────────────────────────────────────────
-    // picks.entry_history.value is a SNAPSHOT at that GW's end — it does
-    // NOT refresh when prices change overnight. With FH override we read
-    // the GW-1 snapshot, which can be £1m+ stale vs current live value.
-    // FPL's FH/WC page always charges current live SP; the solver must
-    // compute the same thing or the ILP ceiling will be wrong.
-    //
-    // Selling rule (FPL official, mirrors Python fetch_fpl_team):
-    //   if now_cost > purchase:  SP = purchase + floor((now-pp)/2)   (half profit, floor)
-    //   else:                    SP = now_cost                        (fell — refund at current)
-    // All values in tenths internally (0.1m). Initial-squad players have
-    // no transfer record → approximate purchase = now_cost - cost_change_start
-    // (same estimation Python uses; small drift is acceptable).
-    var liveSellingPrices = {};
-    var liveRefreshOk = false;
-    try {
-      if (!_bsElemById) throw new Error('bootstrap not fetched');
-      var _xferData = await fetchFpl('/entry/' + id + '/transfers/');
-      // FPL /transfers/ returns newest-first. Replay chronologically so a
-      // later IN can't be wiped by an earlier OUT for the same player.
-      var _xferChrono = (_xferData || []).slice().sort(function (a, b) {
-        var ea = a.event || 0, eb = b.event || 0;
-        if (ea !== eb) return ea - eb;
-        return String(a.time || '').localeCompare(String(b.time || ''));
-      });
-      var _purchaseMap = {};
-      _xferChrono.forEach(function (t) {
-        _purchaseMap[t.element_in] = t.element_in_cost;
-        delete _purchaseMap[t.element_out];
-      });
-      var _priceMap = {};
-      var _changeMap = {};
-      var _nameMap = {};
-      (_bs.elements || []).forEach(function (el) {
-        _priceMap[el.id]   = el.now_cost || 0;
-        _changeMap[el.id]  = el.cost_change_start || 0;
-        _nameMap[el.id]    = el.web_name || '';
-      });
-      // ── Per-FPL-ID purchase-price overrides ───────────────────────────
-      // Manual overrides for players where FPL's bootstrap data doesn't
-      // match the user's actual purchase price (e.g. mid-season club
-      // transfers triggering FPL price rebase, or specific edge cases
-      // where /transfers/ replay misses a record). Verified against the
-      // FPL app → My Team → tap player → "Selling Price". Values in
-      // tenths of M (i.e. 82 = £8.2m).
-      var _PP_OVERRIDES_BY_FPL_ID = {
-        11051: { 'Semenyo': 82, 'Haaland': 146 }
-      };
-      var _ppOverridesForUser = _PP_OVERRIDES_BY_FPL_ID[id] || {};
-      var _derivedTotalTenths = 0;
-      var _pickCount = 0;
-      var _ppOverrideHits = [];
-      (picks.picks || []).forEach(function (pk) {
-        var pid = pk.element;
-        if (!(pid in _priceMap)) return;  // rare: pick not in bootstrap
-        var now_t = _priceMap[pid];
-        var pp_t;
-        if (Object.prototype.hasOwnProperty.call(_purchaseMap, pid)) {
-          pp_t = _purchaseMap[pid];
-        } else {
-          pp_t = Math.max(now_t - (_changeMap[pid] || 0), 0) || now_t;
-        }
-        // Apply manual override AFTER fallback derivation, BEFORE SP formula
-        var _wn = _nameMap[pid] || '';
-        if (Object.prototype.hasOwnProperty.call(_ppOverridesForUser, _wn)) {
-          var _ovr = _ppOverridesForUser[_wn];
-          if (_ovr !== pp_t) {
-            _ppOverrideHits.push(_wn + ': ' + (pp_t/10).toFixed(1) + ' → ' + (_ovr/10).toFixed(1));
-          }
-          pp_t = _ovr;
-        }
-        var sp_t = (now_t > pp_t)
-          ? pp_t + Math.floor((now_t - pp_t) / 2)   // half profit, floor
-          : now_t;                                   // fell or unchanged
-        liveSellingPrices[pid] = sp_t / 10.0;
-        _derivedTotalTenths   += sp_t;
-        _pickCount++;
-      });
-      if (_ppOverrideHits.length > 0) {
-        console.log('[hydrate] Applied PP overrides: ' + _ppOverrideHits.join(', '));
-      }
-      if (_pickCount >= 15) {
-        var _liveSellingValue = _derivedTotalTenths / 10.0;
-        var _budgetDelta = Math.round((_liveSellingValue - sellingValue) * 10) / 10;
-        if (Math.abs(_budgetDelta) > 0.05) {
-          console.log('[hydrate] Live selling value £' + _liveSellingValue.toFixed(1) +
-                      'm (vs snapshot £' + sellingValue.toFixed(1) + 'm, delta £' +
-                      (_budgetDelta >= 0 ? '+' : '') + _budgetDelta.toFixed(1) +
-                      'm) — using live for ILP budget.');
-        }
-        sellingValue = _liveSellingValue;
-        liveRefreshOk = true;
-      } else {
-        throw new Error('only ' + _pickCount + ' of 15 picks resolved in bootstrap');
-      }
-    } catch (_budErr) {
-      console.warn('[hydrate] Live budget recompute failed — falling back to entry_history.value snapshot (may be stale):', _budErr);
-      liveSellingPrices = {};  // signal to downstream: keep baked SP map
-    }
-    // ──────────────────────────────────────────────────────────────────
-
-    // Derive chip availability from history.chips (each chip is one-use-per-half).
-    // Keeping it permissive: if the chip hasn't been played yet, show it as available.
-    var chipsUsed = (history.chips || []).map(function (c) { return c.name; });
-    // (Two-half logic would split by GW<=19 vs >=20, but for v1 treat any use
-    // as "used" — conservative vs showing a chip they don't have.)
-    var hasWc = chipsUsed.indexOf('wildcard') === -1;
-    var hasFh = chipsUsed.indexOf('freehit') === -1;
-    var hasBb = chipsUsed.indexOf('bboost')   === -1;
-    var hasTc = chipsUsed.indexOf('3xc')      === -1;
-
-    // Hydrate globals (declarations were rewritten to `let` at build time)
-    SQUAD_DATA = newSquad;
-    FPL_ID = id;
-    // Merge live SP map into TEAM_META.selling_prices so pitch badges use
-    // today's SP for owned players (not the stale bake). If live refresh
-    // failed, keep the baked SP map as a best-effort fallback.
-    var _mergedSpMap = Object.assign({}, (TEAM_META.selling_prices) || {});
-    if (liveRefreshOk) {
-      Object.keys(liveSellingPrices).forEach(function (k) {
-        _mergedSpMap[k] = liveSellingPrices[k];
-      });
-    }
-    TEAM_META = Object.assign({}, TEAM_META, {
-      team_name: entry.name || 'Your Team',
-      manager: ((entry.player_first_name || '') + ' ' + (entry.player_last_name || '')).trim() || 'Manager',
-      overall_rank: entry.summary_overall_rank || 0,
-      bank: bankVal,
-      free_transfers: ft,
-      squad_value: Math.round(sellingValue * 10) / 10,
-      budget: Math.round((sellingValue + bankVal) * 10) / 10,
-      // FPL's entry_history.value snapshot — what FPL Review and the FPL app
-      // header display as "team value". Includes bank already. Set per Marcus
-      // 2026-04-30 so the top-strip "Initial Bank" reads the same number as
-      // Review for the same FPL ID. The live-recomputed `budget` field above
-      // is still used internally for FH/WC transfer-budget validation — only
-      // the headline display switched to the snapshot.
-      initial_bank: Math.round(apiValue * 10) / 10,
-      selling_prices: _mergedSpMap,
-    });
-    CHIP_PLANNER = Object.assign({}, CHIP_PLANNER, {
-      has_wc: hasWc, has_fh: hasFh, has_bb: hasBb, has_tc: hasTc,
-    });
-    LEAGUE_SIM_META = Object.assign({}, LEAGUE_SIM_META, { fpl_id: id });
-
-    // Recompute per-GW XI base / captain / bench using ApexSolver (authoritative).
-    setStatus('Picking optimal XI\u2026', 80);
-    try {
-      if (window._apexGlpkReady) await window._apexGlpkReady;
-    } catch (_) { /* GLPK not ready is fine for XI picker — it's pure brute-force */ }
-
-    var newXi = [], newCap = [], newBench = [];
-    for (var i = 0; i < TEAM_META.gw_range.length; i++) {
-      var res = window.ApexSolver.pickOptimalXI(SQUAD_DATA, i);
-      newXi.push(res.xi_xp || 0);
-      newCap.push(res.captain_xp || 0);
-      // bench_xp = sum of xp_per_gw[i] over bench players
-      var benchSum = 0;
-      var benchArr = res.bench || [];
-      for (var bi = 0; bi < benchArr.length; bi++) {
-        var bp = benchArr[bi];
-        var xpArr = bp.xp_per_gw || [];
-        benchSum += (xpArr[i] || 0);
-      }
-      newBench.push(Math.round(benchSum * 100) / 100);
-    }
-    GW_XI_BASE = newXi;
-    GW_CAP_XP = newCap;
-    GW_BENCH = newBench;
-    // Rebuild _gwTotals so the "Next N GWs" header sums the freshly-hydrated
-    // values (not the baked [0,0,0,0,0] the public build ships with).
-    if (typeof _rebuildGwTotals === 'function') {
-      _rebuildGwTotals();
-      if (typeof updateRollingTotal === 'function') updateRollingTotal();
-    }
-
-    setStatus('Ready.', 92);
-  }
-})();
-</script>
-
-<!-- ## APEX_MOBILE_FIX:START ## -->
-<style>
-/* ============================================================================
- * apex_mobile.css — universal mobile fixes for apexfootydata.com
- *
- * Loaded by: outputs/index.html, outputs/solver.html, outputs/solver_app.html,
- * outputs/rank_milestones.html. Generated outputs include this via the
- * generators (generate_solver_html.py); index.html and solver.html include it
- * as a static reference.
- *
- * Design intent — "quick responsive pass":
- *   - Stop horizontal overflow at the body level (the killer that forces
- *     mobile browsers to zoom out and make everything tiny).
- *   - Containerise wide tables into horizontal scroll rather than letting
- *     them push the page.
- *   - Bump tap targets to 44px min on the most-used controls.
- *
- * Breakpoint: <= 600px is the primary mobile pass.
- * ========================================================================== */
-
-/* Universal — applies at every width to prevent silent breaks */
-.apex-table-scroll {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    max-width: 100%;
-    /* fade-out hint that there's more horizontal content */
-    background:
-        linear-gradient(to right, transparent 0, transparent 30px),
-        linear-gradient(to left,  transparent 0, transparent 30px);
-}
-.apex-table-scroll > table {
-    min-width: max-content;
-}
-
-/* ───────────────────────────────────────────────────────────────────────────
- * <= 600px — phone breakpoint
- * ──────────────────────────────────────────────────────────────────────── */
-@media (max-width: 600px) {
-
-    /* Stop the body from being pushed wider than the viewport. */
-    html, body {
-        max-width: 100vw;
-        overflow-x: hidden;
-    }
-
-    /* Header / tab-nav: respect parent width, allow internal scroll */
-    .header,
-    .tab-nav {
-        width: 100% !important;
-        max-width: 100% !important;
-        min-width: 0 !important;
-        box-sizing: border-box;
-    }
-    .tab-nav {
-        overflow-x: auto !important;
-        -webkit-overflow-scrolling: touch;
-        scrollbar-width: thin;
-        justify-content: flex-start !important;
-        /* visual cue that there's more to the right */
-        mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent);
-        -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent);
-    }
-    .tab-nav::-webkit-scrollbar { height: 3px; }
-    .tab-nav::-webkit-scrollbar-thumb { background: #2a2a35; border-radius: 2px; }
-
-    /* Tap target floor for primary nav */
-    .tab-button {
-        min-height: 44px;
-        padding-top: 12px !important;
-        padding-bottom: 12px !important;
-    }
-
-    /* Auto-wrapped tables (set by apex_mobile.js) */
-    .apex-table-scroll {
-        margin-left: -8px;
-        margin-right: -8px;
-        padding-left: 8px;
-        padding-right: 8px;
-        /* gradient affordance: subtle right-edge fade */
-        -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 18px), rgba(0,0,0,.5));
-                mask-image: linear-gradient(to right, #000 calc(100% - 18px), rgba(0,0,0,.5));
-    }
-    /* When user has scrolled to the end, drop the fade */
-    .apex-table-scroll.is-scrolled-end,
-    .apex-table-scroll.is-fits {
-        -webkit-mask-image: none;
-                mask-image: none;
-    }
-
-    /* Tighter cell padding so tables feel less hostile on narrow screens */
-    .apex-table-scroll table th,
-    .apex-table-scroll table td {
-        padding-left: 8px !important;
-        padding-right: 8px !important;
-    }
-
-    /* Cookie banner — already fixed-bottom by inline JS. Just make the buttons
-       full-width on tiny screens so they don't crash into each other. */
-    #apex-cookie-banner {
-        flex-wrap: wrap !important;
-        gap: 10px !important;
-    }
-    #apex-cookie-banner > div {
-        width: 100%;
-        justify-content: stretch !important;
-    }
-    #apex-cookie-banner > div > button {
-        flex: 1;
-        min-height: 40px;
-    }
-
-    /* Footer — keep readable on narrow screens */
-    footer {
-        padding-left: 16px !important;
-        padding-right: 16px !important;
-    }
-}
-
-/* ───────────────────────────────────────────────────────────────────────────
- * <= 380px — extra-narrow tightening
- * ──────────────────────────────────────────────────────────────────────── */
-@media (max-width: 380px) {
-    .tab-button {
-        font-size: 12.5px !important;
-        padding-left: 14px !important;
-        padding-right: 14px !important;
-    }
-    .apex-table-scroll table th,
-    .apex-table-scroll table td {
-        font-size: 11.5px !important;
-        padding-left: 6px !important;
-        padding-right: 6px !important;
-    }
-}
-
-/* ============================================================================
- * Solver pitch — shrink shirts to fit 5-per-row in a 390px viewport.
- * Default sizes (.shirt=130, .shirt-wrap=96, gap=14) overflow on mobile.
- * Target row width with 5 shirts: 5*64 + 4*4 = 336px (+ pitch padding) <= 360px.
- * ========================================================================== */
-@media (max-width: 480px) {
-    .pitch { padding: 22px 8px 14px !important; }
-    .pitch-row { gap: 4px !important; margin-bottom: 12px !important; }
-
-    .shirt { width: 66px !important; }
-    .shirt-wrap { width: 56px !important; }
-    .svg-shirt, .shirt-fallback { width: 56px !important; height: 56px !important; }
-
-    .shirt-name {
-        max-width: 62px !important;
-        font-size: 0.7rem !important;
-        padding: 2px 6px !important;
-    }
-    .shirt-fix {
-        max-width: 64px !important;
-        font-size: 0.6rem !important;
-    }
-    .shirt-xp { font-size: 0.92rem !important; margin-top: 2px !important; }
-
-    .shirt-badge {
-        width: 18px !important; height: 18px !important;
-        font-size: 0.62rem !important;
-        bottom: 2px !important; left: -2px !important;
-    }
-
-    /* Pitch markings — scale down so they don't dominate the smaller pitch */
-    .pitch-goal-top   { width: 38px !important; height: 8px !important; }
-    .pitch-penalty-top { width: 90px !important; height: 38px !important; }
-    .pitch-centre-circle { transform: translateX(-50%) scale(0.7) !important; }
-
-    /* Cost badge can wrap into 2 cols on mobile to stay readable */
-    .pitch-cost-badge { min-width: 0 !important; padding: 7px 10px !important; }
-    .pcb-row { gap: 8px !important; }
-    .pcb-label { font-size: 0.62rem !important; }
-    .pcb-val { font-size: 0.78rem !important; }
-}
-
-@media (max-width: 360px) {
-    /* Extra-narrow phones — shrink one more notch for 5-shirt rows */
-    .shirt { width: 60px !important; }
-    .shirt-wrap, .svg-shirt, .shirt-fallback { width: 50px !important; }
-    .svg-shirt, .shirt-fallback { height: 50px !important; }
-    .shirt-name { max-width: 56px !important; font-size: 0.66rem !important; }
-    .shirt-xp { font-size: 0.86rem !important; }
-}
-
-/* ============================================================================
- * Site footer — injected on every page by apex_mobile.js (idempotent).
- * Two rows: brand + tagline/moat-stat | utility links. Collapses to single
- * column on mobile.
- * ========================================================================== */
-.apex-footer {
-    border-top: 1px solid #2a2a35;
-    background: #0c0c0f;
-    color: #6b6b7b;
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 0.82rem;
-    padding: 22px 28px 24px;
-    margin-top: 48px;
-}
-.apex-footer-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 16px;
-    max-width: 1200px;
-    margin: 0 auto;
-}
-.apex-footer-row + .apex-footer-row { margin-top: 8px; }
-.apex-footer-brand {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-.apex-footer-wordmark { font-weight: 600; font-size: 0.95rem; line-height: 1; }
-.apex-footer-apex { color: #F97316; font-weight: 500; }
-.apex-footer-rest { color: #c8c8d0; font-weight: 700; }
-.apex-footer-tagline {
-    color: #8a8a95;
-    font-size: 0.74rem;
-    font-family: 'JetBrains Mono', ui-monospace, monospace;
-}
-.apex-footer-tagline .ftr-stat {
-    color: #F97316;
-    font-weight: 600;
-}
-.apex-footer-links { display: flex; gap: 18px; align-items: center; }
-.apex-footer-links a {
-    color: #8a8a95;
-    text-decoration: none;
-    font-weight: 500;
-    transition: color 0.15s;
-}
-.apex-footer-links a:hover { color: #F97316; }
-.apex-footer-copy { color: #4a4a55; font-size: 0.72rem; }
-.apex-footer-legal { display: flex; gap: 12px; }
-.apex-footer-legal a {
-    color: #6b6b7b;
-    text-decoration: none;
-    font-size: 0.72rem;
-}
-.apex-footer-legal a:hover { color: #c8c8d0; }
-.apex-footer-legal-sep { color: #2a2a35; }
-
-@media (max-width: 600px) {
-    .apex-footer { padding: 18px 16px 22px; margin-top: 32px; }
-    .apex-footer-row {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 8px;
-    }
-    .apex-footer-tagline { font-size: 0.7rem; }
-    .apex-footer-links { gap: 16px; }
-}
-/* ============================================================================
- * 2026-05-09: Marcus paused Form Trends sub-tab.
- * 2026-05-15: Hero stat card restored — Pinnacle moat now 29/35 weeks · +0.074.
- * ========================================================================== */
-.subtab-button[onclick*="showSub(0, 1)"] { display: none !important; }
-
-/* ============================================================================
- * Public tools offline (2026-05-13): hide all nav links to /rank-milestones
- * and /solver/solver_app across solver/site until Marcus re-enables. Removing
- * this block restores the links without code changes.
- * ========================================================================== */
-/* Rank Predictor stays hidden (scrap). Solver links restored 2026-05-14. */
-a[href*="rank-milestones"],
-a[href*="rank_milestones"] {
-    display: none !important;
-}
-
-/* ============================================================================
- * Team Ratings table — fit cleanly in 390px viewport.
- * Scoped to .data-table only (Player Predictions uses .player-table, Matchweek
- * uses .matchweek-table, Team Predictions uses .heatmap-table / .nextgw-table,
- * Final Table uses .final-table — all left untouched here).
- * ========================================================================== */
-@media (max-width: 480px) {
-    .data-table {
-        table-layout: fixed !important;
-        width: 100% !important;
-    }
-    .data-table th.rank,
-    .data-table td.rank {
-        width: 28px !important;
-        padding-left: 4px !important;
-        padding-right: 2px !important;
-        font-size: 0.78rem !important;
-        text-align: left !important;
-    }
-    .data-table td.team-name,
-    .data-table th:nth-child(2) {
-        width: auto !important;
-        max-width: none !important;
-    }
-    .data-table .team-badge {
-        width: 18px !important;
-        height: 18px !important;
-        margin-right: 4px !important;
-    }
-    .data-table td.team-name {
-        font-size: 0.8rem !important;
-        padding-left: 4px !important;
-        padding-right: 4px !important;
-        white-space: nowrap !important;
-        overflow: hidden !important;
-        text-overflow: ellipsis !important;
-    }
-    .data-table th:nth-child(3),
-    .data-table td:nth-child(3),
-    .data-table th:nth-child(4),
-    .data-table td:nth-child(4) {
-        width: 60px !important;
-    }
-    .data-table th:nth-child(5),
-    .data-table td:nth-child(5) {
-        width: 68px !important;
-    }
-    .data-table thead th {
-        font-size: 0.62rem !important;
-        letter-spacing: 0.04em !important;
-        padding: 8px 4px !important;
-        white-space: nowrap !important;
-        text-align: right !important;
-        overflow: hidden !important;
-    }
-    .data-table thead th:nth-child(1),
-    .data-table thead th:nth-child(2) {
-        text-align: left !important;
-    }
-    .data-table thead th:nth-child(3),
-    .data-table thead th:nth-child(4),
-    .data-table thead th:nth-child(5) {
-        font-size: 11px !important;
-        letter-spacing: 0.05em !important;
-        text-align: right !important;
-    }
-    .data-table td:nth-child(n+3) {
-        padding-left: 4px !important;
-        padding-right: 6px !important;
-        font-size: 0.82rem !important;
-        text-align: right !important;
-        vertical-align: middle !important;
-    }
-    .data-table .bar-container {
-        position: relative !important;
-        display: flex !important;
-        flex-direction: column !important;
-        align-items: stretch !important;
-        gap: 3px !important;
-        background: transparent !important;
-        padding: 4px 0 !important;
-        min-width: 0 !important;
-        width: 100% !important;
-        height: auto !important;
-        box-sizing: border-box !important;
-    }
-    .data-table .bar-label {
-        position: static !important;
-        display: block !important;
-        order: -1 !important;
-        font-size: 0.82rem !important;
-        text-align: right !important;
-        padding-right: 4px !important;
-        font-family: 'JetBrains Mono', ui-monospace, monospace !important;
-        white-space: nowrap !important;
-        line-height: 1.1 !important;
-    }
-    .data-table .bar-container .bar {
-        display: block !important;
-        position: static !important;
-        height: 3px !important;
-        border-radius: 1px !important;
-        opacity: 0.9 !important;
-        max-width: 100% !important;
-    }
-}
-
-/* ============================================================================
- * Wide tables (Player Predictions, Matchweek, Team Predictions, Final Table) —
- * force natural width on mobile so they overflow their container and the
- * auto-wrap JS triggers horizontal scroll instead of squashing columns.
- * ========================================================================== */
-@media (max-width: 480px) {
-    .player-table,
-    .nextgw-table,
-    .matchweek-table,
-    .heatmap-table,
-    .final-table {
-        width: max-content !important;
-        min-width: 100% !important;
-        table-layout: auto !important;
-    }
-    /* Tighter cell padding for these wide tables on mobile */
-    .player-table th, .player-table td,
-    .nextgw-table th, .nextgw-table td,
-    .matchweek-table th, .matchweek-table td,
-    .final-table th, .final-table td {
-        padding: 8px 8px !important;
-        font-size: 12px !important;
-        white-space: nowrap !important;
-    }
-    /* Heatmap cells stay compact */
-    .heatmap-table th, .heatmap-table td {
-        padding: 8px 6px !important;
-        font-size: 11px !important;
-    }
-}
-</style>
-<script>
-/* ============================================================================
- * apex_mobile.js -- runtime mobile fixes for apexfootydata.com
- *
- * Wraps any <table> wider than its parent in a .apex-table-scroll div so it
- * scrolls horizontally inside the page rather than pushing the body wider
- * (which would force mobile browsers to zoom out).
- *
- * Idempotent. Re-runs on tab/data renders via MutationObserver.
- * ========================================================================== */
-(function () {
-    'use strict';
-    var WRAP_CLASS = 'apex-table-scroll';
-    var WRAPPED_ATTR = 'data-apex-wrapped';
-
-    function wrapOne(table) {
-        if (!table || table.getAttribute(WRAPPED_ATTR) === '1') return false;
-        var parent = table.parentElement;
-        if (!parent) return false;
-        if (parent.classList && parent.classList.contains(WRAP_CLASS)) return false;
-        if (table.hasAttribute('data-no-scroll')) return false;
-
-        var tableW = table.scrollWidth || table.offsetWidth || 0;
-        var availW = parent.clientWidth || window.innerWidth || 0;
-        if (tableW <= availW + 1) return false;
-
-        var wrap = document.createElement('div');
-        wrap.className = WRAP_CLASS;
-        parent.insertBefore(wrap, table);
-        wrap.appendChild(table);
-        table.setAttribute(WRAPPED_ATTR, '1');
-        attachScrollState(wrap);
-        return true;
-    }
-
-    function attachScrollState(wrap) {
-        function update() {
-            var fits = wrap.scrollWidth <= wrap.clientWidth + 2;
-            var atEnd = wrap.scrollLeft + wrap.clientWidth >= wrap.scrollWidth - 2;
-            wrap.classList.toggle('is-fits', fits);
-            wrap.classList.toggle('is-scrolled-end', !fits && atEnd);
-        }
-        update();
-        wrap.addEventListener('scroll', update, { passive: true });
-        setTimeout(update, 600);
-        setTimeout(update, 2000);
-        if (window.ResizeObserver) {
-            try { new ResizeObserver(update).observe(wrap); } catch (e) {}
-        } else {
-            window.addEventListener('resize', update);
-        }
-    }
-
-    function wrapAll() {
-        var tables = document.querySelectorAll('table');
-        for (var i = 0; i < tables.length; i++) wrapOne(tables[i]);
-    }
-
-    function boot() {
-        wrapAll();
-        setTimeout(wrapAll, 500);
-        setTimeout(wrapAll, 1500);
-        setTimeout(wrapAll, 4000);
-
-        if (window.MutationObserver) {
-            var pending = false;
-            var mo = new MutationObserver(function () {
-                if (pending) return;
-                pending = true;
-                requestAnimationFrame(function () {
-                    pending = false;
-                    wrapAll();
-                });
-            });
-            mo.observe(document.body, { childList: true, subtree: true });
-        }
-    }
-
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', boot);
-    } else {
-        boot();
-    }
-
-    window.__apexMobileRewrap = wrapAll;
-})();
-
-// ── Site footer injection (idempotent) ────────────────────────────────────
-// Builds and inserts a brand-stat-utility footer at the END of <body>.
-// Pulls the moat stat from the hero card's data-stat spans if present;
-// falls back to the static tagline otherwise. Re-runs are no-ops.
-(function () {
-    'use strict';
-    var FOOTER_ID = 'apex-site-footer';
-
-    function makeFooter() {
-        if (document.getElementById(FOOTER_ID)) return;
-        if (!document.body) return;
-
-        // 2026-05-09: moat claim hidden -- static tagline only.
-        var moatHTML = 'data-driven football analytics';
-
-        var f = document.createElement('footer');
-        f.id = FOOTER_ID;
-        f.className = 'apex-footer';
-        f.innerHTML =
-            '<div class="apex-footer-row">' +
-                '<div class="apex-footer-brand">' +
-                    '<span class="apex-footer-wordmark">' +
-                        '<span class="apex-footer-apex">Apex</span>' +
-                        '<span class="apex-footer-rest">FootyData</span>' +
-                    '</span>' +
-                    '<span class="apex-footer-tagline">' + moatHTML + '</span>' +
-                '</div>' +
-                '<div class="apex-footer-links">' +
-                    '<a href="https://x.com/apexfootycom" target="_blank" rel="noopener">X / Twitter</a>' +
-                    '<a href="mailto:contact@apexfootydata.com">Email</a>' +
-                '</div>' +
-            '</div>' +
-            '<div class="apex-footer-row">' +
-                '<span class="apex-footer-copy">&copy; 2026 ApexFootyData</span>' +
-                '<span class="apex-footer-legal">' +
-                    '<a href="mailto:contact@apexfootydata.com">Contact</a>' +
-                    '<span class="apex-footer-legal-sep">&middot;</span>' +
-                    '<a href="#" onclick="alert(\'Privacy: ApexFootyData uses Cloudflare Analytics and Google Analytics 4 for traffic measurement only. No personal data sold or shared. Cookie consent collected on first visit. Contact: contact@apexfootydata.com to request data deletion.\'); return false;">Privacy</a>' +
-                '</span>' +
-            '</div>';
-        document.body.appendChild(f);
-    }
-
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', makeFooter);
-    } else {
-        makeFooter();
-    }
-    // Also run after a tick — moat-stat spans may be filled in by inject scripts after DCL.
-    setTimeout(makeFooter, 600);
-    // 2026-05-09: deferred moat-stat update disabled (claim hidden).
-})();
-
-// ── Mobile: abbreviate Team Ratings headers (2026-05-14) ──────────────────
-// CSS pseudo-element trick was unreliable (OVR going missing). Rewrite the
-// actual th text on narrow viewports. Idempotent — keeps original in data-*
-// so it can be restored if window widens.
-(function () {
-    'use strict';
-    var ABBREV = { 'ATTACK': 'ATT', 'DEFENCE': 'DEF', 'DEFENSE': 'DEF', 'OVERALL': 'OVR' };
-    var ATTR_ORIG = 'data-apex-orig-th';
-
-    function shouldAbbrev() { return window.innerWidth <= 480; }
-
-    function applyHeaderAbbrev() {
-        var tables = document.querySelectorAll('table.data-table');
-        for (var i = 0; i < tables.length; i++) {
-            var ths = tables[i].querySelectorAll('thead th');
-            for (var j = 0; j < ths.length; j++) {
-                var th = ths[j];
-                var txt = (th.textContent || '').trim().toUpperCase();
-                if (shouldAbbrev()) {
-                    if (ABBREV[txt] && !th.hasAttribute(ATTR_ORIG)) {
-                        th.setAttribute(ATTR_ORIG, th.textContent);
-                        th.textContent = ABBREV[txt];
-                    }
-                } else if (th.hasAttribute(ATTR_ORIG)) {
-                    th.textContent = th.getAttribute(ATTR_ORIG);
-                    th.removeAttribute(ATTR_ORIG);
-                }
-            }
-        }
-    }
-
-    function boot() {
-        applyHeaderAbbrev();
-        setTimeout(applyHeaderAbbrev, 500);
-        setTimeout(applyHeaderAbbrev, 1500);
-        window.addEventListener('resize', applyHeaderAbbrev);
-        if (window.MutationObserver) {
-            var pending = false;
-            var mo = new MutationObserver(function () {
-                if (pending) return;
-                pending = true;
-                requestAnimationFrame(function () {
-                    pending = false;
-                    applyHeaderAbbrev();
-                });
-            });
-            mo.observe(document.body, { childList: true, subtree: true });
-        }
-    }
-
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', boot);
-    } else {
-        boot();
-    }
-})();
-</script>
-<!-- ## APEX_MOBILE_FIX:END ## -->
-</body>. Shows when the
+     Toggled by the detection script at the end of the page. Shows when the
      baked cache reports start_gw beyond the season (e.g. GW39 with zero
      fixtures), which is the signal that the season is over and there's
      nothing for the solver to plan against until 2026/27 fixtures load.
@@ -9214,7 +8051,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1780744534-GW38-f5f252ec";
+const BUILD_VERSION = "1780827434-GW38-f5f252ec";
 window.APEX_BUILD = BUILD_VERSION;
 
 let FPL_ID = 11051;
@@ -15164,7 +14001,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW38</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780744534-GW38-f5f252ec</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780827434-GW38-f5f252ec</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
@@ -15257,5 +14094,1180 @@ document.addEventListener('DOMContentLoaded', () => {
 })();
 </script>
 
+
+<script>
+// ══════════════════════════════════════════════════════════════════════
+//  PUBLIC BOOT — runs on apexfootydata.com/solver_app.html
+//  Hydrates SQUAD_DATA / TEAM_META / GW_XI_BASE from the FPL API, then
+//  hands off to switchView('team'). Claims DOMContentLoaded exclusively
+//  so the baked `switchView('landing')` handler no-ops via a guard flag.
+// ══════════════════════════════════════════════════════════════════════
+(function publicBoot() {
+  var params = new URLSearchParams(window.location.search);
+  var idRaw = params.get('id');
+  if (!idRaw || !/^\d+$/.test(idRaw)) {
+    // No ID in URL — send them to the landing form
+    window.location.replace('/solver.html');
+    return;
+  }
+  var fplId = parseInt(idRaw, 10);
+  window._apexPublicBootClaimed = true;
+  // Persist so sibling pages (rank milestones) don't prompt for ID again.
+  try { localStorage.setItem('apex_fpl_id', String(fplId)); } catch (_) {}
+
+  document.addEventListener('DOMContentLoaded', function () {
+    var overlay = document.createElement('div');
+    overlay.id = 'apex-public-boot';
+    overlay.style.cssText = 'position:fixed;inset:0;background:#0c0c0f;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:Space Grotesk,sans-serif;color:#e8e8f0;padding:20px;';
+    overlay.innerHTML =
+      '<div style="font-size:1.5rem;font-weight:700;margin-bottom:20px;letter-spacing:-.01em;">' +
+      '<span style="font-weight:500;">Apex</span><span style="font-weight:800;color:#9ca3af;">FootyData</span></div>' +
+      '<div id="apex-status" style="color:#F97316;font-size:.95rem;margin-bottom:16px;font-weight:600;">Loading your team&hellip;</div>' +
+      '<div style="width:300px;max-width:90vw;background:#1e2130;border:1px solid #2a2a35;border-radius:10px;overflow:hidden;height:10px;">' +
+      '<div id="apex-bar" style="height:100%;width:8%;background:#F97316;transition:width .4s ease;"></div></div>';
+    document.body.appendChild(overlay);
+
+    function setStatus(txt, pct) {
+      var s = document.getElementById('apex-status');
+      var b = document.getElementById('apex-bar');
+      if (s) s.textContent = txt;
+      if (b && pct != null) b.style.width = pct + '%';
+    }
+    function fail(msg) {
+      var s = document.getElementById('apex-status');
+      if (s) { s.textContent = msg; s.style.color = '#f87171'; }
+      var ov = document.getElementById('apex-public-boot');
+      if (ov && !ov.querySelector('.apex-back')) {
+        var back = document.createElement('a');
+        back.className = 'apex-back';
+        back.href = '/solver.html';
+        back.textContent = '\u2190 Back to solver';
+        back.style.cssText = 'margin-top:24px;color:#F97316;text-decoration:none;font-size:.9rem;';
+        ov.appendChild(back);
+      }
+    }
+
+    hydrateFromFPL(fplId, setStatus)
+      .then(function () {
+        setStatus('Rendering\u2026', 95);
+        return new Promise(function (r) { setTimeout(r, 40); });
+      })
+      .then(function () {
+        // Honour ?view= query param from sibling pages (e.g. Rank Predictor
+        // nav links pass view=team / chip-select / league). Fallback = team.
+        var _vReq = params.get('view') || 'team';
+        var _vAllowed = { team: 1, 'chip-select': 1, league: 1 };
+        var _vUse = _vAllowed[_vReq] ? _vReq : 'team';
+        if (typeof switchView === 'function') switchView(_vUse);
+        // Surface the Apex/Review compare toggle if URL has ?compare=1.
+        if (typeof _initCompareToggle === 'function') _initCompareToggle();
+        setTimeout(function () {
+          var ov = document.getElementById('apex-public-boot');
+          if (ov) ov.remove();
+        }, 250);
+        // Eager-warm chip planner so FH_SQUADS / WC_SQUADS are populated before
+        // the user clicks a chip GW pill. Without this, My Squad route + FH
+        // selected shows the user's own squad (with 0 xP on BGW teams) instead
+        // of the Free Hit XI. Chip Planner tab visit used to be the only trigger.
+        setTimeout(function () {
+          if (typeof _ensureChipPlannerLoaded !== 'function') return;
+          _ensureChipPlannerLoaded().then(function () {
+            console.log('[apex-public] Chip planner warmed — FH/WC squads populated');
+            // ── LIVE CHIP-SQUAD COST SYNC (public variant) ─────────────────
+            // On apexfootydata.com, FH_SQUADS / WC_SQUADS arrive empty and are
+            // populated by the chip-planner fetch — AFTER hydrate's in-place
+            // refresh pass already ran. POOL_DATA.cost is already live at this
+            // point (hydrate refreshed it), so sync chip-squad .cost from
+            // POOL_DATA by ID. Closes the pitch-bank £0.1–0.2m drift on Apply.
+            try {
+              var _poolById = {};
+              if (typeof POOL_DATA !== 'undefined' && Array.isArray(POOL_DATA)) {
+                POOL_DATA.forEach(function (pp) { if (pp && pp.id != null) _poolById[pp.id] = pp; });
+              }
+              var _chipSyncN = 0;
+              var _syncChipMap = function (mapObj) {
+                if (!mapObj) return;
+                Object.keys(mapObj).forEach(function (gwKey) {
+                  var arr = mapObj[gwKey];
+                  if (!Array.isArray(arr)) return;
+                  for (var _ci = 0; _ci < arr.length; _ci++) {
+                    var _sp = arr[_ci];
+                    if (!_sp || _sp.id == null) continue;
+                    var _pp = _poolById[_sp.id];
+                    if (!_pp || _pp.cost == null) continue;
+                    var _liveCost = Math.round((_pp.cost || 0) * 10) / 10;
+                    if (Math.abs((_sp.cost || 0) - _liveCost) > 0.001) {
+                      _chipSyncN++;
+                      _sp.cost = _liveCost;
+                    }
+                  }
+                });
+              };
+              _syncChipMap(typeof FH_SQUADS !== 'undefined' ? FH_SQUADS : null);
+              _syncChipMap(typeof WC_SQUADS !== 'undefined' ? WC_SQUADS : null);
+              console.log('[apex-public] Chip-squad cost sync: ' + _chipSyncN + ' updates from live POOL_DATA');
+            } catch (_syncErr) {
+              console.warn('[apex-public] Chip-squad cost sync failed — pitch badge may drift £0.1m:', _syncErr);
+            }
+            // ────────────────────────────────────────────────────────────────
+            // If user is still on a chip GW pill, re-run solve so the panel renders now.
+            try {
+              var fhSel = document.getElementById('sel-fh');
+              var wcSel = document.getElementById('sel-wc');
+              var fhGw  = fhSel ? parseInt(fhSel.value || 0) : 0;
+              var wcGw  = wcSel ? parseInt(wcSel.value || 0) : 0;
+              var activeGw = TEAM_META.gw_range[typeof activeGwIdx === 'number' ? activeGwIdx : 0];
+              if (typeof runSolve === 'function' && ((fhGw && activeGw === fhGw) || (wcGw && activeGw === wcGw))) {
+                runSolve();
+              }
+            } catch (e) { /* non-fatal */ }
+          }).catch(function (err) {
+            console.error('[apex-public] Chip planner warm-up failed:', err);
+          });
+        }, 800);
+      })
+      .catch(function (err) {
+        console.error('[apex-public] Boot failed:', err);
+        fail('Couldn\u2019t load team: ' + (err && err.message ? err.message : err));
+      });
+  });
+
+  async function hydrateFromFPL(id, setStatus) {
+    var proxy = (typeof FPL_CORS_PROXY === 'string' && FPL_CORS_PROXY) ? FPL_CORS_PROXY : '';
+    if (!proxy) throw new Error('FPL proxy not configured');
+
+    async function fetchFpl(path) {
+      var r = await fetch(proxy + path, { cache: 'no-store' });
+      if (!r.ok) throw new Error('FPL API ' + r.status + ' on ' + path);
+      return r.json();
+    }
+
+    setStatus('Looking up manager\u2026', 20);
+    var entry = await fetchFpl('/entry/' + id + '/');
+
+    var startGw = TEAM_META.start_gw;
+
+    setStatus('Fetching your squad\u2026', 40);
+    var picks = null;
+    var gwFetched = null;
+    for (var _i = 0; _i < 2; _i++) {
+      var gw = startGw - _i;
+      if (gw < 1) continue;
+      try {
+        picks = await fetchFpl('/entry/' + id + '/event/' + gw + '/picks/');
+        gwFetched = gw;
+        break;
+      } catch (e) { /* try previous GW */ }
+    }
+    if (!picks) throw new Error('Could not fetch picks for ID ' + id);
+
+    // ── FH OVERRIDE ─────────────────────────────────────────────────────
+    // If the picks we fetched have active_chip === 'freehit', that GW was
+    // played on Free Hit — squad is ephemeral. For ANY future-GW planning
+    // (whether startGw IS the FH GW or a later GW), we must re-fetch
+    // gwFetched-1 to get the user's real squad.
+    //
+    // Don't gate on `gwFetched === startGw`. When startGw advances past
+    // the FH GW (e.g. solver baked at GW34 after FH in GW33), the picks
+    // loop falls back to gwFetched=33 and the FH squad is what we'd
+    // otherwise return. That's the bug ID 316 hit.
+    //
+    // Wildcard does NOT trigger override (WC permanently replaces the
+    // squad). BB/TC don't change the 15.
+    var fhOverridden = false;
+    if (picks.active_chip === 'freehit' && gwFetched && gwFetched > 1) {
+      try {
+        var _preFh = await fetchFpl('/entry/' + id + '/event/' + (gwFetched - 1) + '/picks/');
+        if (_preFh && _preFh.active_chip !== 'freehit' && Array.isArray(_preFh.picks) && _preFh.picks.length) {
+          console.log('[hydrate] FH detected in GW' + gwFetched + ' — using GW' + (gwFetched - 1) + ' squad as baseline');
+          picks = _preFh;
+          gwFetched = gwFetched - 1;
+          fhOverridden = true;
+        } else {
+          console.warn('[hydrate] FH override: GW' + (gwFetched - 1) + ' picks unusable — keeping FH squad');
+        }
+      } catch (_e) {
+        console.warn('[hydrate] FH detected but pre-FH fetch failed:', _e);
+      }
+    }
+    // ────────────────────────────────────────────────────────────────────
+
+    setStatus('Reading your chip history\u2026', 60);
+    var history = await fetchFpl('/entry/' + id + '/history/');
+
+    // ── LIVE PRICE REFRESH ──────────────────────────────────────────────
+    // POOL_DATA.cost is baked at pipeline-build time. FPL updates prices
+    // overnight (~01:30 UK). If any FH/WC squad player has risen since the
+    // last pipeline run, the ILP would underestimate his cost and hand the
+    // user a squad that's £0.1m+ over FPL's real budget. Refresh now_cost
+    // from bootstrap so the ILP prices against what FPL will actually charge.
+    // Also reused by the stub-missing-picks block below.
+    var _bs = null;
+    var _bsElemById = null;
+    try {
+      _bs = await fetchFpl('/bootstrap-static/');
+      _bsElemById = {};
+      var _priceChanges = 0;
+      (_bs.elements || []).forEach(function (el) { _bsElemById[el.id] = el; });
+      for (var _pi = 0; _pi < POOL_DATA.length; _pi++) {
+        var _pp = POOL_DATA[_pi];
+        var _el = _bsElemById[_pp.id];
+        if (!_el) continue;
+        var _liveCost = Math.round(((_el.now_cost || 0) / 10) * 10) / 10;
+        if (Math.abs((_pp.cost || 0) - _liveCost) > 0.001) {
+          _priceChanges++;
+          _pp.cost = _liveCost;
+        }
+      }
+      if (_priceChanges > 0) {
+        console.log('[hydrate] Refreshed ' + _priceChanges + ' player prices from bootstrap (baked pool was stale)');
+      }
+      // Also refresh baked costs inside FH_SQUADS + WC_SQUADS — these are
+      // separate JSON arrays from POOL_DATA, frozen at pipeline-build time.
+      // Without this, "Apply Squad to Plan" drops players onto the pitch with
+      // stale .cost fields, so the pitch-bank badge drifts £0.1–0.2m vs FPL
+      // when any chip-squad pick has changed price overnight. Fix: for every
+      // player in every FH/WC baked squad, overwrite .cost with live now_cost.
+      var _chipCostUpdates = 0;
+      try {
+        var _refreshChipSquadMap = function (mapObj, label) {
+          if (!mapObj) return;
+          Object.keys(mapObj).forEach(function (gwKey) {
+            var arr = mapObj[gwKey];
+            if (!Array.isArray(arr)) return;
+            for (var _ci = 0; _ci < arr.length; _ci++) {
+              var _sp = arr[_ci];
+              if (!_sp || !_sp.id) continue;
+              var _el2 = _bsElemById[_sp.id];
+              if (!_el2) continue;
+              var _liveCost2 = Math.round(((_el2.now_cost || 0) / 10) * 10) / 10;
+              if (Math.abs((_sp.cost || 0) - _liveCost2) > 0.001) {
+                _chipCostUpdates++;
+                _sp.cost = _liveCost2;
+              }
+            }
+          });
+        };
+        _refreshChipSquadMap(typeof FH_SQUADS !== 'undefined' ? FH_SQUADS : null, 'FH');
+        _refreshChipSquadMap(typeof WC_SQUADS !== 'undefined' ? WC_SQUADS : null, 'WC');
+        if (_chipCostUpdates > 0) {
+          console.log('[hydrate] Refreshed ' + _chipCostUpdates + ' baked chip-squad costs (FH/WC) from bootstrap');
+        }
+      } catch (_chipErr) {
+        console.warn('[hydrate] Chip-squad cost refresh failed — pitch badge may drift £0.1m:', _chipErr);
+      }
+    } catch (_bsErr) {
+      console.warn('[hydrate] bootstrap price refresh failed — using baked pool costs:', _bsErr);
+    }
+    // ────────────────────────────────────────────────────────────────────
+
+    // Build SQUAD_DATA = POOL_DATA ∩ picks, with my_* annotations
+    var picksById = new Map((picks.picks || []).map(function (p) { return [p.element, p]; }));
+    var newSquad = [];
+    for (var pi = 0; pi < POOL_DATA.length; pi++) {
+      var pool = POOL_DATA[pi];
+      var pk = picksById.get(pool.id);
+      if (!pk) continue;
+      var merged = {};
+      for (var k in pool) merged[k] = pool[k];
+      merged.my_captain = !!pk.is_captain;
+      merged.my_vc = !!pk.is_vice_captain;
+      merged.my_starter = pk.position <= 11;
+      merged.my_bench_order = pk.position > 11 ? (pk.position - 11) : 0;
+      newSquad.push(merged);
+    }
+
+    // POOL_DATA filters out low-minute players, 3rd-choice GKs, etc. — any of
+    // the user's picks that aren't in the pool would silently disappear. That's
+    // how an owner of Darlow+Verbruggen+Struijk ended up with 12 players on
+    // screen (no GK, 1 bench). Fill the gap with bootstrap stubs so the squad
+    // is always complete; stubs have 0 xP (no Apex rating) but keep the display
+    // valid and the XI picker finds a GK.
+    var _matchedIds = new Set(newSquad.map(function (p) { return p.id; }));
+    var _missingPickIds = [];
+    picksById.forEach(function (_v, _k) { if (!_matchedIds.has(_k)) _missingPickIds.push(_k); });
+    if (_missingPickIds.length) {
+      try {
+        // Reuse bootstrap fetched during live-price refresh above; refetch if it failed.
+        if (!_bs) { _bs = await fetchFpl('/bootstrap-static/'); }
+        // FPL team short names → Apex POOL_DATA full names (must match exactly
+        // for shirt image URLs + team-filter logic elsewhere).
+        var _teamNameMap = {
+          'Man Utd': 'Manchester United',
+          'Man City': 'Manchester City',
+          "Nott'm Forest": 'Nottingham Forest',
+          'Spurs': 'Tottenham',
+          'Newcastle': 'Newcastle United',
+          'Wolves': 'Wolverhampton Wanderers'
+        };
+        var _teamsById = {};
+        (_bs.teams || []).forEach(function (t) {
+          _teamsById[t.id] = _teamNameMap[t.name] || t.name;
+        });
+        var _elemById = _bsElemById || {};
+        if (!_bsElemById) {
+          (_bs.elements || []).forEach(function (el) { _elemById[el.id] = el; });
+        }
+        var _horizon = (TEAM_META.gw_range || []).length || 5;
+        _missingPickIds.forEach(function (eid) {
+          var el = _elemById[eid];
+          if (!el) return;
+          var pk = picksById.get(eid);
+          newSquad.push({
+            id: eid,
+            web_name: el.web_name,
+            team: _teamsById[el.team] || String(el.team),
+            element_type: el.element_type,
+            cost: (el.now_cost || 0) / 10,
+            xp: 0,
+            xp_per_gw: new Array(_horizon).fill(0),
+            total_xp: 0,
+            rolling_xp: 0,
+            my_captain: !!pk.is_captain,
+            my_vc: !!pk.is_vice_captain,
+            my_starter: pk.position <= 11,
+            my_bench_order: pk.position > 11 ? (pk.position - 11) : 0,
+            _no_apex_rating: true
+          });
+        });
+        console.log('[hydrate] Added ' + _missingPickIds.length +
+                    ' bootstrap stubs for picks missing from POOL_DATA:',
+                    _missingPickIds);
+      } catch (e) {
+        console.warn('[hydrate] Failed to add stubs for missing picks:', e);
+      }
+    }
+
+    if (newSquad.length < 11) {
+      throw new Error('Only ' + newSquad.length + ' of 15 players matched the pool. Try again after the next pipeline run.');
+    }
+
+    // Chip-aware FT walk (mirrors apex_fpl_solver.fetch_fpl_team exactly)
+    var chipMap = {};
+    (history.chips || []).forEach(function (c) { chipMap[c.event] = c.name; });
+    var ft = 1;
+    var AFCON_TOPUP_GW = 16;
+    var pastGws = (history.current || []).filter(function (g) { return g.event <= startGw; });
+    for (var gi = 0; gi < pastGws.length; gi++) {
+      var g = pastGws[gi];
+      var made = g.event_transfers || 0;
+      var cost = g.event_transfers_cost || 0;
+      var chip = chipMap[g.event] || '';
+      if (g.event === AFCON_TOPUP_GW) ft = 5;
+      if (chip === 'wildcard' || chip === 'freehit') continue;
+      var hits = Math.floor(cost / 4);
+      if (hits > 0) ft = 1;
+      else if (made === 0) ft = Math.min(ft + 1, 5);
+      else ft = Math.max(Math.min(ft - made + 1, 5), 1);
+    }
+
+    var evHist = picks.entry_history || {};
+    var bankVal = (evHist.bank || 0) / 10.0;
+    // FPL's entry_history.value is the TOTAL (squad selling + bank). To display
+    // "squad value" matching the FPL app exactly we must subtract the bank.
+    var apiValue = (evHist.value || 0) / 10.0;
+    var sellingValue = apiValue > 0 ? (apiValue - bankVal) :
+        newSquad.reduce(function (s, p) { return s + (p.cost || 0); }, 0);
+
+    // ── LIVE BUDGET RECOMPUTE ─────────────────────────────────────────
+    // picks.entry_history.value is a SNAPSHOT at that GW's end — it does
+    // NOT refresh when prices change overnight. With FH override we read
+    // the GW-1 snapshot, which can be £1m+ stale vs current live value.
+    // FPL's FH/WC page always charges current live SP; the solver must
+    // compute the same thing or the ILP ceiling will be wrong.
+    //
+    // Selling rule (FPL official, mirrors Python fetch_fpl_team):
+    //   if now_cost > purchase:  SP = purchase + floor((now-pp)/2)   (half profit, floor)
+    //   else:                    SP = now_cost                        (fell — refund at current)
+    // All values in tenths internally (0.1m). Initial-squad players have
+    // no transfer record → approximate purchase = now_cost - cost_change_start
+    // (same estimation Python uses; small drift is acceptable).
+    var liveSellingPrices = {};
+    var liveRefreshOk = false;
+    try {
+      if (!_bsElemById) throw new Error('bootstrap not fetched');
+      var _xferData = await fetchFpl('/entry/' + id + '/transfers/');
+      // FPL /transfers/ returns newest-first. Replay chronologically so a
+      // later IN can't be wiped by an earlier OUT for the same player.
+      var _xferChrono = (_xferData || []).slice().sort(function (a, b) {
+        var ea = a.event || 0, eb = b.event || 0;
+        if (ea !== eb) return ea - eb;
+        return String(a.time || '').localeCompare(String(b.time || ''));
+      });
+      var _purchaseMap = {};
+      _xferChrono.forEach(function (t) {
+        _purchaseMap[t.element_in] = t.element_in_cost;
+        delete _purchaseMap[t.element_out];
+      });
+      var _priceMap = {};
+      var _changeMap = {};
+      var _nameMap = {};
+      (_bs.elements || []).forEach(function (el) {
+        _priceMap[el.id]   = el.now_cost || 0;
+        _changeMap[el.id]  = el.cost_change_start || 0;
+        _nameMap[el.id]    = el.web_name || '';
+      });
+      // ── Per-FPL-ID purchase-price overrides ───────────────────────────
+      // Manual overrides for players where FPL's bootstrap data doesn't
+      // match the user's actual purchase price (e.g. mid-season club
+      // transfers triggering FPL price rebase, or specific edge cases
+      // where /transfers/ replay misses a record). Verified against the
+      // FPL app → My Team → tap player → "Selling Price". Values in
+      // tenths of M (i.e. 82 = £8.2m).
+      var _PP_OVERRIDES_BY_FPL_ID = {
+        11051: { 'Semenyo': 82, 'Haaland': 146 }
+      };
+      var _ppOverridesForUser = _PP_OVERRIDES_BY_FPL_ID[id] || {};
+      var _derivedTotalTenths = 0;
+      var _pickCount = 0;
+      var _ppOverrideHits = [];
+      (picks.picks || []).forEach(function (pk) {
+        var pid = pk.element;
+        if (!(pid in _priceMap)) return;  // rare: pick not in bootstrap
+        var now_t = _priceMap[pid];
+        var pp_t;
+        if (Object.prototype.hasOwnProperty.call(_purchaseMap, pid)) {
+          pp_t = _purchaseMap[pid];
+        } else {
+          pp_t = Math.max(now_t - (_changeMap[pid] || 0), 0) || now_t;
+        }
+        // Apply manual override AFTER fallback derivation, BEFORE SP formula
+        var _wn = _nameMap[pid] || '';
+        if (Object.prototype.hasOwnProperty.call(_ppOverridesForUser, _wn)) {
+          var _ovr = _ppOverridesForUser[_wn];
+          if (_ovr !== pp_t) {
+            _ppOverrideHits.push(_wn + ': ' + (pp_t/10).toFixed(1) + ' → ' + (_ovr/10).toFixed(1));
+          }
+          pp_t = _ovr;
+        }
+        var sp_t = (now_t > pp_t)
+          ? pp_t + Math.floor((now_t - pp_t) / 2)   // half profit, floor
+          : now_t;                                   // fell or unchanged
+        liveSellingPrices[pid] = sp_t / 10.0;
+        _derivedTotalTenths   += sp_t;
+        _pickCount++;
+      });
+      if (_ppOverrideHits.length > 0) {
+        console.log('[hydrate] Applied PP overrides: ' + _ppOverrideHits.join(', '));
+      }
+      if (_pickCount >= 15) {
+        var _liveSellingValue = _derivedTotalTenths / 10.0;
+        var _budgetDelta = Math.round((_liveSellingValue - sellingValue) * 10) / 10;
+        if (Math.abs(_budgetDelta) > 0.05) {
+          console.log('[hydrate] Live selling value £' + _liveSellingValue.toFixed(1) +
+                      'm (vs snapshot £' + sellingValue.toFixed(1) + 'm, delta £' +
+                      (_budgetDelta >= 0 ? '+' : '') + _budgetDelta.toFixed(1) +
+                      'm) — using live for ILP budget.');
+        }
+        sellingValue = _liveSellingValue;
+        liveRefreshOk = true;
+      } else {
+        throw new Error('only ' + _pickCount + ' of 15 picks resolved in bootstrap');
+      }
+    } catch (_budErr) {
+      console.warn('[hydrate] Live budget recompute failed — falling back to entry_history.value snapshot (may be stale):', _budErr);
+      liveSellingPrices = {};  // signal to downstream: keep baked SP map
+    }
+    // ──────────────────────────────────────────────────────────────────
+
+    // Derive chip availability from history.chips (each chip is one-use-per-half).
+    // Keeping it permissive: if the chip hasn't been played yet, show it as available.
+    var chipsUsed = (history.chips || []).map(function (c) { return c.name; });
+    // (Two-half logic would split by GW<=19 vs >=20, but for v1 treat any use
+    // as "used" — conservative vs showing a chip they don't have.)
+    var hasWc = chipsUsed.indexOf('wildcard') === -1;
+    var hasFh = chipsUsed.indexOf('freehit') === -1;
+    var hasBb = chipsUsed.indexOf('bboost')   === -1;
+    var hasTc = chipsUsed.indexOf('3xc')      === -1;
+
+    // Hydrate globals (declarations were rewritten to `let` at build time)
+    SQUAD_DATA = newSquad;
+    FPL_ID = id;
+    // Merge live SP map into TEAM_META.selling_prices so pitch badges use
+    // today's SP for owned players (not the stale bake). If live refresh
+    // failed, keep the baked SP map as a best-effort fallback.
+    var _mergedSpMap = Object.assign({}, (TEAM_META.selling_prices) || {});
+    if (liveRefreshOk) {
+      Object.keys(liveSellingPrices).forEach(function (k) {
+        _mergedSpMap[k] = liveSellingPrices[k];
+      });
+    }
+    TEAM_META = Object.assign({}, TEAM_META, {
+      team_name: entry.name || 'Your Team',
+      manager: ((entry.player_first_name || '') + ' ' + (entry.player_last_name || '')).trim() || 'Manager',
+      overall_rank: entry.summary_overall_rank || 0,
+      bank: bankVal,
+      free_transfers: ft,
+      squad_value: Math.round(sellingValue * 10) / 10,
+      budget: Math.round((sellingValue + bankVal) * 10) / 10,
+      // FPL's entry_history.value snapshot — what FPL Review and the FPL app
+      // header display as "team value". Includes bank already. Set per Marcus
+      // 2026-04-30 so the top-strip "Initial Bank" reads the same number as
+      // Review for the same FPL ID. The live-recomputed `budget` field above
+      // is still used internally for FH/WC transfer-budget validation — only
+      // the headline display switched to the snapshot.
+      initial_bank: Math.round(apiValue * 10) / 10,
+      selling_prices: _mergedSpMap,
+    });
+    CHIP_PLANNER = Object.assign({}, CHIP_PLANNER, {
+      has_wc: hasWc, has_fh: hasFh, has_bb: hasBb, has_tc: hasTc,
+    });
+    LEAGUE_SIM_META = Object.assign({}, LEAGUE_SIM_META, { fpl_id: id });
+
+    // Recompute per-GW XI base / captain / bench using ApexSolver (authoritative).
+    setStatus('Picking optimal XI\u2026', 80);
+    try {
+      if (window._apexGlpkReady) await window._apexGlpkReady;
+    } catch (_) { /* GLPK not ready is fine for XI picker — it's pure brute-force */ }
+
+    var newXi = [], newCap = [], newBench = [];
+    for (var i = 0; i < TEAM_META.gw_range.length; i++) {
+      var res = window.ApexSolver.pickOptimalXI(SQUAD_DATA, i);
+      newXi.push(res.xi_xp || 0);
+      newCap.push(res.captain_xp || 0);
+      // bench_xp = sum of xp_per_gw[i] over bench players
+      var benchSum = 0;
+      var benchArr = res.bench || [];
+      for (var bi = 0; bi < benchArr.length; bi++) {
+        var bp = benchArr[bi];
+        var xpArr = bp.xp_per_gw || [];
+        benchSum += (xpArr[i] || 0);
+      }
+      newBench.push(Math.round(benchSum * 100) / 100);
+    }
+    GW_XI_BASE = newXi;
+    GW_CAP_XP = newCap;
+    GW_BENCH = newBench;
+    // Rebuild _gwTotals so the "Next N GWs" header sums the freshly-hydrated
+    // values (not the baked [0,0,0,0,0] the public build ships with).
+    if (typeof _rebuildGwTotals === 'function') {
+      _rebuildGwTotals();
+      if (typeof updateRollingTotal === 'function') updateRollingTotal();
+    }
+
+    setStatus('Ready.', 92);
+  }
+})();
+</script>
+
+<!-- ## APEX_MOBILE_FIX:START ## -->
+<style>
+/* ============================================================================
+ * apex_mobile.css — universal mobile fixes for apexfootydata.com
+ *
+ * Loaded by: outputs/index.html, outputs/solver.html, outputs/solver_app.html,
+ * outputs/rank_milestones.html. Generated outputs include this via the
+ * generators (generate_solver_html.py); index.html and solver.html include it
+ * as a static reference.
+ *
+ * Design intent — "quick responsive pass":
+ *   - Stop horizontal overflow at the body level (the killer that forces
+ *     mobile browsers to zoom out and make everything tiny).
+ *   - Containerise wide tables into horizontal scroll rather than letting
+ *     them push the page.
+ *   - Bump tap targets to 44px min on the most-used controls.
+ *
+ * Breakpoint: <= 600px is the primary mobile pass.
+ * ========================================================================== */
+
+/* Universal — applies at every width to prevent silent breaks */
+.apex-table-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100%;
+    /* fade-out hint that there's more horizontal content */
+    background:
+        linear-gradient(to right, transparent 0, transparent 30px),
+        linear-gradient(to left,  transparent 0, transparent 30px);
+}
+.apex-table-scroll > table {
+    min-width: max-content;
+}
+
+/* ───────────────────────────────────────────────────────────────────────────
+ * <= 600px — phone breakpoint
+ * ──────────────────────────────────────────────────────────────────────── */
+@media (max-width: 600px) {
+
+    /* Stop the body from being pushed wider than the viewport. */
+    html, body {
+        max-width: 100vw;
+        overflow-x: hidden;
+    }
+
+    /* Header / tab-nav: respect parent width, allow internal scroll */
+    .header,
+    .tab-nav {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        box-sizing: border-box;
+    }
+    .tab-nav {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+        justify-content: flex-start !important;
+        /* visual cue that there's more to the right */
+        mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent);
+        -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent);
+    }
+    .tab-nav::-webkit-scrollbar { height: 3px; }
+    .tab-nav::-webkit-scrollbar-thumb { background: #2a2a35; border-radius: 2px; }
+
+    /* Tap target floor for primary nav */
+    .tab-button {
+        min-height: 44px;
+        padding-top: 12px !important;
+        padding-bottom: 12px !important;
+    }
+
+    /* Auto-wrapped tables (set by apex_mobile.js) */
+    .apex-table-scroll {
+        margin-left: -8px;
+        margin-right: -8px;
+        padding-left: 8px;
+        padding-right: 8px;
+        /* gradient affordance: subtle right-edge fade */
+        -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 18px), rgba(0,0,0,.5));
+                mask-image: linear-gradient(to right, #000 calc(100% - 18px), rgba(0,0,0,.5));
+    }
+    /* When user has scrolled to the end, drop the fade */
+    .apex-table-scroll.is-scrolled-end,
+    .apex-table-scroll.is-fits {
+        -webkit-mask-image: none;
+                mask-image: none;
+    }
+
+    /* Tighter cell padding so tables feel less hostile on narrow screens */
+    .apex-table-scroll table th,
+    .apex-table-scroll table td {
+        padding-left: 8px !important;
+        padding-right: 8px !important;
+    }
+
+    /* Cookie banner — already fixed-bottom by inline JS. Just make the buttons
+       full-width on tiny screens so they don't crash into each other. */
+    #apex-cookie-banner {
+        flex-wrap: wrap !important;
+        gap: 10px !important;
+    }
+    #apex-cookie-banner > div {
+        width: 100%;
+        justify-content: stretch !important;
+    }
+    #apex-cookie-banner > div > button {
+        flex: 1;
+        min-height: 40px;
+    }
+
+    /* Footer — keep readable on narrow screens */
+    footer {
+        padding-left: 16px !important;
+        padding-right: 16px !important;
+    }
+}
+
+/* ───────────────────────────────────────────────────────────────────────────
+ * <= 380px — extra-narrow tightening
+ * ──────────────────────────────────────────────────────────────────────── */
+@media (max-width: 380px) {
+    .tab-button {
+        font-size: 12.5px !important;
+        padding-left: 14px !important;
+        padding-right: 14px !important;
+    }
+    .apex-table-scroll table th,
+    .apex-table-scroll table td {
+        font-size: 11.5px !important;
+        padding-left: 6px !important;
+        padding-right: 6px !important;
+    }
+}
+
+/* ============================================================================
+ * Solver pitch — shrink shirts to fit 5-per-row in a 390px viewport.
+ * Default sizes (.shirt=130, .shirt-wrap=96, gap=14) overflow on mobile.
+ * Target row width with 5 shirts: 5*64 + 4*4 = 336px (+ pitch padding) <= 360px.
+ * ========================================================================== */
+@media (max-width: 480px) {
+    .pitch { padding: 22px 8px 14px !important; }
+    .pitch-row { gap: 4px !important; margin-bottom: 12px !important; }
+
+    /* doubled-class selectors out-rank the desktop XL rules
+       (.pitch .shirt 140px !important + min-width) on phones */
+    .pitch .shirt.shirt, .bench-row .shirt.shirt, .shirt {
+        width: 66px !important; min-width: 0 !important; max-width: 66px !important; }
+    .pitch .shirt-wrap.shirt-wrap, .bench-row .shirt-wrap.shirt-wrap,
+    .pitch-bench .shirt-wrap.shirt-wrap, .shirt-wrap {
+        width: 56px !important; min-width: 0 !important; }
+    .pitch .svg-shirt.svg-shirt, .bench-row .svg-shirt.svg-shirt,
+    .pitch-bench .svg-shirt.svg-shirt, .svg-shirt, .shirt-fallback {
+        width: 56px !important; height: 56px !important; min-width: 0 !important; }
+
+    .shirt-name {
+        max-width: 62px !important;
+        font-size: 0.7rem !important;
+        padding: 2px 6px !important;
+    }
+    .shirt-fix {
+        max-width: 64px !important;
+        font-size: 0.6rem !important;
+    }
+    .shirt-xp { font-size: 0.92rem !important; margin-top: 2px !important; }
+
+    .shirt-badge {
+        width: 18px !important; height: 18px !important;
+        font-size: 0.62rem !important;
+        bottom: 2px !important; left: -2px !important;
+    }
+
+    /* Pitch markings — scale down so they don't dominate the smaller pitch */
+    .pitch-goal-top   { width: 38px !important; height: 8px !important; }
+    .pitch-penalty-top { width: 90px !important; height: 38px !important; }
+    .pitch-centre-circle { transform: translateX(-50%) scale(0.7) !important; }
+
+    /* Cost badge can wrap into 2 cols on mobile to stay readable */
+    .pitch-cost-badge { min-width: 0 !important; padding: 7px 10px !important; }
+    .pcb-row { gap: 8px !important; }
+    .pcb-label { font-size: 0.62rem !important; }
+    .pcb-val { font-size: 0.78rem !important; }
+}
+
+@media (max-width: 360px) {
+    /* Extra-narrow phones — shrink one more notch for 5-shirt rows */
+    .pitch .shirt.shirt, .bench-row .shirt.shirt, .shirt {
+        width: 60px !important; min-width: 0 !important; max-width: 60px !important; }
+    .pitch .shirt-wrap.shirt-wrap, .bench-row .shirt-wrap.shirt-wrap,
+    .pitch .svg-shirt.svg-shirt, .bench-row .svg-shirt.svg-shirt,
+    .shirt-wrap, .svg-shirt, .shirt-fallback {
+        width: 50px !important; min-width: 0 !important; }
+    .pitch .svg-shirt.svg-shirt, .bench-row .svg-shirt.svg-shirt,
+    .svg-shirt, .shirt-fallback { height: 50px !important; }
+    .shirt-name { max-width: 56px !important; font-size: 0.66rem !important; }
+    .shirt-xp { font-size: 0.86rem !important; }
+}
+
+/* ============================================================================
+ * Site footer — injected on every page by apex_mobile.js (idempotent).
+ * Two rows: brand + tagline/moat-stat | utility links. Collapses to single
+ * column on mobile.
+ * ========================================================================== */
+.apex-footer {
+    border-top: 1px solid #2a2a35;
+    background: #0c0c0f;
+    color: #6b6b7b;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.82rem;
+    padding: 22px 28px 24px;
+    margin-top: 48px;
+}
+.apex-footer-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+.apex-footer-row + .apex-footer-row { margin-top: 8px; }
+.apex-footer-brand {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.apex-footer-wordmark { font-weight: 600; font-size: 0.95rem; line-height: 1; }
+.apex-footer-apex { color: #F97316; font-weight: 500; }
+.apex-footer-rest { color: #c8c8d0; font-weight: 700; }
+.apex-footer-tagline {
+    color: #8a8a95;
+    font-size: 0.74rem;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+}
+.apex-footer-tagline .ftr-stat {
+    color: #F97316;
+    font-weight: 600;
+}
+.apex-footer-links { display: flex; gap: 18px; align-items: center; }
+.apex-footer-links a {
+    color: #8a8a95;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.15s;
+}
+.apex-footer-links a:hover { color: #F97316; }
+.apex-footer-copy { color: #4a4a55; font-size: 0.72rem; }
+.apex-footer-legal { display: flex; gap: 12px; }
+.apex-footer-legal a {
+    color: #6b6b7b;
+    text-decoration: none;
+    font-size: 0.72rem;
+}
+.apex-footer-legal a:hover { color: #c8c8d0; }
+.apex-footer-legal-sep { color: #2a2a35; }
+
+@media (max-width: 600px) {
+    .apex-footer { padding: 18px 16px 22px; margin-top: 32px; }
+    .apex-footer-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    .apex-footer-tagline { font-size: 0.7rem; }
+    .apex-footer-links { gap: 16px; }
+}
+/* ============================================================================
+ * 2026-05-09: Marcus paused Form Trends sub-tab.
+ * 2026-05-15: Hero stat card restored — Pinnacle moat now 29/35 weeks · +0.074.
+ * ========================================================================== */
+.subtab-button[onclick*="showSub(0, 1)"] { display: none !important; }
+
+/* ============================================================================
+ * Public tools offline (2026-05-13): hide all nav links to /rank-milestones
+ * and /solver/solver_app across solver/site until Marcus re-enables. Removing
+ * this block restores the links without code changes.
+ * ========================================================================== */
+/* Rank Predictor stays hidden (scrap). Solver links restored 2026-05-14. */
+a[href*="rank-milestones"],
+a[href*="rank_milestones"] {
+    display: none !important;
+}
+
+/* ============================================================================
+ * Team Ratings table — fit cleanly in 390px viewport.
+ * Scoped to .data-table only (Player Predictions uses .player-table, Matchweek
+ * uses .matchweek-table, Team Predictions uses .heatmap-table / .nextgw-table,
+ * Final Table uses .final-table — all left untouched here).
+ * ========================================================================== */
+@media (max-width: 480px) {
+    .data-table {
+        table-layout: fixed !important;
+        width: 100% !important;
+    }
+    .data-table th.rank,
+    .data-table td.rank {
+        width: 28px !important;
+        padding-left: 4px !important;
+        padding-right: 2px !important;
+        font-size: 0.78rem !important;
+        text-align: left !important;
+    }
+    .data-table td.team-name,
+    .data-table th:nth-child(2) {
+        width: auto !important;
+        max-width: none !important;
+    }
+    .data-table .team-badge {
+        width: 18px !important;
+        height: 18px !important;
+        margin-right: 4px !important;
+    }
+    .data-table td.team-name {
+        font-size: 0.8rem !important;
+        padding-left: 4px !important;
+        padding-right: 4px !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+    .data-table th:nth-child(3),
+    .data-table td:nth-child(3),
+    .data-table th:nth-child(4),
+    .data-table td:nth-child(4) {
+        width: 60px !important;
+    }
+    .data-table th:nth-child(5),
+    .data-table td:nth-child(5) {
+        width: 68px !important;
+    }
+    .data-table thead th {
+        font-size: 0.62rem !important;
+        letter-spacing: 0.04em !important;
+        padding: 8px 4px !important;
+        white-space: nowrap !important;
+        text-align: right !important;
+        overflow: hidden !important;
+    }
+    .data-table thead th:nth-child(1),
+    .data-table thead th:nth-child(2) {
+        text-align: left !important;
+    }
+    .data-table thead th:nth-child(3),
+    .data-table thead th:nth-child(4),
+    .data-table thead th:nth-child(5) {
+        font-size: 11px !important;
+        letter-spacing: 0.05em !important;
+        text-align: right !important;
+    }
+    .data-table td:nth-child(n+3) {
+        padding-left: 4px !important;
+        padding-right: 6px !important;
+        font-size: 0.82rem !important;
+        text-align: right !important;
+        vertical-align: middle !important;
+    }
+    .data-table .bar-container {
+        position: relative !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 3px !important;
+        background: transparent !important;
+        padding: 4px 0 !important;
+        min-width: 0 !important;
+        width: 100% !important;
+        height: auto !important;
+        box-sizing: border-box !important;
+    }
+    .data-table .bar-label {
+        position: static !important;
+        display: block !important;
+        order: -1 !important;
+        font-size: 0.82rem !important;
+        text-align: right !important;
+        padding-right: 4px !important;
+        font-family: 'JetBrains Mono', ui-monospace, monospace !important;
+        white-space: nowrap !important;
+        line-height: 1.1 !important;
+    }
+    .data-table .bar-container .bar {
+        display: block !important;
+        position: static !important;
+        height: 3px !important;
+        border-radius: 1px !important;
+        opacity: 0.9 !important;
+        max-width: 100% !important;
+    }
+}
+
+/* ============================================================================
+ * Wide tables (Player Predictions, Matchweek, Team Predictions, Final Table) —
+ * force natural width on mobile so they overflow their container and the
+ * auto-wrap JS triggers horizontal scroll instead of squashing columns.
+ * ========================================================================== */
+@media (max-width: 480px) {
+    .player-table,
+    .nextgw-table,
+    .matchweek-table,
+    .heatmap-table,
+    .final-table {
+        width: max-content !important;
+        min-width: 100% !important;
+        table-layout: auto !important;
+    }
+    /* Tighter cell padding for these wide tables on mobile */
+    .player-table th, .player-table td,
+    .nextgw-table th, .nextgw-table td,
+    .matchweek-table th, .matchweek-table td,
+    .final-table th, .final-table td {
+        padding: 8px 8px !important;
+        font-size: 12px !important;
+        white-space: nowrap !important;
+    }
+    /* Heatmap cells stay compact */
+    .heatmap-table th, .heatmap-table td {
+        padding: 8px 6px !important;
+        font-size: 11px !important;
+    }
+}
+</style>
+<script>
+/* ============================================================================
+ * apex_mobile.js -- runtime mobile fixes for apexfootydata.com
+ *
+ * Wraps any <table> wider than its parent in a .apex-table-scroll div so it
+ * scrolls horizontally inside the page rather than pushing the body wider
+ * (which would force mobile browsers to zoom out).
+ *
+ * Idempotent. Re-runs on tab/data renders via MutationObserver.
+ * ========================================================================== */
+(function () {
+    'use strict';
+    var WRAP_CLASS = 'apex-table-scroll';
+    var WRAPPED_ATTR = 'data-apex-wrapped';
+
+    function wrapOne(table) {
+        if (!table || table.getAttribute(WRAPPED_ATTR) === '1') return false;
+        var parent = table.parentElement;
+        if (!parent) return false;
+        if (parent.classList && parent.classList.contains(WRAP_CLASS)) return false;
+        if (table.hasAttribute('data-no-scroll')) return false;
+
+        var tableW = table.scrollWidth || table.offsetWidth || 0;
+        var availW = parent.clientWidth || window.innerWidth || 0;
+        if (tableW <= availW + 1) return false;
+
+        var wrap = document.createElement('div');
+        wrap.className = WRAP_CLASS;
+        parent.insertBefore(wrap, table);
+        wrap.appendChild(table);
+        table.setAttribute(WRAPPED_ATTR, '1');
+        attachScrollState(wrap);
+        return true;
+    }
+
+    function attachScrollState(wrap) {
+        function update() {
+            var fits = wrap.scrollWidth <= wrap.clientWidth + 2;
+            var atEnd = wrap.scrollLeft + wrap.clientWidth >= wrap.scrollWidth - 2;
+            wrap.classList.toggle('is-fits', fits);
+            wrap.classList.toggle('is-scrolled-end', !fits && atEnd);
+        }
+        update();
+        wrap.addEventListener('scroll', update, { passive: true });
+        setTimeout(update, 600);
+        setTimeout(update, 2000);
+        if (window.ResizeObserver) {
+            try { new ResizeObserver(update).observe(wrap); } catch (e) {}
+        } else {
+            window.addEventListener('resize', update);
+        }
+    }
+
+    function wrapAll() {
+        var tables = document.querySelectorAll('table');
+        for (var i = 0; i < tables.length; i++) wrapOne(tables[i]);
+    }
+
+    function boot() {
+        wrapAll();
+        setTimeout(wrapAll, 500);
+        setTimeout(wrapAll, 1500);
+        setTimeout(wrapAll, 4000);
+
+        if (window.MutationObserver) {
+            var pending = false;
+            var mo = new MutationObserver(function () {
+                if (pending) return;
+                pending = true;
+                requestAnimationFrame(function () {
+                    pending = false;
+                    wrapAll();
+                });
+            });
+            mo.observe(document.body, { childList: true, subtree: true });
+        }
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', boot);
+    } else {
+        boot();
+    }
+
+    window.__apexMobileRewrap = wrapAll;
+})();
+
+// ── Site footer injection (idempotent) ────────────────────────────────────
+// Builds and inserts a brand-stat-utility footer at the END of <body>.
+// Pulls the moat stat from the hero card's data-stat spans if present;
+// falls back to the static tagline otherwise. Re-runs are no-ops.
+(function () {
+    'use strict';
+    var FOOTER_ID = 'apex-site-footer';
+
+    function makeFooter() {
+        if (document.getElementById(FOOTER_ID)) return;
+        if (!document.body) return;
+
+        // 2026-05-09: moat claim hidden -- static tagline only.
+        var moatHTML = 'data-driven football analytics';
+
+        var f = document.createElement('footer');
+        f.id = FOOTER_ID;
+        f.className = 'apex-footer';
+        f.innerHTML =
+            '<div class="apex-footer-row">' +
+                '<div class="apex-footer-brand">' +
+                    '<span class="apex-footer-wordmark">' +
+                        '<span class="apex-footer-apex">Apex</span>' +
+                        '<span class="apex-footer-rest">FootyData</span>' +
+                    '</span>' +
+                    '<span class="apex-footer-tagline">' + moatHTML + '</span>' +
+                '</div>' +
+                '<div class="apex-footer-links">' +
+                    '<a href="https://x.com/apexfootycom" target="_blank" rel="noopener">X / Twitter</a>' +
+                    '<a href="mailto:contact@apexfootydata.com">Email</a>' +
+                '</div>' +
+            '</div>' +
+            '<div class="apex-footer-row">' +
+                '<span class="apex-footer-copy">&copy; 2026 ApexFootyData</span>' +
+                '<span class="apex-footer-legal">' +
+                    '<a href="mailto:contact@apexfootydata.com">Contact</a>' +
+                    '<span class="apex-footer-legal-sep">&middot;</span>' +
+                    '<a href="#" onclick="alert(\'Privacy: ApexFootyData uses Cloudflare Analytics and Google Analytics 4 for traffic measurement only. No personal data sold or shared. Cookie consent collected on first visit. Contact: contact@apexfootydata.com to request data deletion.\'); return false;">Privacy</a>' +
+                '</span>' +
+            '</div>';
+        document.body.appendChild(f);
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', makeFooter);
+    } else {
+        makeFooter();
+    }
+    // Also run after a tick — moat-stat spans may be filled in by inject scripts after DCL.
+    setTimeout(makeFooter, 600);
+    // 2026-05-09: deferred moat-stat update disabled (claim hidden).
+})();
+
+// ── Mobile: abbreviate Team Ratings headers (2026-05-14) ──────────────────
+// CSS pseudo-element trick was unreliable (OVR going missing). Rewrite the
+// actual th text on narrow viewports. Idempotent — keeps original in data-*
+// so it can be restored if window widens.
+(function () {
+    'use strict';
+    var ABBREV = { 'ATTACK': 'ATT', 'DEFENCE': 'DEF', 'DEFENSE': 'DEF', 'OVERALL': 'OVR' };
+    var ATTR_ORIG = 'data-apex-orig-th';
+
+    function shouldAbbrev() { return window.innerWidth <= 480; }
+
+    function applyHeaderAbbrev() {
+        var tables = document.querySelectorAll('table.data-table');
+        for (var i = 0; i < tables.length; i++) {
+            var ths = tables[i].querySelectorAll('thead th');
+            for (var j = 0; j < ths.length; j++) {
+                var th = ths[j];
+                var txt = (th.textContent || '').trim().toUpperCase();
+                if (shouldAbbrev()) {
+                    if (ABBREV[txt] && !th.hasAttribute(ATTR_ORIG)) {
+                        th.setAttribute(ATTR_ORIG, th.textContent);
+                        th.textContent = ABBREV[txt];
+                    }
+                } else if (th.hasAttribute(ATTR_ORIG)) {
+                    th.textContent = th.getAttribute(ATTR_ORIG);
+                    th.removeAttribute(ATTR_ORIG);
+                }
+            }
+        }
+    }
+
+    function boot() {
+        applyHeaderAbbrev();
+        setTimeout(applyHeaderAbbrev, 500);
+        setTimeout(applyHeaderAbbrev, 1500);
+        window.addEventListener('resize', applyHeaderAbbrev);
+        if (window.MutationObserver) {
+            var pending = false;
+            var mo = new MutationObserver(function () {
+                if (pending) return;
+                pending = true;
+                requestAnimationFrame(function () {
+                    pending = false;
+                    applyHeaderAbbrev();
+                });
+            });
+            mo.observe(document.body, { childList: true, subtree: true });
+        }
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', boot);
+    } else {
+        boot();
+    }
+})();
+</script>
+<!-- ## APEX_MOBILE_FIX:END ## -->
 </body>
 </html>
