@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="38" data-built-at="2026-06-08T22:39:34">
+<meta name="apex-gw" content="38" data-built-at="2026-06-08T22:52:58">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -4000,6 +4000,45 @@ button.secondary, .btn-secondary, .va-btn-secondary {
 .va-solio-pitch .svg-shirt { width: 76px; height: 76px; }
 .va-solio-pitch .pitch-row { gap: 8px; margin-bottom: 16px; }
 
+/* ── 3-pill risk selector in the rail (2026-06-08, Marcus) ──────────────────
+   Balanced / High / Low only, as compact pills. Hides Optimistic/Safe/Custom +
+   the icons, descriptions and the "Choose your strategy" heading. Scoped to the
+   team rail so the chip-select view's full card grid is untouched. */
+.va-solio-rail .aps-head,
+.va-solio-rail .aps-sub { display: none !important; }
+.va-solio-rail #aps-grid-team { display: flex !important; flex-wrap: wrap; gap: 8px !important; }
+.va-solio-rail #aps-grid-team .aps-card[data-preset="optimistic"],
+.va-solio-rail #aps-grid-team .aps-card[data-preset="safe"],
+.va-solio-rail #aps-grid-team .aps-card[data-preset="custom"] { display: none !important; }
+.va-solio-rail #aps-grid-team .aps-card {
+  flex: 1 1 0; padding: 10px 14px !important; border-radius: 10px !important;
+  display: flex !important; align-items: center; justify-content: center; gap: 0 !important;
+  text-align: center;
+}
+.va-solio-rail #aps-grid-team .aps-card.aps-active { padding: 9px 13px !important; }
+.va-solio-rail #aps-grid-team .aps-icon,
+.va-solio-rail #aps-grid-team .aps-card-desc { display: none !important; }
+.va-solio-rail #aps-grid-team .aps-body { align-items: center; gap: 0 !important; }
+.va-solio-rail #aps-grid-team .aps-card-title { font-size: 14px !important; }
+
+/* ── Squad / Player Pool tabs (2026-06-08) ─────────────────────────────────
+   Keeps the 333-row Expected Points table off the main decision view so pitch +
+   rail + recommendations fit one screen. */
+.va-tabs { display: flex; gap: 4px; border-bottom: 2px solid #ece8e1; margin: 0 0 16px; }
+.va-tab {
+  background: none; border: none; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 15px; font-weight: 500; color: #94a3b8; padding: 10px 18px;
+  border-bottom: 2px solid transparent; margin-bottom: -2px;
+}
+.va-tab:hover { color: #6a655d; }
+.va-tab.va-tab-active { color: #16130f; font-weight: 700; border-bottom-color: #F26A1B; }
+#view-team:not(.show-pool) #pool-section,
+#view-team:not(.show-pool) #pool-banner { display: none !important; }
+#view-team.show-pool .va-solio,
+#view-team.show-pool #transfers-section,
+#view-team.show-pool #top-picks-section,
+#view-team.show-pool #model-confidence-wrap-squad { display: none !important; }
+
 .va-team-header,
 .va-team-name-target,
 .va-team-name {
@@ -4829,6 +4868,13 @@ html.apex-offseason #view-landing .hero-sub::after {
         </div>
       </div>
     </section>
+
+    <!-- Squad / Player Pool tabs — keeps the 333-row pool table off the main
+         decision view so everything fits one screen. (2026-06-08) -->
+    <div class="va-tabs" id="va-tabs">
+      <button type="button" class="va-tab va-tab-active" data-tab="squad" onclick="setSolverTab('squad')">Squad</button>
+      <button type="button" class="va-tab" data-tab="pool" onclick="setSolverTab('pool')">Player Pool</button>
+    </div>
 
     <!-- ── SOLIO TWO-PANE: pitch (left) + decision rail (right). Collapses to
          the original single-column stack below 1024px. (2026-06-08) ── -->
@@ -8562,7 +8608,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1780954774-GW38-184bc1eb";
+const BUILD_VERSION = "1780955578-GW38-184bc1eb";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -10290,6 +10336,18 @@ function _renderHeroSparkline() {
     html += '</div>';
     sp.innerHTML = html;
   } catch (_e) {}
+}
+
+// Squad / Player Pool tabs (2026-06-08): the heavy 333-row Expected Points
+// table lives on its own tab so the main decision view (pitch + rail + recs)
+// fits one screen. Toggling a class on #view-team drives the show/hide (CSS).
+function setSolverTab(tab) {
+  const vt = document.getElementById('view-team');
+  if (vt) vt.classList.toggle('show-pool', tab === 'pool');
+  document.querySelectorAll('.va-tab').forEach(function (b) {
+    b.classList.toggle('va-tab-active', b.getAttribute('data-tab') === tab);
+  });
+  try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (_e) {}
 }
 
 function _syncTeamHeaderFromMeta() {
@@ -14290,6 +14348,14 @@ function _poolRemovePlayer(pid) {
   const player = fromXi || fromBench;
   if (!player) return;
 
+  // X-to-replace with tabs (2026-06-08): jump to the Player Pool tab, pre-filtered
+  // to the vacated position, so the replacement list is right there.
+  try {
+    if (typeof setSolverTab === 'function') setSolverTab('pool');
+    const _posBtn = document.querySelector('#pool-pos-pills .pool-pos-pill[data-pos="' + (player.element_type || 0) + '"]');
+    if (_posBtn && typeof setPoolPos === 'function') setPoolPos(_posBtn);
+  } catch (_e) {}
+
   // If there's already a removed player, reset first
   if (_poolRemovedPlayer) _poolResetSlot();
 
@@ -14383,6 +14449,8 @@ function _poolFillSlot(playerId) {
   if (!_poolRemovedPlayer) return;
   const inPlayer = POOL_DATA.find(p => p.id === playerId);
   if (!inPlayer) return;
+  // Picked a replacement → return to the Squad tab so the updated pitch is visible.
+  if (typeof setSolverTab === 'function') setSolverTab('squad');
 
   // Must be same position
   if (inPlayer.element_type !== _poolRemovedPlayer.element_type) {
@@ -14640,6 +14708,8 @@ function renderPoolTable() {
 function _poolAddPlayer(playerId) {
   const inPlayer = POOL_DATA.find(p => p.id === playerId);
   if (!inPlayer) return;
+  // Added a player → return to the Squad tab so the updated pitch is visible.
+  if (typeof setSolverTab === 'function') setSolverTab('squad');
 
   const fullSquad = [..._xiPlayers, ..._benchPlayers];
   if (fullSquad.length !== 15) {
@@ -15105,7 +15175,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW38</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780954774-GW38-184bc1eb</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780955578-GW38-184bc1eb</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
