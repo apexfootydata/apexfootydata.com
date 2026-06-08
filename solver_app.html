@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="38" data-built-at="2026-06-08T21:17:30">
+<meta name="apex-gw" content="38" data-built-at="2026-06-08T22:22:51">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -8562,7 +8562,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1780949850-GW38-184bc1eb";
+const BUILD_VERSION = "1780953771-GW38-184bc1eb";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -9473,23 +9473,12 @@ function selectPreset(name) {
   // 'custom' is excluded — it reveals dials and applies on dial change. Gated on
   // a hydrated squad + team/optimal view; re-entry guarded so reset+optimize
   // never loop. No-ops safely on cold load (SQUAD_DATA / fns absent).
-  const _RISK_PRESETS = ['balanced', 'high', 'low', 'optimistic', 'safe'];
-  if (_RISK_PRESETS.indexOf(name) !== -1 && !_presetApplyBusy) {
-    const _hydrated = (typeof SQUAD_DATA !== 'undefined')
-      && Array.isArray(SQUAD_DATA) && SQUAD_DATA.length > 0;
-    const _onTeamView2 = (typeof currentView === 'undefined')
-      || currentView === 'team' || currentView === 'optimal';
-    if (_hydrated && _onTeamView2
-        && typeof resetSolver === 'function'
-        && typeof runOptimize === 'function') {
-      _presetApplyBusy = true;
-      try {
-        resetSolver();      // restore baseline so presets don't stack transfers
-        runOptimize();      // apply THIS preset's single best move onto the pitch
-      } catch (_e2) { /* non-fatal — fall through to list re-render below */ }
-      finally { _presetApplyBusy = false; }
-    }
-  }
+  // 2026-06-08 (Marcus): selecting a risk box ONLY sets the profile — it must
+  // NOT push players onto the pitch. The user presses Optimize to apply the
+  // move under the chosen profile. (Previously this auto-ran resetSolver()+
+  // runOptimize() on every box click, which surprised the user by changing the
+  // team on selection.) runOptimize() already reads _activePreset, so the
+  // chosen profile is honoured when Optimize is pressed.
 
   // Weekly transfer engine reads the preset now too (High/Low re-rank by
   // ownership differential). If the transfers panel is on screen, re-render
@@ -15116,7 +15105,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW38</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780949850-GW38-184bc1eb</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780953771-GW38-184bc1eb</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
