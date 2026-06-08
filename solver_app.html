@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="39" data-built-at="2026-06-08T15:39:44">
+<meta name="apex-gw" content="39" data-built-at="2026-06-08T15:55:49">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -8242,7 +8242,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1780929584-GW39-738c7259";
+const BUILD_VERSION = "1780930549-GW39-738c7259";
 window.APEX_BUILD = BUILD_VERSION;
 
 let FPL_ID = null;
@@ -9824,6 +9824,7 @@ function initTeamView() {
 
   // Build GW pills
   const pillRow = document.getElementById('gw-pills');
+  if (pillRow) {  // 2026-06-08 null-guard: element may be scrubbed/absent in public build
   pillRow.innerHTML = '';
   TEAM_META.gw_range.forEach((gw, idx) => {
     const btn = document.createElement('button');
@@ -9834,11 +9835,13 @@ function initTeamView() {
     btn.onclick = () => setBaseGw(btn);
     pillRow.appendChild(btn);
   });
+  }  // 2026-06-08 close pillRow null-guard
 
   // Build chip selects + wire up pill tag updates on change.
   // Restore previously-selected value for each chip so user's plan sticks.
   ['wc', 'bb', 'tc', 'fh'].forEach(chip => {
     const sel = document.getElementById(`sel-${chip}`);
+    if (!sel) return;  // 2026-06-08 null-guard: chip select may be absent in public build
     sel.innerHTML = '<option value="0">—</option>';
     TEAM_META.gw_range.forEach(gw => {
       const opt = document.createElement('option');
@@ -11767,6 +11770,13 @@ function _applyOneTransfer(playerId, squad, gwIdx) {
 }
 
 function setBaseGw(btn) {
+  // 2026-06-08 — null-guard: offseason/public builds can have an empty
+  // TEAM_META.gw_range (start_gw=39, no future GWs), so initTeamView builds
+  // zero .gw-pill buttons and `querySelector('.gw-pill')` returns null. Calling
+  // setBaseGw(null) then threw "Cannot read properties of null (reading
+  // 'classList')" which surfaced to the public hydrate .catch as
+  // "Couldn't load team". Bail cleanly when there's no pill to activate.
+  if (!btn) { activeGwIdx = 0; if (typeof _renderHeroSparkline === 'function') _renderHeroSparkline(); return; }
   document.querySelectorAll('.gw-pill').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   activeGwIdx = parseInt(btn.dataset.idx);
@@ -14439,7 +14449,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW39</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780929584-GW39-738c7259</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780930549-GW39-738c7259</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
