@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="38" data-built-at="2026-06-08T20:17:08">
+<meta name="apex-gw" content="38" data-built-at="2026-06-08T20:35:54">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -3934,6 +3934,38 @@ button.secondary, .btn-secondary, .va-btn-secondary {
     max-width: none !important; width: 100% !important; flex: 1 1 100% !important;
   }
 }
+/* APEX_SOLIO_LAYOUT — two-pane team view: pitch left, decision rail right
+   (2026-06-08, Mock approved). Below 1024px it collapses to the original
+   single-column stack (rail then pitch = today's order), so mobile is
+   unchanged. */
+.va-solio {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 400px;
+  gap: 18px;
+  align-items: start;
+  margin-bottom: 10px;
+}
+.va-solio-pitch { grid-column: 1; grid-row: 1; min-width: 0; }
+.va-solio-rail  { grid-column: 2; grid-row: 1; display: flex; flex-direction: column; gap: 12px; }
+/* In the 400px rail the hero stacks: green number on top, range below. */
+.va-solio-rail .va-hero-row { margin-bottom: 0 !important; }
+.va-solio-rail .va-hero-inner {
+  flex-direction: column !important; align-items: stretch !important; gap: 12px !important;
+}
+.va-solio-rail .va-card-hero .va-hero-spark {
+  max-width: none !important; min-width: 0 !important; flex: 1 1 auto !important;
+}
+.va-solio-rail .va-card-value-hero { align-self: flex-start; }
+/* Stat strip reflows to a tidy 2×2 inside the narrow rail. */
+.va-solio-rail .va-strip { flex-wrap: wrap; row-gap: 12px; }
+.va-solio-rail .va-strip-divider { display: none; }
+.va-solio-rail .va-strip-cell { flex: 1 1 calc(50% - 8px); min-width: 0; }
+@media (max-width: 1024px) {
+  .va-solio { grid-template-columns: 1fr; }
+  .va-solio-pitch, .va-solio-rail { grid-column: 1; grid-row: auto; }
+  /* full-width single column → restore the side-by-side hero Marcus approved */
+  .va-solio-rail .va-hero-inner { flex-direction: row !important; align-items: center !important; }
+}
 
 .va-team-header,
 .va-team-name-target,
@@ -4765,6 +4797,10 @@ html.apex-offseason #view-landing .hero-sub::after {
       </div>
     </section>
 
+    <!-- ── SOLIO TWO-PANE: pitch (left) + decision rail (right). Collapses to
+         the original single-column stack below 1024px. (2026-06-08) ── -->
+    <div class="va-solio">
+    <div class="va-solio-rail">
     <section class="va-hero-row">
       <div class="va-card va-card-hero">
         <div class="va-card-accent"></div>
@@ -4928,9 +4964,12 @@ html.apex-offseason #view-landing .hero-sub::after {
     </div>
 
     <div id="solve-banner" style="display:none;margin-bottom:12px;padding:10px 14px;border-radius:8px;background:rgba(249,115,22,.12);border:1px solid rgba(249,115,22,.3);font-size:.85rem;color:var(--accent,#f97316);font-weight:600;"></div>
+    </div><!-- /.va-solio-rail -->
 
-
+    <div class="va-solio-pitch">
     <div id="pitch-wrap"></div>
+    </div><!-- /.va-solio-pitch -->
+    </div><!-- /.va-solio -->
 
     <!-- Model Confidence sits between the pitch and the chip squad panel
          so it lands directly under the bench border — high-visibility slot
@@ -8490,7 +8529,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1780946228-GW38-184bc1eb";
+const BUILD_VERSION = "1780947354-GW38-184bc1eb";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -14954,7 +14993,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW38</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780946228-GW38-184bc1eb</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780947354-GW38-184bc1eb</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
