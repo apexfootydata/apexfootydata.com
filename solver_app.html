@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="38" data-built-at="2026-06-08T18:42:32">
+<meta name="apex-gw" content="38" data-built-at="2026-06-08T20:02:42">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -3878,7 +3878,47 @@ button.secondary, .btn-secondary, .va-btn-secondary {
   justify-content: space-between !important;
   gap: 14px !important;
 }
-.va-hero-spark { display: none !important; }
+/* APEX_HERO_RANGE — risk-driven floor/expected/ceiling panel (Mock A, 2026-06-08).
+   Replaces the old hidden bar-sparkline; fills the empty space beside the big
+   xPts number. Scoped + !important so it wins over the generic .va-hero-spark
+   svg sizing earlier in this file. */
+.va-card-hero .va-hero-spark {
+  display: block !important;
+  width: auto !important;
+  height: auto !important;
+  flex: 1 1 320px !important;
+  max-width: 400px !important;
+  min-width: 240px !important;
+}
+.va-range { width: 100%; font-family: 'Plus Jakarta Sans', sans-serif; }
+.va-range-head {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 3px;
+}
+.va-range-title { font-size: 12px; font-weight: 700; color: #64748b; }
+.va-range-pill {
+  font-size: 10px; font-weight: 700; color: #c2620f;
+  background: #fff4ea; border: 1px solid #ffd9b8;
+  border-radius: 6px; padding: 2px 8px; letter-spacing: 0.02em;
+}
+.va-card-hero .va-hero-spark .va-range-svg {
+  width: 100% !important; height: 54px !important; display: block;
+}
+.va-range-vals { display: flex; justify-content: space-between; margin-top: 1px; }
+.va-range-cell { text-align: left; flex: 1; }
+.va-range-cell-exp { text-align: center; }
+.va-range-cell-r { text-align: right; }
+.va-range-num {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 15px; font-weight: 700; color: #0f172a; line-height: 1.15;
+}
+.va-range-cell-exp .va-range-num { color: #f97316; }
+.va-range-lbl { font-size: 10px; color: #94a3b8; letter-spacing: 0.02em; }
+@media (max-width: 760px) {
+  .va-card-hero .va-hero-spark {
+    max-width: none !important; width: 100% !important; flex: 1 1 100% !important;
+  }
+}
 
 .va-team-header,
 .va-team-name-target,
@@ -4481,6 +4521,49 @@ body, html {
    the 8500px always-on squad view. switchView's own inline display now
    controls which view shows. (view-landing/banner kills above are kept.) */
 /* ═══ APEX_OFFSEASON_KILL:END ═══ */
+
+/* ═══ APEX_TRANSFERS_LIGHT:START ═══ 2026-06-08 white transfer-rec panel + legible OUT player ═══ */
+/* Marcus: "make the whole thing white background." Transfer recommendations
+   panel was dark (--bg2 #1a1a1a) with white --text names, so on the new light
+   theme the OUT player went invisible. Re-skin the .transfers panel to the
+   matchweek-card palette (bg #ffffff, border #e5e7eb, radius 14px, text #0f172a,
+   muted #94a3b8, accent #f97316). Colors only — no layout/markup/id changes.
+   !important needed to beat inline styles + :root vars. */
+
+/* Panel shell (overrides inline background:var(--bg2);border:var(--border)) */
+.transfers {
+  background: #ffffff !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 14px !important;
+}
+.transfers .transfer-row {
+  border-bottom: 1px solid #e5e7eb !important;
+}
+
+/* OUT player — left side. Was inheriting white --text → invisible on white.
+   Name reads as "leaving" (muted slate), meta lighter, price/xPts legible. */
+.transfers .swap-out .name { color: #64748b !important; }
+.transfers .swap-out .pos,
+.transfers .swap-out .team { color: #94a3b8 !important; }
+.transfers .swap-out .cost,
+.transfers .swap-out span[style*="--muted"] { color: #64748b !important; }
+
+/* IN player — right side stays green; ensure team/pos meta is legible on white */
+.transfers .swap-in .name { color: #15803d !important; }
+.transfers .swap-in .pos,
+.transfers .swap-in .team { color: #94a3b8 !important; }
+.transfers .swap-in .cost { color: #64748b !important; }
+
+/* Arrow + gain accents readable on white */
+.transfers .swap-arrow { color: #f97316 !important; }
+.transfers .transfer-meta .gain { color: #15803d !important; }
+
+/* "I disagree" secondary button — muted text/border on white */
+.transfers .transfer-meta button[onclick*="_showOverrideModal"] {
+  color: #64748b !important;
+  border-color: #e5e7eb !important;
+}
+/* ═══ APEX_TRANSFERS_LIGHT:END ═══ */
 
 </style>
 <!-- Cookie consent + conditional Google Analytics 4 loader -->
@@ -8392,7 +8475,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1780940552-GW38-184bc1eb";
+const BUILD_VERSION = "1780945361-GW38-184bc1eb";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -9291,6 +9374,8 @@ function selectPreset(name) {
 
   // Single-select highlight across BOTH presets bars (chip-select + landing).
   _syncPresetHighlight();
+  // Mock A hero: refresh the floor/expected/ceiling range for the new risk profile.
+  if (typeof _renderHeroSparkline === 'function') _renderHeroSparkline();
 
   // Reveal custom dials only for Custom (dials live in the chip-select bar only).
   const dials = document.getElementById('aps-custom-dials');
@@ -9975,30 +10060,69 @@ function _initCompareToggle() {
   } catch (_e) {}
 }
 
+// Hero range panel (Mock A, 2026-06-08). Fills the space beside the big xPts
+// number with a floor / expected / ceiling spread for the ACTIVE gameweek. The
+// band width is driven by the selected risk preset (_activePreset): High fattens
+// the tail and lifts the ceiling, Low pinches it tight around expected. Expected
+// is the same headline number shown in the green card, so the two never disagree.
+const _HERO_SPREAD = {
+  balanced:   { f: 0.12, skew: 1.00 },
+  high:       { f: 0.21, skew: 1.34 },
+  low:        { f: 0.06, skew: 0.90 },
+  optimistic: { f: 0.10, skew: 1.12 },
+  safe:       { f: 0.07, skew: 0.88 },
+  custom:     { f: 0.12, skew: 1.00 },
+};
+const _HERO_PRESET_LABEL = {
+  balanced: 'Balanced', high: 'High risk', low: 'Low risk',
+  optimistic: 'Optimistic', safe: 'Safe', custom: 'Custom',
+};
 function _renderHeroSparkline() {
   try {
     const tm = TEAM_META || {};
     const sp = document.getElementById('va-hero-spark');
-    if (!sp || !Array.isArray(GW_XI_BASE) || GW_XI_BASE.length === 0) return;
-    const vals = GW_XI_BASE.map((v, i) => (v || 0) + ((GW_CAP_XP || [])[i] || 0));
-    const maxV = Math.max(...vals, 1);
-    const range = (tm.gw_range || []);
-    let html = '<svg viewBox="0 0 120 60" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMaxYMid meet">';
-    const barW = 16;
-    const gap  = 6;
-    const totalW = vals.length * barW + (vals.length - 1) * gap;
-    const startX = 120 - totalW;
-    vals.forEach((v, i) => {
-      const h = Math.max(4, Math.round((v / maxV) * 46));
-      const x = startX + i * (barW + gap);
-      const y = 56 - h;
-      const isCurrent = (i === activeGwIdx);
-      const fill = isCurrent ? '#f97316' : 'rgba(255,255,255,0.22)';
-      html += `<rect x="${x}" y="${y}" width="${barW}" height="${h}" rx="2" fill="${fill}"/>`;
-      const lbl = (range[i] != null) ? `GW${range[i]}` : '';
-      html += `<text x="${x + barW / 2}" y="58" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-family="'JetBrains Mono',monospace" font-size="6" font-weight="600">${lbl}</text>`;
-    });
-    html += '</svg>';
+    if (!sp || !Array.isArray(GW_XI_BASE) || GW_XI_BASE.length === 0) { if (sp) sp.innerHTML = ''; return; }
+    const idx = (typeof activeGwIdx === 'number') ? activeGwIdx : 0;
+    // Expected = exact headline total for this GW (incl. live transfers + chips).
+    let E;
+    try {
+      const bbGw = (document.getElementById('sel-bb') || {}).value;
+      const tcGw = (document.getElementById('sel-tc') || {}).value;
+      E = (typeof getTotal === 'function')
+        ? getTotal(idx, bbGw, tcGw)
+        : (GW_XI_BASE[idx] || 0) + ((GW_CAP_XP || [])[idx] || 0);
+    } catch (_eT) {
+      E = (GW_XI_BASE[idx] || 0) + ((GW_CAP_XP || [])[idx] || 0);
+    }
+    if (!(E > 0)) { sp.innerHTML = ''; return; }
+    const pre = (typeof _activePreset === 'string' && _HERO_SPREAD[_activePreset]) ? _activePreset : 'balanced';
+    const s = _HERO_SPREAD[pre];
+    const floor   = E * (1 - s.f * 0.72);
+    const ceiling = E * (1 + s.f * s.skew);
+    const gwLabel = (tm.gw_range && tm.gw_range[idx] != null) ? ('GW' + tm.gw_range[idx]) : '';
+    const presetLabel = _HERO_PRESET_LABEL[pre] || 'Balanced';
+    // Map floor..ceiling onto track x = 20..340; expected dot sits proportionally.
+    const span = Math.max(ceiling - floor, 0.001);
+    const ex = 20 + ((E - floor) / span) * 320;
+    const peakX = Math.max(46, Math.min(316, ex));
+    const hump = 'M20,60 C' + (peakX * 0.55 + 9).toFixed(1) + ',58 ' + (peakX - 34).toFixed(1) + ',22 ' + peakX.toFixed(1) + ',19 C' + (peakX + 44).toFixed(1) + ',16 260,46 340,57';
+    let html = '';
+    html += '<div class="va-range">';
+    html +=   '<div class="va-range-head"><span class="va-range-title">Your ' + gwLabel + ' range</span><span class="va-range-pill">' + presetLabel + '</span></div>';
+    html +=   '<svg class="va-range-svg" viewBox="0 0 360 84" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">';
+    html +=     '<path d="' + hump + ' L340,60 L20,60 Z" fill="rgba(249,115,22,0.13)"/>';
+    html +=     '<path d="' + hump + '" fill="none" stroke="rgba(249,115,22,0.40)" stroke-width="1.5"/>';
+    html +=     '<line x1="20" y1="70" x2="340" y2="70" stroke="#e2ddd3" stroke-width="3" stroke-linecap="round"/>';
+    html +=     '<line x1="20" y1="64" x2="20" y2="76" stroke="#c4bdb2" stroke-width="2"/>';
+    html +=     '<line x1="340" y1="64" x2="340" y2="76" stroke="#c4bdb2" stroke-width="2"/>';
+    html +=     '<circle cx="' + ex.toFixed(1) + '" cy="70" r="6" fill="#f97316" stroke="#fff" stroke-width="2"/>';
+    html +=   '</svg>';
+    html +=   '<div class="va-range-vals">';
+    html +=     '<div class="va-range-cell"><div class="va-range-num">' + floor.toFixed(1) + '</div><div class="va-range-lbl">floor</div></div>';
+    html +=     '<div class="va-range-cell va-range-cell-exp"><div class="va-range-num">' + E.toFixed(1) + '</div><div class="va-range-lbl">expected</div></div>';
+    html +=     '<div class="va-range-cell va-range-cell-r"><div class="va-range-num">' + ceiling.toFixed(1) + '</div><div class="va-range-lbl">ceiling</div></div>';
+    html +=   '</div>';
+    html += '</div>';
     sp.innerHTML = html;
   } catch (_e) {}
 }
@@ -13353,6 +13477,7 @@ function updateChipTotal() {
   if (_lblEl) _lblEl.textContent = 'GW' + TEAM_META.gw_range[activeGwIdx] + ' xPts';
   _gwTotals[activeGwIdx] = newTotal;
   updateRollingTotal();
+  if (typeof _renderHeroSparkline === 'function') _renderHeroSparkline(); // keep range in sync with live xPts
   _renderPitchFromState(); // re-render handles BB label + TC badge
 }
 
@@ -14812,7 +14937,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW38</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780940552-GW38-184bc1eb</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780945361-GW38-184bc1eb</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
