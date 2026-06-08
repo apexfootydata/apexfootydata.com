@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="38" data-built-at="2026-06-08T22:52:58">
+<meta name="apex-gw" content="38" data-built-at="2026-06-08T23:02:35">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -3994,11 +3994,35 @@ button.secondary, .btn-secondary, .va-btn-secondary {
 /* Chip plan fits the narrow rail as 2×2 (was a 4-wide row that overflowed,
    clipping "Free Hit" and forcing a horizontal scrollbar). */
 .va-solio-rail .va-chip-grid { grid-template-columns: 1fr 1fr !important; }
-/* Tighter pitch inside the two-pane so the full squad fits without scrolling. */
-.va-solio-pitch .shirt { width: 104px; }
-.va-solio-pitch .shirt-wrap { width: 76px; }
-.va-solio-pitch .svg-shirt { width: 76px; height: 76px; }
-.va-solio-pitch .pitch-row { gap: 8px; margin-bottom: 16px; }
+/* Tighter pitch inside the two-pane so the full squad fits without scrolling.
+   2026-06-08 vertical-density pass (no-scroll @ ~768–900px tall desktop): trim
+   container top padding, brand header + tabs footprint, pitch padding/rows,
+   shirt sizes, and the rail's range-plot/chip/strip spacing. All scoped to the
+   team view / two-pane so other views, the Player Pool tab, and mobile (<1024px)
+   are untouched. */
+.va-solio-pitch .shirt { width: 96px; }
+.va-solio-pitch .shirt-wrap { width: 64px; margin-bottom: 1px; }
+.va-solio-pitch .svg-shirt { width: 64px; height: 64px; }
+.va-solio-pitch .pitch-row { gap: 8px; margin-bottom: 10px; }
+.va-solio-pitch .pitch { padding: 16px 14px 12px; }
+.va-solio-pitch .shirt-xp { font-size: 1.02rem; margin-top: 2px; }
+.va-solio-pitch .shirt-name { padding: 2px 9px; margin-top: 2px; }
+.va-solio-pitch .shirt-fix { margin-top: 2px; }
+.va-solio-pitch .bench-label { margin: 8px 0 6px; font-size: 0.82rem; }
+.va-solio-pitch .bench-row { padding: 10px; }
+
+/* ── Squad-tab vertical density: top whitespace, header, tabs (scoped) ────── */
+#view-team .container { padding-top: 18px; }
+#view-team .va-tabs { margin: 0 0 10px; }
+#view-team .va-team-header,
+#view-team .va-team-name-target,
+#view-team .va-team-name { line-height: 1.1 !important; }
+
+/* ── Rail density: smaller range plot + tighter inter-card gap (scoped) ───── */
+.va-solio-rail { gap: 8px; }
+.va-solio-rail .va-range-plot { height: 84px; }
+.va-solio-rail .va-chip-panel { padding: 5px 12px !important; }
+.va-solio-rail .va-strip { padding: 10px 16px !important; gap: 8px 18px !important; }
 
 /* ── 3-pill risk selector in the rail (2026-06-08, Marcus) ──────────────────
    Balanced / High / Low only, as compact pills. Hides Optimistic/Safe/Custom +
@@ -8608,7 +8632,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1780955578-GW38-184bc1eb";
+const BUILD_VERSION = "1780956154-GW38-184bc1eb";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -15175,7 +15199,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW38</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780955578-GW38-184bc1eb</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780956154-GW38-184bc1eb</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
