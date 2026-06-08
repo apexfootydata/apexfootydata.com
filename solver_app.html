@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="39" data-built-at="2026-06-08T15:06:52">
+<meta name="apex-gw" content="39" data-built-at="2026-06-08T15:39:44">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -8167,7 +8167,6 @@ html.apex-offseason #view-landing .hero-sub::after {
       _all_inflight_finished: allFinished,
     };
   }
-
   // ── util ───────────────────────────────────────────────────────────────
   function round1(x) { return Math.round(x * 10) / 10; }
   function round2(x) { return Math.round(x * 100) / 100; }
@@ -8216,7 +8215,7 @@ html.apex-offseason #view-landing .hero-sub::after {
     _simulateLeague,
     _buildCorrelationMatrix,
     _cholesky,
-    _version: '0.7.1-presets',
+    _version: '0.7.0-m7',
   };
 })();
 
@@ -8243,7 +8242,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1780927612-GW39-738c7259";
+const BUILD_VERSION = "1780929584-GW39-738c7259";
 window.APEX_BUILD = BUILD_VERSION;
 
 let FPL_ID = null;
@@ -14440,7 +14439,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW39</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780927612-GW39-738c7259</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780929584-GW39-738c7259</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
