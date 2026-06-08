@@ -4418,10 +4418,10 @@ body, html {
   overflow: hidden !important;
 }
 
-/* Ensure team view is visible (PUBLIC_BOOT may try to hide it) */
-#view-team {
-  display: block !important;
-}
+/* 2026-06-08 REMOVED `#view-team { display:block !important }` — it pinned the
+   squad view permanently visible so switchView() could not hide it; Chip
+   Planner / Mini-League rendered off-screen below it. switchView inline display
+   now controls which view shows. */
 /* ═══ APEX_OFFSEASON_KILL:END ═══ */
 
 </style>
