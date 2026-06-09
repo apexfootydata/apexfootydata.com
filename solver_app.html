@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-06-09T19:16:49">
+<meta name="apex-gw" content="32" data-built-at="2026-06-09T19:55:01">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -8956,7 +8956,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1781029008-GW32-2d5feab0";
+const BUILD_VERSION = "1781031301-GW32-2d5feab0";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -9850,6 +9850,27 @@ function _presetParamsForSolve() {
     };
   }
   return _PRESET_PARAMS[_activePreset] || _PRESET_PARAMS.balanced;
+}
+
+// ── Ownership-based risk bias — SHARED (2026-06-09) ────────────────────────
+// Single source of truth for the High/Low ownership tilt. Used by BOTH the
+// weekly transfer engine (computeTransfers) and the Path Planner ("see all
+// options" / runSolve), so every ranking surface tells the same story.
+// RANKING nudge only — displayed gains stay true xP everywhere.
+// High (+1): low-owned (< pivot) boosted, template penalised. Low (-1): flips.
+// Distance is clamped so one mega-owned / mega-diff player can't dominate.
+const _APEX_OWN_PIVOT  = 18.0;  // % ownership "template line": above = template (tunable)
+const _APEX_RISK_OWN_K = 3.0;   // xP swing strength per unit ownership distance (tunable)
+function _apexRiskOwnBias(p) {
+  if (!window.APEX_PRESETS) return 0;
+  const sign = (_activePreset === 'high') ? 1 : (_activePreset === 'low') ? -1 : 0;
+  if (!sign || !p) return 0;
+  try {
+    const pd = (typeof _apexPoolById === 'function' ? _apexPoolById(p.id) : null) || p;
+    const own = (typeof pd.own === 'number') ? pd.own : (parseFloat(pd.own) || 0);
+    const dist = Math.max(-0.6, Math.min(0.2, (_APEX_OWN_PIVOT - own) / 100));
+    return sign * _APEX_RISK_OWN_K * dist;
+  } catch (_e) { return 0; }
 }
 
 function selectPreset(name) {
@@ -10903,39 +10924,13 @@ function computeTransfers(gwIdx) {
   // and High Risk looked identical to Balanced. We now let the bias steer
   // which candidate WINS each slot, so genuine differentials can surface.
   //
-  // _DIFF_W is in xP units PER full (0→100%) ownership swing. At 2.4, a 50pp
-  // ownership gap shifts ranking by 2.4 * 0.5 = 1.2 xP — enough to reorder
-  // real, well-separated options (template vs punt) but still bounded so the
-  // bias won't crown a candidate that's a full xP+ worse on raw projection.
-  // 'balanced'/'optimistic'/'safe'/'custom' → sign 0 → byte-identical to before.
-  // High Risk → reward CEILING (high-variance IN players); Low Risk → reward
-  // FLOOR (consistent, low-variance). Uses the same per-player sd the range
-  // panel simulates from, so the risk toggle and the range tell one story.
-  // Ranking nudge only — the DISPLAYED gain stays the true xP. _RISK_K is the
-  // xP swing per 1 stdev of player spread. balanced/optimistic/safe/custom →
-  // sign 0 → byte-identical to before.
   // OWNERSHIP-based differential lever (2026-06-09). High risk rewards LOW/MID-
   // owned, non-template IN players; Low risk rewards HIGH-owned, template ones.
   // Ranking nudge only — the DISPLAYED gain stays the true xP.
-  const _OWN_PIVOT = 18.0;   // % ownership "template line": above = template (tunable)
-  const _RISK_OWN_K = 3.0;   // xP swing strength per unit ownership distance (tunable)
-  const _presetDiff = (window.APEX_PRESETS && (typeof _activePreset !== 'undefined'))
-    ? _activePreset : 'balanced';
-  const _diffSign = (_presetDiff === 'high') ? 1 : (_presetDiff === 'low') ? -1 : 0;
-  // Bias for a candidate IN player (RANKING only). Resolves ownership by id so it
-  // works whether passed a full pool record or a thin { id }. Distance below the
-  // template line is clamped so one mega-owned/mega-diff player can't dominate.
-  // High (+1): low-owned -> positive boost, template -> penalty. Low (-1): flips.
-  const _diffBias = (p) => {
-    if (!_diffSign || !p) return 0;
-    try {
-      const pd = (typeof _apexPoolById === 'function' ? _apexPoolById(p.id) : null) || p;
-      const own = (typeof pd.own === 'number') ? pd.own : (parseFloat(pd.own) || 0);
-      const dist = Math.max(-0.6, Math.min(0.2, (_OWN_PIVOT - own) / 100));
-      return _diffSign * _RISK_OWN_K * dist;
-    }
-    catch (_e) { return 0; }
-  };
+  // Hoisted to the SHARED _apexRiskOwnBias (defined near _PRESET_PARAMS) so the
+  // Path Planner applies the identical tilt — tune _APEX_OWN_PIVOT /
+  // _APEX_RISK_OWN_K up there, both surfaces move together.
+  const _diffBias = (p) => _apexRiskOwnBias(p);
 
   // Read planned FH GW from the chip dropdown (0 = not planned).
   // Only EXPLICIT user selections change the transfer math — no hidden
@@ -11138,16 +11133,12 @@ function computeTransfers(gwIdx) {
   // Rolling block keeps gain-descending sort.
   //
   // ──── Risk-preset differential adjustment (added 2026-06-08) ────
-  // Cross-slot tiebreak ranking. Reuses the SAME _diffBias / _DIFF_W defined
-  // at the top of computeTransfers (which also steers per-slot selection), so
-  // the differential is applied once, consistently, with the strengthened
-  // weight. RANKING preference only — the DISPLAYED `gain` stays true xP.
-  // Non-diff presets ('balanced'/'optimistic'/'safe'/'custom') → _diffSign 0
-  // → _adjGain === t.gain → ordering byte-identical to before.
-  const _adjGain = (t) => {
-    if (!_diffSign) return t.gain;
-    return t.gain + _diffBias({ id: t.in_id });
-  };
+  // Cross-slot tiebreak ranking. Reuses the SAME _diffBias defined at the top
+  // of computeTransfers (which also steers per-slot selection), so the
+  // differential is applied once, consistently. RANKING preference only — the
+  // DISPLAYED `gain` stays true xP. Non-diff presets ('balanced'/'optimistic'/
+  // 'safe'/'custom') → bias 0 → ordering byte-identical to before.
+  const _adjGain = (t) => t.gain + _diffBias({ id: t.in_id });
   transfers.sort((a, b) => {
     if (a.is_dgw_priority !== b.is_dgw_priority)
       return a.is_dgw_priority ? -1 : 1;
@@ -11550,6 +11541,39 @@ function runOptimize() {
 }
 
 // ──── Solve Button ────
+// ── Path Planner computing overlay (2026-06-09) ────────────────────────────
+// The planner's lookahead walk is heavy SYNCHRONOUS JS — it can block the main
+// thread for a minute or more on a cold cache, which used to look like a crash
+// (frozen page, no feedback). This overlay paints BEFORE the compute starts and
+// uses a compositor-driven spinner: CSS transform animations keep running even
+// while the main thread is blocked, so the page visibly stays alive. Injected
+// from JS so there's no external CSS dependency.
+function _ppShowComputing(msg) {
+  if (!document.getElementById('pp-computing-style')) {
+    const st = document.createElement('style');
+    st.id = 'pp-computing-style';
+    st.textContent = '@keyframes ppspin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }';
+    document.head.appendChild(st);
+  }
+  let ov = document.getElementById('pp-computing-overlay');
+  if (!ov) {
+    ov = document.createElement('div');
+    ov.id = 'pp-computing-overlay';
+    ov.style.cssText = 'position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:rgba(10,10,14,.82);';
+    ov.innerHTML = '<div style="width:46px;height:46px;border:4px solid rgba(249,115,22,.25);border-top-color:#f97316;border-radius:50%;will-change:transform;animation:ppspin .9s linear infinite;"></div>'
+      + '<div id="pp-computing-msg" style="color:#fff;font-weight:700;font-size:1rem;text-align:center;padding:0 16px;"></div>'
+      + '<div style="color:#9a9aa5;font-size:.82rem;max-width:340px;text-align:center;padding:0 16px;">Crunching every transfer path across the horizon. This can take a minute or two. Do not refresh.</div>';
+    document.body.appendChild(ov);
+  }
+  const m = document.getElementById('pp-computing-msg');
+  if (m) m.textContent = msg || 'Computing…';
+  ov.style.display = 'flex';
+}
+function _ppHideComputing() {
+  const ov = document.getElementById('pp-computing-overlay');
+  if (ov) ov.style.display = 'none';
+}
+
 function runSolve() {
   const wcGw  = parseInt(document.getElementById('sel-wc')?.value || 0);
   const fhGw  = parseInt(document.getElementById('sel-fh')?.value || 0);
@@ -11616,8 +11640,25 @@ function runSolve() {
   // doesn't yet model "WC at GW Y" mid-walk (deferred to V2).
   const _hasFutureChip = (wcGw && wcGw !== activeGw) || (fhGw && fhGw !== activeGw);
   if (!_hasFutureChip) {
-    if (_openPathPlannerFromCurrent(activeGwIdx)) {
-      status.textContent = `Planning transfers GW${activeGw} → end of season`;
+    // Same hydration guard _openPathPlannerFromCurrent uses — only show the
+    // overlay when the planner will actually run.
+    if ([..._xiPlayers, ..._benchPlayers].length === 15) {
+      // Paint the overlay first, THEN kick off the heavy synchronous compute
+      // on the next tick so the spinner is on screen before the freeze.
+      const _lastGw = TEAM_META.gw_range[TEAM_META.gw_range.length - 1];
+      _ppShowComputing(`Planning transfers GW${activeGw} → GW${_lastGw}…`);
+      setTimeout(() => {
+        let _ppOk = false;
+        try { _ppOk = _openPathPlannerFromCurrent(activeGwIdx); }
+        finally { _ppHideComputing(); }
+        if (_ppOk) {
+          status.textContent = `Planning transfers GW${activeGw} → end of season`;
+        } else {
+          // Mirror the legacy fallthrough: inline transfer recs.
+          renderTransfers(computeTransfers(activeGwIdx));
+          section.style.display = 'block';
+        }
+      }, 80);
       return;
     }
     // Fallthrough if planner couldn't open (e.g. squad not hydrated yet)
@@ -12072,6 +12113,20 @@ function _ppComputeOptions(workingSquad, gwIdx, bank, workingFt) {
 
   const options = [];
 
+  // ── Risk tilt (2026-06-09) ──
+  // Same ownership bias as computeTransfers (_apexRiskOwnBias), applied to the
+  // VISIBLE Paths ranking only — candidate selection, combo ranking, and the
+  // final lookahead sort. NEVER fed into the recursive future EV
+  // (_ppFutureBest / _ppComputeOptionsLocal): that stays pure xP so the memo
+  // cache is preset-independent and future value is honest. Displayed numbers
+  // stay true xP; High/Low only change which options surface and win.
+  const _ppBias = (opt) => {
+    if (!opt || opt.type === 'none') return 0;
+    let b = _apexRiskOwnBias(opt.in);
+    if (opt.type === 'two') b += _apexRiskOwnBias(opt.in2);
+    return b;
+  };
+
   // ── No Transfer option ──
   options.push({
     type: 'none',
@@ -12112,7 +12167,12 @@ function _ppComputeOptions(workingSquad, gwIdx, bank, workingFt) {
 
   // Sort by evGain desc, dedupe by `out` so we don't show 5 different
   // upgrades for the same outgoing slot — keep the best one per out.
-  candidates.sort((a, b) => b.evGain - a.evGain);
+  // Risk tilt biases WHICH candidate wins each slot (else every slot
+  // pre-collapses to its highest-pure-xP option and a differential never
+  // even enters the list — same lesson as computeTransfers). evGain itself
+  // stays true xP.
+  candidates.sort((a, b) => (b.evGain + _apexRiskOwnBias(b.in))
+                          - (a.evGain + _apexRiskOwnBias(a.in)));
   const seenOuts = new Set();
   const uniquePerOut = [];
   for (const c of candidates) {
@@ -12182,7 +12242,7 @@ function _ppComputeOptions(workingSquad, gwIdx, bank, workingFt) {
       });
     }
   }
-  twoOpts.sort((a, b) => b.netEv - a.netEv);
+  twoOpts.sort((a, b) => (b.netEv + _ppBias(b)) - (a.netEv + _ppBias(a)));
   // Take top 2 two-transfer combos so the user sees diversification options
   for (const opt of twoOpts.slice(0, 2)) options.push(opt);
 
@@ -12204,7 +12264,9 @@ function _ppComputeOptions(workingSquad, gwIdx, bank, workingFt) {
   // Rank by lookahead EV descending. Falls back to local netEv if lookahead
   // is unavailable (last GW of horizon). Top option = the path that
   // maximises *total* horizon points after all future best-response moves.
-  options.sort((a, b) => b.lookaheadEv - a.lookaheadEv);
+  // Risk tilt nudges the displayed order (High → differentials climb,
+  // Low → template climbs); lookaheadEv itself stays true xP.
+  options.sort((a, b) => (b.lookaheadEv + _ppBias(b)) - (a.lookaheadEv + _ppBias(a)));
 
   return options;
 }
@@ -15615,7 +15677,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781029008-GW32-2d5feab0</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781031301-GW32-2d5feab0</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
