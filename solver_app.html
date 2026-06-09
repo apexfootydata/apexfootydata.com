@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-06-09T20:30:44">
+<meta name="apex-gw" content="32" data-built-at="2026-06-09T20:33:12">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -8956,7 +8956,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1781033444-GW32-2d5feab0";
+const BUILD_VERSION = "1781033592-GW32-2d5feab0";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -12292,6 +12292,48 @@ function _ppComputeOptions(workingSquad, gwIdx, bank, workingFt) {
   // Take top 2 two-transfer combos so the user sees diversification options
   for (const opt of twoOpts.slice(0, 2)) options.push(opt);
 
+  // ── Guaranteed risk-mode representation (2026-06-09, Marcus) ──
+  // High/Low must surface genuinely DIFFERENT players, not just reorder the
+  // same xP-optimal set. Under High, inject the best low-owned punts that
+  // didn't make the cut; under Low, the best high-owned template moves. They
+  // rank honestly (true EV + lookahead, so they usually sit lower) but carry
+  // a riskPick flag the renderer badges. Existing qualifying options get the
+  // flag too, so the mode's fingerprint is visible on every relevant row.
+  const _riskSign = (window.APEX_PRESETS && _activePreset === 'high') ? 1
+                  : (window.APEX_PRESETS && _activePreset === 'low') ? -1 : 0;
+  if (_riskSign) {
+    const _ownOf = (p) => {
+      const pd = (typeof _apexPoolById === 'function' ? _apexPoolById(p.id) : null) || p;
+      return (typeof pd.own === 'number') ? pd.own : (parseFloat(pd.own) || 0);
+    };
+    const _qualifies = (p) => _riskSign > 0
+      ? _ownOf(p) <= _APEX_DIFF_OWN_MAX
+      : _ownOf(p) >= _APEX_TEMPLATE_OWN_MIN;
+    const _pickLabel = _riskSign > 0 ? 'differential' : 'template';
+    for (const o of options) {
+      if (o.type === 'one' && o.in && _qualifies(o.in)) o.riskPick = _pickLabel;
+    }
+    let _need = _APEX_RISK_PICK_SLOTS
+      - options.filter(o => o.type === 'one' && o.riskPick).length;
+    if (_need > 0) {
+      const _inIds = new Set(options.filter(o => o.in).map(o => o.in.id));
+      for (const c of candidates) {
+        if (_need <= 0) break;
+        if (_inIds.has(c.in.id) || !_qualifies(c.in) || c.evGain <= 0.05) continue;
+        options.push({
+          type: 'one', out: c.out, in: c.in, evGain: c.evGain,
+          netEv: c.evGain - hit1, hitCost: hit1,
+          horizonAfter: baseHorizonXp + c.evGain,
+          newSquad: workingSquad.map(p => p.id === c.out.id ? c.in : p),
+          newBank: bank + c.outSell - c.inCost,
+          riskPick: _pickLabel,
+        });
+        _inIds.add(c.in.id);
+        _need--;
+      }
+    }
+  }
+
   // ── V3: Lookahead-aware ranking ──
   // Each option's `lookaheadEv` = own netEv + recursive best total EV from
   // the resulting (squad, bank, ft) state through the rest of the horizon.
@@ -12705,7 +12747,7 @@ function _buildActiveCard(gwIdx) {
               <div class="pp-player-shirt">${inShirt}</div>
               <div class="pp-player-info">
                 <div class="pp-player-name pp-in-name">${inP.web_name}</div>
-                <div class="pp-player-meta">${inP.team} · ${_ppPosName(inP.element_type)} · £${(inP.cost || 0).toFixed(1)}m</div>
+                <div class="pp-player-meta">${inP.team} · ${_ppPosName(inP.element_type)} · £${(inP.cost || 0).toFixed(1)}m${_apexOwnTag(inP)}</div>
               </div>
             </div>
             ${disagreeBtn}
@@ -12777,10 +12819,17 @@ function _buildActiveCard(gwIdx) {
                     style="background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:5px;padding:5px 10px;font-size:.7rem;font-weight:600;cursor:pointer;margin-top:6px;">I disagree</button>`;
       }
     }
+    // Risk-pick badge (2026-06-09): flags options that embody the active risk
+    // profile — injected guaranteed picks AND naturally-qualifying ones.
+    const _riskBadge = opt.riskPick === 'differential'
+      ? `<div style="font-size:.68rem;font-weight:800;color:#16a34a;letter-spacing:.4px;margin-bottom:4px;">💎 HIGH-RISK PICK · low-owned punt</div>`
+      : (opt.riskPick === 'template'
+      ? `<div style="font-size:.68rem;font-weight:800;color:#2563eb;letter-spacing:.4px;margin-bottom:4px;">🛡 LOW-RISK PICK · field cover</div>`
+      : '');
     optsHtml += `
       <div class="pp-option ${opt.type === 'none' ? 'pp-option-no-transfer' : ''} ${isTop}">
         <span class="pp-option-rank">#${i + 1}</span>
-        <div class="pp-option-body">${bodyHtml}</div>
+        <div class="pp-option-body">${_riskBadge}${bodyHtml}</div>
         ${evDisplay}
         <div style="display:flex;flex-direction:column;align-items:stretch;gap:4px;">
           <button class="pp-option-select" onclick="_selectPathOption(${gwIdx}, ${i})">Select</button>
@@ -15723,7 +15772,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781033444-GW32-2d5feab0</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781033592-GW32-2d5feab0</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
