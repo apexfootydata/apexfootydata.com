@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-06-09T22:02:18">
+<meta name="apex-gw" content="32" data-built-at="2026-06-09T22:13:07">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -342,11 +342,11 @@ body {
 
 /* ── Pitch view ─────────────────────────────────────────────────────────── */
 .pitch {
-  background: linear-gradient(180deg, #14622a 0%, #1a7833 30%, #1d8038 50%, #1a7833 70%, #14622a 100%);
+  background: linear-gradient(180deg, #0A5743 0%, #0F6E56 30%, #12795E 50%, #0F6E56 70%, #0A5743 100%);
   border-radius: var(--card-radius);
   padding: 28px 16px 20px;
   margin: 20px 0;
-  border: 2px solid #0f4a1e;
+  border: 2px solid #07423A;
   position: relative;
   box-shadow: 0 4px 24px rgba(0,0,0,0.35), inset 0 1px 0 rgba(0,0,0,0.05);
 }
@@ -2776,14 +2776,14 @@ body.compare-review .va-card-hero::before {
   bottom: 16px;
   right: 0;
   width: 4px;
-  background: #F97316;
+  background: #1D9E75;
   border-radius: 2px 0 0 2px;
 }
 .cr-hero-label {
   font-family: 'Plus Jakarta Sans', sans-serif;
   font-size: 0.7rem;
   font-weight: 700;
-  color: #F97316;
+  color: #1D9E75;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   margin-bottom: 8px;
@@ -2792,7 +2792,7 @@ body.compare-review .va-card-hero::before {
   font-family: 'JetBrains Mono', monospace;
   font-size: 2.4rem;
   font-weight: 700;
-  color: #F97316;
+  color: #1D9E75;
   line-height: 1;
   letter-spacing: -0.02em;
 }
@@ -2949,10 +2949,10 @@ body.compare-review .va-card-hero::before {
 }
 /* Top option (rank #1) gets the orange accent — visually anchors "the call" */
 .pp-option-top {
-  border-left-color: #F97316;
+  border-left-color: #1D9E75;
   background: linear-gradient(180deg, rgba(29,158,117,0.07) 0%, rgba(29,158,117,0.015) 100%);
 }
-.pp-option-top:hover { border-left-color: #F97316; }
+.pp-option-top:hover { border-left-color: #1D9E75; }
 
 .pp-option-rank {
   font-family: 'JetBrains Mono', monospace;
@@ -2962,7 +2962,7 @@ body.compare-review .va-card-hero::before {
   min-width: 28px;
   text-align: center;
 }
-.pp-option-top .pp-option-rank { color: #F97316; }
+.pp-option-top .pp-option-rank { color: #1D9E75; }
 
 .pp-option-body { flex: 1; min-width: 240px; }
 
@@ -3018,7 +3018,7 @@ body.compare-review .va-card-hero::before {
 }
 .pp-arrow-block { text-align: center; }
 .pp-arrow {
-  color: #F97316;
+  color: #1D9E75;
   font-weight: 800;
   font-size: 1.15rem;
   letter-spacing: -0.05em;
@@ -3335,8 +3335,8 @@ input, select, textarea {
   border-radius: 10px !important;
 }
 input:focus, select:focus, textarea:focus {
-  outline: 2px solid #F97316 !important;
-  border-color: #F97316 !important;
+  outline: 2px solid #1D9E75 !important;
+  border-color: #1D9E75 !important;
 }
 input::placeholder { color: #94a3b8 !important; }
 
@@ -3347,7 +3347,7 @@ button, .btn, .va-btn, .pp-option-select {
 }
 button.primary, .btn-primary, .va-btn-primary,
 .landing-cta-primary, .landing-cta-secondary {
-  background: #F97316 !important;
+  background: #1D9E75 !important;
   color: #ffffff !important;
   border: none !important;
 }
@@ -3374,7 +3374,7 @@ button.secondary, .btn-secondary, .va-btn-secondary {
    Backgrounds, fonts, shirt SVGs, badges, markings all kept as-is. */
 .pitch, .pitch * { background: revert !important; color: revert !important; border-color: revert !important; }
 .pitch {
-  background: linear-gradient(180deg, #14622a 0%, #1a7833 30%, #1d8038 50%, #1a7833 70%, #14622a 100%) !important;
+  background: linear-gradient(180deg, #0A5743 0%, #0F6E56 30%, #12795E 50%, #0F6E56 70%, #0A5743 100%) !important;
 }
 .pitch .shirt-name { color: revert !important; }
 .pitch .shirt-xp   { color: revert !important; }
@@ -3391,7 +3391,7 @@ button.secondary, .btn-secondary, .va-btn-secondary {
 .bench-container,
 .pitch-bench,
 .bench {
-  background: linear-gradient(180deg, #1a7a3a 0%, #208c44 28%, #259a4d 50%, #208c44 72%, #1a7a3a 100%) !important;
+  background: linear-gradient(180deg, #0F6E56 0%, #13815F 28%, #168B67 50%, #13815F 72%, #0F6E56 100%) !important;
   border: none !important;
   border-radius: var(--card-radius, 14px) !important;
 }
@@ -3548,7 +3548,7 @@ button.secondary, .btn-secondary, .va-btn-secondary {
 .pool-table .pool-xp-total {
   font-size: 16px !important;
   font-weight: 800 !important;
-  color: #F97316 !important;
+  color: #1D9E75 !important;
 }
 /* Row hover effect — subtle peach */
 .pool-table .pool-row:hover {
@@ -3683,7 +3683,7 @@ button.secondary, .btn-secondary, .va-btn-secondary {
 .pp-xmins-btn:hover {
   opacity: 1 !important;
   transform: scale(1.18) !important;
-  background: #F97316 !important;
+  background: #1D9E75 !important;
 }
 /* Reveal the ⏱ button when the user hovers anywhere on the shirt cell. */
 .pitch .shirt:hover .pp-xmins-btn,
@@ -3769,15 +3769,15 @@ button.secondary, .btn-secondary, .va-btn-secondary {
   font-family: 'Plus Jakarta Sans', sans-serif !important;
 }
 
-/* Brighter pitch gradient — Solio-style luminosity */
+/* Pitch — teal-green to match the v4 brand palette (2026-06-09 Marcus). */
 .pitch {
   background: linear-gradient(
     180deg,
-    #1a7a3a 0%,
-    #208c44 28%,
-    #259a4d 50%,
-    #208c44 72%,
-    #1a7a3a 100%
+    #0F6E56 0%,
+    #13815F 28%,
+    #168B67 50%,
+    #13815F 72%,
+    #0F6E56 100%
   ) !important;
 }
 
@@ -4475,7 +4475,7 @@ body, html {
 
 /* ── GW pill — XL ─────────────────────────────────────────────────────── */
 .va-gw-pill, .gw-pill.active {
-  background: #F97316 !important;
+  background: #1D9E75 !important;
   color: #ffffff !important;
   font-family: 'Plus Jakarta Sans', sans-serif !important;
   font-weight: 800 !important;
@@ -4499,7 +4499,7 @@ body, html {
   letter-spacing: 0.02em !important;
 }
 .va-chip-card select {
-  color: #F97316 !important;
+  color: #1D9E75 !important;
   font-family: 'Plus Jakarta Sans', sans-serif !important;
   font-size: 15px !important;
   font-weight: 800 !important;
@@ -4507,7 +4507,7 @@ body, html {
 
 /* ── Solve / Reset buttons — XL ──────────────────────────────────────── */
 .va-solve-btn, button.solve-btn, #transfer-solver-btn {
-  background: #F97316 !important;
+  background: #1D9E75 !important;
   color: #ffffff !important;
   border: none !important;
   border-radius: 12px !important;
@@ -4607,7 +4607,7 @@ body, html {
   font-family: 'Plus Jakarta Sans', sans-serif !important;
   font-size: 12px !important;
   font-weight: 700 !important;
-  color: #F97316 !important;
+  color: #1D9E75 !important;
   cursor: pointer !important;
   appearance: none !important;
   -webkit-appearance: none !important;
@@ -5255,7 +5255,7 @@ html.apex-offseason #view-landing .hero-sub::after {
       <button class="btn solve-btn" onclick="runOptimize()" id="solve-btn"
         title="Apply the single best transfer straight to your squad"
         style="background:var(--accent,#1D9E75);color:#000;border:none;padding:11px 28px;border-radius:8px;font-weight:700;font-size:.95rem;cursor:pointer;display:flex;align-items:center;gap:8px;">
-        ⚡ Optimize
+        ⚡ Quick Optimise
       </button>
       <button class="btn reset-btn" onclick="resetSolver()" id="reset-btn"
         title="Revert all transfers + chip selections, restore original squad"
@@ -8996,7 +8996,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1781038938-GW32-a9172c07";
+const BUILD_VERSION = "1781039587-GW32-a9172c07";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -15539,7 +15539,9 @@ function renderPoolTable() {
       <td><span style="display:inline-flex;align-items:center;">${shirtImg}<strong>${p.web_name}</strong></span></td>
       <td style="color:var(--muted);">${p.team}</td>
       <td style="color:var(--muted);font-size:.72rem;font-weight:700;">${POOL_POS_LABELS[p.element_type] || '?'}</td>
-      <td class="pool-xp" style="color:${(p.xp_minutes || 0) >= 75 ? '#4ade80' : (p.xp_minutes || 0) >= 60 ? 'var(--fg)' : (p.xp_minutes || 0) >= 45 ? '#f59e0b' : '#ef4444'};font-variant-numeric:tabular-nums;">${Math.round(p.xp_minutes || 0)}</td>
+      <td class="pool-xp" style="color:${(p.xmins != null ? p.xmins : (p.xp_minutes || 0)) >= 75 ? '#16a34a' : (p.xmins != null ? p.xmins : (p.xp_minutes || 0)) >= 60 ? 'var(--fg)' : (p.xmins != null ? p.xmins : (p.xp_minutes || 0)) >= 45 ? '#f59e0b' : '#ef4444'};font-variant-numeric:tabular-nums;">
+        <span onclick="event.stopPropagation(); window._openXminsEditor(${p.id})" title="Edit this player's expected minutes"
+          style="cursor:pointer;text-decoration:underline dotted;text-underline-offset:3px;">${Math.round(p.xmins != null ? p.xmins : (p.xp_minutes || 0))} ⏱</span></td>
       <td class="pool-xp">£${p.cost.toFixed(1)}</td>
       ${gwCells}
       <td class="pool-xp pool-xp-total">${p.total_xp.toFixed(1)}</td>
@@ -15868,6 +15870,45 @@ function _recomputeXpForNewXmins(pid, newXmins) {
 // hero xPts total at top of pitch (was a bug: total wasn't refreshing).
 function _applyXminsOverridesAndRender() {
   if (typeof SQUAD_DATA === 'undefined' || !Array.isArray(SQUAD_DATA)) return;
+  // ── Pool players too (2026-06-09) ──
+  // Clock-edits on NON-squad players must flow into POOL_DATA so Optimize,
+  // the transfers list and the planner tree all see them (the G.Jesus case:
+  // phantom recommendation → user sets 20 mins → he drops out of every rec).
+  // Scales the WHOLE horizon from a pristine base (kept on first edit) so
+  // repeated applies stay idempotent.
+  if (typeof POOL_DATA !== 'undefined' && Array.isArray(POOL_DATA)) {
+    POOL_DATA.forEach(pp => {
+      const ov = _xminsOverrides[String(pp.id)];
+      if (ov == null) return;
+      const newXp = _recomputeXpForNewXmins(pp.id, ov);
+      if (newXp == null) return;
+      if (!pp._xp_base) {
+        pp._xp_base = {
+          per_gw: Array.isArray(pp.xp_per_gw) ? pp.xp_per_gw.slice() : null,
+          total:  (typeof pp.total_xp === 'number') ? pp.total_xp : null,
+          gw0:    Array.isArray(pp.xp_per_gw) && pp.xp_per_gw.length ? +pp.xp_per_gw[0] : +pp.xp,
+        };
+      }
+      const ratio = (pp._xp_base.gw0 > 0.01) ? (newXp / pp._xp_base.gw0) : 0;
+      if (pp._xp_base.per_gw) {
+        pp.xp_per_gw = pp._xp_base.per_gw.map(v => +(((+v) || 0) * ratio).toFixed(2));
+      }
+      pp.xp = +newXp.toFixed(2);
+      if (pp._xp_base.total != null) pp.total_xp = +(pp._xp_base.total * ratio).toFixed(2);
+      pp.xmins = +ov;
+    });
+    // Refresh surfaces that rank pool players, if they're on screen.
+    try {
+      if (typeof _renderPoolTable === 'function') _renderPoolTable();
+    } catch (_e) {}
+    try {
+      const _tx = document.getElementById('transfers-section');
+      if (_tx && _tx.style.display !== 'none'
+          && typeof renderTransfers === 'function' && typeof computeTransfers === 'function') {
+        renderTransfers(computeTransfers(activeGwIdx || 0));
+      }
+    } catch (_e) {}
+  }
   // Update player xPs in SQUAD_DATA
   SQUAD_DATA.forEach(p => {
     const ov = _xminsOverrides[String(p.id)];
@@ -15928,7 +15969,11 @@ function _applyXminsOverridesAndRender() {
 
 // Build a modal for editing one player's xMins.
 function _openXminsEditor(pid) {
-  const sq = (typeof SQUAD_DATA !== 'undefined') ? SQUAD_DATA.find(p => p.id === pid) : null;
+  // 2026-06-09 (Marcus: "why can't I click the clock and change G.Jesus?"):
+  // editor now opens for ANY pool player, not just the squad — so a bad
+  // recommendation can be corrected on the spot, no rebuild needed.
+  const sq = ((typeof SQUAD_DATA !== 'undefined') ? SQUAD_DATA.find(p => p.id === pid) : null)
+          || ((typeof POOL_DATA  !== 'undefined') ? POOL_DATA.find(p => p.id === pid)  : null);
   if (!sq) return;
   const base   = _baselineXmins(pid);
   const cur    = _effectiveXmins(pid);
@@ -16052,7 +16097,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781038938-GW32-a9172c07</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781039587-GW32-a9172c07</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
