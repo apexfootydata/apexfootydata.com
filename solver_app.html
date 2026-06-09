@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="38" data-built-at="2026-06-09T09:03:09">
+<meta name="apex-gw" content="38" data-built-at="2026-06-09T09:40:13">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -3849,12 +3849,12 @@ button.secondary, .btn-secondary, .va-btn-secondary {
    removed above). JS auto-fit is now inert (these rules don't read --apex-shirt). */
 .va-solio-pitch .pitch .shirt-wrap,
 .va-solio-pitch .bench-row .shirt-wrap,
-.va-solio-pitch .pitch-bench .shirt-wrap { width: min(9.2vw, 181px) !important; margin-bottom: 0 !important; }
+.va-solio-pitch .pitch-bench .shirt-wrap { width: min(8.1vw, 160px) !important; margin-bottom: 0 !important; }
 .va-solio-pitch .pitch .svg-shirt,
 .va-solio-pitch .bench-row .svg-shirt,
-.va-solio-pitch .pitch-bench .svg-shirt { width: min(6.3vw, 124px) !important; height: min(6.3vw, 124px) !important; }
+.va-solio-pitch .pitch-bench .svg-shirt { width: min(5.6vw, 110px) !important; height: min(5.6vw, 110px) !important; }
 .va-solio-pitch .pitch .shirt,
-.va-solio-pitch .bench-row .shirt { width: min(9.2vw, 181px) !important; min-width: min(9.2vw, 181px) !important; }
+.va-solio-pitch .bench-row .shirt { width: min(8.1vw, 160px) !important; min-width: min(8.1vw, 160px) !important; }
 /* Spread kits ACROSS the full pitch width (Solio-style) instead of bunching them
    in the centre — this is what kills the huge empty-green borders Marcus flagged.
    space-evenly distributes every row edge-to-edge regardless of kit count. */
@@ -3862,10 +3862,10 @@ button.secondary, .btn-secondary, .va-btn-secondary {
 .va-solio-pitch .bench-row, .va-solio-pitch .pitch-bench { padding: 4px !important; gap: 6px !important; margin-top: 4px !important; justify-content: space-evenly !important; }
 /* Labels scaled up to match the 2.6x kits — bigger xPts number, name pill and
    fixture (Marcus: xPts + pills bigger). min(vw, px) so they track the kit size. */
-.va-solio-pitch .shirt-xp { font-size: min(1.9vw, 2rem) !important; margin-top: 2px !important; font-weight: 700 !important; }
-.va-solio-pitch .shirt-name { font-size: min(1.15vw, 1.2rem) !important; padding: 3px 12px !important; max-width: none !important; margin-top: 3px !important; }
-.va-solio-pitch .shirt-fix { font-size: min(0.95vw, 1rem) !important; margin-top: 2px !important; }
-.va-solio-pitch .pitch-cost-badge { padding: 7px 12px !important; min-width: 0 !important; font-size: min(1vw, 0.95rem) !important; }
+.va-solio-pitch .shirt-xp { font-size: min(1.68vw, 1.77rem) !important; margin-top: 2px !important; font-weight: 700 !important; }
+.va-solio-pitch .shirt-name { font-size: min(1.02vw, 1.06rem) !important; padding: 3px 11px !important; max-width: none !important; margin-top: 3px !important; }
+.va-solio-pitch .shirt-fix { font-size: min(0.84vw, 0.89rem) !important; margin-top: 2px !important; }
+.va-solio-pitch .pitch-cost-badge { padding: 6px 11px !important; min-width: 0 !important; font-size: min(0.9vw, 0.9rem) !important; }
 /* Rail: shrink the hero card (green number + range) and stat strip; the GW pill
    row is hidden (single-GW demo) — RE-ENABLE for 26/27 multi-GW by removing the
    gw-pill-row display:none. */
@@ -3874,19 +3874,22 @@ button.secondary, .btn-secondary, .va-btn-secondary {
    are the site brand set: Plus Jakarta Sans + JetBrains Mono for figures. */
 .va-solio-rail { gap: 8px !important; }
 .va-solio-rail .gw-pill-row { display: none !important; }
-.va-solio-rail .va-card-hero { padding: 16px 20px !important; }
-.va-solio-rail .va-card-value-hero { font-size: clamp(46px, 4.6vw, 72px) !important; padding: 8px 24px !important; }
-.va-solio-rail .va-card-label { font-size: clamp(1rem, 1.1vw, 1.4rem) !important; }
-.va-solio-rail .va-range-plot { height: clamp(72px, 7vw, 120px) !important; margin: 8px 0 6px !important; }
-.va-solio-rail .va-range-num { font-size: clamp(30px, 3vw, 48px) !important; }
-.va-solio-rail .va-range-title { font-size: clamp(16px, 1.5vw, 24px) !important; }
-.va-solio-rail .va-range-foot { margin-top: 8px !important; padding-top: 8px !important; font-size: clamp(13px, 1.2vw, 20px) !important; }
-.va-solio-rail .va-strip { padding: 16px 20px !important; gap: 14px 20px !important; }
-.va-solio-rail .va-strip-val { font-size: clamp(1.4rem, 1.9vw, 2.2rem) !important; }
-.va-solio-rail .va-strip-label { font-size: clamp(0.85rem, 0.95vw, 1.2rem) !important; }
-.va-solio-rail #va-solve-actions { margin: 5px 0 7px !important; }
+.va-solio-rail .va-card-hero { padding: 14px 18px !important; }
+.va-solio-rail .va-card-value-hero { font-size: clamp(41px, 4.1vw, 64px) !important; padding: 7px 22px !important; }
+.va-solio-rail .va-card-label { font-size: clamp(0.9rem, 1vw, 1.25rem) !important; }
+.va-solio-rail .va-range-plot { height: clamp(64px, 6.2vw, 106px) !important; margin: 7px 0 5px !important; }
+.va-solio-rail .va-range-num { font-size: clamp(27px, 2.65vw, 42px) !important; }
+.va-solio-rail .va-range-title { font-size: clamp(15px, 1.35vw, 21px) !important; }
+.va-solio-rail .va-range-foot { margin-top: 7px !important; padding-top: 7px !important; font-size: clamp(12px, 1.05vw, 18px) !important; }
+.va-solio-rail .va-strip { padding: 14px 18px !important; gap: 12px 18px !important; }
+.va-solio-rail .va-strip-val { font-size: clamp(1.24rem, 1.68vw, 1.95rem) !important; }
+.va-solio-rail .va-strip-label { font-size: clamp(0.8rem, 0.85vw, 1.05rem) !important; }
+.va-solio-rail #va-solve-actions { margin: 6px 0 8px !important; display: flex !important; flex-wrap: wrap !important; align-items: center !important; gap: 10px !important; }
+/* Long full-width Optimize button (Marcus prefers the long optimiser); Reset +
+   "see all options" wrap to the line beneath it. */
+.va-solio-rail #va-solve-actions .solve-btn { flex: 1 1 100% !important; width: 100% !important; justify-content: center !important; padding: 14px 22px !important; font-size: clamp(1rem, 1.2vw, 1.25rem) !important; }
 .va-solio-rail #va-solve-actions .btn,
-.va-solio-rail #va-solve-actions button { padding: clamp(7px, 1.4vh, 12px) 22px !important; font-size: clamp(0.85rem, 1.6vh, 1.05rem) !important; }
+.va-solio-rail #va-solve-actions button { padding: 10px 20px !important; font-size: clamp(0.85rem, 1vw, 1.05rem) !important; }
 /* Strategy segmented control (Balanced / High risk / Low risk) + chip cards. */
 .va-solio-rail #aps-wrap-team button { font-size: clamp(0.82rem, 1.5vh, 1rem) !important; padding: clamp(7px, 1.4vh, 12px) 14px !important; }
 .va-solio-rail .va-chip-card-tag { font-size: clamp(0.6rem, 1.05vh, 0.72rem) !important; }
@@ -4100,13 +4103,34 @@ body > footer.footer, body > #apex-site-footer { display: none !important; }
 }
 /* Rail running order (2026-06-08, Marcus): strategy first, then Optimize, then
    the chip plan, then the xPts + range graph, then stats / GW pills. */
+/* Rail = clean mock layout (2026-06-09, Marcus): strategy → long Optimize →
+   score card → recommended-transfer banner. Chip planner + stat strip + GW pills
+   are HIDDEN on the squad two-pane to match the mock (reversible: delete the
+   display:none rule to bring them back). */
 .va-solio-rail > #aps-wrap-team    { order: 1; margin-top: 0 !important; }
 .va-solio-rail > #va-solve-actions { order: 2; }
-.va-solio-rail > .va-chip-panel    { order: 3; }
-.va-solio-rail > .va-hero-row      { order: 4; }
-.va-solio-rail > #solve-banner     { order: 5; }
-.va-solio-rail > .va-strip         { order: 6; }
-.va-solio-rail > .gw-pill-row      { order: 7; }
+.va-solio-rail > .va-hero-row      { order: 3; }
+.va-solio-rail > #solve-banner     { order: 4; }
+.va-solio-rail > .va-chip-panel,
+.va-solio-rail > .va-strip,
+.va-solio-rail > .gw-pill-row      { display: none !important; }
+/* ── Mock-style score card: white card, compact green expected box beside the
+   "GW38 range · floor–ceiling" text, small curve below. The floor/expected/
+   ceiling triple, the Live pill and the "% chance" footer are dropped. ── */
+.va-solio-rail .va-card-hero { background: #ffffff !important; border: 0.5px solid #e5e7eb !important; box-shadow: none !important; border-radius: 14px !important; padding: 16px 18px !important; }
+.va-solio-rail .va-hero-inner { flex-direction: row !important; align-items: center !important; gap: 14px !important; flex-wrap: wrap !important; }
+.va-solio-rail .va-card-label { display: none !important; }
+.va-solio-rail .va-card-value-hero { font-size: 34px !important; padding: 6px 16px !important; border-radius: 10px !important; flex: 0 0 auto !important; }
+.va-solio-rail .va-hero-spark { flex: 1 1 200px !important; min-width: 0 !important; max-width: none !important; }
+.va-solio-rail .va-range-head { margin: 0 !important; }
+.va-solio-rail .va-range-title { font-size: clamp(15px, 1.4vw, 20px) !important; color: #475569 !important; font-weight: 500 !important; }
+.va-solio-rail .va-range-pill,
+.va-solio-rail .va-range-vals,
+.va-solio-rail .va-range-foot,
+.va-solio-rail .va-range-track { display: none !important; }
+.va-solio-rail .va-range-plot { height: 56px !important; margin: 8px 0 0 !important; flex-basis: 100% !important; }
+/* Recommended-transfer banner styled as a clean card like the mock. */
+.va-solio-rail > #solve-banner:not(:empty) { background: #ffffff !important; border: 0.5px solid #e5e7eb !important; border-radius: 14px !important; padding: 14px 18px !important; }
 /* Chip plan fits the narrow rail as 2×2 (was a 4-wide row that overflowed,
    clipping "Free Hit" and forcing a horizontal scrollbar). */
 .va-solio-rail .va-chip-grid { grid-template-columns: 1fr 1fr !important; }
@@ -8748,7 +8772,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1780992189-GW38-40732a43";
+const BUILD_VERSION = "1780994413-GW38-40732a43";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -10459,7 +10483,7 @@ function _renderHeroSparkline() {
     const hump = 'M0,70 C' + (peakVB * 0.45).toFixed(1) + ',68 ' + (peakVB - 48).toFixed(1) + ',20 ' + peakVB.toFixed(1) + ',14 C' + (peakVB + 48).toFixed(1) + ',20 ' + (360 - (360 - peakVB) * 0.45).toFixed(1) + ',64 360,70';
     let html = '';
     html += '<div class="va-range">';
-    html +=   '<div class="va-range-head"><span class="va-range-title">Your ' + gwLabel + ' range</span><span class="va-range-pill">Live</span></div>';
+    html +=   '<div class="va-range-head"><span class="va-range-title">' + gwLabel + ' range · ' + floor.toFixed(1) + '–' + ceiling.toFixed(1) + '</span><span class="va-range-pill">Live</span></div>';
     html +=   '<div class="va-range-plot">';
     html +=     '<svg class="va-range-svg" viewBox="0 0 360 80" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">';
     html +=       '<path d="' + hump + ' L360,74 L0,74 Z" fill="rgba(249,115,22,0.14)"/>';
@@ -15374,7 +15398,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW38</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780992189-GW38-40732a43</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780994413-GW38-40732a43</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
