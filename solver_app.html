@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-06-09T20:22:45">
+<meta name="apex-gw" content="32" data-built-at="2026-06-09T20:30:44">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -8956,7 +8956,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1781032964-GW32-2d5feab0";
+const BUILD_VERSION = "1781033444-GW32-2d5feab0";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -9890,6 +9890,26 @@ function _apexRiskOwnBias(p) {
       : _APEX_RISK_XP_CLAMP[0];  // no projection → minimal field relevance
     return sign * _APEX_RISK_OWN_K * dist * scale;
   } catch (_e) { return 0; }
+}
+
+// ── Ownership display thresholds + guaranteed risk-pick slots (2026-06-09) ──
+// Marcus: risk modes must surface visibly DIFFERENT, LABELLED options — not a
+// silent reorder of the same xP-optimal set.
+const _APEX_DIFF_OWN_MAX     = 10.0; // ≤ this % owned = "differential" (tunable)
+const _APEX_TEMPLATE_OWN_MIN = 25.0; // ≥ this % owned = "template" (tunable)
+const _APEX_RISK_PICK_SLOTS  = 2;    // guaranteed punt/template picks in the paths list
+// Compact ownership tag for option rows — shows own% on every IN player, plus
+// a 💎/🛡 character tag so the risk profile of each move is visible at a glance.
+function _apexOwnTag(p) {
+  try {
+    const pd = (typeof _apexPoolById === 'function' ? _apexPoolById(p.id) : null) || p;
+    const own = (typeof pd.own === 'number') ? pd.own : parseFloat(pd.own);
+    if (!isFinite(own)) return '';
+    let tag = '', color = 'var(--muted)';
+    if (own <= _APEX_DIFF_OWN_MAX)          { tag = ' 💎 diff';     color = '#16a34a'; }
+    else if (own >= _APEX_TEMPLATE_OWN_MIN) { tag = ' 🛡 template'; color = '#2563eb'; }
+    return ` · <span style="color:${color};font-weight:700;">${own.toFixed(1)}%${tag}</span>`;
+  } catch (_e) { return ''; }
 }
 
 function selectPreset(name) {
@@ -11394,6 +11414,7 @@ function renderTransfers(recs) {
                   <span class="team">${t.in_team}</span>
                   <span class="cost">£${t.in_cost.toFixed(1)}m</span>
                   <span style="font-size:.75rem;color:#4ade80;font-weight:700;">${t.in_xp.toFixed(1)} xPts</span>
+                  <span style="font-size:.72rem;">${_apexOwnTag({ id: t.in_id })}</span>
                 </div>
               </div>
             </div>
@@ -15702,7 +15723,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781032964-GW32-2d5feab0</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781033444-GW32-2d5feab0</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
