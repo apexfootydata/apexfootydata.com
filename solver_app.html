@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="38" data-built-at="2026-06-09T11:03:53">
+<meta name="apex-gw" content="38" data-built-at="2026-06-09T11:22:41">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -8791,18 +8791,17 @@ html.apex-offseason #view-landing .hero-sub::after {
  *
  * A Solio-style branching transfer-scenario canvas with scroll-to-zoom,
  * drag-to-pan and Fit. Renders into #scenario-planner (in the solver rail).
- * Reads LIVE data: the projected expected points (.va-card-value-hero), the GW
- * label (TEAM_META.gw_range[activeGwIdx]) and transfer recs (computeTransfers).
- * Pure vanilla JS — no React/React-Flow. Fully defensive: any missing data just
- * means fewer nodes, never a thrown error / broken page.
+ * Reads LIVE data: projected expected points (.va-card-value-hero), the GW label
+ * (TEAM_META.gw_range[activeGwIdx]) and transfer recs (computeTransfers).
+ * Pure vanilla JS — no React/React-Flow. Fully defensive: missing data → fewer
+ * nodes, never a thrown error / broken page.
  *
- * Inlined verbatim by generate_solver_html.py via {apex_planner_js} (so the
- * braces here are NOT f-string-escaped — edit this file, then rebuild).
- * See docs/SCENARIO_PLANNER_PLAN.md. Phase B = full tab + future-GW projections.
+ * Inlined verbatim by generate_solver_html.py via {apex_planner_js} (braces NOT
+ * f-string-escaped — edit this file, then rebuild). See docs/SCENARIO_PLANNER_PLAN.md.
  * ========================================================================== */
 (function(){
-  var S={scale:1,tx:0,ty:0,nodes:[],sel:null,idc:0,rows:{},recs:[],base:50,gwl:'GW',root:null};
-  var COLW=220, ROWH=104, CW=168, CH=80, PADX=26, PADY=42;
+  var S={scale:1,tx:0,ty:0,nodes:[],sel:null,idc:0,rows:{},recs:[],base:50,gwl:'GW',root:null,mounted:false};
+  var COLW=300, ROWH=150, CW=240, CH=120, PADX=32, PADY=50;
   function freeRow(c){S.rows[c]=(S.rows[c]==null?-1:S.rows[c])+1;return S.rows[c];}
   function addNode(parent,col,title,sub,pts){var row=freeRow(col);var n={id:++S.idc,parent:parent,col:col,row:row,title:title,sub:sub,pts:pts};n.x=PADX+col*COLW;n.y=PADY+row*ROWH;S.nodes.push(n);return n.id;}
   function get(id){return S.nodes.find(function(n){return n.id===id;});}
@@ -8826,7 +8825,7 @@ html.apex-offseason #view-landing .hero-sub::after {
     var st=host.querySelector('.apl-stage');if(!st||!S.nodes.length)return;
     var maxX=Math.max.apply(null,S.nodes.map(function(n){return n.x+CW;}))+PADX;
     var maxY=Math.max.apply(null,S.nodes.map(function(n){return n.y+CH;}))+PADY;
-    var k=Math.min(st.clientWidth/maxX, st.clientHeight/maxY, 1.5); if(!isFinite(k)||k<=0)k=1;
+    var k=Math.min(st.clientWidth/maxX, st.clientHeight/maxY, 1.4); if(!isFinite(k)||k<=0)k=1;
     S.scale=k;S.tx=Math.max(8,(st.clientWidth-maxX*k)/2);S.ty=Math.max(8,(st.clientHeight-maxY*k)/2);
     applyT(host.querySelector('.apl-vp'));
   }
@@ -8835,19 +8834,19 @@ html.apex-offseason #view-landing .hero-sub::after {
     var best=bestLeaf();
     var layer=host.querySelector('.apl-layer'),svg=host.querySelector('.apl-edges');
     var maxCol=Math.max.apply(null,S.nodes.map(function(n){return n.col;}));
-    var lbl='';for(var c=0;c<=maxCol;c++){lbl+='<div style="position:absolute;left:'+(PADX+c*COLW)+'px;top:'+(PADY-26)+'px;width:'+CW+'px;text-align:center;font-size:11px;color:#94a3b8">'+(c===0?'Now':S.gwl)+'</div>';}
+    var lbl='';for(var c=0;c<=maxCol;c++){lbl+='<div style="position:absolute;left:'+(PADX+c*COLW)+'px;top:'+(PADY-30)+'px;width:'+CW+'px;text-align:center;font-size:13px;color:#94a3b8">'+(c===0?'Now':S.gwl)+'</div>';}
     var cards=S.nodes.map(function(n){
       var leaf=!S.nodes.some(function(m){return m.parent===n.id;});var isBest=leaf&&n.id===best;
       var bd=n.id===S.sel?'2px solid #2563eb':(isBest?'2px solid #16a34a':'0.5px solid #e5e7eb');
       var op=inP[n.id]?'1':'0.55';
-      var h='<div class="apl-nd" data-id="'+n.id+'" style="position:absolute;left:'+n.x+'px;top:'+n.y+'px;width:'+CW+'px;height:'+CH+'px;box-sizing:border-box;background:#fff;border:'+bd+';border-radius:11px;padding:9px 11px;cursor:pointer;opacity:'+op+'">';
-      if(n.pts==null){h+='<div style="display:flex;align-items:center;gap:8px;height:100%"><span style="width:22px;height:22px;border-radius:50%;background:#f97316;flex:0 0 auto"></span><div><div style="font-weight:600;font-size:13px;color:#0f172a">'+n.title+'</div><div style="font-size:11px;color:#64748b">'+n.sub+'</div></div></div>';}
-      else{h+='<div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-weight:600;font-size:12px;color:#0f172a">'+n.title+'</span>'+(isBest?'<span style="font-size:9px;background:#dcfce7;color:#15803d;padding:1px 6px;border-radius:5px">best</span>':'')+'</div><div style="font-size:11px;color:#64748b;margin:2px 0 5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+n.sub+'</div><div><span style="font-family:ui-monospace,monospace;font-size:19px;font-weight:700;color:#0f172a">'+n.pts.toFixed(1)+'</span><span style="font-size:10px;color:#64748b"> pts</span></div>';}
+      var h='<div class="apl-nd" data-id="'+n.id+'" style="position:absolute;left:'+n.x+'px;top:'+n.y+'px;width:'+CW+'px;height:'+CH+'px;box-sizing:border-box;background:#fff;border:'+bd+';border-radius:13px;padding:13px 15px;cursor:pointer;opacity:'+op+'">';
+      if(n.pts==null){h+='<div style="display:flex;align-items:center;gap:11px;height:100%"><span style="width:30px;height:30px;border-radius:50%;background:#f97316;flex:0 0 auto"></span><div><div style="font-weight:600;font-size:16px;color:#0f172a">'+n.title+'</div><div style="font-size:13px;color:#64748b">'+n.sub+'</div></div></div>';}
+      else{h+='<div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-weight:600;font-size:15px;color:#0f172a">'+n.title+'</span>'+(isBest?'<span style="font-size:11px;background:#dcfce7;color:#15803d;padding:2px 8px;border-radius:6px">best</span>':'')+'</div><div style="font-size:13px;color:#64748b;margin:4px 0 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+n.sub+'</div><div><span style="font-family:ui-monospace,monospace;font-size:28px;font-weight:700;color:#0f172a">'+n.pts.toFixed(1)+'</span><span style="font-size:13px;color:#64748b"> pts</span></div>';}
       return h+'</div>';
     }).join('');
     layer.innerHTML=lbl+cards;
     layer.querySelectorAll('.apl-nd').forEach(function(el){el.addEventListener('click',function(ev){ev.stopPropagation();S.sel=+el.getAttribute('data-id');draw(host);});});
-    var ep='';S.nodes.forEach(function(n){if(n.parent==null)return;var p=get(n.parent);var x1=p.x+CW,y1=p.y+CH/2,x2=n.x,y2=n.y+CH/2,mx=(x1+x2)/2;var on=inP[n.id]&&inP[n.parent];ep+='<path d="M'+x1+','+y1+' C'+mx+','+y1+' '+mx+','+y2+' '+x2+','+y2+'" fill="none" stroke="'+(on?'#f97316':'#cbd5e1')+'" stroke-width="'+(on?2.5:1.5)+'"/>';});
+    var ep='';S.nodes.forEach(function(n){if(n.parent==null)return;var p=get(n.parent);var x1=p.x+CW,y1=p.y+CH/2,x2=n.x,y2=n.y+CH/2,mx=(x1+x2)/2;var on=inP[n.id]&&inP[n.parent];ep+='<path d="M'+x1+','+y1+' C'+mx+','+y1+' '+mx+','+y2+' '+x2+','+y2+'" fill="none" stroke="'+(on?'#f97316':'#cbd5e1')+'" stroke-width="'+(on?3:2)+'"/>';});
     svg.innerHTML=ep;
     var sm=host.querySelector('.apl-sum');if(sm){
       var seq=pathTo(S.sel).reverse().map(function(c){var x=get(c);return x.pts==null?x.title:(String(x.sub).indexOf('→')>=0?x.sub:x.title+' '+x.sub);});
@@ -8856,36 +8855,35 @@ html.apex-offseason #view-landing .hero-sub::after {
   }
   function zoomAt(host,cx,cy,f){var k=Math.max(0.3,Math.min(2.4,S.scale*f));S.tx=cx-(cx-S.tx)*(k/S.scale);S.ty=cy-(cy-S.ty)*(k/S.scale);S.scale=k;applyT(host.querySelector('.apl-vp'));}
   function mount(host){
+    var CHIP='height:28px;padding:0 12px;border:0.5px solid #e5e7eb;background:#fff;border-radius:8px;cursor:pointer;font-size:12.5px;box-shadow:0 1px 2px rgba(0,0,0,.04)';
     host.innerHTML=''
-      +'<div class="apl-head" style="display:flex;align-items:center;gap:6px;margin-bottom:6px">'
-      +'<button class="apl-zin" aria-label="Zoom in" style="width:28px;height:26px;border:0.5px solid #e5e7eb;background:#fff;border-radius:7px;cursor:pointer;font-size:15px">+</button>'
-      +'<button class="apl-zout" aria-label="Zoom out" style="width:28px;height:26px;border:0.5px solid #e5e7eb;background:#fff;border-radius:7px;cursor:pointer;font-size:15px">−</button>'
-      +'<button class="apl-fit" style="height:26px;padding:0 10px;border:0.5px solid #e5e7eb;background:#fff;border-radius:7px;cursor:pointer;font-size:12px">Fit</button>'
-      +'<button class="apl-add" style="height:26px;padding:0 10px;border:0.5px solid #e5e7eb;background:#fff;border-radius:7px;cursor:pointer;font-size:12px">+ Scenario</button>'
-      +'<span style="font-size:11px;color:#94a3b8;margin-left:auto">scroll = zoom · drag = pan</span>'
+      +'<div class="apl-stage" style="position:relative;height:340px;background:#f8fafc;border:0.5px solid #e5e7eb;border-radius:12px;overflow:hidden;cursor:grab;touch-action:none">'
+      +'<div class="apl-vp" style="position:absolute;left:0;top:0;transform-origin:0 0"><svg class="apl-edges" width="2400" height="1400" style="position:absolute;left:0;top:0;overflow:visible;pointer-events:none"></svg><div class="apl-layer" style="position:absolute;left:0;top:0"></div></div>'
+      +'<div style="position:absolute;top:8px;right:8px;display:flex;gap:6px;z-index:3"><button class="apl-fit" style="'+CHIP+'">Fit</button><button class="apl-add" style="'+CHIP+'">+ Scenario</button></div>'
       +'</div>'
-      +'<div class="apl-stage" style="position:relative;height:240px;background:#f8fafc;border:0.5px solid #e5e7eb;border-radius:12px;overflow:hidden;cursor:grab;touch-action:none">'
-      +'<div class="apl-vp" style="position:absolute;left:0;top:0;transform-origin:0 0"><svg class="apl-edges" width="1600" height="900" style="position:absolute;left:0;top:0;overflow:visible;pointer-events:none"></svg><div class="apl-layer" style="position:absolute;left:0;top:0"></div></div>'
-      +'</div>'
-      +'<div class="apl-sum" style="margin-top:8px;font-size:12.5px;color:#475569;line-height:1.5"></div>'
+      +'<div class="apl-sum" style="margin-top:8px;font-size:13px;color:#475569;line-height:1.5"></div>'
       +'<div class="apl-picker" style="display:none;margin-top:8px;border:0.5px solid #e5e7eb;border-radius:10px;padding:8px;background:#fff"></div>';
     var st=host.querySelector('.apl-stage');
-    st.addEventListener('wheel',function(e){e.preventDefault();var r=st.getBoundingClientRect();zoomAt(host,e.clientX-r.left,e.clientY-r.top,e.deltaY<0?1.12:0.89);},{passive:false});
+    st.addEventListener('wheel',function(e){e.preventDefault();e.stopPropagation();var r=st.getBoundingClientRect();zoomAt(host,e.clientX-r.left,e.clientY-r.top,e.deltaY<0?1.12:0.89);},{passive:false});
     var d=false,lx,ly;
-    st.addEventListener('pointerdown',function(e){if(e.target.closest('.apl-nd'))return;d=true;lx=e.clientX;ly=e.clientY;st.style.cursor='grabbing';try{st.setPointerCapture(e.pointerId);}catch(_){}});
+    st.addEventListener('pointerdown',function(e){if(e.target.closest('.apl-nd')||e.target.closest('button'))return;d=true;lx=e.clientX;ly=e.clientY;st.style.cursor='grabbing';try{st.setPointerCapture(e.pointerId);}catch(_){}});
     st.addEventListener('pointermove',function(e){if(!d)return;S.tx+=e.clientX-lx;S.ty+=e.clientY-ly;lx=e.clientX;ly=e.clientY;applyT(host.querySelector('.apl-vp'));});
     st.addEventListener('pointerup',function(){d=false;st.style.cursor='grab';});
-    host.querySelector('.apl-zin').onclick=function(){var r=st.getBoundingClientRect();zoomAt(host,r.width/2,r.height/2,1.2);};
-    host.querySelector('.apl-zout').onclick=function(){var r=st.getBoundingClientRect();zoomAt(host,r.width/2,r.height/2,0.83);};
     host.querySelector('.apl-fit').onclick=function(){fit(host);};
     host.querySelector('.apl-add').onclick=function(){
       var pk=host.querySelector('.apl-picker');pk.style.display='block';
-      pk.innerHTML='<div style="font-size:11px;color:#64748b;margin-bottom:5px">Branch a '+S.gwl+' move:</div>'+S.recs.map(function(r,i){return '<button data-i="'+i+'" style="display:block;width:100%;text-align:left;border:0.5px solid #eef2f7;background:#fff;border-radius:7px;padding:6px 9px;margin-bottom:4px;cursor:pointer;font-size:12px">'+r.out_name+' → '+r.in_name+'<span style="color:#16a34a;margin-left:6px">+'+(r.gw0_gain||0).toFixed(1)+'</span></button>';}).join('');
+      pk.innerHTML='<div style="font-size:12px;color:#64748b;margin-bottom:5px">Branch a '+S.gwl+' move:</div>'+S.recs.map(function(r,i){return '<button data-i="'+i+'" style="display:block;width:100%;text-align:left;border:0.5px solid #eef2f7;background:#fff;border-radius:7px;padding:7px 10px;margin-bottom:4px;cursor:pointer;font-size:13px">'+r.out_name+' → '+r.in_name+'<span style="color:#16a34a;margin-left:6px">+'+(r.gw0_gain||0).toFixed(1)+'</span></button>';}).join('');
       pk.querySelectorAll('button').forEach(function(b){b.addEventListener('click',function(){var r=S.recs[+b.getAttribute('data-i')];S.sel=addNode(S.root,1,S.gwl,r.out_name+' → '+r.in_name,S.base+(r.gw0_gain||0));pk.style.display='none';draw(host);fit(host);});});
     };
     draw(host);fit(host);
   }
-  window.apexRenderPlanner=function(){var host=document.getElementById('scenario-planner');if(!host)return;try{buildData();mount(host);}catch(e){}};
+  window.apexRenderPlanner=function(){
+    if(S.mounted)return;
+    var host=document.getElementById('scenario-planner');if(!host)return;
+    var h=document.querySelector('.va-solio-rail .va-card-value-hero');
+    if(!h||!/[0-9]/.test(h.textContent||''))return;
+    try{buildData();mount(host);S.mounted=true;}catch(e){}
+  };
   function _kick(){[300,1200,2600].forEach(function(ms){setTimeout(window.apexRenderPlanner,ms);});}
   if(document.readyState!=='loading')_kick();else document.addEventListener('DOMContentLoaded',_kick);
   window.addEventListener('load',_kick);
@@ -8914,7 +8912,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1780999432-GW38-40732a43";
+const BUILD_VERSION = "1781000561-GW38-40732a43";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -15551,7 +15549,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW38</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780999432-GW38-40732a43</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781000561-GW38-40732a43</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
