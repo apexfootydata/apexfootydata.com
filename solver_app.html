@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-06-09T22:57:09">
+<meta name="apex-gw" content="32" data-built-at="2026-06-09T23:00:33">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — FPL Apex</title>
@@ -5345,6 +5345,10 @@ html.apex-offseason #view-landing .hero-sub::after {
     </div>
 
     <div id="solve-banner" style="display:none;margin-bottom:12px;padding:10px 14px;border-radius:8px;background:rgba(29,158,117,.12);border:1px solid rgba(29,158,117,.3);font-size:.85rem;color:var(--accent,#1D9E75);font-weight:600;"></div>
+    <!-- Engine picks live in their OWN card (2026-06-09): solve-banner gets
+         display:none'd by runSolve/reset/pill flows, which kept vanishing the
+         preview. Nothing else touches this div. -->
+    <div id="engine-picks" style="display:none;margin-bottom:12px;padding:14px 18px;border-radius:12px;background:#FFFFFF;box-shadow:0 1px 4px rgba(0,0,0,.06);"></div>
     <!-- Scenario Planner strip RETIRED 2026-06-09 (Marcus): the decision tree
          in the Path Planner ("plan ahead") does its job better. The freed rail
          space goes to the range hero + Recommended transfer cards (see
@@ -9072,7 +9076,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1781042229-GW32-a9172c07";
+const BUILD_VERSION = "1781042433-GW32-a9172c07";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -10248,6 +10252,13 @@ function _resetTransferPlan() {
 //   • Transfer recs panel hidden, banner hidden, status cleared
 //   • Pitch + GW totals re-rendered
 function resetSolver() {
+  // Engine-picks card: clear the "applied" lock and repaint the preview after
+  // the reset settles (2026-06-09 — picks were vanishing on reset).
+  try {
+    const _ep = document.getElementById('engine-picks');
+    if (_ep) delete _ep.dataset.applied;
+    setTimeout(() => { if (typeof _renderRecoPreview === 'function') _renderRecoPreview(); }, 250);
+  } catch (_e) {}
   // Wipe per-GW transfer plan state
   for (const k of Object.keys(_transfersAppliedByGw)) delete _transfersAppliedByGw[k];
   for (const k of Object.keys(_rollFTByGw)) delete _rollFTByGw[k];
@@ -10945,6 +10956,7 @@ function setSolverTab(tab) {
   }
   try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (_e) {}
   if (tab === 'squad' && typeof window.apexFitPitch === 'function') { setTimeout(window.apexFitPitch, 30); }
+  if (tab === 'squad' && typeof window._renderRecoPreview === 'function') { setTimeout(window._renderRecoPreview, 60); }
   if (tab === 'squad' && typeof window.apexRenderPlanner === 'function') { setTimeout(window.apexRenderPlanner, 40); }
 }
 
@@ -11690,8 +11702,9 @@ function runOptimize() {
   if (status) {
     status.textContent = `Applied best transfer for GW${activeGw}: ${best.out_name} → ${best.in_name} (${_gainTxt})`;
   }
-  var _reco = document.getElementById('solve-banner');
+  var _reco = document.getElementById('engine-picks');
   if (_reco) {
+    _reco.style.display = 'block';
     // Show the REAL this-GW XI impact (gw0_gain) — the number that actually moves
     // the GW total — not the naive in-minus-out diff (gain), which overstates it
     // when the sold player is benched / the buy displaces a starter. Matches the
@@ -11723,7 +11736,7 @@ function runOptimize() {
 // card via dataset.applied so the preview stops repainting it).
 function _renderRecoPreview() {
   try {
-    const _reco = document.getElementById('solve-banner');
+    const _reco = document.getElementById('engine-picks');
     if (!_reco || typeof computeTransfers !== 'function') return;
     if (_reco.dataset.applied === '1') return;
     const full = [...(typeof _xiPlayers !== 'undefined' ? _xiPlayers : []),
@@ -16234,7 +16247,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781042229-GW32-a9172c07</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781042433-GW32-a9172c07</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
