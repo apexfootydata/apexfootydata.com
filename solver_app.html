@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="38" data-built-at="2026-06-09T01:08:49">
+<meta name="apex-gw" content="38" data-built-at="2026-06-09T06:56:38">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -3833,16 +3833,20 @@ button.secondary, .btn-secondary, .va-btn-secondary {
    higher specificity (.va-solio-pitch .pitch ...) + !important to win. Values
    were tuned by measuring docScrollHeight live until it fit ~869px. Scoped to
    .va-solio so the standalone pitch + mobile sizes are untouched. */
-/* Pitch: shrink shirts 135px → 40px and tighten rows/bench. */
-.va-solio-pitch .pitch { padding: 6px 8px 4px !important; margin: 0 0 4px !important; }
+/* Pitch shirts sized with clamp(min, vh, max): fit a ~680px-tall screen at the
+   floor and grow to a 64px svg on tall screens (Solio runs ~85px). Verified
+   live on apexfootydata.com: 54px @695px tall, 73px @950px, no overflow either
+   way. This replaces the fixed 40px crush — bigger shirts now fit because the
+   141px manager banner is gone and the view is height-locked (see app-shell). */
+.va-solio-pitch .pitch { padding: 6px 8px 4px !important; margin: 0 0 6px !important; }
 .va-solio-pitch .pitch .shirt-wrap,
 .va-solio-pitch .bench-row .shirt-wrap,
-.va-solio-pitch .pitch-bench .shirt-wrap { width: 40px !important; margin-bottom: 0 !important; }
+.va-solio-pitch .pitch-bench .shirt-wrap { width: clamp(52px, 7.7vh, 92px) !important; margin-bottom: 0 !important; }
 .va-solio-pitch .pitch .svg-shirt,
 .va-solio-pitch .bench-row .svg-shirt,
-.va-solio-pitch .pitch-bench .svg-shirt { width: 40px !important; height: 40px !important; }
+.va-solio-pitch .pitch-bench .svg-shirt { width: clamp(36px, 5.3vh, 64px) !important; height: clamp(36px, 5.3vh, 64px) !important; }
 .va-solio-pitch .pitch .shirt,
-.va-solio-pitch .bench-row .shirt { width: 58px !important; min-width: 58px !important; }
+.va-solio-pitch .bench-row .shirt { width: clamp(52px, 7.7vh, 92px) !important; min-width: clamp(52px, 7.7vh, 92px) !important; }
 .va-solio-pitch .pitch .pitch-row { margin-bottom: 2px !important; gap: 5px !important; }
 .va-solio-pitch .bench-row { padding: 4px !important; gap: 6px !important; margin-top: 4px !important; }
 .va-solio-pitch .shirt-xp { font-size: 0.78rem !important; margin-top: 0 !important; }
@@ -3865,12 +3869,26 @@ button.secondary, .btn-secondary, .va-btn-secondary {
 .va-solio-rail #va-solve-actions { margin: 2px 0 5px !important; }
 .va-solio-rail #va-solve-actions .btn,
 .va-solio-rail #va-solve-actions button { padding: 7px 16px !important; font-size: 0.85rem !important; }
-/* Trim the header/tab whitespace above the two-pane (was ~200px). */
-#view-team .container { padding-top: 6px !important; padding-bottom: 2px !important; }
+/* Drop the manager banner on the Squad view entirely — Solio carries no header
+   banner, and on Apex it was the single biggest offender (~141px) forcing the
+   page to scroll. The Player Pool view keeps its own header. */
+#view-team .va-header { display: none !important; }
 #view-team .va-tabs { margin: 0 0 6px !important; }
 #view-team .va-id-row { margin: 0 0 4px !important; }
-#view-team .va-id-text, #view-team .va-id-meta, #view-team .va-team-header { margin: 0 !important; padding: 1px 0 !important; }
-#view-team .va-avatar { display: none !important; }
+/* Centre the pitch against the rail within the grid row (Solio centres its squad). */
+.va-solio { align-items: center !important; }
+/* ── Desktop app-shell: lock the Squad view to one screen (Solio model) ──────
+   100dvh minus the ~79px topbar, overflow hidden, content vertically centred —
+   the page physically cannot scroll, exactly like Solio. Scoped to
+   :not(.show-pool) so the Player Pool table still scrolls normally, and to
+   >=1025px so phones/tablets flow and scroll (stack block + mobile sheet). */
+@media (min-width: 1025px) {
+  #view-team:not(.show-pool) { height: calc(100dvh - 80px) !important; overflow: hidden !important;
+    display: flex !important; flex-direction: column !important; }
+  #view-team:not(.show-pool) .container { height: 100% !important; display: flex !important;
+    flex-direction: column !important; justify-content: center !important;
+    padding-top: 0 !important; padding-bottom: 0 !important; overflow: hidden !important; }
+}
 /* Footers eat ~280px below the solver — hide on the solver page so the tool view
    is one screen. (Solver pages only; the landing/index footer is unaffected.) */
 body > footer.footer, body > #apex-site-footer { display: none !important; }
@@ -4021,10 +4039,32 @@ body > footer.footer, body > #apex-site-footer { display: none !important; }
 .va-solio-rail .va-strip-divider { display: none !important; }
 .va-solio-rail .va-strip-cell { flex: none !important; min-width: 0 !important; }
 @media (max-width: 1024px) {
-  .va-solio { grid-template-columns: 1fr; }
-  .va-solio-pitch, .va-solio-rail { grid-column: 1; grid-row: auto; }
-  /* full-width single column → restore the side-by-side hero Marcus approved */
+  /* minmax(0,1fr) lets the single column shrink BELOW its content's min-content
+     width — without it, 1fr (= minmax(auto,1fr)) refused to go under ~648px and
+     the rail's hero was clipped off the right edge of phone screens. */
+  .va-solio { grid-template-columns: minmax(0, 1fr); }
+  .va-solio-pitch, .va-solio-rail { grid-column: 1; grid-row: auto; min-width: 0; }
+}
+/* Tablet (701–1024px): the full-width rail is wide enough for the side-by-side
+   hero (green xPts number beside the range graph) Marcus approved. */
+@media (min-width: 701px) and (max-width: 1024px) {
   .va-solio-rail .va-hero-inner { flex-direction: row !important; align-items: center !important; }
+}
+/* Phone (<=700px): the side-by-side hero needs ~648px and was being chopped off
+   the right of the screen (the core mobile breakage). Stack it — number above
+   the range graph — and pin every rail child to the viewport so nothing spills. */
+@media (max-width: 700px) {
+  .va-solio-rail .va-hero-inner { flex-direction: column !important; align-items: stretch !important; }
+  .va-solio-rail, .va-solio-rail .va-card, .va-solio-rail .va-hero-row,
+  .va-solio-rail .va-card-hero, .va-solio-rail .va-hero-spark,
+  .va-solio-rail .va-range, .va-solio-rail .va-strip { min-width: 0 !important; max-width: 100% !important; }
+  /* Chip plan: it's a flex row with min-width:max-content, so it laid 4 cards
+     across (≈622px) and spilled off-screen — grid-template-columns alone was
+     ignored. Force real 2×2 grid and drop the max-content floor so it fits. */
+  .va-solio-rail .va-chip-grid { display: grid !important; grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important; min-width: 0 !important; }
+  .va-solio-rail .va-chip-card { min-width: 0 !important; }
+  .va-solio-rail .va-chip-card-tag { font-size: 0.6rem !important; letter-spacing: 0 !important; }
 }
 /* Range footer — P(60+) line under the floor/expected/ceiling row. */
 .va-range-foot {
@@ -8681,7 +8721,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1780963729-GW38-40732a43";
+const BUILD_VERSION = "1780984598-GW38-40732a43";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -15248,7 +15288,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW38</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780963729-GW38-40732a43</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780984598-GW38-40732a43</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
