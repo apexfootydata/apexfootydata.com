@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="38" data-built-at="2026-06-09T10:00:24">
+<meta name="apex-gw" content="38" data-built-at="2026-06-09T10:07:03">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -3849,12 +3849,12 @@ button.secondary, .btn-secondary, .va-btn-secondary {
    removed above). JS auto-fit is now inert (these rules don't read --apex-shirt). */
 .va-solio-pitch .pitch .shirt-wrap,
 .va-solio-pitch .bench-row .shirt-wrap,
-.va-solio-pitch .pitch-bench .shirt-wrap { width: min(4.5vw, 90px) !important; margin-bottom: 0 !important; }
+.va-solio-pitch .pitch-bench .shirt-wrap { width: min(5.2vw, 104px) !important; margin-bottom: 0 !important; }
 .va-solio-pitch .pitch .svg-shirt,
 .va-solio-pitch .bench-row .svg-shirt,
-.va-solio-pitch .pitch-bench .svg-shirt { width: min(3.1vw, 62px) !important; height: min(3.1vw, 62px) !important; }
+.va-solio-pitch .pitch-bench .svg-shirt { width: min(3.6vw, 72px) !important; height: min(3.6vw, 72px) !important; }
 .va-solio-pitch .pitch .shirt,
-.va-solio-pitch .bench-row .shirt { width: min(4.5vw, 90px) !important; min-width: min(4.5vw, 90px) !important; }
+.va-solio-pitch .bench-row .shirt { width: min(5.2vw, 104px) !important; min-width: min(5.2vw, 104px) !important; }
 /* Spread kits ACROSS the full pitch width (Solio-style) instead of bunching them
    in the centre — this is what kills the huge empty-green borders Marcus flagged.
    space-evenly distributes every row edge-to-edge regardless of kit count. */
@@ -3890,6 +3890,9 @@ button.secondary, .btn-secondary, .va-btn-secondary {
 .va-solio-rail #va-solve-actions .solve-btn { flex: 1 1 100% !important; width: 100% !important; justify-content: center !important; padding: 15px 22px !important; font-size: clamp(1.05rem, 1.2vw, 1.35rem) !important; }
 .va-solio-rail #va-solve-actions .btn,
 .va-solio-rail #va-solve-actions button { padding: 10px 20px !important; font-size: clamp(0.85rem, 1vw, 1.05rem) !important; }
+/* Drop the inline "Applied best transfer…" status — the Recommended-transfer card
+   below now shows that, so the line is redundant. */
+.va-solio-rail #va-solve-actions #solve-status { display: none !important; }
 /* Strategy segmented control (Balanced / High risk / Low risk) + chip cards. */
 .va-solio-rail #aps-wrap-team button { font-size: clamp(0.95rem, 1.05vw, 1.2rem) !important; padding: 13px 16px !important; }
 .va-solio-rail .va-chip-card-tag { font-size: clamp(0.6rem, 1.05vh, 0.72rem) !important; }
@@ -8783,7 +8786,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1780995624-GW38-40732a43";
+const BUILD_VERSION = "1780996023-GW38-40732a43";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -13711,7 +13714,8 @@ function _renderPitchFromState() {
   const _pitchBankRaw = _budgetTotal - _pitchCost;
   const _pitchBank   = Math.abs(_pitchBankRaw) < 0.15 ? 0 : _pitchBankRaw;
   const _bankColor   = _pitchBank < -0.05 ? '#ef4444' : 'inherit';
-  html += `<div class="pitch-cost-badge"><div class="pcb-row"><span class="pcb-label">Squad value</span><span class="pcb-val">£${_pitchCost.toFixed(1)}m</span></div><div class="pcb-row"><span class="pcb-label">In the bank</span><span class="pcb-val" style="color:${_bankColor}">£${_pitchBank.toFixed(1)}m</span></div></div>`;
+  const _pitchFt = (typeof TEAM_META !== 'undefined' && TEAM_META && TEAM_META.free_transfers != null) ? TEAM_META.free_transfers : 1;
+  html += `<div class="pitch-cost-badge"><div class="pcb-row"><span class="pcb-label">Squad value</span><span class="pcb-val">£${_pitchCost.toFixed(1)}m</span></div><div class="pcb-row"><span class="pcb-label">In the bank</span><span class="pcb-val" style="color:${_bankColor}">£${_pitchBank.toFixed(1)}m</span></div><div class="pcb-row"><span class="pcb-label">Free transfers</span><span class="pcb-val">${_pitchFt}</span></div></div>`;
   // 2026-06-02 Marcus removed pitch brand mark per design preference.
   // (CSS hide in APEX_PITCH_DETAILS block also covers cached builds.)
   // html += `<div class="pitch-brand-mark"><span class="pbm-apex">Apex</span><span class="pbm-rest">FootyData</span></div>`;
@@ -15414,7 +15418,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW38</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780995624-GW38-40732a43</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780996023-GW38-40732a43</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
