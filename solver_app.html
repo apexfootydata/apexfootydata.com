@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="38" data-built-at="2026-06-09T07:50:56">
+<meta name="apex-gw" content="38" data-built-at="2026-06-09T08:47:33">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -3845,14 +3845,17 @@ button.secondary, .btn-secondary, .va-btn-secondary {
    laptops, never clipping the bench. The clamp() is the no-JS fallback. */
 .va-solio-pitch .pitch .shirt-wrap,
 .va-solio-pitch .bench-row .shirt-wrap,
-.va-solio-pitch .pitch-bench .shirt-wrap { width: var(--apex-shirt-w, clamp(58px, 9.2vh, 134px)) !important; margin-bottom: 0 !important; }
+.va-solio-pitch .pitch-bench .shirt-wrap { width: var(--apex-shirt-w, clamp(64px, 12.4vh, 170px)) !important; margin-bottom: 0 !important; }
 .va-solio-pitch .pitch .svg-shirt,
 .va-solio-pitch .bench-row .svg-shirt,
-.va-solio-pitch .pitch-bench .svg-shirt { width: var(--apex-shirt, clamp(40px, 6.4vh, 96px)) !important; height: var(--apex-shirt, clamp(40px, 6.4vh, 96px)) !important; }
+.va-solio-pitch .pitch-bench .svg-shirt { width: var(--apex-shirt, clamp(44px, 8.5vh, 116px)) !important; height: var(--apex-shirt, clamp(44px, 8.5vh, 116px)) !important; }
 .va-solio-pitch .pitch .shirt,
-.va-solio-pitch .bench-row .shirt { width: var(--apex-shirt-w, clamp(58px, 9.2vh, 134px)) !important; min-width: var(--apex-shirt-w, clamp(58px, 9.2vh, 134px)) !important; }
-.va-solio-pitch .pitch .pitch-row { margin-bottom: 2px !important; gap: 5px !important; }
-.va-solio-pitch .bench-row { padding: 4px !important; gap: 6px !important; margin-top: 4px !important; }
+.va-solio-pitch .bench-row .shirt { width: var(--apex-shirt-w, clamp(64px, 12.4vh, 170px)) !important; min-width: var(--apex-shirt-w, clamp(64px, 12.4vh, 170px)) !important; }
+/* Spread kits ACROSS the full pitch width (Solio-style) instead of bunching them
+   in the centre — this is what kills the huge empty-green borders Marcus flagged.
+   space-evenly distributes every row edge-to-edge regardless of kit count. */
+.va-solio-pitch .pitch .pitch-row { margin-bottom: 2px !important; gap: 5px !important; justify-content: space-evenly !important; }
+.va-solio-pitch .bench-row, .va-solio-pitch .pitch-bench { padding: 4px !important; gap: 6px !important; margin-top: 4px !important; justify-content: space-evenly !important; }
 .va-solio-pitch .shirt-xp { font-size: 0.78rem !important; margin-top: 0 !important; }
 .va-solio-pitch .shirt-name { font-size: 0.55rem !important; padding: 1px 5px !important; max-width: 62px !important; }
 .va-solio-pitch .shirt-fix { font-size: 0.5rem !important; }
@@ -8742,7 +8745,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1780987856-GW38-40732a43";
+const BUILD_VERSION = "1780991252-GW38-40732a43";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -10492,6 +10495,7 @@ function apexFitPitch() {
     var rail = document.querySelector('.va-solio-rail');
     var tabs = document.querySelector('#view-team .va-tabs');
     if (!board || !pitchCol) return;
+    if (pitchCol.clientWidth < 200) return; /* not laid out yet — avoid sizing to a collapsed column */
     function set(svg) { root.style.setProperty('--apex-shirt', svg + 'px'); root.style.setProperty('--apex-shirt-w', (svg * 1.46) + 'px'); }
     if (tabs) { /* tabs ref kept for layout context */ }
     // Primary: size kits to FILL the cell width (pitch column / 5). This uses the
@@ -10513,7 +10517,24 @@ window.apexFitPitch = apexFitPitch;
    single call can run before the squad DOM exists. (setSolverTab('squad') also
    refits once hydration finishes.) */
 window.addEventListener('load', function () { [80, 500, 1200, 2500].forEach(function (ms) { setTimeout(apexFitPitch, ms); }); });
+if (document.readyState !== 'loading') { setTimeout(apexFitPitch, 60); }
+else { document.addEventListener('DOMContentLoaded', function () { setTimeout(apexFitPitch, 60); }); }
 (function () { var _aft; window.addEventListener('resize', function () { clearTimeout(_aft); _aft = setTimeout(apexFitPitch, 150); }); })();
+/* Bulletproof firing: a MutationObserver refits whenever the pitch (re)renders —
+   the squad hydrates and re-renders asynchronously (optimise, hydrate, tab swap),
+   so timed calls alone can miss it. apexFitPitch only writes CSS vars on <html>,
+   not on observed nodes, so this can't loop. Debounced. */
+(function () {
+  var _mo, _mot;
+  function arm() {
+    var host = document.getElementById('view-team');
+    if (!host || _mo) return;
+    _mo = new MutationObserver(function () { clearTimeout(_mot); _mot = setTimeout(apexFitPitch, 120); });
+    _mo.observe(host, { childList: true, subtree: true });
+  }
+  if (document.readyState !== 'loading') arm();
+  else document.addEventListener('DOMContentLoaded', arm);
+})();
 
 function setSolverTab(tab) {
   const vt = document.getElementById('view-team');
@@ -15350,7 +15371,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW38</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780987856-GW38-40732a43</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780991252-GW38-40732a43</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
