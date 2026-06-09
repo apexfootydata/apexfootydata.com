@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="38" data-built-at="2026-06-09T12:02:53">
+<meta name="apex-gw" content="38" data-built-at="2026-06-09T12:07:43">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -3909,7 +3909,9 @@ button.secondary, .btn-secondary, .va-btn-secondary {
 /* Pull the bench up tight to the pitch — collapse the board margin, the BENCH
    label's 8px+8px margins and the bench top margin (was a ~34px gap). */
 .va-solio-pitch .pitch { margin-bottom: 0 !important; }
-.va-solio-pitch .bench-label { margin: 1px 0 2px !important; font-size: 0.62rem !important; line-height: 1 !important; }
+/* Hide the "BENCH" label — it sat on the white background and was the entire
+   white strip between the pitch and bench. Gone, the two green panels meet. */
+.va-solio-pitch .bench-label { display: none !important; }
 .va-solio-pitch .bench-row, .va-solio-pitch .pitch-bench { margin-top: 0 !important; }
 #view-team .va-id-row { margin: 0 0 4px !important; }
 /* Centre the pitch against the rail within the grid row (Solio centres its squad). */
@@ -8923,7 +8925,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1781002973-GW38-40732a43";
+const BUILD_VERSION = "1781003263-GW38-40732a43";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -15560,7 +15562,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW38</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781002973-GW38-40732a43</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781003263-GW38-40732a43</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
