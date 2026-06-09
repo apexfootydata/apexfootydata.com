@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="38" data-built-at="2026-06-09T06:56:38">
+<meta name="apex-gw" content="38" data-built-at="2026-06-09T07:09:25">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -3841,12 +3841,12 @@ button.secondary, .btn-secondary, .va-btn-secondary {
 .va-solio-pitch .pitch { padding: 6px 8px 4px !important; margin: 0 0 6px !important; }
 .va-solio-pitch .pitch .shirt-wrap,
 .va-solio-pitch .bench-row .shirt-wrap,
-.va-solio-pitch .pitch-bench .shirt-wrap { width: clamp(52px, 7.7vh, 92px) !important; margin-bottom: 0 !important; }
+.va-solio-pitch .pitch-bench .shirt-wrap { width: clamp(58px, 8.1vh, 108px) !important; margin-bottom: 0 !important; }
 .va-solio-pitch .pitch .svg-shirt,
 .va-solio-pitch .bench-row .svg-shirt,
-.va-solio-pitch .pitch-bench .svg-shirt { width: clamp(36px, 5.3vh, 64px) !important; height: clamp(36px, 5.3vh, 64px) !important; }
+.va-solio-pitch .pitch-bench .svg-shirt { width: clamp(40px, 5.6vh, 76px) !important; height: clamp(40px, 5.6vh, 76px) !important; }
 .va-solio-pitch .pitch .shirt,
-.va-solio-pitch .bench-row .shirt { width: clamp(52px, 7.7vh, 92px) !important; min-width: clamp(52px, 7.7vh, 92px) !important; }
+.va-solio-pitch .bench-row .shirt { width: clamp(58px, 8.1vh, 108px) !important; min-width: clamp(58px, 8.1vh, 108px) !important; }
 .va-solio-pitch .pitch .pitch-row { margin-bottom: 2px !important; gap: 5px !important; }
 .va-solio-pitch .bench-row { padding: 4px !important; gap: 6px !important; margin-top: 4px !important; }
 .va-solio-pitch .shirt-xp { font-size: 0.78rem !important; margin-top: 0 !important; }
@@ -3885,9 +3885,16 @@ button.secondary, .btn-secondary, .va-btn-secondary {
 @media (min-width: 1025px) {
   #view-team:not(.show-pool) { height: calc(100dvh - 80px) !important; overflow: hidden !important;
     display: flex !important; flex-direction: column !important; }
+  /* Widen the tool to use the screen — the old content-sized container left ~300px
+     of dead margin each side at 1920px. min(1600px, 92vw) cuts that to ~160px. */
   #view-team:not(.show-pool) .container { height: 100% !important; display: flex !important;
     flex-direction: column !important; justify-content: center !important;
-    padding-top: 0 !important; padding-bottom: 0 !important; overflow: hidden !important; }
+    padding: 0 20px !important; overflow: hidden !important;
+    width: min(1600px, 92vw) !important; max-width: none !important;
+    margin-left: auto !important; margin-right: auto !important; }
+  /* Pitch capped to a natural width (so the formation doesn't over-spread); the
+     control rail takes the extra width — the distribution graph + stats stretch. */
+  #view-team:not(.show-pool) .va-solio { grid-template-columns: clamp(480px, 42%, 600px) minmax(0, 1fr) !important; }
 }
 /* Footers eat ~280px below the solver — hide on the solver page so the tool view
    is one screen. (Solver pages only; the landing/index footer is unaffected.) */
@@ -8721,7 +8728,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1780984598-GW38-40732a43";
+const BUILD_VERSION = "1780985365-GW38-40732a43";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -15288,7 +15295,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW38</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780984598-GW38-40732a43</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780985365-GW38-40732a43</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
