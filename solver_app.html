@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="38" data-built-at="2026-06-09T11:22:41">
+<meta name="apex-gw" content="38" data-built-at="2026-06-09T11:44:05">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -70,7 +70,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 18px 36px;
+  padding: 10px 36px;
   background: var(--bg);
   border-bottom: 1px solid var(--border);
   max-width: 1760px;
@@ -3901,7 +3901,8 @@ button.secondary, .btn-secondary, .va-btn-secondary {
    banner, and on Apex it was the single biggest offender (~141px) forcing the
    page to scroll. The Player Pool view keeps its own header. */
 #view-team .va-header { display: none !important; }
-#view-team .va-tabs { margin: 0 0 6px !important; }
+#view-team .va-tabs { margin: 0 0 2px !important; }
+#view-team .va-tabs .va-tab { padding-top: 8px !important; padding-bottom: 8px !important; }
 #view-team .va-id-row { margin: 0 0 4px !important; }
 /* Centre the pitch against the rail within the grid row (Solio centres its squad). */
 .va-solio { align-items: center !important; }
@@ -3917,7 +3918,7 @@ button.secondary, .btn-secondary, .va-btn-secondary {
      50/50 split kept. To return to one-screen, restore height:calc(100dvh-80px)
      + overflow:hidden here and shrink the kit min() below. */
   #view-team:not(.show-pool) .container {
-    padding: 8px 16px 30px !important;
+    padding: 2px 16px 6px !important;
     width: min(1860px, 96vw) !important; max-width: none !important;
     margin-left: auto !important; margin-right: auto !important; }
   #view-team:not(.show-pool) .va-solio { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important; align-items: stretch !important; }
@@ -8881,10 +8882,12 @@ html.apex-offseason #view-landing .hero-sub::after {
     if(S.mounted)return;
     var host=document.getElementById('scenario-planner');if(!host)return;
     var h=document.querySelector('.va-solio-rail .va-card-value-hero');
-    if(!h||!/[0-9]/.test(h.textContent||''))return;
+    var v=h?parseFloat((h.textContent||'').replace(/[^0-9.]/g,'')):0;
+    if(!(v>0))return;                 // projection still 0.0 / not hydrated yet — wait for a real value
     try{buildData();mount(host);S.mounted=true;}catch(e){}
   };
-  function _kick(){[300,1200,2600].forEach(function(ms){setTimeout(window.apexRenderPlanner,ms);});}
+  // Poll until the projection has hydrated (then build once and stop).
+  function _kick(){var t=0,iv=setInterval(function(){t++;window.apexRenderPlanner();if(S.mounted||t>40)clearInterval(iv);},400);}
   if(document.readyState!=='loading')_kick();else document.addEventListener('DOMContentLoaded',_kick);
   window.addEventListener('load',_kick);
 })();
@@ -8912,7 +8915,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1781000561-GW38-40732a43";
+const BUILD_VERSION = "1781001845-GW38-40732a43";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -15549,7 +15552,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW38</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781000561-GW38-40732a43</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781001845-GW38-40732a43</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
