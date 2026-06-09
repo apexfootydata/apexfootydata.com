@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="38" data-built-at="2026-06-09T00:23:07">
+<meta name="apex-gw" content="38" data-built-at="2026-06-09T01:08:49">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -3825,6 +3825,55 @@ button.secondary, .btn-secondary, .va-btn-secondary {
 .pitch .pitch-row {
   gap: 10px !important;
 }
+
+/* ══ COMPACT TWO-PANE — fit the Squad tab in one viewport (2026-06-08) ══════
+   Measured live: pitch column 1349px + rail 829px + two footers >> the ~580px
+   available, so the page scrolled badly (1100px overflow). The "wider shirts"
+   block above forces 135px shirts with !important, so these overrides use
+   higher specificity (.va-solio-pitch .pitch ...) + !important to win. Values
+   were tuned by measuring docScrollHeight live until it fit ~869px. Scoped to
+   .va-solio so the standalone pitch + mobile sizes are untouched. */
+/* Pitch: shrink shirts 135px → 40px and tighten rows/bench. */
+.va-solio-pitch .pitch { padding: 6px 8px 4px !important; margin: 0 0 4px !important; }
+.va-solio-pitch .pitch .shirt-wrap,
+.va-solio-pitch .bench-row .shirt-wrap,
+.va-solio-pitch .pitch-bench .shirt-wrap { width: 40px !important; margin-bottom: 0 !important; }
+.va-solio-pitch .pitch .svg-shirt,
+.va-solio-pitch .bench-row .svg-shirt,
+.va-solio-pitch .pitch-bench .svg-shirt { width: 40px !important; height: 40px !important; }
+.va-solio-pitch .pitch .shirt,
+.va-solio-pitch .bench-row .shirt { width: 58px !important; min-width: 58px !important; }
+.va-solio-pitch .pitch .pitch-row { margin-bottom: 2px !important; gap: 5px !important; }
+.va-solio-pitch .bench-row { padding: 4px !important; gap: 6px !important; margin-top: 4px !important; }
+.va-solio-pitch .shirt-xp { font-size: 0.78rem !important; margin-top: 0 !important; }
+.va-solio-pitch .shirt-name { font-size: 0.55rem !important; padding: 1px 5px !important; max-width: 62px !important; }
+.va-solio-pitch .shirt-fix { font-size: 0.5rem !important; }
+.va-solio-pitch .pitch-cost-badge { padding: 5px 9px !important; min-width: 0 !important; font-size: 0.66rem !important; }
+/* Rail: shrink the hero card (green number + range) and stat strip; the GW pill
+   row is hidden (single-GW demo) — RE-ENABLE for 26/27 multi-GW by removing the
+   gw-pill-row display:none. */
+.va-solio-rail { gap: 5px !important; }
+.va-solio-rail .gw-pill-row { display: none !important; }
+.va-solio-rail .va-card-hero { padding: 8px 12px !important; }
+.va-solio-rail .va-card-value-hero { font-size: 28px !important; padding: 5px 14px !important; }
+.va-solio-rail .va-range-plot { height: 40px !important; margin: 3px 0 2px !important; }
+.va-solio-rail .va-range-num { font-size: 20px !important; }
+.va-solio-rail .va-range-title { font-size: 13px !important; }
+.va-solio-rail .va-range-foot { margin-top: 3px !important; padding-top: 3px !important; }
+.va-solio-rail .va-strip { padding: 6px 12px !important; gap: 5px 12px !important; }
+.va-solio-rail .va-strip-val { font-size: 1.05rem !important; }
+.va-solio-rail #va-solve-actions { margin: 2px 0 5px !important; }
+.va-solio-rail #va-solve-actions .btn,
+.va-solio-rail #va-solve-actions button { padding: 7px 16px !important; font-size: 0.85rem !important; }
+/* Trim the header/tab whitespace above the two-pane (was ~200px). */
+#view-team .container { padding-top: 6px !important; padding-bottom: 2px !important; }
+#view-team .va-tabs { margin: 0 0 6px !important; }
+#view-team .va-id-row { margin: 0 0 4px !important; }
+#view-team .va-id-text, #view-team .va-id-meta, #view-team .va-team-header { margin: 0 !important; padding: 1px 0 !important; }
+#view-team .va-avatar { display: none !important; }
+/* Footers eat ~280px below the solver — hide on the solver page so the tool view
+   is one screen. (Solver pages only; the landing/index footer is unaffected.) */
+body > footer.footer, body > #apex-site-footer { display: none !important; }
 
 /* ── Option 2 — small coloured underline beneath the name pill ────────── */
 .shirt-xm-bar {
@@ -8632,7 +8681,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1780960987-GW38-40732a43";
+const BUILD_VERSION = "1780963729-GW38-40732a43";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -15199,7 +15248,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW38</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780960987-GW38-40732a43</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780963729-GW38-40732a43</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
