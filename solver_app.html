@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-06-09T21:17:11">
+<meta name="apex-gw" content="32" data-built-at="2026-06-09T21:28:28">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -3260,7 +3260,13 @@ body {
   background: #fafafa !important;
   color: #0f172a !important;
 }
-.container, main, .view-container,
+/* Page-level wrappers sit transparent on the cream page — no white slab
+   (2026-06-09 Marcus: "use whole page, get rid of borders"). Cards stay white. */
+.container, main, .view-container {
+  background: transparent !important;
+  color: #1E1E1A !important;
+  border-color: transparent !important;
+}
 .topbar, .va-card, .va-hero, .chip-plan-row, .chip-card,
 .pp-card, .player-pool, .pool-table, .data-table,
 .team-table, .results-card, .search-card,
@@ -5922,12 +5928,14 @@ html.apex-offseason #view-landing .hero-sub::after {
     <!-- Decision tree (2026-06-09) — primary planning surface. Auto-built by
          the Path Planner engine; the card stack below becomes the opt-in
          "full list" power-user view. -->
-    <div id="pp-tree-wrap" style="margin:10px 0 4px;">
+    <!-- Full-bleed tree canvas: breaks out of .container so the tree owns the
+         whole page width (Marcus 2026-06-09). -->
+    <div id="pp-tree-wrap" style="margin:10px 0 4px;width:100vw;margin-left:calc(50% - 50vw);padding:0 28px;box-sizing:border-box;">
       <div id="pp-tree" style="overflow-x:auto;-webkit-overflow-scrolling:touch;"></div>
-      <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin:8px 0;">
-        <div id="pp-path-card" style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;min-width:200px;"></div>
+      <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin:10px 0;">
+        <div id="pp-path-card" style="background:#FFFFFF;border-radius:12px;padding:12px 18px;min-width:220px;box-shadow:0 1px 4px rgba(0,0,0,.06);"></div>
         <a href="#" id="pp-list-toggle" onclick="_ppToggleList(); return false;"
-           style="font-size:.78rem;color:var(--muted);text-decoration:underline;cursor:pointer;white-space:nowrap;">Show full options list</a>
+           style="font-size:.82rem;color:var(--muted);text-decoration:underline;cursor:pointer;white-space:nowrap;">Show full options list</a>
       </div>
     </div>
     <!-- Card stack populated dynamically by _renderPathCards -->
@@ -8973,7 +8981,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1781036230-GW32-58d1c719";
+const BUILD_VERSION = "1781036908-GW32-58d1c719";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -12694,11 +12702,13 @@ function _renderPathTree() {
     if (roll) branches.push(roll);
   }
 
-  const COL = 152, NW = 126, NH = 46, BW = 178, BH = 58, BGAP = 14, TOP = 34;
+  // Sized to match the approved mock at 1:1 (2026-06-09 Marcus: "writing way
+  // too small, mock is bigger") — node/type scale ~40% up from v1.
+  const COL = 208, NW = 172, NH = 64, BW = 244, BH = 80, BGAP = 18, TOP = 46;
   const nLocked = sels.length;
   const branchX = 20 + (nLocked + 1) * COL;
   const futN = done ? 0 : Math.max(0, horizonEnd - cur - 1);
-  const width  = Math.max(680, branchX + (done ? 140 : BW + 30) + (futN > 0 ? 250 : 0) + 60);
+  const width  = Math.max(680, branchX + (done ? 200 : BW + 30) + (futN > 0 ? 330 : 0) + 60);
   const height = Math.max(230, TOP + Math.max(1, branches.length) * (BH + BGAP) + 44);
   const midY   = TOP + (Math.max(1, branches.length) * (BH + BGAP) - BGAP) / 2;
 
@@ -12735,11 +12745,16 @@ function _renderPathTree() {
   const line = (x1, y1, x2, y2, col, dash) =>
     `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${col}" stroke-width="1.6"${dash ? ' stroke-dasharray="5 4"' : ''} stroke-linecap="round"/>`;
   const node = (x, y, l1, l2, stroke, fill, tCol, sCol) =>
-    `<g><rect x="${x}" y="${y}" width="${NW}" height="${NH}" rx="9" fill="${fill}" stroke="${stroke}" stroke-width="1.4"/>`
-    + `<text x="${x + NW/2}" y="${y + 19}" text-anchor="middle" font-size="11.5" font-weight="700" fill="${tCol}">${l1}</text>`
-    + `<text x="${x + NW/2}" y="${y + 34}" text-anchor="middle" font-size="9.5" fill="${sCol}">${l2}</text></g>`;
+    `<g><rect x="${x}" y="${y}" width="${NW}" height="${NH}" rx="11" fill="${fill}" stroke="${stroke}" stroke-width="1.6"/>`
+    + `<text x="${x + NW/2}" y="${y + 27}" text-anchor="middle" font-size="16" font-weight="700" fill="${tCol}">${l1}</text>`
+    + `<text x="${x + NW/2}" y="${y + 47}" text-anchor="middle" font-size="12.5" fill="${sCol}">${l2}</text></g>`;
 
-  let s = `<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg" style="display:block;font-family:'Plus Jakarta Sans',sans-serif;">`;
+  // Responsive scale-to-fill (Marcus: "use whole page if you have to" — the
+  // approved mock looked bigger because it scaled to container width). When
+  // the tree is narrower than the page it scales UP (capped at 1.35× so type
+  // stays crisp); once the trunk outgrows the page, min-width pins 1:1 and
+  // the wrap scrolls horizontally instead of shrinking the tree.
+  let s = `<svg viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg" style="display:block;height:auto;width:100%;min-width:${width}px;max-width:${Math.round(width * 1.35)}px;margin:0 auto;font-family:'Plus Jakarta Sans',sans-serif;">`;
 
   // Trunk: start node + locked decisions
   let px = 20;
@@ -12764,7 +12779,7 @@ function _renderPathTree() {
   } else if (branches.length) {
     const gw = gwR[cur];
     const x = branchX;
-    s += `<text x="${x + BW/2}" y="${TOP - 14}" text-anchor="middle" font-size="11" font-weight="700" fill="${GREY_T}">GW${gw} — pick a branch</text>`;
+    s += `<text x="${x + BW/2}" y="${TOP - 16}" text-anchor="middle" font-size="14" font-weight="700" fill="${GREY_T}">GW${gw} — pick a branch</text>`;
     let _bestY = TOP + BH / 2;
     branches.forEach((o, bi) => {
       const y = TOP + bi * (BH + BGAP);
@@ -12794,31 +12809,31 @@ function _renderPathTree() {
       }
       s += line(px + NW, midY, x, y + BH/2, col, bi !== 0);
       s += `<g style="cursor:pointer;" onclick="_selectPathOption(${cur}, ${idx})">`
-        + `<rect x="${x}" y="${y}" width="${BW}" height="${BH}" rx="10" fill="${bg}" stroke="${col}" stroke-width="${bi === 0 ? 2 : 1.4}"/>`
-        + `<text x="${x + BW/2}" y="${y + 23}" text-anchor="middle" font-size="11.5" font-weight="700" fill="${tCol}">${l1}</text>`
-        + `<text x="${x + BW/2}" y="${y + 41}" text-anchor="middle" font-size="10" fill="${sCol}">${l2}</text>`
+        + `<rect x="${x}" y="${y}" width="${BW}" height="${BH}" rx="12" fill="${bg}" stroke="${col}" stroke-width="${bi === 0 ? 2.4 : 1.6}"/>`
+        + `<text x="${x + BW/2}" y="${y + 32}" text-anchor="middle" font-size="16" font-weight="700" fill="${tCol}">${l1}</text>`
+        + `<text x="${x + BW/2}" y="${y + 56}" text-anchor="middle" font-size="13" fill="${sCol}">${l2}</text>`
         + `</g>`;
     });
     // Ghost nodes for the upcoming GWs (mock fidelity) — connected onward
     // from the best branch, annotated with the DGW team count when relevant.
     if (futN > 0) {
-      const g1x = x + BW + 44, gw1 = gwR[cur + 1];
+      const g1x = x + BW + 52, gw1 = gwR[cur + 1];
       const dgwN = _dgwTeamsAt(cur + 1);
       s += line(x + BW, _bestY, g1x, _bestY, TEAL);
-      s += `<g><rect x="${g1x}" y="${_bestY - 22}" width="84" height="44" rx="9" fill="${GREY_BG}" stroke="${GREY}" stroke-width="1.2"/>`
-        + `<text x="${g1x + 42}" y="${_bestY - 3}" text-anchor="middle" font-size="11.5" font-weight="700" fill="${GREY_T}">GW${gw1}</text>`
-        + `<text x="${g1x + 42}" y="${_bestY + 13}" text-anchor="middle" font-size="9.5" fill="${GREY_S}">${dgwN > 0 ? `DGW ×${dgwN}` : 'next up'}</text></g>`;
+      s += `<g><rect x="${g1x}" y="${_bestY - 30}" width="112" height="60" rx="11" fill="${GREY_BG}" stroke="${GREY}" stroke-width="1.4"/>`
+        + `<text x="${g1x + 56}" y="${_bestY - 4}" text-anchor="middle" font-size="15" font-weight="700" fill="${GREY_T}">GW${gw1}</text>`
+        + `<text x="${g1x + 56}" y="${_bestY + 17}" text-anchor="middle" font-size="12" fill="${GREY_S}">${dgwN > 0 ? `DGW ×${dgwN}` : 'next up'}</text></g>`;
       if (futN > 1) {
-        const g2x = g1x + 84 + 20, gw2 = gwR[cur + 2];
-        s += line(g1x + 84, _bestY, g2x, _bestY, GREY, true);
-        s += `<g opacity="0.55"><rect x="${g2x}" y="${_bestY - 22}" width="64" height="44" rx="9" fill="none" stroke="${GREY}" stroke-width="1.2"/>`
-          + `<text x="${g2x + 32}" y="${_bestY - 3}" text-anchor="middle" font-size="11.5" font-weight="700" fill="${GREY_S}">GW${gw2}</text>`
-          + `<text x="${g2x + 32}" y="${_bestY + 13}" text-anchor="middle" font-size="9.5" fill="${GREY_S}">${futN > 2 ? '+' + (futN - 1) + ' more' : 'last GW'}</text></g>`;
+        const g2x = g1x + 112 + 26, gw2 = gwR[cur + 2];
+        s += line(g1x + 112, _bestY, g2x, _bestY, GREY, true);
+        s += `<g opacity="0.55"><rect x="${g2x}" y="${_bestY - 30}" width="88" height="60" rx="11" fill="none" stroke="${GREY}" stroke-width="1.4"/>`
+          + `<text x="${g2x + 44}" y="${_bestY - 4}" text-anchor="middle" font-size="15" font-weight="700" fill="${GREY_S}">GW${gw2}</text>`
+          + `<text x="${g2x + 44}" y="${_bestY + 17}" text-anchor="middle" font-size="12" fill="${GREY_S}">${futN > 2 ? '+' + (futN - 1) + ' more' : 'last GW'}</text></g>`;
       }
     }
   }
   // Caption (mock fidelity)
-  s += `<text x="20" y="${height - 8}" font-size="10.5" fill="${GREY_S}">Tap a branch to take it — the tree grows one gameweek at a time. Greyed branches stay tappable to compare.</text>`;
+  s += `<text x="20" y="${height - 8}" font-size="13" fill="${GREY_S}">Tap a branch to take it — the tree grows one gameweek at a time. Greyed branches stay tappable to compare.</text>`;
   s += '</svg>';
   host.innerHTML = s;
   // Keep the active branches in view as the trunk grows.
@@ -12838,8 +12853,8 @@ function _renderPathTree() {
     const val = sels.length
       ? `${_pathPlanner.totalXp.toFixed(1)} pts${_pathPlanner.totalHits > 0 ? ` · ${_pathPlanner.totalHits} hit${_pathPlanner.totalHits > 1 ? 's' : ''}` : ''}`
       : `+${bestEv.toFixed(1)} pts`;
-    card.innerHTML = `<div style="font-size:.72rem;color:var(--muted);">${label}</div>`
-      + `<div style="font-size:1.15rem;font-weight:700;color:var(--text);">${val}</div>`;
+    card.innerHTML = `<div style="font-size:.85rem;color:var(--muted);">${label}</div>`
+      + `<div style="font-size:1.45rem;font-weight:700;color:var(--text);">${val}</div>`;
   }
 }
 
@@ -16019,7 +16034,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781036230-GW32-58d1c719</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781036908-GW32-58d1c719</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
