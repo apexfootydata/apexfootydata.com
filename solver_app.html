@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-06-09T19:55:01">
+<meta name="apex-gw" content="32" data-built-at="2026-06-09T20:22:45">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -8956,7 +8956,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1781031301-GW32-2d5feab0";
+const BUILD_VERSION = "1781032964-GW32-2d5feab0";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -9861,6 +9861,17 @@ function _presetParamsForSolve() {
 // Distance is clamped so one mega-owned / mega-diff player can't dominate.
 const _APEX_OWN_PIVOT  = 18.0;  // % ownership "template line": above = template (tunable)
 const _APEX_RISK_OWN_K = 3.0;   // xP swing strength per unit ownership distance (tunable)
+// Field-coverage scaling (2026-06-09, Marcus's DGW insight): the rank-risk of
+// (not) owning a player scales with how many points he's expected to score —
+// missing a 32%-owned DGW hauler hurts your rank far more than missing a
+// 32%-owned 3-pointer, because the field banks his haul and you don't. So the
+// ownership tilt is multiplied by the player's per-GW scoring rate relative to
+// a typical starter (~4.0 xP/GW), clamped 0.5–2.0 so one monster projection
+// can't swamp the ranking. DGW assets weigh heavier AUTOMATICALLY: their
+// doubled fixtures inflate horizon xP, which inflates the scale — no
+// DGW-specific hack needed. Typical-rate + clamps tunable below.
+const _APEX_RISK_XP_NORM  = 4.0;  // "typical starter" xP/GW the scale is relative to
+const _APEX_RISK_XP_CLAMP = [0.5, 2.0];
 function _apexRiskOwnBias(p) {
   if (!window.APEX_PRESETS) return 0;
   const sign = (_activePreset === 'high') ? 1 : (_activePreset === 'low') ? -1 : 0;
@@ -9869,7 +9880,15 @@ function _apexRiskOwnBias(p) {
     const pd = (typeof _apexPoolById === 'function' ? _apexPoolById(p.id) : null) || p;
     const own = (typeof pd.own === 'number') ? pd.own : (parseFloat(pd.own) || 0);
     const dist = Math.max(-0.6, Math.min(0.2, (_APEX_OWN_PIVOT - own) / 100));
-    return sign * _APEX_RISK_OWN_K * dist;
+    // Per-GW scoring rate over the baked horizon (total_xp / nGws) — a fair
+    // proxy at any planning depth; falls back to next-GW xp for thin records.
+    const nGw = (TEAM_META && TEAM_META.gw_range) ? TEAM_META.gw_range.length : 0;
+    const perGw = (typeof pd.total_xp === 'number' && nGw > 0)
+      ? pd.total_xp / nGw : (pd.xp || 0);
+    const scale = (perGw > 0)
+      ? Math.max(_APEX_RISK_XP_CLAMP[0], Math.min(_APEX_RISK_XP_CLAMP[1], perGw / _APEX_RISK_XP_NORM))
+      : _APEX_RISK_XP_CLAMP[0];  // no projection → minimal field relevance
+    return sign * _APEX_RISK_OWN_K * dist * scale;
   } catch (_e) { return 0; }
 }
 
@@ -11138,7 +11157,10 @@ function computeTransfers(gwIdx) {
   // differential is applied once, consistently. RANKING preference only — the
   // DISPLAYED `gain` stays true xP. Non-diff presets ('balanced'/'optimistic'/
   // 'safe'/'custom') → bias 0 → ordering byte-identical to before.
-  const _adjGain = (t) => t.gain + _diffBias({ id: t.in_id });
+  // 2026-06-09: the swap's net risk position = bias(in) − bias(out). Under Low,
+  // SELLING a high-owned hauler is itself a rank risk (the field keeps his
+  // points, you don't) — so it now costs ranking credit, symmetrically.
+  const _adjGain = (t) => t.gain + _diffBias({ id: t.in_id }) - _diffBias({ id: t.out_id });
   transfers.sort((a, b) => {
     if (a.is_dgw_priority !== b.is_dgw_priority)
       return a.is_dgw_priority ? -1 : 1;
@@ -12120,10 +12142,12 @@ function _ppComputeOptions(workingSquad, gwIdx, bank, workingFt) {
   // (_ppFutureBest / _ppComputeOptionsLocal): that stays pure xP so the memo
   // cache is preset-independent and future value is honest. Displayed numbers
   // stay true xP; High/Low only change which options surface and win.
+  // Net risk position of the swap = bias(in) − bias(out): under Low, selling
+  // a high-owned hauler is itself a rank risk, so it costs ranking credit.
   const _ppBias = (opt) => {
     if (!opt || opt.type === 'none') return 0;
-    let b = _apexRiskOwnBias(opt.in);
-    if (opt.type === 'two') b += _apexRiskOwnBias(opt.in2);
+    let b = _apexRiskOwnBias(opt.in) - _apexRiskOwnBias(opt.out);
+    if (opt.type === 'two') b += _apexRiskOwnBias(opt.in2) - _apexRiskOwnBias(opt.out2);
     return b;
   };
 
@@ -12170,9 +12194,10 @@ function _ppComputeOptions(workingSquad, gwIdx, bank, workingFt) {
   // Risk tilt biases WHICH candidate wins each slot (else every slot
   // pre-collapses to its highest-pure-xP option and a differential never
   // even enters the list — same lesson as computeTransfers). evGain itself
-  // stays true xP.
-  candidates.sort((a, b) => (b.evGain + _apexRiskOwnBias(b.in))
-                          - (a.evGain + _apexRiskOwnBias(a.in)));
+  // stays true xP. Net position = bias(in) − bias(out) so which OUTS survive
+  // the cross-slot cut is also risk-aware (selling template costs under Low).
+  candidates.sort((a, b) => (b.evGain + _apexRiskOwnBias(b.in) - _apexRiskOwnBias(b.out))
+                          - (a.evGain + _apexRiskOwnBias(a.in) - _apexRiskOwnBias(a.out)));
   const seenOuts = new Set();
   const uniquePerOut = [];
   for (const c of candidates) {
@@ -15677,7 +15702,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781031301-GW32-2d5feab0</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781032964-GW32-2d5feab0</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
