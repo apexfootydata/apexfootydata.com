@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="38" data-built-at="2026-06-09T07:22:11">
+<meta name="apex-gw" content="38" data-built-at="2026-06-09T07:32:35">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -3839,14 +3839,18 @@ button.secondary, .btn-secondary, .va-btn-secondary {
    way. This replaces the fixed 40px crush — bigger shirts now fit because the
    141px manager banner is gone and the view is height-locked (see app-shell). */
 .va-solio-pitch .pitch { padding: 6px 8px 4px !important; margin: 0 0 6px !important; }
+/* Kit size is driven by --apex-shirt / --apex-shirt-w, set by apexFitPitch() JS
+   (in generate_solver_html.py) which sizes the kits to FILL the one-screen height
+   on any monitor — ~104px on a 1080p screen (Solio-size+), shrinking to fit short
+   laptops, never clipping the bench. The clamp() is the no-JS fallback. */
 .va-solio-pitch .pitch .shirt-wrap,
 .va-solio-pitch .bench-row .shirt-wrap,
-.va-solio-pitch .pitch-bench .shirt-wrap { width: clamp(58px, 9.2vh, 134px) !important; margin-bottom: 0 !important; }
+.va-solio-pitch .pitch-bench .shirt-wrap { width: var(--apex-shirt-w, clamp(58px, 9.2vh, 134px)) !important; margin-bottom: 0 !important; }
 .va-solio-pitch .pitch .svg-shirt,
 .va-solio-pitch .bench-row .svg-shirt,
-.va-solio-pitch .pitch-bench .svg-shirt { width: clamp(40px, 6.4vh, 96px) !important; height: clamp(40px, 6.4vh, 96px) !important; }
+.va-solio-pitch .pitch-bench .svg-shirt { width: var(--apex-shirt, clamp(40px, 6.4vh, 96px)) !important; height: var(--apex-shirt, clamp(40px, 6.4vh, 96px)) !important; }
 .va-solio-pitch .pitch .shirt,
-.va-solio-pitch .bench-row .shirt { width: clamp(58px, 9.2vh, 134px) !important; min-width: clamp(58px, 9.2vh, 134px) !important; }
+.va-solio-pitch .bench-row .shirt { width: var(--apex-shirt-w, clamp(58px, 9.2vh, 134px)) !important; min-width: var(--apex-shirt-w, clamp(58px, 9.2vh, 134px)) !important; }
 .va-solio-pitch .pitch .pitch-row { margin-bottom: 2px !important; gap: 5px !important; }
 .va-solio-pitch .bench-row { padding: 4px !important; gap: 6px !important; margin-top: 4px !important; }
 .va-solio-pitch .shirt-xp { font-size: 0.78rem !important; margin-top: 0 !important; }
@@ -8729,7 +8733,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1780986131-GW38-40732a43";
+const BUILD_VERSION = "1780986755-GW38-40732a43";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -10462,6 +10466,48 @@ function _renderHeroSparkline() {
 // Squad / Player Pool tabs (2026-06-08): the heavy 333-row Expected Points
 // table lives on its own tab so the main decision view (pitch + rail + recs)
 // fits one screen. Toggling a class on #view-team drives the show/hide (CSS).
+/* ── Auto-fit pitch kits to fill the one-screen height (2026-06-09) ─────────
+   Sizes the squad kits (via --apex-shirt CSS vars) to fill the locked viewport
+   on ANY monitor: ~104px on 1080p (Solio-size+), shrinking on short laptops,
+   never clipping the bench. Two-sample linear solve of pitch-height vs kit-size,
+   then a safety shrink loop. Desktop + Squad tab only; mobile/Pool fall back to
+   the clamp() in solver_style.css. */
+function apexFitPitch() {
+  try {
+    var root = document.documentElement;
+    if (window.innerWidth < 1025) { root.style.removeProperty('--apex-shirt'); root.style.removeProperty('--apex-shirt-w'); return; }
+    var vt = document.getElementById('view-team');
+    if (!vt || vt.classList.contains('show-pool')) return;
+    var board = document.querySelector('.va-solio-pitch .pitch');
+    var pitchCol = document.querySelector('.va-solio-pitch');
+    var rail = document.querySelector('.va-solio-rail');
+    var tabs = document.querySelector('#view-team .va-tabs');
+    if (!board || !pitchCol) return;
+    function set(svg) { root.style.setProperty('--apex-shirt', svg + 'px'); root.style.setProperty('--apex-shirt-w', (svg * 1.46) + 'px'); return board.getBoundingClientRect().height; }
+    var availH = vt.clientHeight - (tabs ? tabs.offsetHeight : 0) - 20;
+    var h1 = set(50), h2 = set(82);
+    var slope = (h2 - h1) / 32;
+    if (!isFinite(slope) || slope <= 0) { root.style.removeProperty('--apex-shirt'); root.style.removeProperty('--apex-shirt-w'); return; }
+    var overhead = h1 - slope * 50;
+    var target = (availH - overhead) / slope;
+    var maxByWidth = ((pitchCol.clientWidth / 5) - 12) / 1.46;
+    target = Math.min(target, maxByWidth, 120);
+    target = Math.max(target, 40);
+    set(target);
+    var benchEl = document.querySelector('.va-solio-pitch .bench-row, .va-solio-pitch .pitch-bench') || board;
+    var limit = window.innerHeight - 6, guard = 0;
+    while (Math.max(benchEl.getBoundingClientRect().bottom, rail ? rail.getBoundingClientRect().bottom : 0) > limit && target > 40 && guard < 40) {
+      target -= 2; set(target); guard++;
+    }
+  } catch (_e) {}
+}
+window.apexFitPitch = apexFitPitch;
+/* Fire a few times after load — the pitch hydrates asynchronously from FPL, so a
+   single call can run before the squad DOM exists. (setSolverTab('squad') also
+   refits once hydration finishes.) */
+window.addEventListener('load', function () { [80, 500, 1200, 2500].forEach(function (ms) { setTimeout(apexFitPitch, ms); }); });
+(function () { var _aft; window.addEventListener('resize', function () { clearTimeout(_aft); _aft = setTimeout(apexFitPitch, 150); }); })();
+
 function setSolverTab(tab) {
   const vt = document.getElementById('view-team');
   if (vt) vt.classList.toggle('show-pool', tab === 'pool');
@@ -10469,6 +10515,7 @@ function setSolverTab(tab) {
     b.classList.toggle('va-tab-active', b.getAttribute('data-tab') === tab);
   });
   try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (_e) {}
+  if (tab === 'squad' && typeof window.apexFitPitch === 'function') { setTimeout(window.apexFitPitch, 30); }
 }
 
 function _syncTeamHeaderFromMeta() {
@@ -15296,7 +15343,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW38</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780986131-GW38-40732a43</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780986755-GW38-40732a43</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
