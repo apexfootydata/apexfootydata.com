@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-06-09T22:13:07">
+<meta name="apex-gw" content="32" data-built-at="2026-06-09T22:25:56">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -3908,7 +3908,10 @@ button.secondary, .btn-secondary, .va-btn-secondary {
 .va-solio-rail #va-solve-actions { margin: 6px 0 8px !important; display: flex !important; flex-wrap: wrap !important; align-items: center !important; gap: 10px !important; }
 /* Long full-width Optimize button (Marcus prefers the long optimiser); Reset +
    "see all options" wrap to the line beneath it. */
-.va-solio-rail #va-solve-actions .solve-btn { flex: 1 1 100% !important; width: 100% !important; justify-content: center !important; padding: 15px 22px !important; font-size: clamp(1.05rem, 1.2vw, 1.35rem) !important; }
+.va-solio-rail #va-solve-actions .solve-btn { flex: 1 1 100% !important; width: 100% !important; justify-content: center !important; padding: 18px 24px !important; font-size: clamp(1.15rem, 1.35vw, 1.5rem) !important; }
+/* Reset + "plan ahead →" sized up with the rest of the rail (2026-06-09). */
+.va-solio-rail .reset-btn { padding: 14px 26px !important; font-size: 1.05rem !important; }
+.va-solio-rail #see-all-options-link { font-size: 1.02rem !important; font-weight: 600 !important; }
 .va-solio-rail #va-solve-actions .btn,
 .va-solio-rail #va-solve-actions button { padding: 10px 20px !important; font-size: clamp(0.85rem, 1vw, 1.05rem) !important; }
 /* Drop the inline "Applied best transfer…" status — the Recommended-transfer card
@@ -4226,16 +4229,18 @@ body > footer.footer, body > #apex-site-footer { display: none !important; }
 .va-solio-rail #aps-grid-team .aps-card[data-preset="optimistic"],
 .va-solio-rail #aps-grid-team .aps-card[data-preset="safe"],
 .va-solio-rail #aps-grid-team .aps-card[data-preset="custom"] { display: none !important; }
+/* Rail controls sized to match the plan-ahead tree's 16px type
+   (2026-06-09 Marcus: "match the plan ahead size"). */
 .va-solio-rail #aps-grid-team .aps-card {
-  flex: 1 1 0; padding: 10px 14px !important; border-radius: 10px !important;
+  flex: 1 1 0; padding: 14px 16px !important; border-radius: 12px !important;
   display: flex !important; align-items: center; justify-content: center; gap: 0 !important;
   text-align: center;
 }
-.va-solio-rail #aps-grid-team .aps-card.aps-active { padding: 9px 13px !important; }
+.va-solio-rail #aps-grid-team .aps-card.aps-active { padding: 13px 15px !important; }
 .va-solio-rail #aps-grid-team .aps-icon,
 .va-solio-rail #aps-grid-team .aps-card-desc { display: none !important; }
 .va-solio-rail #aps-grid-team .aps-body { align-items: center; gap: 0 !important; }
-.va-solio-rail #aps-grid-team .aps-card-title { font-size: 14px !important; }
+.va-solio-rail #aps-grid-team .aps-card-title { font-size: 16px !important; font-weight: 700 !important; }
 
 /* ── Squad / Player Pool tabs (2026-06-08) ─────────────────────────────────
    Keeps the 333-row Expected Points table off the main decision view so pitch +
@@ -8996,7 +9001,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1781039587-GW32-a9172c07";
+const BUILD_VERSION = "1781040356-GW32-a9172c07";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -16097,7 +16102,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781039587-GW32-a9172c07</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781040356-GW32-a9172c07</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
