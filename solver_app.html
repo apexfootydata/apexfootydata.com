@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-06-09T20:33:12">
+<meta name="apex-gw" content="32" data-built-at="2026-06-09T20:54:31">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -5911,7 +5911,17 @@ html.apex-offseason #view-landing .hero-sub::after {
   </div>
   <main class="container">
     <div class="pp-intro" id="pp-intro">
-      Plan your transfers gameweek by gameweek. Each step shows the highest-EV options for that week — pick one, and the next GW reveals options based on your new squad.
+      Plan your transfers gameweek by gameweek. Pick a branch — the tree grows one GW at a time. Press Esc or ← Back to Squad any time to exit.
+    </div>
+    <!-- Decision tree (2026-06-09) — primary planning surface. Auto-built by
+         the Path Planner engine; the card stack below becomes the opt-in
+         "full list" power-user view. -->
+    <div id="pp-tree-wrap" style="margin:10px 0 4px;">
+      <div id="pp-tree" style="overflow-x:auto;-webkit-overflow-scrolling:touch;"></div>
+      <div style="display:flex;justify-content:flex-end;margin:4px 0 8px;">
+        <a href="#" id="pp-list-toggle" onclick="_ppToggleList(); return false;"
+           style="font-size:.78rem;color:var(--muted);text-decoration:underline;cursor:pointer;">Show full options list</a>
+      </div>
     </div>
     <!-- Card stack populated dynamically by _renderPathCards -->
     <div id="pp-card-stack"></div>
@@ -8956,7 +8966,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1781033592-GW32-2d5feab0";
+const BUILD_VERSION = "1781034871-GW32-2d5feab0";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -12633,6 +12643,136 @@ function _renderPathCards() {
     const applyBtn = document.getElementById('pp-apply-btn');
     if (applyBtn) applyBtn.style.display = 'inline-block';
   }
+
+  // ── Tree-first presentation (2026-06-09) ──
+  // The decision tree is the primary surface; the card stack is the opt-in
+  // "full list". Always show the stack once the walk completes (summary card).
+  const _doneAll = _pathPlanner.currentGwIdx >= horizonEnd;
+  stack.style.display = (_ppListVisible || _doneAll) ? '' : 'none';
+  _renderPathTree();
+}
+
+// Card-stack visibility toggle ("Show full options list").
+let _ppListVisible = false;
+function _ppToggleList() {
+  _ppListVisible = !_ppListVisible;
+  const stack = document.getElementById('pp-card-stack');
+  const tog   = document.getElementById('pp-list-toggle');
+  if (stack) stack.style.display = _ppListVisible ? '' : 'none';
+  if (tog) tog.textContent = _ppListVisible ? 'Hide full options list' : 'Show full options list';
+}
+
+// ── Decision tree renderer (2026-06-09, Marcus: "I want to be a decision
+// tree too") ──. Solio's shape, Apex's brain: the engine grows the tree.
+// Pure renderer over existing planner state — locked selections become the
+// trunk, the active GW fans out as clickable branches (top 3 + Roll), each
+// branch calls the SAME _selectPathOption the card list uses. Branch colour
+// = risk character (accent = engine's best, green = differential punt,
+// blue = template cover). No new engine code.
+function _renderPathTree() {
+  const host = document.getElementById('pp-tree');
+  if (!host) return;
+  const gwR = TEAM_META.gw_range;
+  const horizonEnd = gwR.length;
+  const cur  = _pathPlanner.currentGwIdx;
+  const sels = _pathPlanner.selections;
+  const done = cur >= horizonEnd;
+  const opts = (!done && _pathPlanner._activeOptionsGw === cur && _pathPlanner._activeOptions)
+    ? _pathPlanner._activeOptions : [];
+
+  // Branches: top 3 ranked options, plus Roll FT if it didn't make the cut.
+  let branches = opts.slice(0, 3);
+  if (opts.length && !branches.some(o => o.type === 'none')) {
+    const roll = opts.find(o => o.type === 'none');
+    if (roll) branches.push(roll);
+  }
+
+  const COL = 152, NW = 126, NH = 46, BW = 178, BH = 58, BGAP = 14, TOP = 34;
+  const nLocked = sels.length;
+  const branchX = 20 + (nLocked + 1) * COL;
+  const futN = done ? 0 : Math.max(0, horizonEnd - cur - 1);
+  const width  = Math.max(680, branchX + (done ? 140 : BW + 30) + 130);
+  const height = Math.max(230, TOP + Math.max(1, branches.length) * (BH + BGAP) + 30);
+  const midY   = TOP + (Math.max(1, branches.length) * (BH + BGAP) - BGAP) / 2;
+
+  const esc = (t) => String(t == null ? '' : t).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+  const short = (p) => {
+    const n = (p && p.web_name) || '?';
+    return esc(n.length > 10 ? n.slice(0, 9) + '…' : n);
+  };
+  const selLabel = (sel) => sel.type === 'chip' ? `${sel.chipType} squad`
+    : sel.type === 'none' ? '↻ Roll FT'
+    : sel.type === 'two' ? `${short(sel.out)}»${short(sel.in)} +1`
+    : `${short(sel.out)}»${short(sel.in)}`;
+
+  const line = (x1, y1, x2, y2, col, dash) =>
+    `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${col}" stroke-width="1.6"${dash ? ' stroke-dasharray="5 4"' : ''} stroke-linecap="round"/>`;
+  const node = (x, y, l1, l2, stroke, fill) =>
+    `<g><rect x="${x}" y="${y}" width="${NW}" height="${NH}" rx="9" fill="${fill}" stroke="${stroke}" stroke-width="1.4"/>`
+    + `<text x="${x + NW/2}" y="${y + 19}" text-anchor="middle" font-size="11.5" font-weight="700" fill="var(--text,#e7e7ef)">${l1}</text>`
+    + `<text x="${x + NW/2}" y="${y + 34}" text-anchor="middle" font-size="9.5" fill="var(--muted,#9ca3af)">${l2}</text></g>`;
+
+  let s = `<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg" style="display:block;font-family:'Space Grotesk',sans-serif;">`;
+
+  // Trunk: start node + locked decisions
+  let px = 20;
+  const py = midY - NH / 2;
+  s += node(px, py, 'Your team',
+    `FT ${(TEAM_META && TEAM_META.free_transfers) || 1} · £${((TEAM_META && TEAM_META.bank) || 0).toFixed(1)}m bank`,
+    'var(--border,#3a3a46)', 'var(--bg2,rgba(127,127,127,.05))');
+  sels.forEach((sel, i) => {
+    const x = 20 + (i + 1) * COL;
+    s += line(px + NW, midY, x, midY, '#22c55e');
+    s += node(x, py, `GW${sel.gw} ✓`, `${selLabel(sel)} · ${(sel.gwXp || 0).toFixed(1)} pts`,
+      '#22c55e', 'rgba(34,197,94,.07)');
+    px = x;
+  });
+
+  if (done) {
+    const x = px + COL;
+    s += line(px + NW, midY, x, midY, '#22c55e');
+    s += `<g><rect x="${x}" y="${py}" width="${NW}" height="${NH}" rx="9" fill="rgba(249,115,22,.10)" stroke="var(--accent,#f97316)" stroke-width="1.6"/>`
+      + `<text x="${x + NW/2}" y="${py + 19}" text-anchor="middle" font-size="11.5" font-weight="700" fill="var(--accent,#f97316)">Plan complete</text>`
+      + `<text x="${x + NW/2}" y="${py + 34}" text-anchor="middle" font-size="9.5" fill="var(--muted,#9ca3af)">${_pathPlanner.totalXp.toFixed(1)} pts · review below</text></g>`;
+  } else if (branches.length) {
+    const gw = gwR[cur];
+    const x = branchX;
+    s += `<text x="${x + BW/2}" y="${TOP - 14}" text-anchor="middle" font-size="11" font-weight="700" fill="var(--muted,#9ca3af)">GW${gw} — pick a branch</text>`;
+    branches.forEach((o, bi) => {
+      const y = TOP + bi * (BH + BGAP);
+      const col = o.riskPick === 'differential' ? '#16a34a'
+        : o.riskPick === 'template' ? '#2563eb'
+        : bi === 0 ? 'var(--accent,#f97316)' : 'var(--muted,#9ca3af)';
+      const idx = opts.indexOf(o);
+      const ev = (o.lookaheadEv != null ? o.lookaheadEv : (o.netEv != null ? o.netEv : o.evGain)) || 0;
+      let l1, l2;
+      if (o.type === 'none') {
+        l1 = '↻ Roll the transfer'; l2 = `+${ev.toFixed(1)} · banks an extra FT`;
+      } else if (o.type === 'two') {
+        l1 = `${short(o.out)} » ${short(o.in)} +1 more`;
+        l2 = `+${ev.toFixed(1)}${o.hitCost > 0 ? ` · −${o.hitCost} hit` : ' · 2 FTs'}`;
+      } else {
+        const pd = (typeof _apexPoolById === 'function' ? _apexPoolById(o.in.id) : null) || o.in;
+        const own = (typeof pd.own === 'number') ? pd.own : (parseFloat(pd.own) || 0);
+        const tag = o.riskPick === 'differential' ? ' 💎' : (o.riskPick === 'template' ? ' 🛡' : '');
+        l1 = `${short(o.out)} » ${short(o.in)}`;
+        l2 = `+${ev.toFixed(1)} · ${own.toFixed(1)}% owned${tag}${o.hitCost > 0 ? ` · −${o.hitCost}` : ''}`;
+      }
+      s += line(px + NW, midY, x, y + BH/2, col, bi !== 0);
+      s += `<g style="cursor:pointer;" onclick="_selectPathOption(${cur}, ${idx})">`
+        + `<rect x="${x}" y="${y}" width="${BW}" height="${BH}" rx="10" fill="rgba(127,127,127,.05)" stroke="${col}" stroke-width="${bi === 0 ? 2 : 1.4}"/>`
+        + `<text x="${x + BW/2}" y="${y + 23}" text-anchor="middle" font-size="11.5" font-weight="700" fill="var(--text,#e7e7ef)">${l1}</text>`
+        + `<text x="${x + BW/2}" y="${y + 41}" text-anchor="middle" font-size="10" fill="${col}">${l2}</text>`
+        + `</g>`;
+    });
+    if (futN > 0) {
+      s += `<text x="${x + BW + 16}" y="${midY + 4}" font-size="10.5" fill="var(--muted,#9ca3af)">+${futN} more GW${futN > 1 ? 's' : ''} →</text>`;
+    }
+  }
+  s += '</svg>';
+  host.innerHTML = s;
+  // Keep the active branches in view as the trunk grows.
+  if (host.scrollWidth > host.clientWidth) host.scrollLeft = host.scrollWidth;
 }
 
 function _buildLockedCard(sel) {
@@ -12693,6 +12833,12 @@ function _buildActiveCard(gwIdx) {
   const options = _ppComputeOptions(
     _pathPlanner.workingSquad, gwIdx, _pathPlanner.workingBank, _pathPlanner.workingFt
   );
+  // Cache for the tree renderer AND for _selectPathOptionNow — selecting used
+  // to recompute the exact same options (double freeze). One compute, three
+  // consumers. Invalidation: keyed on gwIdx; every Select advances currentGwIdx
+  // so a stale cache can never be replayed.
+  _pathPlanner._activeOptions   = options;
+  _pathPlanner._activeOptionsGw = gwIdx;
 
   // gwXp under "no transfer" = best XI from current squad at this GW
   const noTransferGwXp = _ppBestXiTotal(_pathPlanner.workingSquad, gwIdx).total;
@@ -12932,9 +13078,30 @@ function _ppCommitToLive(gwIdx, newSquad) {
 // User picks an option for the active GW
 function _selectPathOption(gwIdx, optionIdx) {
   if (gwIdx !== _pathPlanner.currentGwIdx) return;  // not the active card
-  const options = _ppComputeOptions(
-    _pathPlanner.workingSquad, gwIdx, _pathPlanner.workingBank, _pathPlanner.workingFt
-  );
+  // Selecting an option triggers TWO heavy synchronous computes (options
+  // recompute + next-GW card build with lookahead). Without feedback the page
+  // froze dead — Back button unresponsive, refresh the only escape (Marcus,
+  // 2026-06-09). Paint the compositor-animated overlay FIRST, then do the
+  // work on the next tick. Same pattern as runSolve.
+  const _gwNow  = TEAM_META.gw_range[gwIdx];
+  const _gwNext = TEAM_META.gw_range[gwIdx + 1];
+  _ppShowComputing(_gwNext
+    ? `Locking GW${_gwNow} — computing GW${_gwNext} options…`
+    : `Locking GW${_gwNow} — finishing the plan…`);
+  setTimeout(() => {
+    try { _selectPathOptionNow(gwIdx, optionIdx); }
+    finally { _ppHideComputing(); }
+  }, 80);
+}
+
+function _selectPathOptionNow(gwIdx, optionIdx) {
+  // Reuse the options _buildActiveCard already computed for this GW (cached
+  // there) — recomputing doubled the freeze for zero benefit.
+  const options = (_pathPlanner._activeOptionsGw === gwIdx && _pathPlanner._activeOptions)
+    ? _pathPlanner._activeOptions
+    : _ppComputeOptions(
+        _pathPlanner.workingSquad, gwIdx, _pathPlanner.workingBank, _pathPlanner.workingFt
+      );
   const opt = options[optionIdx];
   if (!opt) return;
 
@@ -13020,6 +13187,18 @@ function confirmPathPlan() {
     }
   } catch (e) { /* non-critical */ }
 }
+
+// ESC always escapes the planner (2026-06-09 — "no way to get out" fix).
+// Guarded: no-op while the computing overlay is up (sync JS can't be
+// interrupted anyway) or when the planner view isn't active.
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Escape') return;
+  const ov = document.getElementById('pp-computing-overlay');
+  if (ov && ov.style.display !== 'none') return;
+  if (_pathPlanner && _pathPlanner.active && typeof exitPathPlanner === 'function') {
+    exitPathPlanner();
+  }
+});
 
 function exitPathPlanner() {
   _pathPlanner.active = false;
@@ -15772,7 +15951,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781033592-GW32-2d5feab0</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781034871-GW32-2d5feab0</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
