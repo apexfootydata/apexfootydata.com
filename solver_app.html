@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="38" data-built-at="2026-06-09T08:47:33">
+<meta name="apex-gw" content="38" data-built-at="2026-06-09T09:03:09">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -3843,23 +3843,29 @@ button.secondary, .btn-secondary, .va-btn-secondary {
    (in generate_solver_html.py) which sizes the kits to FILL the one-screen height
    on any monitor — ~104px on a 1080p screen (Solio-size+), shrinking to fit short
    laptops, never clipping the bench. The clamp() is the no-JS fallback. */
+/* Kit size = 2.6x (Marcus's pick from the size mock). min(6.3vw, 124px) → ~121px
+   svg on a 1920 screen; scales down with viewport width, capped. Width-driven so
+   the kits fill the pitch horizontally; the view scrolls vertically (height-lock
+   removed above). JS auto-fit is now inert (these rules don't read --apex-shirt). */
 .va-solio-pitch .pitch .shirt-wrap,
 .va-solio-pitch .bench-row .shirt-wrap,
-.va-solio-pitch .pitch-bench .shirt-wrap { width: var(--apex-shirt-w, clamp(64px, 12.4vh, 170px)) !important; margin-bottom: 0 !important; }
+.va-solio-pitch .pitch-bench .shirt-wrap { width: min(9.2vw, 181px) !important; margin-bottom: 0 !important; }
 .va-solio-pitch .pitch .svg-shirt,
 .va-solio-pitch .bench-row .svg-shirt,
-.va-solio-pitch .pitch-bench .svg-shirt { width: var(--apex-shirt, clamp(44px, 8.5vh, 116px)) !important; height: var(--apex-shirt, clamp(44px, 8.5vh, 116px)) !important; }
+.va-solio-pitch .pitch-bench .svg-shirt { width: min(6.3vw, 124px) !important; height: min(6.3vw, 124px) !important; }
 .va-solio-pitch .pitch .shirt,
-.va-solio-pitch .bench-row .shirt { width: var(--apex-shirt-w, clamp(64px, 12.4vh, 170px)) !important; min-width: var(--apex-shirt-w, clamp(64px, 12.4vh, 170px)) !important; }
+.va-solio-pitch .bench-row .shirt { width: min(9.2vw, 181px) !important; min-width: min(9.2vw, 181px) !important; }
 /* Spread kits ACROSS the full pitch width (Solio-style) instead of bunching them
    in the centre — this is what kills the huge empty-green borders Marcus flagged.
    space-evenly distributes every row edge-to-edge regardless of kit count. */
 .va-solio-pitch .pitch .pitch-row { margin-bottom: 2px !important; gap: 5px !important; justify-content: space-evenly !important; }
 .va-solio-pitch .bench-row, .va-solio-pitch .pitch-bench { padding: 4px !important; gap: 6px !important; margin-top: 4px !important; justify-content: space-evenly !important; }
-.va-solio-pitch .shirt-xp { font-size: 0.78rem !important; margin-top: 0 !important; }
-.va-solio-pitch .shirt-name { font-size: 0.55rem !important; padding: 1px 5px !important; max-width: 62px !important; }
-.va-solio-pitch .shirt-fix { font-size: 0.5rem !important; }
-.va-solio-pitch .pitch-cost-badge { padding: 5px 9px !important; min-width: 0 !important; font-size: 0.66rem !important; }
+/* Labels scaled up to match the 2.6x kits — bigger xPts number, name pill and
+   fixture (Marcus: xPts + pills bigger). min(vw, px) so they track the kit size. */
+.va-solio-pitch .shirt-xp { font-size: min(1.9vw, 2rem) !important; margin-top: 2px !important; font-weight: 700 !important; }
+.va-solio-pitch .shirt-name { font-size: min(1.15vw, 1.2rem) !important; padding: 3px 12px !important; max-width: none !important; margin-top: 3px !important; }
+.va-solio-pitch .shirt-fix { font-size: min(0.95vw, 1rem) !important; margin-top: 2px !important; }
+.va-solio-pitch .pitch-cost-badge { padding: 7px 12px !important; min-width: 0 !important; font-size: min(1vw, 0.95rem) !important; }
 /* Rail: shrink the hero card (green number + range) and stat strip; the GW pill
    row is hidden (single-GW demo) — RE-ENABLE for 26/27 multi-GW by removing the
    gw-pill-row display:none. */
@@ -3868,16 +3874,16 @@ button.secondary, .btn-secondary, .va-btn-secondary {
    are the site brand set: Plus Jakarta Sans + JetBrains Mono for figures. */
 .va-solio-rail { gap: 8px !important; }
 .va-solio-rail .gw-pill-row { display: none !important; }
-.va-solio-rail .va-card-hero { padding: clamp(8px, 1.2vh, 14px) 18px !important; }
-.va-solio-rail .va-card-value-hero { font-size: clamp(30px, 4.4vh, 50px) !important; padding: 6px 20px !important; }
-.va-solio-rail .va-card-label { font-size: clamp(0.78rem, 1.4vh, 1rem) !important; }
-.va-solio-rail .va-range-plot { height: clamp(44px, 7vh, 82px) !important; margin: 5px 0 3px !important; }
-.va-solio-rail .va-range-num { font-size: clamp(20px, 2.9vh, 32px) !important; }
-.va-solio-rail .va-range-title { font-size: clamp(13px, 1.5vh, 16px) !important; }
-.va-solio-rail .va-range-foot { margin-top: 5px !important; padding-top: 5px !important; font-size: clamp(11px, 1.25vh, 13px) !important; }
-.va-solio-rail .va-strip { padding: clamp(8px, 1.3vh, 14px) 18px !important; gap: clamp(6px, 1vh, 12px) 18px !important; }
-.va-solio-rail .va-strip-val { font-size: clamp(1.05rem, 2.4vh, 1.55rem) !important; }
-.va-solio-rail .va-strip-label { font-size: clamp(0.7rem, 1.2vh, 0.84rem) !important; }
+.va-solio-rail .va-card-hero { padding: 16px 20px !important; }
+.va-solio-rail .va-card-value-hero { font-size: clamp(46px, 4.6vw, 72px) !important; padding: 8px 24px !important; }
+.va-solio-rail .va-card-label { font-size: clamp(1rem, 1.1vw, 1.4rem) !important; }
+.va-solio-rail .va-range-plot { height: clamp(72px, 7vw, 120px) !important; margin: 8px 0 6px !important; }
+.va-solio-rail .va-range-num { font-size: clamp(30px, 3vw, 48px) !important; }
+.va-solio-rail .va-range-title { font-size: clamp(16px, 1.5vw, 24px) !important; }
+.va-solio-rail .va-range-foot { margin-top: 8px !important; padding-top: 8px !important; font-size: clamp(13px, 1.2vw, 20px) !important; }
+.va-solio-rail .va-strip { padding: 16px 20px !important; gap: 14px 20px !important; }
+.va-solio-rail .va-strip-val { font-size: clamp(1.4rem, 1.9vw, 2.2rem) !important; }
+.va-solio-rail .va-strip-label { font-size: clamp(0.85rem, 0.95vw, 1.2rem) !important; }
 .va-solio-rail #va-solve-actions { margin: 5px 0 7px !important; }
 .va-solio-rail #va-solve-actions .btn,
 .va-solio-rail #va-solve-actions button { padding: clamp(7px, 1.4vh, 12px) 22px !important; font-size: clamp(0.85rem, 1.6vh, 1.05rem) !important; }
@@ -3899,19 +3905,16 @@ button.secondary, .btn-secondary, .va-btn-secondary {
    :not(.show-pool) so the Player Pool table still scrolls normally, and to
    >=1025px so phones/tablets flow and scroll (stack block + mobile sheet). */
 @media (min-width: 1025px) {
-  #view-team:not(.show-pool) { height: calc(100dvh - 80px) !important; overflow: hidden !important;
-    display: flex !important; flex-direction: column !important; }
-  /* Widen the tool to fill the screen — the old content-sized container left
-     ~300px of dead margin each side at 1920px. min(1860px, 96vw) cuts that to
-     ~30px (Marcus wanted the border gone). Capped at 1860px for ultrawides. */
-  #view-team:not(.show-pool) .container { height: 100% !important; display: flex !important;
-    flex-direction: column !important; justify-content: center !important;
-    padding: 0 16px !important; overflow: hidden !important;
+  /* 2026-06-09: Marcus chose 2.6x kits via the size mock. At that size the squad
+     no longer fits one screen, so the one-screen height-lock is REMOVED and the
+     view scrolls (size was chosen over no-scroll). Container stays wide + centred;
+     50/50 split kept. To return to one-screen, restore height:calc(100dvh-80px)
+     + overflow:hidden here and shrink the kit min() below. */
+  #view-team:not(.show-pool) .container {
+    padding: 8px 16px 30px !important;
     width: min(1860px, 96vw) !important; max-width: none !important;
     margin-left: auto !important; margin-right: auto !important; }
-  /* 50/50 split (Marcus): pitch and rail get equal width. With the wider
-     container the pitch column is now ~780px at 1920px — a much bigger pitch. */
-  #view-team:not(.show-pool) .va-solio { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important; }
+  #view-team:not(.show-pool) .va-solio { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important; align-items: start !important; }
 }
 /* Footers eat ~280px below the solver — hide on the solver page so the tool view
    is one screen. (Solver pages only; the landing/index footer is unaffected.) */
@@ -8745,7 +8748,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1780991252-GW38-40732a43";
+const BUILD_VERSION = "1780992189-GW38-40732a43";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -15371,7 +15374,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW38</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780991252-GW38-40732a43</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780992189-GW38-40732a43</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
