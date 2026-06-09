@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-06-09T22:25:56">
+<meta name="apex-gw" content="32" data-built-at="2026-06-09T22:34:22">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -2920,6 +2920,48 @@ body.compare-review .va-card-hero::before {
   font-family: 'Plus Jakarta Sans', sans-serif;
 }
 
+/* ── Chip plan timeline hero (2026-06-09 revamp) ──
+   Chips ON the gameweek axis — tree visual language, read-only. */
+.opt-timeline {
+  display: flex; align-items: flex-start; gap: 0; margin: 14px 0 4px;
+  position: relative; overflow-x: auto; padding: 6px 0 2px;
+}
+.opt-timeline::before {
+  content: ''; position: absolute; left: 4%; right: 4%; top: 27px;
+  border-top: 2px solid #D9D7CC; z-index: 0;
+}
+.opt-tl-slot { flex: 1 1 0; min-width: 64px; text-align: center; position: relative; z-index: 1; }
+.opt-tl-node {
+  width: 14px; height: 14px; border-radius: 50%; background: #D9D7CC;
+  margin: 14px auto 8px;
+}
+.opt-tl-node.opt-tl-chip {
+  width: 46px; height: 30px; border-radius: 9px; background: #1D9E75;
+  color: #fff; font-weight: 800; font-size: 13px; letter-spacing: .02em;
+  display: flex; align-items: center; justify-content: center;
+  margin: 6px auto 6px; box-shadow: 0 2px 8px rgba(29,158,117,.35);
+}
+.opt-tl-gw { font-size: 12.5px; font-weight: 700; color: #5F5E5A; }
+.opt-tl-gain { font-size: 12px; font-weight: 700; color: #0F6E56; margin-top: 2px; }
+
+/* ── Chip page compaction (2026-06-09): less ceremony, same power ── */
+.cs-intro { margin: 6px 0 14px !important; }
+.cs-intro-title { font-size: 1.6rem !important; margin: 4px 0 !important; }
+.cs-intro-sub { font-size: .95rem !important; }
+.cs-card { padding: 14px 16px !important; }
+/* Primary strategy trio only; Optimistic/Safe/Custom behind the toggle */
+#aps-grid .aps-card[data-preset="optimistic"],
+#aps-grid .aps-card[data-preset="safe"],
+#aps-grid .aps-card[data-preset="custom"] { display: none; }
+#aps-grid.aps-show-advanced .aps-card[data-preset="optimistic"],
+#aps-grid.aps-show-advanced .aps-card[data-preset="safe"],
+#aps-grid.aps-show-advanced .aps-card[data-preset="custom"] { display: flex; }
+.aps-more-toggle {
+  background: none; border: none; cursor: pointer; color: #5F5E5A;
+  font-family: 'Plus Jakarta Sans', sans-serif; font-size: .85rem;
+  font-weight: 600; text-decoration: underline; padding: 8px 0 0; display: block;
+}
+
 /* Decision-tree branch cards — hover lift so tappability is unmissable
    (pairs with the baked-in "tap to pick ›" hint, 2026-06-09). */
 #pp-tree .pp-branch rect { transition: filter 0.15s, transform 0.15s; }
@@ -5793,6 +5835,10 @@ html.apex-offseason #view-landing .hero-sub::after {
           </button>
 
         </div>
+        <!-- 2026-06-09 revamp: Balanced/High/Low are the product; the niche
+             trio lives behind this toggle so the page reads in one glance. -->
+        <button type="button" class="aps-more-toggle"
+          onclick="const g=document.getElementById('aps-grid'); g.classList.toggle('aps-show-advanced'); this.textContent = g.classList.contains('aps-show-advanced') ? 'Fewer strategies ▴' : 'More strategies ▾';">More strategies ▾</button>
 
         <!-- Custom dials — revealed only when Custom is selected -->
         <div id="aps-custom-dials" class="aps-custom-dials" style="display:none;">
@@ -9001,7 +9047,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1781040356-GW32-a9172c07";
+const BUILD_VERSION = "1781040862-GW32-a9172c07";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -11623,7 +11669,20 @@ function runOptimize() {
     // the GW total — not the naive in-minus-out diff (gain), which overstates it
     // when the sold player is benched / the buy displaces a starter. Matches the
     // top-of-pitch total. (2026-06-09, Marcus.)
-    _reco.innerHTML = `<div class="va-reco-title">Recommended transfer</div><div class="va-reco-row"><span class="va-reco-move">${best.out_name} <span class="va-reco-arr">→</span> ${best.in_name}</span><span class="va-reco-gain">+${best.gw0_gain.toFixed(2)} xPts</span></div>`;
+    // Top-3 with ownership tags (2026-06-09 Marcus): the #1 move rarely
+    // changes between risk modes (deadweight sales win under any profile),
+    // so showing only the winner made the risk buttons FEEL dead. Rows 2-3
+    // are where High/Low visibly reorder — surface them right here.
+    let _recoHtml = `<div class="va-reco-title">Recommended transfers</div>`;
+    recs.slice(0, 3).forEach((t, i) => {
+      const _g = (i === 0 ? t.gw0_gain : (t.gain ?? 0));
+      _recoHtml += `<div class="va-reco-row" style="${i > 0 ? 'opacity:.78;' : ''}">`
+        + `<span class="va-reco-move">${i === 0 ? '✓ ' : ''}${t.out_name} <span class="va-reco-arr">→</span> ${t.in_name}`
+        + `<span style="font-size:.78em;">${(typeof _apexOwnTag === 'function') ? _apexOwnTag({ id: t.in_id }) : ''}</span></span>`
+        + `<span class="va-reco-gain">+${(+_g).toFixed(2)} xPts</span></div>`;
+    });
+    _recoHtml += `<div style="font-size:.8rem;color:var(--muted);margin-top:6px;">#1 applied to your pitch · others are one tap away in the Transfers tab</div>`;
+    _reco.innerHTML = _recoHtml;
     _reco.style.display = 'block';
   }
 }
@@ -14855,21 +14914,35 @@ function renderTopRecommendation() {
   const filtered = _filteredSequences();
   if (!filtered.length) { wrap.innerHTML = '<p class="muted" style="text-align:center;padding:2rem;">No sequences match your selected chips.</p>'; return; }
   const top = filtered[0];
-  let chipPills = '';
-  top.breakdown.forEach((item, i) => {
-    chipPills += `<span class="opt-chip-pill opt-${item.chip.toLowerCase()}">${item.chip} GW${item.gw}</span>`;
-    if (i < top.breakdown.length - 1) chipPills += '<span class="opt-arrow">→</span>';
+  // ── Timeline hero (2026-06-09 Marcus chip-page revamp) ──
+  // Chips rendered ON the gameweek axis — same visual language as the
+  // decision tree (teal node = a chip you play, grey dot = a normal GW), but
+  // read-only: chip value depends on the WHOLE sequence, so this is a plan
+  // to adopt, not a path to walk step-by-step.
+  const _gwAxis = (TEAM_META && TEAM_META.gw_range) ? TEAM_META.gw_range : [];
+  let tl = '<div class="opt-timeline">';
+  _gwAxis.forEach(gw => {
+    const hit = top.breakdown.find(b => +b.gw === +gw);
+    if (hit) {
+      const g = (hit.gain != null && isFinite(+hit.gain)) ? `+${(+hit.gain).toFixed(1)}` : '';
+      tl += `<div class="opt-tl-slot"><div class="opt-tl-node opt-tl-chip">${hit.chip}</div>`
+          + `<div class="opt-tl-gw">GW${gw}</div>`
+          + (g ? `<div class="opt-tl-gain">${g}</div>` : '')
+          + `</div>`;
+    } else {
+      tl += `<div class="opt-tl-slot"><div class="opt-tl-node"></div><div class="opt-tl-gw">GW${gw}</div></div>`;
+    }
   });
-  const bdJson = JSON.stringify(top.breakdown).replace(/"/g, '&quot;');
+  tl += '</div>';
   const html = `
     <div class="optimal-top">
-      <div class="optimal-top-label">⚡ Optimal Sequence</div>
-      <div class="optimal-top-seq">${chipPills}</div>
-      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:4px;">
+      <div class="optimal-top-label">⚡ Your chip plan</div>
+      ${tl}
+      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:10px;">
         <div class="optimal-top-ev">${top.total_xp} xPts</div>
         <button onclick='_applyStrategy(${JSON.stringify(top.breakdown)})'
-          style="background:#22c55e;color:#000;border:none;border-radius:8px;padding:9px 20px;font-weight:700;font-size:.85rem;cursor:pointer;white-space:nowrap;">
-          ▶ Select this strategy
+          style="background:var(--accent,#1D9E75);color:#fff;border:none;border-radius:8px;padding:11px 22px;font-weight:700;font-size:.92rem;cursor:pointer;white-space:nowrap;">
+          ▶ Use this plan
         </button>
       </div>
     </div>
@@ -16102,7 +16175,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781040356-GW32-a9172c07</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781040862-GW32-a9172c07</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
