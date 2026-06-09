@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-06-09T22:37:57">
+<meta name="apex-gw" content="32" data-built-at="2026-06-09T22:44:36">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -3911,14 +3911,19 @@ button.secondary, .btn-secondary, .va-btn-secondary {
 /* 2026-06-09: kits sized by width AND height (vh term) — bigger on normal
    desktops than the old 80px cap, auto-compressing on short windows so the
    one-page lock above always holds. xPts scaled up to match. */
+/* 2026-06-09 FINAL: kit size = var(--apex-shirt), written by apexFitPitch()
+   JS which measures the REAL viewport and grows the kits to the largest size
+   where the BENCH still fits on screen (then stops). The static min() is only
+   the no-JS fallback. This re-activates the auto-fit that the 2.6x static
+   rules had disconnected — which is what was clipping the subs. */
 .va-solio-pitch .pitch .shirt-wrap,
 .va-solio-pitch .bench-row .shirt-wrap,
-.va-solio-pitch .pitch-bench .shirt-wrap { width: min(6.4vw, 13.8vh, 130px) !important; margin-bottom: 0 !important; }
+.va-solio-pitch .pitch-bench .shirt-wrap { width: var(--apex-shirt-w, min(6.4vw, 13.8vh, 130px)) !important; margin-bottom: 0 !important; }
 .va-solio-pitch .pitch .svg-shirt,
 .va-solio-pitch .bench-row .svg-shirt,
-.va-solio-pitch .pitch-bench .svg-shirt { width: min(4.5vw, 9.8vh, 92px) !important; height: min(4.5vw, 9.8vh, 92px) !important; }
+.va-solio-pitch .pitch-bench .svg-shirt { width: var(--apex-shirt, min(4.5vw, 9.8vh, 92px)) !important; height: var(--apex-shirt, min(4.5vw, 9.8vh, 92px)) !important; }
 .va-solio-pitch .pitch .shirt,
-.va-solio-pitch .bench-row .shirt { width: min(6.4vw, 13.8vh, 130px) !important; min-width: min(6.4vw, 13.8vh, 130px) !important; }
+.va-solio-pitch .bench-row .shirt { width: var(--apex-shirt-w, min(6.4vw, 13.8vh, 130px)) !important; min-width: var(--apex-shirt-w, min(6.4vw, 13.8vh, 130px)) !important; }
 /* Spread kits ACROSS the full pitch width (Solio-style) instead of bunching them
    in the centre — this is what kills the huge empty-green borders Marcus flagged.
    space-evenly distributes every row edge-to-edge regardless of kit count. */
@@ -3926,9 +3931,11 @@ button.secondary, .btn-secondary, .va-btn-secondary {
 .va-solio-pitch .bench-row, .va-solio-pitch .pitch-bench { padding: 4px !important; gap: 6px !important; margin-top: 4px !important; justify-content: space-evenly !important; }
 /* Labels scaled up to match the 2.6x kits — bigger xPts number, name pill and
    fixture (Marcus: xPts + pills bigger). min(vw, px) so they track the kit size. */
-.va-solio-pitch .shirt-xp { font-size: min(1.45vw, 2.7vh, 1.6rem) !important; margin-top: 1px !important; font-weight: 700 !important; }
-.va-solio-pitch .shirt-name { font-size: min(0.98vw, 1.9vh, 1.05rem) !important; padding: 2px 11px !important; max-width: none !important; margin-top: 2px !important; }
-.va-solio-pitch .shirt-fix { font-size: min(0.78vw, 1.5vh, 0.84rem) !important; margin-top: 1px !important; }
+/* Labels track the kit size (auto-fit measures them too, so the fit loop
+   stays honest): xPts ≈ 30% of kit, name ≈ 20%, fixture ≈ 16%. */
+.va-solio-pitch .shirt-xp { font-size: calc(var(--apex-shirt, 80px) * 0.30) !important; margin-top: 1px !important; font-weight: 700 !important; }
+.va-solio-pitch .shirt-name { font-size: calc(var(--apex-shirt, 80px) * 0.20) !important; padding: 2px 11px !important; max-width: none !important; margin-top: 2px !important; }
+.va-solio-pitch .shirt-fix { font-size: calc(var(--apex-shirt, 80px) * 0.16) !important; margin-top: 1px !important; }
 .va-solio-pitch .pitch-cost-badge { padding: 5px 9px !important; min-width: 0 !important; font-size: min(0.78vw, 0.82rem) !important; }
 /* Rail: shrink the hero card (green number + range) and stat strip; the GW pill
    row is hidden (single-GW demo) — RE-ENABLE for 26/27 multi-GW by removing the
@@ -9068,7 +9075,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1781041077-GW32-a9172c07";
+const BUILD_VERSION = "1781041475-GW32-a9172c07";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -16196,7 +16203,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781041077-GW32-a9172c07</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781041475-GW32-a9172c07</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
