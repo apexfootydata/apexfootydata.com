@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-06-09T22:44:36">
+<meta name="apex-gw" content="32" data-built-at="2026-06-09T22:57:09">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
+<title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — FPL Apex</title>
 <meta name="description" content="Plan FPL transfers, chips, and Free Hit squads. Live xG-based projections, mini-league simulator, rank predictor. Free FPL tool used by 100+ managers.">
 <meta name="keywords" content="FPL solver, FPL chip planner, FPL Free Hit, FPL Wildcard, FPL transfer planner, FPL DGW, Fantasy Premier League tools">
 <link rel="canonical" href="https://apexfootydata.com/solver_app.html">
 <meta name="robots" content="index, follow">
 <!-- Open Graph -->
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="ApexFootyData">
+<meta property="og:site_name" content="FPL Apex">
 <meta property="og:title" content="Apex FPL Solver — Chip Planner &amp; Free Hit Optimiser">
 <meta property="og:description" content="Plan FPL transfers and chips with live xG projections. Free Hit ILP, Wildcard solver, mini-league simulator.">
 <meta property="og:url" content="https://apexfootydata.com/solver_app.html">
@@ -4026,7 +4026,10 @@ button.secondary, .btn-secondary, .va-btn-secondary {
   .va-solio-pitch .shirt-name { margin-top: 1px !important; }
   .va-solio-pitch .shirt-fix { margin-top: 1px !important; }
   .va-solio-pitch .shirt-xm-bar { margin: 2px auto 0 !important; }
-  .va-solio-pitch .bench-row, .va-solio-pitch .pitch-bench { padding: 2px !important; margin-top: 2px !important; }
+  /* 8px bottom padding so the xMins tier bars under the bench names aren't
+     shaved by the panel edge (Marcus 2026-06-09 — the auto-fit loop measures
+     the padded box, so this stays un-clipped at every kit size). */
+  .va-solio-pitch .bench-row, .va-solio-pitch .pitch-bench { padding: 2px 2px 8px !important; margin-top: 2px !important; }
   /* Rail: shave card air, not type */
   .va-solio-rail .va-range-plot { height: clamp(78px, 7vw, 126px) !important; margin: 6px 0 4px !important; }
   .va-solio-rail .va-card-hero { padding: 10px 16px !important; }
@@ -5093,10 +5096,10 @@ html.apex-offseason #view-landing .hero-sub::after {
 
 <header class="topbar" id="topbar" style="display:none;">
   <a href="#" class="logo" onclick="_logoClick(event); return false;">
-    <span class="logo-name logo-name-lg"><span class="logo-apex">Apex</span>FootyData</span>
+    <span class="logo-name logo-name-lg">FPL <span class="logo-apex">Apex</span></span>
   </a>
   <nav class="nav">
-    <a href="/" class="nav-link">← ApexFootyData</a>
+    <a href="/" class="nav-link">← FPL Apex</a>
     <a href="#" class="nav-link" onclick="switchView('team'); return false;">My Squad</a>
     <a href="#" class="nav-link" onclick="switchView('chip-select'); return false;">Chip Planner</a>
     <a href="#" class="nav-link" onclick="switchView('league'); return false;">Mini-League</a>
@@ -5109,7 +5112,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 
 <div id="view-landing" class="view-container" style="display:none;">
   <section class="hero hero-landing">
-    <h1 class="hero-headline"><span style="color:var(--accent);">Apex</span><span style="color:#9ca3af;">FootyData</span></h1>
+    <h1 class="hero-headline"><span style="color:#1E1E1A;">FPL </span><span style="color:var(--accent);">Apex</span></h1>
     <p class="hero-sub">Enter your FPL Team ID to get started.</p>
 
     <div class="landing-id-wrap">
@@ -5143,20 +5146,16 @@ html.apex-offseason #view-landing .hero-sub::after {
     <section class="va-header">
       <div class="va-id">
         <div id="va-avatar" class="va-avatar va-avatar-brand">
-          <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-label="ApexFootyData">
-            <circle cx="50" cy="50" r="47" fill="transparent" stroke="#ffffff" stroke-width="1.5"/>
-            <text x="50" y="44" text-anchor="middle"
+          <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-label="FPL Apex">
+            <circle cx="50" cy="50" r="48" fill="#04342C"/>
+            <text x="50" y="45" text-anchor="middle"
                   font-family="'Plus Jakarta Sans', system-ui, sans-serif"
-                  font-size="20" font-weight="800" fill="#1D9E75"
-                  letter-spacing="-0.5">Apex</text>
-            <text x="50" y="62" text-anchor="middle"
+                  font-size="19" font-weight="700" fill="#9FE1CB"
+                  letter-spacing="1">FPL</text>
+            <text x="50" y="68" text-anchor="middle"
                   font-family="'Plus Jakarta Sans', system-ui, sans-serif"
-                  font-size="14" font-weight="700" fill="#ffffff"
-                  letter-spacing="0">Footy</text>
-            <text x="50" y="76" text-anchor="middle"
-                  font-family="'Plus Jakarta Sans', system-ui, sans-serif"
-                  font-size="14" font-weight="700" fill="#a1a1aa"
-                  letter-spacing="0">Data</text>
+                  font-size="21" font-weight="800" fill="#ffffff"
+                  letter-spacing="0.5">APEX</text>
           </svg>
         </div>
         <div class="va-id-text">
@@ -5748,11 +5747,10 @@ html.apex-offseason #view-landing .hero-sub::after {
     <section class="va-header">
       <div class="va-id">
         <div class="va-avatar va-avatar-brand">
-          <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-label="ApexFootyData">
-            <circle cx="50" cy="50" r="47" fill="transparent" stroke="#ffffff" stroke-width="1.5"/>
-            <text x="50" y="44" text-anchor="middle" font-family="'Plus Jakarta Sans',system-ui,sans-serif" font-size="20" font-weight="800" fill="#1D9E75" letter-spacing="-0.5">Apex</text>
-            <text x="50" y="62" text-anchor="middle" font-family="'Plus Jakarta Sans',system-ui,sans-serif" font-size="14" font-weight="700" fill="#ffffff">Footy</text>
-            <text x="50" y="76" text-anchor="middle" font-family="'Plus Jakarta Sans',system-ui,sans-serif" font-size="14" font-weight="700" fill="#a1a1aa">Data</text>
+          <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-label="FPL Apex">
+            <circle cx="50" cy="50" r="48" fill="#04342C"/>
+            <text x="50" y="45" text-anchor="middle" font-family="'Plus Jakarta Sans',system-ui,sans-serif" font-size="19" font-weight="700" fill="#9FE1CB" letter-spacing="1">FPL</text>
+            <text x="50" y="68" text-anchor="middle" font-family="'Plus Jakarta Sans',system-ui,sans-serif" font-size="21" font-weight="800" fill="#ffffff" letter-spacing="0.5">APEX</text>
           </svg>
         </div>
         <div class="va-id-text">
@@ -6044,11 +6042,10 @@ html.apex-offseason #view-landing .hero-sub::after {
     <section class="va-header">
       <div class="va-id">
         <div class="va-avatar va-avatar-brand">
-          <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-label="ApexFootyData">
-            <circle cx="50" cy="50" r="47" fill="transparent" stroke="#ffffff" stroke-width="1.5"/>
-            <text x="50" y="44" text-anchor="middle" font-family="'Plus Jakarta Sans',system-ui,sans-serif" font-size="20" font-weight="800" fill="#1D9E75" letter-spacing="-0.5">Apex</text>
-            <text x="50" y="62" text-anchor="middle" font-family="'Plus Jakarta Sans',system-ui,sans-serif" font-size="14" font-weight="700" fill="#ffffff">Footy</text>
-            <text x="50" y="76" text-anchor="middle" font-family="'Plus Jakarta Sans',system-ui,sans-serif" font-size="14" font-weight="700" fill="#a1a1aa">Data</text>
+          <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-label="FPL Apex">
+            <circle cx="50" cy="50" r="48" fill="#04342C"/>
+            <text x="50" y="45" text-anchor="middle" font-family="'Plus Jakarta Sans',system-ui,sans-serif" font-size="19" font-weight="700" fill="#9FE1CB" letter-spacing="1">FPL</text>
+            <text x="50" y="68" text-anchor="middle" font-family="'Plus Jakarta Sans',system-ui,sans-serif" font-size="21" font-weight="800" fill="#ffffff" letter-spacing="0.5">APEX</text>
           </svg>
         </div>
         <div class="va-id-text">
@@ -9075,7 +9072,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1781041475-GW32-a9172c07";
+const BUILD_VERSION = "1781042229-GW32-a9172c07";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -9709,7 +9706,7 @@ function shareLeagueTable() {
 `;
   });
   text += `
-Powered by ApexFootyData`;
+Powered by FPL Apex`;
   navigator.clipboard.writeText(text).then(() => {
     const btn = document.getElementById('league-share-btn');
     btn.innerHTML = '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg> Copied!';
@@ -10072,6 +10069,8 @@ function selectPreset(name) {
       renderTransfers(computeTransfers(activeGwIdx));
     }
   } catch (_e) {}
+  // Engine-picks preview re-ranks live with the profile (2026-06-09).
+  try { if (typeof _renderRecoPreview === 'function') _renderRecoPreview(); } catch (_e) {}
 
   // Refresh the scenario planner so its teaser transfer + projection reflect the
   // new risk profile (it builds once on load otherwise). Safe no-op if absent.
@@ -11710,12 +11709,44 @@ function runOptimize() {
         + `<span class="va-reco-gain">+${(+_g).toFixed(2)} xPts</span></div>`;
     });
     _recoHtml += `<div style="font-size:.8rem;color:var(--muted);margin-top:6px;">#1 applied to your pitch · others are one tap away in the Transfers tab</div>`;
+    _reco.dataset.applied = '1';  // preview stops repainting once a move is applied
     _reco.innerHTML = _recoHtml;
     _reco.style.display = 'block';
   }
 }
 
 // ──── Solve Button ────
+// ── Engine-picks preview (2026-06-09, Marcus: "is the space begging?") ─────
+// Fills the rail's dead space with the engine's CURRENT top-3 moves before
+// any button is pressed — auto-computed on load, re-ranked live when the
+// risk profile changes. Quick Optimise still applies #1 (and takes over the
+// card via dataset.applied so the preview stops repainting it).
+function _renderRecoPreview() {
+  try {
+    const _reco = document.getElementById('solve-banner');
+    if (!_reco || typeof computeTransfers !== 'function') return;
+    if (_reco.dataset.applied === '1') return;
+    const full = [...(typeof _xiPlayers !== 'undefined' ? _xiPlayers : []),
+                  ...(typeof _benchPlayers !== 'undefined' ? _benchPlayers : [])];
+    if (full.length !== 15) return;
+    const recs = computeTransfers(activeGwIdx || 0) || [];
+    if (!recs.length) return;
+    let h = `<div class="va-reco-title">Engine picks · GW${TEAM_META.gw_range[activeGwIdx || 0]}</div>`;
+    recs.slice(0, 3).forEach((t, i) => {
+      h += `<div class="va-reco-row" style="${i > 0 ? 'opacity:.8;' : ''}">`
+        + `<span class="va-reco-move">${t.out_name} <span class="va-reco-arr">→</span> ${t.in_name}`
+        + `<span style="font-size:.78em;">${(typeof _apexOwnTag === 'function') ? _apexOwnTag({ id: t.in_id }) : ''}</span></span>`
+        + `<span class="va-reco-gain">+${(+(t.gain ?? 0)).toFixed(2)} xPts</span></div>`;
+    });
+    h += `<div style="font-size:.8rem;color:var(--muted);margin-top:6px;">⚡ Quick Optimise applies the top move · risk boxes re-rank this list</div>`;
+    _reco.style.display = 'block';
+    _reco.innerHTML = h;
+  } catch (_e) {}
+}
+window._renderRecoPreview = _renderRecoPreview;
+// Squad hydrates asynchronously — try a few times after load.
+window.addEventListener('load', function () { [900, 2200, 4000].forEach(function (ms) { setTimeout(_renderRecoPreview, ms); }); });
+
 // ── Path Planner computing overlay (2026-06-09) ────────────────────────────
 // The planner's lookahead walk is heavy SYNCHRONOUS JS — it can block the main
 // thread for a minute or more on a cold cache, which used to look like a crash
@@ -16203,7 +16234,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781041475-GW32-a9172c07</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781042229-GW32-a9172c07</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
@@ -16329,7 +16360,7 @@ document.addEventListener('DOMContentLoaded', () => {
     overlay.style.cssText = 'position:fixed;inset:0;background:#F4F3EC;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:Plus Jakarta Sans,sans-serif;color:#1E1E1A;padding:20px;';
     overlay.innerHTML =
       '<div style="font-size:1.5rem;font-weight:700;margin-bottom:20px;letter-spacing:-.01em;">' +
-      '<span style="font-weight:500;">Apex</span><span style="font-weight:800;color:#5F5E5A;">FootyData</span></div>' +
+      '<span style="font-weight:500;">FPL </span><span style="font-weight:800;color:#1D9E75;">Apex</span></div>' +
       '<div id="apex-status" style="color:#1D9E75;font-size:.95rem;margin-bottom:16px;font-weight:600;">Loading your team&hellip;</div>' +
       '<div style="width:300px;max-width:90vw;background:#F1EFE8;border:1px solid #D9D7CC;border-radius:10px;overflow:hidden;height:10px;">' +
       '<div id="apex-bar" style="height:100%;width:8%;background:#1D9E75;transition:width .4s ease;"></div></div>';
