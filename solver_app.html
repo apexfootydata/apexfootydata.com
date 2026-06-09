@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="38" data-built-at="2026-06-09T10:07:03">
+<meta name="apex-gw" content="38" data-built-at="2026-06-09T10:13:04">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — ApexFootyData</title>
@@ -3925,7 +3925,7 @@ button.secondary, .btn-secondary, .va-btn-secondary {
      (Marcus: "nearly the full length of pitch view"). The pitch is sized compact
      to roughly match the rail, so the group fills most of the height without the
      floaty gaps that space-between produced. */
-  #view-team:not(.show-pool) .va-solio-rail { justify-content: center !important; height: 100% !important; gap: 16px !important; }
+  #view-team:not(.show-pool) .va-solio-rail { justify-content: flex-start !important; height: 100% !important; gap: 16px !important; }
 }
 /* Footers eat ~280px below the solver — hide on the solver page so the tool view
    is one screen. (Solver pages only; the landing/index footer is unaffected.) */
@@ -8786,7 +8786,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1780996023-GW38-40732a43";
+const BUILD_VERSION = "1780996384-GW38-40732a43";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -15418,7 +15418,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW38</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780996023-GW38-40732a43</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1780996384-GW38-40732a43</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
