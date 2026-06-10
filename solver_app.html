@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-06-10T11:10:22">
+<meta name="apex-gw" content="32" data-built-at="2026-06-10T11:40:03">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — FPL Apex</title>
@@ -9076,7 +9076,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1781086222-GW32-33f8face";
+const BUILD_VERSION = "1781088003-GW32-33f8face";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -11859,38 +11859,11 @@ window._renderRecoPreview = _renderRecoPreview;
 // Squad hydrates asynchronously — try a few times after load.
 window.addEventListener('load', function () { [900, 2200, 4000].forEach(function (ms) { setTimeout(_renderRecoPreview, ms); }); });
 
-// ── Path Planner computing overlay (2026-06-09) ────────────────────────────
-// The planner's lookahead walk is heavy SYNCHRONOUS JS — it can block the main
-// thread for a minute or more on a cold cache, which used to look like a crash
-// (frozen page, no feedback). This overlay paints BEFORE the compute starts and
-// uses a compositor-driven spinner: CSS transform animations keep running even
-// while the main thread is blocked, so the page visibly stays alive. Injected
-// from JS so there's no external CSS dependency.
-function _ppShowComputing(msg) {
-  if (!document.getElementById('pp-computing-style')) {
-    const st = document.createElement('style');
-    st.id = 'pp-computing-style';
-    st.textContent = '@keyframes ppspin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }';
-    document.head.appendChild(st);
-  }
-  let ov = document.getElementById('pp-computing-overlay');
-  if (!ov) {
-    ov = document.createElement('div');
-    ov.id = 'pp-computing-overlay';
-    ov.style.cssText = 'position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:rgba(10,10,14,.82);';
-    ov.innerHTML = '<div style="width:46px;height:46px;border:4px solid rgba(29,158,117,.25);border-top-color:#1D9E75;border-radius:50%;will-change:transform;animation:ppspin .9s linear infinite;"></div>'
-      + '<div id="pp-computing-msg" style="color:#fff;font-weight:700;font-size:1rem;text-align:center;padding:0 16px;"></div>'
-      + '<div style="color:#9a9aa5;font-size:.82rem;max-width:340px;text-align:center;padding:0 16px;">Crunching every transfer path across the horizon. This can take a minute or two. Do not refresh.</div>';
-    document.body.appendChild(ov);
-  }
-  const m = document.getElementById('pp-computing-msg');
-  if (m) m.textContent = msg || 'Computing…';
-  ov.style.display = 'flex';
-}
-function _ppHideComputing() {
-  const ov = document.getElementById('pp-computing-overlay');
-  if (ov) ov.style.display = 'none';
-}
+// ── Path Planner computing overlay — MOVED to assets/apex_app.js (2026-06-10).
+// _ppShowComputing / _ppHideComputing now live in the inlined-verbatim asset,
+// interpolated further down this same script (Path Planner section). Function
+// declarations hoist across the whole script, so runSolve below can still
+// call them at click time.
 
 function runSolve() {
   const wcGw  = parseInt(document.getElementById('sel-wc')?.value || 0);
@@ -12324,8 +12297,96 @@ function _applyFullSquad(squad, gwIdx) {
   if (banner) { banner.textContent = ''; banner.style.display = 'none'; }
 }
 
-// Apply one player from WC/FH squad — replaces lowest-xP same-position player,
-// then re-optimises the full XI so highest EV always starts.
+// ════════════════════════════════════════════════════════════════════════════
+// Path Planner + Decision Tree — MOVED to assets/apex_app.js (2026-06-10)
+// ════════════════════════════════════════════════════════════════════════════
+// The entire planner block was extracted to a plain-JS asset, read at build
+// time (see apex_app_js next to the apex_planner_js read) and inlined
+// VERBATIM here — no f-string brace-escaping. Same mechanism as
+// {apex_planner_js}. The block contained ZERO Python interpolations, so the
+// generated HTML is byte-identical. Interpolated at the exact position the
+// code used to occupy, so load order / hoisting are unchanged.
+//
+// What moved (defined in the asset, called from this heredoc + static HTML):
+//   _ppShowComputing/_ppHideComputing (overlay — was further up, pre-runSolve),
+//   _pathPlanner state object, _ppEffCost, _PP_DGW_PREMIUM, _ppHorizonXp,
+//   _ppBestXiTotal, _ppComputeOptions (+_ppBias), _ppLookaheadCache,
+//   _ppStateKey, _ppFutureBest, _ppComputeOptionsLocal, _openPathPlanner,
+//   _openPathPlannerFromCurrent, _ppPosName, _renderPathCards,
+//   _ppListVisible/_ppToggleList, _renderPathTree, _buildLockedCard,
+//   _buildActiveCard, _buildSummaryCard, _ppCommitToLive, _selectPathOption,
+//   _selectPathOptionNow, confirmPathPlan, ESC keydown listener,
+//   exitPathPlanner.
+// Deliberately NOT moved: runSolve (general Solve dispatch, not
+// planner-specific), _showChipSquadPanel, _applyFullSquad, _applyOneTransfer.
+/* ════════════════════════════════════════════════════════════════════════════
+   apex_app.js — Path Planner + Decision Tree (extracted 2026-06-10)
+   ════════════════════════════════════════════════════════════════════════════
+
+   Baked into solver_app.html by generate_solver_html.py (the {apex_app_js}
+   placeholder inside the main app <script>). This file is read at build time
+   and inlined VERBATIM — plain JS, no f-string brace-escaping. Same mechanism
+   as assets/apex_planner.js. Editing this file alone does NOT change the live
+   site: regenerate via generate_solver_html.py (--public for the site build),
+   then push_site.
+
+   Load order: the placeholder sits at the exact position this code used to
+   occupy in the heredoc (after _applyFullSquad, before _applyOneTransfer),
+   inside the same <script> as the rest of the app, so declaration order and
+   hoisting behaviour are unchanged.
+
+   Globals this code DEPENDS ON, defined in the heredoc before/around it
+   (all dereferenced at call time, not load time):
+     POOL_DATA, TEAM_META, GW_XI_BASE, GW_CAP_XP, FH_SQUADS, WC_SQUADS,
+     activeGwIdx, _xiPlayers, _benchPlayers, _capId, _vcId, _jsBaseCapXp,
+     _savedGwSquads, _xiDelta, _capDelta, _benchDelta,
+     pickBestXi, _xpAt, _orderBench, svgShirt, switchView,
+     reorderXiBench, updateChipTotal,
+     _apexRiskOwnBias, _apexPoolById, _apexOwnTag, _activePreset,
+     _APEX_DIFF_OWN_MAX, _APEX_TEMPLATE_OWN_MIN, _APEX_RISK_PICK_SLOTS,
+     _whyPanelEnabled, _isSwapLocked, _showOverrideModal
+
+   Globals this code DEFINES, referenced from the heredoc (runSolve,
+   _restorePlanState, confirmChipReview, chip-select reset, onclick handlers
+   in the static HTML):
+     _pathPlanner, _ppShowComputing, _ppHideComputing, _ppCommitToLive,
+     _openPathPlanner, _openPathPlannerFromCurrent, _selectPathOption,
+     _ppToggleList, confirmPathPlan, exitPathPlanner
+   ════════════════════════════════════════════════════════════════════════════ */
+
+// ── Path Planner computing overlay (2026-06-09) ────────────────────────────
+// The planner's lookahead walk is heavy SYNCHRONOUS JS — it can block the main
+// thread for a minute or more on a cold cache, which used to look like a crash
+// (frozen page, no feedback). This overlay paints BEFORE the compute starts and
+// uses a compositor-driven spinner: CSS transform animations keep running even
+// while the main thread is blocked, so the page visibly stays alive. Injected
+// from JS so there's no external CSS dependency.
+function _ppShowComputing(msg) {
+  if (!document.getElementById('pp-computing-style')) {
+    const st = document.createElement('style');
+    st.id = 'pp-computing-style';
+    st.textContent = '@keyframes ppspin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }';
+    document.head.appendChild(st);
+  }
+  let ov = document.getElementById('pp-computing-overlay');
+  if (!ov) {
+    ov = document.createElement('div');
+    ov.id = 'pp-computing-overlay';
+    ov.style.cssText = 'position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:rgba(10,10,14,.82);';
+    ov.innerHTML = '<div style="width:46px;height:46px;border:4px solid rgba(29,158,117,.25);border-top-color:#1D9E75;border-radius:50%;will-change:transform;animation:ppspin .9s linear infinite;"></div>'
+      + '<div id="pp-computing-msg" style="color:#fff;font-weight:700;font-size:1rem;text-align:center;padding:0 16px;"></div>'
+      + '<div style="color:#9a9aa5;font-size:.82rem;max-width:340px;text-align:center;padding:0 16px;">Crunching every transfer path across the horizon. This can take a minute or two. Do not refresh.</div>';
+    document.body.appendChild(ov);
+  }
+  const m = document.getElementById('pp-computing-msg');
+  if (m) m.textContent = msg || 'Computing…';
+  ov.style.display = 'flex';
+}
+function _ppHideComputing() {
+  const ov = document.getElementById('pp-computing-overlay');
+  if (ov) ov.style.display = 'none';
+}
+
 // ════════════════════════════════════════════════════════════════════════════
 // Path Planner — sequential GW transfer planner (v1)
 // ════════════════════════════════════════════════════════════════════════════
@@ -13556,6 +13617,8 @@ function exitPathPlanner() {
 }
 
 
+// Apply one player from WC/FH squad — replaces lowest-xP same-position player,
+// then re-optimises the full XI so highest EV always starts.
 function _applyOneTransfer(playerId, squad, gwIdx) {
   const inPlayer = squad.find(p => p.id === playerId);
   if (!inPlayer) return;
@@ -16360,7 +16423,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781086222-GW32-33f8face</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781088003-GW32-33f8face</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
