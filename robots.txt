@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://apexfootydata.com/sitemap.xml
+Sitemap: https://fplapex.com/sitemap.xml
