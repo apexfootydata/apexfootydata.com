@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-06-09T23:00:33">
+<meta name="apex-gw" content="32" data-built-at="2026-06-10T09:34:19">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — FPL Apex</title>
@@ -9076,7 +9076,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1781042433-GW32-a9172c07";
+const BUILD_VERSION = "1781080459-GW32-a9172c07";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -10252,6 +10252,8 @@ function _resetTransferPlan() {
 //   • Transfer recs panel hidden, banner hidden, status cleared
 //   • Pitch + GW totals re-rendered
 function resetSolver() {
+  // Persistence: ↺ Reset is the contract for wiping the saved plan (2026-06-09).
+  if (typeof _clearPlanState === 'function') _clearPlanState();
   // Engine-picks card: clear the "applied" lock and repaint the preview after
   // the reset settles (2026-06-09 — picks were vanishing on reset).
   try {
@@ -11729,6 +11731,77 @@ function runOptimize() {
 }
 
 // ──── Solve Button ────
+// ── Plan persistence (2026-06-09, Marcus: "save choices until reset") ──────
+// The whole working plan — applied transfers, per-GW squads, roll-FT flags,
+// chip picks, risk preset — saved to localStorage under the user's FPL id.
+// Restored on next visit IF it's still the same gameweek (a stale plan from a
+// finished GW deletes itself — never resurrect last week's decisions).
+// Cleared by ↺ Reset. Saves are debounced and piggyback on updateChipTotal,
+// which every state-changing flow already calls.
+let _planRestoreDone = false;
+let _planSaveT = null;
+function _planKey() {
+  const id = (typeof FPL_ID !== 'undefined' && FPL_ID) ? FPL_ID
+    : (localStorage.getItem('apex_fpl_id') || '0');
+  return 'apex_plan_v1:' + id;
+}
+function _savePlanState() {
+  clearTimeout(_planSaveT);
+  _planSaveT = setTimeout(() => {
+    try {
+      if (!_planRestoreDone) return;  // don't overwrite while still booting
+      const squads = {};
+      for (const [i, s] of Object.entries(_savedGwSquads || {})) {
+        if (!s || !Array.isArray(s.xi)) continue;
+        squads[i] = { xi: s.xi.map(p => p.id), bench: (s.bench || []).map(p => p.id), cap: s.capId, vc: s.vcId };
+      }
+      const sel = (id) => document.getElementById(id)?.value || '';
+      localStorage.setItem(_planKey(), JSON.stringify({
+        gw0: TEAM_META.gw_range[0],
+        preset: (typeof _activePreset !== 'undefined') ? _activePreset : 'balanced',
+        applied: _transfersAppliedByGw, roll: _rollFTByGw, squads,
+        chips: { wc: sel('sel-wc'), fh: sel('sel-fh'), bb: sel('sel-bb'), tc: sel('sel-tc') },
+      }));
+    } catch (_e) {}
+  }, 400);
+}
+function _clearPlanState() {
+  try { localStorage.removeItem(_planKey()); } catch (_e) {}
+}
+function _restorePlanState() {
+  if (_planRestoreDone) return;
+  try {
+    const full = [...(typeof _xiPlayers !== 'undefined' ? _xiPlayers : []),
+                  ...(typeof _benchPlayers !== 'undefined' ? _benchPlayers : [])];
+    if (full.length !== 15) return;            // squad not hydrated yet — retry later
+    const raw = localStorage.getItem(_planKey());
+    if (!raw) { _planRestoreDone = true; return; }
+    const plan = JSON.parse(raw);
+    if (!plan || +plan.gw0 !== +TEAM_META.gw_range[0]) {
+      localStorage.removeItem(_planKey());     // different GW — plan expired
+      _planRestoreDone = true; return;
+    }
+    const byId = (id) => (POOL_DATA.find(p => p.id === id)
+      || (typeof SQUAD_DATA !== 'undefined' ? SQUAD_DATA.find(p => p.id === id) : null));
+    for (const [i, s] of Object.entries(plan.squads || {})) {
+      const squad = [...(s.xi || []), ...(s.bench || [])].map(byId);
+      if (squad.length === 15 && squad.every(Boolean)) _ppCommitToLive(+i, squad);
+    }
+    Object.assign(_transfersAppliedByGw, plan.applied || {});
+    Object.assign(_rollFTByGw, plan.roll || {});
+    for (const [k, id] of [['wc','sel-wc'],['fh','sel-fh'],['bb','sel-bb'],['tc','sel-tc']]) {
+      const el = document.getElementById(id);
+      if (el && plan.chips && plan.chips[k]) { el.value = plan.chips[k]; el.dispatchEvent(new Event('change')); }
+    }
+    _planRestoreDone = true;                   // set BEFORE selectPreset so its save isn't swallowed
+    if (plan.preset && typeof selectPreset === 'function') selectPreset(plan.preset);
+    if (typeof _switchToGwPill === 'function') _switchToGwPill(TEAM_META.gw_range[activeGwIdx || 0]);
+    if (typeof updateChipTotal === 'function') updateChipTotal();
+    if (typeof _updateFTDisplay === 'function') _updateFTDisplay();
+  } catch (_e) { _planRestoreDone = true; }
+}
+window.addEventListener('load', function () { [1100, 2600, 4400].forEach(function (ms) { setTimeout(_restorePlanState, ms); }); });
+
 // ── Engine-picks preview (2026-06-09, Marcus: "is the space begging?") ─────
 // Fills the rail's dead space with the engine's CURRENT top-3 moves before
 // any button is pressed — auto-computed on load, re-ranked live when the
@@ -14708,6 +14781,8 @@ function getTotal(idx, bbGw, tcGw) {
 }
 
 function updateChipTotal() {
+  // Persistence piggyback: every state-changing flow ends up here (2026-06-09).
+  if (typeof _savePlanState === 'function') _savePlanState();
   const bbGw = document.getElementById('sel-bb')?.value;
   const tcGw = document.getElementById('sel-tc')?.value;
   const newTotal = getTotal(activeGwIdx, bbGw, tcGw);
@@ -16247,7 +16322,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781042433-GW32-a9172c07</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781080459-GW32-a9172c07</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
