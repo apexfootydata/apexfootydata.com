@@ -96,7 +96,7 @@
         }
 
         .logo-brand {
-            font-family: 'Space Grotesk', sans-serif;
+            font-family: 'Plus Jakarta Sans', sans-serif;
             font-size: 24px;
             font-weight: 700;
             color: #9ca3af;
@@ -104,7 +104,7 @@
         }
 
         .logo-subtitle {
-            font-family: 'Space Grotesk', sans-serif;
+            font-family: 'Plus Jakarta Sans', sans-serif;
             font-size: 10px;
             font-weight: 600;
             color: #1D9E75;
@@ -131,7 +131,7 @@
             border: none;
             color: #6b6b7b;
             cursor: pointer;
-            font-family: 'Space Grotesk', sans-serif;
+            font-family: 'Plus Jakarta Sans', sans-serif;
             font-size: 14px;
             font-weight: 500;
             border-bottom: 2px solid transparent;
@@ -175,7 +175,7 @@
             border: 1px solid #2a2a35;
             color: #6b6b7b;
             cursor: pointer;
-            font-family: 'Space Grotesk', sans-serif;
+            font-family: 'Plus Jakarta Sans', sans-serif;
             font-size: 13px;
             font-weight: 500;
             transition: all 0.2s;
@@ -217,7 +217,7 @@
         .data-table th {
             padding: 18px 20px;
             text-align: left;
-            font-family: 'Space Grotesk', sans-serif;
+            font-family: 'Plus Jakarta Sans', sans-serif;
             font-size: 14px;
             font-weight: 600;
             text-transform: uppercase;
@@ -243,7 +243,7 @@
         }
 
         .team-name {
-            font-family: 'Space Grotesk', sans-serif;
+            font-family: 'Plus Jakarta Sans', sans-serif;
             font-weight: 500;
             color: #e8e8f0;
             display: flex;
@@ -348,7 +348,7 @@
         }
 
         .sparkline-team {
-            font-family: 'Space Grotesk', sans-serif;
+            font-family: 'Plus Jakarta Sans', sans-serif;
             font-size: 17px;
             font-weight: 600;
             color: #e8e8f0;
@@ -388,7 +388,7 @@
         .matchweek-table th {
             padding: 18px 20px;
             text-align: left;
-            font-family: 'Space Grotesk', sans-serif;
+            font-family: 'Plus Jakarta Sans', sans-serif;
             font-size: 14px;
             font-weight: 600;
             text-transform: uppercase;
@@ -421,7 +421,7 @@
         }
 
         .fixture-team-cell {
-            font-family: 'Space Grotesk', sans-serif;
+            font-family: 'Plus Jakarta Sans', sans-serif;
             font-weight: 500;
             color: #e8e8f0;
             display: flex;
@@ -575,7 +575,7 @@
         .heatmap-table th {
             padding: 18px 12px;
             text-align: center;
-            font-family: 'Space Grotesk', sans-serif;
+            font-family: 'Plus Jakarta Sans', sans-serif;
             font-size: 14px;
             font-weight: 600;
             text-transform: uppercase;
@@ -590,6 +590,13 @@
             font-weight: 600;
         }
 
+        /* Team column reads left-aligned, not floating in the middle
+           (2026-06-10 Marcus). Applies to the first column of every data
+           table on the site. */
+        .heatmap-table td:first-child, .heatmap-table th:first-child,
+        .data-table td:first-child ~ td.team-name,
+        table td.team-cell { text-align: left !important; }
+
         .heatmap-cell {
             background: #131318;
             color: #c8c8d0;
@@ -603,7 +610,7 @@
         .heatmap-cell.level4 { background: rgba(29, 158, 117, 0.72); color: #0c0c0f; }
 
         .heatmap-team {
-            font-family: 'Space Grotesk', sans-serif;
+            font-family: 'Plus Jakarta Sans', sans-serif;
             font-weight: 500;
             color: #e8e8f0;
             text-align: left;
@@ -647,7 +654,7 @@
         }
 
         .final-panel-title {
-            font-family: 'Space Grotesk', sans-serif;
+            font-family: 'Plus Jakarta Sans', sans-serif;
             font-size: 15px;
             font-weight: 600;
             color: #e8e8f0;
@@ -677,7 +684,7 @@
         .final-table th {
             padding: 16px 16px;
             text-align: left;
-            font-family: 'Space Grotesk', sans-serif;
+            font-family: 'Plus Jakarta Sans', sans-serif;
             font-size: 14px;
             font-weight: 600;
             text-transform: uppercase;
@@ -753,7 +760,7 @@
         .final-rank-rel { color: #f87171; }
 
         .final-team {
-            font-family: 'Space Grotesk', sans-serif;
+            font-family: 'Plus Jakarta Sans', sans-serif;
             font-weight: 500;
             color: #e8e8f0;
             display: flex;
@@ -856,7 +863,7 @@
         .player-table th {
             padding: 18px 16px;
             text-align: left;
-            font-family: 'Space Grotesk', sans-serif;
+            font-family: 'Plus Jakarta Sans', sans-serif;
             font-size: 14px;
             font-weight: 600;
             text-transform: uppercase;
@@ -875,7 +882,7 @@
         }
 
         .player-name {
-            font-family: 'Space Grotesk', sans-serif;
+            font-family: 'Plus Jakarta Sans', sans-serif;
             font-weight: 500;
             color: #e8e8f0;
             width: 190px;
@@ -919,7 +926,7 @@
         .nextgw-table th {
             padding: 18px 16px;
             text-align: left;
-            font-family: 'Space Grotesk', sans-serif;
+            font-family: 'Plus Jakarta Sans', sans-serif;
             font-size: 14px;
             font-weight: 600;
             text-transform: uppercase;
@@ -1499,7 +1506,8 @@
         function getTeamNameWithBadge(team) {
             const badgeUrl = getBadgeUrl(team);
             if (badgeUrl) {
-                return `<img src="${badgeUrl}" class="team-badge" alt="${team}" loading="lazy"> ${team}`;
+                const fallback = badgeUrl.replace('/badges/', '/badges/50/');
+                return `<img src="${badgeUrl}" class="team-badge" alt="${team}" loading="lazy" onerror="this.onerror=null;this.src='${fallback}'"> ${team}`;
             }
             return team;
         }
