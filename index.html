@@ -2705,6 +2705,17 @@
         text-align: center !important;
     }
     .shirt-xp { font-size: 0.92rem !important; margin-top: 2px !important; }
+    /* 2026-06-10: the June-08 "polished xPts" block (.pitch .shirt-xp 26px
+       !important, specificity 0,2,0) beats the single-class rule above —
+       that's the huge numbers on phones. Doubled classes out-rank it.
+       Fixture pill + name pill get the same armour. */
+    .pitch .shirt-xp.shirt-xp, .bench-row .shirt-xp.shirt-xp,
+    .pitch-bench .shirt-xp.shirt-xp {
+        font-size: 1.0rem !important; font-weight: 800 !important; }
+    .pitch .shirt-fix.shirt-fix, .bench-row .shirt-fix.shirt-fix,
+    .pitch-bench .shirt-fix.shirt-fix { font-size: 0.6rem !important; }
+    .pitch .shirt-name.shirt-name, .bench-row .shirt-name.shirt-name {
+        font-size: 0.7rem !important; max-width: 62px !important; }
 
     .shirt-badge {
         width: 18px !important; height: 18px !important;
