@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-06-10T09:34:19">
+<meta name="apex-gw" content="32" data-built-at="2026-06-10T10:03:39">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — FPL Apex</title>
@@ -9076,7 +9076,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1781080459-GW32-a9172c07";
+const BUILD_VERSION = "1781082219-GW32-a9172c07";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -11755,6 +11755,20 @@ function _savePlanState() {
         if (!s || !Array.isArray(s.xi)) continue;
         squads[i] = { xi: s.xi.map(p => p.id), bench: (s.bench || []).map(p => p.id), cap: s.capId, vc: s.vcId };
       }
+      // The ACTIVE GW's live pitch may not be in _savedGwSquads (single-transfer
+      // applies mutate _xiPlayers/_benchPlayers directly) — capture it too, or
+      // a refresh restores the counters but loses the actual move (found in
+      // live contract test 2026-06-10).
+      try {
+        if (Array.isArray(_xiPlayers) && Array.isArray(_benchPlayers)
+            && _xiPlayers.length + _benchPlayers.length === 15) {
+          squads[activeGwIdx || 0] = {
+            xi: _xiPlayers.map(p => p.id), bench: _benchPlayers.map(p => p.id),
+            cap: (typeof _capId !== 'undefined') ? _capId : null,
+            vc:  (typeof _vcId !== 'undefined') ? _vcId : null,
+          };
+        }
+      } catch (_e2) {}
       const sel = (id) => document.getElementById(id)?.value || '';
       localStorage.setItem(_planKey(), JSON.stringify({
         gw0: TEAM_META.gw_range[0],
@@ -16322,7 +16336,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781080459-GW32-a9172c07</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781082219-GW32-a9172c07</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
@@ -17239,7 +17253,7 @@ document.addEventListener('DOMContentLoaded', () => {
     gap: 4px;
 }
 .apex-footer-wordmark { font-weight: 600; font-size: 0.95rem; line-height: 1; }
-.apex-footer-apex { color: #F97316; font-weight: 500; }
+.apex-footer-apex { color: #1D9E75; font-weight: 500; }
 .apex-footer-rest { color: #c8c8d0; font-weight: 700; }
 .apex-footer-tagline {
     color: #8a8a95;
@@ -17247,7 +17261,7 @@ document.addEventListener('DOMContentLoaded', () => {
     font-family: 'JetBrains Mono', ui-monospace, monospace;
 }
 .apex-footer-tagline .ftr-stat {
-    color: #F97316;
+    color: #1D9E75;
     font-weight: 600;
 }
 .apex-footer-links { display: flex; gap: 18px; align-items: center; }
@@ -17257,7 +17271,7 @@ document.addEventListener('DOMContentLoaded', () => {
     font-weight: 500;
     transition: color 0.15s;
 }
-.apex-footer-links a:hover { color: #F97316; }
+.apex-footer-links a:hover { color: #1D9E75; }
 .apex-footer-copy { color: #4a4a55; font-size: 0.72rem; }
 .apex-footer-legal { display: flex; gap: 12px; }
 .apex-footer-legal a {
@@ -17542,8 +17556,8 @@ a[href*="rank_milestones"] {
             '<div class="apex-footer-row">' +
                 '<div class="apex-footer-brand">' +
                     '<span class="apex-footer-wordmark">' +
+                        '<span class="apex-footer-rest">FPL </span>' +
                         '<span class="apex-footer-apex">Apex</span>' +
-                        '<span class="apex-footer-rest">FootyData</span>' +
                     '</span>' +
                     '<span class="apex-footer-tagline">' + moatHTML + '</span>' +
                 '</div>' +
@@ -17553,11 +17567,11 @@ a[href*="rank_milestones"] {
                 '</div>' +
             '</div>' +
             '<div class="apex-footer-row">' +
-                '<span class="apex-footer-copy">&copy; 2026 ApexFootyData</span>' +
+                '<span class="apex-footer-copy">&copy; 2026 FPL Apex</span>' +
                 '<span class="apex-footer-legal">' +
                     '<a href="mailto:contact@apexfootydata.com">Contact</a>' +
                     '<span class="apex-footer-legal-sep">&middot;</span>' +
-                    '<a href="#" onclick="alert(\'Privacy: ApexFootyData uses Cloudflare Analytics and Google Analytics 4 for traffic measurement only. No personal data sold or shared. Cookie consent collected on first visit. Contact: contact@apexfootydata.com to request data deletion.\'); return false;">Privacy</a>' +
+                    '<a href="#" onclick="alert(\'Privacy: FPL Apex uses Cloudflare Analytics and Google Analytics 4 for traffic measurement only. No personal data sold or shared. Cookie consent collected on first visit. Contact: contact@apexfootydata.com to request data deletion.\'); return false;">Privacy</a>' +
                 '</span>' +
             '</div>';
         document.body.appendChild(f);
