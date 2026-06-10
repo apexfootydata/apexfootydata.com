@@ -6,7 +6,7 @@
 <meta name="apex-gw" content="38">
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
-<title>ApexFootyData · FPL Solver</title>
+<title>FPL Apex · FPL Solver</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -39,7 +39,7 @@
     font-family: 'Space Grotesk', sans-serif;
     font-size: 24px; font-weight: 700; line-height: 1;
   }
-  .logo-brand .apex { color: #F97316; font-weight: 500; }
+  .logo-brand .apex { color: #1D9E75; font-weight: 500; }
   .logo-brand .rest { color: #9ca3af; font-weight: 800; }
   .tab-nav {
     display: flex;
@@ -64,7 +64,7 @@
     transition: all 0.2s;
   }
   .tab-button:hover { color: #c8c8d0; }
-  .tab-button.active { color: #F97316; border-bottom-color: #F97316; }
+  .tab-button.active { color: #1D9E75; border-bottom-color: #1D9E75; }
   main {
     flex: 1;
     display: flex;
@@ -87,7 +87,7 @@
     line-height: 1; margin-bottom: 22px;
     letter-spacing: -0.01em;
   }
-  .card-brand .apex { color: #F97316; font-weight: 500; }
+  .card-brand .apex { color: #1D9E75; font-weight: 500; }
   .card-brand .rest { color: #9ca3af; font-weight: 800; }
   h1 {
     font-family: 'Space Grotesk', sans-serif;
@@ -108,11 +108,11 @@
     outline: none;
     margin-bottom: 16px;
   }
-  input:focus { border-color: #F97316; }
+  input:focus { border-color: #1D9E75; }
   input::placeholder { color: #4a4a55; }
   button {
     width: 100%;
-    background: #F97316;
+    background: #1D9E75;
     color: #0c0c0f;
     border: none;
     border-radius: 8px;
@@ -127,9 +127,9 @@
   button:hover { background: #fb923c; }
   button:disabled { opacity: 0.5; cursor: not-allowed; }
   .err { color: #f87171; font-size: 13px; min-height: 1.4em; margin-top: 12px; }
-  .status { color: #F97316; font-size: 13px; font-weight: 600; min-height: 1.4em; margin-top: 14px; }
+  .status { color: #1D9E75; font-size: 13px; font-weight: 600; min-height: 1.4em; margin-top: 14px; }
   .hint { color: #6b6b7b; font-size: 12px; margin-top: 24px; line-height: 1.7; }
-  .hint a { color: #F97316; text-decoration: none; }
+  .hint a { color: #1D9E75; text-decoration: none; }
   footer { padding: 20px 40px; text-align: center; color: #4a4a55; font-size: 11px; border-top: 1px solid #2a2a35; }
 
   /* ═══════════════════════════════════════════════════════════════════
@@ -144,7 +144,7 @@
   body { background: #fafafa !important; color: #0f172a !important; font-size: 15px !important; }
   .header { background: #ffffff !important; border-bottom: 1px solid #e5e7eb !important; padding: 28px 40px !important; }
   .logo-brand { font-size: 32px !important; font-weight: 800 !important; letter-spacing: -0.02em !important; }
-  .logo-brand .apex { color: #F97316 !important; font-weight: 800 !important; }
+  .logo-brand .apex { color: #1D9E75 !important; font-weight: 800 !important; }
   .logo-brand .rest { color: #475569 !important; font-weight: 800 !important; }
 
   .tab-nav { background: #ffffff !important; border-bottom: 1px solid #e5e7eb !important; }
@@ -157,7 +157,7 @@
     padding: 20px 28px !important;
     letter-spacing: -0.01em !important;
   }
-  .tab-button.active, .tab a.active, .nav a.active { color: #F97316 !important; border-bottom-color: #F97316 !important; }
+  .tab-button.active, .tab a.active, .nav a.active { color: #1D9E75 !important; border-bottom-color: #1D9E75 !important; }
 
   /* Entry panel card */
   .card, .entry-card, main > div, .panel {
@@ -199,11 +199,11 @@
     border-radius: 12px !important;
     text-align: center !important;
   }
-  input:focus { outline: 2px solid #F97316 !important; }
+  input:focus { outline: 2px solid #1D9E75 !important; }
 
   /* SOLVE MY TEAM button */
   button {
-    background: #F97316 !important;
+    background: #1D9E75 !important;
     color: #ffffff !important;
     border: none !important;
     font-family: 'Plus Jakarta Sans', sans-serif !important;
@@ -219,14 +219,14 @@
 
   /* Status / building text */
   .status, .building, [class*="status"] {
-    color: #F97316 !important;
+    color: #1D9E75 !important;
     font-weight: 700 !important;
     font-size: 15px !important;
   }
 
   /* Hint / footer instructions — dark on white */
   .hint { color: #475569 !important; font-size: 14px !important; line-height: 1.7 !important; }
-  .hint a { color: #F97316 !important; font-weight: 600 !important; }
+  .hint a { color: #1D9E75 !important; font-weight: 600 !important; }
   .err { color: #dc2626 !important; font-size: 14px !important; }
 
   footer {
@@ -252,7 +252,7 @@
 <div class="header">
   <a href="/" class="logo">
     <div class="logo-text">
-      <div class="logo-brand"><span class="apex">Apex</span><span class="rest">FootyData</span></div>
+      <div class="logo-brand"><span class="rest">FPL </span><span class="apex">Apex</span></div>
     </div>
   </a>
 </div>
@@ -266,7 +266,7 @@
 </div>
 <main>
   <div class="card">
-    <div class="card-brand"><span class="apex">Apex</span><span class="rest">FootyData</span></div>
+    <div class="card-brand"><span class="rest">FPL </span><span class="apex">Apex</span></div>
     <h1>FPL Solver</h1>
     <p class="sub">Enter your FPL Team ID to get started.</p>
     <input id="fpl-id" type="text" inputmode="numeric" pattern="[0-9]*"
@@ -523,7 +523,7 @@
     gap: 4px;
 }
 .apex-footer-wordmark { font-weight: 600; font-size: 0.95rem; line-height: 1; }
-.apex-footer-apex { color: #F97316; font-weight: 500; }
+.apex-footer-apex { color: #1D9E75; font-weight: 500; }
 .apex-footer-rest { color: #c8c8d0; font-weight: 700; }
 .apex-footer-tagline {
     color: #8a8a95;
@@ -531,7 +531,7 @@
     font-family: 'JetBrains Mono', ui-monospace, monospace;
 }
 .apex-footer-tagline .ftr-stat {
-    color: #F97316;
+    color: #1D9E75;
     font-weight: 600;
 }
 .apex-footer-links { display: flex; gap: 18px; align-items: center; }
@@ -541,7 +541,7 @@
     font-weight: 500;
     transition: color 0.15s;
 }
-.apex-footer-links a:hover { color: #F97316; }
+.apex-footer-links a:hover { color: #1D9E75; }
 .apex-footer-copy { color: #4a4a55; font-size: 0.72rem; }
 .apex-footer-legal { display: flex; gap: 12px; }
 .apex-footer-legal a {
@@ -826,8 +826,8 @@ a[href*="rank_milestones"] {
             '<div class="apex-footer-row">' +
                 '<div class="apex-footer-brand">' +
                     '<span class="apex-footer-wordmark">' +
+                        '<span class="apex-footer-rest">FPL </span>' +
                         '<span class="apex-footer-apex">Apex</span>' +
-                        '<span class="apex-footer-rest">FootyData</span>' +
                     '</span>' +
                     '<span class="apex-footer-tagline">' + moatHTML + '</span>' +
                 '</div>' +
@@ -837,11 +837,11 @@ a[href*="rank_milestones"] {
                 '</div>' +
             '</div>' +
             '<div class="apex-footer-row">' +
-                '<span class="apex-footer-copy">&copy; 2026 ApexFootyData</span>' +
+                '<span class="apex-footer-copy">&copy; 2026 FPL Apex</span>' +
                 '<span class="apex-footer-legal">' +
                     '<a href="mailto:contact@apexfootydata.com">Contact</a>' +
                     '<span class="apex-footer-legal-sep">&middot;</span>' +
-                    '<a href="#" onclick="alert(\'Privacy: ApexFootyData uses Cloudflare Analytics and Google Analytics 4 for traffic measurement only. No personal data sold or shared. Cookie consent collected on first visit. Contact: contact@apexfootydata.com to request data deletion.\'); return false;">Privacy</a>' +
+                    '<a href="#" onclick="alert(\'Privacy: FPL Apex uses Cloudflare Analytics and Google Analytics 4 for traffic measurement only. No personal data sold or shared. Cookie consent collected on first visit. Contact: contact@apexfootydata.com to request data deletion.\'); return false;">Privacy</a>' +
                 '</span>' +
             '</div>';
         document.body.appendChild(f);
@@ -1117,7 +1117,7 @@ a[href*="rank_milestones"] {
     gap: 4px;
 }
 .apex-footer-wordmark { font-weight: 600; font-size: 0.95rem; line-height: 1; }
-.apex-footer-apex { color: #F97316; font-weight: 500; }
+.apex-footer-apex { color: #1D9E75; font-weight: 500; }
 .apex-footer-rest { color: #c8c8d0; font-weight: 700; }
 .apex-footer-tagline {
     color: #8a8a95;
@@ -1125,7 +1125,7 @@ a[href*="rank_milestones"] {
     font-family: 'JetBrains Mono', ui-monospace, monospace;
 }
 .apex-footer-tagline .ftr-stat {
-    color: #F97316;
+    color: #1D9E75;
     font-weight: 600;
 }
 .apex-footer-links { display: flex; gap: 18px; align-items: center; }
@@ -1135,7 +1135,7 @@ a[href*="rank_milestones"] {
     font-weight: 500;
     transition: color 0.15s;
 }
-.apex-footer-links a:hover { color: #F97316; }
+.apex-footer-links a:hover { color: #1D9E75; }
 .apex-footer-copy { color: #4a4a55; font-size: 0.72rem; }
 .apex-footer-legal { display: flex; gap: 12px; }
 .apex-footer-legal a {
@@ -1420,8 +1420,8 @@ a[href*="rank_milestones"] {
             '<div class="apex-footer-row">' +
                 '<div class="apex-footer-brand">' +
                     '<span class="apex-footer-wordmark">' +
+                        '<span class="apex-footer-rest">FPL </span>' +
                         '<span class="apex-footer-apex">Apex</span>' +
-                        '<span class="apex-footer-rest">FootyData</span>' +
                     '</span>' +
                     '<span class="apex-footer-tagline">' + moatHTML + '</span>' +
                 '</div>' +
@@ -1431,11 +1431,11 @@ a[href*="rank_milestones"] {
                 '</div>' +
             '</div>' +
             '<div class="apex-footer-row">' +
-                '<span class="apex-footer-copy">&copy; 2026 ApexFootyData</span>' +
+                '<span class="apex-footer-copy">&copy; 2026 FPL Apex</span>' +
                 '<span class="apex-footer-legal">' +
                     '<a href="mailto:contact@apexfootydata.com">Contact</a>' +
                     '<span class="apex-footer-legal-sep">&middot;</span>' +
-                    '<a href="#" onclick="alert(\'Privacy: ApexFootyData uses Cloudflare Analytics and Google Analytics 4 for traffic measurement only. No personal data sold or shared. Cookie consent collected on first visit. Contact: contact@apexfootydata.com to request data deletion.\'); return false;">Privacy</a>' +
+                    '<a href="#" onclick="alert(\'Privacy: FPL Apex uses Cloudflare Analytics and Google Analytics 4 for traffic measurement only. No personal data sold or shared. Cookie consent collected on first visit. Contact: contact@apexfootydata.com to request data deletion.\'); return false;">Privacy</a>' +
                 '</span>' +
             '</div>';
         document.body.appendChild(f);
