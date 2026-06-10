@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
+<title>Accuracy &mdash; FPL Apex</title>
+<meta name="description" content="The FPL Apex accuracy record: validated benchmarks against the leading paid FPL tools, the full 2025/26 season tracker, and a live point-in-time forward test for 2026/27. Wins and losses both published.">
+<meta name="author" content="FPL Apex">
+<link rel="canonical" href="https://fplapex.com/accuracy.html">
+<meta name="robots" content="index, follow">
+<!-- Open Graph (Facebook / WhatsApp / LinkedIn / Discord) -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="FPL Apex">
+<meta property="og:title" content="Accuracy &mdash; FPL Apex">
+<meta property="og:description" content="The receipts: how the FPL Apex model actually performs, benchmarked against the leading paid tools. Predictions locked before each deadline, scored after &mdash; wins and losses both published.">
+<meta property="og:url" content="https://fplapex.com/accuracy.html">
+<meta property="og:image" content="https://fplapex.com/og-image.png">
+<meta property="og:image:alt" content="FPL Apex &mdash; model accuracy record">
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Accuracy &mdash; FPL Apex">
+<meta name="twitter:description" content="How the FPL Apex model actually performs &mdash; point-in-time, wins and losses both published.">
+<meta name="twitter:image" content="https://fplapex.com/og-image.png">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream:   #FAF7F1;
+    --card:    #FFFFFF;
+    --border:  #E6E1D7;
+    --border2: #D9D7CC;
+    --ink:     #14181A;
+    --ink2:    #1E1E1A;
+    --muted:   #5F5E5A;
+    --teal:    #1D9E75;
+    --blue:    #2563eb;
+    --coral:   #D85A30;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--cream);
+    color: var(--ink);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Header — cream strip, compact wordmark */
+  .header {
+    background: var(--cream);
+    border-bottom: 1px solid var(--border);
+    padding: 22px 40px 18px;
+    text-align: center;
+  }
+  .logo { display: inline-flex; flex-direction: column; align-items: center; gap: 7px; text-decoration: none; }
+  .logo-brand { font-size: 30px; font-weight: 800; line-height: 1; letter-spacing: -0.02em; }
+  .logo-brand .rest { color: var(--ink); font-weight: 800; }
+  .logo-brand .apex { color: var(--teal); font-weight: 800; }
+  .logo-tagline {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.32em;
+    color: #6E7478;
+  }
+  .logo-tagline .tag-over { border-bottom: 2px solid var(--teal); padding-bottom: 1px; }
+
+  /* Tab nav — sibling of solver.html */
+  .tab-nav {
+    display: flex;
+    justify-content: center;
+    background: #ffffff;
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .tab-button {
+    padding: 16px 22px;
+    color: var(--muted);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    text-decoration: none;
+    white-space: nowrap;
+    border-bottom: 2px solid transparent;
+    transition: color 0.15s;
+  }
+  .tab-button:hover { color: var(--ink); }
+  .tab-button.active { color: var(--teal); border-bottom-color: var(--teal); }
+
+  main { flex: 1; width: 100%; max-width: 960px; margin: 0 auto; padding: 48px 24px 64px; }
+
+  /* Hero */
+  .eyebrow {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.28em;
+    color: var(--teal);
+    margin-bottom: 12px;
+  }
+  h1 {
+    font-size: 38px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    color: var(--ink);
+    margin-bottom: 14px;
+  }
+  .lede { font-size: 17px; font-weight: 500; color: var(--muted); max-width: 740px; }
+
+  section { margin-top: 52px; }
+  h2 { font-size: 26px; font-weight: 800; letter-spacing: -0.02em; color: var(--ink); margin-bottom: 10px; }
+  h3 { font-size: 17px; font-weight: 700; color: var(--ink); margin-bottom: 6px; }
+  .section-intro { font-size: 15.5px; color: var(--muted); font-weight: 500; max-width: 760px; margin-bottom: 22px; }
+
+  /* Benchmark cards */
+  .bench-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 16px; }
+  .bench-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px 22px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .bench-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .bench-title { font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink2); }
+  .badge {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    padding: 4px 9px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .badge-level { color: var(--blue);  background: rgba(37, 99, 235, 0.07);  border: 1px solid rgba(37, 99, 235, 0.28); }
+  .badge-coral { color: var(--coral); background: rgba(216, 90, 48, 0.07);  border: 1px solid rgba(216, 90, 48, 0.32); }
+  .badge-teal  { color: var(--teal);  background: rgba(29, 158, 117, 0.07); border: 1px solid rgba(29, 158, 117, 0.32); }
+  .bench-nums { display: flex; gap: 26px; }
+  .bn { display: flex; flex-direction: column; gap: 2px; }
+  .bn-label { font-size: 11.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+  .bn-val { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 24px; font-weight: 600; color: var(--ink); line-height: 1.25; }
+  .bn-unit { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 11px; color: var(--muted); }
+  .bench-note { font-size: 13.5px; color: var(--muted); font-weight: 500; line-height: 1.55; }
+  .bench-note strong { color: var(--ink2); }
+  .source-note {
+    margin-top: 16px;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 11.5px;
+    color: var(--muted);
+  }
+
+  /* 25/26 season tracker */
+  .summary-strip { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 18px; }
+  .sum-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 22px 14px;
+    flex: 1;
+    min-width: 170px;
+  }
+  .sum-val { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 27px; font-weight: 600; color: var(--teal); line-height: 1.2; }
+  .sum-label { font-size: 12px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted); margin-top: 3px; }
+  .mw-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 8px; }
+  .mw-chip {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 8px 11px 7px;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+  .mw-label { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 10.5px; font-weight: 500; color: var(--muted); }
+  .mw-val { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 15px; font-weight: 600; color: var(--ink); }
+  .table-foot { font-size: 12.5px; color: var(--muted); font-weight: 500; margin-top: 14px; }
+
+  /* Forward test table */
+  .table-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+  .ft-table { width: 100%; border-collapse: collapse; }
+  .ft-table th {
+    text-align: left;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 13px 18px;
+    background: #FCFAF6;
+    border-bottom: 1px solid var(--border2);
+  }
+  .ft-table td {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 14px;
+    color: var(--ink);
+    padding: 12px 18px;
+    border-bottom: 1px solid var(--border);
+  }
+  .ft-table tr:last-child td { border-bottom: none; }
+  .ft-empty td {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--muted);
+    padding: 22px 18px;
+  }
+
+  /* How to read this */
+  .read-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+  .read-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 20px 22px; }
+  .read-card p { font-size: 14px; font-weight: 500; color: var(--muted); line-height: 1.6; }
+
+  footer {
+    background: #ffffff;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    text-align: center;
+    font-size: 13px;
+    padding: 24px 40px;
+  }
+
+  @media (max-width: 600px) {
+    .header { padding: 18px 16px 14px; }
+    main { padding: 36px 16px 48px; }
+    h1 { font-size: 30px; }
+    h2 { font-size: 22px; }
+    .tab-nav { justify-content: flex-start; }
+    .bench-nums { gap: 18px; }
+    .ft-table th, .ft-table td { padding-left: 12px; padding-right: 12px; }
+  }
+</style>
+</head>
+<body>
+<div class="header">
+  <a href="/" class="logo">
+    <div class="logo-brand"><span class="rest">FPL </span><span class="apex">APEX</span></div>
+    <div class="logo-tagline">NUMBERS <span class="tag-over">OVER</span> NARRATIVES</div>
+  </a>
+</div>
+<div class="tab-nav">
+  <a class="tab-button" href="/#tab0">Team Ratings</a>
+  <a class="tab-button" href="/#tab1">Matchweek Predictions</a>
+  <a class="tab-button" href="/#tab2">Team Predictions</a>
+  <a class="tab-button" href="/#tab3">Player Predictions</a>
+  <a class="tab-button" href="/#tab4">Simulated Final Table</a>
+  <a class="tab-button" href="/solver.html">FPL Solver</a>
+  <a class="tab-button active" href="/accuracy.html">Accuracy</a>
+</div>
+<main>
+
+  <!-- Hero -->
+  <div class="eyebrow">THE RECEIPTS</div>
+  <h1>Model accuracy, published in the open.</h1>
+  <p class="lede">
+    Every prediction model claims it works. This page is where FPL Apex proves it &mdash;
+    validated benchmarks against the leading paid tools, a full-season tracker, and a live
+    forward test where predictions are locked before kick-off and scored after.
+    Wins and losses both published.
+  </p>
+
+  <!-- Validated benchmarks vs leading paid tools -->
+  <section id="benchmarks">
+    <h2>How Apex compares to the leading paid tools</h2>
+    <p class="section-intro">
+      FPL Review and Solio are the benchmark paid projection tools in the FPL community &mdash;
+      the strongest competition we know of. Here is where Apex stands against them, measured
+      on the same players, the same gameweeks, the same data. MAE is mean absolute error:
+      the average size of the miss. Lower is better.
+    </p>
+    <div class="bench-grid">
+
+      <div class="bench-card">
+        <div class="bench-head">
+          <div class="bench-title">Expected points</div>
+          <span class="badge badge-level">LEVEL</span>
+        </div>
+        <div class="bench-nums">
+          <div class="bn">
+            <span class="bn-label">Apex</span>
+            <span class="bn-val">1.880</span>
+            <span class="bn-unit">MAE, pts</span>
+          </div>
+          <div class="bn">
+            <span class="bn-label">FPL Review</span>
+            <span class="bn-val">1.842</span>
+            <span class="bn-unit">MAE, pts</span>
+          </div>
+        </div>
+        <p class="bench-note">
+          Paired difference <strong>+0.038</strong> points, 95% CI
+          <strong>[−0.004, +0.085]</strong>. The interval spans zero:
+          <strong>statistically indistinguishable</strong>. We do not claim to beat
+          Review on points &mdash; we claim to match a leading paid tool, for free.
+        </p>
+      </div>
+
+      <div class="bench-card">
+        <div class="bench-head">
+          <div class="bench-title">Expected minutes</div>
+          <span class="badge badge-coral">REVIEW LEADS</span>
+        </div>
+        <div class="bench-nums">
+          <div class="bn">
+            <span class="bn-label">Apex</span>
+            <span class="bn-val">24.41</span>
+            <span class="bn-unit">MAE, mins</span>
+          </div>
+          <div class="bn">
+            <span class="bn-label">FPL Review</span>
+            <span class="bn-val">20.65</span>
+            <span class="bn-unit">MAE, mins</span>
+          </div>
+        </div>
+        <p class="bench-note">
+          Review is genuinely better at predicting minutes. The gap is concentrated in
+          <strong>team-news rows</strong> &mdash; late injury and lineup calls &mdash; which is
+          exactly what the 2026/27 news pipeline is built to close. Published because
+          honest beats flattering.
+        </p>
+      </div>
+
+      <div class="bench-card">
+        <div class="bench-head">
+          <div class="bench-title">Double gameweeks</div>
+          <span class="badge badge-teal">APEX LEADS</span>
+        </div>
+        <div class="bench-nums">
+          <div class="bn">
+            <span class="bn-label">Verdict</span>
+            <span class="bn-val">Best of 3</span>
+            <span class="bn-unit">Apex / Review / Solio</span>
+          </div>
+        </div>
+        <p class="bench-note">
+          On double-gameweek projections, Apex is the most accurate of the three tools
+          tested. Its second-leg dampener cut the bias on headline double-GW players from
+          <strong>+1.47</strong> to <strong>+0.63</strong> points per player.
+        </p>
+      </div>
+
+    </div>
+    <p class="source-note">Validated 2026-06-10 · 1,707 player-gameweek sample (Apex_vs_Review_test_v2.xlsx) · uncertainty via cluster bootstrap, 10,000 resamples by gameweek.</p>
+  </section>
+
+  <!-- 2025/26 season tracker — generated from outputs/accuracy_history.json -->
+  <section id="season-2526">
+    <h2>2025/26 — match prediction accuracy</h2>
+    <p class="section-intro">
+      Every matchweek of the 2025/26 Premier League season, the model's match goal
+      predictions were scored against what actually happened. The number tracked is
+      MAE &mdash; the average size of the miss, in goals per match. Lower is better.
+    </p>
+    <div class="summary-strip">
+      <div class="sum-card">
+        <div class="sum-val">0.882</div>
+        <div class="sum-label">Average error (goals / match)</div>
+      </div>
+      <div class="sum-card">
+        <div class="sum-val">356</div>
+        <div class="sum-label">Matches scored</div>
+      </div>
+      <div class="sum-card">
+        <div class="sum-val">36</div>
+        <div class="sum-label">Matchweeks tracked</div>
+      </div>
+    </div>
+    <div class="mw-grid">
+      <div class="mw-chip"><span class="mw-label">MW3</span><span class="mw-val">1.143</span></div>
+      <div class="mw-chip"><span class="mw-label">MW4</span><span class="mw-val">0.924</span></div>
+      <div class="mw-chip"><span class="mw-label">MW5</span><span class="mw-val">0.566</span></div>
+      <div class="mw-chip"><span class="mw-label">MW6</span><span class="mw-val">0.808</span></div>
+      <div class="mw-chip"><span class="mw-label">MW7</span><span class="mw-val">0.583</span></div>
+      <div class="mw-chip"><span class="mw-label">MW8</span><span class="mw-val">0.934</span></div>
+      <div class="mw-chip"><span class="mw-label">MW9</span><span class="mw-val">0.925</span></div>
+      <div class="mw-chip"><span class="mw-label">MW10</span><span class="mw-val">0.836</span></div>
+      <div class="mw-chip"><span class="mw-label">MW11</span><span class="mw-val">1.145</span></div>
+      <div class="mw-chip"><span class="mw-label">MW12</span><span class="mw-val">0.821</span></div>
+      <div class="mw-chip"><span class="mw-label">MW13</span><span class="mw-val">0.781</span></div>
+      <div class="mw-chip"><span class="mw-label">MW14</span><span class="mw-val">1.178</span></div>
+      <div class="mw-chip"><span class="mw-label">MW15</span><span class="mw-val">1.012</span></div>
+      <div class="mw-chip"><span class="mw-label">MW16</span><span class="mw-val">1.071</span></div>
+      <div class="mw-chip"><span class="mw-label">MW17</span><span class="mw-val">0.746</span></div>
+      <div class="mw-chip"><span class="mw-label">MW18</span><span class="mw-val">0.687</span></div>
+      <div class="mw-chip"><span class="mw-label">MW19</span><span class="mw-val">0.893</span></div>
+      <div class="mw-chip"><span class="mw-label">MW20</span><span class="mw-val">0.832</span></div>
+      <div class="mw-chip"><span class="mw-label">MW21</span><span class="mw-val">0.961</span></div>
+      <div class="mw-chip"><span class="mw-label">MW22</span><span class="mw-val">0.924</span></div>
+      <div class="mw-chip"><span class="mw-label">MW23</span><span class="mw-val">0.885</span></div>
+      <div class="mw-chip"><span class="mw-label">MW24</span><span class="mw-val">0.927</span></div>
+      <div class="mw-chip"><span class="mw-label">MW25</span><span class="mw-val">0.737</span></div>
+      <div class="mw-chip"><span class="mw-label">MW26</span><span class="mw-val">0.678</span></div>
+      <div class="mw-chip"><span class="mw-label">MW27</span><span class="mw-val">0.915</span></div>
+      <div class="mw-chip"><span class="mw-label">MW28</span><span class="mw-val">0.864</span></div>
+      <div class="mw-chip"><span class="mw-label">MW29</span><span class="mw-val">0.937</span></div>
+      <div class="mw-chip"><span class="mw-label">MW30</span><span class="mw-val">0.862</span></div>
+      <div class="mw-chip"><span class="mw-label">MW31</span><span class="mw-val">1.059</span></div>
+      <div class="mw-chip"><span class="mw-label">MW32</span><span class="mw-val">0.831</span></div>
+      <div class="mw-chip"><span class="mw-label">MW33</span><span class="mw-val">1.130</span></div>
+      <div class="mw-chip"><span class="mw-label">MW34</span><span class="mw-val">0.659</span></div>
+      <div class="mw-chip"><span class="mw-label">MW35</span><span class="mw-val">1.023</span></div>
+      <div class="mw-chip"><span class="mw-label">MW36</span><span class="mw-val">0.797</span></div>
+      <div class="mw-chip"><span class="mw-label">MW37</span><span class="mw-val">0.796</span></div>
+      <div class="mw-chip"><span class="mw-label">MW38</span><span class="mw-val">0.813</span></div>
+    </div>
+    <p class="table-foot">
+      Tracking begins at matchweek 3 &mdash; the model holds off until the new season
+      has given it real in-season data to work with.
+    </p>
+  </section>
+
+  <!-- Live forward test — 2026/27 -->
+  <section id="forward-test">
+    <h2>Live forward test &mdash; 2026/27</h2>
+    <p class="section-intro">
+      From GW1 of 2026/27, projections from all three tools are snapshotted
+      <strong>before each deadline</strong> and scored <strong>after the gameweek
+      finishes</strong>. Point-in-time honest: predictions are locked in advance, never
+      recomputed, and the results land here weekly &mdash; wins and losses both.
+      Each row is the MAE against actual FPL points, on the same set of players.
+    </p>
+    <div class="table-card">
+      <table class="ft-table">
+        <thead>
+          <tr>
+            <th>GW</th>
+            <th>Apex MAE</th>
+            <th>Review MAE</th>
+            <th>Solio MAE</th>
+            <th>Closest</th>
+          </tr>
+        </thead>
+        <tbody>
+<!-- APEX-FT-ROWS-START -->
+          <tr class="ft-empty"><td colspan="5">The forward test starts at GW1 of 2026/27. One row per scored gameweek will appear here &mdash; whichever way it goes.</td></tr>
+<!-- APEX-FT-ROWS-END -->
+        </tbody>
+      </table>
+    </div>
+    <p class="table-foot">
+      Scored by scripts/forward_test/forward_log.py &mdash; snapshot before the deadline,
+      score after the final whistle, publish either way.
+    </p>
+  </section>
+
+  <!-- How to read this -->
+  <section id="how-to-read">
+    <h2>How to read this page</h2>
+    <div class="read-grid">
+      <div class="read-card">
+        <h3>Scoreline vs xG</h3>
+        <p>
+          Most people judge football by results. The scoreline tells you what happened;
+          xG &mdash; expected goals &mdash; tells you what should have happened, based on the
+          quality of chances created. The difference is luck. Apex is built on xG because
+          performance predicts the future better than results do.
+        </p>
+      </div>
+      <div class="read-card">
+        <h3>Why MAE</h3>
+        <p>
+          MAE &mdash; mean absolute error &mdash; is the average size of the miss. Predict 5
+          points, the player scores 7: that's an error of 2. Average it over every player,
+          every week. Lower is better; zero is impossible. It's the fairest single number
+          because a few lucky calls can't game it.
+        </p>
+      </div>
+      <div class="read-card">
+        <h3>Why point-in-time matters</h3>
+        <p>
+          Anyone can show you a backtest that works &mdash; built after the results were
+          known. A point-in-time record can't be massaged: the prediction is locked before
+          kick-off, then scored against what actually happened. That's the standard betting
+          markets are held to, and the standard this page holds Apex to.
+        </p>
+      </div>
+    </div>
+  </section>
+
+</main>
+<footer>fplapex.com &middot; data-driven football analytics</footer>
+</body>
+</html>
