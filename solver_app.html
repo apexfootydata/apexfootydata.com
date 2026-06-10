@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-06-10T20:03:23">
+<meta name="apex-gw" content="32" data-built-at="2026-06-10T23:08:44">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -5442,7 +5442,7 @@ html.apex-offseason #view-landing .hero-sub::after {
           <table class="pool-table" id="pool-table"
             style="width:100%;border-collapse:collapse;font-size:.85rem;min-width:900px;">
             <thead>
-              <tr id="pool-thead-row" style="background:rgba(255,255,255,.03);text-align:left;">
+              <tr id="pool-thead-row" style="background:rgba(0,0,0,.025);text-align:left;">
                 <th data-key="web_name"   onclick="setPoolSort('web_name')"   style="padding:10px 12px;cursor:pointer;font-weight:700;text-transform:uppercase;letter-spacing:.04em;font-size:.7rem;color:var(--muted);">Player</th>
                 <th data-key="team"       onclick="setPoolSort('team')"       style="padding:10px 12px;cursor:pointer;font-weight:700;text-transform:uppercase;letter-spacing:.04em;font-size:.7rem;color:var(--muted);">Team</th>
                 <th data-key="pos"        onclick="setPoolSort('pos')"        style="padding:10px 12px;cursor:pointer;font-weight:700;text-transform:uppercase;letter-spacing:.04em;font-size:.7rem;color:var(--muted);">Pos</th>
@@ -5468,12 +5468,12 @@ html.apex-offseason #view-landing .hero-sub::after {
   border-radius:8px;padding:9px 14px;font-size:.78rem;font-weight:600;
   cursor:pointer;transition:all .2s;letter-spacing:.01em;
 }
-.pool-pos-pill:hover { background:rgba(255,255,255,.04);color:var(--text); }
+.pool-pos-pill:hover { background:rgba(0,0,0,.04);color:var(--text); }
 .pool-pos-pill.active {
   background:var(--accent,#1D9E75);border-color:var(--accent,#1D9E75);color:#fff;
   box-shadow:0 2px 8px rgba(29,158,117,.25);
 }
-.pool-row { border-top:1px solid rgba(255,255,255,.04);transition:background .15s; }
+.pool-row { border-top:1px solid rgba(0,0,0,.06);transition:background .15s; }
 .pool-row:hover { background:rgba(29,158,117,.04); }
 .pool-row td { padding:11px 14px;vertical-align:middle; }
 .pool-row .pool-xp { text-align:right;font-variant-numeric:tabular-nums; }
@@ -5599,7 +5599,7 @@ html.apex-offseason #view-landing .hero-sub::after {
   align-items: center;
   gap: 10px;
   padding: 7px 0;
-  border-bottom: 1px dashed rgba(255,255,255,.08);
+  border-bottom: 1px dashed rgba(0,0,0,.12);
   font-size: .85rem;
 }
 .confidence-row:last-child { border-bottom: none; }
@@ -6098,7 +6098,7 @@ html.apex-offseason #view-landing .hero-sub::after {
     <!-- Loading bar (shown during sim) -->
     <div id="league-loading" style="display:none;text-align:center;padding:28px 0 18px;">
       <div style="font-size:.95rem;color:var(--muted);margin-bottom:14px;" id="league-loading-text">Running simulation…</div>
-      <div style="height:5px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden;max-width:400px;margin:0 auto;">
+      <div style="height:5px;background:rgba(0,0,0,.08);border-radius:2px;overflow:hidden;max-width:400px;margin:0 auto;">
         <div class="lg-loading-bar"></div>
       </div>
     </div>
@@ -6114,7 +6114,7 @@ html.apex-offseason #view-landing .hero-sub::after {
       <div style="font-size:.95rem;color:var(--muted);margin-top:6px;">chance to win</div>
       <!-- Dev-only A/B comparison: Apex (correlation-aware) vs Independent (Copilot-style).
            Hidden by default. Shown when ?compareSim=1 + apex_dev=1 in localStorage. -->
-      <div id="league-hero-altcompare" style="display:none;margin-top:18px;padding-top:14px;border-top:1px solid rgba(255,255,255,.06);font-size:.8rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;">
+      <div id="league-hero-altcompare" style="display:none;margin-top:18px;padding-top:14px;border-top:1px solid rgba(0,0,0,.06);font-size:.8rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;">
         <div style="display:flex;justify-content:center;gap:28px;align-items:baseline;">
           <div style="text-align:center;">
             <div id="league-hero-pct-apex" style="font-size:1.6rem;font-weight:700;color:var(--accent,#1D9E75);letter-spacing:-.01em;text-transform:none;"></div>
@@ -6131,7 +6131,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 
     <!-- Standings table -->
     <div id="league-table-wrap" style="display:none;background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:16px;">
-      <div style="padding:16px 20px 10px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,.04);">
+      <div style="padding:16px 20px 10px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border,#E6E1D7);">
         <div style="display:flex;gap:6px;align-items:center;" id="league-toggle-wrap">
           <button class="lg-toggle lg-toggle-active" id="lg-toggle-current" onclick="toggleLeagueView('current')">Current</button>
           <button class="lg-toggle" id="lg-toggle-projected" onclick="toggleLeagueView('projected')">Projected</button>
@@ -6183,7 +6183,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 /* League tab styles */
 .lg-th {
   padding:14px 18px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
-  font-size:.8rem;color:var(--muted);border-bottom:1px solid rgba(255,255,255,.06);
+  font-size:.8rem;color:var(--muted);border-bottom:1px solid var(--border,#E6E1D7);
 }
 .lg-th-r { text-align:right; }
 .lg-toggle {
@@ -6192,7 +6192,7 @@ html.apex-offseason #view-landing .hero-sub::after {
   cursor:pointer;font-family:inherit;transition:all .15s;
 }
 .lg-toggle-active {
-  background:var(--accent,#1D9E75);color:#000;border-color:var(--accent,#1D9E75);
+  background:var(--accent,#1D9E75);color:#fff;border-color:var(--accent,#1D9E75);
 }
 @keyframes lgLivePulse {
   0%   { box-shadow: 0 0 0 0 rgba(239,68,68,.6); }
@@ -6204,7 +6204,7 @@ html.apex-offseason #view-landing .hero-sub::after {
   100% { background: transparent; }
 }
 .lg-flash { animation: lgCellFlash 1.2s ease-out; }
-.lg-row { border-top:1px solid rgba(255,255,255,.04);transition:background .12s; }
+.lg-row { border-top:1px solid rgba(0,0,0,.06);transition:background .12s; }
 .lg-row:hover { background:rgba(29,158,117,.04); }
 .lg-row td { padding:18px 18px;vertical-align:middle; }
 .lg-row-you { background:rgba(29,158,117,.06);border-left:3px solid var(--accent,#1D9E75); }
@@ -6213,12 +6213,12 @@ html.apex-offseason #view-landing .hero-sub::after {
 .lg-team { font-size:.88rem;color:var(--muted);margin-top:2px; }
 .lg-overall-rank {
   display:inline-block;font-family:'JetBrains Mono',ui-monospace,monospace;
-  font-size:.72rem;font-weight:700;color:#a1a1aa;
-  background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);
+  font-size:.72rem;font-weight:700;color:var(--muted,#5F5E5A);
+  background:#F1EFE8;border:1px solid var(--border,#D9D7CC);
   border-radius:4px;padding:1px 6px;margin-left:6px;letter-spacing:0;vertical-align:1px;
 }
 .lg-you-tag {
-  display:inline-block;background:var(--accent,#1D9E75);color:#000;
+  display:inline-block;background:var(--accent,#1D9E75);color:#fff;
   border-radius:4px;padding:2px 7px;font-size:.72rem;font-weight:800;
   margin-left:7px;letter-spacing:.04em;vertical-align:middle;
 }
@@ -6229,7 +6229,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 .lg-win-cell { text-align:right;min-width:160px; }
 .lg-win-pct { font-weight:800;font-size:1.25rem;font-variant-numeric:tabular-nums; }
 .lg-win-bar-wrap {
-  height:5px;background:rgba(255,255,255,.06);border-radius:2px;margin-top:5px;
+  height:5px;background:rgba(0,0,0,.08);border-radius:2px;margin-top:5px;
   overflow:hidden;
 }
 .lg-win-bar {
@@ -6252,7 +6252,7 @@ html.apex-offseason #view-landing .hero-sub::after {
   animation:apex-slide 1.6s ease-in-out infinite;
 }
 .apex-slide-track {
-  height:4px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden;
+  height:4px;background:rgba(0,0,0,.08);border-radius:2px;overflow:hidden;
   max-width:400px;margin:0 auto;
 }
 @keyframes apex-slide {
@@ -8148,7 +8148,10 @@ html.apex-offseason #view-landing .hero-sub::after {
   // (which also dampens). v1.8: applies to chip_bonus too — a manager who
   // historically paces below ceiling won't suddenly play chips optimally.
   const _LS_REALISM_FACTOR_FALLBACK = 0.88;
-  const _LS_REALISM_FACTOR_MIN = 0.70;
+  // 2026-06-10 audit: 0.70 -> 0.55 to match rank_milestones.js (v1.8 floor was
+  // only applied there — Mini-League projected up to ~27% more for slow pacers,
+  // breaking the "same engine as Rank Predictor" footnote promise).
+  const _LS_REALISM_FACTOR_MIN = 0.55;
   const _LS_REALISM_FACTOR_MAX = 1.00;
 
   function _computeManagerRealismFactor(userCurrentPts, lastFinishedGw,
@@ -9087,7 +9090,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1781118203-GW32-6d27131e";
+const BUILD_VERSION = "1781129324-GW32-6d27131e";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -12063,7 +12066,7 @@ function _showChipSquadPanel(chipType, gw, squad, gwIdx, alreadyApplied, targetI
              </button>`)
         }
       </div>
-      <div style="display:flex;gap:20px;padding:10px 16px;border-bottom:1px solid var(--border);background:rgba(255,255,255,.02);font-size:.8rem;">
+      <div style="display:flex;gap:20px;padding:10px 16px;border-bottom:1px solid var(--border);background:rgba(0,0,0,.02);font-size:.8rem;">
         <div><span style="color:var(--muted);">Squad value</span> <span style="font-weight:700;color:var(--fg);">£${_squadCost.toFixed(1)}m</span></div>
         <div><span style="color:var(--muted);">In the bank</span> <span style="font-weight:700;color:${_bankLeft >= 1.0 ? '#4ade80' : 'var(--fg)'};">£${_bankLeft.toFixed(1)}m</span></div>
       </div>
@@ -12081,7 +12084,7 @@ function _showChipSquadPanel(chipType, gw, squad, gwIdx, alreadyApplied, targetI
       : `style="background:var(--accent);color:#000;border:none;border-radius:5px;padding:3px 10px;font-size:.75rem;font-weight:700;cursor:pointer;" onclick="_applyOneTransfer(${p.id}, window._lastChipSquad, window._lastChipGwIdx)"`;
     const btnLabel = inMySquad ? '✓ In squad' : 'Apply';
     html += `
-      <div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.05);">
+      <div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid rgba(0,0,0,.06);">
         ${img}
         <div style="flex:1;">
           <span style="font-weight:600;">${p.web_name}</span>
@@ -12103,10 +12106,10 @@ function _showChipSquadPanel(chipType, gw, squad, gwIdx, alreadyApplied, targetI
     const inMySquad = [..._xiPlayers, ..._benchPlayers].some(sq => sq.id === p.id);
     const btnCls = inMySquad
       ? 'style="background:rgba(34,197,94,.15);color:#22c55e;border:1px solid #22c55e44;border-radius:5px;padding:3px 10px;font-size:.75rem;font-weight:600;cursor:default;"'
-      : `style="background:rgba(255,255,255,.08);color:var(--muted);border:1px solid var(--border);border-radius:5px;padding:3px 10px;font-size:.75rem;font-weight:600;cursor:pointer;" onclick="_applyOneTransfer(${p.id}, window._lastChipSquad, window._lastChipGwIdx)"`;
+      : `style="background:#F1EFE8;color:var(--muted);border:1px solid var(--border);border-radius:5px;padding:3px 10px;font-size:.75rem;font-weight:600;cursor:pointer;" onclick="_applyOneTransfer(${p.id}, window._lastChipSquad, window._lastChipGwIdx)"`;
     const btnLabel = inMySquad ? '✓ In squad' : 'Apply';
     html += `
-      <div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.05);opacity:.75;">
+      <div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid rgba(0,0,0,.06);opacity:.75;">
         ${img}
         <div style="flex:1;">
           <span style="font-weight:600;">${p.web_name}</span>
@@ -16434,7 +16437,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781118203-GW32-6d27131e</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781129324-GW32-6d27131e</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
