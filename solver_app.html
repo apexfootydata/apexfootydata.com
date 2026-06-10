@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-06-10T19:53:20">
+<meta name="apex-gw" content="32" data-built-at="2026-06-10T20:03:23">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -9087,7 +9087,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1781117600-GW32-6d27131e";
+const BUILD_VERSION = "1781118203-GW32-6d27131e";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -16434,7 +16434,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781117600-GW32-6d27131e</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781118203-GW32-6d27131e</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
@@ -17260,8 +17260,10 @@ document.addEventListener('DOMContentLoaded', () => {
 @media (max-width: 480px) {
     /* 2026-06-06: top padding clears the absolute cost badge so it no longer
        overlaps the GK; was 22px. */
-    .pitch { padding: 78px 8px 14px !important; }
-    .pitch-row { gap: 4px !important; margin-bottom: 12px !important; }
+    /* 2026-06-10: side padding 8→14px — the absolute ⊗/⏱ controls hang
+       outside the kits and were clipping at both screen edges on 5-man rows. */
+    .pitch { padding: 78px 14px 14px !important; }
+    .pitch-row { gap: 3px !important; margin-bottom: 10px !important; }
 
     /* doubled-class selectors out-rank the desktop XL rules
        (.pitch .shirt 140px !important + min-width) on phones */
