@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-06-10T23:08:44">
+<meta name="apex-gw" content="32" data-built-at="2026-06-11T00:25:20">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -6026,6 +6026,10 @@ html.apex-offseason #view-landing .hero-sub::after {
       <span class="cr-cost-label">Hits</span>
       <span class="cr-cost" id="pp-hits">0</span>
     </div>
+    <!-- Start over (2026-06-11, UAT bug 3): shown only when the planner trunk
+         was restored from an applied/saved plan — wipes the plan (resetSolver)
+         and grows a fresh tree. Toggled by _renderPathCards. -->
+    <button class="cr-back-btn" type="button" id="pp-startover-btn" onclick="_ppStartOver()" style="display:none;">↺ Start over</button>
     <button class="cr-apply-btn" type="button" id="pp-apply-btn" onclick="confirmPathPlan()" style="display:none;">✓ Apply Plan to Squad</button>
   </div>
   <main class="container">
@@ -6455,6 +6459,40 @@ html.apex-offseason #view-landing .hero-sub::after {
       'ApexSolver: GLPK not initialised — call ApexSolver.setGLPK(await GLPK()) first.'
     );
     return _glpk;
+  }
+
+  // ── Background-safe yield (2026-06-11, UAT backgrounded-tab freeze) ──────
+  // Chunked computes used to yield with `await new Promise(r => setTimeout(r, 0))`.
+  // Chrome throttles setTimeout to >=1s per tick in hidden/occluded tabs, so a
+  // loop with a few hundred yields (e.g. the 1500-sample confidence resamplers)
+  // ground for 10+ minutes the moment the user switched tabs — only a reload
+  // recovered. MessageChannel port messages are macrotasks that are NOT
+  // throttled in background tabs: visible tabs keep the same paint/input
+  // interleaving, hidden tabs run at full speed. Falls back to setTimeout
+  // (then a resolved promise) in environments without MessageChannel (vm/Node
+  // test contexts). Queue-based so overlapping computes can't steal each
+  // other's wakeup (a single shared onmessage handler resolves FIFO — message
+  // delivery order matches post order, so resolution order is correct).
+  let _yieldChannel = null;
+  const _yieldQueue = [];
+  function _apexYield() {
+    if (typeof MessageChannel === 'function') {
+      if (!_yieldChannel) {
+        _yieldChannel = new MessageChannel();
+        _yieldChannel.port1.onmessage = function () {
+          const resolve = _yieldQueue.shift();
+          if (resolve) resolve();
+        };
+      }
+      return new Promise(function (resolve) {
+        _yieldQueue.push(resolve);
+        _yieldChannel.port2.postMessage(null);
+      });
+    }
+    if (typeof setTimeout === 'function') {
+      return new Promise(function (r) { setTimeout(r, 0); });
+    }
+    return Promise.resolve();
   }
 
   // ── Free Hit / Wildcard constants (mirror apex_fpl_solver.py) ──────────
@@ -7295,9 +7333,11 @@ html.apex-offseason #view-landing .hero-sub::after {
         freq.set(p.id, (freq.get(p.id) || 0) + 1);
       }
       if (onProgress) onProgress(n + 1, nSamples);
-      // Yield to UI every 4 samples so progress renders (browser only — setTimeout may be absent in vm contexts).
-      if ((n & 3) === 3 && typeof setTimeout === 'function') {
-        await new Promise(r => setTimeout(r, 0));
+      // Yield to UI every 4 samples so progress renders. MessageChannel-based
+      // (_apexYield) — NOT setTimeout, which background tabs throttle to >=1s
+      // per tick and turned this loop into a 10+ minute grind when hidden.
+      if ((n & 3) === 3) {
+        await _apexYield();
       }
     }
 
@@ -7404,8 +7444,9 @@ html.apex-offseason #view-landing .hero-sub::after {
         freq.set(p.id, (freq.get(p.id) || 0) + 1);
       }
       if (onProgress) onProgress(n + 1, nSamples);
-      if ((n & 1) === 1 && typeof setTimeout === 'function') {
-        await new Promise(r => setTimeout(r, 0));
+      // Background-safe yield — see runConfidenceFH note (_apexYield).
+      if ((n & 1) === 1) {
+        await _apexYield();
       }
     }
 
@@ -9090,7 +9131,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1781129324-GW32-6d27131e";
+const BUILD_VERSION = "1781133919-GW32-6d27131e";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -10113,12 +10154,23 @@ function selectPreset(name) {
       && typeof CHIP_PLANNER !== 'undefined' && CHIP_PLANNER) {
     // Re-arm lazy so _ensureChipPlannerLoaded actually re-runs the solve.
     CHIP_PLANNER._lazy = true;
+    // 2026-06-11 (UAT bug 1b): this instant re-solve is a ~30-40s recompute
+    // (per-GW WC+FH ILPs) that ran with NO overlay when triggered from the
+    // landing/team preset bar — its only feedback paints into the Chip
+    // Planner tab, which the user may not even be on, so the page looked
+    // dead. Reuse the planner's compositor-driven overlay (its CSS spinner
+    // keeps animating through main-thread blocks) for the duration.
+    if (typeof _ppShowComputing === 'function') {
+      _ppShowComputing(`Re-solving chip strategy for the ${(_HERO_PRESET_LABEL && _HERO_PRESET_LABEL[name]) || name} profile…`);
+    }
     _ensureChipPlannerLoaded().then(function () {
       if (typeof currentView !== 'undefined' && currentView === 'optimal'
           && typeof initOptimalView === 'function') {
         initOptimalView();
       }
-    }).catch(function () {});
+    }).catch(function () {}).finally(function () {
+      if (typeof _ppHideComputing === 'function') _ppHideComputing();
+    });
   }
 }
 
@@ -12213,8 +12265,17 @@ function confirmChipReview() {
   if (chipType === 'WC') {
     // Wildcard = permanent squad change. Open the path planner so the user
     // can walk through GW-by-GW transfer planning from here.
+    // 2026-06-11 (UAT bug 1b): this entry used to call _openPathPlanner
+    // directly — a multi-second synchronous compute with NO overlay, so the
+    // page looked crashed (the runSolve / _selectPathOption entries already
+    // paint one). Same pattern as runSolve: paint the compositor-driven
+    // overlay first, then kick the heavy work on the next tick.
     const chipGw = TEAM_META.gw_range[gwIdx];
-    _openPathPlanner(chipType, chipGw, squad, gwIdx);
+    _ppShowComputing(`Building your WC GW${chipGw} plan…`);
+    setTimeout(() => {
+      try { _openPathPlanner(chipType, chipGw, squad, gwIdx); }
+      finally { _ppHideComputing(); }
+    }, 80);
     return;
   }
   // Free Hit = one-week swap. Apply to active GW, return to team view.
@@ -12433,6 +12494,7 @@ const _pathPlanner = {
   totalHits: 0,           // hit count (-4 each); v1 always 0 since 1-transfer max
   selections: [],         // committed choices per GW
   initialChipSquad: [],   // chip squad before any transfers — used by confirmPathPlan
+  restoredFromSaved: false, // trunk rebuilt from an applied/saved plan (2026-06-11)
 };
 
 // SP-aware effective cost — same formula as the rest of the solver.
@@ -12865,6 +12927,7 @@ function _openPathPlanner(chipType, chipGw, chipSquad, chipGwIdx) {
   _pathPlanner.workingFt        = 1;  // standard FT after a chip GW
   _pathPlanner.selections       = [];
   _pathPlanner.totalHits        = 0;
+  _pathPlanner.restoredFromSaved = false;  // chip flow always starts fresh
 
   // Compute starting bank from the chip squad's spend
   const chipCost = chipSquad.reduce((s, p) => s + _ppEffCost(p), 0);
@@ -12907,6 +12970,129 @@ function _openPathPlanner(chipType, chipGw, chipSquad, chipGwIdx) {
   if (window.scrollTo) window.scrollTo(0, 0);
 }
 
+// ── Saved-plan trunk restore (2026-06-11, UAT bug 3) ────────────────────────
+// After "✓ Apply Plan to Squad", _savedGwSquads holds the planned 15 for every
+// committed horizon GW (and localStorage persistence rebuilds those entries on
+// reload via _restorePlanState → _ppCommitToLive). Reopening the planner used
+// to WIPE that state and start a fresh tree at Total 0.0 — the applied plan
+// was forgotten. This rebuilds the locked trunk by diffing consecutive saved
+// squads (SQUAD_DATA — the user's real FPL squad — is the pre-plan baseline),
+// recomputing per-GW xP / bank / FT / hits with the same helpers the live walk
+// uses, then resumes at the first unplanned GW (or the summary card when the
+// whole horizon was committed). Returns true when a trunk was restored;
+// returns false (caller builds a fresh tree) when there's nothing saved or
+// the diff can't be expressed as planner moves (e.g. a >2-player chip rebuild).
+function _ppRestoreFromSaved(startGwIdx) {
+  try {
+    const horizonEnd = TEAM_META.gw_range.length;
+    const baseSquad = (typeof SQUAD_DATA !== 'undefined' && Array.isArray(SQUAD_DATA)
+      && SQUAD_DATA.length === 15) ? SQUAD_DATA : null;
+    if (!baseSquad) return false;
+
+    // Contiguous run of coherent saved squads from the start GW forward.
+    const savedRun = [];
+    for (let i = startGwIdx; i < horizonEnd; i++) {
+      const s = _savedGwSquads[i];
+      if (!s || !Array.isArray(s.xi) || !Array.isArray(s.bench)) break;
+      const squad = [...s.xi, ...s.bench];
+      if (squad.length !== 15 || !squad.every(Boolean)) break;
+      savedRun.push({ gwIdx: i, squad });
+    }
+    if (!savedRun.length) return false;
+
+    let prev    = baseSquad;
+    let bank    = (TEAM_META && TEAM_META.bank) || 0;
+    let ft      = (TEAM_META && TEAM_META.free_transfers) || 1;
+    let totalXp = 0, totalHits = 0;
+    const selections = [];
+    for (const step of savedRun) {
+      const prevIds = new Set(prev.map(p => p.id));
+      const curIds  = new Set(step.squad.map(p => p.id));
+      const outs = prev.filter(p => !curIds.has(p.id));
+      const ins  = step.squad.filter(p => !prevIds.has(p.id));
+      // >2 swaps in one GW = chip-style rebuild — not a planner move; bail to fresh.
+      if (outs.length !== ins.length || outs.length > 2) return false;
+      // Pair outs→ins by position so two-transfer rows read sensibly.
+      outs.sort((a, b) => (a.element_type || 0) - (b.element_type || 0));
+      ins.sort((a, b) => (a.element_type || 0) - (b.element_type || 0));
+      const txUsed  = outs.length;
+      const hitCost = Math.max(0, txUsed - ft) * 4;
+      let evGain = 0;
+      for (let k = 0; k < txUsed; k++) {
+        evGain += _ppHorizonXp(ins[k], step.gwIdx) - _ppHorizonXp(outs[k], step.gwIdx);
+        bank   += _ppEffCost(outs[k]) - (ins[k].cost || 0);
+      }
+      const gwXp = _ppBestXiTotal(step.squad, step.gwIdx).total;
+      selections.push({
+        gwIdx: step.gwIdx,
+        gw: TEAM_META.gw_range[step.gwIdx],
+        type: txUsed === 0 ? 'none' : (txUsed === 1 ? 'one' : 'two'),
+        out:  outs[0] || null, in:  ins[0] || null,
+        out2: outs[1] || undefined, in2: ins[1] || undefined,
+        evGain: evGain,
+        netEv:  evGain - hitCost,
+        hitCost: hitCost,
+        gwXp: gwXp,
+        bankAfter: bank,
+        ftAfter: Math.min(5, ft - txUsed + 1),
+      });
+      ft = Math.min(5, ft - txUsed + 1);
+      totalXp   += gwXp;
+      totalHits += hitCost / 4;
+      prev = step.squad;
+    }
+
+    // Evidence gate: _savePlanState snapshots the live pitch for the ACTIVE GW
+    // on every interaction (updateChipTotal piggyback), so a saved squad can
+    // exist with zero planning. Only treat the run as "an applied plan" when
+    // at least one GW actually moved a player — an all-roll trunk is
+    // indistinguishable from no plan at all and must open a fresh tree.
+    if (!selections.some(s => s.type !== 'none')) return false;
+
+    _pathPlanner.active            = true;
+    _pathPlanner.startChipType     = null;
+    _pathPlanner.startChipGw       = null;
+    _pathPlanner.startGwIdx        = startGwIdx;
+    _pathPlanner.currentGwIdx      = savedRun[savedRun.length - 1].gwIdx + 1;
+    _pathPlanner.workingSquad      = prev.slice();
+    _pathPlanner.initialChipSquad  = baseSquad.slice();
+    _pathPlanner.workingBank       = Math.max(0, bank);
+    _pathPlanner.workingFt         = ft;
+    _pathPlanner.totalXp           = totalXp;
+    _pathPlanner.totalHits         = totalHits;
+    _pathPlanner.selections        = selections;
+    _pathPlanner.restoredFromSaved = true;
+    // Fresh lookahead memo for any further planning from the restored state.
+    for (const k of Object.keys(_ppLookaheadCache)) delete _ppLookaheadCache[k];
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+// "↺ Start over" (2026-06-11) — discard the applied/saved plan and grow a
+// fresh tree from the user's real squad. Reuses the existing reset machinery:
+// resetSolver is the established plan-wipe contract (clears the localStorage
+// plan, _savedGwSquads, per-GW deltas, restores SQUAD_DATA to the pitch),
+// then the planner reopens with the restore bypass set. Overlay + next-tick
+// pattern matches every other entry into the heavy planner compute.
+let _ppForceFresh = false;
+function _ppStartOver() {
+  const sIdx = (typeof activeGwIdx === 'number') ? activeGwIdx : (_pathPlanner.startGwIdx || 0);
+  const _gwNow = TEAM_META.gw_range[sIdx];
+  _ppShowComputing(`Starting a fresh GW${_gwNow} plan…`);
+  setTimeout(() => {
+    try {
+      _ppForceFresh = true;
+      if (typeof resetSolver === 'function') resetSolver();
+      _openPathPlannerFromCurrent(sIdx);
+    } finally {
+      _ppForceFresh = false;
+      _ppHideComputing();
+    }
+  }, 80);
+}
+
 // Open path planner from the user's CURRENT live squad (no chip in play).
 // First card is the active GW itself, walking forward to end of horizon.
 function _openPathPlannerFromCurrent(startGwIdx) {
@@ -12915,6 +13101,17 @@ function _openPathPlannerFromCurrent(startGwIdx) {
     // Defensive: fall through to inline recs if squad isn't fully hydrated.
     return false;
   }
+
+  // Resume an applied/saved plan instead of wiping it (2026-06-11, UAT bug 3).
+  // _ppStartOver() sets _ppForceFresh to bypass this and get the legacy
+  // fresh-tree behaviour on demand.
+  if (!_ppForceFresh && _ppRestoreFromSaved(startGwIdx)) {
+    switchView('path-planner');
+    _renderPathCards();
+    if (window.scrollTo) window.scrollTo(0, 0);
+    return true;
+  }
+  _pathPlanner.restoredFromSaved = false;
 
   _pathPlanner.active            = true;
   _pathPlanner.startChipType     = null;
@@ -12966,6 +13163,10 @@ function _renderPathCards() {
   if (totalEl) totalEl.textContent = _pathPlanner.totalXp.toFixed(1);
   const hitsEl = document.getElementById('pp-hits');
   if (hitsEl) hitsEl.textContent = _pathPlanner.totalHits;
+  // "↺ Start over" only surfaces when the trunk was restored from an applied/
+  // saved plan (2026-06-11) — a fresh walk already discards via ← Back / Esc.
+  const startOverBtn = document.getElementById('pp-startover-btn');
+  if (startOverBtn) startOverBtn.style.display = _pathPlanner.restoredFromSaved ? 'inline-block' : 'none';
 
   // Render committed selections (locked cards)
   for (const sel of _pathPlanner.selections) {
@@ -13587,6 +13788,38 @@ function confirmPathPlan() {
   for (let i = _pathPlanner.currentGwIdx; i < horizonEnd; i++) {
     _ppCommitToLive(i, _pathPlanner.workingSquad);
   }
+
+  // ── Engine-picks card → applied state (2026-06-11, UAT bug 2) ────────────
+  // Before this, the squad page's "Engine picks" card kept showing the
+  // PRE-plan recommendations after Apply Plan — including selling players the
+  // plan had already sold (Ekitiké in UAT) — and never showed the ✓ applied
+  // state that Quick Optimise sets. Re-running the weekly picks engine here
+  // would be UNSOUND: the applied plan has already consumed this GW's (and
+  // every future GW's) transfers, so fresh "best single move" picks would
+  // stack on top of the plan and contradict it. Simplest correct behaviour:
+  // flip the card into a plan-applied confirmation (same dataset.applied lock
+  // Quick Optimise uses, so _renderRecoPreview stops repainting stale picks)
+  // summarising the plan. ↺ Reset clears the lock and the preview resumes
+  // (resetSolver already deletes dataset.applied + repaints).
+  try {
+    const _reco = document.getElementById('engine-picks');
+    if (_reco) {
+      const _gwA = TEAM_META.gw_range[_pathPlanner.startGwIdx];
+      const _gwB = TEAM_META.gw_range[horizonEnd - 1];
+      const _txSels = _pathPlanner.selections.filter(s => s.type === 'one' || s.type === 'two');
+      const _nTx = _txSels.reduce((n, s) => n + (s.type === 'two' ? 2 : 1), 0);
+      let _h = `<div class="va-reco-title">✓ Plan applied · GW${_gwA}–GW${_gwB}</div>`;
+      _h += `<div class="va-reco-row"><span class="va-reco-move">${_nTx} transfer${_nTx === 1 ? '' : 's'} committed${_pathPlanner.totalHits > 0 ? ` · ${_pathPlanner.totalHits} hit${_pathPlanner.totalHits > 1 ? 's' : ''}` : ''}</span>`
+        + `<span class="va-reco-gain">${_pathPlanner.totalXp.toFixed(1)} pts</span></div>`;
+      for (const s of _txSels.slice(0, 3)) {
+        _h += `<div class="va-reco-row" style="opacity:.8;"><span class="va-reco-move">GW${s.gw} · ${s.out ? s.out.web_name : '?'} <span class="va-reco-arr">→</span> ${s.in ? s.in.web_name : '?'}${s.type === 'two' ? ' +1' : ''}</span></div>`;
+      }
+      _h += `<div style="font-size:.8rem;color:var(--muted);margin-top:6px;">Engine picks resume next GW · reopen <strong>plan ahead →</strong> to review, or ↺ Reset to discard</div>`;
+      _reco.dataset.applied = '1';
+      _reco.innerHTML = _h;
+      _reco.style.display = 'block';
+    }
+  } catch (e) { /* non-critical — picks card is cosmetic */ }
 
   exitPathPlanner();
   // Pulse the pitch to confirm the swap landed
@@ -16437,7 +16670,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781129324-GW32-6d27131e</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781133919-GW32-6d27131e</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
