@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-06-10T17:29:22">
+<meta name="apex-gw" content="32" data-built-at="2026-06-10T17:33:28">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — FPL Apex</title>
@@ -42,7 +42,7 @@
    Teal #1D9E75 = primary action / chosen path · blue #2563eb = template /
    field-cover · warm greys for chrome. v3 black/orange retired. */
 :root {
-  --bg: #F4F3EC;
+  --bg: #FAF7F1;   /* banner cream — single cream everywhere (2026-06-10) */
   --bg2: #FFFFFF;
   --bg3: #F1EFE8;
   --border: #D9D7CC;
@@ -9076,7 +9076,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1781108962-GW32-6d27131e";
+const BUILD_VERSION = "1781109208-GW32-6d27131e";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -16423,7 +16423,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781108962-GW32-6d27131e</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781109208-GW32-6d27131e</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
@@ -16546,7 +16546,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('DOMContentLoaded', function () {
     var overlay = document.createElement('div');
     overlay.id = 'apex-public-boot';
-    overlay.style.cssText = 'position:fixed;inset:0;background:#F4F3EC;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:Plus Jakarta Sans,sans-serif;color:#1E1E1A;padding:20px;';
+    overlay.style.cssText = 'position:fixed;inset:0;background:#FAF7F1;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:Plus Jakarta Sans,sans-serif;color:#1E1E1A;padding:20px;';
     overlay.innerHTML =
       '<div style="font-size:1.5rem;font-weight:700;margin-bottom:20px;letter-spacing:-.01em;">' +
       '<span style="font-weight:800;">FPL </span><span style="font-weight:800;color:#1D9E75;">APEX</span></div>' +
