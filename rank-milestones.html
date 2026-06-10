@@ -178,8 +178,10 @@
 @media (max-width: 480px) {
     /* 2026-06-06: top padding clears the absolute cost badge so it no longer
        overlaps the GK; was 22px. */
-    .pitch { padding: 78px 8px 14px !important; }
-    .pitch-row { gap: 4px !important; margin-bottom: 12px !important; }
+    /* 2026-06-10: side padding 8→14px — the absolute ⊗/⏱ controls hang
+       outside the kits and were clipping at both screen edges on 5-man rows. */
+    .pitch { padding: 78px 14px 14px !important; }
+    .pitch-row { gap: 3px !important; margin-bottom: 10px !important; }
 
     /* doubled-class selectors out-rank the desktop XL rules
        (.pitch .shirt 140px !important + min-width) on phones */
