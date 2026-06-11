@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-06-11T18:34:12">
+<meta name="apex-gw" content="32" data-built-at="2026-06-11T19:09:46">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -9205,7 +9205,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1781199252-GW32-b1cdc621";
+const BUILD_VERSION = "1781201386-GW32-b1cdc621";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -13917,7 +13917,8 @@ function _renderPathTree() {
   // Trunk squad cards (2026-06-11, Marcus: "full squad on each GW box, like
   // Solio") — each locked GW is a full-squad card, not a one-line label.
   // Also retires the old long labels that overflowed the 172px nodes.
-  const TW = 152, TGAP = 34, CH = 266;
+  // 2026-06-11 Marcus (75% zoom): bigger type → wider/taller cards.
+  const TW = 178, TGAP = 34, CH = 300;
   const nLocked = sels.length;
   const branchX = 20 + NW + TGAP + nLocked * (TW + TGAP);
   const futN = done ? 0 : Math.max(0, horizonEnd - cur - 1);
@@ -13990,7 +13991,19 @@ function _renderPathTree() {
   sels.forEach((sel, i) => {
     const x = 20 + NW + TGAP + i * (TW + TGAP);
     s += line(px + pxw, spineY, x, spineY, TEAL);
-    const sq = _savedGwSquads[sel.gwIdx];
+    let sq = _savedGwSquads[sel.gwIdx];
+    // Chip-flow starter week (e.g. WC GW32) isn't committed to _savedGwSquads
+    // until Apply — synthesise its card from the chip squad so the trunk
+    // never opens with a bare node (Marcus screenshot 2026-06-11).
+    if ((!sq || !Array.isArray(sq.xi) || sq.xi.length !== 11)
+        && sel.type === 'chip' && sel.gwIdx === _pathPlanner.startGwIdx
+        && _pathPlanner.initialChipSquad && _pathPlanner.initialChipSquad.length === 15) {
+      try {
+        const r0 = pickBestXi(_pathPlanner.initialChipSquad, sel.gwIdx);
+        sq = { xi: r0.xi, bench: _orderBench(r0.bench),
+               capId: r0.cap ? r0.cap.id : null, vcId: r0.vc ? r0.vc.id : null };
+      } catch (_e) { /* fall through to compact node */ }
+    }
     const isTc = sel.type === 'chip' && sel.chipType === 'TC';
     const isBb = sel.type === 'chip' && sel.chipType === 'BB';
     const chipTag = sel.type === 'chip' ? ` · 🎴${sel.chipType}` : (sel.type === 'two' ? ' · 2 tx' : (sel.type === 'one' ? ' · 1 tx' : ' · roll'));
@@ -13999,25 +14012,25 @@ function _renderPathTree() {
       const xiRows = [...sq.xi].sort((a, b) =>
         ((a.element_type || 0) - (b.element_type || 0)) || (_xpAt(b, sel.gwIdx) - _xpAt(a, sel.gwIdx)));
       let g = `<g><rect x="${x}" y="${TOP}" width="${TW}" height="${CH}" rx="12" fill="#ffffff" stroke="${TEAL}" stroke-width="1.6"/>`
-        + `<rect x="${x}" y="${TOP}" width="${TW}" height="40" rx="12" fill="${TEAL_BG}"/>`
-        + `<rect x="${x}" y="${TOP + 28}" width="${TW}" height="12" fill="${TEAL_BG}"/>`
-        + `<text x="${x + 10}" y="${TOP + 18}" font-size="13.5" font-weight="800" fill="${TEAL_T}">GW${sel.gw} ✓${esc(chipTag)}</text>`
-        + `<text x="${x + 10}" y="${TOP + 33}" font-size="10" font-weight="700" fill="${TEAL_S}">${(sel.gwXp || 0).toFixed(1)} pts${sel.hitCost > 0 ? ` · −${sel.hitCost} hit` : ''}</text>`;
-      let ry = TOP + 54;
+        + `<rect x="${x}" y="${TOP}" width="${TW}" height="44" rx="12" fill="${TEAL_BG}"/>`
+        + `<rect x="${x}" y="${TOP + 32}" width="${TW}" height="12" fill="${TEAL_BG}"/>`
+        + `<text x="${x + 11}" y="${TOP + 20}" font-size="15.5" font-weight="800" fill="${TEAL_T}">GW${sel.gw} ✓${esc(chipTag)}</text>`
+        + `<text x="${x + 11}" y="${TOP + 37}" font-size="11.5" font-weight="700" fill="${TEAL_S}">${(sel.gwXp || 0).toFixed(1)} pts${sel.hitCost > 0 ? ` · −${sel.hitCost} hit` : ''}</text>`;
+      let ry = TOP + 60;
       const row = (p, isBench) => {
         const isCap = sq.capId === p.id, isVc = sq.vcId === p.id;
         const mark = isCap ? (isTc ? ' (C×3)' : ' (C)') : (isVc ? ' (V)' : '');
         const fill = isBench ? (isBb ? TEAL_S : GREY_S) : TEAL_T;
         const w = isCap ? '800' : (inIds.has(p.id) ? '700' : '500');
-        const r = `<text x="${x + 10}" y="${ry}" font-size="10.5" font-weight="${w}" fill="${fill}">`
+        const r = `<text x="${x + 11}" y="${ry}" font-size="12" font-weight="${w}" fill="${fill}">`
           + `<tspan fill="${GREY_S}" font-weight="700">${posL[p.element_type] || ''}</tspan>`
-          + `<tspan dx="5">${inIds.has(p.id) ? '› ' : ''}${nm(p, 12)}${mark}</tspan></text>`;
-        ry += 13.5;
+          + `<tspan dx="6">${inIds.has(p.id) ? '› ' : ''}${nm(p, 13)}${mark}</tspan></text>`;
+        ry += 16;
         return r;
       };
       for (const p of xiRows) g += row(p, false);
       ry += 3;
-      g += `<line x1="${x + 8}" y1="${ry - 9}" x2="${x + TW - 8}" y2="${ry - 9}" stroke="${GREY}" stroke-width="0.8" opacity="0.5"/>`;
+      g += `<line x1="${x + 9}" y1="${ry - 11}" x2="${x + TW - 9}" y2="${ry - 11}" stroke="${GREY}" stroke-width="0.8" opacity="0.5"/>`;
       for (const p of (sq.bench || [])) g += row(p, true);
       g += '</g>';
       s += g;
@@ -17576,7 +17589,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781199252-GW32-b1cdc621</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781201386-GW32-b1cdc621</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
