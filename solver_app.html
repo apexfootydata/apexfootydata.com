@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-06-11T10:56:53">
+<meta name="apex-gw" content="32" data-built-at="2026-06-11T11:10:28">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -9134,7 +9134,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1781171813-GW32-6d27131e";
+const BUILD_VERSION = "1781172628-GW32-6d27131e";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -13358,6 +13358,20 @@ function _renderPathTree() {
 
   // Branches: top 3 ranked options, plus Roll FT if it didn't make the cut.
   let branches = opts.slice(0, 3);
+  // 2026-06-11: NO-HIT GUARANTEE — when the engine best is a double-with-hit,
+  // the most natural user desire is its single-transfer sibling ("just the
+  // Ekitiké move, no hit"). If no single sharing one of the best double's
+  // moves made the top 3, inject the best such single as a branch so the
+  // no-hit route is always one tap away (it previously hid behind the list).
+  if (branches.length && branches[0].type === 'two' && branches[0].hitCost > 0) {
+    const b = branches[0];
+    const isSib = (o) => o.type === 'one' && o.out && o.in
+      && ((b.out && o.out.id === b.out.id) || (b.out2 && o.out.id === b.out2.id));
+    if (!branches.some(isSib)) {
+      const sib = opts.find(isSib);
+      if (sib) branches.splice(2, 1, sib);  // replace 3rd slot, keep top-2
+    }
+  }
   if (opts.length && !branches.some(o => o.type === 'none')) {
     const roll = opts.find(o => o.type === 'none');
     if (roll) branches.push(roll);
@@ -16866,7 +16880,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781171813-GW32-6d27131e</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781172628-GW32-6d27131e</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
