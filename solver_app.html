@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-06-11T14:58:41">
+<meta name="apex-gw" content="32" data-built-at="2026-06-11T15:26:49">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -9152,7 +9152,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1781186321-GW32-b1cdc621";
+const BUILD_VERSION = "1781188009-GW32-b1cdc621";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -10362,6 +10362,7 @@ function resetSolver() {
   // Wipe per-GW transfer plan state
   for (const k of Object.keys(_transfersAppliedByGw)) delete _transfersAppliedByGw[k];
   for (const k of Object.keys(_rollFTByGw)) delete _rollFTByGw[k];
+  window._appliedRecMoves = [];   // 2026-06-11: applied-move record (FT/bank debit)
 
   // Zero deltas across every GW
   for (let i = 0; i < _xiDelta.length; i++)    _xiDelta[i] = 0;
@@ -11717,6 +11718,9 @@ function _applyTransferRec(inId, outId) {
   // Find inPlayer from POOL_DATA
   const inPlayer = POOL_DATA.find(p => p.id === inId);
   if (!inPlayer) { alert('Player data not found.'); return; }
+  // 2026-06-11 (Marcus live find): capture the outgoing player BEFORE the swap
+  // so the applied move can be recorded with its bank delta (see below).
+  const _outPlayerRec = [..._xiPlayers, ..._benchPlayers].find(p => p.id === outId) || null;
 
   // Build updated 15-player squad: replace outId with inPlayer wherever they sit
   const fullSquad = [..._xiPlayers, ..._benchPlayers].map(p => p.id === outId ? inPlayer : p);
@@ -11742,6 +11746,20 @@ function _applyTransferRec(inId, outId) {
   // automatically by getTotal → updateChipTotal below.
   _transfersAppliedByGw[activeGwIdx] = (_transfersAppliedByGw[activeGwIdx] || 0) + 1;
   _rollFTByGw[activeGwIdx] = false;   // can't be rolling if we just made a transfer
+  // 2026-06-11 (Marcus live find): record WHICH move was applied, with its
+  // bank delta (sell out at SP, buy in at cost). The Path Planner debits these
+  // on open — without it, "plan ahead" after Quick Optimise priced a 2-transfer
+  // branch at −4 when the FT was already spent (really −8) and read a stale bank.
+  try {
+    window._appliedRecMoves = window._appliedRecMoves || [];
+    const _sellP = _outPlayerRec
+      ? ((typeof _effCost === 'function') ? _effCost(_outPlayerRec) : (+_outPlayerRec.cost || 0))
+      : 0;
+    window._appliedRecMoves.push({
+      gwIdx: activeGwIdx, inId: inId, outId: outId,
+      bankDelta: _sellP - (+inPlayer.cost || 0),
+    });
+  } catch (_eRec) {}
 
   _renderPitchFromState();
   updateChipTotal();
@@ -13401,6 +13419,9 @@ async function _openPathPlannerFromCurrent(startGwIdx) {
   // _ppForceFresh: the caller's `finally` can't run until we resolve.)
   await _ppNextPaint();
 
+  // Root-label state from any prior session must not leak into this open.
+  _pathPlanner.rootFt = null; _pathPlanner.rootBank = null; _pathPlanner.preAppliedTx = 0;
+
   // Resume an applied/saved plan instead of wiping it (2026-06-11, UAT bug 3).
   // _ppStartOver() sets _ppForceFresh to bypass this and get the legacy
   // fresh-tree behaviour on demand.
@@ -13419,8 +13440,19 @@ async function _openPathPlannerFromCurrent(startGwIdx) {
   _pathPlanner.currentGwIdx      = startGwIdx;  // active card = THIS GW
   _pathPlanner.workingSquad      = liveSquad.slice();
   _pathPlanner.initialChipSquad  = liveSquad.slice();   // re-applied on Confirm
-  _pathPlanner.workingFt         = (TEAM_META && TEAM_META.free_transfers) || 1;
-  _pathPlanner.workingBank       = (TEAM_META && TEAM_META.bank) || 0;
+  // 2026-06-11 (Marcus live find): debit transfers already applied to the
+  // pitch this GW (Quick Optimise / per-path Apply). The squad we open from
+  // ALREADY contains those moves — raw TEAM_META values priced a 2-transfer
+  // branch at −4 when the FT was in fact spent (really −8) and read a stale bank.
+  const _preTx = (typeof _transfersAppliedByGw !== 'undefined'
+    && _transfersAppliedByGw && _transfersAppliedByGw[startGwIdx]) || 0;
+  const _preMoves = (window._appliedRecMoves || []).filter(m => m && m.gwIdx === startGwIdx);
+  const _preBankDelta = _preMoves.reduce((s, m) => s + (+m.bankDelta || 0), 0);
+  _pathPlanner.workingFt         = Math.max(0, ((TEAM_META && TEAM_META.free_transfers) || 1) - _preTx);
+  _pathPlanner.workingBank       = ((TEAM_META && TEAM_META.bank) || 0) + _preBankDelta;
+  _pathPlanner.preAppliedTx      = _preTx;
+  _pathPlanner.rootFt            = _pathPlanner.workingFt;
+  _pathPlanner.rootBank          = _pathPlanner.workingBank;
   _pathPlanner.totalXp           = 0;
   _pathPlanner.totalHits         = 0;
   _pathPlanner.selections        = [];   // no locked chip card
@@ -13607,7 +13639,9 @@ function _renderPathTree() {
   let px = 20;
   const py = midY - NH / 2;
   s += node(px, py, 'Your team',
-    `FT ${(TEAM_META && TEAM_META.free_transfers) || 1} · £${((TEAM_META && TEAM_META.bank) || 0).toFixed(1)}m bank`,
+    `FT ${_pathPlanner.rootFt != null ? _pathPlanner.rootFt : ((TEAM_META && TEAM_META.free_transfers) || 1)}`
+      + `${_pathPlanner.preAppliedTx ? ` (${_pathPlanner.preAppliedTx} applied)` : ''}`
+      + ` · £${(_pathPlanner.rootBank != null ? _pathPlanner.rootBank : ((TEAM_META && TEAM_META.bank) || 0)).toFixed(1)}m bank`,
     GREY, GREY_BG, GREY_T, GREY_S);
   sels.forEach((sel, i) => {
     const x = 20 + (i + 1) * COL;
@@ -17053,7 +17087,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781186321-GW32-b1cdc621</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781188009-GW32-b1cdc621</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
