@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-06-11T15:42:31">
+<meta name="apex-gw" content="32" data-built-at="2026-06-11T16:46:30">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -9152,7 +9152,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1781188951-GW32-b1cdc621";
+const BUILD_VERSION = "1781192789-GW32-b1cdc621";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -10367,6 +10367,7 @@ function resetSolver() {
   for (const k of Object.keys(_transfersAppliedByGw)) delete _transfersAppliedByGw[k];
   for (const k of Object.keys(_rollFTByGw)) delete _rollFTByGw[k];
   window._appliedRecMoves = [];   // 2026-06-11: applied-move record (FT/bank debit)
+  window._ppChipPlays = [];       // 2026-06-11: chips-in-tree play record
 
   // Zero deltas across every GW
   for (let i = 0; i < _xiDelta.length; i++)    _xiDelta[i] = 0;
@@ -11955,6 +11956,10 @@ function _savePlanState() {
         // 2026-06-11 (Marcus live find): Quick-Optimise applied-move record
         // (planner FT/bank debit + picks-card lock) must survive reload too.
         recMoves: (window._appliedRecMoves || []),
+        // 2026-06-11 chips-in-tree: mid-walk chip plays (BB/TC markers + the
+        // FH week) must survive reload so _ppRestoreFromSaved can re-mark
+        // them — a squad diff alone can't see BB/TC and reads FH as a rebuild.
+        ppChips: (window._ppChipPlays || []),
       }));
     } catch (_e) {}
   }, 400);
@@ -11998,6 +12003,7 @@ function _restorePlanState() {
     // the record, and the preview repainted fresh "Engine picks" — from the
     // pre-restore squad — recommending the sale of an already-sold player.
     window._appliedRecMoves = Array.isArray(plan.recMoves) ? plan.recMoves : [];
+    window._ppChipPlays = Array.isArray(plan.ppChips) ? plan.ppChips : [];   // chips-in-tree (2026-06-11)
     try {
       const _qoN = (window._appliedRecMoves || []).filter(m => m && m.gwIdx === (activeGwIdx || 0)).length;
       if (_qoN > 0 && !plan.appliedCard) {
@@ -12158,14 +12164,15 @@ function runSolve() {
   }
 
   // ── Any other GW ──
-  // 2026-04-30: Path planner is the new primary flow. If no chip is planned
-  // anywhere in the horizon, Solve walks the user GW-by-GW from the active
-  // GW through end-of-season. If a chip is planned for a DIFFERENT GW (not
-  // the active one), keep the legacy inline transfer recs + chip-squad
-  // preview panel so the user can see both contexts at once — path planner
-  // doesn't yet model "WC at GW Y" mid-walk (deferred to V2).
+  // 2026-04-30: Path planner is the new primary flow.
+  // 2026-06-11 chips-in-tree: future-chip weeks are now modelled INSIDE the
+  // walk (chip branch cards at planner-marked GWs, priced from the live plan
+  // squad), so the planner is primary even when WC/FH/BB/TC is planned for a
+  // later GW — the "deferred to V2" carve-out below is retired. The legacy
+  // inline-recs path further down remains the fallback when the planner
+  // can't open (squad not hydrated).
   const _hasFutureChip = (wcGw && wcGw !== activeGw) || (fhGw && fhGw !== activeGw);
-  if (!_hasFutureChip) {
+  {
     // Same hydration guard _openPathPlannerFromCurrent uses — only show the
     // overlay when the planner will actually run.
     if ([..._xiPlayers, ..._benchPlayers].length === 15) {
@@ -12780,6 +12787,138 @@ function _ppBestXiTotal(squad, gwIdx) {
   return { xi, cap, total: xi + cap, xiPlayers: r.xi, capId: r.cap?.id };
 }
 
+// ── Chips in the tree (2026-06-11, approved build) ──────────────────────────
+// Division of labour per the approved design: the chip planner is STRATEGY
+// (its accepted sequence — the sel-wc/fh/bb/tc dropdowns, set by "▶ Use this
+// plan" or by hand — marks the weeks), the tree is EXECUTION (the user taps;
+// NO AUTO-APPLY — standing rule, rejected twice). At a marked GW the branch
+// list grows a chip card priced from the CURRENT plan squad, not the
+// build-time guess.
+function _ppChipDropdownGw(chip) {
+  const el = document.getElementById('sel-' + chip);
+  const v = el ? parseInt(el.value || '0', 10) : 0;
+  return (v && isFinite(v)) ? v : 0;
+}
+
+// Chip marked for this gwIdx ('WC'|'FH'|'BB'|'TC') or null. The walk's
+// starting chip (locked card) and chips already played in this walk are
+// excluded so a chip can never be offered twice.
+function _ppPlannedChipAt(gwIdx) {
+  const gw = TEAM_META.gw_range[gwIdx];
+  if (!gw) return null;
+  for (const c of ['wc', 'fh', 'bb', 'tc']) {
+    if (_ppChipDropdownGw(c) !== gw) continue;
+    const t = c.toUpperCase();
+    if (_pathPlanner.startChipType === t) continue;            // locked starter
+    if (_pathPlanner.selections.some(s => s.type === 'chip' && s.chipType === t)) continue;
+    return t;
+  }
+  return null;
+}
+
+// Chip EV priced from the live plan squad at gwIdx.
+//   BB = bench xP sum · TC = +1× captain xP · FH = FH XI ceiling − current XI.
+// Returns null when the chip can't be priced (e.g. FH squad not loaded yet —
+// the lazy-planner gate in runSolve normally guarantees it is).
+function _ppChipEvAt(chipType, squad, gwIdx) {
+  const base = _ppBestXiTotal(squad, gwIdx);
+  if (chipType === 'BB') {
+    const all15 = squad.reduce((s, p) => s + _xpAt(p, gwIdx), 0);
+    const benchXp = Math.max(0, all15 - base.xi);
+    return { ev: benchXp, gwXp: base.total + benchXp };
+  }
+  if (chipType === 'TC') {
+    return { ev: base.cap, gwXp: base.total + base.cap };
+  }
+  if (chipType === 'FH') {
+    const gw = TEAM_META.gw_range[gwIdx];
+    const fhSquad = (typeof FH_SQUADS !== 'undefined' && FH_SQUADS) ? FH_SQUADS[String(gw)] : null;
+    if (!fhSquad || !fhSquad.length) return null;
+    const fhBase = _ppBestXiTotal(fhSquad, gwIdx);
+    return { ev: Math.max(0, fhBase.total - base.total), gwXp: fhBase.total, fhSquad };
+  }
+  if (chipType === 'WC') {
+    // WC re-plans the whole squad — priced from the planner's baked EV; the
+    // branch LINKS OUT to the existing chip-review flow (kept by design).
+    let ev = 0;
+    try {
+      const m = (typeof CHIP_PLANNER !== 'undefined' && CHIP_PLANNER && CHIP_PLANNER.wc_ev) || {};
+      const gw = TEAM_META.gw_range[gwIdx];
+      const v = parseFloat(m[String(gw)] != null ? m[String(gw)] : m[gw]);
+      if (isFinite(v)) ev = v;
+    } catch (_e) { /* keep 0 */ }
+    return { ev, gwXp: null, linkOut: true };
+  }
+  return null;
+}
+
+// Planner's next-best week for a chip AFTER gwIdx — powers the "Hold" hint.
+// Reads the baked per-GW EV maps (build-time squad — fine for a subtitle).
+function _ppNextBestChipWeek(chipType, gwIdx) {
+  try {
+    const key = chipType.toLowerCase() + '_ev';
+    const m = (typeof CHIP_PLANNER !== 'undefined' && CHIP_PLANNER && CHIP_PLANNER[key]) || {};
+    let best = null;
+    for (const k of Object.keys(m)) {
+      const gw = +k, ev = +m[k];
+      const gi = TEAM_META.gw_range.indexOf(gw);
+      if (gi <= gwIdx || gi < 0 || !isFinite(ev)) continue;
+      if (!best || ev > best.ev) best = { gw, ev };
+    }
+    return best;
+  } catch (_e) { return null; }
+}
+
+// Inject the marked chip branch into a computed options list. Shared by
+// _buildActiveCard and the _selectPathOptionNow cache-miss fallback so a
+// chip option index can never dangle. Chip-week economy (approved design §3):
+// WC/FH replace transfers that week (no transfer fan, no hits) — the
+// remaining choices are the best NO-HIT single ("Hold") and Roll. BB/TC
+// coexist with the normal transfer branches, ranked honestly.
+function _ppInjectChipOptions(options, gwIdx) {
+  const chipType = _ppPlannedChipAt(gwIdx);
+  if (!chipType) return options;
+  const priced = _ppChipEvAt(chipType, _pathPlanner.workingSquad, gwIdx);
+  if (!priced) return options;
+  const roll = options.find(o => o.type === 'none');
+  const future = (roll && roll.futureEv != null) ? roll.futureEv : 0;
+  const chipOpt = {
+    type: 'chip',
+    chipType,
+    out: null, in: null,
+    evGain: priced.ev,
+    netEv: priced.ev,
+    hitCost: 0,
+    // Squad/bank/FT all unchanged by a chip play → the future is Roll's future.
+    lookaheadEv: priced.ev + future,
+    futureEv: future,
+    newSquad: _pathPlanner.workingSquad,
+    newBank: _pathPlanner.workingBank,
+    chipGwXp: priced.gwXp,
+    fhSquad: priced.fhSquad || null,
+    linkOut: !!priced.linkOut,
+    holdWeek: _ppNextBestChipWeek(chipType, gwIdx),
+  };
+  if (chipType === 'WC' || chipType === 'FH') {
+    const holdTx = options.find(o => o.type === 'one' && !(o.hitCost > 0));
+    options = [chipOpt];
+    if (holdTx) options.push(holdTx);
+    if (roll) options.push(roll);
+  } else {
+    // Insert by taxed rank score, preserving the existing (risk-tilted)
+    // order among the transfer options.
+    let insAt = options.length;
+    for (let i = 0; i < options.length; i++) {
+      if (_ppRankEv(chipOpt) > _ppRankEv(options[i])) { insAt = i; break; }
+    }
+    options.splice(insAt, 0, chipOpt);
+  }
+  // Tag the best surviving transfer option as the "hold the chip" card.
+  const holdCard = options.find(o => o.type === 'one' || o.type === 'two');
+  if (holdCard) holdCard.holdChip = { chipType, week: chipOpt.holdWeek };
+  return options;
+}
+
 // ── Hit-aversion tax (2026-06-11, Marcus) ───────────────────────────────────
 // A −4 hit is a CERTAIN cost; projected gains are estimates (~1.9 xP/player-GW
 // error). Elite managers therefore demand a margin before paying for hits, and
@@ -12824,7 +12963,7 @@ function _ppRankEv(opt) {
   if (!opt) return 0;
   const base = (opt.lookaheadEv != null) ? opt.lookaheadEv
              : (opt.netEv != null ? opt.netEv : (opt.evGain || 0));
-  if (opt.type === 'none') return base;          // Roll is never taxed
+  if (opt.type === 'none' || opt.type === 'chip') return base;  // Roll & chip plays are never taxed (not transfers)
   const t = _ppPresetTaxes();
   if (!t.hit && !t.ft) return base;              // balanced/high: short-circuit
   let r = base - t.ft;
@@ -12873,7 +13012,7 @@ async function _ppComputeOptions(workingSquad, gwIdx, bank, workingFt) {
   // Net risk position of the swap = bias(in) − bias(out): under Low, selling
   // a high-owned hauler is itself a rank risk, so it costs ranking credit.
   const _ppBias = (opt) => {
-    if (!opt || opt.type === 'none') return 0;
+    if (!opt || opt.type === 'none' || opt.type === 'chip') return 0;
     let b = _apexRiskOwnBias(opt.in) - _apexRiskOwnBias(opt.out);
     if (opt.type === 'two') b += _apexRiskOwnBias(opt.in2) - _apexRiskOwnBias(opt.out2);
     return b;
@@ -13272,6 +13411,8 @@ async function _openPathPlanner(chipType, chipGw, chipSquad, chipGwIdx) {
   for (let _i = chipGwIdx; _i < _hzEndOpen; _i++) {
     delete _savedGwSquads[_i];
   }
+  // Chip plays from a previous walk are stale once their GWs are wiped.
+  window._ppChipPlays = (window._ppChipPlays || []).filter(c => c && c.gwIdx < chipGwIdx);
   // V3: clear lookahead memo so fresh squad state computes fresh future EVs.
   for (const k of Object.keys(_ppLookaheadCache)) delete _ppLookaheadCache[k];
 
@@ -13338,6 +13479,39 @@ function _ppRestoreFromSaved(startGwIdx) {
       const curIds  = new Set(step.squad.map(p => p.id));
       const outs = prev.filter(p => !curIds.has(p.id));
       const ins  = step.squad.filter(p => !prevIds.has(p.id));
+      // ── Chip plays (2026-06-11, chips-in-tree) ──
+      // The squad diff alone can't see a BB/TC play (no swap) and reads an FH
+      // week as a >2-swap rebuild. window._ppChipPlays (persisted in the plan
+      // blob) is the record of taps the walk actually made.
+      const _chipPlay = (window._ppChipPlays || []).find(c => c && c.gwIdx === step.gwIdx);
+      if (_chipPlay && _chipPlay.chipType === 'FH') {
+        // FH = one-week squad; the walk continued from the PRE-FH squad.
+        const _fhXp = _ppBestXiTotal(step.squad, step.gwIdx).total;
+        selections.push({
+          gwIdx: step.gwIdx, gw: TEAM_META.gw_range[step.gwIdx],
+          type: 'chip', chipType: 'FH', out: null, in: null,
+          evGain: 0, netEv: 0, hitCost: 0,
+          gwXp: _fhXp, bankAfter: bank, ftAfter: Math.min(5, ft + 1),
+        });
+        ft = Math.min(5, ft + 1);
+        totalXp += _fhXp;
+        continue;   // prev unchanged — FH reverts
+      }
+      if (_chipPlay && (_chipPlay.chipType === 'BB' || _chipPlay.chipType === 'TC')
+          && outs.length === 0 && ins.length === 0) {
+        const _priced = _ppChipEvAt(_chipPlay.chipType, step.squad, step.gwIdx);
+        const _cXp = _priced ? _priced.gwXp : _ppBestXiTotal(step.squad, step.gwIdx).total;
+        selections.push({
+          gwIdx: step.gwIdx, gw: TEAM_META.gw_range[step.gwIdx],
+          type: 'chip', chipType: _chipPlay.chipType, out: null, in: null,
+          evGain: _priced ? _priced.ev : 0, netEv: _priced ? _priced.ev : 0, hitCost: 0,
+          gwXp: _cXp, bankAfter: bank, ftAfter: Math.min(5, ft + 1),
+        });
+        ft = Math.min(5, ft + 1);
+        totalXp += _cXp;
+        prev = step.squad;
+        continue;
+      }
       // >2 swaps in one GW = chip-style rebuild — not a planner move; bail to fresh.
       if (outs.length !== ins.length || outs.length > 2) return false;
       // Pair outs→ins by position so two-transfer rows read sensibly.
@@ -13497,6 +13671,8 @@ async function _openPathPlannerFromCurrent(startGwIdx) {
   for (let _i = startGwIdx; _i < _hzEndOpenC; _i++) {
     delete _savedGwSquads[_i];
   }
+  // Chip plays from a previous walk are stale once their GWs are wiped.
+  window._ppChipPlays = (window._ppChipPlays || []).filter(c => c && c.gwIdx < startGwIdx);
   // V3: clear lookahead memo so fresh squad state computes fresh future EVs.
   for (const k of Object.keys(_ppLookaheadCache)) delete _ppLookaheadCache[k];
 
@@ -13508,6 +13684,14 @@ async function _openPathPlannerFromCurrent(startGwIdx) {
 
 function _ppPosName(et) {
   return ['', 'GK', 'DEF', 'MID', 'FWD'][et] || 'PLR';
+}
+
+// 2026-06-11 (Marcus live find #4): every HEADLINE plan total must be NET of
+// hit costs. totalXp accumulates raw XI+captain xP; totalHits was only ever a
+// side label — "451.3 pts · 2 hits" read as 451.3 when the honest number is
+// 443.3. Branch RANKING already used netEv; only the headlines lied.
+function _ppNetXp() {
+  return _pathPlanner.totalXp - (_pathPlanner.totalHits || 0) * 4;
 }
 
 // Render the full card stack — locked cards above, active card at bottom.
@@ -13528,7 +13712,7 @@ async function _renderPathCards() {
       : `Transfer Plan · GW${_firstGw} → GW${_lastGw}`;
   }
   const totalEl = document.getElementById('pp-total-xp');
-  if (totalEl) totalEl.textContent = _pathPlanner.totalXp.toFixed(1);
+  if (totalEl) totalEl.textContent = _ppNetXp().toFixed(1);   // net of hits (find #4)
   const hitsEl = document.getElementById('pp-hits');
   if (hitsEl) hitsEl.textContent = _pathPlanner.totalHits;
   // "↺ Start over" only surfaces when the trunk was restored from an applied/
@@ -13614,6 +13798,22 @@ function _renderPathTree() {
     const roll = opts.find(o => o.type === 'none');
     if (roll) branches.push(roll);
   }
+  // C4 (2026-06-11): HIGH-risk tree identity — a badged punt branch must be
+  // IN the tree, not hidden behind "Show full options list". If the fan
+  // carries no differential but the computed options do, swap the last
+  // non-best, non-roll, non-chip slot for the best punt.
+  if (window.APEX_PRESETS && typeof _activePreset !== 'undefined' && _activePreset === 'high'
+      && opts.length && !branches.some(o => o.riskPick === 'differential')) {
+    const punt = opts.find(o => o.riskPick === 'differential');
+    if (punt && branches.indexOf(punt) === -1) {
+      let swapAt = -1;
+      for (let i = branches.length - 1; i >= 1; i--) {
+        if (branches[i].type !== 'none' && branches[i].type !== 'chip') { swapAt = i; break; }
+      }
+      if (swapAt >= 0) branches.splice(swapAt, 1, punt);
+      else branches.splice(Math.min(2, branches.length), 0, punt);
+    }
+  }
 
   // Sized to match the approved mock at 1:1 (2026-06-09 Marcus: "writing way
   // too small, mock is bigger") — node/type scale ~40% up from v1.
@@ -13650,7 +13850,8 @@ function _renderPathTree() {
     const n = (p && p.web_name) || '?';
     return esc(n.length > 10 ? n.slice(0, 9) + '…' : n);
   };
-  const selLabel = (sel) => sel.type === 'chip' ? `${sel.chipType} squad`
+  const selLabel = (sel) => sel.type === 'chip'
+      ? ((sel.chipType === 'BB' || sel.chipType === 'TC') ? `🎴 ${sel.chipType} played` : `${sel.chipType} squad`)
     : sel.type === 'none' ? '↻ Roll FT'
     : sel.type === 'two' ? `2 tx${(sel.hitCost > 0) ? ` · −${sel.hitCost}` : ''}: ${short(sel.out)}»${short(sel.in)}…`
     : `${short(sel.out)}»${short(sel.in)}`;
@@ -13689,7 +13890,7 @@ function _renderPathTree() {
     const x = px + COL;
     s += line(px + NW, midY, x, midY, TEAL);
     s += node(x, py, 'Plan complete',
-      `${_pathPlanner.totalXp.toFixed(1)} pts · review below`,
+      `${_ppNetXp().toFixed(1)} pts · review below`,
       TEAL, TEAL_BG, TEAL_T, TEAL_S);
   } else if (branches.length) {
     const gw = gwR[cur];
@@ -13705,7 +13906,8 @@ function _renderPathTree() {
       const sCol = bi === 0 ? TEAL_S : (o.riskPick === 'template' ? BLUE_S : GREY_S);
       const idx = opts.indexOf(o);
       const ev = (o.lookaheadEv != null ? o.lookaheadEv : (o.netEv != null ? o.netEv : o.evGain)) || 0;
-      const kind = bi === 0 ? 'best move'
+      const kind = o.type === 'chip' ? 'planned chip'
+        : bi === 0 ? 'best move'
         : o.riskPick === 'differential' ? 'punt'
         : o.riskPick === 'template' ? 'field cover'
         : o.type === 'none' ? 'save the FT' : 'alternative';
@@ -13717,16 +13919,22 @@ function _renderPathTree() {
       let l1, l1b = null, l2;
       if (o.type === 'none') {
         l1 = '↻ Roll the transfer'; l2 = `${kind} · +${ev.toFixed(1)} EV · banks an extra FT`;
+      } else if (o.type === 'chip') {
+        // Chip branch (2026-06-11): "🎴 Bench Boost now · +14.2 EV", with the
+        // planner's next-best week as the hold hint when one exists.
+        const _cn = { BB: 'Bench Boost', TC: 'Triple Captain', FH: 'Free Hit', WC: 'Wildcard' };
+        l1 = `🎴 ${_cn[o.chipType] || o.chipType} now`;
+        l2 = `${kind} · +${ev.toFixed(1)} EV${o.holdWeek ? ` · or GW${o.holdWeek.gw} (+${o.holdWeek.ev.toFixed(1)})` : ''}`;
       } else if (o.type === 'two') {
         l1  = `${short(o.out)} » ${short(o.in)}`;
         l1b = `+ ${short(o.out2)} » ${short(o.in2)}`;
-        l2 = `${kind} · 2 transfers · +${ev.toFixed(1)} EV${HIT_TSPAN(o.hitCost)}`;
+        l2 = `${kind} · 2 transfers · +${ev.toFixed(1)} EV${HIT_TSPAN(o.hitCost)}${o.holdChip ? ` · ✋ holds ${o.holdChip.chipType}` : ''}`;
       } else {
         const pd = (typeof _apexPoolById === 'function' ? _apexPoolById(o.in.id) : null) || o.in;
         const own = (typeof pd.own === 'number') ? pd.own : (parseFloat(pd.own) || 0);
         const tag = o.riskPick === 'differential' ? ' 💎' : (o.riskPick === 'template' ? ' 🛡' : '');
         l1 = `${short(o.out)} » ${short(o.in)}`;
-        l2 = `${kind} · +${ev.toFixed(1)} EV · ${own.toFixed(1)}%${tag}${HIT_TSPAN(o.hitCost)}`;
+        l2 = `${kind} · +${ev.toFixed(1)} EV · ${own.toFixed(1)}%${tag}${HIT_TSPAN(o.hitCost)}${o.holdChip ? ` · ✋ holds ${o.holdChip.chipType}` : ''}`;
       }
       s += line(px + NW, midY, x, y + BH/2, col, bi !== 0);
       // "tap to pick ›" affordance (Marcus 2026-06-09): every active branch
@@ -13747,16 +13955,25 @@ function _renderPathTree() {
     if (futN > 0) {
       const g1x = x + BW + 52, gw1 = gwR[cur + 1];
       const dgwN = _dgwTeamsAt(cur + 1);
+      // Chips-in-tree (2026-06-11): upcoming planner-marked chip weeks badge
+      // on the ghost nodes — the accepted sequence is the DEFAULT trunk.
+      const chip1 = _ppPlannedChipAt(cur + 1);
+      const g1sub = chip1
+        ? `🎴 ${chip1}${dgwN > 0 ? ` · DGW ×${dgwN}` : ''}`
+        : (dgwN > 0 ? `DGW ×${dgwN}` : 'next up');
+      const g1stroke = chip1 ? TEAL : GREY;
       s += line(x + BW, _bestY, g1x, _bestY, TEAL);
-      s += `<g><rect x="${g1x}" y="${_bestY - 30}" width="112" height="60" rx="11" fill="${GREY_BG}" stroke="${GREY}" stroke-width="1.4"/>`
+      s += `<g><rect x="${g1x}" y="${_bestY - 30}" width="112" height="60" rx="11" fill="${GREY_BG}" stroke="${g1stroke}" stroke-width="1.4"/>`
         + `<text x="${g1x + 56}" y="${_bestY - 4}" text-anchor="middle" font-size="15" font-weight="700" fill="${GREY_T}">GW${gw1}</text>`
-        + `<text x="${g1x + 56}" y="${_bestY + 17}" text-anchor="middle" font-size="12" fill="${GREY_S}">${dgwN > 0 ? `DGW ×${dgwN}` : 'next up'}</text></g>`;
+        + `<text x="${g1x + 56}" y="${_bestY + 17}" text-anchor="middle" font-size="12" fill="${chip1 ? TEAL_S : GREY_S}">${g1sub}</text></g>`;
       if (futN > 1) {
         const g2x = g1x + 112 + 26, gw2 = gwR[cur + 2];
+        const chip2 = _ppPlannedChipAt(cur + 2);
+        const g2sub = chip2 ? `🎴 ${chip2}` : (futN > 2 ? '+' + (futN - 1) + ' more' : 'last GW');
         s += line(g1x + 112, _bestY, g2x, _bestY, GREY, true);
-        s += `<g opacity="0.55"><rect x="${g2x}" y="${_bestY - 30}" width="88" height="60" rx="11" fill="none" stroke="${GREY}" stroke-width="1.4"/>`
+        s += `<g opacity="0.55"><rect x="${g2x}" y="${_bestY - 30}" width="88" height="60" rx="11" fill="none" stroke="${chip2 ? TEAL : GREY}" stroke-width="1.4"/>`
           + `<text x="${g2x + 44}" y="${_bestY - 4}" text-anchor="middle" font-size="15" font-weight="700" fill="${GREY_S}">GW${gw2}</text>`
-          + `<text x="${g2x + 44}" y="${_bestY + 17}" text-anchor="middle" font-size="12" fill="${GREY_S}">${futN > 2 ? '+' + (futN - 1) + ' more' : 'last GW'}</text></g>`;
+          + `<text x="${g2x + 44}" y="${_bestY + 17}" text-anchor="middle" font-size="12" fill="${chip2 ? TEAL_S : GREY_S}">${g2sub}</text></g>`;
       }
     }
   }
@@ -13779,7 +13996,7 @@ function _renderPathTree() {
       ? `Chosen path · ${sels.length} GW${sels.length > 1 ? 's' : ''} locked`
       : `Engine path · GW${gwR[cur] || gwR[horizonEnd - 1]}→${gwR[horizonEnd - 1]}`;
     const val = sels.length
-      ? `${_pathPlanner.totalXp.toFixed(1)} pts${_pathPlanner.totalHits > 0 ? ` · ${_pathPlanner.totalHits} hit${_pathPlanner.totalHits > 1 ? 's' : ''}` : ''}`
+      ? `${_ppNetXp().toFixed(1)} pts${_pathPlanner.totalHits > 0 ? ` · after ${_pathPlanner.totalHits} hit${_pathPlanner.totalHits > 1 ? 's' : ''}` : ''}`
       : `+${bestEv.toFixed(1)} EV`;
     card.innerHTML = `<div style="font-size:.85rem;color:var(--muted);">${label}</div>`
       + `<div style="font-size:1.45rem;font-weight:700;color:var(--text);">${val}</div>`;
@@ -13791,9 +14008,11 @@ function _buildLockedCard(sel) {
   div.className = 'pp-card pp-locked';
   let body;
   if (sel.type === 'chip') {
+    const _chipAct = (sel.chipType === 'BB' || sel.chipType === 'TC')
+      ? 'played — scoring boosted' : 'squad selected';
     body = `<div class="pp-locked-choice">
       <span class="pp-check">✓</span>
-      <span class="pp-locked-text"><strong>${sel.chipType}</strong> squad selected · ${sel.gwXp.toFixed(1)} xPts this week</span>
+      <span class="pp-locked-text"><strong>${sel.chipType}</strong> ${_chipAct} · ${sel.gwXp.toFixed(1)} xPts this week</span>
     </div>`;
   } else if (sel.type === 'none') {
     body = `<div class="pp-locked-choice">
@@ -13843,9 +14062,11 @@ async function _buildActiveCard(gwIdx) {
   const div = document.createElement('div');
   div.className = 'pp-card pp-active';
 
-  const options = await _ppComputeOptions(
+  // Chips-in-tree (2026-06-11): a planner-marked chip week grows a chip
+  // branch card priced from the CURRENT plan squad (injected post-compute).
+  const options = _ppInjectChipOptions(await _ppComputeOptions(
     _pathPlanner.workingSquad, gwIdx, _pathPlanner.workingBank, _pathPlanner.workingFt
-  );
+  ), gwIdx);
   // Cache for the tree renderer AND for _selectPathOptionNow — selecting used
   // to recompute the exact same options (double freeze). One compute, three
   // consumers. Invalidation: keyed on gwIdx; every Select advances currentGwIdx
@@ -13866,6 +14087,24 @@ async function _buildActiveCard(gwIdx) {
           <div class="pp-no-transfer-text">
             <div class="pp-no-transfer-title">No Transfer</div>
             <div class="pp-no-transfer-sub">Save FT · carry +1 to next GW</div>
+          </div>
+        </div>
+      `;
+    } else if (opt.type === 'chip') {
+      // Chip branch card (2026-06-11) — mirrors the transfer card format.
+      const _chipNames = { BB: 'Bench Boost', TC: 'Triple Captain', FH: 'Free Hit', WC: 'Wildcard' };
+      const _chipSub = opt.linkOut
+        ? 'opens the Wildcard review — squad rebuilt from this week'
+        : (opt.chipType === 'FH' ? 'one-week squad swap · reverts after this GW'
+        : (opt.chipType === 'BB' ? 'all 15 players score this week' : 'captain scores 3× this week'));
+      const _holdHint = opt.holdWeek
+        ? ` · next-best week GW${opt.holdWeek.gw} (+${opt.holdWeek.ev.toFixed(1)})` : '';
+      bodyHtml = `
+        <div class="pp-no-transfer-block">
+          <div class="pp-no-transfer-icon">🎴</div>
+          <div class="pp-no-transfer-text">
+            <div class="pp-no-transfer-title">${_chipNames[opt.chipType] || opt.chipType} now</div>
+            <div class="pp-no-transfer-sub">${_chipSub}${_holdHint}</div>
           </div>
         </div>
       `;
@@ -13985,10 +14224,16 @@ async function _buildActiveCard(gwIdx) {
       : (opt.riskPick === 'template'
       ? `<div style="font-size:.68rem;font-weight:800;color:#2563eb;letter-spacing:.4px;margin-bottom:4px;">🛡 LOW-RISK PICK · field cover</div>`
       : '');
+    // Hold-the-chip badge (2026-06-11): at a chip-marked GW, the best
+    // transfer option doubles as "hold the chip" — show the planner's
+    // next-best week so the trade-off is explicit.
+    const _holdBadge = opt.holdChip
+      ? `<div style="font-size:.68rem;font-weight:800;color:#b45309;letter-spacing:.4px;margin-bottom:4px;">✋ HOLD ${opt.holdChip.chipType}${opt.holdChip.week ? ` · next-best week GW${opt.holdChip.week.gw} (+${opt.holdChip.week.ev.toFixed(1)})` : ''}</div>`
+      : '';
     optsHtml += `
       <div class="pp-option ${opt.type === 'none' ? 'pp-option-no-transfer' : ''} ${isTop}">
         <span class="pp-option-rank">#${i + 1}</span>
-        <div class="pp-option-body">${_riskBadge}${bodyHtml}</div>
+        <div class="pp-option-body">${_riskBadge}${_holdBadge}${bodyHtml}</div>
         ${evDisplay}
         <div style="display:flex;flex-direction:column;align-items:stretch;gap:4px;">
           <button class="pp-option-select" onclick="_selectPathOption(${gwIdx}, ${i})">Select</button>
@@ -14095,6 +14340,25 @@ function _selectPathOption(gwIdx, optionIdx) {
   // so a second branch click COULD start an overlapping walk against shared
   // _pathPlanner state. One compute at a time; extra clicks are dropped.
   if (window._ppComputeBusy) return;
+  // WC branch links out to the existing chip-review flow (approved design §2
+  // — "keep"). The review's Apply reopens the planner from the WC squad.
+  const _cachedOpt = (_pathPlanner._activeOptionsGw === gwIdx && _pathPlanner._activeOptions)
+    ? _pathPlanner._activeOptions[optionIdx] : null;
+  if (_cachedOpt && _cachedOpt.type === 'chip' && _cachedOpt.linkOut) {
+    const _wcGw = TEAM_META.gw_range[gwIdx];
+    const _wcSq = (typeof WC_SQUADS !== 'undefined' && WC_SQUADS) ? WC_SQUADS[String(_wcGw)] : null;
+    if (_wcSq && _wcSq.length && typeof _openChipReview === 'function') {
+      _openChipReview('WC', _wcGw, _wcSq, gwIdx);
+    } else if (typeof _ensureChipPlannerLoaded === 'function') {
+      // Lazy build — WC squad not baked; fetch then open.
+      _ppShowComputing(`Computing WC GW${_wcGw} squad…`);
+      _ensureChipPlannerLoaded().then(() => {
+        const s2 = (typeof WC_SQUADS !== 'undefined' && WC_SQUADS) ? WC_SQUADS[String(_wcGw)] : null;
+        if (s2 && s2.length && typeof _openChipReview === 'function') _openChipReview('WC', _wcGw, s2, gwIdx);
+      }).catch(() => {}).finally(() => _ppHideComputing());
+    }
+    return;
+  }
   // Selecting an option triggers heavy lookahead computes (options recompute
   // + next-GW card build). Paint the compositor-animated overlay FIRST, then
   // run the (now chunked/async) work. Same pattern as runSolve.
@@ -14123,11 +14387,47 @@ async function _selectPathOptionNow(gwIdx, optionIdx) {
   // there) — recomputing doubled the freeze for zero benefit.
   const options = (_pathPlanner._activeOptionsGw === gwIdx && _pathPlanner._activeOptions)
     ? _pathPlanner._activeOptions
-    : await _ppComputeOptions(
+    : _ppInjectChipOptions(await _ppComputeOptions(
         _pathPlanner.workingSquad, gwIdx, _pathPlanner.workingBank, _pathPlanner.workingFt
-      );
+      ), gwIdx);
   const opt = options[optionIdx];
   if (!opt) return;
+
+  // ── Chip play (2026-06-11) ──
+  // BB/TC don't change the squad — only scoring. FH swaps the squad for ONE
+  // week then reverts (python league_sim FH semantics): the FH XI is
+  // committed to THIS GW's pill, but the walk continues from the pre-FH
+  // squad with bank and FTs untouched. No transfer used → FT accrues like
+  // Roll (ftAfter unchanged by chip play, per FPL rules).
+  if (opt.type === 'chip') {
+    if (opt.linkOut) return;   // WC — handled at click time in _selectPathOption
+    const chipGwXp = (opt.chipGwXp != null) ? opt.chipGwXp
+      : _ppBestXiTotal(_pathPlanner.workingSquad, gwIdx).total;
+    _pathPlanner.selections.push({
+      gwIdx,
+      gw: TEAM_META.gw_range[gwIdx],
+      type: 'chip',
+      chipType: opt.chipType,
+      out: null, in: null,
+      evGain: opt.evGain, netEv: opt.netEv, hitCost: 0,
+      gwXp: chipGwXp,
+      bankAfter: _pathPlanner.workingBank,
+      ftAfter: Math.min(5, _pathPlanner.workingFt + 1),
+    });
+    _pathPlanner.workingFt = Math.min(5, _pathPlanner.workingFt + 1);
+    _pathPlanner.totalXp  += chipGwXp;
+    _pathPlanner.currentGwIdx++;
+    // Record the play for plan persistence — _ppRestoreFromSaved re-marks
+    // chip weeks from this (a squad diff alone can't see BB/TC, and reads
+    // an FH week as a >2-swap rebuild).
+    window._ppChipPlays = (window._ppChipPlays || []).filter(c => c && c.gwIdx !== gwIdx);
+    window._ppChipPlays.push({ gwIdx, chipType: opt.chipType });
+    // Pill state: the FH week shows the FH XI; BB/TC weeks keep the plan squad.
+    _ppCommitToLive(gwIdx, (opt.chipType === 'FH' && opt.fhSquad && opt.fhSquad.length === 15)
+      ? opt.fhSquad : _pathPlanner.workingSquad);
+    await _renderPathCards();
+    return;
+  }
 
   // Compute this GW's xP from the new squad
   const result = _ppBestXiTotal(opt.newSquad, gwIdx);
@@ -14264,9 +14564,14 @@ function confirmPathPlan() {
       gwB: _gwB,
       transfers: _nTx,
       hits: _pathPlanner.totalHits,
-      totalPts: +_pathPlanner.totalXp.toFixed(1),
+      totalPts: +_ppNetXp().toFixed(1),   // net of hits (find #4)
       moves: _txSels.slice(0, 3).map(s =>
-        `GW${s.gw} · ${s.out ? s.out.web_name : '?'} → ${s.in ? s.in.web_name : '?'}${s.type === 'two' ? ' +1' : ''}`),
+        `GW${s.gw} · ${s.out ? s.out.web_name : '?'} → ${s.in ? s.in.web_name : '?'}${s.type === 'two' ? ' +1' : ''}`)
+        // Chips-in-tree (2026-06-11): mid-walk chip plays surface on the card too.
+        .concat(_pathPlanner.selections
+          .filter(s => s.type === 'chip' && s.chipType && s.gwIdx !== _pathPlanner.startGwIdx)
+          .map(s => `GW${s.gw} · 🎴 ${s.chipType} played`))
+        .slice(0, 3),
     };
     window._apexAppliedCardMeta = _meta;
     _apexRenderAppliedPicksCard(_meta);
@@ -17121,7 +17426,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781188951-GW32-b1cdc621</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781192789-GW32-b1cdc621</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
