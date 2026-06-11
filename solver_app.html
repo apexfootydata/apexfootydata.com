@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-06-11T15:26:49">
+<meta name="apex-gw" content="32" data-built-at="2026-06-11T15:42:31">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -9152,7 +9152,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1781188009-GW32-b1cdc621";
+const BUILD_VERSION = "1781188951-GW32-b1cdc621";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -10305,7 +10305,11 @@ function getHitPenaltyForGw(gwIdx) {
 function _updateFTDisplay() {
   const el = document.getElementById('free-transfers-val');
   if (!el) return;
-  el.textContent = getEffectiveFTs(activeGwIdx);
+  // 2026-06-11 (C6 / Marcus live find): show FTs REMAINING after moves already
+  // applied this GW, not the pre-move allowance — after Quick Optimise the
+  // badge read 1 while the FT was already spent.
+  const _usedFt = _transfersAppliedByGw[activeGwIdx] || 0;
+  el.textContent = Math.max(0, getEffectiveFTs(activeGwIdx) - _usedFt);
 }
 
 // User clicks "🚫 No Transfer (Roll FT)" — clear any pending transfer count
@@ -11948,6 +11952,9 @@ function _savePlanState() {
         // confirmPathPlan, re-rendered on reload by _restorePlanState so the
         // "✓ Plan applied" state survives a refresh. Cleared by resetSolver.
         appliedCard: (window._apexAppliedCardMeta || null),
+        // 2026-06-11 (Marcus live find): Quick-Optimise applied-move record
+        // (planner FT/bank debit + picks-card lock) must survive reload too.
+        recMoves: (window._appliedRecMoves || []),
       }));
     } catch (_e) {}
   }, 400);
@@ -11985,6 +11992,24 @@ function _restorePlanState() {
     }
     Object.assign(_transfersAppliedByGw, plan.applied || {});
     Object.assign(_rollFTByGw, plan.roll || {});
+    // 2026-06-11 (Marcus live find): restore the Quick-Optimise move record
+    // (planner FT/bank debit) and re-lock the picks card when moves were
+    // applied this GW. Without this a reload kept the transfer COUNT but lost
+    // the record, and the preview repainted fresh "Engine picks" — from the
+    // pre-restore squad — recommending the sale of an already-sold player.
+    window._appliedRecMoves = Array.isArray(plan.recMoves) ? plan.recMoves : [];
+    try {
+      const _qoN = (window._appliedRecMoves || []).filter(m => m && m.gwIdx === (activeGwIdx || 0)).length;
+      if (_qoN > 0 && !plan.appliedCard) {
+        const _rq = document.getElementById('engine-picks');
+        if (_rq) {
+          _rq.dataset.applied = '1';
+          _rq.innerHTML = `<div class="va-reco-title">✓ ${_qoN} move${_qoN > 1 ? 's' : ''} applied · GW${TEAM_META.gw_range[activeGwIdx || 0]}</div>`
+            + `<div style="font-size:.8rem;color:var(--muted);margin-top:6px;">Applied via Quick Optimise · ↺ Reset to discard, or plan ahead → to keep building</div>`;
+          _rq.style.display = 'block';
+        }
+      }
+    } catch (_eQ) {}
     for (const [k, id] of [['wc','sel-wc'],['fh','sel-fh'],['bb','sel-bb'],['tc','sel-tc']]) {
       const el = document.getElementById(id);
       if (el && plan.chips && plan.chips[k]) { el.value = plan.chips[k]; el.dispatchEvent(new Event('change')); }
@@ -12035,7 +12060,16 @@ function _renderRecoPreview() {
         const _rawAp = localStorage.getItem(_planKey());
         if (_rawAp) {
           const _plAp = JSON.parse(_rawAp);
-          if (_plAp && _plAp.appliedCard && +_plAp.gw0 === +TEAM_META.gw_range[0]) return;
+          // 2026-06-11 (Marcus live find): don't paint from the PRE-restore
+          // squad if ANY same-GW plan blob exists (applied card, QO moves, or
+          // committed squads). The 900ms preview ladder beat the 1100ms
+          // restore and painted "Ekitiké → Watkins" from a squad the restore
+          // was about to replace. Restore's tail repaints this card itself.
+          if (_plAp && +_plAp.gw0 === +TEAM_META.gw_range[0]
+              && (_plAp.appliedCard
+                  || (Array.isArray(_plAp.recMoves) && _plAp.recMoves.length)
+                  || (_plAp.applied && Object.keys(_plAp.applied).length)
+                  || (_plAp.squads && Object.keys(_plAp.squads).length))) return;
         }
       }
     } catch (_eAp) {}
@@ -17087,7 +17121,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781188009-GW32-b1cdc621</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781188951-GW32-b1cdc621</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
