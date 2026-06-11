@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-06-11T17:48:53">
+<meta name="apex-gw" content="32" data-built-at="2026-06-11T18:34:12">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -9205,7 +9205,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1781196533-GW32-b1cdc621";
+const BUILD_VERSION = "1781199252-GW32-b1cdc621";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -13913,13 +13913,20 @@ function _renderPathTree() {
 
   // Sized to match the approved mock at 1:1 (2026-06-09 Marcus: "writing way
   // too small, mock is bigger") — node/type scale ~40% up from v1.
-  const COL = 208, NW = 172, NH = 64, BW = 244, BH = 100, BGAP = 18, TOP = 46;  // BH 90→100 (2-line double cards)
+  const NW = 172, NH = 64, BW = 244, BH = 100, BGAP = 18, TOP = 46;  // BH 90→100 (2-line double cards)
+  // Trunk squad cards (2026-06-11, Marcus: "full squad on each GW box, like
+  // Solio") — each locked GW is a full-squad card, not a one-line label.
+  // Also retires the old long labels that overflowed the 172px nodes.
+  const TW = 152, TGAP = 34, CH = 266;
   const nLocked = sels.length;
-  const branchX = 20 + (nLocked + 1) * COL;
+  const branchX = 20 + NW + TGAP + nLocked * (TW + TGAP);
   const futN = done ? 0 : Math.max(0, horizonEnd - cur - 1);
-  const width  = Math.max(680, branchX + (done ? 200 : BW + 30) + (futN > 0 ? 330 : 0) + 60);
-  const height = Math.max(230, TOP + Math.max(1, branches.length) * (BH + BGAP) + 44);
+  const width  = Math.max(680, branchX + (done ? 240 : BW + 30) + (futN > 0 ? 330 : 0) + 60);
+  const fanH   = TOP + Math.max(1, branches.length) * (BH + BGAP) + 44;
+  const trunkH = nLocked ? TOP + CH + 44 : 0;
+  const height = Math.max(230, fanH, trunkH);
   const midY   = TOP + (Math.max(1, branches.length) * (BH + BGAP) - BGAP) / 2;
+  const spineY = TOP + 22;   // connector spine runs through the card headers
 
   // Mock palette — HARD-CODED, no CSS-var inheritance (Marcus 2026-06-09:
   // "replace with the mocked up one theme and colours"; also fixes invisible
@@ -13966,26 +13973,67 @@ function _renderPathTree() {
   // the wrap scrolls horizontally instead of shrinking the tree.
   let s = `<svg viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg" style="display:block;height:auto;width:100%;min-width:${width}px;max-width:${Math.round(width * 1.35)}px;margin:0 auto;font-family:'Plus Jakarta Sans',sans-serif;">`;
 
-  // Trunk: start node + locked decisions
-  let px = 20;
-  const py = midY - NH / 2;
-  s += node(px, py, 'Your team',
+  // Trunk: start node + locked squad cards (2026-06-11 Solio-style rework).
+  // Each card shows the GW header, that week's full 15 (XI by position with
+  // captain marked — C×3 on a TC week — and incoming transfers flagged ›),
+  // bench under the divider (teal on a BB week: those points count). FH
+  // weeks naturally render the one-week FH squad because the card reads
+  // _savedGwSquads, the same snapshot the GW pills use.
+  const posL = ['', 'G', 'D', 'M', 'F'];
+  const nm = (p, n) => { const s0 = (p && p.web_name) || '?'; return esc(s0.length > n ? s0.slice(0, n - 1) + '…' : s0); };
+  let px = 20, pxw = NW;   // right edge tracker for spine connectors
+  s += node(px, spineY - NH / 2, 'Your team',
     `FT ${_pathPlanner.rootFt != null ? _pathPlanner.rootFt : ((TEAM_META && TEAM_META.free_transfers) || 1)}`
       + `${_pathPlanner.preAppliedTx ? ` (${_pathPlanner.preAppliedTx} applied)` : ''}`
       + ` · £${(_pathPlanner.rootBank != null ? _pathPlanner.rootBank : ((TEAM_META && TEAM_META.bank) || 0)).toFixed(1)}m bank`,
     GREY, GREY_BG, GREY_T, GREY_S);
   sels.forEach((sel, i) => {
-    const x = 20 + (i + 1) * COL;
-    s += line(px + NW, midY, x, midY, TEAL);
-    s += node(x, py, `GW${sel.gw} ✓`, `${selLabel(sel)} · ${(sel.gwXp || 0).toFixed(1)} pts`,
-      TEAL, TEAL_BG, TEAL_T, TEAL_S);
-    px = x;
+    const x = 20 + NW + TGAP + i * (TW + TGAP);
+    s += line(px + pxw, spineY, x, spineY, TEAL);
+    const sq = _savedGwSquads[sel.gwIdx];
+    const isTc = sel.type === 'chip' && sel.chipType === 'TC';
+    const isBb = sel.type === 'chip' && sel.chipType === 'BB';
+    const chipTag = sel.type === 'chip' ? ` · 🎴${sel.chipType}` : (sel.type === 'two' ? ' · 2 tx' : (sel.type === 'one' ? ' · 1 tx' : ' · roll'));
+    if (sq && Array.isArray(sq.xi) && sq.xi.length === 11) {
+      const inIds = new Set([sel.in && sel.in.id, sel.in2 && sel.in2.id].filter(Boolean));
+      const xiRows = [...sq.xi].sort((a, b) =>
+        ((a.element_type || 0) - (b.element_type || 0)) || (_xpAt(b, sel.gwIdx) - _xpAt(a, sel.gwIdx)));
+      let g = `<g><rect x="${x}" y="${TOP}" width="${TW}" height="${CH}" rx="12" fill="#ffffff" stroke="${TEAL}" stroke-width="1.6"/>`
+        + `<rect x="${x}" y="${TOP}" width="${TW}" height="40" rx="12" fill="${TEAL_BG}"/>`
+        + `<rect x="${x}" y="${TOP + 28}" width="${TW}" height="12" fill="${TEAL_BG}"/>`
+        + `<text x="${x + 10}" y="${TOP + 18}" font-size="13.5" font-weight="800" fill="${TEAL_T}">GW${sel.gw} ✓${esc(chipTag)}</text>`
+        + `<text x="${x + 10}" y="${TOP + 33}" font-size="10" font-weight="700" fill="${TEAL_S}">${(sel.gwXp || 0).toFixed(1)} pts${sel.hitCost > 0 ? ` · −${sel.hitCost} hit` : ''}</text>`;
+      let ry = TOP + 54;
+      const row = (p, isBench) => {
+        const isCap = sq.capId === p.id, isVc = sq.vcId === p.id;
+        const mark = isCap ? (isTc ? ' (C×3)' : ' (C)') : (isVc ? ' (V)' : '');
+        const fill = isBench ? (isBb ? TEAL_S : GREY_S) : TEAL_T;
+        const w = isCap ? '800' : (inIds.has(p.id) ? '700' : '500');
+        const r = `<text x="${x + 10}" y="${ry}" font-size="10.5" font-weight="${w}" fill="${fill}">`
+          + `<tspan fill="${GREY_S}" font-weight="700">${posL[p.element_type] || ''}</tspan>`
+          + `<tspan dx="5">${inIds.has(p.id) ? '› ' : ''}${nm(p, 12)}${mark}</tspan></text>`;
+        ry += 13.5;
+        return r;
+      };
+      for (const p of xiRows) g += row(p, false);
+      ry += 3;
+      g += `<line x1="${x + 8}" y1="${ry - 9}" x2="${x + TW - 8}" y2="${ry - 9}" stroke="${GREY}" stroke-width="0.8" opacity="0.5"/>`;
+      for (const p of (sq.bench || [])) g += row(p, true);
+      g += '</g>';
+      s += g;
+    } else {
+      // Fallback (no snapshot): legacy compact node, label kept short.
+      s += node(x, spineY - NH / 2, `GW${sel.gw} ✓`,
+        `${selLabel(sel).slice(0, 18)} · ${(sel.gwXp || 0).toFixed(1)} pts`,
+        TEAL, TEAL_BG, TEAL_T, TEAL_S);
+    }
+    px = x; pxw = TW;
   });
 
   if (done) {
-    const x = px + COL;
-    s += line(px + NW, midY, x, midY, TEAL);
-    s += node(x, py, 'Plan complete',
+    const x = px + pxw + TGAP;
+    s += line(px + pxw, spineY, x, spineY, TEAL);
+    s += node(x, spineY - NH / 2, 'Plan complete',
       `${_ppNetXp().toFixed(1)} pts · review below`,
       TEAL, TEAL_BG, TEAL_T, TEAL_S);
   } else if (branches.length) {
@@ -14034,7 +14082,11 @@ function _renderPathTree() {
         l1 = `${short(o.out)} » ${short(o.in)}`;
         l2 = `${kind} · +${ev.toFixed(1)} EV · ${own.toFixed(1)}%${tag}${HIT_TSPAN(o.hitCost)}${o.holdChip ? ` · ✋ holds ${o.holdChip.chipType}` : ''}`;
       }
-      s += line(px + NW, midY, x, y + BH/2, col, bi !== 0);
+      s += line(px + pxw, spineY, x, y + BH/2, col, bi !== 0);
+      // Label-overflow guard (2026-06-11, Marcus: "writing comes out of the
+      // boxes") — long sub-lines step the font down instead of spilling.
+      const _plain2 = String(l2).replace(/<[^>]+>/g, '');
+      const _f2 = _plain2.length > 36 ? 11 : (_plain2.length > 30 ? 12 : 13);
       // "tap to pick ›" affordance (Marcus 2026-06-09): every active branch
       // self-explains — nobody should need the caption to know it's a button.
       s += `<g class="pp-branch" style="cursor:pointer;" onclick="_selectPathOption(${cur}, ${idx})">`
@@ -14042,9 +14094,9 @@ function _renderPathTree() {
         + (l1b
           ? `<text x="${x + BW/2}" y="${y + 24}" text-anchor="middle" font-size="14.5" font-weight="700" fill="${tCol}">${l1}</text>`
             + `<text x="${x + BW/2}" y="${y + 43}" text-anchor="middle" font-size="14.5" font-weight="700" fill="${tCol}">${l1b}</text>`
-            + `<text x="${x + BW/2}" y="${y + 64}" text-anchor="middle" font-size="12.5" fill="${sCol}">${l2}</text>`
+            + `<text x="${x + BW/2}" y="${y + 64}" text-anchor="middle" font-size="${Math.min(_f2, 12.5)}" fill="${sCol}">${l2}</text>`
           : `<text x="${x + BW/2}" y="${y + 29}" text-anchor="middle" font-size="16" font-weight="700" fill="${tCol}">${l1}</text>`
-            + `<text x="${x + BW/2}" y="${y + 51}" text-anchor="middle" font-size="13" fill="${sCol}">${l2}</text>`)
+            + `<text x="${x + BW/2}" y="${y + 51}" text-anchor="middle" font-size="${_f2}" fill="${sCol}">${l2}</text>`)
         + `<text x="${x + BW - 14}" y="${y + BH - 12}" text-anchor="end" font-size="11" font-weight="600" fill="${col}" opacity="0.8">tap to pick ›</text>`
         + `</g>`;
     });
@@ -17524,7 +17576,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781196533-GW32-b1cdc621</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781199252-GW32-b1cdc621</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
