@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-06-11T09:33:33">
+<meta name="apex-gw" content="32" data-built-at="2026-06-11T10:40:45">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -8949,6 +8949,9 @@ html.apex-offseason #view-landing .hero-sub::after {
     livePointsNow,
     setFetchFpl,
     setGLPK,
+    // Background-safe cooperative yield (MessageChannel macrotask) — shared
+    // with the Path Planner's chunked compute in apex_app.js (2026-06-11).
+    _apexYield,
     // Exposed for rank_milestones.js (needs raw FPL endpoints beyond the
     // league-sim surface).
     _fetchFpl,
@@ -9131,7 +9134,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1781166813-GW32-6d27131e";
+const BUILD_VERSION = "1781170845-GW32-6d27131e";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -10090,6 +10093,12 @@ function _apexOwnTag(p) {
 function selectPreset(name) {
   if (!window.APEX_PRESETS) return;
   if (!_PRESET_PARAMS[name]) return;
+  // Planner compute in flight → ignore risk-box clicks (2026-06-11). The
+  // chunked planner walk yields to the event loop now, and _apexRiskOwnBias /
+  // the option rankers read _activePreset mid-walk — flipping it would mix
+  // presets inside one tree. (The full-screen overlay blocks most clicks
+  // already; this covers anything that still gets through.)
+  if (window._ppComputeBusy) return;
   _activePreset = name;
 
   // Single-select highlight across BOTH presets bars (chip-select + landing).
@@ -10322,7 +10331,11 @@ function resetSolver() {
   if (typeof _clearPlanState === 'function') _clearPlanState();
   // Engine-picks card: clear the "applied" lock and repaint the preview after
   // the reset settles (2026-06-09 — picks were vanishing on reset).
+  // 2026-06-11: also drop the persisted applied-card meta — _clearPlanState
+  // above already removed the localStorage blob (incl. appliedCard); clearing
+  // the window copy stops a later _savePlanState from resurrecting it.
   try {
+    window._apexAppliedCardMeta = null;
     const _ep = document.getElementById('engine-picks');
     if (_ep) delete _ep.dataset.applied;
     setTimeout(() => { if (typeof _renderRecoPreview === 'function') _renderRecoPreview(); }, 250);
@@ -11841,6 +11854,10 @@ function _savePlanState() {
         preset: (typeof _activePreset !== 'undefined') ? _activePreset : 'balanced',
         applied: _transfersAppliedByGw, roll: _rollFTByGw, squads,
         chips: { wc: sel('sel-wc'), fh: sel('sel-fh'), bb: sel('sel-bb'), tc: sel('sel-tc') },
+        // Applied-plan picks card (2026-06-11): compact summary set by
+        // confirmPathPlan, re-rendered on reload by _restorePlanState so the
+        // "✓ Plan applied" state survives a refresh. Cleared by resetSolver.
+        appliedCard: (window._apexAppliedCardMeta || null),
       }));
     } catch (_e) {}
   }, 400);
@@ -11882,6 +11899,18 @@ function _restorePlanState() {
       const el = document.getElementById(id);
       if (el && plan.chips && plan.chips[k]) { el.value = plan.chips[k]; el.dispatchEvent(new Event('change')); }
     }
+    // Applied-plan picks card (2026-06-11): re-render the "✓ Plan applied"
+    // state + re-set dataset.applied BEFORE any preview repaint below/after —
+    // otherwise the card reverted to fresh "Engine picks" computed from a
+    // half-restored squad (recommending players the plan already sold).
+    // _renderRecoPreview also gates on this blob directly in case its load
+    // ladder fires before this restore does.
+    try {
+      if (plan.appliedCard && typeof _apexRenderAppliedPicksCard === 'function') {
+        window._apexAppliedCardMeta = plan.appliedCard;
+        _apexRenderAppliedPicksCard(plan.appliedCard);
+      }
+    } catch (_eA) {}
     _planRestoreDone = true;                   // set BEFORE selectPreset so its save isn't swallowed
     if (plan.preset && typeof selectPreset === 'function') selectPreset(plan.preset);
     if (typeof _switchToGwPill === 'function') _switchToGwPill(TEAM_META.gw_range[activeGwIdx || 0]);
@@ -11904,6 +11933,19 @@ function _renderRecoPreview() {
     const _reco = document.getElementById('engine-picks');
     if (!_reco || typeof computeTransfers !== 'function') return;
     if (_reco.dataset.applied === '1') return;
+    // Applied-plan boot gate (2026-06-11): the preview's load ladder (900ms)
+    // can fire before _restorePlanState's (1100ms). If the saved blob says a
+    // plan was applied this GW, don't paint stale pre-plan picks — restore
+    // will render the applied card and set dataset.applied itself.
+    try {
+      if (!_planRestoreDone) {
+        const _rawAp = localStorage.getItem(_planKey());
+        if (_rawAp) {
+          const _plAp = JSON.parse(_rawAp);
+          if (_plAp && _plAp.appliedCard && +_plAp.gw0 === +TEAM_META.gw_range[0]) return;
+        }
+      }
+    } catch (_eAp) {}
     const full = [...(typeof _xiPlayers !== 'undefined' ? _xiPlayers : []),
                   ...(typeof _benchPlayers !== 'undefined' ? _benchPlayers : [])];
     if (full.length !== 15) return;
@@ -12000,14 +12042,21 @@ function runSolve() {
     // Same hydration guard _openPathPlannerFromCurrent uses — only show the
     // overlay when the planner will actually run.
     if ([..._xiPlayers, ..._benchPlayers].length === 15) {
-      // Paint the overlay first, THEN kick off the heavy synchronous compute
-      // on the next tick so the spinner is on screen before the freeze.
+      // Re-entrancy guard (2026-06-11): the planner compute is async/chunked
+      // now — a second Solve mid-walk would race the in-flight one.
+      if (window._ppComputeBusy) {
+        status.textContent = 'Planner is already computing — hang on…';
+        return;
+      }
+      // Paint the overlay first, THEN kick off the heavy (now chunked/async)
+      // compute so the spinner is on screen before the work starts.
+      window._ppComputeBusy = true;
       const _lastGw = TEAM_META.gw_range[TEAM_META.gw_range.length - 1];
       _ppShowComputing(`Planning transfers GW${activeGw} → GW${_lastGw}…`);
-      setTimeout(() => {
+      setTimeout(async () => {
         let _ppOk = false;
-        try { _ppOk = _openPathPlannerFromCurrent(activeGwIdx); }
-        finally { _ppHideComputing(); }
+        try { _ppOk = await _openPathPlannerFromCurrent(activeGwIdx); }
+        finally { window._ppComputeBusy = false; _ppHideComputing(); }
         if (_ppOk) {
           status.textContent = `Planning transfers GW${activeGw} → end of season`;
         } else {
@@ -12270,11 +12319,14 @@ function confirmChipReview() {
     // page looked crashed (the runSolve / _selectPathOption entries already
     // paint one). Same pattern as runSolve: paint the compositor-driven
     // overlay first, then kick the heavy work on the next tick.
+    // Re-entrancy guard (2026-06-11): one planner compute at a time.
+    if (window._ppComputeBusy) return;
+    window._ppComputeBusy = true;
     const chipGw = TEAM_META.gw_range[gwIdx];
     _ppShowComputing(`Building your WC GW${chipGw} plan…`);
-    setTimeout(() => {
-      try { _openPathPlanner(chipType, chipGw, squad, gwIdx); }
-      finally { _ppHideComputing(); }
+    setTimeout(async () => {
+      try { await _openPathPlanner(chipType, chipGw, squad, gwIdx); }
+      finally { window._ppComputeBusy = false; _ppHideComputing(); }
     }, 80);
     return;
   }
@@ -12462,6 +12514,54 @@ function _ppHideComputing() {
   if (ov) ov.style.display = 'none';
 }
 
+// ── Cooperative-yield plumbing (2026-06-11, foreground-freeze fix) ──────────
+// The planner's lookahead walk used to run fully synchronously — 1-5 minutes
+// of blocked main thread during which the overlay couldn't even paint. The
+// compute entry points are now async and yield back to the event loop at a
+// coarse cadence (~every 35ms of work) via the background-safe MessageChannel
+// yield shared with apex_solver.js (window.ApexSolver._apexYield — NOT
+// setTimeout, which hidden tabs throttle to >=1s/tick).
+//
+// Re-entrancy: window._ppComputeBusy is the single in-flight flag. Every
+// compute entry (branch clicks via _selectPathOption, runSolve, chip-review
+// confirm, Start over) checks it before starting and clears it in `finally`;
+// selectPreset also early-returns on it so risk-box clicks can't mutate
+// ranking state mid-walk. (A window property, not `let`, so the heredoc code
+// that runs textually before this file's top-level can reference it without
+// TDZ risk.)
+window._ppComputeBusy = false;
+function _ppYield() {
+  try {
+    if (window.ApexSolver && typeof window.ApexSolver._apexYield === 'function') {
+      return window.ApexSolver._apexYield();
+    }
+  } catch (_e) { /* fall through */ }
+  return new Promise(function (r) { setTimeout(r, 0); });
+}
+let _ppLastYieldTs = 0;
+// Returns a promise when enough work has accumulated since the last yield,
+// null otherwise — callers do `const y = _ppMaybeYield(); if (y) await y;`
+// so the fast path skips the await entirely (yielding EVERY iteration would
+// turn a 30s walk into minutes of macrotask overhead).
+function _ppMaybeYield() {
+  const now = (typeof performance !== 'undefined' && performance.now)
+    ? performance.now() : Date.now();
+  if (now - _ppLastYieldTs < 35) return null;
+  _ppLastYieldTs = now;
+  return _ppYield();
+}
+// rAF + macrotask double-defer: resolves AFTER the browser has actually
+// painted the computing overlay, so heavy work never starts on a blank frame.
+function _ppNextPaint() {
+  return new Promise(function (r) {
+    if (typeof requestAnimationFrame === 'function') {
+      requestAnimationFrame(function () { setTimeout(r, 0); });
+    } else {
+      setTimeout(r, 16);
+    }
+  });
+}
+
 // ════════════════════════════════════════════════════════════════════════════
 // Path Planner — sequential GW transfer planner (v1)
 // ════════════════════════════════════════════════════════════════════════════
@@ -12550,7 +12650,9 @@ function _ppBestXiTotal(squad, gwIdx) {
 // Hit cost = 4 × max(0, transfersUsed - workingFt). Net EV (which we rank
 // on) = raw evGain - hitCost. A 2-transfer combo only surfaces if its
 // net EV beats the best single transfer.
-function _ppComputeOptions(workingSquad, gwIdx, bank, workingFt) {
+// ASYNC (2026-06-11): awaits the recursive lookahead so the main thread gets
+// periodic paints. Callers: _buildActiveCard, _selectPathOptionNow (both async).
+async function _ppComputeOptions(workingSquad, gwIdx, bank, workingFt) {
   const horizonEnd = TEAM_META.gw_range.length;
   // Hit cost stays valid even if caller forgets to pass workingFt.
   if (typeof workingFt !== 'number') workingFt = 1;
@@ -12756,7 +12858,7 @@ function _ppComputeOptions(workingSquad, gwIdx, bank, workingFt) {
   for (const opt of options) {
     const txUsed = opt.type === 'two' ? 2 : (opt.type === 'one' ? 1 : 0);
     const nextFt = Math.min(5, workingFt - txUsed + 1);
-    const future = _ppFutureBest(opt.newSquad, gwIdx + 1, opt.newBank, nextFt);
+    const future = await _ppFutureBest(opt.newSquad, gwIdx + 1, opt.newBank, nextFt);
     opt.lookaheadEv = (opt.netEv != null ? opt.netEv : opt.evGain) + future;
     opt.futureEv    = future;   // exposed for the UI sub-line
   }
@@ -12788,12 +12890,21 @@ function _ppStateKey(squad, gwIdx, bank, ft) {
   return `${gwIdx}|${ids}|${Math.round(bank * 10)}|${ft}`;
 }
 
-function _ppFutureBest(squad, gwIdx, bank, ft) {
+// ASYNC (2026-06-11): yields to the event loop every ~35ms of work via
+// _ppMaybeYield so the overlay spinner/text keep painting and input stays
+// responsive (the full-screen overlay still blocks clicks; selectPreset and
+// the entry points are additionally guarded by window._ppComputeBusy).
+async function _ppFutureBest(squad, gwIdx, bank, ft) {
   const horizonEnd = TEAM_META.gw_range.length;
   if (gwIdx >= horizonEnd) return 0;
 
   const key = _ppStateKey(squad, gwIdx, bank, ft);
   if (_ppLookaheadCache[key] != null) return _ppLookaheadCache[key];
+
+  // Coarse-cadence cooperative yield — sits just before the heavy local
+  // enumeration (a full POOL_DATA scan per squad slot), NOT inside it.
+  const _y = _ppMaybeYield();
+  if (_y) await _y;
 
   // Compute LOCAL options at this future state (no recursion — we'll
   // recurse explicitly). Returns top candidates with netEv computed.
@@ -12808,7 +12919,7 @@ function _ppFutureBest(squad, gwIdx, bank, ft) {
   for (const opt of opts.slice(0, 3)) {
     const txUsed = opt.type === 'two' ? 2 : (opt.type === 'one' ? 1 : 0);
     const nextFt = Math.min(5, ft - txUsed + 1);
-    const future = _ppFutureBest(opt.newSquad, gwIdx + 1, opt.newBank, nextFt);
+    const future = await _ppFutureBest(opt.newSquad, gwIdx + 1, opt.newBank, nextFt);
     const total = (opt.netEv != null ? opt.netEv : opt.evGain) + future;
     if (total > best) best = total;
   }
@@ -12916,7 +13027,11 @@ function _ppComputeOptionsLocal(workingSquad, gwIdx, bank, workingFt) {
 }
 
 // Open the path planner with a chip squad as the starting state.
-function _openPathPlanner(chipType, chipGw, chipSquad, chipGwIdx) {
+// ASYNC (2026-06-11): caller (confirmChipReview) shows the computing overlay,
+// sets window._ppComputeBusy and awaits this; we guarantee the overlay gets a
+// real paint before the heavy card build starts.
+async function _openPathPlanner(chipType, chipGw, chipSquad, chipGwIdx) {
+  await _ppNextPaint();
   _pathPlanner.active = true;
   _pathPlanner.startChipType = chipType;
   _pathPlanner.startChipGw   = chipGw;
@@ -12966,7 +13081,7 @@ function _openPathPlanner(chipType, chipGw, chipSquad, chipGwIdx) {
   });
 
   switchView('path-planner');
-  _renderPathCards();
+  await _renderPathCards();
   if (window.scrollTo) window.scrollTo(0, 0);
 }
 
@@ -13078,16 +13193,19 @@ function _ppRestoreFromSaved(startGwIdx) {
 // pattern matches every other entry into the heavy planner compute.
 let _ppForceFresh = false;
 function _ppStartOver() {
+  if (window._ppComputeBusy) return;   // compute in flight — ignore re-clicks
   const sIdx = (typeof activeGwIdx === 'number') ? activeGwIdx : (_pathPlanner.startGwIdx || 0);
   const _gwNow = TEAM_META.gw_range[sIdx];
+  window._ppComputeBusy = true;
   _ppShowComputing(`Starting a fresh GW${_gwNow} plan…`);
-  setTimeout(() => {
+  setTimeout(async () => {
     try {
       _ppForceFresh = true;
       if (typeof resetSolver === 'function') resetSolver();
-      _openPathPlannerFromCurrent(sIdx);
+      await _openPathPlannerFromCurrent(sIdx);
     } finally {
       _ppForceFresh = false;
+      window._ppComputeBusy = false;
       _ppHideComputing();
     }
   }, 80);
@@ -13095,19 +13213,25 @@ function _ppStartOver() {
 
 // Open path planner from the user's CURRENT live squad (no chip in play).
 // First card is the active GW itself, walking forward to end of horizon.
-function _openPathPlannerFromCurrent(startGwIdx) {
+// ASYNC (2026-06-11): callers (runSolve, _ppStartOver) show the overlay, set
+// window._ppComputeBusy and await the returned promise (resolves true/false —
+// runSolve's inline-recs fallback contract is unchanged).
+async function _openPathPlannerFromCurrent(startGwIdx) {
   const liveSquad = [..._xiPlayers, ..._benchPlayers];
   if (liveSquad.length !== 15) {
     // Defensive: fall through to inline recs if squad isn't fully hydrated.
     return false;
   }
+  // Let the caller's overlay actually paint before any heavy work. (Safe re
+  // _ppForceFresh: the caller's `finally` can't run until we resolve.)
+  await _ppNextPaint();
 
   // Resume an applied/saved plan instead of wiping it (2026-06-11, UAT bug 3).
   // _ppStartOver() sets _ppForceFresh to bypass this and get the legacy
   // fresh-tree behaviour on demand.
   if (!_ppForceFresh && _ppRestoreFromSaved(startGwIdx)) {
     switchView('path-planner');
-    _renderPathCards();
+    await _renderPathCards();
     if (window.scrollTo) window.scrollTo(0, 0);
     return true;
   }
@@ -13136,7 +13260,7 @@ function _openPathPlannerFromCurrent(startGwIdx) {
   for (const k of Object.keys(_ppLookaheadCache)) delete _ppLookaheadCache[k];
 
   switchView('path-planner');
-  _renderPathCards();
+  await _renderPathCards();
   if (window.scrollTo) window.scrollTo(0, 0);
   return true;
 }
@@ -13146,7 +13270,10 @@ function _ppPosName(et) {
 }
 
 // Render the full card stack — locked cards above, active card at bottom.
-function _renderPathCards() {
+// ASYNC (2026-06-11): awaits _buildActiveCard (the heavy lookahead compute).
+// Callers: _openPathPlanner, _openPathPlannerFromCurrent, _selectPathOptionNow
+// — all async, all await this.
+async function _renderPathCards() {
   const stack = document.getElementById('pp-card-stack');
   if (!stack) return;
   stack.innerHTML = '';
@@ -13176,14 +13303,19 @@ function _renderPathCards() {
   // Active card — only if there's a GW left to decide
   const horizonEnd = TEAM_META.gw_range.length;
   if (_pathPlanner.currentGwIdx < horizonEnd) {
-    const activeCard = _buildActiveCard(_pathPlanner.currentGwIdx);
+    const activeCard = await _buildActiveCard(_pathPlanner.currentGwIdx);
     stack.appendChild(activeCard);
   } else {
     // All GWs decided — show summary
     stack.appendChild(_buildSummaryCard());
-    const applyBtn = document.getElementById('pp-apply-btn');
-    if (applyBtn) applyBtn.style.display = 'inline-block';
   }
+
+  // "✓ Apply Plan to Squad" only once something is actually locked
+  // (2026-06-11 trivia C: after Start over the button stayed visible —
+  // and clickable — from the previous walk with 0 GWs decided). Partial
+  // walks stay appliable: confirmPathPlan backfills undecided GWs.
+  const applyBtn = document.getElementById('pp-apply-btn');
+  if (applyBtn) applyBtn.style.display = _pathPlanner.selections.length > 0 ? 'inline-block' : 'none';
 
   // ── Tree-first presentation (2026-06-09) ──
   // The decision tree is the primary surface; the card stack is the opt-in
@@ -13437,12 +13569,14 @@ function _buildLockedCard(sel) {
   return div;
 }
 
-function _buildActiveCard(gwIdx) {
+// ASYNC (2026-06-11): awaits _ppComputeOptions (lookahead walk). Caller:
+// _renderPathCards (async).
+async function _buildActiveCard(gwIdx) {
   const gw = TEAM_META.gw_range[gwIdx];
   const div = document.createElement('div');
   div.className = 'pp-card pp-active';
 
-  const options = _ppComputeOptions(
+  const options = await _ppComputeOptions(
     _pathPlanner.workingSquad, gwIdx, _pathPlanner.workingBank, _pathPlanner.workingFt
   );
   // Cache for the tree renderer AND for _selectPathOptionNow — selecting used
@@ -13690,28 +13824,38 @@ function _ppCommitToLive(gwIdx, newSquad) {
 // User picks an option for the active GW
 function _selectPathOption(gwIdx, optionIdx) {
   if (gwIdx !== _pathPlanner.currentGwIdx) return;  // not the active card
-  // Selecting an option triggers TWO heavy synchronous computes (options
-  // recompute + next-GW card build with lookahead). Without feedback the page
-  // froze dead — Back button unresponsive, refresh the only escape (Marcus,
-  // 2026-06-09). Paint the compositor-animated overlay FIRST, then do the
-  // work on the next tick. Same pattern as runSolve.
+  // Re-entrancy guard (2026-06-11): the compute now yields to the event loop,
+  // so a second branch click COULD start an overlapping walk against shared
+  // _pathPlanner state. One compute at a time; extra clicks are dropped.
+  if (window._ppComputeBusy) return;
+  // Selecting an option triggers heavy lookahead computes (options recompute
+  // + next-GW card build). Paint the compositor-animated overlay FIRST, then
+  // run the (now chunked/async) work. Same pattern as runSolve.
   const _gwNow  = TEAM_META.gw_range[gwIdx];
   const _gwNext = TEAM_META.gw_range[gwIdx + 1];
+  window._ppComputeBusy = true;
   _ppShowComputing(_gwNext
     ? `Locking GW${_gwNow} — computing GW${_gwNext} options…`
     : `Locking GW${_gwNow} — finishing the plan…`);
-  setTimeout(() => {
-    try { _selectPathOptionNow(gwIdx, optionIdx); }
-    finally { _ppHideComputing(); }
+  setTimeout(async () => {
+    try {
+      await _ppNextPaint();
+      await _selectPathOptionNow(gwIdx, optionIdx);
+    } finally {
+      window._ppComputeBusy = false;
+      _ppHideComputing();
+    }
   }, 80);
 }
 
-function _selectPathOptionNow(gwIdx, optionIdx) {
+// ASYNC (2026-06-11): awaits _ppComputeOptions fallback + _renderPathCards.
+// Caller: _selectPathOption (awaits inside its guarded async callback).
+async function _selectPathOptionNow(gwIdx, optionIdx) {
   // Reuse the options _buildActiveCard already computed for this GW (cached
   // there) — recomputing doubled the freeze for zero benefit.
   const options = (_pathPlanner._activeOptionsGw === gwIdx && _pathPlanner._activeOptions)
     ? _pathPlanner._activeOptions
-    : _ppComputeOptions(
+    : await _ppComputeOptions(
         _pathPlanner.workingSquad, gwIdx, _pathPlanner.workingBank, _pathPlanner.workingFt
       );
   const opt = options[optionIdx];
@@ -13754,7 +13898,7 @@ function _selectPathOptionNow(gwIdx, optionIdx) {
   // has a coherent entry).
   _ppCommitToLive(gwIdx, opt.newSquad);
 
-  _renderPathCards();
+  await _renderPathCards();
 }
 
 // Commit the planned path to the live squad.
@@ -13773,6 +13917,38 @@ function _selectPathOptionNow(gwIdx, optionIdx) {
 // WC propagation that overwrites every future _savedGwSquads[i] with the
 // chip squad, wiping the per-GW transfer choices the user just made (audit
 // finding 2026-04-30 / CRITICAL bug #1).
+
+// ── Applied-plan picks card (2026-06-11, reload-persistence fix) ────────────
+// Renders the "✓ Plan applied" state into #engine-picks from a compact meta
+// object and sets dataset.applied so _renderRecoPreview stops repainting
+// stale pre-plan picks. Called from BOTH confirmPathPlan (live apply) and
+// _restorePlanState (page reload — the meta is persisted in the saved-plan
+// localStorage blob as `appliedCard`). resetSolver clears the blob AND
+// window._apexAppliedCardMeta, so ↺ Reset still resumes the live preview.
+// meta = { gwA, gwB, transfers, hits, totalPts, moves: [up to 3 strings] }
+function _apexRenderAppliedPicksCard(meta) {
+  if (!meta) return false;
+  const _reco = document.getElementById('engine-picks');
+  if (!_reco) return false;
+  // Range from the GWs the user ACTUALLY locked (trivia D: header used to
+  // hard-claim GW32–GW38 when only GW32 was decided).
+  const _rng = (meta.gwA != null && meta.gwB != null && +meta.gwB !== +meta.gwA)
+    ? `GW${meta.gwA}–GW${meta.gwB}` : `GW${meta.gwA}`;
+  const _nTx  = +meta.transfers || 0;
+  const _hits = +meta.hits || 0;
+  let _h = `<div class="va-reco-title">✓ Plan applied · ${_rng}</div>`;
+  _h += `<div class="va-reco-row"><span class="va-reco-move">${_nTx} transfer${_nTx === 1 ? '' : 's'} committed${_hits > 0 ? ` · ${_hits} hit${_hits > 1 ? 's' : ''}` : ''}</span>`
+    + `<span class="va-reco-gain">${(+meta.totalPts || 0).toFixed(1)} pts</span></div>`;
+  for (const m of (meta.moves || []).slice(0, 3)) {
+    _h += `<div class="va-reco-row" style="opacity:.8;"><span class="va-reco-move">${String(m).replace(' → ', ' <span class="va-reco-arr">→</span> ')}</span></div>`;
+  }
+  _h += `<div style="font-size:.8rem;color:var(--muted);margin-top:6px;">Engine picks resume next GW · reopen <strong>plan ahead →</strong> to review, or ↺ Reset to discard</div>`;
+  _reco.dataset.applied = '1';
+  _reco.innerHTML = _h;
+  _reco.style.display = 'block';
+  return true;
+}
+
 function confirmPathPlan() {
   // Commit chip squad to chip GW (chip flow only — non-chip flow's first
   // GW was committed by _selectPathOption like any other).
@@ -13801,24 +13977,31 @@ function confirmPathPlan() {
   // Quick Optimise uses, so _renderRecoPreview stops repainting stale picks)
   // summarising the plan. ↺ Reset clears the lock and the preview resumes
   // (resetSolver already deletes dataset.applied + repaints).
+  // 2026-06-11: rendering factored into _apexRenderAppliedPicksCard and the
+  // meta stashed on window._apexAppliedCardMeta — _savePlanState persists it
+  // (`appliedCard`) so a reload re-renders the applied state instead of
+  // recomputing stale picks from a half-restored squad (live-confirmed bug:
+  // post-reload card recommended selling a player the plan had already sold).
   try {
-    const _reco = document.getElementById('engine-picks');
-    if (_reco) {
-      const _gwA = TEAM_META.gw_range[_pathPlanner.startGwIdx];
-      const _gwB = TEAM_META.gw_range[horizonEnd - 1];
-      const _txSels = _pathPlanner.selections.filter(s => s.type === 'one' || s.type === 'two');
-      const _nTx = _txSels.reduce((n, s) => n + (s.type === 'two' ? 2 : 1), 0);
-      let _h = `<div class="va-reco-title">✓ Plan applied · GW${_gwA}–GW${_gwB}</div>`;
-      _h += `<div class="va-reco-row"><span class="va-reco-move">${_nTx} transfer${_nTx === 1 ? '' : 's'} committed${_pathPlanner.totalHits > 0 ? ` · ${_pathPlanner.totalHits} hit${_pathPlanner.totalHits > 1 ? 's' : ''}` : ''}</span>`
-        + `<span class="va-reco-gain">${_pathPlanner.totalXp.toFixed(1)} pts</span></div>`;
-      for (const s of _txSels.slice(0, 3)) {
-        _h += `<div class="va-reco-row" style="opacity:.8;"><span class="va-reco-move">GW${s.gw} · ${s.out ? s.out.web_name : '?'} <span class="va-reco-arr">→</span> ${s.in ? s.in.web_name : '?'}${s.type === 'two' ? ' +1' : ''}</span></div>`;
-      }
-      _h += `<div style="font-size:.8rem;color:var(--muted);margin-top:6px;">Engine picks resume next GW · reopen <strong>plan ahead →</strong> to review, or ↺ Reset to discard</div>`;
-      _reco.dataset.applied = '1';
-      _reco.innerHTML = _h;
-      _reco.style.display = 'block';
-    }
+    const _txSels = _pathPlanner.selections.filter(s => s.type === 'one' || s.type === 'two');
+    const _nTx = _txSels.reduce((n, s) => n + (s.type === 'two' ? 2 : 1), 0);
+    // Trivia D: range = the GWs actually locked in the walk, not the whole
+    // horizon (selections includes the chip starter card when present).
+    const _lockedGws = _pathPlanner.selections.map(s => +s.gw).filter(g => isFinite(g));
+    const _gwA = _lockedGws.length ? Math.min.apply(null, _lockedGws)
+      : TEAM_META.gw_range[_pathPlanner.startGwIdx];
+    const _gwB = _lockedGws.length ? Math.max.apply(null, _lockedGws) : _gwA;
+    const _meta = {
+      gwA: _gwA,
+      gwB: _gwB,
+      transfers: _nTx,
+      hits: _pathPlanner.totalHits,
+      totalPts: +_pathPlanner.totalXp.toFixed(1),
+      moves: _txSels.slice(0, 3).map(s =>
+        `GW${s.gw} · ${s.out ? s.out.web_name : '?'} → ${s.in ? s.in.web_name : '?'}${s.type === 'two' ? ' +1' : ''}`),
+    };
+    window._apexAppliedCardMeta = _meta;
+    _apexRenderAppliedPicksCard(_meta);
   } catch (e) { /* non-critical — picks card is cosmetic */ }
 
   exitPathPlanner();
@@ -16670,7 +16853,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781166813-GW32-6d27131e</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781170845-GW32-6d27131e</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
