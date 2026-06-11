@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-06-11T16:46:30">
+<meta name="apex-gw" content="32" data-built-at="2026-06-11T16:54:07">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -9152,7 +9152,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1781192789-GW32-b1cdc621";
+const BUILD_VERSION = "1781193247-GW32-b1cdc621";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -12801,19 +12801,48 @@ function _ppChipDropdownGw(chip) {
 }
 
 // Chip marked for this gwIdx ('WC'|'FH'|'BB'|'TC') or null. The walk's
-// starting chip (locked card) and chips already played in this walk are
+// starting chip (locked card) and chips already PLAYED in this walk are
 // excluded so a chip can never be offered twice.
+//
+// HELD-CHIP RE-OFFER (2026-06-11, Marcus): holding a chip at its marked week
+// (taking the transfer/roll instead) does NOT kill it — it comes back at the
+// planner's best remaining week, exactly what the hold badge promises. Rule:
+// once the marked week is behind the walk and the chip is unplayed, offer it
+// at any gwIdx that is the argmax of the chip's remaining per-GW EV (ties →
+// earliest). Holding again simply rolls it to the next argmax. Still a tap —
+// nothing auto-applies.
 function _ppPlannedChipAt(gwIdx) {
   const gw = TEAM_META.gw_range[gwIdx];
   if (!gw) return null;
   for (const c of ['wc', 'fh', 'bb', 'tc']) {
-    if (_ppChipDropdownGw(c) !== gw) continue;
+    const markedGw = _ppChipDropdownGw(c);
+    if (!markedGw) continue;
     const t = c.toUpperCase();
     if (_pathPlanner.startChipType === t) continue;            // locked starter
     if (_pathPlanner.selections.some(s => s.type === 'chip' && s.chipType === t)) continue;
-    return t;
+    if (markedGw === gw) return t;                             // the marked week itself
+    const markedIdx = TEAM_META.gw_range.indexOf(markedGw);
+    if (markedIdx < gwIdx && _ppChipBestRemainingIdx(t, gwIdx) === gwIdx) return t;
   }
   return null;
+}
+
+// Argmax gwIdx of a chip's remaining per-GW EV from fromIdx onward (baked
+// CHIP_PLANNER maps; ties → earliest). -1 when the map is empty/unloaded —
+// re-offer then degrades to one-shot rather than guessing.
+function _ppChipBestRemainingIdx(chipType, fromIdx) {
+  try {
+    const m = (typeof CHIP_PLANNER !== 'undefined' && CHIP_PLANNER
+      && CHIP_PLANNER[chipType.toLowerCase() + '_ev']) || {};
+    let bestIdx = -1, bestEv = -Infinity;
+    for (const k of Object.keys(m)) {
+      const gi = TEAM_META.gw_range.indexOf(+k);
+      const ev = +m[k];
+      if (gi < fromIdx || gi < 0 || !isFinite(ev)) continue;
+      if (ev > bestEv) { bestEv = ev; bestIdx = gi; }
+    }
+    return bestIdx;
+  } catch (_e) { return -1; }
 }
 
 // Chip EV priced from the live plan squad at gwIdx.
@@ -13920,11 +13949,13 @@ function _renderPathTree() {
       if (o.type === 'none') {
         l1 = '↻ Roll the transfer'; l2 = `${kind} · +${ev.toFixed(1)} EV · banks an extra FT`;
       } else if (o.type === 'chip') {
-        // Chip branch (2026-06-11): "🎴 Bench Boost now · +14.2 EV", with the
-        // planner's next-best week as the hold hint when one exists.
+        // Chip branch (2026-06-11): "🎴 Bench Boost now · +14.2 EV". The hold
+        // line says exactly what happens — held chips re-offer at the
+        // planner's best remaining week (no silent one-shot).
         const _cn = { BB: 'Bench Boost', TC: 'Triple Captain', FH: 'Free Hit', WC: 'Wildcard' };
         l1 = `🎴 ${_cn[o.chipType] || o.chipType} now`;
-        l2 = `${kind} · +${ev.toFixed(1)} EV${o.holdWeek ? ` · or GW${o.holdWeek.gw} (+${o.holdWeek.ev.toFixed(1)})` : ''}`;
+        l1b = o.holdWeek ? `hold → comes back GW${o.holdWeek.gw} (+${o.holdWeek.ev.toFixed(1)})` : null;
+        l2 = `${kind} · +${ev.toFixed(1)} EV`;
       } else if (o.type === 'two') {
         l1  = `${short(o.out)} » ${short(o.in)}`;
         l1b = `+ ${short(o.out2)} » ${short(o.in2)}`;
@@ -14098,7 +14129,7 @@ async function _buildActiveCard(gwIdx) {
         : (opt.chipType === 'FH' ? 'one-week squad swap · reverts after this GW'
         : (opt.chipType === 'BB' ? 'all 15 players score this week' : 'captain scores 3× this week'));
       const _holdHint = opt.holdWeek
-        ? ` · next-best week GW${opt.holdWeek.gw} (+${opt.holdWeek.ev.toFixed(1)})` : '';
+        ? ` · hold it and it comes back GW${opt.holdWeek.gw} (+${opt.holdWeek.ev.toFixed(1)})` : '';
       bodyHtml = `
         <div class="pp-no-transfer-block">
           <div class="pp-no-transfer-icon">🎴</div>
@@ -14228,7 +14259,7 @@ async function _buildActiveCard(gwIdx) {
     // transfer option doubles as "hold the chip" — show the planner's
     // next-best week so the trade-off is explicit.
     const _holdBadge = opt.holdChip
-      ? `<div style="font-size:.68rem;font-weight:800;color:#b45309;letter-spacing:.4px;margin-bottom:4px;">✋ HOLD ${opt.holdChip.chipType}${opt.holdChip.week ? ` · next-best week GW${opt.holdChip.week.gw} (+${opt.holdChip.week.ev.toFixed(1)})` : ''}</div>`
+      ? `<div style="font-size:.68rem;font-weight:800;color:#b45309;letter-spacing:.4px;margin-bottom:4px;">✋ HOLD ${opt.holdChip.chipType}${opt.holdChip.week ? ` — it comes back at GW${opt.holdChip.week.gw} (+${opt.holdChip.week.ev.toFixed(1)})` : ''}</div>`
       : '';
     optsHtml += `
       <div class="pp-option ${opt.type === 'none' ? 'pp-option-no-transfer' : ''} ${isTop}">
@@ -17426,7 +17457,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781192789-GW32-b1cdc621</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781193247-GW32-b1cdc621</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
