@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-06-11T14:29:41">
+<meta name="apex-gw" content="32" data-built-at="2026-06-11T14:58:41">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -9152,7 +9152,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1781184581-GW32-b1cdc621";
+const BUILD_VERSION = "1781186321-GW32-b1cdc621";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -9491,7 +9491,7 @@ async function _leagueLivePollOnce() {
           prevData: _leagueDataAlt,
           pool: POOL_DATA,
           nSims: _leagueDataAlt.n_sims || 5000,
-          cv: 0.25,
+          cv: 0.33,
           seed: 42,
         });
         if (altFresh) _leagueDataAlt = altFresh;
@@ -11774,6 +11774,27 @@ function runOptimize() {
   const section = document.getElementById('transfers-section');
   const activeGw = TEAM_META.gw_range[activeGwIdx];
 
+  // 2026-06-11 C2/C3 ambiguity resolved: with a FULL PLAN applied, a one-click
+  // "best single move" is computed against a squad whose transfers the plan
+  // already spent — it would stack on and contradict the plan (same reasoning
+  // as the renderTransfers / Engine-Picks suppression). Make the conflict
+  // explicit instead of silently double-spending transfers.
+  let _qoPlan = window._apexAppliedCardMeta;
+  if (!_qoPlan) {
+    try {
+      const _rawQ = localStorage.getItem(_planKey());
+      if (_rawQ) {
+        const _plQ = JSON.parse(_rawQ);
+        if (_plQ && _plQ.appliedCard && +_plQ.gw0 === +TEAM_META.gw_range[0]) _qoPlan = _plQ.appliedCard;
+      }
+    } catch (_eQ) {}
+  }
+  if (_qoPlan) {
+    const _gwQ = _qoPlan.gwA === _qoPlan.gwB ? `GW${_qoPlan.gwA}` : `GW${_qoPlan.gwA}–GW${_qoPlan.gwB}`;
+    if (status) status.textContent = `✓ Plan applied (${_gwQ}) — open "plan ahead →" to edit it, or ↺ Reset to discard and use Quick Optimise`;
+    return;
+  }
+
   // If a chip squad (WC/FH) is planned ON this GW, one-click transfer doesn't
   // apply — defer to the full Solve flow which opens the chip-review view.
   if ((fhGw && activeGw === fhGw) || (wcGw && activeGw === wcGw)) {
@@ -12107,7 +12128,9 @@ function runSolve() {
       window._ppComputeBusy = true;
       const _lastGw = TEAM_META.gw_range[TEAM_META.gw_range.length - 1];
       _ppShowComputing(`Planning transfers GW${activeGw} → GW${_lastGw}…`);
-      setTimeout(async () => {
+      // 2026-06-11 C1: async IIFE, not setTimeout(80) — hidden-tab timer
+      // clamping; _openPathPlannerFromCurrent awaits _ppNextPaint itself.
+      (async () => {
         let _ppOk = false;
         try { _ppOk = await _openPathPlannerFromCurrent(activeGwIdx); }
         finally { window._ppComputeBusy = false; _ppHideComputing(); }
@@ -12118,7 +12141,7 @@ function runSolve() {
           renderTransfers(computeTransfers(activeGwIdx));
           section.style.display = 'block';
         }
-      }, 80);
+      })();
       return;
     }
     // Fallthrough if planner couldn't open (e.g. squad not hydrated yet)
@@ -12378,10 +12401,14 @@ function confirmChipReview() {
     window._ppComputeBusy = true;
     const chipGw = TEAM_META.gw_range[gwIdx];
     _ppShowComputing(`Building your WC GW${chipGw} plan…`);
-    setTimeout(async () => {
-      try { await _openPathPlanner(chipType, chipGw, squad, gwIdx); }
+    // 2026-06-11 C1: async IIFE + explicit paint await, not setTimeout(80).
+    (async () => {
+      try {
+        await _ppNextPaint();
+        await _openPathPlanner(chipType, chipGw, squad, gwIdx);
+      }
       finally { window._ppComputeBusy = false; _ppHideComputing(); }
-    }, 80);
+    })();
     return;
   }
   // Free Hit = one-week swap. Apply to active GW, return to team view.
@@ -13342,8 +13369,12 @@ function _ppStartOver() {
   const _gwNow = TEAM_META.gw_range[sIdx];
   window._ppComputeBusy = true;
   _ppShowComputing(`Starting a fresh GW${_gwNow} plan…`);
-  setTimeout(async () => {
+  // 2026-06-11 C1: async IIFE, not setTimeout(80) — hidden tabs clamp timers
+  // (≥1s, up to 1/min under intensive throttling). _ppNextPaint provides the
+  // same paint-first guarantee without throttle exposure.
+  (async () => {
     try {
+      await _ppNextPaint();
       _ppForceFresh = true;
       if (typeof resetSolver === 'function') resetSolver();
       await _openPathPlannerFromCurrent(sIdx);
@@ -13352,7 +13383,7 @@ function _ppStartOver() {
       window._ppComputeBusy = false;
       _ppHideComputing();
     }
-  }, 80);
+  })();
 }
 
 // Open path planner from the user's CURRENT live squad (no chip in play).
@@ -13617,17 +13648,17 @@ function _renderPathTree() {
         ? ` · <tspan fill="#D85A30" font-weight="700">−${hc} HIT</tspan>` : '';
       let l1, l1b = null, l2;
       if (o.type === 'none') {
-        l1 = '↻ Roll the transfer'; l2 = `${kind} · +${ev.toFixed(1)} · banks an extra FT`;
+        l1 = '↻ Roll the transfer'; l2 = `${kind} · +${ev.toFixed(1)} EV · banks an extra FT`;
       } else if (o.type === 'two') {
         l1  = `${short(o.out)} » ${short(o.in)}`;
         l1b = `+ ${short(o.out2)} » ${short(o.in2)}`;
-        l2 = `${kind} · 2 transfers · +${ev.toFixed(1)}${HIT_TSPAN(o.hitCost)}`;
+        l2 = `${kind} · 2 transfers · +${ev.toFixed(1)} EV${HIT_TSPAN(o.hitCost)}`;
       } else {
         const pd = (typeof _apexPoolById === 'function' ? _apexPoolById(o.in.id) : null) || o.in;
         const own = (typeof pd.own === 'number') ? pd.own : (parseFloat(pd.own) || 0);
         const tag = o.riskPick === 'differential' ? ' 💎' : (o.riskPick === 'template' ? ' 🛡' : '');
         l1 = `${short(o.out)} » ${short(o.in)}`;
-        l2 = `${kind} · +${ev.toFixed(1)} · ${own.toFixed(1)}%${tag}${HIT_TSPAN(o.hitCost)}`;
+        l2 = `${kind} · +${ev.toFixed(1)} EV · ${own.toFixed(1)}%${tag}${HIT_TSPAN(o.hitCost)}`;
       }
       s += line(px + NW, midY, x, y + BH/2, col, bi !== 0);
       // "tap to pick ›" affordance (Marcus 2026-06-09): every active branch
@@ -13681,7 +13712,7 @@ function _renderPathTree() {
       : `Engine path · GW${gwR[cur] || gwR[horizonEnd - 1]}→${gwR[horizonEnd - 1]}`;
     const val = sels.length
       ? `${_pathPlanner.totalXp.toFixed(1)} pts${_pathPlanner.totalHits > 0 ? ` · ${_pathPlanner.totalHits} hit${_pathPlanner.totalHits > 1 ? 's' : ''}` : ''}`
-      : `+${bestEv.toFixed(1)} pts`;
+      : `+${bestEv.toFixed(1)} EV`;
     card.innerHTML = `<div style="font-size:.85rem;color:var(--muted);">${label}</div>`
       + `<div style="font-size:1.45rem;font-weight:700;color:var(--text);">${val}</div>`;
   }
@@ -14005,7 +14036,8 @@ function _selectPathOption(gwIdx, optionIdx) {
   _ppShowComputing(_gwNext
     ? `Locking GW${_gwNow} — computing GW${_gwNext} options…`
     : `Locking GW${_gwNow} — finishing the plan…`);
-  setTimeout(async () => {
+  // 2026-06-11 C1: async IIFE, not setTimeout(80) — see _ppStartOver note.
+  (async () => {
     try {
       await _ppNextPaint();
       await _selectPathOptionNow(gwIdx, optionIdx);
@@ -14013,7 +14045,7 @@ function _selectPathOption(gwIdx, optionIdx) {
       window._ppComputeBusy = false;
       _ppHideComputing();
     }
-  }, 80);
+  })();
 }
 
 // ASYNC (2026-06-11): awaits _ppComputeOptions fallback + _renderPathCards.
@@ -17021,7 +17053,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781184581-GW32-b1cdc621</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781186321-GW32-b1cdc621</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
