@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-06-11T16:54:07">
+<meta name="apex-gw" content="32" data-built-at="2026-06-11T17:48:53">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -1335,17 +1335,26 @@ body {
 }
 .apply-row-btn:hover { opacity: 0.85; }
 
-/* Chip colour coding */
-.opt-wc { background: rgba(29,158,117,0.2);  color: var(--accent); border: 1px solid rgba(29,158,117,0.27); }
-.opt-fh { background: rgba(168,85,247,0.2);  color: #a855f7; border: 1px solid #a855f744; }
-.opt-bb { background: rgba(10,132,255,0.2);  color: #0a84ff; border: 1px solid #0a84ff44; }
-.opt-tc { background: rgba(234,179,8,0.2);   color: #eab308; border: 1px solid #eab30844; }
+/* Chip colour coding — 2026-06-11: unified with the Step-1 toggle cards
+   (WC purple, FH blue, BB teal, TC amber). Same chip = same colour on every
+   screen; the old mapping flipped WC/FH/BB between pages. */
+.opt-wc { background: rgba(124,58,237,0.10); color: #6d28d9; border: 1px solid rgba(124,58,237,0.28); }
+.opt-fh { background: rgba(37,99,235,0.10);  color: #1d4ed8; border: 1px solid rgba(37,99,235,0.28); }
+.opt-bb { background: rgba(29,158,117,0.12); color: #0F6E56; border: 1px solid rgba(29,158,117,0.32); }
+.opt-tc { background: rgba(217,119,6,0.12);  color: #b45309; border: 1px solid rgba(217,119,6,0.3); }
 
 .opt-table, .opt-ref-table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   margin-bottom: 12px;
   font-size: 0.9rem;
+  /* 2026-06-11 polish: tables sit in a white card, not raw on the page. */
+  background: #ffffff;
+  border: 1px solid #e2e0d8;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(15,23,42,0.04);
 }
 .opt-table th, .opt-ref-table th {
   text-align: left;
@@ -1355,7 +1364,14 @@ body {
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
+  background: #faf9f5;
 }
+/* Numbers are the brand — render them in the mono stack. */
+.opt-ev, .optimal-top-ev, .opt-baseline-val, .opt-baseline-gain,
+.opt-table td:nth-child(4), .opt-table td:nth-child(5) {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+}
+.opt-table tbody tr:last-child td, .opt-ref-table tbody tr:last-child td { border-bottom: none; }
 .opt-table td, .opt-ref-table td {
   padding: 10px 12px;
   border-bottom: 1px solid var(--border);
@@ -2240,7 +2256,7 @@ body {
 }
 .va-cs-on {
   background: rgba(29,158,117,0.14);
-  color: #fb923c;
+  color: #0F6E56;   /* 2026-06-11: was orange #fb923c — pre-teal-rebrand fossil */
   border-color: rgba(29,158,117,0.4);
 }
 .va-cs-off {
@@ -2571,16 +2587,30 @@ body.compare-review .va-card-hero::before {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  background: rgba(0,0,0,0.025);
-  border: 1px solid rgba(0,0,0,0.08);
+  background: #ffffff;
+  border: 1px solid #e2e0d8;
   border-radius: 14px;
   padding: 22px 20px 20px;
   cursor: pointer;
-  transition: border-color 0.18s, background 0.18s, opacity 0.18s, transform 0.1s;
+  transition: border-color 0.18s, background 0.18s, opacity 0.18s, transform 0.1s, box-shadow 0.18s;
   position: relative;
   user-select: none;
+  box-shadow: 0 1px 3px rgba(15,23,42,0.04);
 }
-.cs-card:hover { transform: translateY(-1px); }
+.cs-card:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(15,23,42,0.08); }
+/* Toggle affordance (2026-06-11 polish): these cards ARE on/off switches —
+   say so. Empty ring = off, teal check = in play. Pure CSS, no JS. */
+.cs-card::after {
+  content: '';
+  position: absolute; top: 13px; right: 13px;
+  width: 22px; height: 22px; border-radius: 50%;
+  border: 2px solid #d6d4cb; background: #ffffff;
+  font-size: 13px; font-weight: 800; line-height: 19px; text-align: center;
+  color: #ffffff;
+  transition: background 0.15s, border-color 0.15s;
+  box-sizing: border-box;
+}
+.cs-card-active::after { content: '✓'; background: #1D9E75; border-color: #1D9E75; }
 .cs-card input[type="checkbox"] {
   position: absolute; top: 0; left: 0; opacity: 0;
   pointer-events: none;
@@ -2620,31 +2650,33 @@ body.compare-review .va-card-hero::before {
   border-top: 1px solid rgba(0,0,0,0.06);
 }
 
-/* Per-chip tag colours (match the squad-page chip-plan + WC_SQUAD palette) */
-.cs-card-wc .cs-card-tag { background: rgba(168,85,247,0.18); color: #c4b5fd; }
-.cs-card-fh .cs-card-tag { background: rgba(59,130,246,0.18); color: #93c5fd; }
-.cs-card-bb .cs-card-tag { background: rgba(34,197,94,0.18); color: #86efac; }
-.cs-card-tc .cs-card-tag { background: rgba(251,191,36,0.18); color: #fcd34d; }
+/* Per-chip tag colours — DEEP text on a light tint (2026-06-11: the old
+   pastel-on-dark values were a dark-theme fossil that read as disabled on
+   the cream page). Same chip→colour mapping as the results-page pills. */
+.cs-card-wc .cs-card-tag { background: rgba(124,58,237,0.10); color: #6d28d9; }
+.cs-card-fh .cs-card-tag { background: rgba(37,99,235,0.10);  color: #1d4ed8; }
+.cs-card-bb .cs-card-tag { background: rgba(29,158,117,0.12); color: #0F6E56; }
+.cs-card-tc .cs-card-tag { background: rgba(217,119,6,0.12);  color: #b45309; }
 
-/* Active state — chip is available. Subtle accent on the matching ramp. */
+/* Active state — chip is in play. Crisp teal-leaning card. */
 .cs-card-active {
-  border-color: rgba(255,255,255,0.18);
-  background: rgba(0,0,0,0.04);
+  border-color: rgba(29,158,117,0.45);
+  background: #ffffff;
 }
-.cs-card-active.cs-card-wc:hover { border-color: rgba(168,85,247,0.5); background: rgba(168,85,247,0.06); }
-.cs-card-active.cs-card-fh:hover { border-color: rgba(59,130,246,0.5); background: rgba(59,130,246,0.06); }
-.cs-card-active.cs-card-bb:hover { border-color: rgba(34,197,94,0.5); background: rgba(34,197,94,0.06); }
-.cs-card-active.cs-card-tc:hover { border-color: rgba(251,191,36,0.5); background: rgba(251,191,36,0.06); }
-.cs-card-active .cs-card-state { color: #4ade80; }
+.cs-card-active.cs-card-wc:hover { border-color: rgba(124,58,237,0.55); background: rgba(124,58,237,0.03); }
+.cs-card-active.cs-card-fh:hover { border-color: rgba(37,99,235,0.55);  background: rgba(37,99,235,0.03); }
+.cs-card-active.cs-card-bb:hover { border-color: rgba(29,158,117,0.6);  background: rgba(29,158,117,0.04); }
+.cs-card-active.cs-card-tc:hover { border-color: rgba(217,119,6,0.55);  background: rgba(217,119,6,0.03); }
+.cs-card-active .cs-card-state { color: #0F6E56; }
 
 /* Used state — chip is gone. Card greys out, name struck through. */
 .cs-card-used {
-  opacity: 0.5;
-  background: rgba(255,255,255,0.015);
-  border-color: rgba(0,0,0,0.06);
+  opacity: 0.55;
+  background: #faf9f5;
+  border-color: #e2e0d8;
 }
 .cs-card-used .cs-card-name { text-decoration: line-through; color: var(--muted); }
-.cs-card-used .cs-card-state { color: #71717a; }
+.cs-card-used .cs-card-state { color: #9ca3af; }
 
 .cs-cta-row {
   display: flex;
@@ -2653,7 +2685,7 @@ body.compare-review .va-card-hero::before {
 }
 .cs-cta-btn {
   background: var(--accent, #1D9E75);
-  color: #18181b;
+  color: #ffffff;
   border: none;
   border-radius: 10px;
   padding: 16px 40px;
@@ -2945,6 +2977,17 @@ body.compare-review .va-card-hero::before {
 .opt-tl-gw { font-size: 12.5px; font-weight: 700; color: #5F5E5A; }
 .opt-tl-gain { font-size: 12px; font-weight: 700; color: #0F6E56; margin-top: 2px; }
 
+/* ── Chip page rhythm (2026-06-11 polish): one centered column, even
+   vertical beats — hero → step → toggles → strategy → CTA. ── */
+#view-chip-select .va-header { margin-bottom: 4px; }
+#view-chip-select .cs-intro { margin: 26px 0 22px !important; }
+#view-chip-select .cs-card-grid { margin-bottom: 28px; }
+#view-chip-select .aps-head { justify-content: center; }
+#view-chip-select .aps-sub { text-align: center; }
+#view-chip-select .aps-more-toggle { display: block; margin: 10px auto 0; }
+#view-chip-select .cs-cta-row { margin: 28px 0 44px; }
+#view-optimal .cs-intro-eyebrow { text-align: center; margin-bottom: 8px; }
+
 /* ── Chip page compaction (2026-06-09): less ceremony, same power ── */
 .cs-intro { margin: 6px 0 14px !important; }
 .cs-intro-title { font-size: 1.6rem !important; margin: 4px 0 !important; }
@@ -2957,10 +3000,19 @@ body.compare-review .va-card-hero::before {
 #aps-grid.aps-show-advanced .aps-card[data-preset="optimistic"],
 #aps-grid.aps-show-advanced .aps-card[data-preset="safe"],
 #aps-grid.aps-show-advanced .aps-card[data-preset="custom"] { display: flex; }
+/* 2026-06-11 polish: was a bare underlined hyperlink — now a quiet ghost
+   pill that matches the button system. */
 .aps-more-toggle {
-  background: none; border: none; cursor: pointer; color: #5F5E5A;
-  font-family: 'Plus Jakarta Sans', sans-serif; font-size: .85rem;
-  font-weight: 600; text-decoration: underline; padding: 8px 0 0; display: block;
+  background: #ffffff; border: 1px solid #e2e0d8; border-radius: 999px;
+  cursor: pointer; color: #5F5E5A;
+  font-family: 'Plus Jakarta Sans', sans-serif; font-size: .82rem;
+  font-weight: 700; text-decoration: none; padding: 7px 16px;
+  display: inline-block; margin-top: 10px;
+  transition: border-color .15s, color .15s, box-shadow .15s;
+}
+.aps-more-toggle:hover {
+  color: #085041; border-color: rgba(29,158,117,0.5);
+  box-shadow: 0 1px 6px rgba(15,23,42,0.05);
 }
 
 /* Decision-tree branch cards — hover lift so tappability is unmissable
@@ -5683,7 +5735,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 .aps-beta {
   font-family: 'JetBrains Mono', monospace;
   font-size: 10px; font-weight: 700; letter-spacing: 0.6px;
-  color: #1D9E75; background: #fff6ef; border: 1px solid #f9c79b;
+  color: #0F6E56; background: #E1F5EE; border: 1px solid #BFE7D8;  /* 2026-06-11: teal, was peach */
   border-radius: 999px; padding: 2px 8px; text-transform: uppercase;
 }
 .aps-sub {
@@ -5702,7 +5754,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 }
 .aps-card:hover { box-shadow: 0 2px 10px rgba(15,23,42,.06); }
 .aps-card.aps-active {
-  border: 2px solid #1D9E75; background: #fff6ef;
+  border: 2px solid #1D9E75; background: #F0FAF6;  /* 2026-06-11: was peach #fff6ef — orange-era fossil */
   padding: 17px 19px;  /* compensate +1px border so layout doesn't jump */
 }
 .aps-icon {
@@ -5781,7 +5833,7 @@ html.apex-offseason #view-landing .hero-sub::after {
     </section>
 
     <section class="cs-intro">
-      <div class="cs-intro-eyebrow">— STEP 1</div>
+      <div class="cs-intro-eyebrow">STEP 1 OF 2</div>
       <h2 class="cs-intro-title">Which chips are still in play?</h2>
       <p class="cs-intro-sub">Toggle off the ones you've already burned this season. We'll compute the optimal sequence for the rest.</p>
     </section>
@@ -5793,28 +5845,28 @@ html.apex-offseason #view-landing .hero-sub::after {
           <span class="cs-card-tag">WC</span>
           <span class="cs-card-name">Wildcard</span>
           <span class="cs-card-desc">Unlimited transfers, no hits</span>
-          <span class="cs-card-state">Available</span>
+          <span class="cs-card-state">In play</span>
         </label>
         <label class="cs-card cs-card-fh cs-card-active" id="lbl-fh">
           <input type="checkbox" id="chk-fh" checked onchange="toggleChipLabel('fh')">
           <span class="cs-card-tag">FH</span>
           <span class="cs-card-name">Free Hit</span>
           <span class="cs-card-desc">One-week squad swap</span>
-          <span class="cs-card-state">Available</span>
+          <span class="cs-card-state">In play</span>
         </label>
         <label class="cs-card cs-card-bb cs-card-active" id="lbl-bb">
           <input type="checkbox" id="chk-bb" checked onchange="toggleChipLabel('bb')">
           <span class="cs-card-tag">BB</span>
           <span class="cs-card-name">Bench Boost</span>
           <span class="cs-card-desc">All 15 players score</span>
-          <span class="cs-card-state">Available</span>
+          <span class="cs-card-state">In play</span>
         </label>
         <label class="cs-card cs-card-tc cs-card-active" id="lbl-tc">
           <input type="checkbox" id="chk-tc" checked onchange="toggleChipLabel('tc')">
           <span class="cs-card-tag">TC</span>
           <span class="cs-card-name">Triple Captain</span>
           <span class="cs-card-desc">3× captain instead of 2×</span>
-          <span class="cs-card-state">Available</span>
+          <span class="cs-card-state">In play</span>
         </label>
       </div>
 
@@ -5921,6 +5973,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 <div id="view-optimal" class="view-container" style="display:none;">
   <main class="container">
     <div class="page-header page-header-centered">
+      <div class="cs-intro-eyebrow">STEP 2 OF 2</div>
       <h1>Optimal Chip Strategy</h1>
       <p class="sub">Every valid chip sequence ranked by total projected xPts — personalised to your squad.</p>
     </div>
@@ -9152,7 +9205,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1781193247-GW32-b1cdc621";
+const BUILD_VERSION = "1781196533-GW32-b1cdc621";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -9967,7 +10020,7 @@ function toggleChipLabel(chip) {
   if (chk.checked) {
     lbl.classList.add('cs-card-active');
     lbl.classList.remove('cs-card-used');
-    if (stateEl) stateEl.textContent = 'Available';
+    if (stateEl) stateEl.textContent = 'In play';   // answers the page's question directly
   } else {
     lbl.classList.remove('cs-card-active');
     lbl.classList.add('cs-card-used');
@@ -11075,10 +11128,24 @@ function _syncTeamHeaderFromMeta() {
     document.querySelectorAll('.' + cls).forEach(el => { if (val !== undefined && val !== null) el.textContent = val; });
   };
   setAll('va-team-name-target', tm.team_name || 'My Team');
-  setAll('va-manager-target',   tm.manager || '');
+  // Manager line dedupe (2026-06-11 polish): when the manager name is blank
+  // or just repeats the team name (e.g. team "Xhaka Khan" / manager "Xhaka
+  // Khan"), the second line reads like a template bug — hide it AND its
+  // separator dot. Leading dashes/dots in FPL profile names are stripped.
+  const _mgrRaw  = String(tm.manager || '').replace(/^[\s\-–—·.]+/, '').trim();
+  const _mgrDupe = !_mgrRaw
+    || _mgrRaw.toLowerCase() === String(tm.team_name || '').trim().toLowerCase();
+  document.querySelectorAll('.va-manager-target').forEach(el => {
+    el.textContent = _mgrDupe ? '' : _mgrRaw;
+    el.style.display = _mgrDupe ? 'none' : '';
+    const _sib = el.nextElementSibling;
+    if (_sib && _sib.classList && _sib.classList.contains('va-dot')) {
+      _sib.style.display = _mgrDupe ? 'none' : '';
+    }
+  });
   setAll('va-rank-target',      (tm.overall_rank || 0).toLocaleString());
   set('team-name',         tm.team_name || 'My Team');
-  set('manager',           tm.manager || '');
+  // (id="manager" carries class va-manager-target — handled by the loop above.)
   set('overall-rank',      (tm.overall_rank || 0).toLocaleString());
   set('bank-val',          '£' + (tm.bank != null ? tm.bank.toFixed(1) : '0.0') + 'm');
   // FT shows current value; the "/2" suffix is rendered in markup as a sub.
@@ -17457,7 +17524,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781193247-GW32-b1cdc621</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781196533-GW32-b1cdc621</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
