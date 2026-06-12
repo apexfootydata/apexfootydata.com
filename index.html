@@ -1271,7 +1271,7 @@
                 Premier League predictions, <span style="color:#1D9E75;">powered by xG.</span>
             </h1>
             <p style="font-size:18px;font-weight:500;color:#475569;line-height:1.55;margin:0 0 20px;max-width:680px;margin-left:auto;margin-right:auto;">
-                An xG-based model for Premier League match and player projections, plus a free FPL solver and rank predictor. Back in August for 2026/27.
+                The free FPL solver that plans your transfers, captain and chips &mdash; backed by an xG model whose predictions are scored publicly every week. Back in August for 2026/27.
             </p>
             <div style="display:inline-flex;gap:10px;flex-wrap:wrap;justify-content:center;">
                 <a href="solver.html" style="background:#1D9E75;color:#fff;font-weight:700;font-size:15px;padding:13px 22px;border-radius:10px;text-decoration:none;letter-spacing:0.01em;">Open FPL Solver →</a>
@@ -1279,6 +1279,85 @@
                 <a href="accuracy.html" style="background:#ffffff;color:#0f172a;font-weight:700;font-size:15px;padding:13px 22px;border-radius:10px;text-decoration:none;border:1px solid #D9D7CC;">Model accuracy →</a>
             </div>
         </div>
+    </section>
+
+    <!-- ── FPL offering (2026-06-12, prompted by FPL Fran's feedback: "no idea
+         what you're offering re: fpl") — static copy + teaser table rendered
+         from the existing PLAYER_NEXTGW data block, so it refreshes with every
+         pipeline run. Safe to keep: site_inject only swaps sentinel data. ── -->
+    <section id="fpl-offer" style="background:#FAF7F1;padding:46px 20px 54px;border-bottom:1px solid #EAE7DC;">
+        <div style="max-width:920px;margin:0 auto;text-align:center;">
+            <h2 style="font-size:28px;font-weight:800;color:#0f172a;letter-spacing:-0.02em;margin:0 0 10px;">
+                Built for your <span style="color:#1D9E75;">FPL team</span>
+            </h2>
+            <p style="font-size:16px;font-weight:500;color:#475569;line-height:1.55;margin:0 auto 28px;max-width:620px;">
+                Enter your FPL ID. No signup. The model does the rest &mdash; and every
+                projection is scored publicly on the <a href="accuracy.html" style="color:#1D9E75;font-weight:700;text-decoration:none;">Accuracy page</a>, including the misses.
+            </p>
+            <div style="display:flex;flex-wrap:wrap;gap:14px;justify-content:center;margin-bottom:30px;">
+                <div style="flex:1 1 200px;max-width:215px;background:#fff;border:1px solid #D9D7CC;border-radius:12px;padding:18px 16px;text-align:left;">
+                    <div style="font-size:14px;font-weight:800;color:#0f172a;margin-bottom:6px;">Transfers</div>
+                    <div style="font-size:13px;color:#475569;line-height:1.5;">Your top 3 moves this week, for your exact squad, ranked by expected points. Template or differential &mdash; you pick the risk.</div>
+                </div>
+                <div style="flex:1 1 200px;max-width:215px;background:#fff;border:1px solid #D9D7CC;border-radius:12px;padding:18px 16px;text-align:left;">
+                    <div style="font-size:14px;font-weight:800;color:#0f172a;margin-bottom:6px;">Captain &amp; chips</div>
+                    <div style="font-size:13px;color:#475569;line-height:1.5;">The best armband each week, and the optimal gameweek to play every chip, planned through GW38.</div>
+                </div>
+                <div style="flex:1 1 200px;max-width:215px;background:#fff;border:1px solid #D9D7CC;border-radius:12px;padding:18px 16px;text-align:left;">
+                    <div style="font-size:14px;font-weight:800;color:#0f172a;margin-bottom:6px;">Rank predictor</div>
+                    <div style="font-size:13px;color:#475569;line-height:1.5;">Where your season really lands: expected finish and ceiling, updated every gameweek.</div>
+                </div>
+                <div style="flex:1 1 200px;max-width:215px;background:#fff;border:1px solid #D9D7CC;border-radius:12px;padding:18px 16px;text-align:left;">
+                    <div style="font-size:14px;font-weight:800;color:#0f172a;margin-bottom:6px;">Mini-league</div>
+                    <div style="font-size:13px;color:#475569;line-height:1.5;">Your % chance of winning your league, and which moves raise it.</div>
+                </div>
+            </div>
+            <div id="fpl-offer-teaser" style="display:none;background:#fff;border:1px solid #D9D7CC;border-radius:12px;padding:20px 18px 14px;max-width:680px;margin:0 auto 22px;text-align:left;">
+                <div style="font-size:13px;font-weight:800;color:#0f172a;letter-spacing:0.04em;text-transform:uppercase;margin-bottom:10px;">
+                    Most dangerous players this gameweek
+                </div>
+                <table style="width:100%;border-collapse:collapse;font-size:13px;">
+                    <thead>
+                        <tr style="color:#64748b;text-align:left;">
+                            <th style="padding:4px 6px;font-weight:600;">Player</th>
+                            <th style="padding:4px 6px;font-weight:600;">Team</th>
+                            <th style="padding:4px 6px;font-weight:600;text-align:right;">xGI</th>
+                        </tr>
+                    </thead>
+                    <tbody id="fpl-offer-teaser-body"></tbody>
+                </table>
+                <div style="font-size:12.5px;color:#64748b;margin-top:10px;padding:0 6px 4px;">
+                    Full expected-points projections for every player live in the solver.
+                </div>
+            </div>
+            <a href="solver.html" style="display:inline-block;background:#1D9E75;color:#fff;font-weight:700;font-size:15px;padding:13px 26px;border-radius:10px;text-decoration:none;letter-spacing:0.01em;">Open the solver &rarr;</a>
+        </div>
+        <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            try {
+                if (typeof PLAYER_NEXTGW === 'undefined' || !Array.isArray(PLAYER_NEXTGW) || !PLAYER_NEXTGW.length) return;
+                var top = PLAYER_NEXTGW.slice()
+                    .filter(function (p) { return p && typeof p.xGI === 'number'; })
+                    .sort(function (a, b) { return b.xGI - a.xGI; })
+                    .slice(0, 10);
+                if (!top.length) return;
+                var esc = function (s) {
+                    return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
+                        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+                    });
+                };
+                var rows = top.map(function (p, i) {
+                    return '<tr style="border-top:1px solid #F0EDE3;">'
+                        + '<td style="padding:6px;font-weight:700;color:#0f172a;">' + (i + 1) + '. ' + esc(p.name) + '</td>'
+                        + '<td style="padding:6px;color:#475569;">' + esc(p.team) + '</td>'
+                        + '<td style="padding:6px;text-align:right;font-weight:700;color:#1D9E75;">' + p.xGI.toFixed(2) + '</td>'
+                        + '</tr>';
+                }).join('');
+                document.getElementById('fpl-offer-teaser-body').innerHTML = rows;
+                document.getElementById('fpl-offer-teaser').style.display = 'block';
+            } catch (e) { /* teaser is optional — never break the page */ }
+        });
+        </script>
     </section>
 
     <!-- Main tabs (offseason: Team Predictions hidden — per-GW projections meaningless mid-season-end) -->
