@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-06-11T21:45:48">
+<meta name="apex-gw" content="32" data-built-at="2026-06-12T10:37:26">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -9205,7 +9205,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1781210748-GW32-b1cdc621";
+const BUILD_VERSION = "1781257046-GW32-b1cdc621";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -10110,7 +10110,7 @@ function _presetParamsForSolve() {
 // High (+1): low-owned (< pivot) boosted, template penalised. Low (-1): flips.
 // Distance is clamped so one mega-owned / mega-diff player can't dominate.
 const _APEX_OWN_PIVOT  = 18.0;  // % ownership "template line": above = template (tunable)
-const _APEX_RISK_OWN_K = 3.0;   // xP swing strength per unit ownership distance (tunable)
+const _APEX_RISK_OWN_K = 6.0;   // xP swing strength per unit ownership distance (tunable; 3.0→6.0 2026-06-12, presets felt dead — tilt couldn't flip real gaps)
 // Field-coverage scaling (2026-06-09, Marcus's DGW insight): the rank-risk of
 // (not) owning a player scales with how many points he's expected to score —
 // missing a 32%-owned DGW hauler hurts your rank far more than missing a
@@ -17589,7 +17589,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781210748-GW32-b1cdc621</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781257046-GW32-b1cdc621</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
