@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-06-13T13:06:01">
+<meta name="apex-gw" content="32" data-built-at="2026-06-13T13:28:20">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -5082,6 +5082,15 @@ body, html {
 #view-chip-select .cs-card-grid { margin-left: auto !important; margin-right: auto !important; }
 #view-chip-select .aps-wrap { max-width: 980px !important; margin-left: auto !important; margin-right: auto !important; }
 
+
+/* ── Chip-select Solio polish (2026-06-13): flatten the cards (no float/lift),
+   drop the redundant "IN PLAY/SPENT" line (the teal ✓-ring + greyed 'used' card
+   already say it) and the strike-through. Keeps the existing ✓ toggle. ── */
+#view-chip-select .cs-card { box-shadow: none !important; }
+#view-chip-select .cs-card:hover { transform: none !important; box-shadow: none !important; background: #ffffff !important; }
+#view-chip-select .cs-card-state { display: none !important; }
+#view-chip-select .cs-card-used .cs-card-name { text-decoration: none !important; }
+
 </style>
 <!-- Cookie consent + conditional Google Analytics 4 loader -->
 <script>
@@ -9235,7 +9244,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1781352361-GW32-b1cdc621";
+const BUILD_VERSION = "1781353700-GW32-b1cdc621";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -17667,7 +17676,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781352361-GW32-b1cdc621</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781353700-GW32-b1cdc621</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
