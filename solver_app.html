@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-06-13T12:41:11">
+<meta name="apex-gw" content="32" data-built-at="2026-06-13T13:00:24">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -9226,7 +9226,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1781350871-GW32-b1cdc621";
+const BUILD_VERSION = "1781352024-GW32-b1cdc621";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -14167,6 +14167,7 @@ function _renderPathTree() {
   s += `<text x="20" y="${height - 8}" font-size="13" fill="${GREY_S}">Tap a branch to take it — the tree grows one gameweek at a time. Greyed branches stay tappable to compare.</text>`;
   s += '</svg>';
   host.innerHTML = s;
+  _ppSetupZoom(host);
   // Keep the active branches in view as the trunk grows.
   if (host.scrollWidth > host.clientWidth) host.scrollLeft = host.scrollWidth;
 
@@ -14187,6 +14188,51 @@ function _renderPathTree() {
     card.innerHTML = `<div style="font-size:.85rem;color:var(--muted);">${label}</div>`
       + `<div style="font-size:1.45rem;font-weight:700;color:var(--text);">${val}</div>`;
   }
+}
+
+var _ppZoom = { z: 1, tx: 0, ty: 0, wired: false };
+function _ppApplyZoom(svg) {
+  if (!svg) return;
+  svg.style.transformOrigin = '0 0';
+  svg.style.transform = 'translate(' + _ppZoom.tx + 'px,' + _ppZoom.ty + 'px) scale(' + _ppZoom.z + ')';
+}
+function _ppSetupZoom(host) {
+  if (!host) return;
+  var svg = host.querySelector('svg');
+  _ppZoom.z = 1; _ppZoom.tx = 0; _ppZoom.ty = 0;
+  _ppApplyZoom(svg);
+  if (_ppZoom.wired) return;
+  _ppZoom.wired = true;
+  host.style.overflow = 'hidden';
+  host.style.cursor = 'grab';
+  host.style.touchAction = 'none';
+  host.addEventListener('wheel', function (e) {
+    var s = host.querySelector('svg'); if (!s) return;
+    e.preventDefault();
+    var r = host.getBoundingClientRect();
+    var cx = e.clientX - r.left, cy = e.clientY - r.top;
+    var nz = Math.max(0.7, Math.min(3, _ppZoom.z * (e.deltaY < 0 ? 1.12 : 0.89)));
+    _ppZoom.tx = cx - (cx - _ppZoom.tx) * (nz / _ppZoom.z);
+    _ppZoom.ty = cy - (cy - _ppZoom.ty) * (nz / _ppZoom.z);
+    _ppZoom.z = nz; _ppApplyZoom(s);
+  }, { passive: false });
+  var drag = false, lx = 0, ly = 0;
+  host.addEventListener('pointerdown', function (e) {
+    if (e.target.closest && e.target.closest('.pp-branch')) return;
+    drag = true; lx = e.clientX; ly = e.clientY; host.style.cursor = 'grabbing';
+    try { host.setPointerCapture(e.pointerId); } catch (_e) {}
+  });
+  host.addEventListener('pointermove', function (e) {
+    if (!drag) return;
+    _ppZoom.tx += e.clientX - lx; _ppZoom.ty += e.clientY - ly;
+    lx = e.clientX; ly = e.clientY; _ppApplyZoom(host.querySelector('svg'));
+  });
+  var end = function () { drag = false; host.style.cursor = 'grab'; };
+  host.addEventListener('pointerup', end);
+  host.addEventListener('pointerleave', end);
+  host.addEventListener('dblclick', function () {
+    _ppZoom.z = 1; _ppZoom.tx = 0; _ppZoom.ty = 0; _ppApplyZoom(host.querySelector('svg'));
+  });
 }
 
 function _buildLockedCard(sel) {
@@ -17612,7 +17658,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781350871-GW32-b1cdc621</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781352024-GW32-b1cdc621</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
