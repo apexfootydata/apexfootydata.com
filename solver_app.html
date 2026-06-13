@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-06-13T13:34:01">
+<meta name="apex-gw" content="32" data-built-at="2026-06-13T13:49:28">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -9244,7 +9244,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1781354041-GW32-b1cdc621";
+const BUILD_VERSION = "1781354967-GW32-b1cdc621";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -12263,7 +12263,7 @@ function runSolve() {
   if (wcGw && activeGw === wcGw) {
     const wcSquad = WC_SQUADS[String(wcGw)];
     if (wcSquad && wcSquad.length) {
-      _openChipReview('WC', wcGw, wcSquad, activeGwIdx);
+      _openPathPlanner('WC', wcGw, wcSquad, activeGwIdx);
       status.textContent = `WC GW${wcGw} squad loaded`;
       return;
     }
@@ -14590,21 +14590,23 @@ function _selectPathOption(gwIdx, optionIdx) {
   // so a second branch click COULD start an overlapping walk against shared
   // _pathPlanner state. One compute at a time; extra clicks are dropped.
   if (window._ppComputeBusy) return;
-  // WC branch links out to the existing chip-review flow (approved design §2
-  // — "keep"). The review's Apply reopens the planner from the WC squad.
+  // WC branch (2026-06-13, Marcus: demote the squad-review interstitial). Tap
+  // locks the Wildcard and grows the tree straight from the optimal WC squad via
+  // _openPathPlanner — the same end state the review's Apply produced, minus the
+  // forced screen. The WC 15 stays visible in the locked tree card.
   const _cachedOpt = (_pathPlanner._activeOptionsGw === gwIdx && _pathPlanner._activeOptions)
     ? _pathPlanner._activeOptions[optionIdx] : null;
   if (_cachedOpt && _cachedOpt.type === 'chip' && _cachedOpt.linkOut) {
     const _wcGw = TEAM_META.gw_range[gwIdx];
     const _wcSq = (typeof WC_SQUADS !== 'undefined' && WC_SQUADS) ? WC_SQUADS[String(_wcGw)] : null;
-    if (_wcSq && _wcSq.length && typeof _openChipReview === 'function') {
-      _openChipReview('WC', _wcGw, _wcSq, gwIdx);
+    if (_wcSq && _wcSq.length && typeof _openPathPlanner === 'function') {
+      _openPathPlanner('WC', _wcGw, _wcSq, gwIdx);
     } else if (typeof _ensureChipPlannerLoaded === 'function') {
       // Lazy build — WC squad not baked; fetch then open.
       _ppShowComputing(`Computing WC GW${_wcGw} squad…`);
       _ensureChipPlannerLoaded().then(() => {
         const s2 = (typeof WC_SQUADS !== 'undefined' && WC_SQUADS) ? WC_SQUADS[String(_wcGw)] : null;
-        if (s2 && s2.length && typeof _openChipReview === 'function') _openChipReview('WC', _wcGw, s2, gwIdx);
+        if (s2 && s2.length && typeof _openPathPlanner === 'function') _openPathPlanner('WC', _wcGw, s2, gwIdx);
       }).catch(() => {}).finally(() => _ppHideComputing());
     }
     return;
@@ -17688,7 +17690,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781354041-GW32-b1cdc621</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781354967-GW32-b1cdc621</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
