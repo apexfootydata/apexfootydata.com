@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-06-13T11:27:08">
+<meta name="apex-gw" content="32" data-built-at="2026-06-13T11:51:11">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -4056,7 +4056,7 @@ button.secondary, .btn-secondary, .va-btn-secondary {
 /* Centre the pitch against the rail within the grid row (Solio centres its squad). */
 .va-solio { align-items: center !important; }
 /* ── Desktop app-shell: lock the Squad view to one screen (Solio model) ──────
-   100dvh minus the ~79px topbar, overflow hidden, content vertically centred —
+   100dvh minus the ~59px topbar (measured 2026-06-13), overflow hidden, centred —
    the page physically cannot scroll, exactly like Solio. Scoped to
    :not(.show-pool) so the Player Pool table still scrolls normally, and to
    >=1025px so phones/tablets flow and scroll (stack block + mobile sheet). */
@@ -4072,7 +4072,7 @@ button.secondary, .btn-secondary, .va-btn-secondary {
     padding: 2px 16px 4px !important;
     width: min(1860px, 96vw) !important; max-width: none !important;
     margin-left: auto !important; margin-right: auto !important;
-    height: calc(100dvh - 84px) !important;
+    height: calc(100dvh - 64px) !important;
     overflow: hidden !important;
   }
   #view-team:not(.show-pool) .va-solio { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important; align-items: start !important; }
@@ -9205,7 +9205,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1781346428-GW32-b1cdc621";
+const BUILD_VERSION = "1781347871-GW32-b1cdc621";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -11073,7 +11073,9 @@ function apexFitPitch() {
     target = Math.max(target, 40);
     set(target);
     var benchEl = document.querySelector('.va-solio-pitch .bench-row, .va-solio-pitch .pitch-bench') || board;
-    var limit = window.innerHeight - 6, guard = 0;
+    var _cont = document.querySelector('.container');
+    var _clip = _cont ? _cont.getBoundingClientRect().bottom : window.innerHeight;
+    var limit = Math.min(window.innerHeight, _clip) - 6, guard = 0;
     while (Math.max(benchEl.getBoundingClientRect().bottom, rail ? rail.getBoundingClientRect().bottom : 0) > limit && target > 40 && guard < 80) {
       target -= 2; set(target); guard++;
     }
@@ -17589,7 +17591,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781346428-GW32-b1cdc621</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781347871-GW32-b1cdc621</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
