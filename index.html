@@ -1372,7 +1372,7 @@
                 var rows = top.map(function (p, i) {
                     return '<tr style="border-top:1px solid #F0EDE3;">'
                         + '<td style="padding:6px;font-weight:700;color:#0f172a;">' + (i + 1) + '. ' + esc(p.name) + '</td>'
-                        + '<td style="padding:6px;color:#475569;">' + esc(p.team) + '</td>'
+                        + '<td style="padding:6px;color:#475569;white-space:nowrap;">' + getTeamNameWithBadge(p.team) + '</td>'
                         + '<td style="padding:6px;text-align:right;font-weight:700;color:#1D9E75;">' + p.xGI.toFixed(2) + '</td>'
                         + '</tr>';
                 }).join('');
