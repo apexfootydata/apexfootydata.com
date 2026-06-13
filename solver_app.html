@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-06-13T12:00:00">
+<meta name="apex-gw" content="32" data-built-at="2026-06-13T12:15:47">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -4080,7 +4080,7 @@ button.secondary, .btn-secondary, .va-btn-secondary {
     justify-content: flex-start !important;
     max-height: calc(100dvh - 96px) !important;
     overflow-y: auto !important;
-    gap: 6px !important;
+    gap: 5px !important;
   }
   /* Pitch air trims — kit + label sizes grow, the GREEN shrinks */
   .va-solio-pitch .pitch { padding: 10px 12px 6px !important; }
@@ -4094,9 +4094,9 @@ button.secondary, .btn-secondary, .va-btn-secondary {
      the padded box, so this stays un-clipped at every kit size). */
   .va-solio-pitch .bench-row, .va-solio-pitch .pitch-bench { padding: 2px 2px 8px !important; margin-top: 2px !important; }
   /* Rail: shave card air, not type */
-  .va-solio-rail .va-range-plot { height: clamp(60px, 11vh, 126px) !important; margin: 6px 0 4px !important; }
-  .va-solio-rail .va-card-hero { padding: 9px 16px !important; }
-  .va-solio-rail .va-strip { padding: 8px 14px !important; }
+  .va-solio-rail .va-range-plot { height: clamp(50px, 8vh, 126px) !important; margin: 6px 0 4px !important; }
+  .va-solio-rail .va-card-hero { padding: 8px 16px !important; }
+  .va-solio-rail .va-strip { padding: 6px 14px !important; }
 }
 /* Footers eat ~280px below the solver — hide on the solver page so the tool view
    is one screen. (Solver pages only; the landing/index footer is unaffected.) */
@@ -9205,7 +9205,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1781348400-GW32-b1cdc621";
+const BUILD_VERSION = "1781349347-GW32-b1cdc621";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -11076,7 +11076,7 @@ function apexFitPitch() {
     var _cont = document.querySelector('.container');
     var _clip = _cont ? _cont.getBoundingClientRect().bottom : window.innerHeight;
     var limit = Math.min(window.innerHeight, _clip) - 6, guard = 0;
-    while (Math.max(benchEl.getBoundingClientRect().bottom, rail ? rail.getBoundingClientRect().bottom : 0) > limit && target > 40 && guard < 80) {
+    while (benchEl.getBoundingClientRect().bottom > limit && target > 40 && guard < 80) {
       target -= 2; set(target); guard++;
     }
   } catch (_e) {}
@@ -17591,7 +17591,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781348400-GW32-b1cdc621</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781349347-GW32-b1cdc621</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
