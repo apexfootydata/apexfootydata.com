@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-06-13T12:29:41">
+<meta name="apex-gw" content="32" data-built-at="2026-06-13T12:41:11">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -5052,6 +5052,27 @@ body, html {
 }
 /* ═══ APEX_TRANSFERS_LIGHT:END ═══ */
 
+
+/* ── Short-viewport one-page fit for the full-page planner steps (2026-06-13).
+   Scoped to <=760px tall so normal monitors keep the roomy layout; only short
+   screens (e.g. 1536x695 @125% Windows scaling) get the compaction. Chip step
+   hides the decorative team header + tightens intro; tree step trims the chrome
+   around the (already height-capped) SVG tree. ── */
+@media (max-height: 760px) {
+  #view-chip-select .va-header { display: none !important; }
+  #view-chip-select .container { padding: 8px 16px 12px !important; }
+  #view-chip-select .cs-intro { margin: 4px 0 10px !important; }
+  #view-chip-select .cs-intro-title { font-size: 22px !important; margin: 2px 0 !important; }
+  #view-chip-select .cs-intro-sub { margin: 3px 0 0 !important; font-size: 13px !important; }
+  #view-chip-select .aps-title { font-size: 19px !important; margin: 6px 0 !important; }
+  #view-chip-select .chip-selector-form { margin-top: 6px !important; }
+  #view-chip-select .cs-card-grid { gap: 10px !important; margin: 8px 0 !important; }
+  #view-chip-select .aps-wrap { margin-top: 10px !important; }
+  #view-path-planner .container { padding: 6px 16px 10px !important; }
+  #view-path-planner .pp-intro { margin: 4px 0 !important; font-size: 13px !important; }
+  #view-path-planner #pp-path-card { padding: 10px 14px !important; }
+}
+
 </style>
 <!-- Cookie consent + conditional Google Analytics 4 loader -->
 <script>
@@ -9205,7 +9226,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1781350181-GW32-b1cdc621";
+const BUILD_VERSION = "1781350871-GW32-b1cdc621";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -13974,7 +13995,7 @@ function _renderPathTree() {
   // the tree is narrower than the page it scales UP (capped at 1.35× so type
   // stays crisp); once the trunk outgrows the page, min-width pins 1:1 and
   // the wrap scrolls horizontally instead of shrinking the tree.
-  let s = `<svg viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg" style="display:block;width:auto;max-width:100%;height:min(${height}px, calc(100dvh - 250px));margin:0 auto;font-family:'Plus Jakarta Sans',sans-serif;">`;
+  let s = `<svg viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg" style="display:block;width:auto;max-width:100%;height:min(${height}px, calc(100dvh - 300px));margin:0 auto;font-family:'Plus Jakarta Sans',sans-serif;">`;
 
   // Trunk: start node + locked squad cards (2026-06-11 Solio-style rework).
   // Each card shows the GW header, that week's full 15 (XI by position with
@@ -17591,7 +17612,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781350181-GW32-b1cdc621</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781350871-GW32-b1cdc621</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
