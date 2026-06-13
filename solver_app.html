@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-06-13T13:28:20">
+<meta name="apex-gw" content="32" data-built-at="2026-06-13T13:34:01">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -9244,7 +9244,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1781353700-GW32-b1cdc621";
+const BUILD_VERSION = "1781354041-GW32-b1cdc621";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -16316,6 +16316,17 @@ function renderBaselineStrip() {
 }
 
 // ──── Apply strategy: set chip dropdowns → switch to team view → apply squad ────
+function _ppGoToTree(idx) {
+  if (typeof _openPathPlannerFromCurrent !== 'function' || window._ppComputeBusy) return;
+  const i = (typeof idx === 'number' && idx >= 0) ? idx : activeGwIdx;
+  window._ppComputeBusy = true;
+  if (typeof _ppShowComputing === 'function') _ppShowComputing('Building your decision tree…');
+  (async () => {
+    try { await _openPathPlannerFromCurrent(i); } catch (_e) {}
+    finally { window._ppComputeBusy = false; if (typeof _ppHideComputing === 'function') _ppHideComputing(); }
+  })();
+}
+
 function _applyStrategy(breakdown) {
   // Step 1: Switch to team view FIRST so initTeamView() rebuilds the
   // <select> option lists. We must do this before setting .value — if we
@@ -16342,13 +16353,13 @@ function _applyStrategy(breakdown) {
     const wcItem = breakdown.find(b => b.chip === 'WC');
     const fhItem = breakdown.find(b => b.chip === 'FH');
     const primary = wcItem || fhItem;
-    if (!primary) { runSolve(); return; }
+    if (!primary) { _ppGoToTree(activeGwIdx); return; }
 
     const chipType = primary.chip;
     const chipGw   = primary.gw;
     const squads   = chipType === 'WC' ? WC_SQUADS : FH_SQUADS;
     const squad    = squads[String(chipGw)];
-    if (!squad || !squad.length) { runSolve(); return; }
+    if (!squad || !squad.length) { _ppGoToTree(solveIdx); return; }
 
     const gwIdx    = TEAM_META.gw_range.indexOf(chipGw);
     const solveIdx = gwIdx >= 0 ? gwIdx : activeGwIdx;
@@ -16395,6 +16406,7 @@ function _applyStrategy(breakdown) {
         }
       }
     }
+    _ppGoToTree(solveIdx);
   }, 120);
 }
 
@@ -16431,7 +16443,7 @@ function renderTopRecommendation() {
         <div class="optimal-top-ev">${top.total_xp} xPts</div>
         <button onclick='_applyStrategy(${JSON.stringify(top.breakdown)})'
           style="background:var(--accent,#1D9E75);color:#fff;border:none;border-radius:8px;padding:11px 22px;font-weight:700;font-size:.92rem;cursor:pointer;white-space:nowrap;">
-          ▶ Use this plan
+          Plan transfers →
         </button>
       </div>
     </div>
@@ -17676,7 +17688,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781353700-GW32-b1cdc621</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781354041-GW32-b1cdc621</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
