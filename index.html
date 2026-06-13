@@ -1283,7 +1283,6 @@
             <div style="font-size:13px;color:#6B756F;margin-bottom:20px;">No signup &mdash; just your Team ID. &nbsp;·&nbsp; <a href="solver.html" style="color:#1D9E75;font-weight:600;text-decoration:none;">Don't know your ID?</a></div>
             <div style="display:inline-flex;gap:20px;flex-wrap:wrap;justify-content:center;font-size:13.5px;">
                 <a href="#matchweek" onclick="showTab(1);return false;" style="color:#475569;text-decoration:none;">See the predictions &rarr;</a>
-                <a href="accuracy.html" style="color:#475569;text-decoration:none;">Model accuracy &rarr;</a>
             </div>
             <script>
             function apexHeroSolve() {
@@ -1316,8 +1315,7 @@
                 Built for your <span style="color:#1D9E75;">FPL team</span>
             </h2>
             <p style="font-size:16px;font-weight:500;color:#475569;line-height:1.55;margin:0 auto 28px;max-width:620px;">
-                Enter your FPL ID. No signup. The model does the rest &mdash; and every
-                projection is scored publicly on the <a href="accuracy.html" style="color:#1D9E75;font-weight:700;text-decoration:none;">Accuracy page</a>, including the misses.
+                Enter your FPL ID. No signup. The model does the rest &mdash; and every projection is scored publicly, including the misses.
             </p>
             <div style="display:flex;flex-wrap:wrap;gap:14px;justify-content:center;margin-bottom:30px;">
                 <div style="flex:1 1 200px;max-width:215px;background:#fff;border:1px solid #D9D7CC;border-radius:12px;padding:18px 16px;text-align:left;">
@@ -1383,35 +1381,6 @@
             } catch (e) { /* teaser is optional — never break the page */ }
         });
         </script>
-    </section>
-
-    <!-- Proof layer — figures mirrored from accuracy.html (THE RECEIPTS): fixed 2025/26
-         season tracker + validated benchmark framing. Full live detail on accuracy.html. -->
-    <section id="proof-layer" style="background:#FAF7F1;padding:46px 20px 54px;border-bottom:1px solid #EAE7DC;font-family:'Plus Jakarta Sans',sans-serif;">
-        <div style="max-width:920px;margin:0 auto;text-align:center;">
-            <div style="font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#1D9E75;margin-bottom:10px;">The receipts</div>
-            <h2 style="font-size:28px;font-weight:800;color:#0f172a;letter-spacing:-0.02em;margin:0 0 10px;">
-                Every prediction, <span style="color:#1D9E75;">scored in public.</span>
-            </h2>
-            <p style="font-size:16px;font-weight:500;color:#475569;line-height:1.55;margin:0 auto 28px;max-width:640px;">
-                All of 2025/26, the model&rsquo;s match predictions were scored against what actually happened &mdash; wins and losses both. On expected points it lands level with FPL Review, a leading paid tool. For free.
-            </p>
-            <div style="display:flex;flex-wrap:wrap;gap:14px;justify-content:center;margin-bottom:28px;">
-                <div style="flex:1 1 180px;max-width:215px;background:#fff;border:1px solid #D9D7CC;border-radius:12px;padding:20px 16px;">
-                    <div style="font-size:30px;font-weight:800;color:#1D9E75;line-height:1;">0.882</div>
-                    <div style="font-size:13px;color:#475569;margin-top:8px;line-height:1.4;">Average error, goals per match <span style="color:#94a3b8;">(lower is better)</span></div>
-                </div>
-                <div style="flex:1 1 180px;max-width:215px;background:#fff;border:1px solid #D9D7CC;border-radius:12px;padding:20px 16px;">
-                    <div style="font-size:30px;font-weight:800;color:#0f172a;line-height:1;">356</div>
-                    <div style="font-size:13px;color:#475569;margin-top:8px;line-height:1.4;">Matches scored and published</div>
-                </div>
-                <div style="flex:1 1 180px;max-width:215px;background:#fff;border:1px solid #D9D7CC;border-radius:12px;padding:20px 16px;">
-                    <div style="font-size:30px;font-weight:800;color:#0f172a;line-height:1;">36</div>
-                    <div style="font-size:13px;color:#475569;margin-top:8px;line-height:1.4;">Matchweeks tracked, all season</div>
-                </div>
-            </div>
-            <a href="accuracy.html" style="display:inline-block;background:#fff;color:#0f172a;font-weight:700;font-size:15px;padding:13px 26px;border-radius:10px;text-decoration:none;border:1px solid #D9D7CC;">See the full accuracy record &rarr;</a>
-        </div>
     </section>
 
     <!-- Main tabs (offseason: Team Predictions hidden — per-GW projections meaningless mid-season-end) -->
