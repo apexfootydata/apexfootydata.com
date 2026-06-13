@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-06-13T13:49:28">
+<meta name="apex-gw" content="32" data-built-at="2026-06-13T14:28:44">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -9244,7 +9244,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1781354967-GW32-b1cdc621";
+const BUILD_VERSION = "1781357324-GW32-b1cdc621";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -16415,7 +16415,13 @@ function _applyStrategy(breakdown) {
 function renderTopRecommendation() {
   const wrap = document.getElementById('optimal-top-wrap');
   const filtered = _filteredSequences();
-  if (!filtered.length) { wrap.innerHTML = '<p class="muted" style="text-align:center;padding:2rem;">No sequences match your selected chips.</p>'; return; }
+  if (!filtered.length) {
+    const _computing = (typeof _chipPlannerLoaded !== 'undefined' && !_chipPlannerLoaded) || (typeof CHIP_PLANNER !== 'undefined' && CHIP_PLANNER && CHIP_PLANNER._lazy);
+    wrap.innerHTML = _computing
+      ? '<p class="muted" style="text-align:center;padding:2rem;">Computing your strategy…</p>'
+      : '<p class="muted" style="text-align:center;padding:2rem;">No sequences match your selected chips.</p>';
+    return;
+  }
   const top = filtered[0];
   // ── Timeline hero (2026-06-09 Marcus chip-page revamp) ──
   // Chips rendered ON the gameweek axis — same visual language as the
@@ -16721,10 +16727,11 @@ function renderChipEvTable() {
     const idx = TEAM_META.gw_range.indexOf(gw);
     const flags = CHIP_PLANNER.rotation_risk[gw] || [];
     let row = `<tr class="${flags.length > 0 ? 'opt-risk-row' : ''}"><td><strong>GW${gw}</strong></td>`;
-    if (_activeChips.wc) row += `<td class="${CHIP_PLANNER.wc_ev[gw] > 0 ? 'ev-positive' : ''}">+${CHIP_PLANNER.wc_ev[gw]}</td>`;
-    if (_activeChips.fh) row += `<td class="${CHIP_PLANNER.fh_ev[gw] > 0 ? 'ev-positive' : ''}">+${CHIP_PLANNER.fh_ev[gw]}</td>`;
-    if (_activeChips.bb) row += `<td class="${CHIP_PLANNER.bb_ev[gw] > 0 ? 'ev-positive' : ''}">+${CHIP_PLANNER.bb_ev[gw]}</td>`;
-    if (_activeChips.tc) row += `<td class="${CHIP_PLANNER.tc_ev[gw] > 0 ? 'ev-positive' : ''}">+${CHIP_PLANNER.tc_ev[gw]}</td>`;
+    const _evCell = (m) => { const v = m && m[gw]; return (typeof v === 'number' && isFinite(v)) ? `<td class="${v > 0 ? 'ev-positive' : ''}">+${v}</td>` : '<td class="muted">—</td>'; };
+    if (_activeChips.wc) row += _evCell(CHIP_PLANNER.wc_ev);
+    if (_activeChips.fh) row += _evCell(CHIP_PLANNER.fh_ev);
+    if (_activeChips.bb) row += _evCell(CHIP_PLANNER.bb_ev);
+    if (_activeChips.tc) row += _evCell(CHIP_PLANNER.tc_ev);
     row += '<td class="opt-risk-cell">';
     if (flags.length > 0) {
       flags.forEach(f => { row += `<span class="opt-risk-tag">${f.team}</span>`; });
@@ -17690,7 +17697,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781354967-GW32-b1cdc621</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781357324-GW32-b1cdc621</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
