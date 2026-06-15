@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-06-13T22:07:45">
+<meta name="apex-gw" content="32" data-built-at="2026-06-15T22:10:34">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — FPL Apex</title>
-<meta name="description" content="Plan FPL transfers, chips, and Free Hit squads. Live xG-based projections, mini-league simulator, rank predictor. Free FPL tool used by 100+ managers.">
+<meta name="description" content="Plan FPL transfers, chips, and Free Hit squads. Live xG-based projections and a mini-league simulator. Free FPL tool used by 100+ managers.">
 <meta name="keywords" content="FPL solver, FPL chip planner, FPL Free Hit, FPL Wildcard, FPL transfer planner, FPL DGW, Fantasy Premier League tools">
 <link rel="canonical" href="https://fplapex.com/solver_app.html">
 <meta name="robots" content="index, follow">
@@ -20,7 +20,7 @@
 <!-- Twitter Card -->
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Apex FPL Solver — Chip Planner &amp; Free Hit Optimiser">
-<meta name="twitter:description" content="Plan FPL transfers + chips with live xG. Mini-league sim + rank predictor.">
+<meta name="twitter:description" content="Plan FPL transfers + chips with live xG, plus a mini-league simulator.">
 <meta name="twitter:image" content="https://fplapex.com/og-image.png">
 <!-- JSON-LD -->
 <script type="application/ld+json">
@@ -29,7 +29,7 @@
   "@type": "WebApplication",
   "name": "Apex FPL Solver",
   "url": "https://fplapex.com/solver_app.html",
-  "description": "Fantasy Premier League solver with chip planner, Free Hit optimiser, transfer recommender, mini-league simulator, and rank predictor. Powered by Dixon-Coles + xG.",
+  "description": "Fantasy Premier League solver with chip planner, Free Hit optimiser, transfer recommender, and mini-league simulator. Powered by Dixon-Coles + xG.",
   "applicationCategory": "SportsApplication",
   "operatingSystem": "Web Browser",
   "offers": { "@type": "Offer", "price": "0", "priceCurrency": "GBP" }
@@ -5205,7 +5205,6 @@ html.apex-offseason #view-landing .hero-sub::after {
     <a href="#" class="nav-link" onclick="switchView('team'); return false;">My Squad</a>
     <a href="#" class="nav-link" onclick="switchView('chip-select'); return false;">Chip Planner</a>
     <a href="#" class="nav-link" onclick="switchView('league'); return false;">Mini-League</a>
-    <a href="/rank-milestones" class="nav-link" onclick="return _goRankMilestones(event)">Rank Predictor</a>
   </nav>
 </header>
 
@@ -9244,7 +9243,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1781384865-GW32-b1cdc621";
+const BUILD_VERSION = "1781557834-GW32-b1cdc621";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -17697,7 +17696,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781384865-GW32-b1cdc621</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781557834-GW32-b1cdc621</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
