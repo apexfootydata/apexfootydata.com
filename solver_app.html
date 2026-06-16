@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-06-15T22:10:34">
+<meta name="apex-gw" content="32" data-built-at="2026-06-16T10:21:15">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -5387,7 +5387,7 @@ html.apex-offseason #view-landing .hero-sub::after {
           <span class="aps-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 7-7"/><path d="M14 8h6v6"/></svg></span>
           <span class="aps-body">
             <span class="aps-card-title">High risk</span>
-            <span class="aps-card-desc">Chase differentials. Upside over safety.</span>
+            <span class="aps-card-desc">Strong picks the crowd's missed — same expected points, bigger rank swings.</span>
           </span>
         </button>
 
@@ -5929,7 +5929,7 @@ html.apex-offseason #view-landing .hero-sub::after {
             <span class="aps-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 7-7"/><path d="M14 8h6v6"/></svg></span>
             <span class="aps-body">
               <span class="aps-card-title">High risk</span>
-              <span class="aps-card-desc">Chase differentials. Upside over safety.</span>
+              <span class="aps-card-desc">Strong picks the crowd's missed — same expected points, bigger rank swings.</span>
             </span>
           </button>
 
@@ -9243,7 +9243,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1781557834-GW32-b1cdc621";
+const BUILD_VERSION = "1781601675-GW32-b1cdc621";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -10098,6 +10098,14 @@ function applyChipSelection() {
 // via the `differential` flag on the High preset.
 window.APEX_PRESETS = (window.APEX_PRESETS !== false);
 
+// ── Differential fix switch (2026-06-15) ─────────────────────────────────────
+// false  = current behaviour (High risk can drift into low-xP punts). Demo unchanged.
+// true   = differential gate ON: High risk chases only high-xP, low-owned players
+//          (true differentials) and never low-xP punts. Validated at logic level.
+// To activate: set this to true, rebuild, eyeball that High's picks lean
+// differential, then let the 26/27 forward test confirm before trusting it default-on.
+window.APEX_RISK_DIFF = true;   // differential fix ACTIVE (2026-06-15)
+
 let _activePreset = 'balanced';
 // Re-entry guard: while a preset click is applying reset()+optimize() to the
 // pitch, block any nested selectPreset apply so the two calls can't loop.
@@ -10160,6 +10168,13 @@ const _APEX_RISK_OWN_K = 6.0;   // xP swing strength per unit ownership distance
 // DGW-specific hack needed. Typical-rate + clamps tunable below.
 const _APEX_RISK_XP_NORM  = 4.0;  // "typical starter" xP/GW the scale is relative to
 const _APEX_RISK_XP_CLAMP = [0.5, 2.0];
+// DIFFERENTIAL GATE (2026-06-15, flag window.APEX_RISK_DIFF, default off).
+// Min per-GW projection for ANY ownership tilt. Below this, no bias either way —
+// so "High risk" rewards low ownership only on starter-quality players (true
+// differentials: same xP, lower owned) and never drags in low-xP punts.
+// Validated 2026-06-15: high-xP differentials returned ~7.1 mean / 6.9 rank-value
+// vs punt buckets 1.9-3.9 mean. Byte-identical when the flag is off.
+const _APEX_DIFF_MIN_PERGW = 4.0;
 function _apexRiskOwnBias(p) {
   if (!window.APEX_PRESETS) return 0;
   const sign = (_activePreset === 'high') ? 1 : (_activePreset === 'low') ? -1 : 0;
@@ -10173,6 +10188,8 @@ function _apexRiskOwnBias(p) {
     const nGw = (TEAM_META && TEAM_META.gw_range) ? TEAM_META.gw_range.length : 0;
     const perGw = (typeof pd.total_xp === 'number' && nGw > 0)
       ? pd.total_xp / nGw : (pd.xp || 0);
+    // Differential gate: no risk tilt on sub-starter projections (kills punt-drift).
+    if (window.APEX_RISK_DIFF && perGw < _APEX_DIFF_MIN_PERGW) return 0;
     const scale = (perGw > 0)
       ? Math.max(_APEX_RISK_XP_CLAMP[0], Math.min(_APEX_RISK_XP_CLAMP[1], perGw / _APEX_RISK_XP_NORM))
       : _APEX_RISK_XP_CLAMP[0];  // no projection → minimal field relevance
@@ -17696,7 +17713,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781557834-GW32-b1cdc621</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781601675-GW32-b1cdc621</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
