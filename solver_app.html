@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-06-18T16:25:03">
+<meta name="apex-gw" content="32" data-built-at="2026-06-18T17:03:54">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -364,6 +364,53 @@ body {
   min-width: 210px;
   backdrop-filter: blur(4px);
   border: 1px solid rgba(0,0,0,0.06);
+}
+/* On-pitch GW stepper (top-right) — cycle the pitch through horizon GWs. 2026-06-18 */
+.pitch-gw-nav {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0,0,0,0.55);
+  border-radius: 10px;
+  padding: 6px 8px;
+  z-index: 3;
+  backdrop-filter: blur(4px);
+}
+.pgn-btn {
+  appearance: none;
+  -webkit-appearance: none;
+  border: none;
+  background: rgba(255,255,255,0.14);
+  color: #fff;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  font-size: 1.25rem;
+  line-height: 1;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.12s ease;
+}
+.pgn-btn:hover:not(:disabled) { background: rgba(255,255,255,0.30); }
+.pgn-btn:disabled { opacity: 0.35; cursor: default; }
+.pgn-label {
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.9rem;
+  min-width: 46px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+@media (max-width: 600px) {
+  .pitch-gw-nav { top: 8px; right: 10px; padding: 5px 6px; gap: 4px; }
+  .pgn-btn { width: 26px; height: 26px; font-size: 1.05rem; }
+  .pgn-label { font-size: 0.82rem; min-width: 40px; }
 }
 .pitch-brand-mark {
   position: absolute;
@@ -9215,7 +9262,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1781796302-GW32-e17be841";
+const BUILD_VERSION = "1781798634-GW32-e17be841";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -14955,6 +15002,35 @@ function setBaseGw(btn) {
   // DO NOT call _syncTopPitchToChipState() here.
 }
 
+// 2026-06-18 — on-pitch GW stepper. Steps the active GW by +/-1 and reuses
+// setBaseGw so behaviour is identical to clicking a pill. Works even when the
+// pill row is hidden under an applied plan (falls back to a direct shirt
+// re-render if no pill element is present).
+function _stepGw(delta) {
+  const range = (typeof TEAM_META !== 'undefined' && TEAM_META.gw_range) ? TEAM_META.gw_range : [];
+  if (range.length <= 1) return;
+  let idx = ((typeof activeGwIdx === 'number') ? activeGwIdx : 0) + delta;
+  idx = Math.max(0, Math.min(range.length - 1, idx));
+  if (idx === activeGwIdx) return;
+  const pill = document.querySelector('.gw-pill[data-idx="' + idx + '"]');
+  if (pill && typeof setBaseGw === 'function') {
+    setBaseGw(pill);
+  } else {
+    activeGwIdx = idx;
+    if (typeof updateShirtXp === 'function') updateShirtXp();
+    if (typeof reorderXiBench === 'function') reorderXiBench();
+    if (typeof updateChipTotal === 'function') updateChipTotal();
+  }
+  const _lbl = document.getElementById('pitch-gw-label');
+  if (_lbl) _lbl.textContent = 'GW' + range[activeGwIdx];
+  const _nav = document.querySelector('.pitch-gw-nav');
+  if (_nav) {
+    const _btns = _nav.querySelectorAll('.pgn-btn');
+    if (_btns[0]) _btns[0].disabled = (activeGwIdx <= 0);
+    if (_btns[1]) _btns[1].disabled = (activeGwIdx >= range.length - 1);
+  }
+}
+
 // Keep the top pitch aligned with the currently-selected FH/WC chip for
 // the active GW:
 //   • If FH or WC is selected on this GW → show that squad (no held-player 0.0s)
@@ -15903,6 +15979,19 @@ function _renderPitchFromState() {
   const _bankColor   = _pitchBank < -0.05 ? '#ef4444' : 'inherit';
   const _pitchFt = (typeof TEAM_META !== 'undefined' && TEAM_META && TEAM_META.free_transfers != null) ? TEAM_META.free_transfers : 1;
   html += `<div class="pitch-cost-badge"><div class="pcb-row"><span class="pcb-label">Squad value</span><span class="pcb-val">£${_pitchCost.toFixed(1)}m</span></div><div class="pcb-row"><span class="pcb-label">In the bank</span><span class="pcb-val" style="color:${_bankColor}">£${_pitchBank.toFixed(1)}m</span></div><div class="pcb-row"><span class="pcb-label">Free transfers</span><span class="pcb-val">${_pitchFt}</span></div></div>`;
+  // 2026-06-18 — on-pitch GW stepper (top-right). Lets the user cycle the pitch
+  // through the horizon GWs with arrows even when the pill row is hidden under
+  // an applied plan. Only shown when there is more than one GW in range.
+  const _gwRangeNav = (TEAM_META.gw_range) || [];
+  if (_gwRangeNav.length > 1) {
+    const _gwIdxNav = (typeof activeGwIdx === 'number') ? activeGwIdx : 0;
+    const _gwNowNav = (_gwRangeNav[_gwIdxNav] != null) ? _gwRangeNav[_gwIdxNav] : _gwRangeNav[0];
+    html += `<div class="pitch-gw-nav">`
+          + `<button type="button" class="pgn-btn" ${_gwIdxNav <= 0 ? 'disabled' : ''} onclick="_stepGw(-1)" aria-label="Previous gameweek">&lsaquo;</button>`
+          + `<span class="pgn-label" id="pitch-gw-label">GW${_gwNowNav}</span>`
+          + `<button type="button" class="pgn-btn" ${_gwIdxNav >= _gwRangeNav.length - 1 ? 'disabled' : ''} onclick="_stepGw(1)" aria-label="Next gameweek">&rsaquo;</button>`
+          + `</div>`;
+  }
   // 2026-06-02 Marcus removed pitch brand mark per design preference.
   // (CSS hide in APEX_PITCH_DETAILS block also covers cached builds.)
   // html += `<div class="pitch-brand-mark"><span class="pbm-apex">Apex</span><span class="pbm-rest">FootyData</span></div>`;
@@ -17697,7 +17786,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781796302-GW32-e17be841</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1781798634-GW32-e17be841</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
