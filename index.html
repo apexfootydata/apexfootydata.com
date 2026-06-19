@@ -2789,17 +2789,17 @@
        (100vw − 60px)/5 reserves 60px for pitch padding + control overhang.
        Capped 72px so big phones don't balloon. */
     .pitch .shirt.shirt, .bench-row .shirt.shirt, .shirt {
-        width: calc((100vw - 64px) / 5) !important; min-width: 0 !important; max-width: 70px !important; }
+        width: calc((100vw - 105px) / 5) !important; min-width: 0 !important; max-width: 60px !important; }
     .pitch .shirt-wrap.shirt-wrap, .bench-row .shirt-wrap.shirt-wrap,
     .pitch-bench .shirt-wrap.shirt-wrap, .shirt-wrap {
-        width: 56px !important; min-width: 0 !important; }
+        width: 44px !important; min-width: 0 !important; }
     .pitch .svg-shirt.svg-shirt, .bench-row .svg-shirt.svg-shirt,
     .pitch-bench .svg-shirt.svg-shirt, .svg-shirt, .shirt-fallback {
-        width: 56px !important; height: 56px !important; min-width: 0 !important; }
+        width: 44px !important; height: 44px !important; min-width: 0 !important; }
 
     .shirt-name {
-        max-width: 62px !important;
-        font-size: 0.7rem !important;
+        max-width: 50px !important;
+        font-size: 0.66rem !important;
         padding: 2px 6px !important;
     }
     .shirt-fix {
@@ -2822,7 +2822,7 @@
     .pitch .shirt-fix.shirt-fix, .bench-row .shirt-fix.shirt-fix,
     .pitch-bench .shirt-fix.shirt-fix { font-size: 0.6rem !important; }
     .pitch .shirt-name.shirt-name, .bench-row .shirt-name.shirt-name {
-        font-size: 0.7rem !important; max-width: 62px !important; }
+        font-size: 0.66rem !important; max-width: 50px !important; }
 
     .shirt-badge {
         width: 18px !important; height: 18px !important;
@@ -2845,13 +2845,13 @@
 @media (max-width: 360px) {
     /* Extra-narrow phones — shrink one more notch for 5-shirt rows */
     .pitch .shirt.shirt, .bench-row .shirt.shirt, .shirt {
-        width: 60px !important; min-width: 0 !important; max-width: 60px !important; }
+        width: calc((100vw - 95px) / 5) !important; min-width: 0 !important; max-width: 52px !important; }
     .pitch .shirt-wrap.shirt-wrap, .bench-row .shirt-wrap.shirt-wrap,
     .pitch .svg-shirt.svg-shirt, .bench-row .svg-shirt.svg-shirt,
     .shirt-wrap, .svg-shirt, .shirt-fallback {
-        width: 50px !important; min-width: 0 !important; }
+        width: 40px !important; min-width: 0 !important; }
     .pitch .svg-shirt.svg-shirt, .bench-row .svg-shirt.svg-shirt,
-    .svg-shirt, .shirt-fallback { height: 50px !important; }
+    .svg-shirt, .shirt-fallback { height: 40px !important; }
     .shirt-name { max-width: 56px !important; font-size: 0.66rem !important; }
     .shirt-xp { font-size: 0.86rem !important; }
 }
