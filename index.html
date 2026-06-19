@@ -2779,8 +2779,12 @@
 
     /* doubled-class selectors out-rank the desktop XL rules
        (.pitch .shirt 140px !important + min-width) on phones */
+    /* 2026-06-19: size shirts to the viewport so 5-per-row + the absolute
+       ⊗/⏱ controls ALWAYS fit — fixed 66px overflowed ~375px phones (SE/mini).
+       (100vw − 60px)/5 reserves 60px for pitch padding + control overhang.
+       Capped 72px so big phones don't balloon. */
     .pitch .shirt.shirt, .bench-row .shirt.shirt, .shirt {
-        width: 66px !important; min-width: 0 !important; max-width: 66px !important; }
+        width: calc((100vw - 60px) / 5) !important; min-width: 0 !important; max-width: 72px !important; }
     .pitch .shirt-wrap.shirt-wrap, .bench-row .shirt-wrap.shirt-wrap,
     .pitch-bench .shirt-wrap.shirt-wrap, .shirt-wrap {
         width: 56px !important; min-width: 0 !important; }
