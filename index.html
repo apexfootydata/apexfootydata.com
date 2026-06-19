@@ -2774,7 +2774,12 @@
        overlaps the GK; was 22px. */
     /* 2026-06-10: side padding 8→14px — the absolute ⊗/⏱ controls hang
        outside the kits and were clipping at both screen edges on 5-man rows. */
-    .pitch { padding: 78px 14px 14px !important; }
+    .pitch { padding: 78px 18px 14px !important; }
+    /* 2026-06-19: the ⏱ clock button is pinned right:-6px so it pokes past
+       every shirt; on the outermost players (5-man row) that clips at the
+       screen edge. Tuck both edge controls inside the shirt on phones. */
+    .pitch .pp-xmins-btn.pp-xmins-btn, .bench-row .pp-xmins-btn.pp-xmins-btn { right: 1px !important; }
+    .pitch .pp-remove-btn.pp-remove-btn, .bench-row .pp-remove-btn.pp-remove-btn { left: 1px !important; }
     .pitch-row { gap: 3px !important; margin-bottom: 10px !important; }
 
     /* doubled-class selectors out-rank the desktop XL rules
