@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FPL Apex — Evaluation</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{ --cream:#FAF7F1; --ink:#1a2e28; --teal:#1D9E75; --muted:#7a8783; }
+  *{ box-sizing:border-box; }
+  body{ margin:0; background:var(--cream); color:var(--ink);
+        font-family:'Plus Jakarta Sans',-apple-system,Segoe UI,sans-serif; }
+  nav{ display:flex; gap:34px; align-items:center; padding:20px 30px;
+       border-bottom:1px solid rgba(26,46,40,.10); font-size:15px; font-weight:500; }
+  nav .home{ font-weight:800; }
+  nav a{ color:#5c6b65; text-decoration:none; }
+  nav a.active{ color:var(--teal); font-weight:700; }
+  main{ max-width:620px; margin:0 auto; padding:30px 24px 60px; }
+  .preview{ display:inline-block; font-size:11px; font-weight:800; letter-spacing:1.5px;
+            color:var(--teal); background:#1D9E7515; padding:5px 12px; border-radius:20px; }
+  h1{ font-size:26px; font-weight:800; margin:12px 0 6px; }
+  .lede{ font-size:15px; color:var(--muted); margin:0 0 22px; line-height:1.55; }
+  .explain{ background:#fff; border-radius:12px; padding:14px 18px; font-size:13.5px; line-height:1.6; margin-bottom:26px; }
+  .explain b{ color:var(--ink); }
+  .card{ background:#fff; border-radius:18px; padding:28px 30px 24px; border:1px solid rgba(26,46,40,.07); }
+  .head{ display:flex; justify-content:space-between; align-items:center; }
+  .wordmark{ font-size:20px; font-weight:800; letter-spacing:.5px; }
+  .wordmark span{ color:var(--teal); }
+  .tag{ font-size:10px; font-weight:700; letter-spacing:2px; color:var(--teal); }
+  .rule{ height:1px; background:rgba(26,46,40,.12); margin:14px 0 14px; }
+  .ttl{ font-size:13px; font-weight:700; color:#5c6b65; letter-spacing:.4px; }
+  .sub{ font-size:12px; color:var(--muted); margin-top:3px; }
+  .bars{ margin-top:16px; display:flex; flex-direction:column; gap:11px; }
+  .barrow .lab{ display:flex; justify-content:space-between; font-size:14px; margin-bottom:5px; }
+  .barrow .lab .v{ font-weight:700; }
+  .track{ height:12px; background:#e7e3d8; border-radius:7px; overflow:hidden; }
+  .fill{ height:100%; border-radius:7px; }
+  .readline{ font-size:13px; font-weight:700; margin-top:16px; color:var(--ink); }
+  .season{ margin-top:20px; background:var(--cream); border-radius:14px; padding:16px 18px; position:relative; }
+  .exbadge{ position:absolute; top:12px; right:14px; font-size:9.5px; font-weight:800; letter-spacing:1px;
+            color:var(--muted); background:rgba(26,46,40,.06); padding:3px 8px; border-radius:12px; }
+  .tiles{ display:flex; gap:10px; margin-top:30px; }
+  .tile{ flex:1; text-align:center; border-radius:10px; padding:10px 0; }
+  .tile .n{ font-size:24px; font-weight:800; }
+  .tile .t{ font-size:11px; font-weight:700; }
+  .form{ display:flex; gap:4px; margin-top:6px; }
+  .form i{ flex:1; height:22px; border-radius:5px; }
+  .legend{ display:flex; gap:12px; font-size:10px; font-weight:700; }
+  .legend span{ display:flex; align-items:center; gap:4px; }
+  .sw{ width:10px; height:10px; border-radius:3px; display:inline-block; }
+  .footer{ margin-top:18px; display:flex; justify-content:space-between; align-items:center; }
+  .caveat{ font-size:11.5px; color:var(--muted); margin-top:18px; line-height:1.55; }
+</style>
+</head>
+<body>
+  <nav>
+    <span class="home">&larr; FPL Apex</span>
+    <a href="/solver_app.html">My Squad</a>
+    <a href="/solver_app.html">Chip Planner</a>
+    <a href="/solver_app.html">Mini-League</a>
+    <a href="#" class="active">Evaluation</a>
+  </nav>
+
+  <main>
+    <span class="preview">PREVIEW · SAMPLE WEEKS</span>
+    <h1>Model evaluation</h1>
+    <p class="lede">How close Apex's projections land versus the leading paid tools — scored every
+      gameweek, in the open. Same players, same metric, no cherry-picking. Live tracking begins 2026/27.</p>
+
+    <div class="explain">
+      <b>What "average miss" means:</b> for every player we take the gap between our projected points
+      and what they actually scored, then average it. So <b>Apex 3.15</b> = our picks were, on average,
+      3.15 points from reality. Lower is closer; a perfect projection would be 0.
+      <br><br>
+      <b>Scored honestly:</b> on the template players (20%+ owned), using whatever they actually got —
+      <b>including a 0 if they blanked or sat on the bench.</b> Nothing filtered out. Every tool judged
+      on the same players, matched by FPL player ID.
+    </div>
+
+    <div class="card">
+      <div class="head">
+        <div class="wordmark">FPL <span>APEX</span></div>
+        <div class="tag">NUMBERS over NARRATIVES</div>
+      </div>
+      <div class="rule"></div>
+      <div class="ttl">SAMPLE · PROJECTION ACCURACY (template players)</div>
+      <div class="sub">Average miss per pick · <b style="color:var(--ink)">lower = closer</b></div>
+
+      <div class="bars">
+        <div class="barrow">
+          <div class="lab"><span style="font-weight:700;">Apex</span><span class="v" style="color:var(--teal)">3.15</span></div>
+          <div class="track"><div class="fill" style="width:95%;background:#1D9E75"></div></div>
+        </div>
+        <div class="barrow">
+          <div class="lab"><span>Tool A <span style="font-size:10px;font-weight:700;color:var(--muted)">&middot; sample</span></span><span class="v">3.11</span></div>
+          <div class="track"><div class="fill" style="width:94%;background:#3f4d47"></div></div>
+        </div>
+        <div class="barrow">
+          <div class="lab"><span>Tool B</span><span class="v">3.17</span></div>
+          <div class="track"><div class="fill" style="width:96%;background:#b8c2bc"></div></div>
+        </div>
+      </div>
+
+      <div class="readline">Neck-and-neck with the paid tools — all three within a fraction of a point.</div>
+
+      <div class="season">
+        <span class="exbadge">EXAMPLE LAYOUT</span>
+        <div style="font-size:11px;font-weight:800;color:var(--muted);letter-spacing:1.5px;">SEASON RUNNING TOTAL · fills in live each gameweek</div>
+        <div class="tiles">
+          <div class="tile" style="background:#1D9E7512"><div class="n" style="color:var(--teal)">&mdash;</div><div class="t">Apex</div></div>
+          <div class="tile" style="background:rgba(63,77,71,.10)"><div class="n" style="color:#3f4d47">&mdash;</div><div class="t" style="color:#3f4d47">Tool A</div></div>
+          <div class="tile" style="background:rgba(26,46,40,.04)"><div class="n" style="color:#8d978f">&mdash;</div><div class="t" style="color:#8d978f">Tool B</div></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin:16px 0 6px;">
+          <div style="font-size:10px;font-weight:700;color:var(--muted);letter-spacing:1px;">FORM · weeks closest</div>
+          <div class="legend">
+            <span><span class="sw" style="background:#1D9E75"></span>Apex</span>
+            <span><span class="sw" style="background:#3f4d47"></span>Tool A</span>
+            <span><span class="sw" style="background:#b8c2bc"></span>Tool B</span>
+          </div>
+        </div>
+        <div class="form" id="form"></div>
+      </div>
+
+      <div class="footer">
+        <div style="font-size:14px;font-weight:700;">Independently scored, every gameweek.</div>
+        <div style="font-size:13px;font-weight:700;color:var(--teal)">fplapex.com</div>
+      </div>
+    </div>
+
+    <p class="caveat"><b>Preview.</b> Headline figures are a real sample (GW28–36 template players); the
+      running total is an example layout that fills in automatically once 2026/27 begins. Rivals shown
+      as Tool A / Tool B for now. Only aggregate accuracy is ever shown — never any tool's individual projections.</p>
+  </main>
+
+<script>
+  (function(){
+    var win=['a','a','b','a','a','b','a','a','a','b','a','a'];
+    var col={a:'#1D9E75',s:'#3f4d47',b:'#b8c2bc'};
+    var host=document.getElementById('form');
+    win.forEach(function(w){var d=document.createElement('i');d.style.background=(col[w]||'#cfd6d2');d.style.opacity='.45';host.appendChild(d);});
+  })();
+</script>
+</body>
+</html>
