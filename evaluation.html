@@ -64,10 +64,10 @@
 </head>
 <body>
   <nav>
-    <span class="home">&larr; FPL Apex</span>
-    <a href="/solver_app.html">My Squad</a>
-    <a href="/solver_app.html">Chip Planner</a>
-    <a href="/solver_app.html">Mini-League</a>
+    <a href="/" class="home">&larr; FPL Apex</a>
+    <a href="/solver_app.html" class="nav-solver" data-view="team">My Squad</a>
+    <a href="/solver_app.html" class="nav-solver" data-view="chip-select">Chip Planner</a>
+    <a href="/solver_app.html" class="nav-solver" data-view="league">Mini-League</a>
     <a href="#" class="active">Evaluation</a>
   </nav>
 
@@ -151,6 +151,21 @@
   </main>
 
 <script>
+  /* Nav deep-links: carry the user's FPL Team ID into the solver so My Squad /
+     Chip Planner / Mini-League open the right view directly — no Team ID box.
+     ID comes from ?id= in the URL, else the persisted apex_fpl_id (set whenever
+     the solver loads a team). If we have no ID, links fall back to the solver
+     entry, which will ask for one. */
+  (function(){
+    var id='';
+    try{ id=(new URLSearchParams(location.search)).get('id')||''; }catch(_){}
+    if(!(id&&/^\d+$/.test(id))){ try{ id=localStorage.getItem('apex_fpl_id')||''; }catch(_){} }
+    if(id&&/^\d+$/.test(id)){
+      document.querySelectorAll('a.nav-solver').forEach(function(a){
+        a.href='/solver_app.html?id='+id+'&view='+a.getAttribute('data-view');
+      });
+    }
+  })();
   (function(){
     var win=['a','a','b','a','a','b','a','a','a','b','a','a'];
     var col={a:'#1D9E75',s:'#3f4d47',b:'#b8c2bc'};
