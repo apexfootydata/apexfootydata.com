@@ -119,13 +119,14 @@
         <div class="readline">Neck-and-neck with the paid tools — all three within a fraction of a point.</div>
 
         <div class="season">
-          <span class="exbadge">EXAMPLE LAYOUT</span>
-          <div style="font-size:12px;font-weight:800;color:var(--muted);letter-spacing:1.5px;">SEASON RUNNING TOTAL · fills in live each gameweek</div>
+          <span class="exbadge" id="eval-badge">EXAMPLE LAYOUT</span>
+          <div style="font-size:12px;font-weight:800;color:var(--muted);letter-spacing:1.5px;padding-right:108px;" id="eval-heading">SEASON RUNNING TOTAL · fills in live each gameweek</div>
           <div class="tiles">
-            <div class="tile" style="background:#1D9E7512"><div class="n" style="color:var(--teal)">&mdash;</div><div class="t">Apex</div></div>
-            <div class="tile" style="background:rgba(63,77,71,.10)"><div class="n" style="color:#3f4d47">&mdash;</div><div class="t" style="color:#3f4d47">Tool A</div></div>
-            <div class="tile" style="background:rgba(26,46,40,.04)"><div class="n" style="color:#8d978f">&mdash;</div><div class="t" style="color:#8d978f">Tool B</div></div>
+            <div class="tile" style="background:#1D9E7512"><div class="n" style="color:var(--teal)" id="eval-apex">&mdash;</div><div class="t">Apex</div></div>
+            <div class="tile" style="background:rgba(63,77,71,.10)"><div class="n" style="color:#3f4d47" id="eval-toolA">&mdash;</div><div class="t" style="color:#3f4d47">Tool A</div></div>
+            <div class="tile" style="background:rgba(26,46,40,.04)"><div class="n" style="color:#8d978f" id="eval-toolB">&mdash;</div><div class="t" style="color:#8d978f">Tool B</div></div>
           </div>
+          <div id="eval-verdict" style="display:none;font-size:14px;font-weight:700;color:var(--ink);margin-top:16px;"></div>
           <div style="display:flex;justify-content:space-between;align-items:center;margin:20px 0 6px;">
             <div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:1px;">FORM · weeks closest</div>
             <div class="legend">
@@ -166,11 +167,46 @@
       });
     }
   })();
+  /* Season running total — baked by forward_log.py `eval` from the live
+     forward-test log. null until the first 26/27 GW is scored, so the page
+     shows the EXAMPLE LAYOUT mockup pre-season and flips to live by itself. */
+  /* APEX-EVAL-DATA-START */
+var EVAL_DATA = null;
+  /* APEX-EVAL-DATA-END */
   (function(){
-    var win=['a','a','b','a','a','b','a','a','a','b','a','a'];
-    var col={a:'#1D9E75',s:'#3f4d47',b:'#b8c2bc'};
+    var COL={apex:'#1D9E75',review:'#3f4d47',toolA:'#3f4d47',toolB:'#b8c2bc',level:'#cfd6d2'};
     var host=document.getElementById('form');
-    win.forEach(function(w){var d=document.createElement('i');d.style.background=(col[w]||'#cfd6d2');d.style.opacity='.45';host.appendChild(d);});
+    function bar(kind,live){var d=document.createElement('i');d.style.background=(COL[kind]||'#cfd6d2');d.style.opacity=live?'1':'.45';host.appendChild(d);}
+
+    var live = EVAL_DATA && EVAL_DATA.weeks > 0;
+    if(!live){
+      // Preview mockup — illustrative form pattern, dimmed.
+      ['apex','apex','toolB','apex','apex','toolB','apex','apex','apex','toolB','apex','apex']
+        .forEach(function(k){bar(k,false);});
+      return;
+    }
+
+    // ── Live: fill tiles, verdict, badge, form from the real numbers ──
+    function fmt(v){return (v==null)?'—':Number(v).toFixed(2);}
+    document.getElementById('eval-apex').textContent  = fmt(EVAL_DATA.apex);
+    document.getElementById('eval-toolA').textContent = fmt(EVAL_DATA.review);
+    var bEl=document.getElementById('eval-toolB');
+    bEl.innerHTML = (EVAL_DATA.solio==null) ? '—'
+                    : (fmt(EVAL_DATA.solio)+'<span style="font-size:14px;">&dagger;</span>');
+
+    var head=document.getElementById('eval-heading');
+    if(head) head.textContent='SEASON RUNNING TOTAL · '+EVAL_DATA.weeks+
+                              ' gameweek'+(EVAL_DATA.weeks===1?'':'s')+' scored';
+    var badge=document.getElementById('eval-badge');
+    if(badge){badge.textContent='LIVE';badge.style.color='var(--teal)';
+              badge.style.background='rgba(29,158,117,.12)';}
+    var pv=document.querySelector('.preview');
+    if(pv) pv.textContent='LIVE · '+EVAL_DATA.weeks+' GAMEWEEKS';
+
+    var vEl=document.getElementById('eval-verdict');
+    if(vEl && EVAL_DATA.verdict){vEl.innerHTML=EVAL_DATA.verdict;vEl.style.display='block';}
+
+    (EVAL_DATA.form||[]).forEach(function(k){bar(k,true);});
   })();
 </script>
 </body>
