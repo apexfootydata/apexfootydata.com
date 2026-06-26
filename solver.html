@@ -312,7 +312,14 @@
   }
   try {
     var _saved = localStorage.getItem('apex_fpl_id');
-    if (_saved && /^\d+$/.test(_saved)) input.value = _saved;
+    // Returning visitor: if we already know a valid Team ID, skip the entry box
+    // and go straight to their solver. New visitors (no saved ID) still see it.
+    // Escape hatch: /solver.html?change=1 stays on the box to enter a different ID.
+    var _stay = /[?&]change=1\b/.test(location.search);
+    if (_saved && /^\d+$/.test(_saved)) {
+      if (_stay) { input.value = _saved; }
+      else { window.location.replace('/solver_app.html?id=' + _saved); }
+    }
   } catch (_) {}
 </script>
 
