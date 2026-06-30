@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-06-26T07:26:01">
+<meta name="apex-gw" content="32" data-built-at="2026-06-18T16:24:52">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/x-icon" href="favicon.ico?v=3">
@@ -1570,24 +1570,21 @@
             "Bournemouth": "t91",
             "Brentford": "t94",
             "Brighton": "t36",
-            "Burnley": "t90",
             "Chelsea": "t8",
+            "Coventry": "t45",
             "Crystal Palace": "t31",
             "Everton": "t11",
             "Fulham": "t54",
+            "Hull": "t88",
             "Ipswich": "t40",
             "Leeds": "t2",
-            "Leicester": "t13",
             "Liverpool": "t14",
             "Man City": "t43",
             "Man Utd": "t1",
             "Newcastle": "t4",
             "Nott'm Forest": "t17",
-            "Southampton": "t20",
             "Sunderland": "t56",
-            "Tottenham": "t6",
-            "West Ham": "t21",
-            "Wolves": "t39"
+            "Tottenham": "t6"
         };
         // ██ SITE_DATA:END ██
 
@@ -1615,7 +1612,8 @@
                 "West Ham": "#7A263A", "Brighton": "#0057B8", "Wolves": "#FDB913",
                 "Leeds": "#FFCD00", "Burnley": "#6C1D45", "Brentford": "#E30613",
                 "Fulham": "#1E1E1A", "Bournemouth": "#DA291C", "Crystal Palace": "#1B458F",
-                "Nott'm Forest": "#DD0000", "Sunderland": "#EB172B"
+                "Nott'm Forest": "#DD0000", "Sunderland": "#EB172B",
+                "Ipswich": "#3A64A3", "Hull": "#F18A00", "Coventry": "#4B92DB"
             };
             const c = TEAM_DOT[img.alt] || "#5F5E5A";
             const span = document.createElement('span');
@@ -1634,116 +1632,116 @@
         // Data
         // ██ SITE_DATA:RATINGS ██
         const RATINGS = [
-            {rank: 1, team: "Arsenal", attack: 1.62, defence: 0.79, overall: 0.83},
-            {rank: 2, team: "Man City", attack: 1.74, defence: 1.06, overall: 0.69},
-            {rank: 3, team: "Man Utd", attack: 1.53, defence: 1.17, overall: 0.36},
-            {rank: 4, team: "Liverpool", attack: 1.57, defence: 1.22, overall: 0.35},
-            {rank: 5, team: "Bournemouth", attack: 1.45, defence: 1.26, overall: 0.20},
-            {rank: 6, team: "Chelsea", attack: 1.45, defence: 1.30, overall: 0.15},
-            {rank: 7, team: "Aston Villa", attack: 1.36, defence: 1.25, overall: 0.11},
-            {rank: 8, team: "Brighton", attack: 1.31, defence: 1.20, overall: 0.11},
-            {rank: 9, team: "Brentford", attack: 1.39, defence: 1.34, overall: 0.05},
-            {rank: 10, team: "Newcastle", attack: 1.36, defence: 1.33, overall: 0.03},
-            {rank: 11, team: "Leeds", attack: 1.29, defence: 1.27, overall: 0.02},
-            {rank: 12, team: "Crystal Palace", attack: 1.25, defence: 1.34, overall: -0.09},
-            {rank: 13, team: "Fulham", attack: 1.16, defence: 1.29, overall: -0.14},
-            {rank: 14, team: "Everton", attack: 1.13, defence: 1.28, overall: -0.15},
-            {rank: 15, team: "Nott'm Forest", attack: 1.20, defence: 1.35, overall: -0.15},
-            {rank: 16, team: "Tottenham", attack: 1.15, defence: 1.33, overall: -0.18},
-            {rank: 17, team: "Sunderland", attack: 1.04, defence: 1.30, overall: -0.27},
-            {rank: 18, team: "West Ham", attack: 1.15, defence: 1.46, overall: -0.31},
-            {rank: 19, team: "Wolves", attack: 0.88, defence: 1.51, overall: -0.63},
-            {rank: 20, team: "Burnley", attack: 0.90, defence: 1.78, overall: -0.88}
+            {rank: 1, team: "Arsenal", attack: 1.67, defence: 0.81, overall: 0.86},
+            {rank: 2, team: "Man City", attack: 1.79, defence: 1.08, overall: 0.71},
+            {rank: 3, team: "Man Utd", attack: 1.57, defence: 1.19, overall: 0.38},
+            {rank: 4, team: "Liverpool", attack: 1.61, defence: 1.24, overall: 0.37},
+            {rank: 5, team: "Bournemouth", attack: 1.49, defence: 1.28, overall: 0.21},
+            {rank: 6, team: "Chelsea", attack: 1.49, defence: 1.32, overall: 0.17},
+            {rank: 7, team: "Brighton", attack: 1.35, defence: 1.22, overall: 0.13},
+            {rank: 8, team: "Aston Villa", attack: 1.40, defence: 1.27, overall: 0.12},
+            {rank: 9, team: "Brentford", attack: 1.43, defence: 1.36, overall: 0.07},
+            {rank: 10, team: "Newcastle", attack: 1.40, defence: 1.35, overall: 0.04},
+            {rank: 11, team: "Crystal Palace", attack: 1.28, defence: 1.36, overall: -0.08},
+            {rank: 12, team: "Fulham", attack: 1.19, defence: 1.32, overall: -0.13},
+            {rank: 13, team: "Everton", attack: 1.16, defence: 1.30, overall: -0.14},
+            {rank: 14, team: "Nott'm Forest", attack: 1.23, defence: 1.38, overall: -0.14},
+            {rank: 15, team: "Tottenham", attack: 1.18, defence: 1.35, overall: -0.17},
+            {rank: 16, team: "Leeds", attack: 1.11, defence: 1.30, overall: -0.19},
+            {rank: 17, team: "Sunderland", attack: 0.93, defence: 1.32, overall: -0.39},
+            {rank: 18, team: "Coventry", attack: 0.96, defence: 1.45, overall: -0.49},
+            {rank: 19, team: "Hull", attack: 0.96, defence: 1.45, overall: -0.49},
+            {rank: 20, team: "Ipswich", attack: 0.96, defence: 1.45, overall: -0.49}
         ];
         // ██ SITE_DATA:END ██
 
         // ██ SITE_DATA:FIXTURES ██
         const FIXTURES = [
-            {home: "Arsenal", homeRating: 1.85, homeCS: 42.8, homeWin: 60.5, homeWinDisplay: 60.5, away: "Bournemouth", awayRating: 0.85, awayCS: 15.8, awayWin: 14.6, awayWinDisplay: 14.6, draw: 24.8, kickoff: "2000-01-01T19:00:00"},
-            {home: "Brentford", homeRating: 1.61, homeCS: 32.9, homeWin: 47.7, homeWinDisplay: 47.7, away: "Everton", awayRating: 1.11, awayCS: 20.1, awayWin: 24.3, awayWinDisplay: 24.3, draw: 28.0, kickoff: "2000-01-01T19:00:00"},
-            {home: "Burnley", homeRating: 0.98, homeCS: 17.9, homeWin: 19.3, homeWinDisplay: 19.3, away: "Brighton", awayRating: 1.72, awayCS: 37.5, awayWin: 54.0, awayWinDisplay: 54.0, draw: 26.7, kickoff: "2000-01-01T19:00:00"},
-            {home: "Chelsea", homeRating: 1.38, homeCS: 19.0, homeWin: 30.3, homeWinDisplay: 30.3, away: "Man City", awayRating: 1.66, awayCS: 25.1, awayWin: 43.0, awayWinDisplay: 43.0, draw: 26.7, kickoff: "2000-01-01T19:00:00"},
-            {home: "Crystal Palace", homeRating: 1.50, homeCS: 26.1, homeWin: 39.7, homeWinDisplay: 39.7, away: "Newcastle", awayRating: 1.34, awayCS: 22.3, awayWin: 32.2, awayWinDisplay: 32.2, draw: 28.1, kickoff: "2000-01-01T19:00:00"},
-            {home: "Liverpool", homeRating: 1.83, homeCS: 35.4, homeWin: 55.4, homeWinDisplay: 55.4, away: "Fulham", awayRating: 1.04, awayCS: 16.0, awayWin: 19.1, awayWinDisplay: 19.1, draw: 25.5, kickoff: "2000-01-01T19:00:00"},
-            {home: "Man Utd", homeRating: 1.76, homeCS: 32.9, homeWin: 51.8, homeWinDisplay: 51.8, away: "Leeds", awayRating: 1.11, awayCS: 17.2, awayWin: 21.9, awayWinDisplay: 21.9, draw: 26.3, kickoff: "2000-01-01T19:00:00"},
-            {home: "Nott'm Forest", homeRating: 1.35, homeCS: 25.9, homeWin: 35.5, homeWinDisplay: 35.5, away: "Aston Villa", awayRating: 1.35, awayCS: 25.8, awayWin: 35.4, awayWinDisplay: 35.4, draw: 29.1, kickoff: "2000-01-01T19:00:00"},
-            {home: "Sunderland", homeRating: 1.24, homeCS: 33.3, homeWin: 37.8, homeWinDisplay: 37.8, away: "Tottenham", awayRating: 1.10, awayCS: 28.9, awayWin: 30.5, awayWinDisplay: 30.5, draw: 31.7, kickoff: "2000-01-01T19:00:00"},
-            {home: "West Ham", homeRating: 1.57, homeCS: 38.6, homeWin: 50.8, homeWinDisplay: 50.8, away: "Wolves", awayRating: 0.95, awayCS: 20.7, awayWin: 20.7, awayWinDisplay: 20.7, draw: 28.5, kickoff: "2000-01-01T19:00:00"}
+            {home: "Arsenal", homeRating: 2.14, homeCS: 57.0, homeWin: 74.0, homeWinDisplay: 74.0, away: "Coventry", awayRating: 0.56, awayCS: 12.0, awayWin: 8.0, awayWinDisplay: 8.0, draw: 18.0, kickoff: "2000-01-01T15:00:00"},
+            {home: "Brentford", homeRating: 1.70, homeCS: 32.0, homeWin: 50.0, homeWinDisplay: 50.0, away: "Tottenham", awayRating: 1.15, awayCS: 18.0, awayWin: 26.0, awayWinDisplay: 26.0, draw: 24.0, kickoff: "2000-01-01T15:00:00"},
+            {home: "Brighton", homeRating: 1.52, homeCS: 29.0, homeWin: 44.0, homeWinDisplay: 44.0, away: "Aston Villa", awayRating: 1.23, awayCS: 22.0, awayWin: 31.0, awayWinDisplay: 31.0, draw: 25.0, kickoff: "2000-01-01T15:00:00"},
+            {home: "Everton", homeRating: 1.40, homeCS: 30.0, homeWin: 41.0, homeWinDisplay: 41.0, away: "Crystal Palace", awayRating: 1.20, awayCS: 25.0, awayWin: 32.0, awayWinDisplay: 32.0, draw: 26.0, kickoff: "2000-01-01T15:00:00"},
+            {home: "Fulham", homeRating: 1.38, homeCS: 24.0, homeWin: 37.0, homeWinDisplay: 37.0, away: "Chelsea", awayRating: 1.41, awayCS: 25.0, awayWin: 38.0, awayWinDisplay: 38.0, draw: 25.0, kickoff: "2000-01-01T15:00:00"},
+            {home: "Hull", homeRating: 1.01, homeCS: 19.0, homeWin: 23.0, homeWinDisplay: 23.0, away: "Man Utd", awayRating: 1.64, awayCS: 36.0, awayWin: 52.0, awayWinDisplay: 52.0, draw: 25.0, kickoff: "2000-01-01T15:00:00"},
+            {home: "Ipswich", homeRating: 1.12, homeCS: 38.0, homeWin: 39.0, homeWinDisplay: 39.0, away: "Sunderland", awayRating: 0.97, awayCS: 33.0, awayWin: 31.0, awayWinDisplay: 31.0, draw: 30.0, kickoff: "2000-01-01T15:00:00"},
+            {home: "Man City", homeRating: 2.02, homeCS: 32.0, homeWin: 57.0, homeWinDisplay: 57.0, away: "Bournemouth", awayRating: 1.15, awayCS: 13.0, awayWin: 21.0, awayWinDisplay: 21.0, draw: 21.0, kickoff: "2000-01-01T15:00:00"},
+            {home: "Newcastle", homeRating: 1.53, homeCS: 21.0, homeWin: 37.0, homeWinDisplay: 37.0, away: "Liverpool", awayRating: 1.57, awayCS: 22.0, awayWin: 39.0, awayWinDisplay: 39.0, draw: 24.0, kickoff: "2000-01-01T15:00:00"},
+            {home: "Nott'm Forest", homeRating: 1.41, homeCS: 33.0, homeWin: 44.0, homeWinDisplay: 44.0, away: "Leeds", awayRating: 1.10, awayCS: 24.0, awayWin: 29.0, awayWinDisplay: 29.0, draw: 27.0, kickoff: "2000-01-01T15:00:00"}
         ];
         // ██ SITE_DATA:END ██
 
         // ██ SITE_DATA:TEAM_PREDICTIONS ██
         const TEAM_PREDICTIONS = {
-            "Arsenal": [61, 35, 64, 66, 59, 82],
-            "Man City": [43, 104, null, 49, 124, 42],
-            "Man Utd": [52, 35, 52, 44, 44, 56],
-            "Liverpool": [55, 41, 55, 29, 49, 35],
-            "Aston Villa": [35, 52, 35, 50, 54, 38],
-            "Brighton": [54, 78, null, 31, 61, 31],
-            "Leeds": [22, 85, null, 66, 34, 39],
-            "Brentford": [48, 48, 23, 53, 17, 47],
-            "Chelsea": [30, 68, null, 51, 25, 52],
-            "Crystal Palace": [40, 48, 20, 23, 58, 26],
-            "Bournemouth": [15, 81, null, 51, 37, 31],
-            "Newcastle": [32, 39, 12, 40, 34, 52],
-            "Nott'm Forest": [35, 61, 31, 23, 38, 18],
-            "Tottenham": [30, 34, 40, 22, 36, 22],
-            "Sunderland": [38, 20, 37, 37, 26, 25],
-            "Everton": [24, 30, 32, 23, 27, 43],
-            "West Ham": [51, 24, 38, 21, 15, 22],
-            "Fulham": [19, 25, 35, 10, 34, 41],
-            "Wolves": [21, 15, 29, 31, 14, 28],
-            "Burnley": [19, 26, null, 12, 19, 4]
+            "Arsenal": [74],
+            "Coventry": [8],
+            "Brentford": [50],
+            "Tottenham": [26],
+            "Brighton": [44],
+            "Aston Villa": [31],
+            "Everton": [41],
+            "Crystal Palace": [32],
+            "Fulham": [37],
+            "Chelsea": [38],
+            "Hull": [23],
+            "Man Utd": [52],
+            "Ipswich": [39],
+            "Sunderland": [31],
+            "Man City": [57],
+            "Bournemouth": [21],
+            "Newcastle": [37],
+            "Liverpool": [39],
+            "Nott'm Forest": [44],
+            "Leeds": [29]
         };
         // ██ SITE_DATA:END ██
 
         // ██ SITE_DATA:TEAM_GOALS ██
         const TEAM_GOALS = {
-            "Man City":       [1.66, 3.53, null, 1.64, 4.22, 1.61],
-            "Arsenal":        [1.85, 1.26, 1.95, 1.90, 1.75, 2.62],
-            "Man Utd":        [1.76, 1.46, 1.85, 1.69, 1.47, 1.87],
-            "Liverpool":      [1.83, 1.47, 1.90, 1.35, 1.84, 1.44],
-            "Aston Villa":    [1.35, 1.60, 1.29, 1.63, 1.78, 1.50],
-            "Crystal Palace": [1.50, 1.65, 1.12, 1.16, 2.41, 1.23],
-            "Brentford":      [1.61, 1.63, 1.20, 1.84, 1.08, 1.69],
-            "Chelsea":        [1.38, 2.81, null, 1.77, 1.30, 1.73],
-            "Brighton":       [1.72, 2.82, null, 1.29, 1.80, 1.23],
-            "Leeds":          [1.11, 2.97, null, 2.08, 1.26, 1.40],
-            "Bournemouth":    [0.85, 3.09, null, 1.76, 1.38, 1.39],
-            "Newcastle":      [1.34, 1.55, 0.79, 1.48, 1.35, 1.80],
-            "Nott'm Forest":  [1.35, 1.93, 1.15, 1.14, 1.44, 1.03],
-            "West Ham":       [1.57, 1.13, 1.32, 1.13, 0.82, 1.12],
-            "Everton":        [1.11, 1.25, 1.22, 1.08, 1.11, 1.33],
-            "Tottenham":      [1.10, 1.24, 1.28, 1.05, 1.32, 1.09],
-            "Fulham":         [1.04, 1.14, 1.30, 0.67, 1.31, 1.29],
-            "Sunderland":     [1.24, 0.95, 1.27, 1.16, 1.09, 0.97],
-            "Wolves":         [0.95, 0.83, 1.06, 1.04, 0.78, 1.03],
-            "Burnley":        [0.98, 1.76, null, 0.85, 1.02, 0.53]
+            "Arsenal": [2.14],
+            "Coventry": [0.56],
+            "Brentford": [1.7],
+            "Tottenham": [1.15],
+            "Brighton": [1.52],
+            "Aston Villa": [1.23],
+            "Everton": [1.4],
+            "Crystal Palace": [1.2],
+            "Fulham": [1.38],
+            "Chelsea": [1.41],
+            "Hull": [1.01],
+            "Man Utd": [1.64],
+            "Ipswich": [1.12],
+            "Sunderland": [0.97],
+            "Man City": [2.02],
+            "Bournemouth": [1.15],
+            "Newcastle": [1.53],
+            "Liverpool": [1.57],
+            "Nott'm Forest": [1.41],
+            "Leeds": [1.1]
         };
         // ██ SITE_DATA:END ██
 
         // ██ SITE_DATA:TEAM_CS ██
         const TEAM_CS = {
-            "Arsenal":        [43, 29, 45, 51, 44, 59],
-            "Man City":       [25, 70, null, 34, 72, 25],
-            "Brighton":       [37, 57, null, 23, 46, 25],
-            "Aston Villa":    [26, 39, 27, 35, 36, 24],
-            "Man Utd":        [33, 22, 30, 26, 33, 36],
-            "Leeds":          [17, 62, null, 43, 27, 29],
-            "Sunderland":     [33, 20, 32, 35, 23, 26],
-            "Liverpool":      [35, 29, 33, 18, 27, 22],
-            "Tottenham":      [29, 28, 35, 20, 28, 18],
-            "Crystal Palace": [26, 32, 15, 17, 45, 19],
-            "Brentford":      [33, 32, 16, 32, 12, 29],
-            "Nott'm Forest":  [26, 41, 28, 17, 26, 15],
-            "Everton":        [20, 23, 27, 19, 24, 38],
-            "Chelsea":        [19, 45, null, 32, 16, 34],
-            "Bournemouth":    [16, 51, null, 31, 27, 20],
-            "Newcastle":      [22, 24, 14, 28, 24, 32],
-            "Wolves":         [21, 17, 28, 31, 17, 28],
-            "Fulham":         [16, 20, 27, 15, 25, 36],
-            "West Ham":       [39, 19, 30, 16, 17, 17],
-            "Burnley":        [18, 25, null, 12, 17, 7]
+            "Arsenal": [57],
+            "Coventry": [12],
+            "Brentford": [32],
+            "Tottenham": [18],
+            "Brighton": [29],
+            "Aston Villa": [22],
+            "Everton": [30],
+            "Crystal Palace": [25],
+            "Fulham": [24],
+            "Chelsea": [25],
+            "Hull": [19],
+            "Man Utd": [36],
+            "Ipswich": [38],
+            "Sunderland": [33],
+            "Man City": [32],
+            "Bournemouth": [13],
+            "Newcastle": [21],
+            "Liverpool": [22],
+            "Nott'm Forest": [33],
+            "Leeds": [24]
         };
         // ██ SITE_DATA:END ██
 
@@ -2014,31 +2012,31 @@
 
         // ██ SITE_DATA:FINAL_TABLE ██
         const FINAL_TABLE = [
-            {team: "Arsenal", played: 38, points: 85, left: 0, projected: 85.0, rMin: 85, rMax: 85},
-            {team: "Man City", played: 38, points: 78, left: 0, projected: 78.0, rMin: 78, rMax: 78},
-            {team: "Man Utd", played: 38, points: 71, left: 0, projected: 71.0, rMin: 71, rMax: 71},
-            {team: "Aston Villa", played: 38, points: 65, left: 0, projected: 65.0, rMin: 65, rMax: 65},
-            {team: "Liverpool", played: 38, points: 60, left: 0, projected: 60.0, rMin: 60, rMax: 60},
-            {team: "Bournemouth", played: 38, points: 57, left: 0, projected: 57.0, rMin: 57, rMax: 57},
-            {team: "Sunderland", played: 38, points: 54, left: 0, projected: 54.0, rMin: 54, rMax: 54},
-            {team: "Brentford", played: 38, points: 53, left: 0, projected: 53.0, rMin: 53, rMax: 53},
-            {team: "Brighton", played: 38, points: 53, left: 0, projected: 53.0, rMin: 53, rMax: 53},
-            {team: "Chelsea", played: 38, points: 52, left: 0, projected: 52.0, rMin: 52, rMax: 52},
-            {team: "Fulham", played: 38, points: 52, left: 0, projected: 52.0, rMin: 52, rMax: 52},
-            {team: "Newcastle", played: 38, points: 49, left: 0, projected: 49.0, rMin: 49, rMax: 49},
-            {team: "Everton", played: 38, points: 49, left: 0, projected: 49.0, rMin: 49, rMax: 49},
-            {team: "Leeds", played: 38, points: 47, left: 0, projected: 47.0, rMin: 47, rMax: 47},
-            {team: "Crystal Palace", played: 38, points: 45, left: 0, projected: 45.0, rMin: 45, rMax: 45},
-            {team: "Nott'm Forest", played: 38, points: 44, left: 0, projected: 44.0, rMin: 44, rMax: 44},
-            {team: "Tottenham", played: 38, points: 41, left: 0, projected: 41.0, rMin: 41, rMax: 41},
-            {team: "West Ham", played: 38, points: 39, left: 0, projected: 39.0, rMin: 39, rMax: 39},
-            {team: "Burnley", played: 38, points: 22, left: 0, projected: 22.0, rMin: 22, rMax: 22},
-            {team: "Wolves", played: 38, points: 20, left: 0, projected: 20.0, rMin: 20, rMax: 20}
+            {team: "Arsenal", played: 0, points: 0, left: 38, projected: 76.1, rMin: 76, rMax: 76},
+            {team: "Man City", played: 0, points: 0, left: 38, projected: 71.0, rMin: 71, rMax: 71},
+            {team: "Man Utd", played: 0, points: 0, left: 38, projected: 62.4, rMin: 62, rMax: 62},
+            {team: "Liverpool", played: 0, points: 0, left: 38, projected: 62.0, rMin: 62, rMax: 62},
+            {team: "Bournemouth", played: 0, points: 0, left: 38, projected: 57.9, rMin: 58, rMax: 58},
+            {team: "Chelsea", played: 0, points: 0, left: 38, projected: 56.6, rMin: 57, rMax: 57},
+            {team: "Brighton", played: 0, points: 0, left: 38, projected: 55.5, rMin: 56, rMax: 56},
+            {team: "Aston Villa", played: 0, points: 0, left: 38, projected: 55.5, rMin: 56, rMax: 56},
+            {team: "Brentford", played: 0, points: 0, left: 38, projected: 54.0, rMin: 54, rMax: 54},
+            {team: "Newcastle", played: 0, points: 0, left: 38, projected: 53.4, rMin: 53, rMax: 53},
+            {team: "Crystal Palace", played: 0, points: 0, left: 38, projected: 49.8, rMin: 50, rMax: 50},
+            {team: "Fulham", played: 0, points: 0, left: 38, projected: 48.3, rMin: 48, rMax: 48},
+            {team: "Nott'm Forest", played: 0, points: 0, left: 38, projected: 48.0, rMin: 48, rMax: 48},
+            {team: "Everton", played: 0, points: 0, left: 38, projected: 47.9, rMin: 48, rMax: 48},
+            {team: "Tottenham", played: 0, points: 0, left: 38, projected: 47.1, rMin: 47, rMax: 47},
+            {team: "Leeds", played: 0, points: 0, left: 38, projected: 46.4, rMin: 46, rMax: 46},
+            {team: "Sunderland", played: 0, points: 0, left: 38, projected: 40.3, rMin: 40, rMax: 40},
+            {team: "Ipswich", played: 0, points: 0, left: 38, projected: 38.2, rMin: 38, rMax: 38},
+            {team: "Hull", played: 0, points: 0, left: 38, projected: 38.1, rMin: 38, rMax: 38},
+            {team: "Coventry", played: 0, points: 0, left: 38, projected: 38.1, rMin: 38, rMax: 38}
         ];
         // ██ SITE_DATA:END ██
 
         // ██ SITE_DATA:GW_LABELS ██
-        const GW_LABELS = ["GW32", "GW33", "GW34", "GW35", "GW36", "GW37"];
+        const GW_LABELS = ["GW1"];
         // ██ SITE_DATA:END ██
 
         // ██ SITE_DATA:TRENDS ██
