@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-07-01T23:15:47">
+<meta name="apex-gw" content="32" data-built-at="2026-07-01T23:25:47">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -8508,7 +8508,12 @@ html.apex-offseason #view-landing .hero-sub::after {
   // only applied there — Mini-League projected up to ~27% more for slow pacers,
   // breaking the "same engine as Rank Predictor" footnote promise).
   const _LS_REALISM_FACTOR_MIN = 0.55;
-  const _LS_REALISM_FACTOR_MAX = 1.00;
+  // 2026-07-01 audit: cap raised 1.00 -> 1.30. Clamping at 1.0 gave elite
+  // rivals (pacing ABOVE the model's forward ceiling) zero upward credit,
+  // under-projecting them 5-15% and running the user's title odds hot.
+  // MIRRORED in rank_milestones.js + league_sim.py + rank_milestones.py —
+  // change all four together or the "same engine" promise breaks.
+  const _LS_REALISM_FACTOR_MAX = 1.30;
 
   function _computeManagerRealismFactor(userCurrentPts, lastFinishedGw,
                                           remainingMean, remainingGwsCount,
@@ -9850,7 +9855,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1782944147-GW32-b8b07348";
+const BUILD_VERSION = "1782944747-GW32-b8b07348";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -18646,7 +18651,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1782944147-GW32-b8b07348</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1782944747-GW32-b8b07348</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
