@@ -1591,6 +1591,12 @@
         function getBadgeUrl(team) {
             const badgeId = TEAM_BADGES[team];
             if (badgeId) {
+                // Liverpool's root t14.png is a white/mono crest — invisible on
+                // the light cards. The /50/ colour variant renders red, so use
+                // it directly for Liverpool (2026-06-30).
+                if (team === "Liverpool") {
+                    return `https://resources.premierleague.com/premierleague/badges/50/${badgeId}.png`;
+                }
                 return `https://resources.premierleague.com/premierleague/badges/${badgeId}.png`;
             }
             return "";
