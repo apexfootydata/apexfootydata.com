@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-07-01T19:44:18">
+<meta name="apex-gw" content="32" data-built-at="2026-07-01T19:51:38">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -9512,19 +9512,35 @@ html.apex-offseason #view-landing .hero-sub::after {
   }
 
   // build [{id, cap}] XI for me + rival
+  // pick a valid best XI (1 GK, 3-5 DEF, 2-5 MID, 1-3 FWD) maximising xp0
+  function bestXiFrom(list) {
+    var byPos = { 1: [], 2: [], 3: [], 4: [] };
+    list.forEach(function (p) { if (!byPos[p.element_type]) byPos[p.element_type] = []; byPos[p.element_type].push(p); });
+    Object.keys(byPos).forEach(function (k) { byPos[k].sort(function (a, b) { return b.xp0 - a.xp0; }); });
+    var forms = [[1,3,4,3],[1,3,5,2],[1,4,3,3],[1,4,4,2],[1,5,3,2],[1,4,5,1],[1,5,4,1]];
+    var best = [], bestScore = -1;
+    forms.forEach(function (f) {
+      if ((byPos[1]||[]).length < f[0] || (byPos[2]||[]).length < f[1] || (byPos[3]||[]).length < f[2] || (byPos[4]||[]).length < f[3]) return;
+      var xi = byPos[1].slice(0, f[0]).concat(byPos[2].slice(0, f[1]), byPos[3].slice(0, f[2]), byPos[4].slice(0, f[3]));
+      var sc = xi.reduce(function (a, p) { return a + p.xp0; }, 0);
+      if (sc > bestScore) { bestScore = sc; best = xi; }
+    });
+    return best;
+  }
   function myXi() {
-    var xi = [];
     try {
-      var best = pickBestXi(SQUAD_DATA, 0) || [];
+      if (typeof SQUAD_DATA === 'undefined' || !SQUAD_DATA || !SQUAD_DATA.length) return [];
+      var list = SQUAD_DATA.map(function (p) { return { id: p.id, element_type: p.element_type, xp0: info(p.id).xp0 }; });
+      var xi = bestXiFrom(list);
       var cap = null, capXp = -1;
-      best.forEach(function (p) { var x = info(p.id).xp0; if (x > capXp) { capXp = x; cap = p.id; } });
-      best.forEach(function (p) { xi.push({ id: p.id, cap: p.id === cap }); });
-    } catch (e) {}
-    return xi;
+      xi.forEach(function (p) { if (p.xp0 > capXp) { capXp = p.xp0; cap = p.id; } });
+      return xi.map(function (p) { return { id: p.id, cap: p.id === cap }; });
+    } catch (e) { return []; }
   }
   function rivalXi(picks) {
-    return picks.filter(function (p) { return p.position <= 11; })
-                .map(function (p) { return { id: p.element, cap: (p.multiplier || 0) >= 2 || p.is_captain }; });
+    var starters = (picks || []).filter(function (p) { return p.position <= 11; });
+    if (!starters.length) starters = (picks || []).slice(0, 11);
+    return starters.map(function (p) { return { id: p.element, cap: ((p.multiplier || 0) >= 2) || !!p.is_captain }; });
   }
 
   function simulate(mine, theirs) {
@@ -9627,7 +9643,7 @@ html.apex-offseason #view-landing .hero-sub::after {
       if (status) status.textContent = 'Loading rival…';
       var picks = await fetchPicks(entryId);
       var mine = myXi(), theirs = rivalXi(picks);
-      if (!mine.length || !theirs.length) { if (status) status.textContent = 'Could not build both teams.'; return; }
+      if (!mine.length || !theirs.length) { if (status) status.textContent = 'Your XI: ' + mine.length + ' players, rival XI: ' + theirs.length + '. ' + (!mine.length ? 'Your squad did not load (open My Squad first).' : 'Rival picks came back empty.'); return; }
       renderXiList('rival-your-xi', mine, null);
       renderXiList('rival-their-xi', theirs, null);
       var stanceEl = document.querySelector('#rival-stance .on');
@@ -9671,7 +9687,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1782931458-GW32-660415fd";
+const BUILD_VERSION = "1782931898-GW32-660415fd";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -18460,7 +18476,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1782931458-GW32-660415fd</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1782931898-GW32-660415fd</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
