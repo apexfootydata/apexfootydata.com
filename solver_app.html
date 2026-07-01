@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-07-01T22:08:48">
+<meta name="apex-gw" content="32" data-built-at="2026-07-01T22:54:36">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -6265,7 +6265,11 @@ html.apex-offseason #view-landing .hero-sub::after {
       <div style="color:var(--muted);font-size:.9rem;margin-bottom:14px;">Head-to-head vs one rival for the upcoming gameweek. Shared players cancel out; only your differentials and captain move the gap.</div>
       <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">
         <div style="flex:1;min-width:220px;">
-          <label style="display:block;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px;">Rival (from your league)</label>
+          <label style="display:block;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px;">Mini-league</label>
+          <select id="rival-league-select" onmousedown="rivalLeagues()" onchange="rivalLeagueChanged()" style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--fg);padding:11px 14px;font-size:.95rem;font-family:inherit;"><option value="">- pick a league -</option></select>
+        </div>
+        <div style="flex:1;min-width:220px;">
+          <label style="display:block;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px;">Rival</label>
           <select id="rival-select" onmousedown="rivalRefresh()" onchange="rivalAutofill()" style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--fg);padding:11px 14px;font-size:.95rem;font-family:inherit;"><option value="">- pick a rival -</option></select>
         </div>
         <div style="min-width:150px;">
@@ -9500,36 +9504,86 @@ html.apex-offseason #view-landing .hero-sub::after {
     if (status) status.textContent = n ? (n + ' rivals loaded. Pick one — lead/gap fills in automatically.') : 'No rivals found — type a Team ID below.';
     return n;
   }
-  var _rivalsFor = null;   // which "me" the dropdown was populated for — repopulates on team switch
+  var _rivalsFor = null;    // which "me" the rival list was populated for
+  var _leaguesFor = null;   // which "me" the league list was populated for
+  function _proxy() { return (typeof FPL_CORS_PROXY === 'string' && FPL_CORS_PROXY) ? FPL_CORS_PROXY : ''; }
+  async function _fetchStandings(leagueId) {
+    var data = await fetch(_proxy() + '/leagues-classic/' + leagueId + '/standings/', { cache: 'no-store' }).then(function (r) { return r.json(); });
+    return (data && data.standings && data.standings.results) || [];
+  }
+  function _applyStandings(results) {
+    window._rivalStandings = results.map(function (m) { return { entry_id: m.entry, current_total: m.total, player_name: m.player_name, entry_name: m.entry_name }; });
+    fillRivals(results.map(function (m) { return { id: m.entry, name: m.player_name, team: m.entry_name }; }));
+    _rivalsFor = meId();
+  }
+  // Step 1: fill the mini-league dropdown from the loaded team's classic leagues.
+  window.rivalLeagues = async function (force) {
+    var lsel = $('rival-league-select'); if (!lsel) return false;
+    var me = meId(); if (!me) return false;
+    if (!force && _leaguesFor !== null && String(_leaguesFor) === String(me) && lsel.options.length > 0 && lsel.value) return true;
+    var status = $('rival-status'); if (status) status.textContent = 'Loading your leagues…';
+    try {
+      var entry = await fetch(_proxy() + '/entry/' + me + '/', { cache: 'no-store' }).then(function (r) { return r.json(); });
+      var cl = (entry && entry.leagues && entry.leagues.classic) || [];
+      cl = cl.filter(function (l) { return l.league_type !== 's' && (l.rank_count || 0) > 1 && (l.rank_count || 0) < 200000; });
+      cl.sort(function (a, b) { return (a.rank_count || 1e9) - (b.rank_count || 1e9); });
+      lsel.innerHTML = '';
+      _leaguesFor = me;
+      if (!cl.length) {
+        var o0 = document.createElement('option'); o0.value = ''; o0.textContent = '- no mini-leagues found -'; lsel.appendChild(o0);
+        if (status) status.textContent = 'No mini-leagues on this team — type a rival Team ID instead.';
+        return false;
+      }
+      cl.forEach(function (l) {
+        var o = document.createElement('option'); o.value = l.id;
+        o.textContent = (l.name || ('League ' + l.id)) + ' (' + (l.rank_count || '?') + ' teams)';
+        lsel.appendChild(o);
+      });
+      if (status) status.textContent = '';
+      return true;
+    } catch (e) { if (status) status.textContent = 'Could not load your leagues — type a rival Team ID instead.'; return false; }
+  };
+  // Step 2: league picked -> fill the rival dropdown from that league's standings.
+  window.rivalLeagueChanged = async function () {
+    var lsel = $('rival-league-select'), sel = $('rival-select');
+    if (!lsel || !lsel.value || !sel) return;
+    var status = $('rival-status'); if (status) status.textContent = 'Loading league standings…';
+    try { _applyStandings(await _fetchStandings(lsel.value)); }
+    catch (e) { if (status) status.textContent = 'Could not load that league — type a rival Team ID instead.'; }
+  };
   window.rivalRefresh = async function () {
     var sel = $('rival-select'); if (!sel) return;
     var me = meId();
-    if (_rivalsFor !== null && String(_rivalsFor) === String(me) && sel.options.length > 1) return;  // populated for THIS team
-    // 1) reuse a Title-race sim if one has run — but only if it's MY league (contains me)
+    if ($('rival-league-select')) {
+      // Two-step UX: leagues first, rivals from the chosen league. Reload both on team switch.
+      if (_leaguesFor === null || String(_leaguesFor) !== String(me)) {
+        var ok = await window.rivalLeagues(true);
+        if (ok) await window.rivalLeagueChanged();
+        return;
+      }
+      if (_rivalsFor === null || String(_rivalsFor) !== String(me) || sel.options.length <= 1) await window.rivalLeagueChanged();
+      return;
+    }
+    // Legacy fallback (baked HTML without the league dropdown): auto-pick smallest league.
+    if (_rivalsFor !== null && String(_rivalsFor) === String(me) && sel.options.length > 1) return;
     var st = (window._leagueData && _leagueData.standings) || null;
     if (st && st.length && me && st.some(function (m) { return String(m.entry_id) === String(me); })) {
       window._rivalStandings = st;
       fillRivals(st.map(function (m) { return { id: m.entry_id, name: m.player_name, team: m.entry_name }; }));
       _rivalsFor = me; return;
     }
-    // 2) fetch a league's standings directly (no sim needed)
-    var proxy = (typeof FPL_CORS_PROXY === 'string' && FPL_CORS_PROXY) ? FPL_CORS_PROXY : '';
     var status = $('rival-status'); if (status) status.textContent = 'Loading your league…';
     try {
-      var leagueId = ($('league-select') && $('league-select').value) || null;
-      if (!leagueId && me) {
-        var entry = await fetch(proxy + '/entry/' + me + '/', { cache: 'no-store' }).then(function (r) { return r.json(); });
+      var leagueId = null;
+      if (me) {
+        var entry = await fetch(_proxy() + '/entry/' + me + '/', { cache: 'no-store' }).then(function (r) { return r.json(); });
         var cl = (entry && entry.leagues && entry.leagues.classic) || [];
         cl = cl.filter(function (l) { return l.league_type !== 's' && (l.rank_count || 0) > 1 && (l.rank_count || 0) < 200000; });
         cl.sort(function (a, b) { return (a.rank_count || 1e9) - (b.rank_count || 1e9); });
         if (cl.length) leagueId = cl[0].id;
       }
-      if (!leagueId) { if (status) status.textContent = 'Pick a league above, or type a rival Team ID.'; return; }
-      var data = await fetch(proxy + '/leagues-classic/' + leagueId + '/standings/', { cache: 'no-store' }).then(function (r) { return r.json(); });
-      var results = (data && data.standings && data.standings.results) || [];
-      window._rivalStandings = results.map(function (m) { return { entry_id: m.entry, current_total: m.total, player_name: m.player_name, entry_name: m.entry_name }; });
-      fillRivals(results.map(function (m) { return { id: m.entry, name: m.player_name, team: m.entry_name }; }));
-      _rivalsFor = me;
+      if (!leagueId) { if (status) status.textContent = 'Type a rival Team ID.'; return; }
+      _applyStandings(await _fetchStandings(leagueId));
     } catch (e) { if (status) status.textContent = 'Could not load your league — type a rival Team ID instead.'; }
   };
 
@@ -9796,7 +9850,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1782940128-GW32-b8b07348";
+const BUILD_VERSION = "1782942876-GW32-b8b07348";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -18586,7 +18640,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1782940128-GW32-b8b07348</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1782942876-GW32-b8b07348</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
