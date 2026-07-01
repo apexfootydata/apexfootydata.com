@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-07-01T23:25:47">
+<meta name="apex-gw" content="32" data-built-at="2026-07-01T23:44:35">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -9495,6 +9495,11 @@ html.apex-offseason #view-landing .hero-sub::after {
   function bank() { try { return (window.TEAM_META && +TEAM_META.bank) || 0; } catch (e) { return 0; } }
   // "me" = the LOADED team. FPL_ID is hydrated on team load; TEAM_META.entry_id is the stale bake.
   function meId() { try { if (typeof FPL_ID !== 'undefined' && FPL_ID) return FPL_ID; } catch (e) {} return (window.TEAM_META && TEAM_META.entry_id) || null; }
+  // If the URL names a team (?id=...), that team is being hydrated async. Until
+  // meId matches it, ANY fill would use the baked id and flash the wrong leagues.
+  var _urlId = null;
+  try { var _m = (window.location.search || '').match(/[?&]id=(\d+)/); if (_m) _urlId = _m[1]; } catch (e) {}
+  function _bootPending() { return _urlId !== null && String(meId()) !== String(_urlId); }
 
   function fillRivals(list) {
     var sel = $('rival-select'); if (!sel) return;
@@ -9558,6 +9563,7 @@ html.apex-offseason #view-landing .hero-sub::after {
   };
   window.rivalRefresh = async function () {
     var sel = $('rival-select'); if (!sel) return;
+    if (_bootPending()) return;   // team in URL still hydrating — filling now would use the baked id
     var me = meId();
     if ($('rival-league-select')) {
       // Two-step UX: leagues first, rivals from the chosen league. Reload both on team switch.
@@ -9829,7 +9835,19 @@ html.apex-offseason #view-landing .hero-sub::after {
     finally { _busy = false; }
   };
 
-  document.addEventListener('DOMContentLoaded', function () { try { window.rivalRefresh(); } catch (e) {} });
+  document.addEventListener('DOMContentLoaded', function () {
+    try {
+      // Public boot (?id=...) hydrates the team ASYNC — pre-filling here would
+      // show the baked team's leagues, then switch on click. Skip; the settle
+      // retries below (and the dropdown's own onmousedown) fill it correctly.
+      if (!window._apexPublicBootClaimed) window.rivalRefresh();
+    } catch (e) {}
+  });
+  // Settle to the LOADED team once hydration lands. rivalRefresh is idempotent
+  // per meId (keyed caches), so repeat calls are free no-ops.
+  window.addEventListener('load', function () {
+    [1500, 3500, 6500, 10000, 15000].forEach(function (ms) { setTimeout(function () { try { window.rivalRefresh(); } catch (e) {} }, ms); });
+  });
 })();
 
 </script>
@@ -9855,7 +9873,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1782944747-GW32-b8b07348";
+const BUILD_VERSION = "1782945875-GW32-b8b07348";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -18651,7 +18669,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1782944747-GW32-b8b07348</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1782945875-GW32-b8b07348</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
