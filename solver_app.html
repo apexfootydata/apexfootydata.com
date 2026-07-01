@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-07-01T20:48:02">
+<meta name="apex-gw" content="32" data-built-at="2026-07-01T20:54:15">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -9488,7 +9488,7 @@ html.apex-offseason #view-landing .hero-sub::after {
   function fillRivals(list) {
     var sel = $('rival-select'); if (!sel) return;
     sel.innerHTML = '<option value="">- pick a rival -</option>';
-    var me = (typeof FPL_ID !== 'undefined') ? FPL_ID : null, n = 0;
+    var me = (window.TEAM_META && TEAM_META.entry_id) || ((typeof FPL_ID !== 'undefined') ? FPL_ID : null), n = 0;
     list.forEach(function (m) {
       if (me && String(m.id) === String(me)) return;
       var o = document.createElement('option'); o.value = m.id;
@@ -9507,7 +9507,7 @@ html.apex-offseason #view-landing .hero-sub::after {
     if (st && st.length) { window._rivalStandings = st; fillRivals(st.map(function (m) { return { id: m.entry_id, name: m.player_name, team: m.entry_name }; })); _rivalsLoaded = true; return; }
     // 2) fetch a league's standings directly (no sim needed)
     var proxy = (typeof FPL_CORS_PROXY === 'string' && FPL_CORS_PROXY) ? FPL_CORS_PROXY : '';
-    var me = (typeof FPL_ID !== 'undefined') ? FPL_ID : null;
+    var me = (window.TEAM_META && TEAM_META.entry_id) || ((typeof FPL_ID !== 'undefined') ? FPL_ID : null);
     var status = $('rival-status'); if (status) status.textContent = 'Loading your league…';
     try {
       var leagueId = ($('league-select') && $('league-select').value) || null;
@@ -9691,8 +9691,8 @@ html.apex-offseason #view-landing .hero-sub::after {
     try {
       var sel = $('rival-select'); if (!sel || !sel.value) return;
       var st = (window._leagueData && _leagueData.standings) || window._rivalStandings || []; if (!st.length) return;
-      var me = (typeof FPL_ID !== 'undefined') ? FPL_ID : null;
-      var mine = st.filter(function (m) { return me && m.entry_id === me; })[0];
+      var me = (window.TEAM_META && TEAM_META.entry_id) || ((typeof FPL_ID !== 'undefined') ? FPL_ID : null);
+      var mine = st.filter(function (m) { return me && String(m.entry_id) === String(me); })[0];
       var them = st.filter(function (m) { return String(m.entry_id) === String(sel.value); })[0];
       if (!mine || !them) return;
       var gap = (mine.current_total || 0) - (them.current_total || 0), lead = gap >= 0;
@@ -9758,7 +9758,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1782935282-GW32-660415fd";
+const BUILD_VERSION = "1782935654-GW32-660415fd";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -18548,7 +18548,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1782935282-GW32-660415fd</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1782935654-GW32-660415fd</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
