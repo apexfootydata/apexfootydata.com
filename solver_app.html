@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-07-01T20:54:15">
+<meta name="apex-gw" content="32" data-built-at="2026-07-01T21:25:41">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -9459,7 +9459,7 @@ html.apex-offseason #view-landing .hero-sub::after {
   function gauss() { var u = 0, v = 0; while (!u) u = Math.random(); while (!v) v = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
   function curGw() { try { return (typeof LEAGUE_SIM_META !== 'undefined' && LEAGUE_SIM_META && LEAGUE_SIM_META.start_gw) || (window._leagueData && _leagueData.start_gw) || 1; } catch (e) { return 1; } }
   function normCdf(z) { var t = 1 / (1 + 0.2316419 * Math.abs(z)); var d = 0.3989423 * Math.exp(-z * z / 2); var p = d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274)))); return z > 0 ? 1 - p : p; }
-  function objFromMoments(mean, sd, stance, margin) { var t = stance === 'lead' ? -margin : margin; if (sd <= 0) return mean > t ? 1 : 0; return 1 - normCdf((t - mean) / sd); }
+  function objFromMoments(mean, sd, stance, margin) { var t = stance === 'lead' ? -margin : margin; if (!isFinite(mean)) mean = 0; if (!(sd > 0) || !isFinite(sd)) return mean > t ? 1 : 0; return 1 - normCdf((t - mean) / sd); }
 
   var _pool = null;
   function poolMap() {
@@ -9471,8 +9471,8 @@ html.apex-offseason #view-landing .hero-sub::after {
           name: p.web_name || p.name || ('#' + p.id),
           et: p.element_type, pos: ({ 1: 'GK', 2: 'DEF', 3: 'MID', 4: 'FWD' })[p.element_type] || '',
           team: p.team || '', cost: +(p.cost || 0),
-          xp0: (p.xp_per_gw && p.xp_per_gw.length) ? +p.xp_per_gw[0] : +(p.xp || 0),
-          sd0: (p.xp_sd_per_gw && p.xp_sd_per_gw.length) ? +p.xp_sd_per_gw[0] : +(p.xp_sd || 2.0)
+          xp0: (function (x) { return isFinite(x) ? x : 0; })((p.xp_per_gw && p.xp_per_gw.length) ? +p.xp_per_gw[0] : +(p.xp || 0)),
+          sd0: (function (s) { return (isFinite(s) && s >= 0) ? s : 2.0; })((p.xp_sd_per_gw && p.xp_sd_per_gw.length) ? +p.xp_sd_per_gw[0] : +(p.xp_sd || 2.0))
         };
       });
     } catch (e) {}
@@ -9484,11 +9484,13 @@ html.apex-offseason #view-landing .hero-sub::after {
     return { name: nm, et: 3, pos: '', team: '', cost: 0, xp0: 0, sd0: 2.0 };
   }
   function bank() { try { return (window.TEAM_META && +TEAM_META.bank) || 0; } catch (e) { return 0; } }
+  // "me" = the LOADED team. FPL_ID is hydrated on team load; TEAM_META.entry_id is the stale bake.
+  function meId() { try { if (typeof FPL_ID !== 'undefined' && FPL_ID) return FPL_ID; } catch (e) {} return (window.TEAM_META && TEAM_META.entry_id) || null; }
 
   function fillRivals(list) {
     var sel = $('rival-select'); if (!sel) return;
     sel.innerHTML = '<option value="">- pick a rival -</option>';
-    var me = (window.TEAM_META && TEAM_META.entry_id) || ((typeof FPL_ID !== 'undefined') ? FPL_ID : null), n = 0;
+    var me = meId(), n = 0;
     list.forEach(function (m) {
       if (me && String(m.id) === String(me)) return;
       var o = document.createElement('option'); o.value = m.id;
@@ -9498,16 +9500,20 @@ html.apex-offseason #view-landing .hero-sub::after {
     if (status) status.textContent = n ? (n + ' rivals loaded. Pick one — lead/gap fills in automatically.') : 'No rivals found — type a Team ID below.';
     return n;
   }
-  var _rivalsLoaded = false;
+  var _rivalsFor = null;   // which "me" the dropdown was populated for — repopulates on team switch
   window.rivalRefresh = async function () {
     var sel = $('rival-select'); if (!sel) return;
-    if (_rivalsLoaded && sel.options.length > 1) return;      // already populated
-    // 1) reuse a Title-race sim if one has run
+    var me = meId();
+    if (_rivalsFor !== null && String(_rivalsFor) === String(me) && sel.options.length > 1) return;  // populated for THIS team
+    // 1) reuse a Title-race sim if one has run — but only if it's MY league (contains me)
     var st = (window._leagueData && _leagueData.standings) || null;
-    if (st && st.length) { window._rivalStandings = st; fillRivals(st.map(function (m) { return { id: m.entry_id, name: m.player_name, team: m.entry_name }; })); _rivalsLoaded = true; return; }
+    if (st && st.length && me && st.some(function (m) { return String(m.entry_id) === String(me); })) {
+      window._rivalStandings = st;
+      fillRivals(st.map(function (m) { return { id: m.entry_id, name: m.player_name, team: m.entry_name }; }));
+      _rivalsFor = me; return;
+    }
     // 2) fetch a league's standings directly (no sim needed)
     var proxy = (typeof FPL_CORS_PROXY === 'string' && FPL_CORS_PROXY) ? FPL_CORS_PROXY : '';
-    var me = (window.TEAM_META && TEAM_META.entry_id) || ((typeof FPL_ID !== 'undefined') ? FPL_ID : null);
     var status = $('rival-status'); if (status) status.textContent = 'Loading your league…';
     try {
       var leagueId = ($('league-select') && $('league-select').value) || null;
@@ -9523,7 +9529,7 @@ html.apex-offseason #view-landing .hero-sub::after {
       var results = (data && data.standings && data.standings.results) || [];
       window._rivalStandings = results.map(function (m) { return { entry_id: m.entry, current_total: m.total, player_name: m.player_name, entry_name: m.entry_name }; });
       fillRivals(results.map(function (m) { return { id: m.entry, name: m.player_name, team: m.entry_name }; }));
-      _rivalsLoaded = true;
+      _rivalsFor = me;
     } catch (e) { if (status) status.textContent = 'Could not load your league — type a rival Team ID instead.'; }
   };
 
@@ -9532,7 +9538,7 @@ html.apex-offseason #view-landing .hero-sub::after {
     if (!proxy) throw new Error('FPL proxy not configured');
     var gw = curGw();
     for (var g = gw; g >= gw - 1 && g >= 1; g--) {
-      try { var r = await fetch(proxy + '/entry/' + entryId + '/event/' + g + '/picks/', { cache: 'no-store' }); if (r.ok) { var j = await r.json(); if (j && j.picks && j.picks.length) return j.picks; } } catch (e) {}
+      try { var r = await fetch(proxy + '/entry/' + entryId + '/event/' + g + '/picks/', { cache: 'no-store' }); if (r.ok) { var j = await r.json(); if (j && j.picks && j.picks.length) return { picks: j.picks, chip: (j.active_chip || null), gw: g }; } } catch (e) {}
     }
     throw new Error('Could not load that team’s picks');
   }
@@ -9555,16 +9561,34 @@ html.apex-offseason #view-landing .hero-sub::after {
     try {
       if (typeof SQUAD_DATA === 'undefined' || !SQUAD_DATA || !SQUAD_DATA.length) return [];
       var list = SQUAD_DATA.map(function (p) { return { id: p.id, element_type: p.element_type, xp0: info(p.id).xp0 }; });
-      var xi = bestXiFrom(list), cap = null, capXp = -1;
-      xi.forEach(function (p) { if (p.xp0 > capXp) { capXp = p.xp0; cap = p.id; } });
+      var xi = bestXiFrom(list);
+      // REAL armband: use my_captain from SQUAD_DATA; if he's not playing (xp~0), fall to my_vc; else model-best.
+      var realCap = null, realVc = null;
+      SQUAD_DATA.forEach(function (p) { if (p.my_captain) realCap = p.id; if (p.my_vc) realVc = p.id; });
+      var inXi = {}; xi.forEach(function (p) { inXi[p.id] = 1; });
+      var playing = function (id) { return info(id).xp0 > 0.01; };
+      var cap = (realCap && inXi[realCap]) ? realCap : null;
+      if (cap && !playing(cap)) cap = (realVc && inXi[realVc] && playing(realVc)) ? realVc : null;   // VC fallback
+      if (!cap) { var bx = -1; xi.forEach(function (p) { if (p.xp0 > bx) { bx = p.xp0; cap = p.id; } }); }
       return xi.map(function (p) { return { id: p.id, cap: p.id === cap }; });
     } catch (e) { return []; }
   }
-  function rivalXi(picks) {
-    var s = (picks || []).filter(function (p) { return p.position <= 11; });
-    if (!s.length) s = (picks || []).slice(0, 11);
-    return s.map(function (p) { return { id: p.element, cap: ((p.multiplier || 0) >= 2) || !!p.is_captain }; });
+  function rivalXi(pd) {
+    var picks = (pd && pd.picks) || pd || [];
+    // multiplier>0 keeps exactly who scores: 11 normally, all 15 on Bench Boost, captain 2 (or 3 on TC)
+    var s = picks.filter(function (p) { return (p.multiplier || 0) > 0; });
+    if (!s.length) s = picks.filter(function (p) { return p.position <= 11; });
+    if (!s.length) s = picks.slice(0, 11);
+    var xi = s.map(function (p) { return { id: p.element, mult: (p.multiplier && p.multiplier > 0) ? p.multiplier : (p.is_captain ? 2 : 1), cap: ((p.multiplier || 0) >= 2) || !!p.is_captain, vc: !!p.is_vice_captain }; });
+    // VC fallback: if their captain isn't playing (xp~0), the VC inherits the multiplier (incl. TC 3x)
+    var c = xi.filter(function (p) { return p.mult >= 2; })[0];
+    if (c && info(c.id).xp0 <= 0.01) {
+      var v = xi.filter(function (p) { return p.vc; })[0];
+      if (v && info(v.id).xp0 > 0.01) { v.mult = c.mult; v.cap = true; c.mult = 1; c.cap = false; }
+    }
+    return xi;
   }
+  function wOf(p) { return (p.mult && p.mult > 0) ? p.mult : (p.cap ? 2 : 1); }
 
   function simulate(mine, theirs) {
     var ids = {}; mine.concat(theirs).forEach(function (p) { ids[p.id] = 1; });
@@ -9572,8 +9596,8 @@ html.apex-offseason #view-landing .hero-sub::after {
     for (var s = 0; s < SIMS; s++) {
       var draw = {};
       for (var k = 0; k < keys.length; k++) { var d = info(keys[k]); var v = d.xp0 + d.sd0 * gauss(); draw[keys[k]] = v > 0 ? v : 0; }
-      var yt = 0; for (var i = 0; i < mine.length; i++) yt += draw[mine[i].id] * (mine[i].cap ? 2 : 1);
-      var rt = 0; for (var j = 0; j < theirs.length; j++) rt += draw[theirs[j].id] * (theirs[j].cap ? 2 : 1);
+      var yt = 0; for (var i = 0; i < mine.length; i++) yt += draw[mine[i].id] * wOf(mine[i]);
+      var rt = 0; for (var j = 0; j < theirs.length; j++) rt += draw[theirs[j].id] * wOf(theirs[j]);
       diffs[s] = yt - rt;
     }
     return diffs;
@@ -9587,11 +9611,11 @@ html.apex-offseason #view-landing .hero-sub::after {
   // analytic diff mean/var for a given mine/theirs (independent players)
   function moments(mine, theirs) {
     var mean = 0, varr = 0;
-    mine.forEach(function (p) { var d = info(p.id), w = p.cap ? 2 : 1; mean += w * d.xp0; varr += w * w * d.sd0 * d.sd0; });
-    theirs.forEach(function (p) { var d = info(p.id), w = p.cap ? 2 : 1; mean -= w * d.xp0; varr += w * w * d.sd0 * d.sd0; });
+    mine.forEach(function (p) { var d = info(p.id), w = wOf(p); mean += w * d.xp0; varr += w * w * d.sd0 * d.sd0; });
+    theirs.forEach(function (p) { var d = info(p.id), w = wOf(p); mean -= w * d.xp0; varr += w * w * d.sd0 * d.sd0; });
     // shared players cancel in mean AND variance -> subtract their double-counted variance
-    var mineIds = {}; mine.forEach(function (p) { mineIds[p.id] = p.cap ? 2 : 1; });
-    theirs.forEach(function (p) { if (mineIds[p.id]) { var d = info(p.id); var wm = mineIds[p.id], wt = p.cap ? 2 : 1; varr -= (wm * wm + wt * wt) * d.sd0 * d.sd0; varr += (wm - wt) * (wm - wt) * d.sd0 * d.sd0; } });
+    var mineIds = {}; mine.forEach(function (p) { mineIds[p.id] = wOf(p); });
+    theirs.forEach(function (p) { if (mineIds[p.id]) { var d = info(p.id); var wm = mineIds[p.id], wt = wOf(p); varr -= (wm * wm + wt * wt) * d.sd0 * d.sd0; varr += (wm - wt) * (wm - wt) * d.sd0 * d.sd0; } });
     return { mean: mean, sd: Math.sqrt(Math.max(varr, 0.01)) };
   }
 
@@ -9610,7 +9634,8 @@ html.apex-offseason #view-landing .hero-sub::after {
   function renderXiList(elId, xi) {
     var el = $(elId); if (!el) return;
     el.innerHTML = xi.map(function (p) { var d = info(p.id);
-      return '<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:.85rem"><span>' + d.name + (p.cap ? ' <b style="color:var(--accent,#1D9E75)">(C)</b>' : '') + ' <span style="color:var(--muted)">' + d.pos + '</span></span><span style="font-variant-numeric:tabular-nums;color:var(--muted)">' + d.xp0.toFixed(1) + ' &plusmn;' + d.sd0.toFixed(1) + '</span></div>';
+      var w = wOf(p), badge = w >= 3 ? ' <b style="color:var(--accent,#1D9E75)">(TC)</b>' : (w >= 2 ? ' <b style="color:var(--accent,#1D9E75)">(C)</b>' : '');
+      return '<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:.85rem"><span>' + d.name + badge + ' <span style="color:var(--muted)">' + d.pos + '</span></span><span style="font-variant-numeric:tabular-nums;color:var(--muted)">' + d.xp0.toFixed(1) + ' &plusmn;' + d.sd0.toFixed(1) + '</span></div>';
     }).join('');
   }
   function renderResult(d, stance, margin) {
@@ -9638,8 +9663,14 @@ html.apex-offseason #view-landing .hero-sub::after {
       out.push({ label: 'Captain ' + info(p.id).name, sub: 'instead of ' + info(curCap).name, obj: obj, mine: nm });
     });
     // (2) single transfers (no hit — 1 FT). block=cover their diffs; chase=high-upside non-owned.
+    // Legality: exclude ALL 15 owned players (not just XI), enforce 3-per-club, use SELLING price not buy price.
+    var ownedIds = {}; try { if (typeof SQUAD_DATA !== 'undefined' && SQUAD_DATA) SQUAD_DATA.forEach(function (q) { ownedIds[q.id] = 1; }); } catch (e) {}
+    mine.forEach(function (p) { ownedIds[p.id] = 1; });
+    var clubCount = {};
+    Object.keys(ownedIds).forEach(function (id) { var t = info(+id).team; if (t) clubCount[t] = (clubCount[t] || 0) + 1; });
+    var spMap = (window.TEAM_META && TEAM_META.selling_prices) || {};
     var poolArr = []; var m = poolMap();
-    Object.keys(m).forEach(function (id) { id = +id; if (mineIds[id]) return; var d = m[id]; var score = stance === 'lead' ? (theirIds[id] ? d.xp0 + 5 : d.xp0) : (theirIds[id] ? -1 : d.xp0 + 0.4 * d.sd0); poolArr.push({ id: id, d: d, score: score }); });
+    Object.keys(m).forEach(function (id) { id = +id; if (ownedIds[id]) return; var d = m[id]; var score = stance === 'lead' ? (theirIds[id] ? d.xp0 + 5 : d.xp0) : (theirIds[id] ? -1 : d.xp0 + 0.4 * d.sd0); poolArr.push({ id: id, d: d, score: score }); });
     poolArr.sort(function (a, b) { return b.score - a.score; });
     var considered = 0;
     for (var i = 0; i < poolArr.length && considered < 40; i++) {
@@ -9647,7 +9678,10 @@ html.apex-offseason #view-landing .hero-sub::after {
       var outCand = mine.filter(function (p) { return info(p.id).et === B.d.et && p.id !== curCap; }).sort(function (a, b) { return info(a.id).xp0 - info(b.id).xp0; })[0];
       if (!outCand) continue;
       var A = info(outCand.id);
-      if (B.d.cost - A.cost > bank() + 0.05) continue;   // budget check
+      // 3-per-club: incoming club count, minus 1 if the outgoing player is from that club
+      if (B.d.team && ((clubCount[B.d.team] || 0) - (A.team === B.d.team ? 1 : 0)) >= 3) continue;
+      var sell = (spMap[outCand.id] > 0) ? +spMap[outCand.id] : A.cost;  // FPL sells at SP, not buy price
+      if (B.d.cost - sell > bank() + 0.05) continue;   // budget check
       considered++;
       var nm2 = mine.map(function (q) { return q.id === outCand.id ? { id: B.id, cap: false } : { id: q.id, cap: q.cap }; });
       var mm = moments(nm2, theirs), obj2 = objFromMoments(mm.mean, mm.sd, stance, margin);
@@ -9690,8 +9724,8 @@ html.apex-offseason #view-landing .hero-sub::after {
   window.rivalAutofill = function () {
     try {
       var sel = $('rival-select'); if (!sel || !sel.value) return;
-      var st = (window._leagueData && _leagueData.standings) || window._rivalStandings || []; if (!st.length) return;
-      var me = (window.TEAM_META && TEAM_META.entry_id) || ((typeof FPL_ID !== 'undefined') ? FPL_ID : null);
+      var st = window._rivalStandings || (window._leagueData && _leagueData.standings) || []; if (!st.length) return;
+      var me = meId();
       var mine = st.filter(function (m) { return me && String(m.entry_id) === String(me); })[0];
       var them = st.filter(function (m) { return String(m.entry_id) === String(sel.value); })[0];
       if (!mine || !them) return;
@@ -9714,22 +9748,26 @@ html.apex-offseason #view-landing .hero-sub::after {
     $('rival-margin-lab').textContent = btn.getAttribute('data-v') === 'lead' ? 'Lead (pts)' : 'Gap (pts)';
   };
 
+  var _busy = false;
   window.rivalCompare = async function () {
     var status = $('rival-status');
+    if (_busy) return;   // ignore clicks while a compare is in flight
+    _busy = true;
     try {
       var sel = $('rival-select'), manual = $('rival-manual');
       var entryId = (sel && sel.value) || (manual && manual.value.trim());
       if (!entryId || !/^\d+$/.test(String(entryId))) { if (status) status.textContent = 'Pick a rival or type a valid Team ID.'; return; }
       if (typeof SQUAD_DATA === 'undefined' || !SQUAD_DATA || !SQUAD_DATA.length) { if (status) status.textContent = 'Your squad did not load — open My Squad first.'; return; }
       if (status) status.textContent = 'Loading rival…';
-      var picks = await fetchPicks(entryId);
-      var mine = myXi(), theirs = rivalXi(picks);
+      var pd = await fetchPicks(entryId);
+      var mine = myXi(), theirs = rivalXi(pd);
       if (!mine.length || !theirs.length) { if (status) status.textContent = 'Your XI: ' + mine.length + ' players, rival XI: ' + theirs.length + '. ' + (!mine.length ? 'Your squad did not load.' : 'Rival picks came back empty.'); return; }
       var stanceEl = document.querySelector('#rival-stance .on');
       _state = { mine: mine, theirs: theirs, stance: stanceEl ? stanceEl.getAttribute('data-v') : 'lead', margin: Math.max(0, parseInt(($('rival-margin') || {}).value, 10) || 0) };
       runAndRender();
-      if (status) status.textContent = '';
+      if (status) status.textContent = (pd && pd.gw && pd.gw < curGw()) ? ("Using their GW" + pd.gw + " team — this week's picks aren't out yet.") : '';
     } catch (e) { if (status) status.textContent = (e && e.message) ? e.message : 'Something went wrong.'; }
+    finally { _busy = false; }
   };
 
   document.addEventListener('DOMContentLoaded', function () { try { window.rivalRefresh(); } catch (e) {} });
@@ -9758,7 +9796,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1782935654-GW32-660415fd";
+const BUILD_VERSION = "1782937541-GW32-660415fd";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -18548,7 +18586,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1782935654-GW32-660415fd</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1782937541-GW32-660415fd</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
