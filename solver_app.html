@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-07-01T23:44:35">
+<meta name="apex-gw" content="32" data-built-at="2026-07-02T00:21:34">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -9873,7 +9873,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1782945875-GW32-b8b07348";
+const BUILD_VERSION = "1782948094-GW32-b8b07348";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -9893,7 +9893,7 @@ const _APEX_FH_SQUADS_BACKUP = JSON.parse(JSON.stringify(FH_SQUADS));
 const REVIEW_WC_SQUADS = {};
 const REVIEW_FH_SQUADS = {};
 let TEAM_META = {"team_name": "Xhaka Khan", "manager": "- Xhaka Khan", "overall_rank": 236258, "bank": 1.5, "free_transfers": 1, "squad_value": 103.6, "budget": 102.6, "start_gw": 32, "gw_range": [32, 33, 34, 35, 36, 37, 38], "gw_labels": ["GW32", "GW33", "GW34", "GW35", "GW36", "GW37", "GW38"], "dgw_teams_by_gw": {"33": ["Bournemouth", "Brighton", "Burnley", "Chelsea", "Leeds", "Man City"], "36": ["Crystal Palace", "Man City"]}, "bgw_teams_by_gw": {"34": ["Bournemouth", "Brighton", "Burnley", "Chelsea", "Leeds", "Manchester City"]}, "selling_prices": {"139": 4.5, "317": 4.4, "473": 5.3, "373": 6.1, "449": 9.8, "119": 8.1, "387": 7.1, "329": 5.8, "660": 4.8, "136": 6.6, "661": 8.7, "470": 4.0, "694": 4.5, "430": 14.6, "5": 6.8}, "deadlines_by_gw": {"1": 1755279000, "2": 1755883800, "3": 1756548000, "4": 1757757600, "5": 1758362400, "6": 1758967200, "7": 1759512600, "8": 1760781600, "9": 1761327000, "10": 1762003800, "11": 1762599600, "12": 1763809200, "13": 1764423000, "14": 1764698400, "15": 1765018800, "16": 1765632600, "17": 1766228400, "18": 1766773800, "19": 1767117600, "20": 1767438000, "21": 1767724200, "22": 1768647600, "23": 1769252400, "24": 1769866200, "25": 1770402600, "26": 1770746400, "27": 1771680600, "28": 1772217000, "29": 1772560800, "30": 1773495000, "31": 1774031400, "32": 1775842200, "33": 1776506400, "34": 1777051800, "35": 1777656600, "36": 1778320800, "37": 1778866200, "38": 1779629400}};
-let CHIP_PLANNER = {"has_wc": true, "has_fh": true, "has_bb": true, "has_tc": true, "sequences": [], "best_sequence": null, "baseline_total_xp": 376.9, "bb_ev": {"32": 2.89, "33": 3.74, "34": 1.5, "35": 2.39, "36": 2.84, "37": 1.77, "38": 3.02}, "tc_ev": {"32": 5.74, "33": 10.14, "34": 5.72, "35": 6.06, "36": 10.23, "37": 5.76, "38": 6.48}, "wc_ev": {}, "fh_ev": {}, "rotation_risk": {}, "_lazy": true};
+let CHIP_PLANNER = {"has_wc": true, "has_fh": true, "has_bb": true, "has_tc": true, "radar": {"window_end": 38, "later_dgws": [], "later_blanks": [], "second_half_unlock": false}, "bb_playable": {"32": 1, "33": 1, "34": 1, "35": 1, "36": 1, "37": 1, "38": 1}, "sequences": [], "best_sequence": null, "baseline_total_xp": 376.9, "bb_ev": {"32": 2.89, "33": 3.74, "34": 1.5, "35": 2.39, "36": 2.84, "37": 1.77, "38": 3.02}, "tc_ev": {"32": 5.74, "33": 10.14, "34": 5.72, "35": 6.06, "36": 10.23, "37": 5.76, "38": 6.48}, "wc_ev": {}, "fh_ev": {}, "rotation_risk": {}, "_lazy": true};
 let LEAGUE_SIM_META = {"start_gw": 32, "horizon_gws": 7, "fpl_id": 11051};
 // FR xP data for browser-side Rank Milestones (assets/rank_milestones.js).
 // FR_NEXT_XP_BY_ID → raw FR xP for the next GW (= start_gw), live CSV.
@@ -12594,7 +12594,7 @@ function renderTransfers(recs) {
         <div class="transfer-meta">
           ${t.is_dgw_priority
             ? `<span class="gain" style="color:#D85A30;">+${t.gw0_gain.toFixed(2)} GW${TEAM_META.gw_range[activeGwIdx]}</span>`
-            : `<span class="gain">+${t.gain.toFixed(2)} xPts</span>`
+            : `<span class="gain">+${t.gain.toFixed(2)} xPts to GW${TEAM_META.gw_range[TEAM_META.gw_range.length - 1]}</span>`
           }
           ${t.is_dgw_priority
             ? `<span style="background:#D85A30;color:#000;font-size:.62rem;font-weight:700;padding:2px 6px;border-radius:4px;letter-spacing:0.4px;">🔥 DGW SPIKE</span>`
@@ -12793,7 +12793,7 @@ function runOptimize() {
   // result above the (re-rendered) recs panel with an Undo affordance.
   const _gainTxt = best.is_dgw_priority
     ? `+${best.gw0_gain.toFixed(2)} GW${activeGw} (DGW spike)`
-    : `+${best.gain.toFixed(2)} xPts`;
+    : `+${best.gain.toFixed(2)} xPts to GW${TEAM_META.gw_range[TEAM_META.gw_range.length - 1]}`;
   if (section) {
     const resultCard = `
       <div id="optimize-result" style="margin:0 0 14px 0;padding:12px 16px;border-radius:12px;
@@ -12830,10 +12830,13 @@ function runOptimize() {
     let _recoHtml = `<div class="va-reco-title">Recommended transfers</div>`;
     recs.slice(0, 3).forEach((t, i) => {
       const _g = (i === 0 ? t.gw0_gain : (t.gain ?? 0));
+      // Row 0 = THIS GW's gain; rows 1+ = summed to the horizon end. Label them
+      // differently or users read a 7-GW sum as a weekly gain.
+      const _gl = (i === 0 ? 'xPts this GW' : `xPts to GW${TEAM_META.gw_range[TEAM_META.gw_range.length - 1]}`);
       _recoHtml += `<div class="va-reco-row" style="${i > 0 ? 'opacity:.78;' : ''}">`
         + `<span class="va-reco-move">${i === 0 ? '✓ ' : ''}${t.out_name} <span class="va-reco-arr">→</span> ${t.in_name}`
         + `<span style="font-size:.78em;">${(typeof _apexOwnTag === 'function') ? _apexOwnTag({ id: t.in_id }) : ''}</span></span>`
-        + `<span class="va-reco-gain">+${(+_g).toFixed(2)} xPts</span></div>`;
+        + `<span class="va-reco-gain">+${(+_g).toFixed(2)} ${_gl}</span></div>`;
     });
     _recoHtml += `<div style="font-size:.8rem;color:var(--muted);margin-top:6px;">#1 applied to your pitch · others are one tap away in the Transfers tab</div>`;
     _reco.dataset.applied = '1';  // preview stops repainting once a move is applied
@@ -13033,7 +13036,7 @@ function _renderRecoPreview() {
         h += `<div class="va-reco-row" style="${i > 0 ? 'opacity:.8;' : ''}">`
           + `<span class="va-reco-move">${t.out_name} <span class="va-reco-arr">→</span> ${t.in_name}`
           + `<span style="font-size:.78em;">${(typeof _apexOwnTag === 'function') ? _apexOwnTag({ id: t.in_id }) : ''}</span></span>`
-          + `<span class="va-reco-gain">+${(+(t.gain ?? 0)).toFixed(2)} xPts</span></div>`;
+          + `<span class="va-reco-gain">+${(+(t.gain ?? 0)).toFixed(2)} xPts to GW${TEAM_META.gw_range[TEAM_META.gw_range.length - 1]}</span></div>`;
       }
     });
     h += `<div style="font-size:.8rem;color:var(--muted);margin-top:6px;">⚡ Quick Optimise applies the top move · risk boxes re-rank this list</div>`;
@@ -17286,7 +17289,36 @@ function renderBaselineStrip() {
       <div class="opt-baseline-gain">+${gain} xPts with chips</div>
     </div>
   `;
-  wrap.innerHTML = html;
+  // ── Season chip-timing radar (2026-07-01): this plan only sees its window.
+  // Tell the user what's BEYOND it, or confirm nothing bigger is coming.
+  let radarHtml = '';
+  const _rad = CHIP_PLANNER.radar || null;
+  if (_rad) {
+    if (_rad.later_dgws && _rad.later_dgws.length) {
+      const picks = _rad.later_dgws.slice(0, 2).map(d => 'GW' + d.gw + ' (' + d.teams.slice(0, 3).join(', ') + (d.teams.length > 3 ? ' +' + (d.teams.length - 3) + ' more' : '') + ')');
+      radarHtml += `<div style="margin-top:9px;font-size:.8rem;color:#f0b03a;font-weight:600;">⏳ Season radar: double gameweek${_rad.later_dgws.length > 1 ? 's' : ''} at ${picks.join(' and ')} — beyond this plan's window. Holding TC/BB for a double often beats using them now.</div>`;
+    } else {
+      radarHtml += `<div style="margin-top:9px;font-size:.8rem;color:var(--muted);">✓ Season radar: no double gameweeks after GW${_rad.window_end} — using chips inside this plan is safe.</div>`;
+    }
+    if (_rad.later_blanks && _rad.later_blanks.length) {
+      radarHtml += `<div style="margin-top:5px;font-size:.8rem;color:#f0b03a;">⚠ Blank gameweek at GW${_rad.later_blanks[0].gw} (${_rad.later_blanks[0].teams.length}+ teams without a fixture) — a Free Hit candidate beyond this window.</div>`;
+    }
+    if (_rad.second_half_unlock) {
+      radarHtml += `<div style="margin-top:5px;font-size:.8rem;color:var(--muted);">ℹ GW20 unlocks the second set of chips — chips used in the first half become available again.</div>`;
+    }
+  }
+  // ── Bench Boost playability gate: BB on a fodder bench is a wasted chip.
+  try {
+    const bp = CHIP_PLANNER.bb_playable || null;
+    if (bp && CHIP_PLANNER.bb_ev) {
+      const bestBbGw = Object.keys(CHIP_PLANNER.bb_ev).sort((a, b) => CHIP_PLANNER.bb_ev[b] - CHIP_PLANNER.bb_ev[a])[0];
+      const nPlay = bestBbGw != null ? (bp[String(bestBbGw)] ?? 4) : 4;
+      if (bestBbGw != null && nPlay < 4) {
+        radarHtml += `<div style="margin-top:5px;font-size:.8rem;color:#f87171;font-weight:600;">⚠ Bench Boost check: only ${nPlay} of your 4 bench players project real minutes in GW${bestBbGw} — strengthen the bench before boosting.</div>`;
+      }
+    }
+  } catch (_e) {}
+  wrap.innerHTML = html + radarHtml;
 }
 
 // ──── Apply strategy: set chip dropdowns → switch to team view → apply squad ────
@@ -18669,7 +18701,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1782945875-GW32-b8b07348</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1782948094-GW32-b8b07348</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
