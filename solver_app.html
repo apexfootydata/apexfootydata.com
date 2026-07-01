@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-07-01T20:31:19">
+<meta name="apex-gw" content="32" data-built-at="2026-07-01T20:48:02">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -9485,19 +9485,46 @@ html.apex-offseason #view-landing .hero-sub::after {
   }
   function bank() { try { return (window.TEAM_META && +TEAM_META.bank) || 0; } catch (e) { return 0; } }
 
-  window.rivalRefresh = function () {
+  function fillRivals(list) {
     var sel = $('rival-select'); if (!sel) return;
     sel.innerHTML = '<option value="">- pick a rival -</option>';
-    var st = (window._leagueData && _leagueData.standings) || [];
     var me = (typeof FPL_ID !== 'undefined') ? FPL_ID : null, n = 0;
-    st.forEach(function (m) {
-      if (me && m.entry_id === me) return;
-      var o = document.createElement('option'); o.value = m.entry_id;
-      o.textContent = (m.player_name || 'Manager') + ' - ' + (m.entry_name || ''); sel.appendChild(o); n++;
+    list.forEach(function (m) {
+      if (me && String(m.id) === String(me)) return;
+      var o = document.createElement('option'); o.value = m.id;
+      o.textContent = (m.name || 'Manager') + ' - ' + (m.team || ''); sel.appendChild(o); n++;
     });
     var status = $('rival-status');
-    if (status) status.textContent = n ? (n + ' rivals loaded from your league. Or type any Team ID below.')
-                                       : 'Run a Title-race simulation above first to list your league - or just type a rival Team ID below.';
+    if (status) status.textContent = n ? (n + ' rivals loaded. Pick one — lead/gap fills in automatically.') : 'No rivals found — type a Team ID below.';
+    return n;
+  }
+  var _rivalsLoaded = false;
+  window.rivalRefresh = async function () {
+    var sel = $('rival-select'); if (!sel) return;
+    if (_rivalsLoaded && sel.options.length > 1) return;      // already populated
+    // 1) reuse a Title-race sim if one has run
+    var st = (window._leagueData && _leagueData.standings) || null;
+    if (st && st.length) { window._rivalStandings = st; fillRivals(st.map(function (m) { return { id: m.entry_id, name: m.player_name, team: m.entry_name }; })); _rivalsLoaded = true; return; }
+    // 2) fetch a league's standings directly (no sim needed)
+    var proxy = (typeof FPL_CORS_PROXY === 'string' && FPL_CORS_PROXY) ? FPL_CORS_PROXY : '';
+    var me = (typeof FPL_ID !== 'undefined') ? FPL_ID : null;
+    var status = $('rival-status'); if (status) status.textContent = 'Loading your league…';
+    try {
+      var leagueId = ($('league-select') && $('league-select').value) || null;
+      if (!leagueId && me) {
+        var entry = await fetch(proxy + '/entry/' + me + '/', { cache: 'no-store' }).then(function (r) { return r.json(); });
+        var cl = (entry && entry.leagues && entry.leagues.classic) || [];
+        cl = cl.filter(function (l) { return l.league_type !== 's' && (l.rank_count || 0) > 1 && (l.rank_count || 0) < 200000; });
+        cl.sort(function (a, b) { return (a.rank_count || 1e9) - (b.rank_count || 1e9); });
+        if (cl.length) leagueId = cl[0].id;
+      }
+      if (!leagueId) { if (status) status.textContent = 'Pick a league above, or type a rival Team ID.'; return; }
+      var data = await fetch(proxy + '/leagues-classic/' + leagueId + '/standings/', { cache: 'no-store' }).then(function (r) { return r.json(); });
+      var results = (data && data.standings && data.standings.results) || [];
+      window._rivalStandings = results.map(function (m) { return { entry_id: m.entry, current_total: m.total, player_name: m.player_name, entry_name: m.entry_name }; });
+      fillRivals(results.map(function (m) { return { id: m.entry, name: m.player_name, team: m.entry_name }; }));
+      _rivalsLoaded = true;
+    } catch (e) { if (status) status.textContent = 'Could not load your league — type a rival Team ID instead.'; }
   };
 
   async function fetchPicks(entryId) {
@@ -9663,7 +9690,7 @@ html.apex-offseason #view-landing .hero-sub::after {
   window.rivalAutofill = function () {
     try {
       var sel = $('rival-select'); if (!sel || !sel.value) return;
-      var st = (window._leagueData && _leagueData.standings) || []; if (!st.length) return;
+      var st = (window._leagueData && _leagueData.standings) || window._rivalStandings || []; if (!st.length) return;
       var me = (typeof FPL_ID !== 'undefined') ? FPL_ID : null;
       var mine = st.filter(function (m) { return me && m.entry_id === me; })[0];
       var them = st.filter(function (m) { return String(m.entry_id) === String(sel.value); })[0];
@@ -9731,7 +9758,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1782934279-GW32-660415fd";
+const BUILD_VERSION = "1782935282-GW32-660415fd";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -18521,7 +18548,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1782934279-GW32-660415fd</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1782935282-GW32-660415fd</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
