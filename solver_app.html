@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-07-01T18:46:18">
+<meta name="apex-gw" content="32" data-built-at="2026-07-01T19:44:18">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -6259,6 +6259,45 @@ html.apex-offseason #view-landing .hero-sub::after {
       </div>
     </section>
 
+    <!-- Rival Mode (Phase 2, BETA) — head-to-head vs one mini-league rival -->
+    <div id="rival-mode-card" style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:22px 26px;margin-bottom:22px;">
+      <div style="font-size:1.15rem;font-weight:800;margin-bottom:4px;">Beat a rival this week <span style="font-size:.68rem;font-weight:700;color:#000;background:var(--accent,#1D9E75);border-radius:5px;padding:2px 7px;vertical-align:middle;">BETA</span></div>
+      <div style="color:var(--muted);font-size:.9rem;margin-bottom:14px;">Head-to-head vs one rival for the upcoming gameweek. Shared players cancel out; only your differentials and captain move the gap.</div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">
+        <div style="flex:1;min-width:220px;">
+          <label style="display:block;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px;">Rival (from your league)</label>
+          <select id="rival-select" onmousedown="rivalRefresh()" style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--fg);padding:11px 14px;font-size:.95rem;font-family:inherit;"><option value="">- pick a rival -</option></select>
+        </div>
+        <div style="min-width:150px;">
+          <label style="display:block;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px;">or Team ID</label>
+          <input id="rival-manual" type="text" inputmode="numeric" placeholder="e.g. 12345" style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--fg);padding:11px 14px;font-size:.95rem;font-family:inherit;">
+        </div>
+      </div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:14px;">
+        <span style="font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;">You are</span>
+        <div id="rival-stance" style="display:inline-flex;border:1px solid var(--border);border-radius:8px;overflow:hidden;">
+          <button type="button" class="on" data-v="lead" onclick="rivalStance(this)" style="background:var(--accent,#1D9E75);color:#000;border:none;font-family:inherit;font-weight:700;font-size:.85rem;padding:9px 14px;cursor:pointer;">Leading</button>
+          <button type="button" data-v="chase" onclick="rivalStance(this)" style="background:var(--bg3);color:var(--fg);border:none;border-left:1px solid var(--border);font-family:inherit;font-weight:700;font-size:.85rem;padding:9px 14px;cursor:pointer;">Chasing</button>
+        </div>
+        <span id="rival-margin-lab" style="font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;">Lead (pts)</span>
+        <input id="rival-margin" type="number" value="10" min="0" max="120" style="width:70px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--fg);padding:9px 11px;font-size:.9rem;font-family:inherit;">
+        <button onclick="rivalCompare()" style="background:var(--accent,#1D9E75);color:#000;border:none;border-radius:8px;padding:11px 22px;font-size:.95rem;font-weight:700;cursor:pointer;margin-left:auto;">Compare</button>
+      </div>
+      <div id="rival-status" style="margin-top:12px;font-size:.85rem;color:var(--muted);"></div>
+      <div id="rival-results" style="display:none;margin-top:16px;">
+        <div id="rival-verdict" style="border:2px solid var(--accent,#1D9E75);border-radius:10px;padding:12px 15px;margin-bottom:14px;line-height:1.4;"></div>
+        <div style="display:grid;grid-template-columns:1.3fr 1fr;gap:16px;align-items:start;">
+          <div><canvas id="rival-canvas" width="520" height="210" style="width:100%;height:210px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;"></canvas>
+            <div style="font-size:.72rem;color:var(--muted);text-align:center;margin-top:6px;">Green = you finish level or ahead. Red = they overtake you.</div></div>
+          <div id="rival-metrics"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;">
+          <div><div style="font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px;">Your XI</div><div id="rival-your-xi"></div></div>
+          <div><div style="font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px;">Rival XI</div><div id="rival-their-xi"></div></div>
+        </div>
+      </div>
+    </div>
+
     <!-- League selector -->
     <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:24px 28px;margin-bottom:22px;">
       <div style="display:flex;gap:16px;align-items:flex-end;flex-wrap:wrap;">
@@ -9402,6 +9441,215 @@ html.apex-offseason #view-landing .hero-sub::after {
 
 </script>
 
+<!-- Rival Mode (Phase 2) — head-to-head vs one mini-league rival. assets/apex_rival.js -->
+<script>
+/* apex_rival.js — Rival Mode (Phase 2). Head-to-head Monte Carlo of your GW
+   swing vs one mini-league rival, using per-player xP + xp_sd baked into
+   POOL_DATA. Shared players cancel; only differentials + captain move the gap.
+   Self-contained asset (no f-string brace-doubling). Reads globals:
+   POOL_DATA, SQUAD_DATA, _leagueData, LEAGUE_SIM_META, FPL_CORS_PROXY, pickBestXi. */
+(function () {
+  "use strict";
+  var SIMS = 20000;
+
+  function $(id) { return document.getElementById(id); }
+  function gauss() { var u = 0, v = 0; while (!u) u = Math.random(); while (!v) v = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
+  function curGw() { try { return (typeof LEAGUE_SIM_META !== 'undefined' && LEAGUE_SIM_META && LEAGUE_SIM_META.start_gw) || (window._leagueData && _leagueData.start_gw) || 1; } catch (e) { return 1; } }
+
+  // id -> {name, pos, xp0, sd0} from POOL_DATA (index 0 = current GW)
+  var _pool = null;
+  function poolMap() {
+    if (_pool) return _pool;
+    _pool = {};
+    try {
+      (POOL_DATA || []).forEach(function (p) {
+        _pool[p.id] = {
+          name: p.web_name || p.name || ('#' + p.id),
+          pos: ({ 1: 'GK', 2: 'DEF', 3: 'MID', 4: 'FWD' })[p.element_type] || '',
+          xp0: (p.xp_per_gw && p.xp_per_gw.length) ? +p.xp_per_gw[0] : +(p.xp || 0),
+          sd0: (p.xp_sd_per_gw && p.xp_sd_per_gw.length) ? +p.xp_sd_per_gw[0] : +(p.xp_sd || 2.0)
+        };
+      });
+    } catch (e) {}
+    return _pool;
+  }
+  function info(id) {
+    var m = poolMap();
+    if (m[id]) return m[id];
+    return { name: '#' + id, pos: '', xp0: 0, sd0: 2.0 };
+  }
+
+  // ---- populate rival dropdown from the league standings (if a sim has run) ----
+  window.rivalRefresh = function () {
+    var sel = $('rival-select'); if (!sel) return;
+    sel.innerHTML = '<option value="">— pick a rival —</option>';
+    var st = (window._leagueData && _leagueData.standings) || [];
+    var me = (typeof FPL_ID !== 'undefined') ? FPL_ID : null;
+    var n = 0;
+    st.forEach(function (m) {
+      if (me && m.entry_id === me) return;
+      var o = document.createElement('option');
+      o.value = m.entry_id;
+      o.textContent = (m.player_name || 'Manager') + ' — ' + (m.entry_name || '');
+      sel.appendChild(o); n++;
+    });
+    var status = $('rival-status');
+    if (status) status.textContent = n ? (n + ' rivals loaded from your league. Or type any Team ID below.')
+                                       : 'Run a Title-race simulation above first to list your league — or just type a rival Team ID below.';
+  };
+
+  async function fetchPicks(entryId) {
+    var proxy = (typeof FPL_CORS_PROXY === 'string' && FPL_CORS_PROXY) ? FPL_CORS_PROXY : '';
+    if (!proxy) throw new Error('FPL proxy not configured');
+    var gw = curGw();
+    for (var g = gw; g >= gw - 1 && g >= 1; g--) {
+      try {
+        var r = await fetch(proxy + '/entry/' + entryId + '/event/' + g + '/picks/', { cache: 'no-store' });
+        if (r.ok) { var j = await r.json(); if (j && j.picks && j.picks.length) return j.picks; }
+      } catch (e) {}
+    }
+    throw new Error('Could not load that team’s picks');
+  }
+
+  // build [{id, cap}] XI for me + rival
+  function myXi() {
+    var xi = [];
+    try {
+      var best = pickBestXi(SQUAD_DATA, 0) || [];
+      var cap = null, capXp = -1;
+      best.forEach(function (p) { var x = info(p.id).xp0; if (x > capXp) { capXp = x; cap = p.id; } });
+      best.forEach(function (p) { xi.push({ id: p.id, cap: p.id === cap }); });
+    } catch (e) {}
+    return xi;
+  }
+  function rivalXi(picks) {
+    return picks.filter(function (p) { return p.position <= 11; })
+                .map(function (p) { return { id: p.element, cap: (p.multiplier || 0) >= 2 || p.is_captain }; });
+  }
+
+  function simulate(mine, theirs) {
+    var ids = {}; mine.concat(theirs).forEach(function (p) { ids[p.id] = 1; });
+    var keys = Object.keys(ids).map(Number);
+    var diffs = new Float64Array(SIMS);
+    for (var s = 0; s < SIMS; s++) {
+      var draw = {};
+      for (var k = 0; k < keys.length; k++) { var d = info(keys[k]); var v = d.xp0 + d.sd0 * gauss(); draw[keys[k]] = v > 0 ? v : 0; }
+      var yt = 0; for (var i = 0; i < mine.length; i++) yt += draw[mine[i].id] * (mine[i].cap ? 2 : 1);
+      var rt = 0; for (var j = 0; j < theirs.length; j++) rt += draw[theirs[j].id] * (theirs[j].cap ? 2 : 1);
+      diffs[s] = yt - rt;
+    }
+    return diffs;
+  }
+  function stats(d) {
+    var m = 0; for (var i = 0; i < d.length; i++) m += d[i]; m /= d.length;
+    var s = 0; for (var j = 0; j < d.length; j++) s += (d[j] - m) * (d[j] - m); s = Math.sqrt(s / d.length);
+    function p(t) { var c = 0; for (var k = 0; k < d.length; k++) if (d[k] > t) c++; return c / d.length; }
+    return { m: m, s: s, pGt: p };
+  }
+
+  function drawCurve(d, thresh) {
+    var cv = $('rival-canvas'); if (!cv || !cv.getContext) return;
+    var ctx = cv.getContext('2d'), W = cv.width, H = cv.height; ctx.clearRect(0, 0, W, H);
+    var lo = -45, hi = 45, bins = 90, bw = (hi - lo) / bins, h = new Array(bins).fill(0);
+    for (var i = 0; i < d.length; i++) { var b = Math.floor((d[i] - lo) / bw); if (b >= 0 && b < bins) h[b]++; }
+    var mx = Math.max.apply(null, h) || 1, pad = 26, gh = H - 2 * pad;
+    function X(v) { return pad + (v - lo) / (hi - lo) * (W - 2 * pad); }
+    function Y(c) { return H - pad - c / mx * gh; }
+    for (var b2 = 0; b2 < bins; b2++) {
+      var cx = lo + b2 * bw + bw / 2;
+      ctx.fillStyle = cx > thresh ? 'rgba(29,158,117,0.35)' : 'rgba(239,68,68,0.30)';
+      ctx.fillRect(X(lo + b2 * bw), Y(h[b2]), Math.max(1, X(bw) - X(0) - 0.5), H - pad - Y(h[b2]));
+    }
+    ctx.beginPath(); ctx.moveTo(X(lo), Y(0));
+    for (var b3 = 0; b3 < bins; b3++) ctx.lineTo(X(lo + b3 * bw + bw / 2), Y(h[b3]));
+    ctx.lineTo(X(hi), Y(0)); ctx.strokeStyle = 'rgba(255,255,255,0.55)'; ctx.lineWidth = 1.3; ctx.stroke();
+    function line(v, col, txt) { ctx.strokeStyle = col; ctx.setLineDash([4, 4]); ctx.beginPath(); ctx.moveTo(X(v), pad - 6); ctx.lineTo(X(v), H - pad); ctx.stroke(); ctx.setLineDash([]); ctx.fillStyle = col; ctx.font = "700 10px 'Plus Jakarta Sans',sans-serif"; ctx.fillText(txt, X(v) + 3, pad + 2); }
+    line(0, 'rgba(255,255,255,0.4)', '0');
+    line(thresh, '#f87171', thresh < 0 ? ('lose lead (' + (-thresh) + ')') : ('catch (+' + thresh + ')'));
+  }
+
+  function renderXiList(elId, xi, capId) {
+    var el = $(elId); if (!el) return;
+    el.innerHTML = xi.map(function (p) {
+      var d = info(p.id);
+      return '<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:.85rem">'
+        + '<span>' + d.name + (p.cap ? ' <b style="color:var(--accent,#1D9E75)">(C)</b>' : '') + ' <span style="color:var(--muted)">' + d.pos + '</span></span>'
+        + '<span style="font-variant-numeric:tabular-nums;color:var(--muted)">' + d.xp0.toFixed(1) + ' ±' + d.sd0.toFixed(1) + '</span></div>';
+    }).join('');
+  }
+
+  function renderResult(d, stance, margin) {
+    var prob = stance === 'lead' ? d.pGt(-margin) : d.pGt(margin);
+    var v = $('rival-verdict'), a;
+    if (stance === 'lead') {
+      a = prob >= 0.85 ? ["You're in great shape", "Protect the lead — match their key players, don't take risks.", "#1D9E75"]
+        : prob >= 0.65 ? ["Solid, but not safe", "Cover their main differential to tighten it up.", "#f0b03a"]
+        :                ["Your lead is under threat", "Cover their differentials — a quiet week could cost you.", "#f87171"];
+    } else {
+      a = prob >= 0.35 ? ["Live chance", "Take some risks — a differential captain swings it your way.", "#1D9E75"]
+        : prob >= 0.15 ? ["Long shot", "You'll need differentials and a bit of luck.", "#f0b03a"]
+        :                ["Very unlikely this week", "Swing for the fences — you've little to lose.", "#f87171"];
+    }
+    if (v) {
+      v.style.borderColor = a[2];
+      v.innerHTML = '<span style="font-size:1.15rem;font-weight:800;color:' + a[2] + '">' + a[0] + '</span>'
+        + '<span style="color:var(--muted);font-weight:600"> — ' + a[1] + '</span>';
+    }
+    var head = stance === 'lead'
+      ? ['You keep your ' + margin + '-point lead', (prob * 100).toFixed(0) + '%']
+      : ['You close the ' + margin + '-point gap', (prob * 100).toFixed(0) + '%'];
+    function row(k, val, col) { return '<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.06)"><span style="color:var(--muted)">' + k + '</span><span style="font-variant-numeric:tabular-nums;font-weight:700' + (col ? ';color:' + col : '') + '">' + val + '</span></div>'; }
+    var swing = Math.abs(d.m) < 0.5 ? 'about level' : (d.m > 0 ? '+' + d.m.toFixed(1) + ' ahead' : Math.abs(d.m).toFixed(1) + ' behind');
+    var mEl = $('rival-metrics');
+    if (mEl) mEl.innerHTML =
+      row(head[0], head[1], a[2]) +
+      row('Typical week vs them', swing, d.m >= 0 ? '#1D9E75' : '#f87171') +
+      row('How swingy the week could be', d.s.toFixed(1)) +
+      row('Chance you beat them this week', (d.pGt(0) * 100).toFixed(0) + '%') +
+      row('Chance you gain 15+ on them', (d.pGt(15) * 100).toFixed(0) + '%', '#1D9E75') +
+      row('Chance you lose 15+ to them', ((1 - d.pGt(-15)) * 100).toFixed(0) + '%', '#f87171');
+  }
+
+  window.rivalStance = function (btn) {
+    var wrap = $('rival-stance'); if (!wrap) return;
+    [].forEach.call(wrap.querySelectorAll('button'), function (b) { b.classList.remove('on'); });
+    btn.classList.add('on');
+    $('rival-margin-lab').textContent = btn.getAttribute('data-v') === 'lead' ? 'Lead (pts)' : 'Gap (pts)';
+  };
+
+  window.rivalCompare = async function () {
+    var status = $('rival-status');
+    try {
+      var sel = $('rival-select'), manual = $('rival-manual');
+      var entryId = (sel && sel.value) || (manual && manual.value.trim());
+      if (!entryId || !/^\d+$/.test(String(entryId))) { if (status) status.textContent = 'Pick a rival or type a valid Team ID.'; return; }
+      if (typeof SQUAD_DATA === 'undefined' || !SQUAD_DATA || !SQUAD_DATA.length) { if (status) status.textContent = 'Load your own squad first (open My Squad).'; return; }
+      if (status) status.textContent = 'Loading rival…';
+      var picks = await fetchPicks(entryId);
+      var mine = myXi(), theirs = rivalXi(picks);
+      if (!mine.length || !theirs.length) { if (status) status.textContent = 'Could not build both teams.'; return; }
+      renderXiList('rival-your-xi', mine, null);
+      renderXiList('rival-their-xi', theirs, null);
+      var stanceEl = document.querySelector('#rival-stance .on');
+      var stance = stanceEl ? stanceEl.getAttribute('data-v') : 'lead';
+      var margin = Math.max(0, parseInt(($('rival-margin') || {}).value, 10) || 0);
+      var arr = simulate(mine, theirs);
+      var d = stats(arr);
+      var thresh = stance === 'lead' ? -margin : margin;
+      drawCurve(arr, thresh);
+      renderResult(d, stance, margin);
+      $('rival-results').style.display = 'block';
+      if (status) status.textContent = '';
+    } catch (e) {
+      if (status) status.textContent = (e && e.message) ? e.message : 'Something went wrong.';
+    }
+  };
+
+  document.addEventListener('DOMContentLoaded', function () { try { window.rivalRefresh(); } catch (e) {} });
+})();
+
+</script>
+
 <!-- GLPK WASM bootstrap — loads the solver library from jsdelivr CDN (zero-cost
      static hosting friendly). Works from file:// and https:// equally. -->
 <script type="module">
@@ -9423,7 +9671,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1782927977-GW32-660415fd";
+const BUILD_VERSION = "1782931458-GW32-660415fd";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -18212,7 +18460,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1782927977-GW32-660415fd</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1782931458-GW32-660415fd</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
