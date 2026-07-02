@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-07-02T11:35:53">
+<meta name="apex-gw" content="32" data-built-at="2026-07-02T11:41:59">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -3710,7 +3710,9 @@ button.secondary, .btn-secondary, .va-btn-secondary {
   border: 1.5px solid #ffffff;
   z-index: 4;
   box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-  pointer-events: none;
+  /* clickable since 07-02: tap opens the score-profile panel */
+  pointer-events: auto;
+  cursor: pointer;
 }
 .prof-badge.prof-expl   { background: #E8A020; color: #1E1E1A; }
 .prof-badge.prof-steady { background: #DCF0E7; color: #0E6B4F; }
@@ -9984,7 +9986,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1782988553-GW32-b8b07348";
+const BUILD_VERSION = "1782988919-GW32-b8b07348";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -16837,6 +16839,60 @@ function _apexProfile(p, gwIdx) {
   } catch (_e) { return null; }
 }
 
+// ── Score-profile panel (2026-07-02): tap the badge → full distribution. ──
+// Buckets computed analytically from the same normal approx as the badge
+// (clamped-at-0 mass folds into the lowest bucket). Mounted on <body>, NOT
+// inside .pitch, so the background-revert rule can't strip it.
+window._showProfilePanel = function (pid) {
+  try {
+    let p = (typeof SQUAD_DATA !== 'undefined' && SQUAD_DATA || []).find(q => q.id === pid);
+    if (!p && typeof POOL_DATA !== 'undefined') p = (POOL_DATA || []).find(q => q.id === pid);
+    if (!p) return;
+    const prof = _apexProfile(p, activeGwIdx);
+    if (!prof) return;
+    const F = (t) => _profNormCdf((t - prof.xp) / prof.sd);
+    const buckets = [
+      ['0–1 pts', F(1.5)],
+      ['2–3', F(3.5) - F(1.5)],
+      ['4–6', F(6.5) - F(3.5)],
+      ['7–9', F(9.5) - F(6.5)],
+      ['10–12', F(12.5) - F(9.5)],
+      ['13+', 1 - F(12.5)]
+    ].map(([lab, pr]) => [lab, Math.max(0, Math.round(pr * 100))]);
+    const mx = Math.max(...buckets.map(b => b[1]), 1);
+    const badgeCol = prof.cls === 'expl' ? ['#FBF0DA', '#B87A0E', '#E8A020'] : (prof.cls === 'steady' ? ['#E7F3EE', '#1D9E75', '#1D9E75'] : ['#F1EFE8', '#4A4840', '#D9D7CC']);
+    const glyph = prof.cls === 'expl' ? '⚡ EXPLOSIVE' : (prof.cls === 'steady' ? '🛡 STEADY' : '= BALANCED');
+    const gwNo = TEAM_META.gw_range[activeGwIdx];
+    const rows = buckets.map(([lab, pct]) => {
+      const hot = (lab === '10–12' || lab === '13+');
+      return `<div style="display:flex;align-items:center;gap:9px;margin:5px 0;">` +
+        `<div style="width:52px;font-size:.7rem;color:#7A776C;font-weight:700;text-align:right;">${lab}</div>` +
+        `<div style="flex:1;background:#F1EFE8;border-radius:5px;height:14px;overflow:hidden;">` +
+        `<div style="height:100%;width:${Math.round(pct / mx * 100)}%;background:${hot ? '#E8A020' : '#1D9E75'};border-radius:5px;"></div></div>` +
+        `<div style="width:38px;font-size:.72rem;color:#7A776C;font-variant-numeric:tabular-nums;">${pct}%</div></div>`;
+    }).join('');
+    const old = document.getElementById('apex-profile-overlay');
+    if (old) old.remove();
+    const ov = document.createElement('div');
+    ov.id = 'apex-profile-overlay';
+    ov.style.cssText = 'position:fixed;inset:0;background:rgba(20,20,18,0.45);z-index:99998;display:flex;align-items:center;justify-content:center;padding:18px;';
+    ov.onclick = (e) => { if (e.target === ov) ov.remove(); };
+    ov.innerHTML = `<div style="background:#FFFFFF;border:1px solid #E5E2D8;border-radius:14px;padding:20px 22px;max-width:360px;width:100%;box-shadow:0 12px 34px rgba(0,0,0,0.25);font-family:'Plus Jakarta Sans',sans-serif;color:#1E1E1A;position:relative;">` +
+      `<button onclick="document.getElementById('apex-profile-overlay').remove()" style="position:absolute;top:10px;right:12px;background:none;border:none;font-size:1.05rem;color:#7A776C;cursor:pointer;font-weight:700;">✕</button>` +
+      `<div style="font-weight:800;font-size:1.08rem;">${p.web_name}</div>` +
+      `<div style="color:#7A776C;font-size:.78rem;margin-top:1px;">${p.team || ''} · GW${gwNo} · ${prof.xp.toFixed(1)} xPts</div>` +
+      `<span style="display:inline-block;font-size:.64rem;font-weight:800;letter-spacing:.05em;border-radius:6px;padding:4px 9px;margin-top:9px;background:${badgeCol[0]};color:${badgeCol[1]};border:1px solid ${badgeCol[2]};">${glyph}</span>` +
+      `<div style="margin-top:14px;">${rows}</div>` +
+      `<div style="display:flex;gap:12px;margin-top:14px;">` +
+      `<div style="flex:1;background:#FAF9F4;border:1px solid #E5E2D8;border-radius:10px;padding:9px 12px;"><div style="font-size:.62rem;color:#7A776C;text-transform:uppercase;letter-spacing:.05em;font-weight:700;">Blank risk (≤3)</div><div style="font-size:1.2rem;font-weight:800;">${prof.blank}%</div></div>` +
+      `<div style="flex:1;background:#FAF9F4;border:1px solid #E5E2D8;border-radius:10px;padding:9px 12px;"><div style="font-size:.62rem;color:#7A776C;text-transform:uppercase;letter-spacing:.05em;font-weight:700;">Haul chance (10+)</div><div style="font-size:1.2rem;font-weight:800;color:#B87A0E;">${prof.haul}%</div></div>` +
+      `</div>` +
+      `<div style="margin-top:12px;font-size:.7rem;color:#7A776C;line-height:1.5;">From the model's own per-player variance — how spread out this player's scores tend to be, not just the average.</div>` +
+      `</div>`;
+    document.body.appendChild(ov);
+  } catch (_e) {}
+};
+
 function _shirtHtml(p, isXi) {
   const isCap = p.id === _capId;
   const isVc  = p.id === _vcId;
@@ -16877,7 +16933,7 @@ function _shirtHtml(p, isXi) {
       : (_prof.cls === 'steady'
         ? '<svg viewBox="0 0 24 24" width="11" height="11" fill="#0E6B4F"><path d="M12 2l8 3v6c0 5-3.5 9.2-8 11-4.5-1.8-8-6-8-11V5l8-3z"/></svg>'
         : '=');
-    profBadgeHtml = `<span class="prof-badge prof-${_prof.cls}" title="${_prof.label} profile — blank risk ${_prof.blank}%, haul (10+) ${_prof.haul}%">${_pg}</span>`;
+    profBadgeHtml = `<span class="prof-badge prof-${_prof.cls}" onclick="event.stopPropagation(); window._showProfilePanel(${p.id})" title="${_prof.label} profile — tap for the full score breakdown">${_pg}</span>`;
   }
   // TC glow only fires for XI captain or XI vice. If _capId transiently points
   // to a benched player during a swap, we don't pulse — bench can't be triple-captained.
@@ -18863,7 +18919,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1782988553-GW32-b8b07348</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1782988919-GW32-b8b07348</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
