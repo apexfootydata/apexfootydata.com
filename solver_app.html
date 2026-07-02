@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-07-02T15:51:07">
+<meta name="apex-gw" content="32" data-built-at="2026-07-02T16:15:46">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -4624,6 +4624,15 @@ body > footer.footer, body > #apex-site-footer { display: none !important; }
 #view-team.show-pool #transfers-section,
 #view-team.show-pool #top-picks-section,
 #view-team.show-pool #model-confidence-wrap-squad { display: none !important; }
+/* Squad Brief tab (2026-07-02) — same show/hide pattern as pool/transfers.
+   The Brief card lived in the rail for a day and broke the one-page rule. */
+#view-team:not(.show-brief) #brief-section { display: none !important; }
+#view-team.show-brief .va-solio,
+#view-team.show-brief #pool-section,
+#view-team.show-brief #pool-banner,
+#view-team.show-brief #transfers-section,
+#view-team.show-brief #top-picks-section,
+#view-team.show-brief #model-confidence-wrap-squad { display: none !important; }
 /* Transfers tab (2026-06-09, Marcus): the Recommended Transfers list now lives on
    its own tab like Player Pool. While active, hide the squad two-pane + pool; show
    the list. Everywhere else the list stays hidden (it used to appear inline after
@@ -5508,6 +5517,7 @@ html.apex-offseason #view-landing .hero-sub::after {
       <button type="button" class="va-tab va-tab-active" data-tab="squad" onclick="setSolverTab('squad')">Squad</button>
       <button type="button" class="va-tab" data-tab="pool" onclick="setSolverTab('pool')">Player Pool</button>
       <button type="button" class="va-tab" data-tab="transfers" onclick="setSolverTab('transfers')">Transfers</button>
+      <button type="button" class="va-tab" data-tab="brief" onclick="setSolverTab('brief')">Squad Brief</button>
     </div>
 
     <!-- ── SOLIO TWO-PANE: pitch (left) + decision rail (right). Collapses to
@@ -5667,7 +5677,6 @@ html.apex-offseason #view-landing .hero-sub::after {
          display:none'd by runSolve/reset/pill flows, which kept vanishing the
          preview. Nothing else touches this div. -->
     <div id="engine-picks" style="display:none;margin-bottom:12px;padding:14px 18px;border-radius:12px;background:#FFFFFF;box-shadow:0 1px 4px rgba(0,0,0,.06);"></div>
-    <div id="squad-brief" style="display:none;margin-bottom:12px;padding:14px 18px;border-radius:12px;background:#FFFFFF;box-shadow:0 1px 4px rgba(0,0,0,.06);"></div>
     <!-- Scenario Planner strip RETIRED 2026-06-09 (Marcus): the decision tree
          in the Path Planner ("plan ahead") does its job better. The freed rail
          space goes to the range hero + Recommended transfer cards (see
@@ -5687,6 +5696,14 @@ html.apex-offseason #view-landing .hero-sub::after {
     <div id="model-confidence-wrap-squad"></div>
 
     <section id="transfers-section" style="display:none;"></section>
+
+    <!-- Squad Brief tab content (2026-07-02) — moved out of the rail (it broke
+         the one-page rule) into its own sub-tab, per Marcus. -->
+    <section id="brief-section">
+      <div style="max-width:720px;margin:0 auto;padding:6px 16px 40px;">
+        <div id="squad-brief" style="display:none;margin-top:12px;padding:18px 22px;border-radius:12px;background:#FFFFFF;box-shadow:0 1px 4px rgba(0,0,0,.06);"></div>
+      </div>
+    </section>
     <section id="top-picks-section"></section>
 
     <!-- ── EXPECTED POINTS TABLE (inline on squad page) ──────────── -->
@@ -9994,7 +10011,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1783003867-GW32-b8b07348";
+const BUILD_VERSION = "1783005346-GW32-b8b07348";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -12095,7 +12112,8 @@ else { document.addEventListener('DOMContentLoaded', function () { setTimeout(ap
 
 function setSolverTab(tab) {
   const vt = document.getElementById('view-team');
-  if (vt) { vt.classList.toggle('show-pool', tab === 'pool'); vt.classList.toggle('show-transfers', tab === 'transfers'); }
+  if (vt) { vt.classList.toggle('show-pool', tab === 'pool'); vt.classList.toggle('show-transfers', tab === 'transfers'); vt.classList.toggle('show-brief', tab === 'brief'); }
+  if (tab === 'brief') { try { _renderSquadBrief(); } catch (_e) {} }
   document.querySelectorAll('.va-tab').forEach(function (b) {
     b.classList.toggle('va-tab-active', b.getAttribute('data-tab') === tab);
   });
@@ -19101,7 +19119,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1783003867-GW32-b8b07348</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1783005346-GW32-b8b07348</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
