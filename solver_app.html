@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-07-02T13:42:57">
+<meta name="apex-gw" content="32" data-built-at="2026-07-02T15:03:37">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -9993,7 +9993,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1782996177-GW32-b8b07348";
+const BUILD_VERSION = "1783001017-GW32-b8b07348";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -16970,6 +16970,7 @@ window._showProfilePanel = function (pid) {
       `<div style="flex:1;background:#FAF9F4;border:1px solid #E5E2D8;border-radius:10px;padding:9px 12px;"><div style="font-size:.62rem;color:#7A776C;text-transform:uppercase;letter-spacing:.05em;font-weight:700;">Haul chance (10+)</div><div style="font-size:1.2rem;font-weight:800;color:#B87A0E;">${prof.haul}%</div></div>` +
       `</div>` +
       `<div style="margin-top:12px;font-size:.7rem;color:#7A776C;line-height:1.5;">From the model's own per-player variance — how spread out this player's scores tend to be, not just the average.</div>` +
+      `<button onclick="document.getElementById('apex-profile-overlay').remove(); window._showWhyPanel(${pid});" style="margin-top:12px;width:100%;background:#FFFFFF;color:#1D9E75;border:1.5px solid #1D9E75;border-radius:9px;padding:9px;font-family:inherit;font-weight:800;font-size:.82rem;cursor:pointer;">Why this number? — see the model's working →</button>` +
       `</div>`;
     document.body.appendChild(ov);
   } catch (_e) {}
@@ -19001,7 +19002,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1782996177-GW32-b8b07348</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1783001017-GW32-b8b07348</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
