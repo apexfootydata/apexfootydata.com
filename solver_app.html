@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-07-02T15:03:37">
+<meta name="apex-gw" content="32" data-built-at="2026-07-02T15:51:07">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -5667,6 +5667,7 @@ html.apex-offseason #view-landing .hero-sub::after {
          display:none'd by runSolve/reset/pill flows, which kept vanishing the
          preview. Nothing else touches this div. -->
     <div id="engine-picks" style="display:none;margin-bottom:12px;padding:14px 18px;border-radius:12px;background:#FFFFFF;box-shadow:0 1px 4px rgba(0,0,0,.06);"></div>
+    <div id="squad-brief" style="display:none;margin-bottom:12px;padding:14px 18px;border-radius:12px;background:#FFFFFF;box-shadow:0 1px 4px rgba(0,0,0,.06);"></div>
     <!-- Scenario Planner strip RETIRED 2026-06-09 (Marcus): the decision tree
          in the Path Planner ("plan ahead") does its job better. The freed rail
          space goes to the range hero + Recommended transfer cards (see
@@ -9993,7 +9994,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1783001017-GW32-b8b07348";
+const BUILD_VERSION = "1783003867-GW32-b8b07348";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -10015,6 +10016,8 @@ const REVIEW_FH_SQUADS = {};
 let TEAM_META = {"team_name": "Xhaka Khan", "manager": "- Xhaka Khan", "overall_rank": 236258, "bank": 1.5, "free_transfers": 1, "squad_value": 103.6, "budget": 102.6, "start_gw": 32, "gw_range": [32, 33, 34, 35, 36, 37, 38], "gw_labels": ["GW32", "GW33", "GW34", "GW35", "GW36", "GW37", "GW38"], "dgw_teams_by_gw": {"33": ["Bournemouth", "Brighton", "Burnley", "Chelsea", "Leeds", "Man City"], "36": ["Crystal Palace", "Man City"]}, "bgw_teams_by_gw": {"34": ["Bournemouth", "Brighton", "Burnley", "Chelsea", "Leeds", "Manchester City"]}, "selling_prices": {"139": 4.5, "317": 4.4, "473": 5.3, "373": 6.1, "449": 9.8, "119": 8.1, "387": 7.1, "329": 5.8, "660": 4.8, "136": 6.6, "661": 8.7, "470": 4.0, "694": 4.5, "430": 14.6, "5": 6.8}, "deadlines_by_gw": {"1": 1755279000, "2": 1755883800, "3": 1756548000, "4": 1757757600, "5": 1758362400, "6": 1758967200, "7": 1759512600, "8": 1760781600, "9": 1761327000, "10": 1762003800, "11": 1762599600, "12": 1763809200, "13": 1764423000, "14": 1764698400, "15": 1765018800, "16": 1765632600, "17": 1766228400, "18": 1766773800, "19": 1767117600, "20": 1767438000, "21": 1767724200, "22": 1768647600, "23": 1769252400, "24": 1769866200, "25": 1770402600, "26": 1770746400, "27": 1771680600, "28": 1772217000, "29": 1772560800, "30": 1773495000, "31": 1774031400, "32": 1775842200, "33": 1776506400, "34": 1777051800, "35": 1777656600, "36": 1778320800, "37": 1778866200, "38": 1779629400}};
 let CHIP_PLANNER = {"has_wc": true, "has_fh": true, "has_bb": true, "has_tc": true, "radar": {"window_end": 38, "later_dgws": [], "later_blanks": [], "second_half_unlock": false}, "bb_playable": {"32": 1, "33": 1, "34": 1, "35": 1, "36": 1, "37": 1, "38": 1}, "sequences": [], "best_sequence": null, "baseline_total_xp": 376.9, "bb_ev": {"32": 2.89, "33": 3.74, "34": 1.5, "35": 2.39, "36": 2.84, "37": 1.77, "38": 3.02}, "tc_ev": {"32": 5.74, "33": 10.14, "34": 5.72, "35": 6.06, "36": 10.23, "37": 5.76, "38": 6.48}, "wc_ev": {}, "fh_ev": {}, "rotation_risk": {}, "_lazy": true};
 const APEX_LEAGUE_DATA = {"ratings": [], "fixtures": [], "final_table": []};
+const APEX_MOST_CAPTAINED = 430;
+const APEX_EO = {"gw": 32, "sample_n": 200, "players": {"1": {"xi": 14.0, "cap": 0.0, "eo": 14.0}, "291": {"xi": 4.5, "cap": 0.0, "eo": 4.5}, "260": {"xi": 6.5, "cap": 0.0, "eo": 6.5}, "5": {"xi": 86.5, "cap": 0.0, "eo": 86.5}, "373": {"xi": 24.0, "cap": 0.0, "eo": 24.0}, "47": {"xi": 9.0, "cap": 0.0, "eo": 9.0}, "517": {"xi": 7.5, "cap": 0.0, "eo": 7.5}, "449": {"xi": 99.5, "cap": 92.5, "eo": 192.0}, "82": {"xi": 83.5, "cap": 0.0, "eo": 83.5}, "329": {"xi": 17.5, "cap": 0.0, "eo": 17.5}, "249": {"xi": 57.5, "cap": 0.0, "eo": 57.5}, "101": {"xi": 6.5, "cap": 0.0, "eo": 6.5}, "661": {"xi": 0.0, "cap": 0.0, "eo": 0.0}, "337": {"xi": 0.5, "cap": 0.0, "eo": 0.5}, "684": {"xi": 6.5, "cap": 0.0, "eo": 6.5}, "139": {"xi": 69.5, "cap": 0.0, "eo": 69.5}, "411": {"xi": 72.5, "cap": 0.0, "eo": 72.5}, "77": {"xi": 3.0, "cap": 0.0, "eo": 3.0}, "235": {"xi": 69.5, "cap": 0.5, "eo": 70.0}, "163": {"xi": 7.5, "cap": 0.0, "eo": 7.5}, "430": {"xi": 90.5, "cap": 4.5, "eo": 95.0}, "624": {"xi": 30.5, "cap": 2.5, "eo": 33.5}, "178": {"xi": 10.0, "cap": 0.0, "eo": 10.0}, "341": {"xi": 0.0, "cap": 0.0, "eo": 0.0}, "84": {"xi": 2.0, "cap": 0.0, "eo": 2.0}, "72": {"xi": 10.5, "cap": 0.0, "eo": 10.5}, "343": {"xi": 2.0, "cap": 0.0, "eo": 2.0}, "36": {"xi": 2.0, "cap": 0.0, "eo": 2.0}, "83": {"xi": 9.0, "cap": 0.0, "eo": 9.0}, "21": {"xi": 5.0, "cap": 0.0, "eo": 5.0}, "515": {"xi": 4.5, "cap": 0.0, "eo": 4.5}, "64": {"xi": 1.0, "cap": 0.0, "eo": 1.0}, "470": {"xi": 5.0, "cap": 0.0, "eo": 5.0}, "8": {"xi": 0.0, "cap": 0.0, "eo": 0.0}, "749": {"xi": 0.0, "cap": 0.0, "eo": 0.0}, "151": {"xi": 69.5, "cap": 0.0, "eo": 69.5}, "691": {"xi": 47.0, "cap": 0.0, "eo": 47.0}, "783": {"xi": 46.0, "cap": 0.0, "eo": 46.0}, "136": {"xi": 36.5, "cap": 0.0, "eo": 36.5}, "683": {"xi": 1.5, "cap": 0.0, "eo": 1.5}, "387": {"xi": 9.0, "cap": 0.0, "eo": 9.0}, "242": {"xi": 3.0, "cap": 0.0, "eo": 3.0}, "32": {"xi": 0.0, "cap": 0.0, "eo": 0.0}, "317": {"xi": 2.5, "cap": 0.0, "eo": 2.5}, "169": {"xi": 1.5, "cap": 0.0, "eo": 1.5}, "342": {"xi": 0.0, "cap": 0.0, "eo": 0.0}, "485": {"xi": 15.0, "cap": 0.0, "eo": 15.0}, "119": {"xi": 6.5, "cap": 0.0, "eo": 6.5}, "157": {"xi": 4.5, "cap": 0.0, "eo": 4.5}, "347": {"xi": 0.0, "cap": 0.0, "eo": 0.0}, "344": {"xi": 0.0, "cap": 0.0, "eo": 0.0}, "256": {"xi": 3.5, "cap": 0.0, "eo": 3.5}, "67": {"xi": 0.5, "cap": 0.0, "eo": 0.5}, "354": {"xi": 1.5, "cap": 0.0, "eo": 1.5}, "706": {"xi": 0.5, "cap": 0.0, "eo": 0.5}, "74": {"xi": 1.0, "cap": 0.0, "eo": 1.0}, "148": {"xi": 2.0, "cap": 0.0, "eo": 2.0}, "807": {"xi": 1.0, "cap": 0.0, "eo": 1.0}, "736": {"xi": 0.5, "cap": 0.0, "eo": 0.5}, "253": {"xi": 1.5, "cap": 0.0, "eo": 1.5}, "6": {"xi": 2.0, "cap": 0.0, "eo": 2.0}, "350": {"xi": 0.0, "cap": 0.0, "eo": 0.0}, "224": {"xi": 1.0, "cap": 0.0, "eo": 1.0}, "348": {"xi": 0.0, "cap": 0.0, "eo": 0.0}, "660": {"xi": 0.0, "cap": 0.0, "eo": 0.0}, "390": {"xi": 0.5, "cap": 0.0, "eo": 0.5}, "100": {"xi": 0.0, "cap": 0.0, "eo": 0.0}, "252": {"xi": 0.0, "cap": 0.0, "eo": 0.0}, "220": {"xi": 0.5, "cap": 0.0, "eo": 0.5}, "38": {"xi": 0.5, "cap": 0.0, "eo": 0.5}, "575": {"xi": 0.5, "cap": 0.0, "eo": 0.5}, "613": {"xi": 0.5, "cap": 0.0, "eo": 0.5}, "717": {"xi": 0.5, "cap": 0.0, "eo": 0.5}, "473": {"xi": 0.0, "cap": 0.0, "eo": 0.0}, "384": {"xi": 0.5, "cap": 0.0, "eo": 0.5}, "442": {"xi": 0.0, "cap": 0.0, "eo": 0.0}, "237": {"xi": 0.0, "cap": 0.0, "eo": 0.0}, "440": {"xi": 1.5, "cap": 0.0, "eo": 1.5}, "694": {"xi": 2.5, "cap": 0.0, "eo": 2.5}, "113": {"xi": 1.0, "cap": 0.0, "eo": 1.0}, "670": {"xi": 0.5, "cap": 0.0, "eo": 0.5}, "287": {"xi": 0.5, "cap": 0.0, "eo": 0.5}, "228": {"xi": 0.0, "cap": 0.0, "eo": 0.0}, "16": {"xi": 0.0, "cap": 0.0, "eo": 0.0}, "402": {"xi": 0.0, "cap": 0.0, "eo": 0.0}, "318": {"xi": 0.5, "cap": 0.0, "eo": 0.5}, "502": {"xi": 0.5, "cap": 0.0, "eo": 0.5}, "450": {"xi": 4.0, "cap": 0.0, "eo": 4.0}, "160": {"xi": 0.5, "cap": 0.0, "eo": 0.5}, "646": {"xi": 0.5, "cap": 0.0, "eo": 0.5}, "457": {"xi": 0.5, "cap": 0.0, "eo": 0.5}, "295": {"xi": 0.0, "cap": 0.0, "eo": 0.0}, "335": {"xi": 0.0, "cap": 0.0, "eo": 0.0}, "441": {"xi": 0.0, "cap": 0.0, "eo": 0.0}, "407": {"xi": 0.5, "cap": 0.0, "eo": 0.5}, "40": {"xi": 0.0, "cap": 0.0, "eo": 0.0}, "120": {"xi": 0.5, "cap": 0.0, "eo": 0.5}, "7": {"xi": 0.0, "cap": 0.0, "eo": 0.0}, "382": {"xi": 1.5, "cap": 0.0, "eo": 1.5}, "508": {"xi": 0.5, "cap": 0.0, "eo": 0.5}, "367": {"xi": 0.0, "cap": 0.0, "eo": 0.0}, "261": {"xi": 0.0, "cap": 0.0, "eo": 0.0}, "311": {"xi": 0.0, "cap": 0.0, "eo": 0.0}, "166": {"xi": 0.5, "cap": 0.0, "eo": 0.5}, "541": {"xi": 0.5, "cap": 0.0, "eo": 0.5}, "299": {"xi": 0.5, "cap": 0.0, "eo": 0.5}, "191": {"xi": 0.0, "cap": 0.0, "eo": 0.0}, "686": {"xi": 0.5, "cap": 0.0, "eo": 0.5}, "230": {"xi": 0.0, "cap": 0.0, "eo": 0.0}, "106": {"xi": 0.5, "cap": 0.0, "eo": 0.5}, "374": {"xi": 0.5, "cap": 0.0, "eo": 0.5}, "257": {"xi": 0.5, "cap": 0.0, "eo": 0.5}, "267": {"xi": 1.0, "cap": 0.0, "eo": 1.0}, "603": {"xi": 0.5, "cap": 0.0, "eo": 0.5}, "381": {"xi": 0.5, "cap": 0.0, "eo": 0.5}, "303": {"xi": 0.5, "cap": 0.0, "eo": 0.5}, "531": {"xi": 0.0, "cap": 0.0, "eo": 0.0}, "679": {"xi": 1.0, "cap": 0.0, "eo": 1.0}, "628": {"xi": 0.0, "cap": 0.0, "eo": 0.0}, "458": {"xi": 0.0, "cap": 0.0, "eo": 0.0}, "226": {"xi": 0.0, "cap": 0.0, "eo": 0.0}, "443": {"xi": 0.5, "cap": 0.0, "eo": 0.5}, "314": {"xi": 0.0, "cap": 0.0, "eo": 0.0}, "90": {"xi": 0.0, "cap": 0.0, "eo": 0.0}, "615": {"xi": 0.5, "cap": 0.0, "eo": 0.5}}};
 let LEAGUE_SIM_META = {"start_gw": 32, "horizon_gws": 7, "fpl_id": 11051};
 // FR xP data for browser-side Rank Milestones (assets/rank_milestones.js).
 // FR_NEXT_XP_BY_ID → raw FR xP for the next GW (= start_gw), live CSV.
@@ -16230,6 +16233,14 @@ function _showWhyPanel(playerId) {
   // Card risk — xpCard is NEGATIVE (it's a cost). Show it explicitly so the
   // breakdown sums to the headline xP. Hide if effectively zero.
   if (xpCard < -0.05) rows.push(['Card risk',                             xpCard.toFixed(1)   + ' pts']);
+  // Reconcile (2026-07-02, Marcus caught rows not summing to the headline):
+  // components under 0.05 are hidden above — surface their combined value so
+  // the visible rows always account for the full headline number.
+  const _shownSum = (xpApp > 0.05 ? xpApp : 0) + (xpG > 0.05 ? xpG : 0) + (xpA > 0.05 ? xpA : 0)
+    + ((xpCs > 0.05 && isDef) ? xpCs : 0) + ((xpSv > 0.05 && isGk) ? xpSv : 0)
+    + (xpBonus > 0.05 ? xpBonus : 0) + (xpDefcon > 0.05 ? xpDefcon : 0) + (xpCard < -0.05 ? xpCard : 0);
+  const _resid = xp - _shownSum;
+  if (Math.abs(_resid) >= 0.05) rows.push(['Other small components',      _resid.toFixed(1) + ' pts']);
   rows.push(['Apex confidence',                                           conf]);
 
   const rowsHtml = rows.map(([k, v]) =>
@@ -16249,7 +16260,7 @@ function _showWhyPanel(playerId) {
        <div class="why-xp-headline">${xp.toFixed(1)}</div>
        <div class="why-xp-label">expected points · GW${_gw || '?'}</div>
        ${rowsHtml}
-       <div class="why-foot">Apex shows the workings. You decide. Override on the pitch any time — your call always wins.</div>
+       <div class="why-foot">Rows are rounded to one decimal, so they can differ from the headline by up to 0.1 — the unrounded parts sum exactly.<br><br>Apex shows the workings. You decide. Override on the pitch any time — your call always wins.</div>
        <button class="why-modal-close" onclick="document.getElementById('why-modal-backdrop')?.remove()">Close</button>
      </div>`;
   backdrop.addEventListener('click', () => backdrop.remove());
@@ -16976,6 +16987,91 @@ window._showProfilePanel = function (pid) {
   } catch (_e) {}
 };
 
+// ── Squad Brief (2026-07-02, Compass-steal #1): you vs the crowd. ──
+// Four one-line verdicts (captain leverage / template overlap / differential
+// count / team stacking) + a plain-English read. All client-side from data
+// already baked: POOL_DATA.own, the live XI, APEX_MOST_CAPTAINED.
+function _renderSquadBrief() {
+  const host = document.getElementById('squad-brief');
+  if (!host) return;
+  try {
+    const xi = (typeof _xiPlayers !== 'undefined' && _xiPlayers) || [];
+    if (xi.length < 11 || typeof POOL_DATA === 'undefined') { host.style.display = 'none'; return; }
+    const _own = (id) => { const q = POOL_DATA.find(x => x.id === id); return q ? +(q.own || 0) : 0; };
+    // Template XI: highest-owned legal formation from the pool (same 7 shapes as the solver)
+    const byPos = {1: [], 2: [], 3: [], 4: []};
+    POOL_DATA.forEach(p => { if (byPos[p.element_type]) byPos[p.element_type].push(p); });
+    Object.keys(byPos).forEach(k => byPos[k].sort((a, b) => (+b.own || 0) - (+a.own || 0)));
+    const forms = [[1,3,4,3],[1,3,5,2],[1,4,3,3],[1,4,4,2],[1,5,3,2],[1,4,5,1],[1,5,4,1]];
+    let tmpl = [], tmplOwn = -1;
+    forms.forEach(f => {
+      if (byPos[1].length < f[0] || byPos[2].length < f[1] || byPos[3].length < f[2] || byPos[4].length < f[3]) return;
+      const t = byPos[1].slice(0, f[0]).concat(byPos[2].slice(0, f[1]), byPos[3].slice(0, f[2]), byPos[4].slice(0, f[3]));
+      const s = t.reduce((a, p) => a + (+p.own || 0), 0);
+      if (s > tmplOwn) { tmplOwn = s; tmpl = t; }
+    });
+    const tmplIds = new Set(tmpl.map(p => p.id));
+    const overlap = xi.filter(p => tmplIds.has(p.id)).length;
+    const ovPct = Math.round(100 * overlap / 11);
+    // Captain leverage
+    const cap = xi.find(p => p.id === _capId) || xi[0];
+    const capOwn = Math.round(_own(cap.id));
+    const capMost = (typeof APEX_MOST_CAPTAINED !== 'undefined' && APEX_MOST_CAPTAINED && cap.id === APEX_MOST_CAPTAINED);
+    // Sampled top-10k EO (eo_sampler.py) — the pro-grade leverage number when available.
+    let capEo = null, eoLine = '';
+    try {
+      if (typeof APEX_EO !== 'undefined' && APEX_EO && APEX_EO.players) {
+        const e = APEX_EO.players[String(cap.id)];
+        if (e) { capEo = +e.eo; eoLine = ` \u00b7 EO ${Math.round(capEo)}% near the top (captained by ${Math.round(+e.cap)}%)`; }
+      }
+    } catch (_e) {}
+    const capCrowd = capMost || capOwn >= 40 || (capEo != null && capEo >= 80);
+    // Differentials (starters under 15% owned)
+    const diffs = xi.filter(p => _own(p.id) < 15).map(p => p.web_name);
+    // Stacking
+    const perTeam = {};
+    xi.forEach(p => { const t = p.team || ''; if (t) perTeam[t] = (perTeam[t] || 0) + 1; });
+    const stackTeam = Object.keys(perTeam).sort((a, b) => perTeam[b] - perTeam[a])[0];
+    const stackN = stackTeam ? perTeam[stackTeam] : 0;
+    // Best explosive lower-owned armband alternative in the XI
+    let alt = null;
+    try {
+      alt = xi.filter(p => p.id !== cap.id && _own(p.id) < 25)
+        .map(p => ({ p: p, prof: _apexProfile(p, activeGwIdx) }))
+        .filter(x => x.prof && x.prof.cls === 'expl')
+        .sort((a, b) => b.prof.haul - a.prof.haul)[0] || null;
+    } catch (_e) {}
+    const pill = (txt, kind) => {
+      const c = kind === 'warn' ? ['#FBF0DA', '#B87A0E', '#E8A020'] : (kind === 'bad' ? ['#FBE3DC', '#A33B1B', '#D85A30'] : ['#E7F3EE', '#1D9E75', '#1D9E75']);
+      return `<span style="font-size:.66rem;font-weight:800;border-radius:6px;padding:3px 9px;white-space:nowrap;background:${c[0]};color:${c[1]};border:1px solid ${c[2]};">${txt}</span>`;
+    };
+    const row = (k, sub, pillHtml) => `<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--border);">` +
+      `<div><div style="font-size:.85rem;font-weight:700;">${k}</div><div style="font-size:.72rem;color:var(--muted);margin-top:1px;">${sub}</div></div>${pillHtml}</div>`;
+    let html = `<div style="font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px;">Squad brief — you vs the crowd</div>`;
+    html += row('Captain leverage',
+      `${cap.web_name} — ${capOwn}% owned${capMost ? ', the game\u2019s most-captained pick' : ''}${eoLine}`,
+      capCrowd ? pill('RIDING THE CROWD', 'warn') : (capOwn < 20 ? pill('REAL LEVERAGE', 'good') : pill('MODERATE', 'good')));
+    html += row('Template overlap', `${overlap} of your 11 starters are in the most-owned XI`,
+      ovPct >= 70 ? pill('HIGH \u00b7 ' + ovPct + '%', 'warn') : (ovPct >= 45 ? pill('MID \u00b7 ' + ovPct + '%', 'good') : pill('LOW \u00b7 ' + ovPct + '%', 'good')));
+    html += row('Differentials', diffs.length ? `${diffs.slice(0, 3).join(', ')}${diffs.length > 3 ? ' +' + (diffs.length - 3) : ''} under 15% owned` : 'No starter under 15% owned',
+      diffs.length >= 3 ? pill('STRONG', 'good') : (diffs.length ? pill('THIN', 'warn') : pill('NONE', 'bad')));
+    if (stackN >= 3) html += row('Team stacking', `${stackN} starters from ${stackTeam} — one bad afternoon hits all of them`, pill('WATCH', 'warn'));
+    // The read
+    let read;
+    if (capCrowd && ovPct >= 70) {
+      read = `<b>This squad banks points but can\u2019t climb.</b> When ${cap.web_name} hauls, most of your rivals score it with you. Protecting a lead? Perfect \u2014 change nothing.` +
+        (alt ? ` Chasing? Move the armband to ${alt.p.web_name} (${Math.round(_own(alt.p.id))}% owned, \u26a1 ${alt.prof.haul}% haul chance) and you swing without touching the squad.` : ` Chasing? Your XI has no explosive differential to captain \u2014 that\u2019s the transfer to hunt.`);
+    } else if (ovPct < 45) {
+      read = `<b>High-swing squad.</b> Low template overlap means big rank moves in both directions \u2014 great for chasing, dangerous for protecting a lead.`;
+    } else {
+      read = `<b>Balanced setup.</b> Enough template to bank the obvious points, ${diffs.length ? 'with ' + diffs.length + ' differential' + (diffs.length > 1 ? 's' : '') + ' to move you when they hit' : 'but no differentials to move you up'}.`;
+    }
+    html += `<div style="margin-top:11px;border:2px solid var(--accent,#1D9E75);border-radius:10px;padding:11px 14px;font-size:.84rem;line-height:1.5;">${read}</div>`;
+    host.innerHTML = html;
+    host.style.display = 'block';
+  } catch (_e) { host.style.display = 'none'; }
+}
+
 function _shirtHtml(p, isXi) {
   const isCap = p.id === _capId;
   const isVc  = p.id === _vcId;
@@ -17062,6 +17158,9 @@ function _shirtHtml(p, isXi) {
 
 function _renderPitchFromState() {
   const wrap = document.getElementById('pitch-wrap');
+  // Squad Brief follows every squad change (transfers, armband, GW nav) —
+  // rendered after this frame so it never blocks the pitch paint.
+  try { setTimeout(_renderSquadBrief, 0); } catch (_e) {}
   const gks  = _xiPlayers.filter(p => p.element_type === 1);
   const defs = _xiPlayers.filter(p => p.element_type === 2);
   const mids = _xiPlayers.filter(p => p.element_type === 3);
@@ -19002,7 +19101,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1783001017-GW32-b8b07348</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1783003867-GW32-b8b07348</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
