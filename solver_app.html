@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-07-02T18:39:59">
+<meta name="apex-gw" content="32" data-built-at="2026-07-02T19:01:20">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -5342,25 +5342,26 @@ body, html {
    !important rules → last declared wins over the roomy block (~:4495-4514).
    Desktop two-pane only; pool/brief/mobile untouched. */
 @media (min-width: 1025px) {
-  /* Engine picks card — the tallest rail item: tighter title, rows, type */
-  .va-solio-rail .va-reco-title { font-size: clamp(1.05rem, 1.25vw, 1.4rem) !important; margin-bottom: 8px !important; }
-  .va-solio-rail .va-reco-row { padding: 4px 0 !important; gap: 12px !important; }
-  .va-solio-rail .va-reco-move { font-size: clamp(1.0rem, 1.15vw, 1.3rem) !important; }
-  .va-solio-rail .va-reco-gain { font-size: clamp(1.05rem, 1.25vw, 1.4rem) !important; }
-  .va-solio-rail > #solve-banner:not(:empty) { padding: 12px 16px !important; }
+  /* Round 2 (Marcus: "made the right side a little too much") — give back ~half
+     the type size, keep the tight spacing. Between original roomy and round-1. */
+  .va-solio-rail .va-reco-title { font-size: clamp(1.12rem, 1.38vw, 1.55rem) !important; margin-bottom: 10px !important; }
+  .va-solio-rail .va-reco-row { padding: 5px 0 !important; gap: 13px !important; }
+  .va-solio-rail .va-reco-move { font-size: clamp(1.08rem, 1.28vw, 1.45rem) !important; }
+  .va-solio-rail .va-reco-gain { font-size: clamp(1.12rem, 1.38vw, 1.55rem) !important; }
+  .va-solio-rail > #solve-banner:not(:empty) { padding: 14px 18px !important; }
   /* Risk boxes + action buttons */
-  .va-solio-rail #aps-wrap-team button { padding: 9px 14px !important; font-size: clamp(0.88rem, 0.95vw, 1.05rem) !important; }
-  .va-solio-rail #va-solve-actions { margin: 4px 0 6px !important; }
-  .va-solio-rail #va-solve-actions .solve-btn { padding: 13px 20px !important; font-size: clamp(1.0rem, 1.15vw, 1.25rem) !important; }
-  .va-solio-rail .reset-btn { padding: 9px 20px !important; font-size: 0.95rem !important; }
-  .va-solio-rail #see-all-options-link { font-size: 0.95rem !important; }
+  .va-solio-rail #aps-wrap-team button { padding: 11px 15px !important; font-size: clamp(0.92rem, 1vw, 1.12rem) !important; }
+  .va-solio-rail #va-solve-actions { margin: 5px 0 7px !important; }
+  .va-solio-rail #va-solve-actions .solve-btn { padding: 15px 22px !important; font-size: clamp(1.08rem, 1.25vw, 1.38rem) !important; }
+  .va-solio-rail .reset-btn { padding: 11px 22px !important; font-size: 1.0rem !important; }
+  .va-solio-rail #see-all-options-link { font-size: 0.98rem !important; }
   /* Hero (GW xPts + range curve) */
-  .va-solio-rail .va-card-value-hero { font-size: clamp(28px, 2vw, 38px) !important; padding: 5px 14px !important; }
-  .va-solio-rail .va-range-title { font-size: clamp(14px, 1.1vw, 18px) !important; }
-  .va-solio-rail .va-range-plot { height: clamp(44px, 6vh, 100px) !important; margin: 4px 0 2px !important; }
-  .va-solio-rail .va-card-hero { padding: 6px 14px !important; }
+  .va-solio-rail .va-card-value-hero { font-size: clamp(31px, 2.2vw, 42px) !important; padding: 6px 16px !important; }
+  .va-solio-rail .va-range-title { font-size: clamp(15px, 1.2vw, 20px) !important; }
+  .va-solio-rail .va-range-plot { height: clamp(50px, 7vh, 112px) !important; margin: 5px 0 3px !important; }
+  .va-solio-rail .va-card-hero { padding: 7px 15px !important; }
   /* Stat strip + overall rail rhythm */
-  .va-solio-rail .va-strip-val { font-size: clamp(1.1rem, 1.4vw, 1.6rem) !important; }
+  .va-solio-rail .va-strip-val { font-size: clamp(1.16rem, 1.52vw, 1.75rem) !important; }
   .va-solio-rail { gap: 4px !important; }
 }
 /* ═══ APEX_RAIL_COMPACT:END ═══ */
@@ -10539,7 +10540,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1783013999-GW32-b8b07348";
+const BUILD_VERSION = "1783015279-GW32-b8b07348";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -19650,7 +19651,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1783013999-GW32-b8b07348</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1783015279-GW32-b8b07348</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
