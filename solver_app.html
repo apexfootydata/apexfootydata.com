@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-07-02T19:01:20">
+<meta name="apex-gw" content="32" data-built-at="2026-07-02T19:30:16">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -10540,7 +10540,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1783015279-GW32-b8b07348";
+const BUILD_VERSION = "1783017016-GW32-b8b07348";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -19651,7 +19651,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1783015279-GW32-b8b07348</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1783017016-GW32-b8b07348</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
@@ -20136,6 +20136,10 @@ document.addEventListener('DOMContentLoaded', () => {
     var chipMap = {};
     (history.chips || []).forEach(function (c) { chipMap[c.event] = c.name; });
     var ft = 1;
+    // SEASON RULE (H2, 2026-07-02): 25/26-only AFCON FT top-up. Set the flag
+    // false for 26/27 unless FPL repeats it — twin of AFCON_FT_TOPUP_ON in
+    // apex_fpl_solver.py's SEASON RULES block (review every August).
+    var AFCON_TOPUP_ON = true;
     var AFCON_TOPUP_GW = 16;
     var pastGws = (history.current || []).filter(function (g) { return g.event <= startGw; });
     for (var gi = 0; gi < pastGws.length; gi++) {
@@ -20143,7 +20147,7 @@ document.addEventListener('DOMContentLoaded', () => {
       var made = g.event_transfers || 0;
       var cost = g.event_transfers_cost || 0;
       var chip = chipMap[g.event] || '';
-      if (g.event === AFCON_TOPUP_GW) ft = 5;
+      if (AFCON_TOPUP_ON && g.event === AFCON_TOPUP_GW) ft = 5;
       if (chip === 'wildcard' || chip === 'freehit') continue;
       var hits = Math.floor(cost / 4);
       if (hits > 0) ft = 1;
@@ -20260,6 +20264,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     // ──────────────────────────────────────────────────────────────────
 
+    // SEASON RULE (H2, 2026-07-02): verify for 26/27 when FPL announces —
+    // twin of CHIP_HALF_SPLIT_GW in apex_fpl_solver.py's SEASON RULES block.
     // 25/26: two sets of every chip — one per half (halves split at GW20). A
     // chip is unavailable only if already played in the CURRENT half, so a
     // first-half use no longer blocks the second-half twin (and vice-versa).
