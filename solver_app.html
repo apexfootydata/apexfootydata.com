@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-07-02T10:32:16">
+<meta name="apex-gw" content="32" data-built-at="2026-07-02T10:42:07">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -3711,6 +3711,18 @@ button.secondary, .btn-secondary, .va-btn-secondary {
 .prof-badge.prof-expl   { background: #E8A020; color: #1E1E1A; }
 .prof-badge.prof-steady { background: #DCF0E7; color: #0E6B4F; }
 .prof-badge.prof-bal    { background: #E9E7DD; color: #4A4840; opacity: 0.92; }
+/* The white-theme block declares `.pitch, .pitch * { background: revert !important }`
+   which strips ALL badge backgrounds inside the pitch (same reason cap-badge
+   re-asserts with !important). Mirror that convention here — verified live
+   2026-07-02 via injected CSS on fplapex.com. */
+.pitch .prof-badge {
+  background: #E9E7DD !important;
+  border: 1.5px solid #ffffff !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3) !important;
+}
+.pitch .prof-badge.prof-expl   { background: #E8A020 !important; }
+.pitch .prof-badge.prof-steady { background: #DCF0E7 !important; }
+.pitch .prof-badge.prof-bal    { background: #E9E7DD !important; }
 @media (max-width: 640px) {
   .prof-badge { width: 16px; height: 16px; font-size: 0.56rem; top: -4px; right: -5px; }
 }
@@ -9902,7 +9914,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1782984736-GW32-b8b07348";
+const BUILD_VERSION = "1782985327-GW32-b8b07348";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -18778,7 +18790,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1782984736-GW32-b8b07348</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1782985327-GW32-b8b07348</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
