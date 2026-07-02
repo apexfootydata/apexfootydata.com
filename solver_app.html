@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-07-02T16:15:46">
+<meta name="apex-gw" content="32" data-built-at="2026-07-02T16:35:24">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -4644,6 +4644,9 @@ body > footer.footer, body > #apex-site-footer { display: none !important; }
 #view-team.show-transfers #model-confidence-wrap-squad { display: none !important; }
 #view-team.show-transfers #transfers-section { display: block !important; }
 #view-team:not(.show-transfers) #transfers-section { display: none !important; }
+/* Transfer Paths (2026-07-02) — routes block above the recs list; same gate. */
+#view-team.show-transfers #transfer-paths-section { display: block !important; }
+#view-team:not(.show-transfers) #transfer-paths-section { display: none !important; }
 
 .va-team-header,
 .va-team-name-target,
@@ -5694,6 +5697,11 @@ html.apex-offseason #view-landing .hero-sub::after {
          so it lands directly under the bench border — high-visibility slot
          users won't miss. (moved 2026-04-29 per Marcus) -->
     <div id="model-confidence-wrap-squad"></div>
+
+    <!-- Transfer Paths (2026-07-02) — three staged routes, rendered by
+         assets/apex_paths.js above the weekly recs. Same show-transfers CSS
+         gate as #transfers-section (see solver_style.css). -->
+    <section id="transfer-paths-section"><div id="transfer-paths-body"></div></section>
 
     <section id="transfers-section" style="display:none;"></section>
 
@@ -9990,6 +9998,493 @@ html.apex-offseason #view-landing .hero-sub::after {
 
 </script>
 
+<!-- Transfer Paths (2026-07-02) — three staged transfer routes. assets/apex_paths.js -->
+<script>
+// ═══════════════════════════════════════════════════════════════════════════
+// APEX TRANSFER PATHS (2026-07-02) — three staged ROUTES over the next GWs,
+// rendered ABOVE the weekly recs in the Transfers tab.
+//
+//   Route 1  MODEL'S PICK — the engine's best move each week (free first;
+//            a −4 hit only when it clearly pays for itself).
+//   Route 2  PATIENT      — bank this week's FT, free double move next week.
+//   Route 3  RANK SWING   — one move a week, incoming players must be low-EO
+//            differentials (top-10k EO from APEX_EO when baked, else own%).
+//
+// HOW IT COMPUTES: a small pure forward simulator that mirrors the live
+// weekly engine's rules (same-position swap, SELLING-price budget, 3-per-club,
+// remaining-horizon xP ranking via _xpAt) but runs on an explicit squad state
+// so it can step forward week by week WITHOUT touching pitch globals.
+// Totals = full-horizon (to the last baked GW) XI+captain xPts of the evolving
+// squad MINUS the same for the untouched squad, NET of explicit −4 hits —
+// so all three cards are honestly comparable, banking included.
+//
+// APPLY stages MOVE ONE only: a this-week move goes through the existing
+// _applyTransferRec (FT/hit accounting, plan tracking, pitch — all standard);
+// a this-week bank goes through _rollFT. Future moves are advisory and are
+// re-computed each week (prices move, news lands).
+//
+// WIRING (generator): read+inject like apex_rival.js; one setTimeout hook at
+// the top of renderTransfers calls window._renderTransferPaths; container
+// <section id="transfer-paths-section"> sits above #transfers-section and is
+// CSS-gated by #view-team.show-transfers exactly like the recs list.
+// All globals are read lazily at call time with typeof guards — this file
+// must never throw at load, whatever the bake shipped.
+// ═══════════════════════════════════════════════════════════════════════════
+(function () {
+  'use strict';
+
+  // ── Tunables ──────────────────────────────────────────────────────────────
+  var TXP_WINDOW        = 3;    // staged-move window in GWs (incl. current)
+  var TXP_MIN_GAIN      = 0.5;  // remaining-horizon xP gain to justify a move
+  var TXP_HIT_NET_MIN   = 2.0;  // a −4 move must net at least this AFTER the hit
+  var TXP_EO_DIFF_MAX   = 15;   // rank swing: incoming EO (or own%) ≤ this
+  var TXP_DIFF_MIN_PERGW = 3.0; // rank swing: per-GW xP floor (no punts)
+  var TXP_MAX_FT        = 5;    // FPL stored-FT cap
+
+  // ── Lazy global access (all guarded — never throw) ───────────────────────
+  function _txpMeta()  { return (typeof TEAM_META  !== 'undefined') ? TEAM_META  : null; }
+  function _txpPool()  { return (typeof POOL_DATA  !== 'undefined' && Array.isArray(POOL_DATA)) ? POOL_DATA : []; }
+  function _txpLiveSquad() {
+    try {
+      if (typeof _xiPlayers !== 'undefined' && typeof _benchPlayers !== 'undefined'
+          && Array.isArray(_xiPlayers) && Array.isArray(_benchPlayers)) {
+        var s = _xiPlayers.concat(_benchPlayers);
+        if (s.length === 15) return s;
+      }
+    } catch (e) {}
+    return null;
+  }
+  function _txpGwIdx() { return (typeof activeGwIdx === 'number') ? activeGwIdx : 0; }
+  function _txpXp(p, i) {
+    try { if (typeof _xpAt === 'function') return _xpAt(p, i) || 0; } catch (e) {}
+    var arr = p.xp_per_gw || [p.xp || 0];
+    return i < arr.length ? (arr[i] || 0) : 0;
+  }
+  function _txpXpFrom(p, fromIdx, nGws) {
+    var s = 0;
+    for (var i = fromIdx; i < nGws; i++) s += _txpXp(p, i);
+    return s;
+  }
+  // Top-10k EO when the sampler file was baked; plain ownership otherwise.
+  function _txpEo(p) {
+    try {
+      if (typeof APEX_EO !== 'undefined' && APEX_EO && APEX_EO.players) {
+        var e = APEX_EO.players[String(p.id)];
+        if (e && isFinite(+e.eo)) return +e.eo;
+      }
+    } catch (e2) {}
+    var o = (typeof p.own === 'number') ? p.own : parseFloat(p.own);
+    return isFinite(o) ? o : 100; // unknown = assume owned (never a "differential")
+  }
+  function _txpEoBaked() {
+    try { return !!(typeof APEX_EO !== 'undefined' && APEX_EO && APEX_EO.players && APEX_EO.sample_n >= 30); }
+    catch (e) { return false; }
+  }
+  // SELLING price: route-local overlay (players bought inside the sim sell at
+  // purchase price) → TEAM_META.selling_prices → now_cost. Mirrors _effCost.
+  function _txpSell(p, spOverlay) {
+    if (spOverlay && spOverlay[String(p.id)] != null) return spOverlay[String(p.id)];
+    var tm = _txpMeta();
+    var sp = tm && tm.selling_prices ? tm.selling_prices[String(p.id)] : null;
+    return (sp != null && sp > 0) ? sp : (p.cost || 0);
+  }
+  function _txpEsc(s) {
+    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  // ── Forward simulator ─────────────────────────────────────────────────────
+  function _txpNewState() {
+    var live = _txpLiveSquad();
+    if (!live) return null;
+    var tm = _txpMeta();
+    return {
+      squad: live.slice(),
+      bank: (tm && tm.bank) || 0,
+      sp: {},              // id → selling price for players bought in-sim
+      moves: [],           // { w, gwIdx, out, in, gain }
+      banks: [],           // w indices where the route explicitly banks
+      hits: 0,
+    };
+  }
+
+  // Best same-position upgrade for one squad under one GW's remaining horizon.
+  // opts: { maxEo, minPerGw, excludeIds } — rank-swing filters. Ranking is by
+  // TRUE remaining-horizon xP gain (no bias) so route totals stay honest.
+  function _txpBestMove(state, gwIdx, opts) {
+    opts = opts || {};
+    var tm = _txpMeta();
+    if (!tm || !tm.gw_range) return null;
+    var nGws = tm.gw_range.length;
+    var pool = _txpPool();
+    var squadIds = {};
+    var teamCounts = {};
+    var i, p;
+    for (i = 0; i < state.squad.length; i++) {
+      p = state.squad[i];
+      squadIds[p.id] = true;
+      var t = p.team || '';
+      teamCounts[t] = (teamCounts[t] || 0) + 1;
+    }
+    var best = null;
+    for (i = 0; i < state.squad.length; i++) {
+      var outP = state.squad[i];
+      var pos = outP.element_type || 3;
+      var outSell = _txpSell(outP, state.sp);
+      var outTotal = _txpXpFrom(outP, gwIdx, nGws);
+      for (var j = 0; j < pool.length; j++) {
+        var inP = pool[j];
+        if (inP.element_type !== pos) continue;
+        if (squadIds[inP.id]) continue;
+        if (opts.excludeIds && opts.excludeIds[inP.id]) continue;
+        if ((inP.cost || 99) > outSell + state.bank + 0.05) continue;
+        var inTeam = inP.team || '';
+        if (inTeam !== (outP.team || '') && (teamCounts[inTeam] || 0) >= 3) continue;
+        if (opts.maxEo != null && _txpEo(inP) > opts.maxEo) continue;
+        var inTotal = _txpXpFrom(inP, gwIdx, nGws);
+        if (opts.minPerGw != null && nGws > gwIdx
+            && (inTotal / (nGws - gwIdx)) < opts.minPerGw) continue;
+        var gain = inTotal - outTotal;
+        if (!best || gain > best.gain) best = { out: outP, in: inP, gain: gain };
+      }
+    }
+    return best;
+  }
+
+  function _txpApplyMove(state, mv, w, gwIdx) {
+    state.squad = state.squad.map(function (p) { return p.id === mv.out.id ? mv.in : p; });
+    state.bank = state.bank + _txpSell(mv.out, state.sp) - (mv.in.cost || 0);
+    state.sp[String(mv.in.id)] = mv.in.cost || 0;
+    state.moves.push({ w: w, gwIdx: gwIdx, out: mv.out, in: mv.in, gain: mv.gain });
+  }
+
+  // FTs available RIGHT NOW (this GW's allowance minus moves already applied,
+  // respecting an explicit roll of the previous GW via getEffectiveFTs).
+  function _txpFtsNow(gwIdx) {
+    var fts = 1, applied = 0;
+    try { if (typeof getEffectiveFTs === 'function') fts = getEffectiveFTs(gwIdx); } catch (e) {}
+    try { if (typeof _transfersAppliedByGw !== 'undefined') applied = _transfersAppliedByGw[gwIdx] || 0; } catch (e2) {}
+    return Math.max(0, fts - applied);
+  }
+  function _txpRolledNow(gwIdx) {
+    try { if (typeof _rollFTByGw !== 'undefined') return !!_rollFTByGw[gwIdx]; } catch (e) {}
+    return false;
+  }
+
+  // Route builder. plan[w] = max moves the route WANTS at week w
+  // (Model/Swing: 1 every week; Patient: [0, 2, 1]). allowHit lets a week-0+
+  // move go through on a −4 when it still nets ≥ TXP_HIT_NET_MIN.
+  function _txpBuildRoute(startIdx, plan, opts, allowHit) {
+    var state = _txpNewState();
+    if (!state) return null;
+    var tm = _txpMeta();
+    var nGws = tm.gw_range.length;
+    var fts = _txpFtsNow(startIdx);
+    var rolled0 = _txpRolledNow(startIdx);
+    var steps = [];
+    for (var w = 0; w < plan.length; w++) {
+      var gwIdx = startIdx + w;
+      if (gwIdx >= nGws) break;
+      if (w > 0) fts = Math.min(TXP_MAX_FT, fts + 1);
+      var want = plan[w];
+      if (w === 0 && rolled0) want = 0; // user already rolled this GW
+      var made = 0;
+      for (var k = 0; k < want; k++) {
+        var mv = _txpBestMove(state, gwIdx, opts);
+        if (!mv) break;
+        if (fts > 0) {
+          if (mv.gain < TXP_MIN_GAIN) break;
+          _txpApplyMove(state, mv, w, gwIdx); fts--; made++;
+        } else if (allowHit && mv.gain - 4 >= TXP_HIT_NET_MIN) {
+          _txpApplyMove(state, mv, w, gwIdx); state.hits++; made++;
+        } else break;
+      }
+      if (made === 0) state.banks.push(w);
+      steps.push({ w: w, gw: tm.gw_range[gwIdx], moves: state.moves.filter(function (m) { return m.w === w; }) });
+    }
+    state.steps = steps;
+    return state;
+  }
+
+  // Full-horizon XI+captain total for a route (moves applied at their GW),
+  // via the same pickBestXi the pitch uses. Net of −4 hits.
+  function _txpRouteTotal(state, startIdx) {
+    var tm = _txpMeta();
+    if (!tm || typeof pickBestXi !== 'function') return null;
+    var nGws = tm.gw_range.length;
+    var squad = _txpLiveSquad().slice();
+    var total = 0;
+    for (var idx = startIdx; idx < nGws; idx++) {
+      for (var m = 0; m < state.moves.length; m++) {
+        if (state.moves[m].gwIdx === idx) {
+          var mv = state.moves[m];
+          squad = squad.map(function (p) { return p.id === mv.out.id ? mv.in : p; });
+        }
+      }
+      try {
+        var r = pickBestXi(squad, idx);
+        var xiSum = r.xi.reduce(function (s, p) { return s + _txpXp(p, idx); }, 0);
+        total += xiSum + (r.cap ? _txpXp(r.cap, idx) : 0);
+      } catch (e) { return null; }
+    }
+    return total - 4 * state.hits;
+  }
+  function _txpBaselineTotal(startIdx) {
+    return _txpRouteTotal({ moves: [], hits: 0 }, startIdx);
+  }
+
+  // ── Compute all three routes ──────────────────────────────────────────────
+  function _txpComputeRoutes() {
+    var tm = _txpMeta();
+    var startIdx = _txpGwIdx();
+    if (!tm || !tm.gw_range || !_txpLiveSquad()) return null;
+    var W = Math.min(TXP_WINDOW, tm.gw_range.length - startIdx);
+    if (W < 1) return null;
+
+    var onePerWeek = []; for (var w = 0; w < W; w++) onePerWeek.push(1);
+    var patientPlan = [0].concat(W > 1 ? [2] : []).concat(W > 2 ? [1] : []);
+
+    var model   = _txpBuildRoute(startIdx, onePerWeek, {}, true);
+    var patient = _txpBuildRoute(startIdx, patientPlan, {}, false);
+    var swing   = _txpBuildRoute(startIdx, onePerWeek,
+      { maxEo: TXP_EO_DIFF_MAX, minPerGw: TXP_DIFF_MIN_PERGW }, false);
+    if (!model || !patient || !swing) return null;
+
+    var base = _txpBaselineTotal(startIdx);
+    if (base == null) return null;
+    var mT = _txpRouteTotal(model, startIdx);
+    var pT = _txpRouteTotal(patient, startIdx);
+    var sT = _txpRouteTotal(swing, startIdx);
+    if (mT == null || pT == null || sT == null) return null;
+
+    return {
+      startIdx: startIdx, window: W,
+      lastGw: tm.gw_range[tm.gw_range.length - 1],
+      model:   { state: model,   delta: mT - base },
+      patient: { state: patient, delta: pT - base },
+      swing:   { state: swing,   delta: sT - base },
+    };
+  }
+
+  // ── Render ────────────────────────────────────────────────────────────────
+  function _txpStepHtml(step, showEo) {
+    var txt;
+    if (step.moves.length === 0) {
+      txt = '<span style="color:var(--muted);">Bank the free transfer</span>';
+    } else {
+      txt = step.moves.map(function (m) {
+        var eoTag = '';
+        if (showEo) {
+          var eo = _txpEo(m.in);
+          eoTag = ' <span style="font-size:.68rem;color:#B87A0E;font-weight:800;">'
+            + (Math.round(eo * 10) / 10) + '% ' + (_txpEoBaked() ? 'EO' : 'owned') + '</span>';
+        }
+        return _txpEsc(m.out.web_name || '?') + ' → <b style="color:#0F6E56;">'
+          + _txpEsc(m.in.web_name || '?') + '</b>' + eoTag;
+      }).join(' &nbsp;·&nbsp; ');
+    }
+    return '<div style="display:flex;gap:10px;align-items:baseline;margin:3px 0;font-size:.84rem;">'
+      + '<span style="flex:0 0 44px;font-size:.7rem;font-weight:800;color:var(--muted);letter-spacing:.4px;">GW' + step.gw + '</span>'
+      + '<span>' + txt + '</span></div>';
+  }
+
+  function _txpRiskLine(key, R, routes) {
+    var d = function (x) { return (Math.round(x * 10) / 10).toFixed(1); };
+    if (key === 'model') {
+      if (R.state.hits > 0)
+        return 'Includes a −4 hit — already netted out of the total, and it still leads.';
+      if (R.state.moves.length === 0)
+        return 'The engine sees no upgrade worth a move — bank and let the FT stack.';
+      return 'Steady route. No hits; prices are today’s — early moves lock value.';
+    }
+    if (key === 'patient') {
+      var giveUp = routes.model.delta - R.delta;
+      if (R.state.moves.length === 0)
+        return 'Nothing clears the bar even with two FTs — full patience, keep stacking.';
+      if (giveUp > 0.05)
+        return 'Gives up ~' + d(giveUp) + ' xPts vs the pick to see this week’s team news before committing a free double move.';
+      return 'Costs nothing vs the pick — and you see this week’s team news before committing.';
+    }
+    // swing
+    var below = routes.model.delta - R.delta;
+    if (R.state.moves.length === 0)
+      return 'No low-EO player clears the quality bar right now — a differential for its own sake is just a worse team.';
+    var src = _txpEoBaked() ? 'under ' + TXP_EO_DIFF_MAX + '% EO near the top of the game' : 'under ' + TXP_EO_DIFF_MAX + '% owned';
+    return (below > 0.05 ? '~' + d(below) + ' xPts below the pick, but every incoming player is ' + src
+      : 'Matches the pick AND every incoming player is ' + src)
+      + ' — the route if you’re chasing rank, not protecting it.';
+  }
+
+  // First actionable step of a route → Apply button descriptor.
+  function _txpApplyDescriptor(R, startIdx) {
+    var w0moves = R.state.moves.filter(function (m) { return m.w === 0; });
+    if (_txpRolledNow(startIdx)) return { kind: 'none', label: 'FT already rolled this week ✓' };
+    if (w0moves.length > 0) {
+      var mv = w0moves[0];
+      var hit = (_txpFtsNow(startIdx) === 0);
+      return {
+        kind: 'move', inId: mv.in.id, outId: mv.out.id,
+        label: 'Apply GW' + _txpMeta().gw_range[startIdx] + ' move: '
+          + (mv.out.web_name || '?') + ' → ' + (mv.in.web_name || '?') + (hit ? ' (−4 hit)' : ''),
+      };
+    }
+    return { kind: 'roll', label: 'Roll the FT now' };
+  }
+
+  function _txpCardHtml(key, R, routes, startIdx, lastGw, best) {
+    var tags = {
+      model:   { txt: 'MODEL’S PICK', style: 'background:#1D9E75;color:#fff;' },
+      patient: { txt: 'PATIENT',          style: 'background:#F1EFE8;color:var(--text);border:1px solid var(--border);' },
+      swing:   { txt: '⚡ RANK SWING', style: 'background:#FBF0DA;color:#B87A0E;border:1px solid #E8B54A;' },
+    };
+    var tag = tags[key];
+    var stepsHtml = R.state.steps.map(function (s) { return _txpStepHtml(s, key === 'swing'); }).join('');
+    var ad = _txpApplyDescriptor(R, startIdx);
+    var btn;
+    if (ad.kind === 'none') {
+      btn = '<div style="margin-top:10px;font-size:.75rem;color:var(--muted);font-weight:700;">' + _txpEsc(ad.label) + '</div>';
+    } else {
+      btn = '<button class="txp-apply" data-kind="' + ad.kind + '"'
+        + (ad.kind === 'move' ? ' data-in="' + ad.inId + '" data-out="' + ad.outId + '"' : '')
+        + ' style="margin-top:10px;width:100%;border:none;border-radius:7px;padding:8px 12px;font-size:.78rem;font-weight:800;cursor:pointer;'
+        + (best ? 'background:#1D9E75;color:#fff;' : 'background:var(--bg);color:var(--text);border:1px solid var(--border);')
+        + '">' + _txpEsc(ad.label) + '</button>';
+    }
+    var deltaTxt = (R.delta >= 0 ? '+' : '−') + Math.abs(R.delta).toFixed(1);
+    return '<div style="flex:1 1 240px;min-width:230px;background:var(--bg2);border:1px solid '
+      + (best ? '#1D9E75' : 'var(--border)') + ';border-radius:12px;padding:16px 18px;position:relative;'
+      + (best ? 'box-shadow:0 2px 10px rgba(29,158,117,.14);' : '') + '">'
+      + '<span style="display:inline-block;font-size:.64rem;font-weight:800;letter-spacing:.6px;padding:3px 9px;border-radius:5px;margin-bottom:9px;' + tag.style + '">' + tag.txt + '</span>'
+      + stepsHtml
+      + '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:10px;padding-top:9px;border-top:1px dashed var(--border);">'
+      +   '<span style="font-size:.68rem;color:var(--muted);font-weight:800;letter-spacing:.4px;">TOTAL TO GW' + lastGw + '</span>'
+      +   '<b style="font-size:1.02rem;color:' + (R.delta >= 0 ? '#0F6E56' : '#D93A2B') + ';">' + deltaTxt + ' xPts</b>'
+      + '</div>'
+      + (R.state.hits > 0 ? '<div style="font-size:.7rem;color:#D93A2B;font-weight:700;margin-top:2px;">includes ' + R.state.hits + ' × −4 hit (netted)</div>' : '')
+      + '<div style="font-size:.74rem;color:var(--muted);margin-top:7px;line-height:1.45;">' + _txpRiskLine(key, R, routes) + '</div>'
+      + btn
+      + '</div>';
+  }
+
+  // Chip planned inside the window → the tree owns chip weeks; be honest.
+  function _txpChipInWindow(startIdx, W) {
+    try {
+      var tm = _txpMeta();
+      var gws = [];
+      for (var w = 0; w < W; w++) if (startIdx + w < tm.gw_range.length) gws.push(tm.gw_range[startIdx + w]);
+      var wc = parseInt((document.getElementById('sel-wc') || {}).value || 0);
+      var fh = parseInt((document.getElementById('sel-fh') || {}).value || 0);
+      if (wc && gws.indexOf(wc) !== -1) return 'Wildcard';
+      if (fh && gws.indexOf(fh) !== -1) return 'Free Hit';
+    } catch (e) {}
+    return null;
+  }
+
+  function _txpPlanApplied() {
+    var meta = window._apexAppliedCardMeta;
+    if (meta) return true;
+    try {
+      if (typeof _planKey === 'function') {
+        var raw = localStorage.getItem(_planKey());
+        if (raw) {
+          var pl = JSON.parse(raw);
+          var tm = _txpMeta();
+          if (pl && pl.appliedCard && tm && +pl.gw0 === +tm.gw_range[0]) return true;
+        }
+      }
+    } catch (e) {}
+    return false;
+  }
+
+  window._renderTransferPaths = function () {
+    var body = document.getElementById('transfer-paths-body');
+    if (!body) return;
+    try {
+      var tm = _txpMeta();
+      if (!tm || !tm.gw_range || !_txpLiveSquad() || typeof pickBestXi !== 'function') { body.innerHTML = ''; return; }
+      if (_txpPlanApplied()) { body.innerHTML = ''; return; } // plan summary card owns the tab
+      var startIdx = _txpGwIdx();
+      var W = Math.min(TXP_WINDOW, tm.gw_range.length - startIdx);
+      var chip = _txpChipInWindow(startIdx, W);
+      var head = '<div class="section-title" style="margin-top:2rem;">🛣 Transfer paths — three routes, not three moves</div>';
+      if (chip) {
+        body.innerHTML = head
+          + '<div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:18px 20px;font-size:.85rem;color:var(--muted);">'
+          + 'You’ve planned a <b>' + chip + '</b> inside the next ' + W + ' gameweeks — chip weeks reshape the whole squad, so staged routes would mislead. '
+          + '<a href="#" class="txp-tree-link" style="color:#1D9E75;font-weight:700;">Open the plan-ahead tree →</a> — it prices chips properly.</div>';
+        _txpBind(body);
+        return;
+      }
+      var routes = _txpComputeRoutes();
+      if (!routes) { body.innerHTML = ''; return; }
+      var order = ['model', 'patient', 'swing'];
+      var bestKey = order.reduce(function (a, b) { return routes[b].delta > routes[a].delta ? b : a; }, 'model');
+      var cards = order.map(function (k) {
+        return _txpCardHtml(k, routes[k], routes, routes.startIdx, routes.lastGw, k === bestKey);
+      }).join('');
+      body.innerHTML = head
+        + '<p class="muted" style="font-size:.8rem;margin:0 0 12px;">Staged over the next ' + routes.window
+        + ' gameweeks · totals run to GW' + routes.lastGw + ' vs making no transfers, hits already netted · Apply stages the first step only — later moves are re-checked every week as prices and news land.</p>'
+        + '<div style="display:flex;gap:12px;flex-wrap:wrap;align-items:stretch;">' + cards + '</div>'
+        + '<p style="font-size:.76rem;color:var(--muted);margin:10px 0 0;">Want to branch it yourself? '
+        + '<a href="#" class="txp-tree-link" style="color:#1D9E75;font-weight:700;">Open the full plan-ahead tree →</a></p>';
+      _txpBind(body);
+    } catch (e) {
+      try { body.innerHTML = ''; } catch (e2) {}
+    }
+  };
+
+  // ── Events (delegated — names with apostrophes make inline onclick fragile) ─
+  function _txpBind(body) {
+    if (body._txpBound) return;
+    body._txpBound = true;
+    body.addEventListener('click', function (ev) {
+      var t = ev.target;
+      var link = t.closest ? t.closest('.txp-tree-link') : null;
+      if (link) { ev.preventDefault(); _txpOpenTree(); return; }
+      var btn = t.closest ? t.closest('.txp-apply') : null;
+      if (!btn) return;
+      ev.preventDefault();
+      var kind = btn.getAttribute('data-kind');
+      try {
+        if (kind === 'move' && typeof _applyTransferRec === 'function') {
+          _applyTransferRec(parseInt(btn.getAttribute('data-in'), 10), parseInt(btn.getAttribute('data-out'), 10));
+        } else if (kind === 'roll' && typeof _rollFT === 'function') {
+          _rollFT();
+        }
+        // Both paths call renderTransfers → the hook re-renders these cards
+        // against the new live state; move two becomes next week's move one.
+      } catch (e) {}
+    });
+  }
+
+  // Deep-link to the plan-ahead tree — same busy-guarded async pattern the
+  // Solve flow uses; safe no-op if the planner isn't in this bake.
+  function _txpOpenTree() {
+    try {
+      if (window._ppComputeBusy) return;
+      if (typeof _openPathPlannerFromCurrent !== 'function') return;
+      window._ppComputeBusy = true;
+      try { if (typeof _ppShowComputing === 'function') _ppShowComputing('Planning transfers…'); } catch (e) {}
+      (async function () {
+        try { await _openPathPlannerFromCurrent(_txpGwIdx()); }
+        finally {
+          window._ppComputeBusy = false;
+          try { if (typeof _ppHideComputing === 'function') _ppHideComputing(); } catch (e) {}
+        }
+      })();
+    } catch (e) { window._ppComputeBusy = false; }
+  }
+
+  // Test hooks (node harness only — harmless in the browser).
+  window._txpTestHooks = {
+    bestMove: _txpBestMove, buildRoute: _txpBuildRoute, routeTotal: _txpRouteTotal,
+    newState: _txpNewState, computeRoutes: _txpComputeRoutes, eo: _txpEo, sell: _txpSell,
+  };
+})();
+
+</script>
+
 <!-- GLPK WASM bootstrap — loads the solver library from jsdelivr CDN (zero-cost
      static hosting friendly). Works from file:// and https:// equally. -->
 <script type="module">
@@ -10011,7 +10506,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1783005346-GW32-b8b07348";
+const BUILD_VERSION = "1783006524-GW32-b8b07348";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -12619,6 +13114,9 @@ function evaluateRollVsTransfer(thisGwIdx) {
 
 // ──── Transfer Recommendations ────
 function renderTransfers(recs) {
+  // Transfer Paths cards follow every recs re-render (GW nav, apply, roll,
+  // preset change) — after this frame so they never block the recs paint.
+  try { setTimeout(function () { if (window._renderTransferPaths) window._renderTransferPaths(); }, 0); } catch (_eTxp) {}
   const section = document.getElementById('transfers-section');
   // 2026-06-11 P2 fix: when a FULL PLAN is applied (plan-ahead tree), this
   // tab's single-move recs are computed against a squad whose transfers are
@@ -19119,7 +19617,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1783005346-GW32-b8b07348</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1783006524-GW32-b8b07348</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
