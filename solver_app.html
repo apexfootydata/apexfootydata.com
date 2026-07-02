@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-07-02T00:21:34">
+<meta name="apex-gw" content="32" data-built-at="2026-07-02T10:19:48">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -3686,6 +3686,35 @@ button.secondary, .btn-secondary, .va-btn-secondary {
   opacity: 1 !important;
 }
 /* ═══ APEX_PITCH_TEXT:END ═══ */
+
+/* ═══ APEX_PROFILE_BADGES:START ═══ 2026-07-01 score-profile corner markers ═══ */
+/* Small circle top-right of the shirt: amber bolt = explosive, pale-teal
+   shield = steady, neutral "=" = balanced. Derived from baked xp_sd — no new
+   data. Muted variants sit quiet; only amber pulls the eye (by design). */
+.prof-badge {
+  position: absolute;
+  top: -5px;
+  right: -7px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.66rem;
+  font-weight: 800;
+  border: 1.5px solid #ffffff;
+  z-index: 4;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  pointer-events: none;
+}
+.prof-badge.prof-expl   { background: #E8A020; color: #1E1E1A; }
+.prof-badge.prof-steady { background: #DCF0E7; color: #0E6B4F; }
+.prof-badge.prof-bal    { background: #E9E7DD; color: #4A4840; opacity: 0.92; }
+@media (max-width: 640px) {
+  .prof-badge { width: 16px; height: 16px; font-size: 0.56rem; top: -4px; right: -5px; }
+}
+/* ═══ APEX_PROFILE_BADGES:END ═══ */
 
 
 /* ═══ APEX_POOL_TABLE_TYPOGRAPHY:START ═══ 2026-06-02 bigger names + Plus Jakarta ═══ */
@@ -9873,7 +9902,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1782948094-GW32-b8b07348";
+const BUILD_VERSION = "1782983988-GW32-b8b07348";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -16689,6 +16718,43 @@ try {
   }
 } catch (_) {}
 
+// ── Score profile (2026-07-01): badge + spread from baked xp_sd. Season-
+// agnostic — derives from whatever arrays are baked (GW32 demo and 26/27
+// alike). Analytic normal approximation, no sampling. SQUAD_DATA players
+// don't carry sd, so fall back to the POOL_DATA entry by id (cached map).
+const _PROF_STEADY_CV = 0.70, _PROF_BAL_CV = 0.90, _PROF_MIN_XP = 2.0;
+let _profPoolById = null;
+function _profNormCdf(z) {
+  const t = 1 / (1 + 0.2316419 * Math.abs(z));
+  const d = 0.3989423 * Math.exp(-z * z / 2);
+  const pr = d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274))));
+  return z > 0 ? 1 - pr : pr;
+}
+function _apexProfile(p, gwIdx) {
+  try {
+    if (!p) return null;
+    let src = p;
+    if (!Array.isArray(p.xp_sd_per_gw) && p.xp_sd == null) {
+      if (!_profPoolById) {
+        _profPoolById = {};
+        (typeof POOL_DATA !== 'undefined' && POOL_DATA || []).forEach(q => { _profPoolById[q.id] = q; });
+      }
+      src = _profPoolById[p.id] || p;
+    }
+    const xp = _xpAt(p, gwIdx);
+    const sdArr = Array.isArray(src.xp_sd_per_gw) ? src.xp_sd_per_gw : null;
+    const sd = +(((sdArr && sdArr[gwIdx] != null) ? sdArr[gwIdx] : src.xp_sd) || 0);
+    if (!(xp >= _PROF_MIN_XP) || !(sd > 0) || !isFinite(sd)) return null;
+    const cv = sd / xp;
+    const cls = cv <= _PROF_STEADY_CV ? 'steady' : (cv <= _PROF_BAL_CV ? 'bal' : 'expl');
+    const label = cls === 'steady' ? 'Steady' : (cls === 'bal' ? 'Balanced' : 'Explosive');
+    const pAbove = (t) => 1 - _profNormCdf((t - xp) / sd);   // P(score > t)
+    const blank = Math.round(100 * (1 - pAbove(3.5)));       // 3 or fewer
+    const haul = Math.round(100 * pAbove(9.5));              // 10 plus
+    return { cls: cls, label: label, cv: cv, blank: blank, haul: haul, xp: xp, sd: sd };
+  } catch (_e) { return null; }
+}
+
 function _shirtHtml(p, isXi) {
   const isCap = p.id === _capId;
   const isVc  = p.id === _vcId;
@@ -16716,6 +16782,17 @@ function _shirtHtml(p, isXi) {
     badges += '<span class="shirt-badge cap-badge">C</span>';
   } else if (isVc && isXi) {
     badges += '<span class="shirt-badge vc-badge">V</span>';
+  }
+  // Score-profile corner marker (2026-07-01): amber bolt = explosive, teal
+  // shield = steady, "=" = balanced. Hover title carries blank/haul odds.
+  const _prof = _apexProfile(p, activeGwIdx);
+  if (_prof) {
+    const _pg = _prof.cls === 'expl'
+      ? '<svg viewBox="0 0 24 24" width="11" height="11" fill="#1E1E1A"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z"/></svg>'
+      : (_prof.cls === 'steady'
+        ? '<svg viewBox="0 0 24 24" width="11" height="11" fill="#0E6B4F"><path d="M12 2l8 3v6c0 5-3.5 9.2-8 11-4.5-1.8-8-6-8-11V5l8-3z"/></svg>'
+        : '=');
+    badges += `<span class="prof-badge prof-${_prof.cls}" title="${_prof.label} profile — blank risk ${_prof.blank}%, haul (10+) ${_prof.haul}%">${_pg}</span>`;
   }
   // TC glow only fires for XI captain or XI vice. If _capId transiently points
   // to a benched player during a swap, we don't pulse — bench can't be triple-captained.
@@ -18701,7 +18778,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1782948094-GW32-b8b07348</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1782983988-GW32-b8b07348</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
