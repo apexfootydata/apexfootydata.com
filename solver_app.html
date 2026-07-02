@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-07-02T11:26:32">
+<meta name="apex-gw" content="32" data-built-at="2026-07-02T11:35:53">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -3694,11 +3694,13 @@ button.secondary, .btn-secondary, .va-btn-secondary {
 .prof-badge {
   position: absolute;
   /* card-relative since 07-02 (was shirt-wrap-relative): column top, exactly
-     above the ⏱ (top 18px) and ✕ (top 41px) hover circles. */
+     above the ⏱ and ✕ hover circles. UNIFORM SPEC: every circle in the column
+     is 22px border-box with a 1.5px white ring — equal size, equal 5px gaps. */
   top: -5px;
   right: -6px;
-  width: 20px;
-  height: 20px;
+  box-sizing: border-box;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -3757,25 +3759,39 @@ button.secondary, .btn-secondary, .va-btn-secondary {
   }
 }
 /* Utility COLUMN beside the shirt (2026-07-02, per Marcus's sketch): one
-   vertical line of same-size circles down the right side — ⚡ profile badge
-   on top (always visible), then ⏱, then ✕ (hover-revealed), all 20px. */
-.shirt .pp-xmins-btn {
-  top: 18px !important;
+   vertical line of IDENTICAL circles down the right side — ⚡ profile badge
+   on top (always visible), then ⏱, then ✕ (hover-revealed).
+   UNIFORM SPEC (all three): 22px border-box, 1.5px white ring, same shadow,
+   right -6px, tops -5 / 22 / 49 = equal 5px gaps. Doubled classes so this
+   outranks each button's own !important base rules. */
+.shirt .pp-xmins-btn.pp-xmins-btn,
+.shirt .pp-remove-btn.pp-remove-btn {
+  box-sizing: border-box !important;
+  width: 22px !important;
+  height: 22px !important;
   right: -6px !important;
   left: auto !important;
-  width: 20px !important;
-  height: 20px !important;
-  line-height: 20px !important;
-  font-size: 0.7rem !important;
+  border: 1.5px solid #ffffff !important;
+  border-radius: 50% !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: 1 !important;
+  padding: 0 !important;
+  font-size: 0.72rem !important;
+  transform: none !important;
 }
-.shirt .pp-remove-btn {
-  top: 41px !important;
-  right: -6px !important;
-  left: auto !important;
-  width: 20px !important;
-  height: 20px !important;
-  line-height: 20px !important;
-  font-size: 0.68rem !important;
+.shirt .pp-xmins-btn.pp-xmins-btn {
+  top: 22px !important;
+  background: rgba(15, 23, 42, 0.88) !important;
+  color: #ffffff !important;
+}
+.shirt .pp-remove-btn.pp-remove-btn {
+  top: 49px !important;
+  background: #D93A2B !important;   /* the .pitch * background-revert strips the
+                                       base red — re-assert or it renders bare */
+  color: #ffffff !important;
 }
 @media (max-width: 640px) {
   .prof-badge { width: 16px; height: 16px; font-size: 0.56rem; top: -4px; right: -5px; }
@@ -9968,7 +9984,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1782987992-GW32-b8b07348";
+const BUILD_VERSION = "1782988553-GW32-b8b07348";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -18847,7 +18863,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1782987992-GW32-b8b07348</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1782988553-GW32-b8b07348</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
