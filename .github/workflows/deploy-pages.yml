@@ -1,0 +1,34 @@
+name: Deploy site to Pages
+# 2026-07-02: replaces the managed 'pages build and deployment' pipeline.
+# WHY: GitHub's managed deploy has a fixed 10-minute timeout; this site's
+# deployments have been taking ~9-10+ min server-side to report healthy
+# (this morning's success: 9m43s), so afternoon deploys all died with
+# 'Timeout reached, aborting!' and the live site went stale. Here WE own
+# the timeout (30 min). Pure static site - no build step, just upload+deploy.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+concurrency:
+  group: pages
+  cancel-in-progress: true
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+      - id: deployment
+        uses: actions/deploy-pages@v4
+        with:
+          timeout: 1800000
+          error_count: 30
