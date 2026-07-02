@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-07-02T10:42:07">
+<meta name="apex-gw" content="32" data-built-at="2026-07-02T10:52:08">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -3723,6 +3723,37 @@ button.secondary, .btn-secondary, .va-btn-secondary {
 .pitch .prof-badge.prof-expl   { background: #E8A020 !important; }
 .pitch .prof-badge.prof-steady { background: #DCF0E7 !important; }
 .pitch .prof-badge.prof-bal    { background: #E9E7DD !important; }
+
+/* ── Hover-reveal utilities (2026-07-02, from the pitch-redesign mock) ──
+   ✕ / ⏱ / ? are rare-use controls: hidden at rest, revealed on card hover.
+   Frees the corners so the profile badge + armband read clean.
+   Touch devices have no hover — keep the buttons always visible there. */
+/* !important throughout: .pp-xmins-btn carries its own `opacity: 0.7 !important`
+   which silently beats a plain hide rule (live-debugged 2026-07-02). */
+.shirt .pp-remove-btn,
+.shirt .pp-xmins-btn,
+.shirt .pp-why-btn {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transition: opacity 0.12s ease;
+}
+.shirt:hover .pp-remove-btn,
+.shirt:hover .pp-xmins-btn,
+.shirt:hover .pp-why-btn,
+.shirt:focus-within .pp-remove-btn,
+.shirt:focus-within .pp-xmins-btn,
+.shirt:focus-within .pp-why-btn {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+@media (hover: none) {
+  .shirt .pp-remove-btn,
+  .shirt .pp-xmins-btn,
+  .shirt .pp-why-btn {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+}
 @media (max-width: 640px) {
   .prof-badge { width: 16px; height: 16px; font-size: 0.56rem; top: -4px; right: -5px; }
 }
@@ -9914,7 +9945,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1782985327-GW32-b8b07348";
+const BUILD_VERSION = "1782985928-GW32-b8b07348";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -18790,7 +18821,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1782985327-GW32-b8b07348</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1782985928-GW32-b8b07348</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
