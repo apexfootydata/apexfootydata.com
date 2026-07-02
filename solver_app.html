@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-07-02T16:35:24">
+<meta name="apex-gw" content="32" data-built-at="2026-07-02T16:51:36">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -5332,6 +5332,39 @@ body, html {
 #view-chip-select .cs-card-state { display: none !important; }
 #view-chip-select .cs-card-used .cs-card-name { text-decoration: none !important; }
 
+
+/* ═══ APEX_RAIL_COMPACT:START ═══ 2026-07-02 rail fits one screen, no inner scroll ═══
+   Marcus: "why doesn't everything fit on the right side without scroll?" The 06-09
+   "roomy rail" pass sized Engine-picks/buttons/hero for presence; on his viewport the
+   stack now runs a few % past the rail's calc(100dvh−96px) cap, so the internal
+   safety-valve scrollbar appears. This pass shaves ~10% air + type from the tall
+   items only — same layout, same hierarchy. MUST sit at END of file: equal-specificity
+   !important rules → last declared wins over the roomy block (~:4495-4514).
+   Desktop two-pane only; pool/brief/mobile untouched. */
+@media (min-width: 1025px) {
+  /* Engine picks card — the tallest rail item: tighter title, rows, type */
+  .va-solio-rail .va-reco-title { font-size: clamp(1.05rem, 1.25vw, 1.4rem) !important; margin-bottom: 8px !important; }
+  .va-solio-rail .va-reco-row { padding: 4px 0 !important; gap: 12px !important; }
+  .va-solio-rail .va-reco-move { font-size: clamp(1.0rem, 1.15vw, 1.3rem) !important; }
+  .va-solio-rail .va-reco-gain { font-size: clamp(1.05rem, 1.25vw, 1.4rem) !important; }
+  .va-solio-rail > #solve-banner:not(:empty) { padding: 12px 16px !important; }
+  /* Risk boxes + action buttons */
+  .va-solio-rail #aps-wrap-team button { padding: 9px 14px !important; font-size: clamp(0.88rem, 0.95vw, 1.05rem) !important; }
+  .va-solio-rail #va-solve-actions { margin: 4px 0 6px !important; }
+  .va-solio-rail #va-solve-actions .solve-btn { padding: 13px 20px !important; font-size: clamp(1.0rem, 1.15vw, 1.25rem) !important; }
+  .va-solio-rail .reset-btn { padding: 9px 20px !important; font-size: 0.95rem !important; }
+  .va-solio-rail #see-all-options-link { font-size: 0.95rem !important; }
+  /* Hero (GW xPts + range curve) */
+  .va-solio-rail .va-card-value-hero { font-size: clamp(28px, 2vw, 38px) !important; padding: 5px 14px !important; }
+  .va-solio-rail .va-range-title { font-size: clamp(14px, 1.1vw, 18px) !important; }
+  .va-solio-rail .va-range-plot { height: clamp(44px, 6vh, 100px) !important; margin: 4px 0 2px !important; }
+  .va-solio-rail .va-card-hero { padding: 6px 14px !important; }
+  /* Stat strip + overall rail rhythm */
+  .va-solio-rail .va-strip-val { font-size: clamp(1.1rem, 1.4vw, 1.6rem) !important; }
+  .va-solio-rail { gap: 4px !important; }
+}
+/* ═══ APEX_RAIL_COMPACT:END ═══ */
+
 </style>
 <!-- Cookie consent + conditional Google Analytics 4 loader -->
 <script>
@@ -10506,7 +10539,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1783006524-GW32-b8b07348";
+const BUILD_VERSION = "1783007496-GW32-b8b07348";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -19617,7 +19650,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1783006524-GW32-b8b07348</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1783007496-GW32-b8b07348</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
