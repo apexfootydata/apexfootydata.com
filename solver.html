@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="apex-gw" content="38">
+<meta name="apex-gw" content="32">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
 <link rel="shortcut icon" type="image/x-icon" href="favicon.ico?v=2">
 <title>Free FPL Solver — Transfers, Chips &amp; Rank Predictor | FPL Apex</title>
@@ -1465,15 +1465,19 @@ a[href*="rank_milestones"] {
                 '</div>' +
                 '<div class="apex-footer-links">' +
                     '<a href="https://x.com/FPLApexHQ" target="_blank" rel="noopener">X / Twitter</a>' +
-                    '<a href="mailto:contact@apexfootydata.com">Email</a>' +
+                    // 2026-07-02: contact moved to the live domain (ImprovMX forward).
+                    // The old apexfootydata.com inbox dies with the O365 cancellation.
+                    '<a href="mailto:contact@fplapex.com">Email</a>' +
                 '</div>' +
             '</div>' +
             '<div class="apex-footer-row">' +
                 '<span class="apex-footer-copy">&copy; 2026 FPL Apex</span>' +
                 '<span class="apex-footer-legal">' +
-                    '<a href="mailto:contact@apexfootydata.com">Contact</a>' +
+                    '<a href="mailto:contact@fplapex.com">Contact</a>' +
                     '<span class="apex-footer-legal-sep">&middot;</span>' +
-                    '<a href="#" onclick="alert(\'Privacy: FPL Apex uses Cloudflare Analytics and Google Analytics 4 for traffic measurement only. No personal data sold or shared. Cookie consent collected on first visit. Contact: contact@apexfootydata.com to request data deletion.\'); return false;">Privacy</a>' +
+                    // 2026-07-02: real privacy page replaces the alert() popup
+                    // (looked broken/dev-mode; not linkable; blocked by some browsers).
+                    '<a href="/privacy.html">Privacy</a>' +
                 '</span>' +
             '</div>';
         document.body.appendChild(f);

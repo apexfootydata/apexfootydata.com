@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-07-02T19:30:05">
+<meta name="apex-gw" content="32" data-built-at="2026-07-03T10:25:28">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/x-icon" href="favicon.ico?v=3">
@@ -1335,6 +1335,7 @@
             <div id="fpl-offer-teaser" style="display:none;background:#fff;border:1px solid #D9D7CC;border-radius:12px;padding:20px 18px 14px;max-width:680px;margin:0 auto 22px;text-align:left;">
                 <div style="font-size:13px;font-weight:800;color:#0f172a;letter-spacing:0.04em;text-transform:uppercase;margin-bottom:10px;">
                     Most dangerous players this gameweek
+                    <span style="background:#F1EFE8;color:#7a8783;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;vertical-align:middle;margin-left:6px;letter-spacing:0.06em;">GW32 · FINAL</span>
                 </div>
                 <table style="width:100%;border-collapse:collapse;font-size:13px;">
                     <thead>
@@ -2222,6 +2223,11 @@
             if (!iso) return null;
             const d = new Date(iso);
             if (isNaN(d.getTime())) return null;
+            // 2026-07-02 (premium sweep): the pipeline stamps synthetic fixtures
+            // with a sentinel "2000-01-01" kickoff — cards were showing a fake
+            // "SAT 01.01 · 19:00" to every visitor. No date beats a wrong date:
+            // fall back to the GW-label stripe (renderer already handles null).
+            if (d.getFullYear() < 2010) return null;
             const DAYS = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
             return {
                 dow: DAYS[d.getDay()],
@@ -2592,8 +2598,35 @@
         }
         function _offsRender(arr, hi, bi, hl, pi) {
             var he=document.getElementById(hi), be=document.getElementById(bi);
-            if(he) he.innerHTML = _offsHead();
-            if(be) be.innerHTML = arr.map(function(p){return _offsRow(p,hl);}).join('');
+            // 2026-07-02 (premium sweep): the 26/27 SITE_DATA re-inject switched the
+            // player arrays back to per-GW heatmap shape ({name, team, gw:[...], total})
+            // while this offseason renderer expected flat season totals (p.pos/p.xG/...).
+            // p.xG.toFixed then threw mid-map → headers rendered, ZERO rows (the
+            // "dead empty table" every visitor saw). Detect the shape and render a
+            // clean projected-totals list for heatmap data; keep the old row for
+            // flat data; never leave the table empty.
+            var isHeat = arr && arr.length && arr[0] && arr[0].gw !== undefined;
+            var lbl = hl==='goals' ? 'Projected goals' : hl==='assists' ? 'Projected assists' : 'Projected involvements';
+            try {
+                if (isHeat) {
+                    if(he) he.innerHTML = '<tr>' +
+                        '<th style="text-align:left;padding:14px 12px;">Player</th>' +
+                        '<th style="text-align:left;padding:14px 12px;">Team</th>' +
+                        '<th style="text-align:right;padding:14px 12px;">' + lbl + '</th></tr>';
+                    if(be) be.innerHTML = arr.map(function(p){
+                        return '<tr style="border-bottom:1px solid #e5e7eb;">' +
+                            '<td style="padding:14px 12px;font-weight:700;color:#0f172a;">' + p.name + '</td>' +
+                            '<td style="padding:14px 12px;">' + getTeamNameWithBadge(p.team) + '</td>' +
+                            '<td style="text-align:right;padding:14px 12px;font-weight:800;color:#1D9E75;font-variant-numeric:tabular-nums;">' + (+p.total).toFixed(1) + '</td></tr>';
+                    }).join('');
+                } else {
+                    if(he) he.innerHTML = _offsHead();
+                    if(be) be.innerHTML = arr.map(function(p){return _offsRow(p,hl);}).join('');
+                }
+            } catch (e) {
+                console.warn('[render] player table fell back:', e);
+                if(be) be.innerHTML = '<tr><td style="padding:16px;color:#64748b;">Player projections return with the new season’s data.</td></tr>';
+            }
             var pe=document.getElementById(pi); if(pe) pe.style.display='none';
         }
         window.renderPlayerGoals   = function(){ _offsRender(PLAYER_GOALS,   'playerGoalsHead',   'playerGoalsTable',   'goals',   'paginationGoals'); };
@@ -3203,15 +3236,19 @@ a[href*="rank_milestones"] {
                 '</div>' +
                 '<div class="apex-footer-links">' +
                     '<a href="https://x.com/FPLApexHQ" target="_blank" rel="noopener">X / Twitter</a>' +
-                    '<a href="mailto:contact@apexfootydata.com">Email</a>' +
+                    // 2026-07-02: contact moved to the live domain (ImprovMX forward).
+                    // The old apexfootydata.com inbox dies with the O365 cancellation.
+                    '<a href="mailto:contact@fplapex.com">Email</a>' +
                 '</div>' +
             '</div>' +
             '<div class="apex-footer-row">' +
                 '<span class="apex-footer-copy">&copy; 2026 FPL Apex</span>' +
                 '<span class="apex-footer-legal">' +
-                    '<a href="mailto:contact@apexfootydata.com">Contact</a>' +
+                    '<a href="mailto:contact@fplapex.com">Contact</a>' +
                     '<span class="apex-footer-legal-sep">&middot;</span>' +
-                    '<a href="#" onclick="alert(\'Privacy: FPL Apex uses Cloudflare Analytics and Google Analytics 4 for traffic measurement only. No personal data sold or shared. Cookie consent collected on first visit. Contact: contact@apexfootydata.com to request data deletion.\'); return false;">Privacy</a>' +
+                    // 2026-07-02: real privacy page replaces the alert() popup
+                    // (looked broken/dev-mode; not linkable; blocked by some browsers).
+                    '<a href="/privacy.html">Privacy</a>' +
                 '</span>' +
             '</div>';
         document.body.appendChild(f);

@@ -15,4 +15,16 @@
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
+  <!-- evaluation.html deliberately omitted while it carries noindex (preview
+       scaffold until 26/27 real data lands) — add it back when noindex drops. -->
+  <url>
+    <loc>https://fplapex.com/defcon_tracker.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://fplapex.com/privacy.html</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.1</priority>
+  </url>
 </urlset>

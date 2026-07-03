@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-07-02T19:30:16">
+<meta name="apex-gw" content="32" data-built-at="2026-07-03T10:25:38">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -2201,7 +2201,7 @@ body {
   cursor: pointer;
   transition: background 0.15s;
 }
-.why-modal-close:hover { background: #fb923c; }
+.why-modal-close:hover { background: #1D9E75; } /* 2026-07-02: was orange #fb923c — pre-teal fossil */
 
 /* Empty slot placeholder */
 .pp-empty-slot {
@@ -2414,7 +2414,7 @@ body {
   text-transform: uppercase;
   margin-bottom: 12px;
 }
-.va-card-hero .va-card-label { color: #fb923c; }
+.va-card-hero .va-card-label { color: #0F6E56; } /* 2026-07-02: was orange #fb923c — pre-teal fossil */
 .va-card-value {
   font-family: 'JetBrains Mono', ui-monospace, monospace;
   font-size: 2rem;
@@ -5648,7 +5648,7 @@ html.apex-offseason #view-landing .hero-sub::after {
     <div id="aps-wrap-team" class="aps-wrap" style="display:none;">
       <div class="aps-head">
         <h2 class="aps-title">Choose your strategy</h2>
-        <span class="aps-beta">Beta</span>
+        <span class="aps-beta">New</span>
       </div>
       <p class="aps-sub">One tap sets the solver's risk profile. · <span class="aps-sub-default">Balanced by default</span></p>
       <div class="aps-grid" id="aps-grid-team">
@@ -6189,7 +6189,7 @@ html.apex-offseason #view-landing .hero-sub::after {
       <div id="aps-wrap" class="aps-wrap" style="display:none;">
         <div class="aps-head">
           <h2 class="aps-title">Choose your strategy</h2>
-          <span class="aps-beta">Beta</span>
+          <span class="aps-beta">New</span>
         </div>
         <p class="aps-sub">One tap sets the solver's risk profile. · <span class="aps-sub-default">Balanced by default</span></p>
         <div class="aps-grid" id="aps-grid">
@@ -6441,7 +6441,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 
     <!-- Rival Mode (Phase 2, BETA) — head-to-head vs one mini-league rival -->
     <div id="rival-mode-card" style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:22px 26px;margin-bottom:22px;">
-      <div style="font-size:1.15rem;font-weight:800;margin-bottom:4px;">Beat a rival this week <span style="font-size:.68rem;font-weight:700;color:#000;background:var(--accent,#1D9E75);border-radius:5px;padding:2px 7px;vertical-align:middle;">BETA</span></div>
+      <div style="font-size:1.15rem;font-weight:800;margin-bottom:4px;">Beat a rival this week <span style="font-size:.68rem;font-weight:700;color:#fff;background:var(--accent,#1D9E75);border-radius:5px;padding:2px 7px;vertical-align:middle;">NEW</span></div>
       <div style="color:var(--muted);font-size:.9rem;margin-bottom:14px;">Head-to-head vs one rival for the upcoming gameweek. Shared players cancel out; only your differentials and captain move the gap.</div>
       <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">
         <div style="flex:1;min-width:220px;">
@@ -10540,7 +10540,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1783017016-GW32-b8b07348";
+const BUILD_VERSION = "1783070738-GW32-b8b07348";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -16551,6 +16551,10 @@ function setBaseGw(btn) {
   try {
     const _tSec = document.getElementById('transfers-section');
     if (_tSec) { _tSec.style.display = 'none'; }
+    // Transfer Paths cards recompute for the NEW GW (audit fix 2026-07-02:
+    // they otherwise kept showing the previous GW's routes). Unlike the recs
+    // panel they're stateless + ~1ms, so an honest refresh beats hiding.
+    try { if (window._renderTransferPaths) window._renderTransferPaths(); } catch (_eTxp2) {}
     const _stat = document.getElementById('solve-status');
     if (_stat) _stat.textContent = '';
     // Also hide the chip squad banner — it's tied to the previous GW's Solve.
@@ -19651,7 +19655,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1783017016-GW32-b8b07348</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1783070738-GW32-b8b07348</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
@@ -19893,7 +19897,22 @@ document.addEventListener('DOMContentLoaded', () => {
       })
       .catch(function (err) {
         console.error('[apex-public] Boot failed:', err);
-        fail('Couldn\u2019t load team: ' + (err && err.message ? err.message : err));
+        // 2026-07-02 (premium sweep): never leak API paths / HTTP codes to the
+        // user — the raw err.message read like "FPL API 404 on /entry/…", the
+        // single biggest trust-killer in the audit. Full detail stays in the
+        // console line above for debugging. Classify into a human message and
+        // settle the progress bar so the page doesn't look hung.
+        var _m = String(err && err.message ? err.message : err || '');
+        var _human;
+        if (_m.indexOf('404') !== -1 && _m.indexOf('/entry/') !== -1) {
+          _human = 'We couldn\u2019t find a team with that ID. Double-check it on the FPL site (Points page \u2192 the number in the URL) and try again.';
+        } else if (_m.indexOf('Failed to fetch') !== -1 || _m.indexOf('NetworkError') !== -1 || _m.indexOf('timeout') !== -1) {
+          _human = 'The FPL servers didn\u2019t answer \u2014 they wobble around deadlines. Give it a minute and refresh.';
+        } else {
+          _human = 'Something went wrong loading your team. Refresh to try again \u2014 if it keeps happening, the FPL API may be down.';
+        }
+        try { var _b = document.getElementById('apex-bar'); if (_b) _b.style.width = '100%'; } catch (_e) {}
+        fail(_human);
       });
   });
 
@@ -20912,15 +20931,19 @@ a[href*="rank_milestones"] {
                 '</div>' +
                 '<div class="apex-footer-links">' +
                     '<a href="https://x.com/FPLApexHQ" target="_blank" rel="noopener">X / Twitter</a>' +
-                    '<a href="mailto:contact@apexfootydata.com">Email</a>' +
+                    // 2026-07-02: contact moved to the live domain (ImprovMX forward).
+                    // The old apexfootydata.com inbox dies with the O365 cancellation.
+                    '<a href="mailto:contact@fplapex.com">Email</a>' +
                 '</div>' +
             '</div>' +
             '<div class="apex-footer-row">' +
                 '<span class="apex-footer-copy">&copy; 2026 FPL Apex</span>' +
                 '<span class="apex-footer-legal">' +
-                    '<a href="mailto:contact@apexfootydata.com">Contact</a>' +
+                    '<a href="mailto:contact@fplapex.com">Contact</a>' +
                     '<span class="apex-footer-legal-sep">&middot;</span>' +
-                    '<a href="#" onclick="alert(\'Privacy: FPL Apex uses Cloudflare Analytics and Google Analytics 4 for traffic measurement only. No personal data sold or shared. Cookie consent collected on first visit. Contact: contact@apexfootydata.com to request data deletion.\'); return false;">Privacy</a>' +
+                    // 2026-07-02: real privacy page replaces the alert() popup
+                    // (looked broken/dev-mode; not linkable; blocked by some browsers).
+                    '<a href="/privacy.html">Privacy</a>' +
                 '</span>' +
             '</div>';
         document.body.appendChild(f);
