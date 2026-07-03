@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-07-03T10:25:38">
+<meta name="apex-gw" content="32" data-built-at="2026-07-03T11:12:44">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -4647,6 +4647,11 @@ body > footer.footer, body > #apex-site-footer { display: none !important; }
 /* Transfer Paths (2026-07-02) — routes block above the recs list; same gate. */
 #view-team.show-transfers #transfer-paths-section { display: block !important; }
 #view-team:not(.show-transfers) #transfer-paths-section { display: none !important; }
+/* Premium Four (2026-07-03): pinned-rival card is a Squad-view feature only;
+   the deadline bar (px-deadline-wrap) deliberately stays on every sub-tab. */
+#view-team.show-transfers #px-rival-wrap,
+#view-team.show-pool #px-rival-wrap,
+#view-team.show-brief #px-rival-wrap { display: none !important; }
 
 .va-team-header,
 .va-team-name-target,
@@ -5557,6 +5562,9 @@ html.apex-offseason #view-landing .hero-sub::after {
       <button type="button" class="va-tab" data-tab="brief" onclick="setSolverTab('brief')">Squad Brief</button>
     </div>
 
+    <!-- Premium Four (2026-07-03): deadline countdown + nudge bar, above the two-pane. -->
+    <div id="px-deadline-wrap"></div>
+
     <!-- ── SOLIO TWO-PANE: pitch (left) + decision rail (right). Collapses to
          the original single-column stack below 1024px. (2026-06-08) ── -->
     <div class="va-solio">
@@ -5732,6 +5740,9 @@ html.apex-offseason #view-landing .hero-sub::after {
          users won't miss. (moved 2026-04-29 per Marcus) -->
     <div id="model-confidence-wrap-squad"></div>
 
+    <!-- Premium Four (2026-07-03): pinned-rival persistent card, under the pitch. -->
+    <div id="px-rival-wrap"></div>
+
     <!-- Transfer Paths (2026-07-02) — three staged routes, rendered by
          assets/apex_paths.js above the weekly recs. Same show-transfers CSS
          gate as #transfers-section (see solver_style.css). -->
@@ -5744,6 +5755,8 @@ html.apex-offseason #view-landing .hero-sub::after {
     <section id="brief-section">
       <div style="max-width:720px;margin:0 auto;padding:6px 16px 40px;">
         <div id="squad-brief" style="display:none;margin-top:12px;padding:18px 22px;border-radius:12px;background:#FFFFFF;box-shadow:0 1px 4px rgba(0,0,0,.06);"></div>
+        <!-- Premium Four (2026-07-03): template-risk dial, under the Brief. -->
+        <div id="px-dial-wrap"></div>
       </div>
     </section>
     <section id="top-picks-section"></section>
@@ -6152,6 +6165,9 @@ html.apex-offseason #view-landing .hero-sub::after {
       <h2 class="cs-intro-title">Which chips are still in play?</h2>
       <p class="cs-intro-sub">Toggle off the ones you've already burned this season. We'll compute the optimal sequence for the rest.</p>
     </section>
+
+    <!-- Premium Four (2026-07-03): season chip calendar strip. -->
+    <div id="px-chipcal-wrap"></div>
 
     <div class="chip-selector-form">
       <div class="cs-card-grid">
@@ -10519,6 +10535,444 @@ html.apex-offseason #view-landing .hero-sub::after {
 
 </script>
 
+<!-- Premium Four (2026-07-03) — deadline bar, pinned rival, template dial, chip calendar. assets/apex_premium.js -->
+<script>
+// ═══════════════════════════════════════════════════════════════════════════
+// APEX PREMIUM FOUR (2026-07-03) — the four sign-off features from
+// outputs/mocks/apex_premium_five_mock.html (Sunday Text excluded per Marcus):
+//
+//   2. DEADLINE BAR   — countdown to the next FPL deadline + honest nudge
+//                       ("Your XI leaves X xPts on the bench · N fixes found")
+//                       → #px-deadline-wrap, top of the Squad view.
+//   3. PINNED RIVAL   — pick a nemesis once (from your smallest classic league),
+//                       persistent card shows the points gap every visit.
+//                       → #px-rival-wrap under the pitch. localStorage pin.
+//   4. TEMPLATE DIAL  — "You're NN% template" gauge + protect-or-chase read.
+//                       → #px-dial-wrap at the top of the Squad Brief tab.
+//   5. CHIP CALENDAR  — season strip GW1–38, both chip sets (halves split at
+//                       GW20 — 25/26 rule, VERIFY for 26/27), click a chip then
+//                       a GW to assign (drives the existing sel-wc/fh/bb/tc
+//                       dropdowns). → #px-chipcal-wrap in the Chip Planner.
+//
+// WIRING: generator reads+injects this file (rival/paths pattern — zero
+// f-string braces), adds the four container divs, and one setTimeout hook in
+// _renderPitchFromState calls window._pxRefresh(). Everything reads globals
+// lazily with typeof guards — this file must never throw at load, whatever
+// the bake shipped. All rules honoured from existing data; no new modelling.
+// ═══════════════════════════════════════════════════════════════════════════
+(function () {
+  'use strict';
+
+  // ── shared helpers ────────────────────────────────────────────────────────
+  function _gMeta() { return (typeof TEAM_META !== 'undefined') ? TEAM_META : null; }
+  function _gPool() { return (typeof POOL_DATA !== 'undefined' && Array.isArray(POOL_DATA)) ? POOL_DATA : []; }
+  function _gIdx()  { return (typeof activeGwIdx === 'number') ? activeGwIdx : 0; }
+  function _gXi()   {
+    try {
+      if (typeof _xiPlayers !== 'undefined' && Array.isArray(_xiPlayers) && _xiPlayers.length === 11) return _xiPlayers;
+    } catch (e) {}
+    return null;
+  }
+  function _gSquad() {
+    try {
+      if (typeof _xiPlayers !== 'undefined' && typeof _benchPlayers !== 'undefined') {
+        var s = _xiPlayers.concat(_benchPlayers);
+        if (s.length === 15) return s;
+      }
+    } catch (e) {}
+    return null;
+  }
+  function _xp(p, i) {
+    try { if (typeof _xpAt === 'function') return _xpAt(p, i) || 0; } catch (e) {}
+    var a = p.xp_per_gw || [p.xp || 0];
+    return i < a.length ? (a[i] || 0) : 0;
+  }
+  function _meId() {
+    try { if (typeof FPL_ID !== 'undefined' && FPL_ID) return FPL_ID; } catch (e) {}
+    try { if (typeof TEAM_META !== 'undefined' && TEAM_META && TEAM_META.entry_id) return TEAM_META.entry_id; } catch (e2) {}
+    return 0;
+  }
+  function _esc(s) {
+    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+  function _apiBase() {
+    try { if (typeof FPL_CORS_PROXY !== 'undefined' && FPL_CORS_PROXY) return FPL_CORS_PROXY; } catch (e) {}
+    return 'https://fantasy.premierleague.com/api';
+  }
+  function _fetchJson(path) {
+    return fetch(_apiBase() + path, { headers: { 'Accept': 'application/json' } })
+      .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); });
+  }
+
+  // ═══ 2 · DEADLINE BAR ═══════════════════════════════════════════════════
+  var _dlTimer = null;
+  var _dlDeadline;           // undefined = not fetched, null = none upcoming
+  function _dlFetch() {
+    if (_dlDeadline !== undefined) { _dlRender(); return; }
+    _dlDeadline = null; // only try once per page life
+    _fetchJson('/bootstrap-static/').then(function (bs) {
+      var now = Date.now();
+      var ev = (bs.events || []).filter(function (e) {
+        return e.deadline_time && new Date(e.deadline_time).getTime() > now;
+      })[0];
+      if (ev) _dlDeadline = { gw: ev.id, t: new Date(ev.deadline_time).getTime() };
+      _dlRender();
+    }).catch(function () { _dlRender(); });
+  }
+  function _dlNudge() {
+    // Bench-loss: current XI vs the optimal XI the engine would pick.
+    var out = { loss: 0, fixes: 0 };
+    try {
+      var squad = _gSquad(), xi = _gXi();
+      if (squad && xi && typeof pickBestXi === 'function') {
+        var idx = _gIdx();
+        var cur = 0, i;
+        for (i = 0; i < xi.length; i++) cur += _xp(xi[i], idx);
+        var best = pickBestXi(squad, idx);
+        var opt = 0;
+        for (i = 0; i < best.xi.length; i++) opt += _xp(best.xi[i], idx);
+        out.loss = Math.max(0, opt - cur);
+      }
+      if (typeof computeTransfers === 'function') {
+        out.fixes = (computeTransfers(_gIdx()) || []).length;
+      }
+    } catch (e) {}
+    return out;
+  }
+  function _dlRender() {
+    var wrap = document.getElementById('px-deadline-wrap');
+    if (!wrap) return;
+    try {
+      var n = _dlNudge();
+      var clock, when;
+      if (_dlDeadline) {
+        var ms = _dlDeadline.t - Date.now();
+        var d = Math.floor(ms / 86400000), h = Math.floor(ms % 86400000 / 3600000), m = Math.floor(ms % 3600000 / 60000);
+        clock = d + 'd ' + h + 'h ' + String(m).padStart(2, '0') + 'm';
+        when = 'GW' + _dlDeadline.gw + ' deadline · ' +
+          new Date(_dlDeadline.t).toLocaleString(undefined, { weekday: 'short', hour: '2-digit', minute: '2-digit' });
+        if (!_dlTimer) _dlTimer = setInterval(_dlRender, 30000);
+      } else {
+        clock = '—';
+        when = _dlDeadline === null ? 'No upcoming deadline — new-season fixtures land here' : 'Checking the next deadline…';
+      }
+      var nudge;
+      if (n.loss >= 0.5) {
+        nudge = '<button onclick="try{setSolverTab(\'squad\');if(typeof runOptimize===\'function\'){}}catch(e){}"' +
+          ' style="margin-left:auto;background:#FBF0DA;border:1px solid #E8B54A;color:#8a5f0a;font-size:.78rem;font-weight:700;border-radius:9px;padding:9px 14px;cursor:pointer;font-family:inherit;">' +
+          '⚠ Your XI leaves <b style="color:#B87A0E;">' + n.loss.toFixed(1) + ' xPts</b> on the bench' +
+          (n.fixes ? ' · <b style="color:#B87A0E;">' + n.fixes + ' fix' + (n.fixes > 1 ? 'es' : '') + ' found</b>' : '') + '</button>';
+      } else if (n.fixes > 0) {
+        nudge = '<button onclick="try{setSolverTab(\'transfers\')}catch(e){}"' +
+          ' style="margin-left:auto;background:#FBF0DA;border:1px solid #E8B54A;color:#8a5f0a;font-size:.78rem;font-weight:700;border-radius:9px;padding:9px 14px;cursor:pointer;font-family:inherit;">' +
+          '⚡ XI is set · <b style="color:#B87A0E;">' + n.fixes + ' transfer idea' + (n.fixes > 1 ? 's' : '') + '</b> waiting →</button>';
+      } else {
+        nudge = '<span style="margin-left:auto;background:#E7F6EF;border:1px solid #1D9E75;color:#0F6E56;font-size:.78rem;font-weight:700;border-radius:9px;padding:9px 14px;">✓ Squad optimised · nothing left on the bench</span>';
+      }
+      wrap.innerHTML =
+        '<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:#fff;border:1px solid #E7E2D8;border-radius:12px;padding:10px 16px;margin:0 0 10px;">' +
+        '<div><div style="font-family:\'JetBrains Mono\',monospace;font-weight:800;font-size:1.05rem;color:#0F6E56;">' + clock + '</div>' +
+        '<div style="font-size:.68rem;color:#7a8783;">' + _esc(when) + '</div></div>' + nudge + '</div>';
+    } catch (e) { try { wrap.innerHTML = ''; } catch (e2) {} }
+  }
+
+  // ═══ 3 · PINNED RIVAL ═══════════════════════════════════════════════════
+  function _pinKey() { return 'apex_rival_pin:' + _meId(); }
+  function _pinGet() {
+    try { var raw = localStorage.getItem(_pinKey()); return raw ? JSON.parse(raw) : null; } catch (e) { return null; }
+  }
+  function _pinSet(obj) { try { localStorage.setItem(_pinKey(), JSON.stringify(obj)); } catch (e) {} }
+  window._pxUnpin = function () { try { localStorage.removeItem(_pinKey()); } catch (e) {} _rivalRenderCard(); };
+
+  var _pinChoices = null, _pinBusy = false;
+  window._pxPickRival = function () {
+    if (_pinBusy) return;
+    var me = _meId();
+    if (!me) return;
+    _pinBusy = true;
+    _rivalRenderCard('Finding your mini-leagues…');
+    _fetchJson('/entry/' + me + '/').then(function (entry) {
+      var leagues = ((entry.leagues || {}).classic || []).filter(function (l) {
+        return l.league_type !== 's' && (l.rank_count == null || l.rank_count <= 200000);
+      });
+      leagues.sort(function (a, b) { return (a.rank_count || 1e9) - (b.rank_count || 1e9); });
+      if (!leagues.length) throw new Error('no classic leagues');
+      var lg = leagues[0];
+      return _fetchJson('/leagues-classic/' + lg.id + '/standings/').then(function (st) {
+        var rows = ((st.standings || {}).results || []).slice(0, 8);
+        _pinChoices = rows.filter(function (r) { return r.entry !== me; }).map(function (r) {
+          return { id: r.entry, name: r.player_name || r.entry_name, team: r.entry_name,
+                   total: r.total, rank: r.rank, league: lg.name, leagueId: lg.id };
+        });
+        _pinBusy = false;
+        _rivalRenderCard();
+      });
+    }).catch(function () { _pinBusy = false; _pinChoices = []; _rivalRenderCard(); });
+  };
+  window._pxPinChoice = function (i) {
+    var c = _pinChoices && _pinChoices[i];
+    if (!c) return;
+    var meTotal = _myLeagueTotal(c.leagueId);
+    _pinSet({ id: c.id, name: c.name, team: c.team, league: c.league, leagueId: c.leagueId,
+              rivalTotal: c.total, myTotal: meTotal, pinnedAt: new Date().toISOString().slice(0, 10) });
+    _pinChoices = null;
+    _rivalRenderCard();
+    _pinRefreshGap();
+  };
+  var _myTotals = {};
+  function _myLeagueTotal(leagueId) { return _myTotals[leagueId] || null; }
+  function _pinRefreshGap() {
+    var pin = _pinGet();
+    if (!pin || !pin.leagueId) return;
+    _fetchJson('/leagues-classic/' + pin.leagueId + '/standings/').then(function (st) {
+      var rows = ((st.standings || {}).results || []);
+      var me = _meId(), mine = null, theirs = null;
+      rows.forEach(function (r) {
+        if (r.entry === me) mine = r;
+        if (r.entry === pin.id) theirs = r;
+      });
+      if (mine) { _myTotals[pin.leagueId] = mine.total; pin.myTotal = mine.total; pin.myRank = mine.rank; }
+      if (theirs) { pin.rivalTotal = theirs.total; pin.rivalRank = theirs.rank; }
+      pin.refreshed = new Date().toISOString().slice(0, 10);
+      _pinSet(pin);
+      _rivalRenderCard();
+    }).catch(function () {});
+  }
+  function _rivalRenderCard(statusTxt) {
+    var wrap = document.getElementById('px-rival-wrap');
+    if (!wrap) return;
+    try {
+      var pin = _pinGet();
+      var shell = function (inner) {
+        return '<div style="background:#fff;border:1px solid #E7E2D8;border-radius:12px;padding:14px 18px;margin:10px 0 4px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;">' + inner + '</div>';
+      };
+      if (statusTxt) { wrap.innerHTML = shell('<span style="color:#7a8783;font-size:.85rem;">' + _esc(statusTxt) + '</span>'); return; }
+      if (_pinChoices) {
+        if (!_pinChoices.length) {
+          wrap.innerHTML = shell('<span style="color:#7a8783;font-size:.85rem;">Couldn’t load your leagues — try again in a minute.</span>' +
+            '<a href="#" onclick="_pxPickRival();return false;" style="color:#0F6E56;font-weight:700;font-size:.8rem;">Retry</a>');
+          return;
+        }
+        var btns = _pinChoices.map(function (c, i) {
+          return '<button onclick="_pxPinChoice(' + i + ')" style="background:#FAF7F1;border:1px solid #E7E2D8;border-radius:8px;padding:7px 12px;font-family:inherit;font-size:.78rem;font-weight:700;cursor:pointer;color:#16201A;">' +
+            _esc(c.name) + ' <span style="color:#7a8783;font-weight:600;">P' + c.rank + ' · ' + c.total + '</span></button>';
+        }).join(' ');
+        wrap.innerHTML = shell('<div style="flex-basis:100%;font-weight:800;font-size:.85rem;">Pick your rival <span style="color:#7a8783;font-weight:600;">(' + _esc(_pinChoices[0].league) + ')</span></div>' + btns);
+        return;
+      }
+      if (!pin) {
+        wrap.innerHTML = shell(
+          '<span style="font-size:1rem;">📌</span>' +
+          '<div style="flex:1;min-width:200px;"><div style="font-weight:800;font-size:.88rem;">Pin your rival</div>' +
+          '<div style="font-size:.76rem;color:#7a8783;">Pick the one person you most want to beat — the gap shows here every week.</div></div>' +
+          '<button onclick="_pxPickRival()" style="background:#1D9E75;color:#fff;border:none;border-radius:9px;padding:9px 16px;font-family:inherit;font-weight:800;font-size:.8rem;cursor:pointer;">Choose →</button>');
+        return;
+      }
+      var gap = (pin.myTotal != null && pin.rivalTotal != null) ? pin.myTotal - pin.rivalTotal : null;
+      var gapTxt = gap == null ? '—' : (gap >= 0 ? '+' + gap : String(gap));
+      var gapCol = gap == null ? '#7a8783' : (gap >= 0 ? '#0F6E56' : '#D93A2B');
+      var read = gap == null ? 'Refreshing standings…'
+        : gap >= 0 ? 'Your lead. Protect it — check the Rival duel before big moves.'
+                   : 'You’re chasing. The Rank Swing route + a differential captain closes gaps fastest.';
+      wrap.innerHTML = shell(
+        '<div style="width:40px;height:40px;border-radius:50%;background:#1D9E75;color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;">' + _esc((pin.name || '?').charAt(0).toUpperCase()) + '</div>' +
+        '<div style="flex:1;min-width:170px;"><div style="font-weight:800;font-size:.92rem;">' + _esc(pin.name) + '</div>' +
+        '<div style="font-size:.72rem;color:#7a8783;">' + _esc(pin.league) + (pin.refreshed ? ' · as of ' + _esc(pin.refreshed) : '') +
+        ' · <a href="#" onclick="_pxUnpin();return false;" style="color:#7a8783;">unpin</a></div></div>' +
+        '<div style="text-align:right;"><div style="font-family:\'JetBrains Mono\',monospace;font-weight:800;font-size:1.15rem;color:' + gapCol + ';">' + gapTxt + ' pts</div>' +
+        '<div style="font-size:.66rem;color:#7a8783;">' + (gap == null ? '' : (gap >= 0 ? 'your lead' : 'behind')) + '</div></div>' +
+        '<div style="flex-basis:100%;font-size:.78rem;color:#7a8783;">' + read +
+        ' <a href="#" onclick="try{switchView(\'league\')}catch(e){};return false;" style="color:#0F6E56;font-weight:700;">Run the head-to-head →</a></div>');
+    } catch (e) { try { wrap.innerHTML = ''; } catch (e2) {} }
+  }
+
+  // ═══ 4 · TEMPLATE DIAL ═══════════════════════════════════════════════════
+  function _tplXi() {
+    // Highest-owned legal XI from the pool (same idea as Squad Brief).
+    var pool = _gPool().slice().sort(function (a, b) { return (+b.own || 0) - (+a.own || 0); });
+    var forms = [[1,3,4,3],[1,3,5,2],[1,4,3,3],[1,4,4,2],[1,5,3,2],[1,4,5,1],[1,3,6,1]];
+    var best = null, bestOwn = -1;
+    forms.forEach(function (f) {
+      var need = { 1: f[0], 2: f[1], 3: f[2], 4: f[3] };
+      var xi = [], own = 0, cnt = { 1: 0, 2: 0, 3: 0, 4: 0 };
+      for (var i = 0; i < pool.length && xi.length < 11; i++) {
+        var p = pool[i], t = p.element_type;
+        if (cnt[t] < need[t]) { cnt[t]++; xi.push(p); own += (+p.own || 0); }
+      }
+      if (xi.length === 11 && own > bestOwn) { bestOwn = own; best = xi; }
+    });
+    return best || [];
+  }
+  function _dialRender() {
+    var wrap = document.getElementById('px-dial-wrap');
+    if (!wrap) return;
+    try {
+      var xi = _gXi();
+      if (!xi) { wrap.innerHTML = ''; return; }
+      var tpl = _tplXi();
+      var tplIds = {};
+      tpl.forEach(function (p) { tplIds[p.id] = true; });
+      var overlap = 0, diffs = 0;
+      var ownOf = {};
+      _gPool().forEach(function (p) { ownOf[p.id] = +p.own || 0; });
+      xi.forEach(function (p) {
+        if (tplIds[p.id]) overlap++;
+        if ((ownOf[p.id] || 0) < 15) diffs++;
+      });
+      var pct = Math.round(overlap / 11 * 100);
+      // arc: 180° gauge, pct of the sweep
+      var ang = Math.PI * (1 - pct / 100);
+      var x = 75 + 65 * Math.cos(ang), y = 78 - 65 * Math.sin(ang);
+      var large = pct > 50 ? 1 : 0;
+      var read;
+      if (pct >= 73) read = '<b>Safe but capped</b> — you rise and fall with the crowd. ' + (diffs ? 'Your ' + diffs + ' differential' + (diffs > 1 ? 's' : '') + ' carry the swing potential.' : 'Two differentials under 15% owned would put real rank swings in play — see the Rank Swing route.');
+      else if (pct >= 46) read = '<b>Balanced</b> — enough template to stay steady, ' + diffs + ' differential' + (diffs === 1 ? '' : 's') + ' to move when they hit. The flexible spot.';
+      else read = '<b>Maverick</b> — big rank swings both ways. Protecting a lead? The Low-risk preset pulls you back toward template.';
+      wrap.innerHTML =
+        '<div style="display:flex;gap:22px;align-items:center;flex-wrap:wrap;background:#FFFFFF;box-shadow:0 1px 4px rgba(0,0,0,.06);border-radius:12px;padding:16px 22px;margin:12px 0 0;">' +
+        '<div><div style="position:relative;width:150px;height:84px;">' +
+        '<svg width="150" height="84" viewBox="0 0 150 84">' +
+        '<path d="M 10 78 A 65 65 0 0 1 140 78" fill="none" stroke="#F0EDE4" stroke-width="13" stroke-linecap="round"/>' +
+        '<path d="M 10 78 A 65 65 0 ' + large + ' 1 ' + x.toFixed(1) + ' ' + y.toFixed(1) + '" fill="none" stroke="#1D9E75" stroke-width="13" stroke-linecap="round"/>' +
+        '<circle cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="7" fill="#0F6E56"/></svg>' +
+        '<div style="position:absolute;left:0;right:0;bottom:0;text-align:center;font-family:\'JetBrains Mono\',monospace;font-weight:800;font-size:1.4rem;">' + pct + '%</div></div>' +
+        '<div style="display:flex;justify-content:space-between;font-size:.6rem;color:#7a8783;width:150px;margin-top:2px;"><span>Maverick</span><span>Template</span></div></div>' +
+        '<div style="flex:1;min-width:230px;"><div style="font-weight:800;margin-bottom:3px;">You’re ' + pct + '% template</div>' +
+        '<p style="font-size:.82rem;color:#7a8783;margin:0;">' + read + '</p></div></div>';
+    } catch (e) { try { wrap.innerHTML = ''; } catch (e2) {} }
+  }
+
+  // ═══ 5 · CHIP CALENDAR ═══════════════════════════════════════════════════
+  // SEASON RULE: halves split at GW20 (25/26 "two sets" rule — verify 26/27,
+  // twin of CHIP_HALF_SPLIT_GW in apex_fpl_solver.py).
+  var _CC_SPLIT = 20;
+  var _ccArmed = null; // chip key armed for placement ('wc'|'fh'|'bb'|'tc')
+  window._pxCcArm = function (k) {
+    _ccArmed = (_ccArmed === k) ? null : k;
+    _ccRender();
+  };
+  window._pxCcPlace = function (gw) {
+    if (!_ccArmed) return;
+    try {
+      var sel = document.getElementById('sel-' + _ccArmed);
+      if (sel) {
+        sel.value = String(gw);
+        sel.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+    } catch (e) {}
+    _ccArmed = null;
+    _ccRender();
+  };
+  window._pxCcClear = function (k) {
+    try {
+      var sel = document.getElementById('sel-' + k);
+      if (sel) { sel.value = ''; sel.dispatchEvent(new Event('change', { bubbles: true })); }
+    } catch (e) {}
+    _ccArmed = null;
+    _ccRender();
+  };
+  function _ccSelected(k) {
+    try {
+      var sel = document.getElementById('sel-' + k);
+      var v = sel ? parseInt(sel.value, 10) : 0;
+      return (v && !isNaN(v)) ? v : 0;
+    } catch (e) { return 0; }
+  }
+  function _ccRender() {
+    var wrap = document.getElementById('px-chipcal-wrap');
+    if (!wrap) return;
+    try {
+      var tm = _gMeta();
+      var cp = (typeof CHIP_PLANNER !== 'undefined') ? CHIP_PLANNER : null;
+      if (!tm || !tm.gw_range || !tm.gw_range.length || !cp) { wrap.innerHTML = ''; return; }
+      var startGw = tm.gw_range[0], endGw = 38;
+      var CHIPS = [
+        { k: 'wc', label: 'WC', has: !!cp.has_wc },
+        { k: 'fh', label: 'FH', has: !!cp.has_fh },
+        { k: 'bb', label: 'BB', has: !!cp.has_bb },
+        { k: 'tc', label: 'TC', has: !!cp.has_tc },
+      ];
+      var inSecondHalf = startGw >= _CC_SPLIT;
+      var setLabel = inSecondHalf ? '2' : '1';
+      var pctOf = function (gw) { return ((gw - 0.5) / endGw * 100); };
+      // GW cells (clickable when a chip is armed) — only current window GWs are live targets
+      var cells = '';
+      for (var g = 1; g <= endGw; g++) {
+        var inWindow = tm.gw_range.indexOf(g) !== -1;
+        var live = _ccArmed && inWindow;
+        cells += '<div onclick="' + (live ? '_pxCcPlace(' + g + ')' : '') + '"' +
+          ' style="position:absolute;top:0;bottom:0;left:' + ((g - 1) / endGw * 100) + '%;width:' + (100 / endGw) + '%;' +
+          (live ? 'cursor:pointer;background:rgba(29,158,117,.10);' : '') +
+          (g === _CC_SPLIT ? 'border-left:2px dashed #E8B54A;' : '') +
+          (g < startGw ? 'background:rgba(0,0,0,.035);' : '') + '"></div>';
+      }
+      // chip pills: placed (at selected GW) or tray (unplaced)
+      var pills = '', tray = '';
+      CHIPS.forEach(function (c, ci) {
+        var name = c.label + setLabel;
+        if (!c.has) {
+          tray += '<span style="background:#C9C5B9;color:#fff;font-size:.66rem;font-weight:800;border-radius:14px;padding:6px 11px;">' + name + ' · used</span>';
+          return;
+        }
+        var gw = _ccSelected(c.k);
+        if (gw) {
+          pills += '<div onclick="_pxCcClear(\'' + c.k + '\')" title="Click to clear"' +
+            ' style="position:absolute;top:' + (28 + (ci % 2) * 34) + 'px;left:' + pctOf(gw) + '%;transform:translateX(-50%);background:#1D9E75;color:#fff;font-size:.64rem;font-weight:800;border-radius:14px;padding:5px 10px;box-shadow:0 2px 6px rgba(15,110,86,.3);cursor:pointer;white-space:nowrap;">' +
+            name + '<span style="display:block;font-size:.54rem;font-weight:700;color:rgba(255,255,255,.75);text-align:center;">GW' + gw + '</span></div>';
+        } else {
+          var armed = _ccArmed === c.k;
+          tray += '<button onclick="_pxCcArm(\'' + c.k + '\')" style="background:' + (armed ? '#0F6E56' : '#fff') + ';color:' + (armed ? '#fff' : '#16201A') + ';border:1.5px ' + (armed ? 'solid #0F6E56' : 'dashed #1D9E75') + ';font-size:.66rem;font-weight:800;border-radius:14px;padding:6px 11px;cursor:pointer;font-family:inherit;">' + name + (armed ? ' · pick a GW →' : '') + '</button>';
+        }
+      });
+      var ghost = inSecondHalf
+        ? '<span style="position:absolute;top:8px;left:12px;font-size:.58rem;font-weight:800;letter-spacing:1px;color:#a8a294;text-transform:uppercase;">Set 1 · expired GW' + (_CC_SPLIT - 1) + '</span>'
+        : '<span style="position:absolute;top:8px;left:12px;font-size:.58rem;font-weight:800;letter-spacing:1px;color:#7a8783;text-transform:uppercase;">Set 1 · use by GW' + (_CC_SPLIT - 1) + '</span>';
+      var lab2 = '<span style="position:absolute;top:8px;left:calc(' + ((_CC_SPLIT - 1) / endGw * 100) + '% + 10px);font-size:.58rem;font-weight:800;letter-spacing:1px;color:#B87A0E;text-transform:uppercase;">Set 2 · unlocks GW' + _CC_SPLIT + '</span>';
+      var gwlabs = '';
+      [1, 5, 10, 15, 20, 25, 30, 35, 38].forEach(function (g) {
+        gwlabs += '<span style="position:absolute;bottom:6px;left:' + pctOf(g) + '%;transform:translateX(-50%);font-size:.56rem;color:#7a8783;">' + g + '</span>';
+      });
+      wrap.innerHTML =
+        '<div style="margin:0 0 18px;">' +
+        '<div style="font-weight:800;font-size:.92rem;margin-bottom:6px;">Season chip calendar <span style="font-size:.66rem;font-weight:700;color:#7a8783;">· tap a chip, then tap a gameweek · tap a placed chip to clear</span></div>' +
+        '<div style="overflow-x:auto;"><div style="position:relative;min-width:680px;height:104px;background:#fff;border:1px solid #E7E2D8;border-radius:12px;">' +
+        cells + ghost + lab2 + pills + gwlabs +
+        '</div></div>' +
+        '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;align-items:center;">' +
+        '<span style="font-size:.68rem;color:#7a8783;font-weight:700;">Your set ' + setLabel + ':</span>' + tray + '</div>' +
+        (inSecondHalf ? '' : '<div style="font-size:.68rem;color:#7a8783;margin-top:4px;">Set 1 chips don’t carry over — anything unused at GW' + (_CC_SPLIT - 1) + ' is gone.</div>') +
+        '</div>';
+    } catch (e) { try { wrap.innerHTML = ''; } catch (e2) {} }
+  }
+
+  // ═══ refresh orchestrator ═════════════════════════════════════════════════
+  var _pxBooted = false;
+  window._pxRefresh = function () {
+    try { _dlFetch(); } catch (e) {}
+    try { _dlRender(); } catch (e) {}
+    try { _dialRender(); } catch (e) {}
+    try { _rivalRenderCard(); } catch (e) {}
+    try { _ccRender(); } catch (e) {}
+    if (!_pxBooted) {
+      _pxBooted = true;
+      try { if (_pinGet()) setTimeout(_pinRefreshGap, 2500); } catch (e) {}
+    }
+  };
+  // initial paint (squad may not be hydrated yet — every renderer no-ops safely;
+  // the _renderPitchFromState hook repaints once the pitch lands)
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function () { setTimeout(window._pxRefresh, 400); });
+  } else {
+    setTimeout(window._pxRefresh, 400);
+  }
+
+  // test hooks (node harness)
+  window._pxTestHooks = { nudge: _dlNudge, templateXi: _tplXi, meId: _meId };
+})();
+
+</script>
+
 <!-- GLPK WASM bootstrap — loads the solver library from jsdelivr CDN (zero-cost
      static hosting friendly). Works from file:// and https:// equally. -->
 <script type="module">
@@ -10540,7 +10994,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1783070738-GW32-b8b07348";
+const BUILD_VERSION = "1783073563-GW32-b8b07348";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -17715,6 +18169,8 @@ function _renderPitchFromState() {
   // Squad Brief follows every squad change (transfers, armband, GW nav) —
   // rendered after this frame so it never blocks the pitch paint.
   try { setTimeout(_renderSquadBrief, 0); } catch (_e) {}
+  // Premium Four repaint (deadline nudge, dial, rival card, chip calendar).
+  try { setTimeout(function () { if (window._pxRefresh) window._pxRefresh(); }, 0); } catch (_ePx) {}
   const gks  = _xiPlayers.filter(p => p.element_type === 1);
   const defs = _xiPlayers.filter(p => p.element_type === 2);
   const mids = _xiPlayers.filter(p => p.element_type === 3);
@@ -19655,7 +20111,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1783070738-GW32-b8b07348</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1783073563-GW32-b8b07348</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
