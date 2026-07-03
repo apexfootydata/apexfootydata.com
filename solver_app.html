@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-07-03T11:12:44">
+<meta name="apex-gw" content="32" data-built-at="2026-07-03T11:29:57">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -4647,11 +4647,13 @@ body > footer.footer, body > #apex-site-footer { display: none !important; }
 /* Transfer Paths (2026-07-02) — routes block above the recs list; same gate. */
 #view-team.show-transfers #transfer-paths-section { display: block !important; }
 #view-team:not(.show-transfers) #transfer-paths-section { display: none !important; }
-/* Premium Four (2026-07-03): pinned-rival card is a Squad-view feature only;
-   the deadline bar (px-deadline-wrap) deliberately stays on every sub-tab. */
+/* Premium Four (2026-07-03): pinned-rival card is a Squad-view feature only. */
 #view-team.show-transfers #px-rival-wrap,
 #view-team.show-pool #px-rival-wrap,
 #view-team.show-brief #px-rival-wrap { display: none !important; }
+/* Deadline pill overlays the pitch (v2 — the full-width bar broke the
+   one-page fit). Hide on phones: the pitch is too tight for an overlay. */
+@media (max-width: 640px) { .px-dl-pill { display: none !important; } }
 
 .va-team-header,
 .va-team-name-target,
@@ -5562,8 +5564,8 @@ html.apex-offseason #view-landing .hero-sub::after {
       <button type="button" class="va-tab" data-tab="brief" onclick="setSolverTab('brief')">Squad Brief</button>
     </div>
 
-    <!-- Premium Four (2026-07-03): deadline countdown + nudge bar, above the two-pane. -->
-    <div id="px-deadline-wrap"></div>
+    <!-- Premium Four (2026-07-03): deadline pill lives ON the pitch (overlay,
+         injected by apex_premium.js) — a bar here broke the one-page height. -->
 
     <!-- ── SOLIO TWO-PANE: pitch (left) + decision rail (right). Collapses to
          the original single-column stack below 1024px. (2026-06-08) ── -->
@@ -10641,40 +10643,48 @@ html.apex-offseason #view-landing .hero-sub::after {
     return out;
   }
   function _dlRender() {
-    var wrap = document.getElementById('px-deadline-wrap');
-    if (!wrap) return;
+    // v2 (Marcus: the full-width bar broke the one-page fit) — a COMPACT pill
+    // overlaid on the pitch, in the empty green left of the goal box. Injected
+    // fresh after every pitch render (the pitch rebuilds its DOM); background
+    // uses inline !important to beat the `.pitch * { background: revert }` rule.
     try {
+      var host = document.querySelector('.va-solio-pitch');
+      if (!host) return;
+      var old = host.querySelector('.px-dl-pill');
       var n = _dlNudge();
-      var clock, when;
+      var bits = [];
       if (_dlDeadline) {
         var ms = _dlDeadline.t - Date.now();
         var d = Math.floor(ms / 86400000), h = Math.floor(ms % 86400000 / 3600000), m = Math.floor(ms % 3600000 / 60000);
-        clock = d + 'd ' + h + 'h ' + String(m).padStart(2, '0') + 'm';
-        when = 'GW' + _dlDeadline.gw + ' deadline · ' +
-          new Date(_dlDeadline.t).toLocaleString(undefined, { weekday: 'short', hour: '2-digit', minute: '2-digit' });
+        bits.push('⏳ GW' + _dlDeadline.gw + ' · ' + d + 'd ' + h + 'h ' + String(m).padStart(2, '0') + 'm');
         if (!_dlTimer) _dlTimer = setInterval(_dlRender, 30000);
-      } else {
-        clock = '—';
-        when = _dlDeadline === null ? 'No upcoming deadline — new-season fixtures land here' : 'Checking the next deadline…';
       }
-      var nudge;
+      var act = null;
       if (n.loss >= 0.5) {
-        nudge = '<button onclick="try{setSolverTab(\'squad\');if(typeof runOptimize===\'function\'){}}catch(e){}"' +
-          ' style="margin-left:auto;background:#FBF0DA;border:1px solid #E8B54A;color:#8a5f0a;font-size:.78rem;font-weight:700;border-radius:9px;padding:9px 14px;cursor:pointer;font-family:inherit;">' +
-          '⚠ Your XI leaves <b style="color:#B87A0E;">' + n.loss.toFixed(1) + ' xPts</b> on the bench' +
-          (n.fixes ? ' · <b style="color:#B87A0E;">' + n.fixes + ' fix' + (n.fixes > 1 ? 'es' : '') + ' found</b>' : '') + '</button>';
+        bits.push('⚠ ' + n.loss.toFixed(1) + ' xPts on bench');
+        act = 'squad';
       } else if (n.fixes > 0) {
-        nudge = '<button onclick="try{setSolverTab(\'transfers\')}catch(e){}"' +
-          ' style="margin-left:auto;background:#FBF0DA;border:1px solid #E8B54A;color:#8a5f0a;font-size:.78rem;font-weight:700;border-radius:9px;padding:9px 14px;cursor:pointer;font-family:inherit;">' +
-          '⚡ XI is set · <b style="color:#B87A0E;">' + n.fixes + ' transfer idea' + (n.fixes > 1 ? 's' : '') + '</b> waiting →</button>';
-      } else {
-        nudge = '<span style="margin-left:auto;background:#E7F6EF;border:1px solid #1D9E75;color:#0F6E56;font-size:.78rem;font-weight:700;border-radius:9px;padding:9px 14px;">✓ Squad optimised · nothing left on the bench</span>';
+        bits.push('⚡ ' + n.fixes + ' transfer idea' + (n.fixes > 1 ? 's' : '') + ' →');
+        act = 'transfers';
+      } else if (_dlDeadline) {
+        bits.push('✓ set');
       }
-      wrap.innerHTML =
-        '<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:#fff;border:1px solid #E7E2D8;border-radius:12px;padding:10px 16px;margin:0 0 10px;">' +
-        '<div><div style="font-family:\'JetBrains Mono\',monospace;font-weight:800;font-size:1.05rem;color:#0F6E56;">' + clock + '</div>' +
-        '<div style="font-size:.68rem;color:#7a8783;">' + _esc(when) + '</div></div>' + nudge + '</div>';
-    } catch (e) { try { wrap.innerHTML = ''; } catch (e2) {} }
+      if (!bits.length) { if (old) old.remove(); return; } // nothing to say — stay quiet
+      var pill = old || document.createElement('button');
+      pill.className = 'px-dl-pill';
+      pill.textContent = bits.join('  ·  ');
+      pill.setAttribute('style',
+        'position:absolute !important;top:12px !important;left:31% !important;transform:translateX(-50%) !important;' +
+        'background:rgba(255,255,255,.94) !important;color:#0F6E56 !important;border:none !important;' +
+        'border-radius:16px !important;padding:6px 13px !important;font-family:inherit !important;' +
+        'font-size:.72rem !important;font-weight:800 !important;cursor:' + (act ? 'pointer' : 'default') + ' !important;' +
+        'box-shadow:0 2px 8px rgba(0,0,0,.18) !important;z-index:30 !important;white-space:nowrap !important;');
+      pill.onclick = act ? function () { try { setSolverTab(act); } catch (e) {} } : null;
+      if (!old) {
+        if (!host.style.position) host.style.position = 'relative';
+        host.appendChild(pill);
+      }
+    } catch (e) {}
   }
 
   // ═══ 3 · PINNED RIVAL ═══════════════════════════════════════════════════
@@ -10994,7 +11004,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1783073563-GW32-b8b07348";
+const BUILD_VERSION = "1783074597-GW32-b8b07348";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -20111,7 +20121,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1783073563-GW32-b8b07348</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1783074597-GW32-b8b07348</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
