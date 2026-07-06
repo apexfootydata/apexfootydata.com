@@ -1180,6 +1180,35 @@ a[href*="rank_milestones"] {
 }
 
 /* ============================================================================
+ * Shirt controls — neat right-hand column on mobile, like desktop. 2026-07-06.
+ * The old mobile rules scattered them (⏱ shoved mid-right, ✕ pushed left and
+ * lost). Stack all three down the right edge, same size, scaled to fit the
+ * small shirt: status badge on top (always on), ⏱ below, ✕ at the bottom
+ * (⏱/✕ revealed on tap via .pp-revealed). Also hide the halfway markings,
+ * which cut through the middle row's fixture labels on the compressed pitch.
+ * ========================================================================== */
+@media (max-width: 480px) {
+    .pitch .prof-badge, .bench-row .prof-badge,
+    .pitch .pp-xmins-btn.pp-xmins-btn, .bench-row .pp-xmins-btn.pp-xmins-btn,
+    .pitch .pp-remove-btn.pp-remove-btn, .bench-row .pp-remove-btn.pp-remove-btn {
+        width: 15px !important;
+        height: 15px !important;
+        min-width: 0 !important;
+        right: -1px !important;
+        left: auto !important;
+        font-size: 0.5rem !important;
+        line-height: 15px !important;
+    }
+    .pitch .prof-badge, .bench-row .prof-badge { top: -3px !important; }
+    .pitch .pp-xmins-btn.pp-xmins-btn, .bench-row .pp-xmins-btn.pp-xmins-btn { top: 13px !important; }
+    .pitch .pp-remove-btn.pp-remove-btn, .bench-row .pp-remove-btn.pp-remove-btn { top: 29px !important; }
+
+    /* Decorative halfway line + centre circle sit at 50% and slice through the
+       middle row's fixture text on the shorter mobile pitch — drop them. */
+    .pitch-halfway, .pitch-centre-circle, .pitch-centre-dot { display: none !important; }
+}
+
+/* ============================================================================
  * Site footer — injected on every page by apex_mobile.js (idempotent).
  * Two rows: brand + tagline/moat-stat | utility links. Collapses to single
  * column on mobile.
