@@ -1584,6 +1584,7 @@
 
 
 
+
     <!-- TAB 6: Leaders (25/26 season demo) -->
     <div class="tab-content">
         <div style="text-align:center;margin:6px 0 18px;">
@@ -2921,6 +2922,27 @@
     .svg-shirt, .shirt-fallback { height: 40px !important; }
     .shirt-name { max-width: 56px !important; font-size: 0.66rem !important; }
     .shirt-xp { font-size: 0.86rem !important; }
+}
+
+/* ============================================================================
+ * Tap-to-reveal shirt actions (touch only) — 2026-07-06.
+ * The ✕ remove + ⏱ minutes buttons are hover-revealed on desktop but were
+ * forced always-on for touch, so on the shrunk mobile shirts they sat on top
+ * of the xPts number (Gabriel ".6", Haaland ".7"). Now they're hidden by
+ * default — pitch reads clean — and a tap on a shirt adds .pp-revealed (JS in
+ * _onShirtClick) to show that one player's buttons.
+ * ========================================================================== */
+@media (hover: none) {
+    .shirt .pp-remove-btn.pp-remove-btn,
+    .shirt .pp-xmins-btn.pp-xmins-btn {
+        opacity: 0 !important;
+        pointer-events: none !important;
+    }
+    .shirt.pp-revealed .pp-remove-btn.pp-remove-btn,
+    .shirt.pp-revealed .pp-xmins-btn.pp-xmins-btn {
+        opacity: 1 !important;
+        pointer-events: auto !important;
+    }
 }
 
 /* ============================================================================

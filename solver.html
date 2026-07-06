@@ -1127,6 +1127,27 @@ a[href*="rank_milestones"] {
 }
 
 /* ============================================================================
+ * Tap-to-reveal shirt actions (touch only) — 2026-07-06.
+ * The ✕ remove + ⏱ minutes buttons are hover-revealed on desktop but were
+ * forced always-on for touch, so on the shrunk mobile shirts they sat on top
+ * of the xPts number (Gabriel ".6", Haaland ".7"). Now they're hidden by
+ * default — pitch reads clean — and a tap on a shirt adds .pp-revealed (JS in
+ * _onShirtClick) to show that one player's buttons.
+ * ========================================================================== */
+@media (hover: none) {
+    .shirt .pp-remove-btn.pp-remove-btn,
+    .shirt .pp-xmins-btn.pp-xmins-btn {
+        opacity: 0 !important;
+        pointer-events: none !important;
+    }
+    .shirt.pp-revealed .pp-remove-btn.pp-remove-btn,
+    .shirt.pp-revealed .pp-xmins-btn.pp-xmins-btn {
+        opacity: 1 !important;
+        pointer-events: auto !important;
+    }
+}
+
+/* ============================================================================
  * Site footer — injected on every page by apex_mobile.js (idempotent).
  * Two rows: brand + tagline/moat-stat | utility links. Collapses to single
  * column on mobile.
