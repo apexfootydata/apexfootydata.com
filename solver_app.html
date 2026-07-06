@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-07-06T18:45:15">
+<meta name="apex-gw" content="32" data-built-at="2026-07-06T22:15:53">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -11007,7 +11007,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1783359915-GW32-b8b07348";
+const BUILD_VERSION = "1783372553-GW32-b8b07348";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -20130,7 +20130,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1783359915-GW32-b8b07348</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1783372553-GW32-b8b07348</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
@@ -21144,9 +21144,10 @@ document.addEventListener('DOMContentLoaded', () => {
     .pitch .pp-xmins-btn.pp-xmins-btn, .bench-row .pp-xmins-btn.pp-xmins-btn { top: 13px !important; }
     .pitch .pp-remove-btn.pp-remove-btn, .bench-row .pp-remove-btn.pp-remove-btn { top: 29px !important; }
 
-    /* Decorative halfway line + centre circle sit at 50% and slice through the
-       middle row's fixture text on the shorter mobile pitch — drop them. */
-    .pitch-halfway, .pitch-centre-circle, .pitch-centre-dot { display: none !important; }
+    /* Only the solid halfway LINE cut through the middle row's fixture text —
+       hide just that. Keep the centre circle + dot (a faint ring under text
+       reads fine, and the pitch looks bare without it). */
+    .pitch-halfway { display: none !important; }
 }
 
 /* ============================================================================

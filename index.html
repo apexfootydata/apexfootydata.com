@@ -1587,6 +1587,7 @@
 
 
 
+
     <!-- TAB 6: Leaders (25/26 season demo) -->
     <div class="tab-content">
         <div style="text-align:center;margin:6px 0 18px;">
@@ -3003,9 +3004,10 @@
     .pitch .pp-xmins-btn.pp-xmins-btn, .bench-row .pp-xmins-btn.pp-xmins-btn { top: 13px !important; }
     .pitch .pp-remove-btn.pp-remove-btn, .bench-row .pp-remove-btn.pp-remove-btn { top: 29px !important; }
 
-    /* Decorative halfway line + centre circle sit at 50% and slice through the
-       middle row's fixture text on the shorter mobile pitch — drop them. */
-    .pitch-halfway, .pitch-centre-circle, .pitch-centre-dot { display: none !important; }
+    /* Only the solid halfway LINE cut through the middle row's fixture text —
+       hide just that. Keep the centre circle + dot (a faint ring under text
+       reads fine, and the pitch looks bare without it). */
+    .pitch-halfway { display: none !important; }
 }
 
 /* ============================================================================
