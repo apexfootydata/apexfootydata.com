@@ -1585,6 +1585,7 @@
 
 
 
+
     <!-- TAB 6: Leaders (25/26 season demo) -->
     <div class="tab-content">
         <div style="text-align:center;margin:6px 0 18px;">
@@ -2943,6 +2944,38 @@
         opacity: 1 !important;
         pointer-events: auto !important;
     }
+}
+
+/* ============================================================================
+ * Solver top-nav swipe fix — 2026-07-06.
+ * The solver header nav uses <nav class="nav"> / <a class="nav-link">, NOT the
+ * .tab-nav/.tab-button the earlier mobile rules targeted — so it never became
+ * scrollable and tabs past the edge (Evaluation) were unreachable, while the
+ * labels wrapped to two lines. Make it a single-line horizontal-scroll strip.
+ * ========================================================================== */
+@media (max-width: 760px) {
+    header.topbar { flex-wrap: wrap; }          /* logo row, then nav on its own row */
+    header.topbar .nav {
+        position: static;
+        transform: none;
+        flex: 1 1 100%;
+        min-width: 0;                            /* allow the flex item to shrink so overflow scrolls */
+        max-width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        flex-wrap: nowrap;
+        justify-content: flex-start;
+        scrollbar-width: thin;
+        /* fade cue that there's more to the right */
+        -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent);
+                mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent);
+    }
+    header.topbar .nav .nav-link {
+        white-space: nowrap;                     /* stops "My / Squad" wrapping to two lines */
+        flex: 0 0 auto;
+    }
+    header.topbar .nav::-webkit-scrollbar { height: 3px; }
+    header.topbar .nav::-webkit-scrollbar-thumb { background: #C9C7BB; border-radius: 2px; }
 }
 
 /* ============================================================================

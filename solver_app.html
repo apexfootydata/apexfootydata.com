@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-07-06T18:14:31">
+<meta name="apex-gw" content="32" data-built-at="2026-07-06T18:31:07">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -11007,7 +11007,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1783358071-GW32-b8b07348";
+const BUILD_VERSION = "1783359067-GW32-b8b07348";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -20130,7 +20130,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1783358071-GW32-b8b07348</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1783359067-GW32-b8b07348</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
@@ -21086,6 +21086,38 @@ document.addEventListener('DOMContentLoaded', () => {
         opacity: 1 !important;
         pointer-events: auto !important;
     }
+}
+
+/* ============================================================================
+ * Solver top-nav swipe fix — 2026-07-06.
+ * The solver header nav uses <nav class="nav"> / <a class="nav-link">, NOT the
+ * .tab-nav/.tab-button the earlier mobile rules targeted — so it never became
+ * scrollable and tabs past the edge (Evaluation) were unreachable, while the
+ * labels wrapped to two lines. Make it a single-line horizontal-scroll strip.
+ * ========================================================================== */
+@media (max-width: 760px) {
+    header.topbar { flex-wrap: wrap; }          /* logo row, then nav on its own row */
+    header.topbar .nav {
+        position: static;
+        transform: none;
+        flex: 1 1 100%;
+        min-width: 0;                            /* allow the flex item to shrink so overflow scrolls */
+        max-width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        flex-wrap: nowrap;
+        justify-content: flex-start;
+        scrollbar-width: thin;
+        /* fade cue that there's more to the right */
+        -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent);
+                mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent);
+    }
+    header.topbar .nav .nav-link {
+        white-space: nowrap;                     /* stops "My / Squad" wrapping to two lines */
+        flex: 0 0 auto;
+    }
+    header.topbar .nav::-webkit-scrollbar { height: 3px; }
+    header.topbar .nav::-webkit-scrollbar-thumb { background: #C9C7BB; border-radius: 2px; }
 }
 
 /* ============================================================================
