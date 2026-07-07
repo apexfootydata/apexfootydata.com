@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-07-07T18:28:26">
+<meta name="apex-gw" content="32" data-built-at="2026-07-07T19:36:17">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -12992,7 +12992,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1783445306-GW32-420fc15a";
+const BUILD_VERSION = "1783449377-GW32-420fc15a";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -14453,7 +14453,10 @@ function pickBestXi(squad, gwIdx) {
   squad.forEach(p => { xpMap[p.id] = _xpAt(p, gwIdx); });
 
   const formations = [
-    [1,3,4,3], [1,3,5,2], [1,4,3,3], [1,4,4,2], [1,5,3,2], [1,4,5,1], [1,3,6,1]
+    // 2026-07-07 verify-suite fix: added the legal 5-4-1 and 5-2-3 (their
+    // absence made the XI sub-optimal in ~8% of random squads, worst 2.5 xP);
+    // dropped 3-6-1 (impossible — an FPL squad carries only 5 MIDs).
+    [1,3,4,3], [1,3,5,2], [1,4,3,3], [1,4,4,2], [1,5,3,2], [1,4,5,1], [1,5,4,1], [1,5,2,3]
   ];
 
   let bestXi = [];
@@ -15992,13 +15995,18 @@ function _applyTransferRec(inId, outId) {
       const _rP = pickBestXi(fullSquad, _i);
       const _xiSumP = _rP.xi.reduce((s, p) => s + _xpAt(p, _i), 0);
       const _capXpP = _rP.cap ? _xpAt(_rP.cap, _i) : 0;
+      const _benchSumP = _rP.bench.reduce((s, p) => s + _xpAt(p, _i), 0);
       _xiDelta[_i]    = _xiSumP - (GW_XI_BASE[_i] || 0);
       _capDelta[_i]   = _capXpP - (GW_CAP_XP[_i]  || 0);
-      _benchDelta[_i] = 0;
+      // 2026-07-07 delta-accounting fix — benchDelta ABSOLUTE vs GW_BENCH baseline
+      // (was hard 0). Under Bench Boost getTotal adds GW_BENCH+benchDelta; a
+      // transfer that changes the bench sum otherwise left the stale base bench.
+      _benchDelta[_i] = _benchSumP - (GW_BENCH[_i] || 0);
       _savedGwSquads[_i] = {
         xi: [..._rP.xi], bench: [..._orderBench(_rP.bench)],
         capId: _rP.cap.id, vcId: _rP.vc.id,
         xiDelta: _xiDelta[_i], capDelta: _capDelta[_i],
+        benchDelta: _benchDelta[_i],
         jsBaseCapXp: _capXpP,
       };
     }
@@ -16801,9 +16809,12 @@ function _applyFullSquad(squad, gwIdx) {
   // We want that to equal: newXiSum + newCapXp (JS-computed 2× cap total)
   const newXiSum  = _xiPlayers.reduce((s, p) => s + _xpAt(p, activeGwIdx), 0);
   const newCapXp  = result.cap ? _xpAt(result.cap, activeGwIdx) : 0;
+  const newBenchSum = _benchPlayers.reduce((s, p) => s + _xpAt(p, activeGwIdx), 0);
   _xiDelta[activeGwIdx]    = newXiSum - (GW_XI_BASE[activeGwIdx] || 0);
   _capDelta[activeGwIdx]   = newCapXp - (GW_CAP_XP[activeGwIdx]  || 0);
-  _benchDelta[activeGwIdx] = 0;
+  // 2026-07-07 delta-accounting fix — benchDelta ABSOLUTE vs GW_BENCH (was 0),
+  // so Bench Boost on a WC/FH squad reflects THIS squad's bench, not the base.
+  _benchDelta[activeGwIdx] = newBenchSum - (GW_BENCH[activeGwIdx] || 0);
   _jsBaseCapXp = newCapXp;
 
   // Save state so it persists when user switches GW pills and returns
@@ -16811,6 +16822,7 @@ function _applyFullSquad(squad, gwIdx) {
     xi: [..._xiPlayers], bench: [..._benchPlayers],
     capId: _capId, vcId: _vcId,
     xiDelta: _xiDelta[activeGwIdx], capDelta: _capDelta[activeGwIdx],
+    benchDelta: _benchDelta[activeGwIdx],
     jsBaseCapXp: _jsBaseCapXp,
   };
 
@@ -16828,13 +16840,17 @@ function _applyFullSquad(squad, gwIdx) {
       const _r = pickBestXi(squad, _i);
       const _xiSum = _r.xi.reduce((s, p) => s + _xpAt(p, _i), 0);
       const _capXp = _r.cap ? _xpAt(_r.cap, _i) : 0;
+      const _benchSum = _r.bench.reduce((s, p) => s + _xpAt(p, _i), 0);
       _xiDelta[_i]    = _xiSum - (GW_XI_BASE[_i] || 0);
       _capDelta[_i]   = _capXp - (GW_CAP_XP[_i]  || 0);
-      _benchDelta[_i] = 0;
+      // 2026-07-07 delta-accounting fix — benchDelta ABSOLUTE vs GW_BENCH (was 0)
+      // so a future-GW Bench Boost on the propagated WC squad uses its own bench.
+      _benchDelta[_i] = _benchSum - (GW_BENCH[_i] || 0);
       _savedGwSquads[_i] = {
         xi: [..._r.xi], bench: [..._orderBench(_r.bench)],
         capId: _r.cap.id, vcId: _r.vc.id,
         xiDelta: _xiDelta[_i], capDelta: _capDelta[_i],
+        benchDelta: _benchDelta[_i],
         jsBaseCapXp: _capXp,
       };
     }
@@ -20550,9 +20566,15 @@ function _swapPlayers(srcId, srcIsXi, tgtId, tgtIsXi) {
     // benchP moved into XI, xiP moved onto bench
     _xiDelta[activeGwIdx]    += _xpAt(benchP, activeGwIdx) - _xpAt(xiP, activeGwIdx);
     _benchDelta[activeGwIdx] += _xpAt(xiP, activeGwIdx)   - _xpAt(benchP, activeGwIdx);
-    // Cap delta: track deviation of current captain's JS xP from the baseline JS cap xP
+    // Cap delta: 2026-07-07 delta-accounting fix — derive ABSOLUTELY against the
+    // Python baseline GW_CAP_XP, NOT _jsBaseCapXp. getTotal adds GW_CAP_XP+capDelta,
+    // and every other writer (_applyTransferRec, _applyFullSquad, pool/override
+    // paths) already uses this absolute basis. The old _jsBaseCapXp basis broke
+    // after a captain-changing transfer (which moves _jsBaseCapXp but leaves
+    // GW_CAP_XP stale), silently dropping the transfer's captain uplift on the
+    // next bench swap. One convention everywhere = no baseline mismatch.
     const capPlayer = _xiPlayers.find(p => p.id === _capId);
-    _capDelta[activeGwIdx] = (capPlayer ? _xpAt(capPlayer, activeGwIdx) : 0) - _jsBaseCapXp;
+    _capDelta[activeGwIdx] = (capPlayer ? _xpAt(capPlayer, activeGwIdx) : 0) - (GW_CAP_XP[activeGwIdx] || 0);
   }
   _renderPitchFromState();
   updateChipTotal();
@@ -20585,9 +20607,13 @@ function _onShirtClick(e) {
 function setCap(pid) {
   if (pid === _vcId) _vcId = _capId; // promote old cap to vc
   _capId = pid;
-  // Update cap delta: deviation of new captain's JS xP from baseline JS cap xP
+  // Update cap delta: 2026-07-07 delta-accounting fix — ABSOLUTE basis vs the
+  // Python baseline GW_CAP_XP (not _jsBaseCapXp). Matches every other capDelta
+  // writer so a captain re-pick after a captain-changing transfer keeps the
+  // transfer's captain uplift (previously dropped because _jsBaseCapXp had
+  // moved to the new cap while GW_CAP_XP still held the pre-transfer baseline).
   const capPlayer = _xiPlayers.find(p => p.id === _capId);
-  _capDelta[activeGwIdx] = (capPlayer ? _xpAt(capPlayer, activeGwIdx) : 0) - _jsBaseCapXp;
+  _capDelta[activeGwIdx] = (capPlayer ? _xpAt(capPlayer, activeGwIdx) : 0) - (GW_CAP_XP[activeGwIdx] || 0);
   document.getElementById('shirt-action-popup')?.remove();
   _renderPitchFromState();
   updateChipTotal();
@@ -20609,7 +20635,10 @@ function reorderXiBench() {
     _vcId         = saved.vcId;
     _xiDelta[activeGwIdx]    = saved.xiDelta;
     _capDelta[activeGwIdx]   = saved.capDelta;
-    _benchDelta[activeGwIdx] = 0;
+    // 2026-07-07 delta-accounting fix — restore the SAVED benchDelta (was hard 0),
+    // so navigating away and back to a WC/transfer GW keeps its true bench sum for
+    // Bench Boost. Guarded for any pre-fix saved object that lacks the field.
+    _benchDelta[activeGwIdx] = (typeof saved.benchDelta === 'number') ? saved.benchDelta : 0;
     _jsBaseCapXp = saved.jsBaseCapXp;
   } else {
     // Original squad — reset to optimal XI from SQUAD_DATA
@@ -22455,7 +22484,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1783445306-GW32-420fc15a</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1783449377-GW32-420fc15a</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
