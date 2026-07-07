@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-07-07T16:07:51">
+<meta name="apex-gw" content="32" data-built-at="2026-07-07T16:30:19">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -12988,7 +12988,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1783436871-GW32-420fc15a";
+const BUILD_VERSION = "1783438219-GW32-420fc15a";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -14041,12 +14041,15 @@ function _apexOwnTag(p) {
     const pd = (typeof _apexPoolById === 'function' ? _apexPoolById(p.id) : null) || p;
     const own = (typeof pd.own === 'number') ? pd.own : parseFloat(pd.own);
     if (!isFinite(own)) return '';
-    let tag = '', color = 'var(--muted)';
-    if (own <= _APEX_DIFF_OWN_MAX)          { tag = ' 💎 diff';     color = '#16a34a'; }
-    else if (own >= _APEX_TEMPLATE_OWN_MIN) { tag = ' 🛡 template'; color = '#2563eb'; }
+    let tag = '', color = 'var(--muted)', ttl = 'How many FPL managers own this player';
+    if (own <= _APEX_DIFF_OWN_MAX)          { tag = ' 💎'; color = '#16a34a'; ttl = 'Differential — few rivals own him: same points, bigger rank swing'; }
+    else if (own >= _APEX_TEMPLATE_OWN_MIN) { tag = ' 🛡'; color = '#2563eb'; ttl = 'Template — most rivals own him: safe, protects your rank'; }
     // UX pass 2026-07-07: say what the % IS — a bare "13.7%" was the second-most
-    // hit mystery number in the child-test walkthrough.
-    return ` · <span style="color:${color};font-weight:700;" title="How many FPL managers own this player">owned by ${own.toFixed(1)}%${tag}</span>`;
+    // hit mystery number in the child-test walkthrough. v2 same day: compact +
+    // nowrap + smaller font — the longer "owned by" phrasing wrapped every
+    // Engine-picks row to two lines (~90px) and broke the one-page fit. The
+    // diff/template word lives in the tooltip now; the emoji carries it inline.
+    return ` · <span style="color:${color};font-weight:700;font-size:.78em;white-space:nowrap;" title="${ttl}">${own.toFixed(1)}% owned${tag}</span>`;
   } catch (_e) { return ''; }
 }
 
@@ -22448,7 +22451,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1783436871-GW32-420fc15a</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1783438219-GW32-420fc15a</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
