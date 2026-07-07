@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-07-07T14:02:01">
+<meta name="apex-gw" content="32" data-built-at="2026-07-07T15:47:31">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -5578,7 +5578,7 @@ html.apex-offseason #view-landing .hero-sub::after {
           <div class="va-hero-text">
             <div class="va-card-label" id="gw-xp-label">GW32 PROJECTED</div>
             <div class="va-card-value va-card-value-hero" id="gw-xp-val">0</div>
-            <div class="va-card-sub">xPts this gameweek</div>
+            <div class="va-card-sub" title="xPts = expected points: what our model projects your team to score">Projected points (xPts) this gameweek</div>
           </div>
           <div class="va-hero-spark" id="va-hero-spark" aria-label="Projected xPts trajectory"></div>
         </div>
@@ -5700,8 +5700,23 @@ html.apex-offseason #view-landing .hero-sub::after {
       </div>
     </div>
 
+    <!-- First-run primer (UX pass 2026-07-07): one guided-start line so the
+         solver doesn't open as a dashboard dump. Dismissed forever on first
+         Quick Optimise or via the ×. localStorage-flagged. -->
+    <div id="apex-firstrun-hint" style="display:none;text-align:center;margin:0 0 10px;font-size:.82rem;color:var(--muted);">
+      New here? Tap <b style="color:var(--accent,#1D9E75);">⚡ Quick Optimise</b> — it makes this week's best transfer for you. Everything else can wait.
+      <a href="#" onclick="try{localStorage.setItem('apex_firstrun_done','1');}catch(e){}document.getElementById('apex-firstrun-hint').style.display='none';return false;" style="color:var(--muted);text-decoration:none;margin-left:6px;" title="Dismiss">✕</a>
+    </div>
+    <script>
+      try {
+        if (!localStorage.getItem('apex_firstrun_done')) {
+          var _frh = document.getElementById('apex-firstrun-hint');
+          if (_frh) _frh.style.display = 'block';
+        }
+      } catch (_eFr) {}
+    </script>
     <div id="va-solve-actions" style="display:flex;gap:10px;margin:0 0 20px;align-items:center;justify-content:center;flex-wrap:wrap;">
-      <button class="btn solve-btn" onclick="runOptimize()" id="solve-btn"
+      <button class="btn solve-btn" onclick="try{localStorage.setItem('apex_firstrun_done','1');var _f=document.getElementById('apex-firstrun-hint');if(_f)_f.style.display='none';}catch(e){}runOptimize()" id="solve-btn"
         title="Apply the single best transfer straight to your squad"
         style="background:var(--accent,#1D9E75);color:#000;border:none;padding:11px 28px;border-radius:8px;font-weight:700;font-size:.95rem;cursor:pointer;display:flex;align-items:center;gap:8px;">
         ⚡ Quick Optimise
@@ -5864,7 +5879,7 @@ html.apex-offseason #view-landing .hero-sub::after {
                 <th data-key="web_name"   onclick="setPoolSort('web_name')"   style="padding:10px 12px;cursor:pointer;font-weight:700;text-transform:uppercase;letter-spacing:.04em;font-size:.7rem;color:var(--muted);">Player</th>
                 <th data-key="team"       onclick="setPoolSort('team')"       style="padding:10px 12px;cursor:pointer;font-weight:700;text-transform:uppercase;letter-spacing:.04em;font-size:.7rem;color:var(--muted);">Team</th>
                 <th data-key="pos"        onclick="setPoolSort('pos')"        style="padding:10px 12px;cursor:pointer;font-weight:700;text-transform:uppercase;letter-spacing:.04em;font-size:.7rem;color:var(--muted);">Pos</th>
-                <th data-key="xp_minutes" onclick="setPoolSort('xp_minutes')" style="padding:10px 12px;cursor:pointer;font-weight:700;text-transform:uppercase;letter-spacing:.04em;font-size:.7rem;color:var(--muted);text-align:right;" title="Expected minutes for this GW (ML-predicted)">xMins</th>
+                <th data-key="xp_minutes" onclick="setPoolSort('xp_minutes')" style="padding:10px 12px;cursor:pointer;font-weight:700;text-transform:uppercase;letter-spacing:.04em;font-size:.7rem;color:var(--muted);text-align:right;" title="How many minutes we expect them to play this gameweek">Exp. mins</th>
                 <th data-key="cost"       onclick="setPoolSort('cost')"       style="padding:10px 12px;cursor:pointer;font-weight:700;text-transform:uppercase;letter-spacing:.04em;font-size:.7rem;color:var(--muted);text-align:right;">£</th>
                 <!-- GW columns injected by JS -->
                 <th data-key="total_xp" onclick="setPoolSort('total_xp')" style="padding:10px 12px;cursor:pointer;font-weight:700;text-transform:uppercase;letter-spacing:.04em;font-size:.7rem;color:var(--accent,#1D9E75);text-align:right;">Total</th>
@@ -12968,7 +12983,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1783429321-GW32-420fc15a";
+const BUILD_VERSION = "1783435651-GW32-420fc15a";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -14024,7 +14039,9 @@ function _apexOwnTag(p) {
     let tag = '', color = 'var(--muted)';
     if (own <= _APEX_DIFF_OWN_MAX)          { tag = ' 💎 diff';     color = '#16a34a'; }
     else if (own >= _APEX_TEMPLATE_OWN_MIN) { tag = ' 🛡 template'; color = '#2563eb'; }
-    return ` · <span style="color:${color};font-weight:700;">${own.toFixed(1)}%${tag}</span>`;
+    // UX pass 2026-07-07: say what the % IS — a bare "13.7%" was the second-most
+    // hit mystery number in the child-test walkthrough.
+    return ` · <span style="color:${color};font-weight:700;" title="How many FPL managers own this player">owned by ${own.toFixed(1)}%${tag}</span>`;
   } catch (_e) { return ''; }
 }
 
@@ -14805,6 +14822,19 @@ function _apexComponents(player, idx) {
          + _apexCat(pd, 'xp_dc_per_gw', idx) + _apexCat(pd, 'xp_card_per_gw', idx),
   };
 }
+// Baked calibrated sd (methods-review alignment, 2026-07-07). The pool bakes
+// xp_sd_per_gw from the FULL component variance model (goals/assists/CS/defcon/
+// bonus/appearance/saves, VAR_SD_CALIB=1.24 applied) — the same sd Rival Mode
+// trusts. The local JS formula below omits bonus/defcon/saves/cards variance,
+// so on its own it runs systematically TIGHT (worst for defenders, whose upside
+// IS bonus+defcon). Where the baked sd exists we calibrate to it; the local
+// formula stays as the fallback for players baked without an sd array.
+function _apexBakedSd(playerId, idx) {
+  const pd = _apexPoolById(playerId);
+  const a = pd && pd.xp_sd_per_gw;
+  const v = (Array.isArray(a) && idx < a.length) ? +a[idx] : 0;
+  return (isFinite(v) && v > 0) ? v : 0;
+}
 // Analytic mean + variance for one player — drives the risk-preset ranking.
 function _apexPlayerMV(player, idx) {
   const c = _apexComponents(player, idx);
@@ -14814,7 +14844,9 @@ function _apexPlayerMV(player, idx) {
   const pcs = csp > 0 ? Math.min(1, Math.max(0, c.cs / csp)) : 0;
   const pplay = Math.min(1, Math.max(0, c.app / 2));
   const mean = c.app + c.g + c.a + c.cs + c.konst;
-  const variance = lg * pg * pg + la * 9 + pcs * (1 - pcs) * csp * csp + pplay * (1 - pplay) * 4;
+  let variance = lg * pg * pg + la * 9 + pcs * (1 - pcs) * csp * csp + pplay * (1 - pplay) * 4;
+  const bsd = _apexBakedSd(player.id, idx);
+  if (bsd > 0) variance = bsd * bsd;   // calibrated truth wins over the local approximation
   return { mean: mean, variance: variance, sd: Math.sqrt(Math.max(0, variance)) };
 }
 // Seeded RNG (mulberry32) for REPRODUCIBLE sims. _apexSimDist re-seeds per GW so
@@ -14848,7 +14880,24 @@ function _apexDrawPlayer(player, idx) {
   const g = _apexPois(lg), a = _apexPois(la);
   const cs = (_apexRng() < pcs) ? 1 : 0;
   const app = (_apexRng() < pplay) ? 2 : 0;
-  return g * pg + a * 3 + cs * csp + app + c.konst;
+  const d = g * pg + a * 3 + cs * csp + app + c.konst;
+  // Calibrated-sd alignment (2026-07-07): stretch the draw's deviation from the
+  // local mean so the per-player sd matches the baked xp_sd_per_gw (full
+  // component variance + VAR_SD_CALIB) — same truth Rival Mode uses. Keeps the
+  // component draw's SHAPE (Poisson skew, CS bimodality); fixes its WIDTH.
+  // No baked sd (or degenerate local sd) → unchanged local draw.
+  const bsd = _apexBakedSd(player.id, idx);
+  if (bsd > 0) {
+    const lmean = c.app + c.g + c.a + c.cs + c.konst;
+    const lvar = lg * pg * pg + la * 9 + pcs * (1 - pcs) * csp * csp + pplay * (1 - pplay) * 4;
+    const lsd = Math.sqrt(Math.max(0, lvar));
+    if (lsd > 0.05) return lmean + (d - lmean) * (bsd / lsd);
+    // Local draw is (near-)deterministic but truth says there IS swing
+    // (bonus/defcon players): Box–Muller gaussian on the seeded RNG.
+    const u1 = Math.max(1e-12, _apexRng()), u2 = _apexRng();
+    return lmean + bsd * Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+  }
+  return d;
 }
 // Monte-Carlo the XI total (captain doubled) → real percentiles + P(60+).
 function _apexSimDist(xi, capId, idx, nSims) {
@@ -22394,7 +22443,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1783429321-GW32-420fc15a</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1783435651-GW32-420fc15a</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
