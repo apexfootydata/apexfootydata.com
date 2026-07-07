@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-07-07T15:50:38">
+<meta name="apex-gw" content="32" data-built-at="2026-07-07T16:07:51">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -4647,6 +4647,10 @@ body > footer.footer, body > #apex-site-footer { display: none !important; }
 /* Transfer Paths (2026-07-02) — routes block above the recs list; same gate. */
 #view-team.show-transfers #transfer-paths-section { display: block !important; }
 #view-team:not(.show-transfers) #transfer-paths-section { display: none !important; }
+/* Sensitivity (2026-07-07) — stress-test block lives with the recs; same gate
+   (one-page-fit rule: nothing new may add height to the Squad view). */
+#view-team.show-transfers #sensitivity-section { display: block !important; }
+#view-team:not(.show-transfers) #sensitivity-section { display: none !important; }
 /* Premium Four (2026-07-03): pinned-rival card is a Squad-view feature only. */
 #view-team.show-transfers #px-rival-wrap,
 #view-team.show-pool #px-rival-wrap,
@@ -5700,12 +5704,13 @@ html.apex-offseason #view-landing .hero-sub::after {
       </div>
     </div>
 
-    <!-- First-run primer (UX pass 2026-07-07): one guided-start line so the
-         solver doesn't open as a dashboard dump. Dismissed forever on first
-         Quick Optimise or via the ×. localStorage-flagged. -->
-    <div id="apex-firstrun-hint" style="display:none;text-align:center;margin:0 0 10px;font-size:.82rem;color:var(--muted);">
+    <!-- First-run primer (UX pass 2026-07-07, v2 same day): a FIXED floating
+         toast, NOT in-flow — the in-flow version added rail height and broke
+         the one-page fit (Marcus). Zero layout impact; dismissed forever on
+         first Quick Optimise or via the ×. localStorage-flagged. -->
+    <div id="apex-firstrun-hint" style="display:none;position:fixed;bottom:22px;left:50%;transform:translateX(-50%);z-index:9000;background:#fff;border:1px solid var(--accent,#1D9E75);border-radius:12px;padding:10px 16px;font-size:.82rem;color:var(--text,#16201C);box-shadow:0 6px 24px rgba(0,0,0,.14);max-width:92vw;text-align:center;">
       New here? Tap <b style="color:var(--accent,#1D9E75);">⚡ Quick Optimise</b> — it makes this week's best transfer for you. Everything else can wait.
-      <a href="#" onclick="try{localStorage.setItem('apex_firstrun_done','1');}catch(e){}document.getElementById('apex-firstrun-hint').style.display='none';return false;" style="color:var(--muted);text-decoration:none;margin-left:6px;" title="Dismiss">✕</a>
+      <a href="#" onclick="try{localStorage.setItem('apex_firstrun_done','1');}catch(e){}document.getElementById('apex-firstrun-hint').style.display='none';return false;" style="color:var(--muted);text-decoration:none;margin-left:8px;font-weight:700;" title="Dismiss">✕</a>
     </div>
     <script>
       try {
@@ -12983,7 +12988,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1783435838-GW32-420fc15a";
+const BUILD_VERSION = "1783436871-GW32-420fc15a";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -22443,7 +22448,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1783435838-GW32-420fc15a</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1783436871-GW32-420fc15a</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
