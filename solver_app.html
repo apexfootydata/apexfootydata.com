@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-07-07T16:30:19">
+<meta name="apex-gw" content="32" data-built-at="2026-07-07T18:28:26">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -10268,7 +10268,11 @@ html.apex-offseason #view-landing .hero-sub::after {
   function stats(d) {
     var m = 0; for (var i = 0; i < d.length; i++) m += d[i]; m /= d.length;
     var s = 0; for (var j = 0; j < d.length; j++) s += (d[j] - m) * (d[j] - m); s = Math.sqrt(s / d.length);
-    function p(t) { var c = 0; for (var k = 0; k < d.length; k++) if (d[k] > t) c++; return c / d.length; }
+    // Ties count as half (2026-07-07 verification fix): strict > read an
+    // EXACTLY identical team+captain as 0% instead of 50% — every simulated
+    // diff was 0 and all ties scored as losses. Template twins with the same
+    // captain are real in casual leagues, so the knife-edge case must read 50.
+    function p(t) { var c = 0; for (var k = 0; k < d.length; k++) { if (d[k] > t) c++; else if (d[k] === t) c += 0.5; } return c / d.length; }
     return { m: m, s: s, pGt: p };
   }
   // analytic diff mean/var for a given mine/theirs (independent players)
@@ -12988,7 +12992,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1783438219-GW32-420fc15a";
+const BUILD_VERSION = "1783445306-GW32-420fc15a";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -22451,7 +22455,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1783438219-GW32-420fc15a</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1783445306-GW32-420fc15a</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
