@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-07-07T12:06:13">
+<meta name="apex-gw" content="32" data-built-at="2026-07-07T14:02:01">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -5716,8 +5716,31 @@ html.apex-offseason #view-landing .hero-sub::after {
         style="font-size:.8rem;color:var(--muted);text-decoration:underline;cursor:pointer;">
         plan ahead →
       </a>
+      <button class="btn" onclick="_apexToggleDrafts()" id="apex-drafts-btn"
+        title="Save named plans and compare them side by side"
+        style="background:transparent;color:var(--text);border:1px solid var(--border);padding:11px 18px;border-radius:8px;font-weight:600;font-size:.85rem;cursor:pointer;display:flex;align-items:center;gap:6px;">
+        ▤ Drafts
+      </button>
       <span id="solve-status" class="muted" style="font-size:.82rem;"></span>
     </div>
+    <!-- Drafts (2026-07-07): named plan snapshots + compare grid (apex_drafts.js).
+         Hidden until the ▤ Drafts button is pressed; renderCompare gates itself
+         on apexCan('savedPlans') and shows a locked teaser to free users. -->
+    <div id="apex-drafts-panel" style="display:none;margin:0 0 18px;"></div>
+    <script>
+      function _apexToggleDrafts() {
+        var el = document.getElementById('apex-drafts-panel');
+        if (!el) return;
+        var showing = el.style.display !== 'none';
+        if (showing) { el.style.display = 'none'; return; }
+        el.style.display = 'block';
+        try {
+          if (window.apexDrafts && typeof window.apexDrafts.renderCompare === 'function') {
+            window.apexDrafts.renderCompare(el);
+          }
+        } catch (_e) {}
+      }
+    </script>
 
     <div id="solve-banner" style="display:none;margin-bottom:12px;padding:10px 14px;border-radius:8px;background:rgba(29,158,117,.12);border:1px solid rgba(29,158,117,.3);font-size:.85rem;color:var(--accent,#1D9E75);font-weight:600;"></div>
     <!-- Engine picks live in their OWN card (2026-06-09): solve-banner gets
@@ -5749,6 +5772,17 @@ html.apex-offseason #view-landing .hero-sub::after {
          assets/apex_paths.js above the weekly recs. Same show-transfers CSS
          gate as #transfers-section (see solver_style.css). -->
     <section id="transfer-paths-section"><div id="transfer-paths-body"></div></section>
+    <!-- Sensitivity (2026-07-07) — stress-test the engine's top move. CSS-gated
+         with the transfers view exactly like the paths block. -->
+    <section id="sensitivity-section" style="margin:8px 0;">
+      <button id="sensitivity-btn" type="button"
+        style="background:var(--bg2,#faf8f3);border:1px solid var(--accent,#1D9E75);
+               color:var(--accent,#1D9E75);font-weight:700;font-size:.78rem;
+               padding:6px 12px;border-radius:8px;cursor:pointer;">
+        Stress-test this pick
+      </button>
+      <div id="sensitivity-body"></div>
+    </section>
 
     <section id="transfers-section" style="display:none;"></section>
 
@@ -5769,6 +5803,8 @@ html.apex-offseason #view-landing .hero-sub::after {
     <section id="pool-section" style="margin-top:24px;">
       <h2 style="font-size:1.1rem;font-weight:700;margin-bottom:4px;">Expected Points</h2>
       <p class="muted" style="font-size:.78rem;margin-bottom:12px;">Tap <strong style="color:var(--accent,#1D9E75);">✕</strong> on any player above to remove them, then pick a replacement below.</p>
+      <!-- Custom Projections (2026-07-07) — upload-your-own-xP panel. assets/apex_customproj.js -->
+      <div id="customproj-panel" style="margin-bottom:14px;"></div>
 
       <div class="pool-filters" style="background:var(--bg2);border:1px solid var(--border-light);border-radius:var(--card-radius);padding:18px;margin-bottom:16px;box-shadow:var(--card-shadow);">
         <div style="display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end;">
@@ -6170,6 +6206,30 @@ html.apex-offseason #view-landing .hero-sub::after {
 
     <!-- Premium Four (2026-07-03): season chip calendar strip. -->
     <div id="px-chipcal-wrap"></div>
+
+    <!-- Chip Timing (2026-07-07): ranked chip-sequence table (apex_chiptiming.js).
+         Runs the solver's own enumeration for the chips still in play and lists
+         the top sequences with an Apply button each. Gated on apexCan('chipTiming')
+         — free users get a locked teaser. -->
+    <div style="margin:6px 0 4px;">
+      <button class="btn" onclick="_apexRunChipTiming()" id="apex-chiptiming-btn"
+        title="Rank every chip sequence and apply the best in one tap"
+        style="background:var(--accent,#1D9E75);color:#000;border:none;padding:9px 18px;border-radius:8px;font-weight:700;font-size:.85rem;cursor:pointer;">
+        ⚡ Best chip timing
+      </button>
+    </div>
+    <div id="apex-chiptiming-panel" style="margin:0 0 14px;"></div>
+    <script>
+      function _apexRunChipTiming() {
+        var el = document.getElementById('apex-chiptiming-panel');
+        if (!el) return;
+        try {
+          if (window.apexChipTiming && typeof window.apexChipTiming.runAndRender === 'function') {
+            window.apexChipTiming.runAndRender(el, 5);
+          }
+        } catch (_e) {}
+      }
+    </script>
 
     <div class="chip-selector-form">
       <div class="cs-card-grid">
@@ -6695,6 +6755,13 @@ html.apex-offseason #view-landing .hero-sub::after {
 <script>
 /* apex_entitlements.js — tier entitlement SEAM (2026-06-15, tiers finalised 2026-07-07)
  *
+ * CHANGELOG:
+ *   2026-07-07  Added deadlineLockoutMins cap (free=60, season=0) + the
+ *               window.apexDeadlineLocked() helper (free solver locks 1h before
+ *               the FPL deadline; Apex members plan to kickoff). Added the
+ *               lockBan capability (0 free / Infinity season) for the Lock/Exclude
+ *               forced-decisions feature. Both inert while APEX_TIERS=false.
+ *
  * Single source of truth for "what is this user allowed to do?".
  *
  * Today it is a STUB: with the master flag OFF (default) it grants EVERYTHING,
@@ -6732,7 +6799,13 @@ html.apex-offseason #view-landing .hero-sub::after {
       editProjections: false,
       exportCsv: false,
       multiId: false,
-      eosReport: false
+      eosReport: false,
+      sensitivity: false,         // "stress-test this pick" = paid headline
+      customProjections: false,   // upload-your-own-xP CSV = paid
+      drafts: 1,                  // named plan snapshots (slots)
+      chipTiming: false,          // best-chip-weeks search = paid
+      lockBan: 0,                 // Lock/Exclude forced decisions = paid (0 = hidden)
+      deadlineLockoutMins: 60     // free solver locks 60 min before the deadline
       // NOT listed (therefore always allowed, by design): projections,
       // accuracy page, deadline bar, template dial, pitch, squad brief.
     },
@@ -6747,7 +6820,13 @@ html.apex-offseason #view-landing .hero-sub::after {
       editProjections: true,
       exportCsv: true,
       multiId: true,
-      eosReport: true
+      eosReport: true,
+      sensitivity: true,          // full stress-test
+      customProjections: true,    // full custom-projection upload
+      drafts: 10,                 // 10 named plan snapshots
+      chipTiming: true,           // best-chip-weeks search
+      lockBan: Infinity,          // full lock/exclude control
+      deadlineLockoutMins: 0      // members plan right up to kickoff
     }
   };
 
@@ -6780,6 +6859,165 @@ html.apex-offseason #view-landing .hero-sub::after {
       (blurb || 'Part of the Apex season pass. Free tells you who’s good — Apex tells you how to beat your league.') +
       '</div></div>';
   };
+
+  // Deadline lockout (Review-style). TRUE only when the seam is ON, the tier
+  // carries a positive lockout window, the next FPL deadline is known, and we
+  // are now inside that window (deadline − lockoutMins ≤ now). Never throws;
+  // false on any missing/garbage data so a fetch failure can never lock a user
+  // out. window._apexNextDeadline (epoch ms) is published by apex_premium.js.
+  window.apexDeadlineLocked = function () {
+    try {
+      if (!window.APEX_TIERS) return false;                 // seam OFF -> never
+      var mins = window.apexCap('deadlineLockoutMins');
+      if (!(typeof mins === 'number' && mins > 0)) return false;
+      var dl = window._apexNextDeadline;
+      if (!(typeof dl === 'number' && isFinite(dl) && dl > 0)) return false;
+      return Date.now() >= (dl - mins * 60000);
+    } catch (e) { return false; }
+  };
+})();
+
+</script>
+
+<!-- Lock / Exclude (2026-07-07) — forced-decision player locks & bans. MUST
+     load after entitlements, before the solver, so window.apexLocks exists when
+     the ILP builds its candidate pool. Inert (all-false) while APEX_TIERS=false
+     only matters at the gated call sites; the store itself always answers.
+     See assets/apex_locks.js. -->
+<script>
+// ═══════════════════════════════════════════════════════════════════════════
+// APEX LOCKS — Lock / Exclude players (forced decisions v1, 2026-07-07)
+//
+// Two user overrides that the model must respect:
+//   LOCK  (🔒) — never suggest this player OUT. "I'm keeping him, don't sell."
+//   BAN   (🚫) — never suggest this player IN.  "I don't want him, don't buy."
+//
+// DOCTRINE: user beliefs override the model — exactly the philosophy behind
+// editable minutes. If Marcus (or a member) has decided, the engine defers.
+// These forced decisions are NEVER auto-cleared, re-evaluated, or expired by
+// any code path — only an explicit clearAll() wipes them. The model may
+// disagree loudly in the UI, but it does not quietly undo the user's call.
+//
+// STATE: localStorage 'apex_locks_v1:<fplid>' → { locked:[ids], banned:[ids] }
+// with the same FPL_ID-first id resolution _planKey uses (FPL_ID → stored
+// apex_fpl_id → '0'), so a user's locks follow their team, not the browser.
+//
+// GATE: capability 'lockBan' (entitlements seam). Free = 0 (feature UI hidden),
+// season = Infinity. With APEX_TIERS=false everyone has it (getTier→season).
+// This module NEVER reads the gate itself — the engine filters and the pool UI
+// check apexCap('lockBan') at their call sites. That keeps this file a pure
+// state store: if a caller asks isLocked/isBanned it always answers honestly,
+// and the gate decides whether that answer is allowed to bite.
+//
+// This is a separate IIFE (not baked into the generator f-string), so no
+// double-brace escaping applies. Every global is read lazily behind typeof
+// guards; the module must never throw at load, whatever the bake shipped.
+//
+// V1 SCOPE: toggles live in the POOL TABLE row actions only. Squad-PITCH lock/
+// ban badges are deliberately SKIPPED in v1 (documented). Engine effects wired:
+// computeTransfers (weekly recs), _txpBestMove (transfer paths), and the WC/FH
+// browser ILP (banned stripped from the candidate pool). LOCKED-player forced
+// INCLUSION in the WC/FH ILP is v2 — a TODO sits at that call site.
+// ═══════════════════════════════════════════════════════════════════════════
+(function () {
+  'use strict';
+
+  // ── id resolution — mirrors generate_solver_html.py::_planKey() ───────────
+  function _meId() {
+    try { if (typeof FPL_ID !== 'undefined' && FPL_ID) return FPL_ID; } catch (e) {}
+    try {
+      var s = (typeof localStorage !== 'undefined') ? localStorage.getItem('apex_fpl_id') : null;
+      if (s) return s;
+    } catch (e2) {}
+    return '0';
+  }
+  function _key() { return 'apex_locks_v1:' + _meId(); }
+
+  // ── load / persist ────────────────────────────────────────────────────────
+  // Kept as Sets in memory for O(1) membership; serialised as id arrays.
+  var _locked = null, _banned = null; // lazy — populated on first access
+
+  function _norm(id) { var n = +id; return isFinite(n) ? n : null; }
+
+  function _load() {
+    if (_locked && _banned) return;
+    _locked = {}; _banned = {};
+    try {
+      var raw = (typeof localStorage !== 'undefined') ? localStorage.getItem(_key()) : null;
+      if (raw) {
+        var o = JSON.parse(raw);
+        if (o && Array.isArray(o.locked)) o.locked.forEach(function (id) { var n = _norm(id); if (n != null) _locked[n] = true; });
+        if (o && Array.isArray(o.banned)) o.banned.forEach(function (id) { var n = _norm(id); if (n != null) _banned[n] = true; });
+      }
+    } catch (e) { _locked = {}; _banned = {}; }
+  }
+
+  function _persist() {
+    try {
+      if (typeof localStorage === 'undefined') return;
+      localStorage.setItem(_key(), JSON.stringify({
+        locked: Object.keys(_locked).map(Number),
+        banned: Object.keys(_banned).map(Number),
+      }));
+    } catch (e) {}
+  }
+
+  // ── re-render callback registry (same shape as apexEdits.onRecompute) ──────
+  // Callers register a fn; toggles fire them all so the pool table + transfers
+  // repaint. Never throws out of a bad callback.
+  var _cbs = [];
+  function _fire() {
+    for (var i = 0; i < _cbs.length; i++) {
+      try { _cbs[i](); } catch (e) {}
+    }
+  }
+
+  // ── public API ────────────────────────────────────────────────────────────
+  window.apexLocks = {
+    isLocked: function (id) { _load(); var n = _norm(id); return n != null && !!_locked[n]; },
+    isBanned: function (id) { _load(); var n = _norm(id); return n != null && !!_banned[n]; },
+
+    // Toggle lock. A player can't be both locked and banned (nonsensical:
+    // "keep him" vs "never buy") — locking clears any ban on the same id.
+    toggleLock: function (id) {
+      _load(); var n = _norm(id); if (n == null) return false;
+      var now;
+      if (_locked[n]) { delete _locked[n]; now = false; }
+      else { _locked[n] = true; delete _banned[n]; now = true; }
+      _persist(); _fire();
+      return now;
+    },
+    // Toggle ban. Banning clears any lock on the same id (same reasoning).
+    toggleBan: function (id) {
+      _load(); var n = _norm(id); if (n == null) return false;
+      var now;
+      if (_banned[n]) { delete _banned[n]; now = false; }
+      else { _banned[n] = true; delete _locked[n]; now = true; }
+      _persist(); _fire();
+      return now;
+    },
+
+    counts: function () {
+      _load();
+      return { locked: Object.keys(_locked).length, banned: Object.keys(_banned).length };
+    },
+
+    // Explicit wipe — the ONLY path that clears forced decisions (doctrine).
+    clearAll: function () {
+      _load(); _locked = {}; _banned = {}; _persist(); _fire();
+    },
+
+    // Register a repaint callback (pool table / transfers). Returns an
+    // unsubscribe fn. Mirrors apexEdits.onRecompute.
+    onRecompute: function (fn) {
+      if (typeof fn !== 'function') return function () {};
+      _cbs.push(fn);
+      return function () { var i = _cbs.indexOf(fn); if (i >= 0) _cbs.splice(i, 1); };
+    },
+  };
+
+  // Test hooks (node harness only — harmless in the browser).
+  window._apexLocksTestHooks = { key: _key, meId: _meId, load: _load, fireCount: function () { return _cbs.length; } };
 })();
 
 </script>
@@ -7137,6 +7375,34 @@ html.apex-offseason #view-landing .hero-sub::after {
     return ev;
   }
 
+  // ── Lock / Exclude forced decisions (2026-07-07) ──
+  // BANNED players are stripped from the candidate pool before the ILP runs, so
+  // Wildcard / Free Hit squads can never contain a player the user has excluded
+  // (user beliefs override the model — same doctrine as editable minutes).
+  // Gated on 'lockBan' (0 free → no filtering; Infinity season / tiers-OFF → on).
+  // Guards no-op if apexLocks / apexCap are absent, keeping today's behaviour.
+  //
+  // TODO(v2): LOCKED-player FORCED INCLUSION in the WC/FH ILP — add a hard
+  // constraint x_i = 1 for every locked squad player. Not attempted here; v1
+  // covers exclusion (ban) only. Locked-out-of-suggestions already works in the
+  // weekly engine (computeTransfers / _txpBestMove) via the OUT skip.
+  function _lbGateOn() {
+    try { return (typeof window !== 'undefined' && typeof window.apexCap === 'function')
+      ? (window.apexCap('lockBan') > 0) : true; }
+    catch (e) { return true; }
+  }
+  function _filterBanned(pool) {
+    try {
+      if (!_lbGateOn()) return pool;
+      if (typeof window === 'undefined' || typeof window.apexLocks === 'undefined') return pool;
+      var out = pool.filter(function (p) { return !window.apexLocks.isBanned(p.id); });
+      // Safety valve: never starve the ILP below a legal squad. If bans would
+      // leave too few players, fall back to the unfiltered pool rather than
+      // throwing "pool has N players" — a ban should shape, not break, a solve.
+      return (out.length >= FPL_RULES.SQUAD_SIZE) ? out : pool;
+    } catch (e) { return pool; }
+  }
+
   /**
    * Core ILP — given a precomputed EV vector (plus optional BB-aware terms),
    * picks the optimal 15 + 11 under FPL rules.
@@ -7407,6 +7673,7 @@ html.apex-offseason #view-landing .hero-sub::after {
    */
   async function solveFreeHit(pool, gwIdx, opts = {}) {
     gwIdx = gwIdx || 0;
+    pool = _filterBanned(pool);   // strip user-banned players before solve
     const ev = _computeRollingEV(pool, 1, gwIdx);
     const raw = await _solveSquadILP(pool, ev, Object.assign({ name: 'apex_fh' }, opts));
     if (raw.status !== 'optimal') {
@@ -7451,6 +7718,7 @@ html.apex-offseason #view-landing .hero-sub::after {
   async function solveWildcard(pool, startIdx, horizon, opts = {}) {
     startIdx = startIdx || 0;
     horizon  = horizon  || 6;
+    pool = _filterBanned(pool);   // strip user-banned players before solve
 
     // chipMode (added 2026-04-29 for parity with Python WC ILP): use CHIP_DECAY
     // [1.0, 1.0, 0.30, 0.15] + DGW premium + FT-saving bonus on gw_i=1 DGW.
@@ -9596,6 +9864,8 @@ html.apex-offseason #view-landing .hero-sub::after {
     _simulateLeague,
     _buildCorrelationMatrix,
     _cholesky,
+    _filterBanned,      // exposed for the lock/exclude node harness
+    _lbGateOn,
     _version: '0.7.0-m7',
   };
 })();
@@ -10274,12 +10544,32 @@ html.apex-offseason #view-landing .hero-sub::after {
   // Best same-position upgrade for one squad under one GW's remaining horizon.
   // opts: { maxEo, minPerGw, excludeIds } — rank-swing filters. Ranking is by
   // TRUE remaining-horizon xP gain (no bias) so route totals stay honest.
+  // Lock / Exclude forced decisions (2026-07-07) — mirrors computeTransfers.
+  // Banned players are never moved IN; locked players are never moved OUT.
+  // Gated on 'lockBan' (0 free → filters off; Infinity season / tiers-OFF → on).
+  // Guards no-op if apexLocks/apexCap are absent, keeping today's behaviour.
+  function _txpLbOn() {
+    try { return (typeof window.apexCap === 'function') ? (window.apexCap('lockBan') > 0) : true; }
+    catch (e) { return true; }
+  }
+  function _txpBanned(id) {
+    if (!_txpLbOn()) return false;
+    try { return (typeof window.apexLocks !== 'undefined') && window.apexLocks.isBanned(id); }
+    catch (e) { return false; }
+  }
+  function _txpLocked(id) {
+    if (!_txpLbOn()) return false;
+    try { return (typeof window.apexLocks !== 'undefined') && window.apexLocks.isLocked(id); }
+    catch (e) { return false; }
+  }
+
   function _txpBestMove(state, gwIdx, opts) {
     opts = opts || {};
     var tm = _txpMeta();
     if (!tm || !tm.gw_range) return null;
     var nGws = tm.gw_range.length;
     var pool = _txpPool();
+    var _lbOn = _txpLbOn();
     var squadIds = {};
     var teamCounts = {};
     var i, p;
@@ -10292,6 +10582,7 @@ html.apex-offseason #view-landing .hero-sub::after {
     var best = null;
     for (i = 0; i < state.squad.length; i++) {
       var outP = state.squad[i];
+      if (_lbOn && _txpLocked(outP.id)) continue;   // locked = never moved OUT
       var pos = outP.element_type || 3;
       var outSell = _txpSell(outP, state.sp);
       var outTotal = _txpXpFrom(outP, gwIdx, nGws);
@@ -10299,6 +10590,7 @@ html.apex-offseason #view-landing .hero-sub::after {
         var inP = pool[j];
         if (inP.element_type !== pos) continue;
         if (squadIds[inP.id]) continue;
+        if (_lbOn && _txpBanned(inP.id)) continue;   // banned = never moved IN
         if (opts.excludeIds && opts.excludeIds[inP.id]) continue;
         if ((inP.cost || 99) > outSell + state.bank + 0.05) continue;
         var inTeam = inP.team || '';
@@ -10652,6 +10944,1531 @@ html.apex-offseason #view-landing .hero-sub::after {
   window._txpTestHooks = {
     bestMove: _txpBestMove, buildRoute: _txpBuildRoute, routeTotal: _txpRouteTotal,
     newState: _txpNewState, computeRoutes: _txpComputeRoutes, eo: _txpEo, sell: _txpSell,
+    banned: _txpBanned, locked: _txpLocked, lbOn: _txpLbOn,
+  };
+})();
+
+</script>
+
+<!-- Sensitivity (2026-07-07) — "stress-test this pick". Must load after
+     entitlements (for apexCan/apexLockedHtml) and after the solver (uses
+     computeTransfers at call time, guarded). assets/apex_sensitivity.js -->
+<script>
+// ═══════════════════════════════════════════════════════════════════════════
+// APEX SENSITIVITY (2026-07-07) — "which moves survive if projections are
+// slightly off?". A Premium headline: stress-test the engine's top transfer
+// recommendation against noise in the underlying xP.
+//
+// WHY THIS EXISTS: every projection is an estimate. A move that only wins by a
+// rounding error is fragile — nudge the numbers and it flips. A move that keeps
+// winning across many jittered worlds is one you can trust. This module runs
+// the live transfer engine N times over slightly-perturbed projections and
+// reports how often the SAME top move comes back.
+//
+// HOW: for each run we multiply every pool player's per-GW xP by (1 + e),
+// e ~ Normal(0, SIGMA), SIGMA=0.10. Ten percent is chosen because it is roughly
+// the model's own per-player per-GW MAE-to-mean ratio — i.e. the typical size
+// of the error already baked into a single projection. Jittering by that much
+// asks "if my numbers are wrong by about as much as they usually are, does the
+// recommendation change?". A seeded mulberry32 RNG makes every run set
+// reproducible (same seed → same worlds → same verdict, no flicker).
+//
+// NON-DESTRUCTIVE (critical): the pool is never left dirty. Before each run we
+// snapshot every player's xp_per_gw array + xp scalar, patch them in place,
+// call the engine, then restore the originals in a finally block. After a full
+// run() the pool is byte-identical to before (the harness proves this).
+//
+// PERF: computeTransfers over the whole pool is heavy; N runs would jank the
+// main thread. We chunk with setTimeout(0) between runs, report progress, and
+// expose cancel(). Results are memo-safe: a fresh run() supersedes any in-flight
+// one.
+//
+// GATE: capability 'sensitivity' (entitlements seam). Free = teaser card only;
+// season / tiers-OFF = full. render() shows apexLockedHtml when not permitted.
+//
+// HOUSE PATTERN: IIFE, lazy typeof-guarded globals, never throws at load, no
+// reliance on load order beyond apex_entitlements.js coming first (for apexCan/
+// apexLockedHtml — both are typeof-guarded anyway).
+// ═══════════════════════════════════════════════════════════════════════════
+(function () {
+  'use strict';
+
+  // ── Tunables ───────────────────────────────────────────────────────────────
+  var SIGMA        = 0.10;  // jitter SD: ~model per-player per-GW MAE/mean ratio
+  var DEFAULT_RUNS = 30;    // enough to separate ROBUST/SPLIT/FRAGILE cheaply
+  var SEED_BASE    = 0x9E3779B1; // fixed base → reproducible run sets
+  var ROBUST_PCT   = 0.70;  // ≥70% survival = ROBUST
+  var SPLIT_PCT    = 0.40;  // 40–70% = SPLIT, <40% = FRAGILE
+
+  // ── Local mulberry32 (reimplemented; NOT dependent on the generator's) ──────
+  function _mulberry32(seed) {
+    var a = seed >>> 0;
+    return function () {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      var t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  // Box–Muller: two uniforms → one standard normal. rng in (0,1].
+  function _gauss(rng) {
+    var u1 = rng(); if (u1 < 1e-12) u1 = 1e-12;
+    var u2 = rng();
+    return Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+  }
+
+  // ── Lazy global access (all guarded — never throw) ──────────────────────────
+  function _pool() {
+    try { return (typeof POOL_DATA !== 'undefined' && Array.isArray(POOL_DATA)) ? POOL_DATA : []; }
+    catch (e) { return []; }
+  }
+  function _gwIdx() {
+    try { return (typeof activeGwIdx === 'number') ? activeGwIdx : 0; } catch (e) { return 0; }
+  }
+  function _computeTransfers(idx) {
+    if (typeof computeTransfers !== 'function') return null;
+    return computeTransfers(idx);
+  }
+  function _can() {
+    try { return (typeof window.apexCan === 'function') ? !!window.apexCan('sensitivity') : true; }
+    catch (e) { return true; }
+  }
+  function _lockedHtml(title, blurb) {
+    try { if (typeof window.apexLockedHtml === 'function') return window.apexLockedHtml(title, blurb); }
+    catch (e) {}
+    return '<div style="padding:14px;border:1px dashed #1D9E75;border-radius:12px;">🔒 ' +
+           (title || 'Apex feature') + '</div>';
+  }
+
+  // ── Top-move extraction: the first rec after the engine's own sort ──────────
+  // computeTransfers returns a sorted array; recs[0] is the model's pick. We key
+  // a move by out_id→in_id so "same move" is exact, and carry names for display.
+  function _topMove(recs) {
+    if (!recs || !recs.length) return null;
+    var r = recs[0];
+    if (!r || r.out_id == null || r.in_id == null) return null;
+    return {
+      key: r.out_id + '->' + r.in_id,
+      out_id: r.out_id, in_id: r.in_id,
+      out_name: r.out_name || '?', in_name: r.in_name || '?',
+    };
+  }
+
+  // ── Non-destructive jitter over the WHOLE pool ──────────────────────────────
+  // Snapshot → patch → (caller computes) → restore, restore always runs in the
+  // finally block. Returns the top move for this jittered world (or null).
+  function _runOne(idx, rng) {
+    var pool = _pool();
+    var snap = [];   // [{p, xp_per_gw, xp}] pristine copies
+    try {
+      for (var i = 0; i < pool.length; i++) {
+        var p = pool[i];
+        var base = Array.isArray(p.xp_per_gw) ? p.xp_per_gw : null;
+        snap.push({ p: p, xp_per_gw: base ? base.slice() : null, xp: p.xp });
+        // One multiplicative factor per player per GW cell (independent noise).
+        if (base) {
+          var patched = new Array(base.length);
+          for (var g = 0; g < base.length; g++) {
+            var f = 1 + SIGMA * _gauss(rng);
+            if (f < 0) f = 0;                       // xP can't go negative
+            patched[g] = base[g] * f;
+          }
+          p.xp_per_gw = patched;
+        }
+        // Keep the scalar xp consistent with cell 0 (engines that read p.xp).
+        if (typeof p.xp === 'number') {
+          var f0 = 1 + SIGMA * _gauss(rng);
+          if (f0 < 0) f0 = 0;
+          p.xp = snap[i].xp * f0;
+        }
+      }
+      var recs = _computeTransfers(idx);
+      return _topMove(recs);
+    } finally {
+      // Restore EVERY player to its pristine values — byte-identical pool.
+      for (var j = 0; j < snap.length; j++) {
+        var s = snap[j];
+        if (s.xp_per_gw !== null) s.p.xp_per_gw = s.xp_per_gw;
+        s.p.xp = s.xp;
+      }
+    }
+  }
+
+  // ── State for an in-flight / completed run ──────────────────────────────────
+  var _state = {
+    running: false,
+    cancelled: false,
+    token: 0,          // supersede guard: a new run() bumps this
+    nRuns: 0,
+    done: 0,
+    counts: {},        // key -> survival count
+    labels: {},        // key -> {out_name,in_name}
+    order: [],         // keys in first-seen order (stable display)
+    unjittered: null,  // the model's real pick (no noise)
+    finished: false,
+  };
+  var _lastContainer = null;   // remember where to re-render on completion
+
+  function _resetState(nRuns) {
+    _state.running = true;
+    _state.cancelled = false;
+    _state.token += 1;
+    _state.nRuns = nRuns;
+    _state.done = 0;
+    _state.counts = {};
+    _state.labels = {};
+    _state.order = [];
+    _state.unjittered = null;
+    _state.finished = false;
+  }
+
+  function _record(mv) {
+    if (!mv) return;
+    if (!(mv.key in _state.counts)) {
+      _state.counts[mv.key] = 0;
+      _state.labels[mv.key] = { out_name: mv.out_name, in_name: mv.in_name };
+      _state.order.push(mv.key);
+    }
+    _state.counts[mv.key] += 1;
+  }
+
+  function _verdict(pct) {
+    if (pct >= ROBUST_PCT) return { label: 'ROBUST', color: '#1D9E75' };
+    if (pct >= SPLIT_PCT)  return { label: 'SPLIT',  color: '#D9932B' };
+    return { label: 'FRAGILE', color: '#D8452F' };
+  }
+
+  // ── Chunked runner ──────────────────────────────────────────────────────────
+  // Runs one jittered world per tick, yielding to the event loop between each so
+  // the UI stays responsive. onProgress(done,total) fired each tick; onDone(res)
+  // when complete. A newer run() invalidates this one via the token check.
+  function run(nRuns, opts) {
+    opts = opts || {};
+    var N = (typeof nRuns === 'number' && nRuns > 0) ? Math.floor(nRuns) : DEFAULT_RUNS;
+    if (!_can()) {
+      // Gated: don't burn cycles. Report a locked outcome the caller can render.
+      if (typeof opts.onDone === 'function') opts.onDone({ locked: true });
+      return { cancel: function () {} };
+    }
+    _resetState(N);
+    var myToken = _state.token;
+
+    // The model's unjittered pick (baseline marker), computed once, clean.
+    try { _state.unjittered = _topMove(_computeTransfers(_gwIdx())); }
+    catch (e) { _state.unjittered = null; }
+
+    var rng = _mulberry32(SEED_BASE);   // one stream → reproducible run set
+    var idx = _gwIdx();
+
+    function _tick() {
+      if (_state.token !== myToken || _state.cancelled) { _state.running = false; return; }
+      if (_state.done >= N) {
+        _state.running = false;
+        _state.finished = true;
+        var res = results();
+        if (typeof opts.onDone === 'function') { try { opts.onDone(res); } catch (e) {} }
+        return;
+      }
+      try { _record(_runOne(idx, rng)); } catch (e) { /* count as a no-move run */ }
+      _state.done += 1;
+      if (typeof opts.onProgress === 'function') {
+        try { opts.onProgress(_state.done, N); } catch (e) {}
+      }
+      setTimeout(_tick, 0);
+    }
+    setTimeout(_tick, 0);
+    return { cancel: cancel };
+  }
+
+  function cancel() {
+    _state.cancelled = true;
+    _state.running = false;
+  }
+
+  // ── Results snapshot (survival table + verdict on the top-surviving move) ────
+  function results() {
+    var moves = _state.order.map(function (k) {
+      return {
+        key: k,
+        out_name: _state.labels[k].out_name,
+        in_name: _state.labels[k].in_name,
+        survived: _state.counts[k],
+        total: _state.done,
+        pct: _state.done > 0 ? (_state.counts[k] / _state.done) : 0,
+      };
+    }).sort(function (a, b) { return b.survived - a.survived; });
+
+    var top = moves.length ? moves[0] : null;
+    return {
+      locked: false,
+      nRuns: _state.nRuns,
+      done: _state.done,
+      finished: _state.finished,
+      moves: moves,
+      unjittered: _state.unjittered,   // {key,out_name,in_name} or null
+      verdict: top ? _verdict(top.pct) : null,
+    };
+  }
+
+  // ── Render ──────────────────────────────────────────────────────────────────
+  function _esc(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  function render(containerEl) {
+    if (!containerEl) return;
+    _lastContainer = containerEl;
+
+    // Gate: free tier sees the teaser, never the table.
+    if (!_can()) {
+      containerEl.innerHTML = _lockedHtml(
+        'Stress-test',
+        'See which transfer survives when the projections are slightly off. ' +
+        'Robust moves win across many worlds; fragile ones flip on a rounding error.'
+      );
+      return;
+    }
+
+    var res = results();
+
+    if (_state.running && !_state.finished) {
+      var pctDone = res.nRuns ? Math.round((res.done / res.nRuns) * 100) : 0;
+      containerEl.innerHTML =
+        '<div style="padding:12px 14px;border:1px solid var(--border,#e5e2da);border-radius:12px;' +
+        'background:var(--bg2,#faf8f3);font-size:.82rem;color:var(--muted,#7a8783);">' +
+        'Stress-testing the pick… <strong>' + res.done + '/' + res.nRuns + '</strong> (' + pctDone + '%)' +
+        '</div>';
+      return;
+    }
+
+    if (!res.finished || !res.moves.length) {
+      containerEl.innerHTML =
+        '<div style="padding:12px 14px;border:1px solid var(--border,#e5e2da);border-radius:12px;' +
+        'background:var(--bg2,#faf8f3);font-size:.82rem;color:var(--muted,#7a8783);">' +
+        'No transfer to stress-test — the engine has no top move this week.</div>';
+      return;
+    }
+
+    var v = res.verdict;
+    var rows = res.moves.map(function (m) {
+      var isPick = res.unjittered && m.key === res.unjittered.key;
+      var pct = Math.round(m.pct * 100);
+      return '<tr>' +
+        '<td style="padding:6px 10px;">' + _esc(m.out_name) + ' → ' + _esc(m.in_name) +
+        (isPick ? ' <span title="model\'s unjittered pick" style="color:#1D9E75;font-weight:800;">◆</span>' : '') +
+        '</td>' +
+        '<td style="padding:6px 10px;text-align:right;font-variant-numeric:tabular-nums;">' +
+        m.survived + '/' + m.total + '</td>' +
+        '<td style="padding:6px 10px;text-align:right;font-weight:700;font-variant-numeric:tabular-nums;">' +
+        pct + '%</td>' +
+        '</tr>';
+    }).join('');
+
+    var top = res.moves[0];
+    var topPct = Math.round(top.pct * 100);
+
+    containerEl.innerHTML =
+      '<div style="border:1px solid var(--border,#e5e2da);border-radius:12px;overflow:hidden;' +
+      'background:var(--bg2,#faf8f3);margin:8px 0;">' +
+      '<div style="padding:12px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;' +
+      'border-bottom:1px solid var(--border,#e5e2da);">' +
+      '<span style="font-weight:800;font-size:.9rem;">Stress test</span>' +
+      '<span style="background:' + v.color + ';color:#fff;font-weight:800;font-size:.72rem;' +
+      'padding:3px 9px;border-radius:999px;letter-spacing:.04em;">' + v.label + '</span>' +
+      '<span style="color:var(--muted,#7a8783);font-size:.78rem;">' +
+      _esc(top.out_name) + ' → ' + _esc(top.in_name) + ' survived ' + top.survived + '/' +
+      top.total + ' runs (' + topPct + '%)</span>' +
+      '</div>' +
+      '<table style="width:100%;border-collapse:collapse;font-size:.8rem;">' +
+      '<thead><tr style="text-align:left;color:var(--muted,#7a8783);">' +
+      '<th style="padding:6px 10px;font-weight:700;">Top move</th>' +
+      '<th style="padding:6px 10px;text-align:right;font-weight:700;">Survived</th>' +
+      '<th style="padding:6px 10px;text-align:right;font-weight:700;">%</th>' +
+      '</tr></thead><tbody>' + rows + '</tbody></table>' +
+      '<div style="padding:8px 14px;font-size:.72rem;color:var(--muted,#7a8783);">' +
+      '◆ = model\'s unjittered pick · noise ±' + Math.round(SIGMA * 100) +
+      '% per projection, ' + res.nRuns + ' runs</div>' +
+      '</div>';
+  }
+
+  // ── Public API ──────────────────────────────────────────────────────────────
+  window.apexSensitivity = {
+    run: run,
+    cancel: cancel,
+    results: results,
+    render: render,
+    // A convenience the UI button uses: run, live-progress into el, render on done.
+    runInto: function (containerEl, nRuns) {
+      if (!containerEl) return { cancel: function () {} };
+      if (!_can()) { render(containerEl); return { cancel: function () {} }; }
+      return run(nRuns, {
+        onProgress: function () { render(containerEl); },
+        onDone: function () { render(containerEl); },
+      });
+    },
+  };
+
+  // Test hooks (node harness only — harmless in the browser).
+  window._apexSensitivityTestHooks = {
+    mulberry32: _mulberry32,
+    gauss: _gauss,
+    runOne: _runOne,
+    topMove: _topMove,
+    verdict: _verdict,
+    SIGMA: SIGMA,
+  };
+})();
+
+</script>
+
+<!-- Custom Projections (2026-07-07) — upload-your-own-xP CSV. Loads after the
+     solver so POOL_DATA exists when it rehydrates persisted overrides.
+     assets/apex_customproj.js -->
+<script>
+// ═══════════════════════════════════════════════════════════════════════════
+// APEX CUSTOM PROJECTIONS (2026-07-07) — "upload your own projections". A
+// Premium CSV-upload feature: a manager who trusts their own numbers (or another
+// source) can override the model's xP wholesale and let the solver plan on top.
+//
+// CSV SHAPE (two accepted forms; header row required):
+//   A) flat:      name_or_id, xp                → one value applied to EVERY GW
+//   B) per-GW:    name_or_id, xp_gw1, xp_gw2…   → one value per horizon slot
+// The first column is the player key: an exact FPL id (numeric) first, else a
+// case- and accent-insensitive web_name match against POOL_DATA. We NEVER guess
+// beyond that exact-normalised name match — unmatched rows are reported, not
+// fuzzily forced onto the nearest name.
+//
+// APPLY (same pristine-snapshot discipline as the xMins editor, but its OWN base
+// key so the two never collide): the first time a player is overridden we stash
+// pp._cp_base = {xp_per_gw, xp} once; thereafter we write xp_per_gw / xp /
+// total_xp from the uploaded numbers. clearAll() restores every _cp_base and
+// deletes the stash → pool byte-identical to before.
+//
+// INTERACTION WITH THE xMINS EDITOR (documented rule): custom projections
+// REPLACE xP wholesale, so if BOTH systems touch the same player, CUSTOM PROJ
+// WINS and the xMins editor is bypassed for that player (its minutes edit would
+// only re-derive an xP we're about to overwrite). This is the simplest coherent
+// v1; the UI flags any such player so the user isn't surprised. Per-player, not
+// global: a player with a custom projection is "owned" by this module; every
+// other player still honours the xMins editor normally.
+//
+// PERSIST: localStorage 'apex_customproj_v1:<fplid>' stores the PARSED VALUES
+// (id → {perGw:[…]} or {flat:x}), never the file. Same id resolution as the
+// locks module (FPL_ID → apex_fpl_id → '0') so overrides follow the team.
+//
+// GATE: capability 'customProjections'. Free = teaser only (no upload); season /
+// tiers-OFF = full. mount() renders the locked teaser when not permitted.
+//
+// HOUSE PATTERN: IIFE, lazy typeof-guarded globals, never throws at load, no
+// reliance on load order beyond apex_entitlements.js coming first.
+// ═══════════════════════════════════════════════════════════════════════════
+(function () {
+  'use strict';
+
+  var LS_PREFIX = 'apex_customproj_v1:';
+  var BASE_KEY  = '_cp_base';        // per-player pristine stash (OUR key, not _xp_base)
+
+  var _store = null;    // id(string) -> { perGw:[numbers] }  (flat is expanded to perGw at apply)
+  var _recompute = [];  // solver "recompute + re-render" callbacks
+  var _lastReport = null; // last parse report (for the harness / UI)
+
+  // ── id resolution — mirrors apex_locks.js::_meId() / generator _planKey() ────
+  function _meId() {
+    try { if (typeof FPL_ID !== 'undefined' && FPL_ID) return FPL_ID; } catch (e) {}
+    try {
+      var s = (typeof localStorage !== 'undefined') ? localStorage.getItem('apex_fpl_id') : null;
+      if (s) return s;
+    } catch (e2) {}
+    return '0';
+  }
+  function _key() { return LS_PREFIX + _meId(); }
+
+  // ── lazy globals ─────────────────────────────────────────────────────────────
+  function _pool() {
+    try { return (typeof POOL_DATA !== 'undefined' && Array.isArray(POOL_DATA)) ? POOL_DATA : []; }
+    catch (e) { return []; }
+  }
+  function _can() {
+    try { return (typeof window.apexCan === 'function') ? !!window.apexCan('customProjections') : true; }
+    catch (e) { return true; }
+  }
+  function _lockedHtml(title, blurb) {
+    try { if (typeof window.apexLockedHtml === 'function') return window.apexLockedHtml(title, blurb); }
+    catch (e) {}
+    return '<div style="padding:14px;border:1px dashed #1D9E75;border-radius:12px;">🔒 ' +
+           (title || 'Apex feature') + '</div>';
+  }
+  function _fire() {
+    for (var i = 0; i < _recompute.length; i++) { try { _recompute[i](); } catch (e) {} }
+  }
+
+  // ── name normalisation: lowercase, strip accents, collapse whitespace ────────
+  function _norm(s) {
+    return String(s == null ? '' : s)
+      .normalize ? String(s).normalize('NFD').replace(/[̀-ͯ]/g, '')
+        .toLowerCase().replace(/\s+/g, ' ').trim()
+      : String(s).toLowerCase().replace(/\s+/g, ' ').trim();
+  }
+
+  // ── persistence ──────────────────────────────────────────────────────────────
+  function _load() {
+    if (_store) return _store;
+    _store = {};
+    try {
+      var raw = (typeof localStorage !== 'undefined') ? localStorage.getItem(_key()) : null;
+      if (raw) {
+        var o = JSON.parse(raw);
+        if (o && typeof o === 'object') {
+          Object.keys(o).forEach(function (id) {
+            var v = o[id];
+            if (v && Array.isArray(v.perGw)) _store[String(id)] = { perGw: v.perGw.map(Number) };
+          });
+        }
+      }
+    } catch (e) { _store = {}; }
+    return _store;
+  }
+  function _persist() {
+    try {
+      if (typeof localStorage === 'undefined') return;
+      localStorage.setItem(_key(), JSON.stringify(_store || {}));
+    } catch (e) {}
+  }
+
+  // ── CSV parse (tiny, dependency-free) ────────────────────────────────────────
+  // Handles quoted fields + commas inside quotes. Returns array of string arrays.
+  function _parseCsv(text) {
+    var rows = [], row = [], cur = '', inQ = false;
+    text = String(text == null ? '' : text).replace(/\r\n?/g, '\n');
+    for (var i = 0; i < text.length; i++) {
+      var c = text[i];
+      if (inQ) {
+        if (c === '"') {
+          if (text[i + 1] === '"') { cur += '"'; i++; }
+          else inQ = false;
+        } else cur += c;
+      } else {
+        if (c === '"') inQ = true;
+        else if (c === ',') { row.push(cur); cur = ''; }
+        else if (c === '\n') { row.push(cur); rows.push(row); row = []; cur = ''; }
+        else cur += c;
+      }
+    }
+    // flush last field/row (files may not end in newline)
+    if (cur.length || row.length) { row.push(cur); rows.push(row); }
+    // drop wholly-empty rows
+    return rows.filter(function (r) { return r.some(function (f) { return String(f).trim() !== ''; }); });
+  }
+
+  // ── build a lookup: exact id, else normalised web_name (last-wins collisions) ─
+  function _index() {
+    var byId = {}, byName = {};
+    var pool = _pool();
+    for (var i = 0; i < pool.length; i++) {
+      var p = pool[i];
+      byId[String(p.id)] = p;
+      var n = _norm(p.web_name);
+      if (n) byName[n] = p;
+    }
+    return { byId: byId, byName: byName };
+  }
+
+  // horizon length from the pool (max xp_per_gw length seen), min 1.
+  function _horizon() {
+    var pool = _pool(), h = 1;
+    for (var i = 0; i < pool.length; i++) {
+      if (Array.isArray(pool[i].xp_per_gw) && pool[i].xp_per_gw.length > h) h = pool[i].xp_per_gw.length;
+    }
+    return h;
+  }
+
+  // ── PARSE a CSV string → {applied, matched:[{id,perGw}], unmatched:[names] } ──
+  // Does NOT touch the pool; parseAndApply() does. Split so the harness can test
+  // parsing in isolation.
+  function parse(text) {
+    var rows = _parseCsv(text);
+    var report = { rowsSeen: 0, matched: [], unmatched: [], skipped: [] };
+    if (!rows.length) return report;
+
+    var idx = _index();
+    var H = _horizon();
+
+    // Header row: first cell is the key column; remaining cells are xp column(s).
+    // We don't require exact header names — shape is inferred by column count.
+    var header = rows[0];
+    var nValCols = Math.max(0, header.length - 1);
+    var body = rows.slice(1);
+
+    for (var r = 0; r < body.length; r++) {
+      var cells = body[r];
+      if (!cells.length) continue;
+      var keyRaw = String(cells[0] == null ? '' : cells[0]).trim();
+      if (keyRaw === '') continue;
+      report.rowsSeen++;
+
+      // resolve player: exact id first, else normalised name.
+      var pl = null;
+      if (/^\d+$/.test(keyRaw) && idx.byId[keyRaw]) pl = idx.byId[keyRaw];
+      if (!pl) pl = idx.byName[_norm(keyRaw)] || null;
+      if (!pl) { report.unmatched.push(keyRaw); continue; }
+
+      // collect numeric values from columns 1..n
+      var vals = [];
+      var bad = false;
+      for (var c = 1; c < cells.length; c++) {
+        var raw = String(cells[c] == null ? '' : cells[c]).trim();
+        if (raw === '') continue;          // trailing empties ignored
+        var v = parseFloat(raw);
+        if (!isFinite(v)) { bad = true; break; }
+        vals.push(v);
+      }
+      if (bad || vals.length === 0) { report.skipped.push(keyRaw); continue; }
+
+      // shape: 1 value = flat across horizon; >1 = per-GW (padded/truncated to H).
+      var perGw;
+      if (vals.length === 1) {
+        perGw = new Array(H);
+        for (var g = 0; g < H; g++) perGw[g] = vals[0];
+      } else {
+        perGw = new Array(H);
+        for (var g2 = 0; g2 < H; g2++) perGw[g2] = (g2 < vals.length) ? vals[g2] : 0;
+      }
+      report.matched.push({ id: String(pl.id), name: pl.web_name, perGw: perGw });
+    }
+    (void nValCols);
+    return report;
+  }
+
+  // ── APPLY a single override to the live pool (pristine snapshot once) ─────────
+  function _applyToPool(id, perGw) {
+    var pool = _pool();
+    for (var i = 0; i < pool.length; i++) {
+      var p = pool[i];
+      if (String(p.id) !== String(id)) continue;
+      if (!p[BASE_KEY]) {
+        p[BASE_KEY] = {
+          xp_per_gw: Array.isArray(p.xp_per_gw) ? p.xp_per_gw.slice() : null,
+          xp: p.xp,
+          total_xp: p.total_xp,
+        };
+      }
+      p.xp_per_gw = perGw.slice();
+      p.xp = perGw.length ? perGw[0] : 0;
+      p.total_xp = perGw.reduce(function (a, b) { return a + b; }, 0);
+      return true;
+    }
+    return false;
+  }
+
+  // ── RESTORE a single player from its stash ───────────────────────────────────
+  function _restoreOne(p) {
+    var b = p[BASE_KEY];
+    if (!b) return;
+    if (b.xp_per_gw !== null) p.xp_per_gw = b.xp_per_gw; else delete p.xp_per_gw;
+    p.xp = b.xp;
+    if (typeof b.total_xp === 'undefined') delete p.total_xp; else p.total_xp = b.total_xp;
+    delete p[BASE_KEY];
+  }
+
+  // Re-apply everything in the store onto the (possibly re-loaded) pool.
+  function _syncPool() {
+    var s = _load();
+    Object.keys(s).forEach(function (id) { _applyToPool(id, s[id].perGw); });
+  }
+
+  // ── public API ───────────────────────────────────────────────────────────────
+  window.apexCustomProj = {
+    enabled: _can,
+
+    // Parse-only (no side effects) — exposed for preview + harness.
+    parse: parse,
+
+    // Parse a CSV string, apply matched rows to the pool + store, persist, fire
+    // recompute. Returns the parse report. Gated: no-op report when not allowed.
+    parseAndApply: function (text) {
+      if (!_can()) return { rowsSeen: 0, matched: [], unmatched: [], skipped: [], locked: true };
+      var report = parse(text);
+      var s = _load();
+      for (var i = 0; i < report.matched.length; i++) {
+        var m = report.matched[i];
+        s[m.id] = { perGw: m.perGw.slice() };
+        _applyToPool(m.id, m.perGw);
+      }
+      _persist();
+      _lastReport = report;
+      _fire();
+      return report;
+    },
+
+    // Is this player currently overridden by custom projections?
+    isCustom: function (id) { return Object.prototype.hasOwnProperty.call(_load(), String(id)); },
+
+    // Interaction rule helper: TRUE if the xMins editor should be bypassed for
+    // this player (because custom proj owns its xP). The generator's recompute
+    // path consults this so the two systems compose deterministically.
+    overridesMinutes: function (id) { return this.isCustom(id); },
+
+    count: function () { return Object.keys(_load()).length; },
+
+    // Clear one override: restore that player, drop from store, persist, fire.
+    clearOne: function (id) {
+      var s = _load();
+      if (!Object.prototype.hasOwnProperty.call(s, String(id))) return;
+      var pool = _pool();
+      for (var i = 0; i < pool.length; i++) { if (String(pool[i].id) === String(id)) { _restoreOne(pool[i]); break; } }
+      delete s[String(id)];
+      _persist(); _fire();
+    },
+
+    // Clear ALL: restore every stashed player, wipe store, persist, fire.
+    clearAll: function () {
+      var pool = _pool();
+      for (var i = 0; i < pool.length; i++) { if (pool[i][BASE_KEY]) _restoreOne(pool[i]); }
+      _store = {}; _persist(); _fire();
+    },
+
+    // Re-apply persisted overrides onto the current pool (call after pool load).
+    rehydrate: function () { if (_can()) _syncPool(); },
+
+    onRecompute: function (fn) { if (typeof fn === 'function') _recompute.push(fn); },
+
+    lastReport: function () { return _lastReport; },
+
+    // ── UI: compact panel (upload + applied-count + clear-all) into `el` ───────
+    mount: function (el) {
+      if (!el) return;
+      if (!_can()) {
+        el.innerHTML = _lockedHtml(
+          'Custom projections',
+          'Upload your own xP (CSV) and let the solver plan on top of your numbers.'
+        );
+        return;
+      }
+      var n = this.count();
+      el.innerHTML =
+        '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;' +
+        'padding:10px 12px;border:1px solid var(--border,#e5e2da);border-radius:10px;' +
+        'background:var(--bg2,#faf8f3);font-size:.8rem;">' +
+        '<strong style="font-size:.82rem;">Custom projections</strong>' +
+        '<label style="cursor:pointer;background:var(--accent,#1D9E75);color:#fff;font-weight:700;' +
+        'padding:5px 11px;border-radius:7px;font-size:.76rem;">Upload CSV' +
+        '<input type="file" accept=".csv,text/csv" id="apex-cp-file" style="display:none;"></label>' +
+        '<span id="apex-cp-count" style="color:var(--muted,#7a8783);">' +
+        (n ? (n + ' applied') : 'none applied') + '</span>' +
+        (n ? '<button id="apex-cp-clear" style="margin-left:auto;background:transparent;' +
+             'border:1px solid var(--border,#e5e2da);border-radius:7px;padding:5px 10px;' +
+             'font-size:.74rem;cursor:pointer;color:var(--muted,#7a8783);">Clear all</button>' : '') +
+        '<div id="apex-cp-status" style="flex-basis:100%;color:var(--muted,#7a8783);font-size:.74rem;"></div>' +
+        '</div>';
+
+      var self = this;
+      var fileEl = el.querySelector('#apex-cp-file');
+      var statusEl = el.querySelector('#apex-cp-status');
+      var clearEl = el.querySelector('#apex-cp-clear');
+
+      if (fileEl) {
+        fileEl.addEventListener('change', function () {
+          var f = fileEl.files && fileEl.files[0];
+          if (!f) return;
+          var reader = new FileReader();
+          reader.onload = function () {
+            var rep;
+            try { rep = self.parseAndApply(String(reader.result || '')); }
+            catch (e) { if (statusEl) statusEl.textContent = 'Could not read that file.'; return; }
+            var msg = rep.matched.length + ' applied';
+            if (rep.unmatched.length) msg += ' · ' + rep.unmatched.length + ' unmatched (' +
+              rep.unmatched.slice(0, 5).join(', ') + (rep.unmatched.length > 5 ? '…' : '') + ')';
+            if (rep.skipped.length) msg += ' · ' + rep.skipped.length + ' skipped';
+            self.mount(el);                          // re-render the count/clear button
+            var s2 = el.querySelector('#apex-cp-status'); if (s2) s2.textContent = msg;
+          };
+          reader.readAsText(f);
+        });
+      }
+      if (clearEl) {
+        clearEl.addEventListener('click', function () { self.clearAll(); self.mount(el); });
+      }
+    },
+  };
+
+  // Test hooks (node harness only — harmless in the browser).
+  window._apexCustomProjTestHooks = {
+    parseCsv: _parseCsv,
+    norm: _norm,
+    key: _key,
+    meId: _meId,
+    applyToPool: _applyToPool,
+    restoreOne: _restoreOne,
+    baseKey: BASE_KEY,
+    store: function () { return _load(); },
+  };
+})();
+
+</script>
+
+<!-- Drafts (2026-07-07) — named plan snapshots + side-by-side compare.
+     assets/apex_drafts.js -->
+<script>
+// ═══════════════════════════════════════════════════════════════════════════
+// APEX DRAFTS (2026-07-07) — named snapshots of the working plan + a
+// side-by-side comparison table (the Review-Premium "10 drafts + cross-draft
+// eval" feature, built on Apex's existing plan blob).
+//
+//   The solver already persists ONE working plan per FPL id under
+//   localStorage 'apex_plan_v1:<fplid>' (see generate_solver_html.py
+//   _savePlanState / _restorePlanState). A "draft" here is simply a NAMED COPY
+//   of that blob. You can save up to N drafts, list them, load one back through
+//   the EXISTING restore path, delete them, and — the paid hook — compare()
+//   them side by side: per-GW projected XI+captain totals across the horizon,
+//   with the best total highlighted.
+//
+// STORAGE:
+//   localStorage 'apex_drafts_v1:<fplid>' = { <name>: { blob, savedAt } }
+//   where <blob> is the verbatim apex_plan_v1 object. Cap = apexCap('drafts')
+//   (anchors doc adds drafts:1 free / 10 season to TIER_CAPS; undefined ⇒ no
+//   cap while the seam is OFF, so nothing is limited in the live demo).
+//
+// COMPARE MATHS (per draft, per GW in TEAM_META.gw_range):
+//   • Resolve the draft's stored squad for that GW from blob.squads[idx]
+//     (xi + bench id lists). If none stored for that idx, fall back to the live
+//     squad (SQUAD_DATA) so early GWs the plan didn't touch still score.
+//   • Look each id up in POOL_DATA / SQUAD_DATA to get xp_per_gw.
+//   • Normal GW  : ApexSolver.pickOptimalXI(squad, idx).total_xp
+//                  (XI + best captain doubled) — or, if the solver isn't
+//                  present, a self-contained XI+captain estimate.
+//   • BB GW (blob.chips.bb === gw): add the whole-15 sum + captain (bench
+//     scores). TC GW: add one extra captain (captain tripled). FH GW: if a FH
+//     squad is stored for that idx use it; else mark the cell '~' (unresolvable).
+//   • Any GW whose squad can't be resolved to 15 real players ⇒ cell '~'.
+//
+// HOUSE RULES (mirrors assets/apex_paths.js header): IIFE, 'use strict', every
+// global read LAZILY behind a typeof guard, never throw at load. Gated on
+// apexCan('savedPlans') for the feature + apexCap('drafts') for the slot count.
+//
+// PUBLIC API — window.apexDrafts:
+//   .saveAs(name)        → save current plan blob as <name>; returns {ok,error?}
+//   .list()             → [{ name, savedAt }]  (newest first)
+//   .load(name)         → the raw blob (caller feeds it to the restore path)
+//   .delete(name)       → remove a draft
+//   .compare()          → { gwRange, drafts:[{name, cells:[{gw,total,note}], total}],
+//                           current:{...}, bestName }
+//   .renderCompare(el)  → render the comparison grid into el
+//   .capInfo()          → { used, cap, room }
+// ═══════════════════════════════════════════════════════════════════════════
+(function () {
+  'use strict';
+
+  var _DEFAULT_CAP = 10;   // used only if apexCap('drafts') is undefined AND we
+                           // still want a sane ceiling; see _cap().
+
+  // ── Lazy global access (guarded — never throw) ────────────────────────────
+  function _meta()  { return (typeof TEAM_META !== 'undefined' && TEAM_META) ? TEAM_META : null; }
+  function _pool()  { return (typeof POOL_DATA !== 'undefined' && Array.isArray(POOL_DATA)) ? POOL_DATA : []; }
+  function _squadData() { return (typeof SQUAD_DATA !== 'undefined' && Array.isArray(SQUAD_DATA)) ? SQUAD_DATA : []; }
+  function _solver() { return (typeof window !== 'undefined' && window.ApexSolver) ? window.ApexSolver : null; }
+
+  function _fplId() {
+    try {
+      if (typeof FPL_ID !== 'undefined' && FPL_ID) return String(FPL_ID);
+    } catch (e) {}
+    try { return localStorage.getItem('apex_fpl_id') || '0'; } catch (e) { return '0'; }
+  }
+  function _planKey()   { return 'apex_plan_v1:' + _fplId(); }
+  function _draftsKey() { return 'apex_drafts_v1:' + _fplId(); }
+
+  function _can(feature) {
+    try { return (typeof window.apexCan === 'function') ? !!window.apexCan(feature) : true; }
+    catch (e) { return true; }
+  }
+  // apexCap('drafts') → number when the anchors doc has added it; undefined
+  // while the seam is OFF (tier 'season' doesn't list a numeric cap for an
+  // unknown feature ⇒ undefined). Treat undefined as "no cap" (live demo
+  // unrestricted); Infinity likewise.
+  function _cap() {
+    try {
+      if (typeof window.apexCap === 'function') {
+        var v = window.apexCap('drafts');
+        if (typeof v === 'number' && isFinite(v)) return v;
+        if (v === Infinity) return Infinity;
+      }
+    } catch (e) {}
+    return Infinity; // seam OFF / feature not in caps ⇒ unrestricted
+  }
+  function _lockedHtml(title, blurb) {
+    try {
+      if (typeof window.apexLockedHtml === 'function') return window.apexLockedHtml(title, blurb);
+    } catch (e) {}
+    return '<div style="padding:14px;color:#7a8783;font-size:.85rem;">' + title + '</div>';
+  }
+
+  // ── Storage helpers ───────────────────────────────────────────────────────
+  function _readDrafts() {
+    try {
+      var raw = localStorage.getItem(_draftsKey());
+      if (!raw) return {};
+      var obj = JSON.parse(raw);
+      return (obj && typeof obj === 'object') ? obj : {};
+    } catch (e) { return {}; }
+  }
+  function _writeDrafts(obj) {
+    try { localStorage.setItem(_draftsKey(), JSON.stringify(obj || {})); return true; }
+    catch (e) { return false; }
+  }
+  function _readLivePlan() {
+    try {
+      var raw = localStorage.getItem(_planKey());
+      if (!raw) return null;
+      var obj = JSON.parse(raw);
+      return (obj && typeof obj === 'object') ? obj : null;
+    } catch (e) { return null; }
+  }
+
+  // ── Public: saveAs / list / load / delete ─────────────────────────────────
+  function saveAs(name) {
+    name = (name == null ? '' : String(name)).trim();
+    if (!name) return { ok: false, error: 'Name required' };
+    var blob = _readLivePlan();
+    if (!blob) return { ok: false, error: 'No plan to save yet — apply some moves first.' };
+
+    var drafts = _readDrafts();
+    var exists = Object.prototype.hasOwnProperty.call(drafts, name);
+    if (!exists) {
+      var cap = _cap();
+      var used = Object.keys(drafts).length;
+      if (used >= cap) {
+        return { ok: false, error: 'Draft limit reached (' + cap + '). Delete one first.', capped: true };
+      }
+    }
+    drafts[name] = { blob: blob, savedAt: Date.now() };
+    if (!_writeDrafts(drafts)) return { ok: false, error: 'Could not save (storage full?).' };
+    return { ok: true, name: name };
+  }
+
+  function list() {
+    var drafts = _readDrafts();
+    return Object.keys(drafts)
+      .map(function (name) { return { name: name, savedAt: (drafts[name] && drafts[name].savedAt) || 0 }; })
+      .sort(function (a, b) { return b.savedAt - a.savedAt; });
+  }
+
+  function load(name) {
+    var drafts = _readDrafts();
+    var d = drafts[name];
+    return (d && d.blob) ? d.blob : null;
+  }
+
+  function del(name) {
+    var drafts = _readDrafts();
+    if (Object.prototype.hasOwnProperty.call(drafts, name)) {
+      delete drafts[name];
+      _writeDrafts(drafts);
+      return true;
+    }
+    return false;
+  }
+
+  function capInfo() {
+    var cap = _cap();
+    var used = Object.keys(_readDrafts()).length;
+    return { used: used, cap: cap, room: (cap === Infinity ? Infinity : Math.max(0, cap - used)) };
+  }
+
+  // ── Squad resolution + per-GW scoring ─────────────────────────────────────
+  function _byId(id) {
+    var pool = _pool();
+    for (var i = 0; i < pool.length; i++) if (pool[i].id === id) return pool[i];
+    var sq = _squadData();
+    for (var j = 0; j < sq.length; j++) if (sq[j].id === id) return sq[j];
+    return null;
+  }
+  function _xpAt(p, idx) {
+    if (!p) return 0;
+    var arr = p.xp_per_gw;
+    if (Array.isArray(arr) && idx < arr.length) return arr[idx] || 0;
+    return p.xp || 0;
+  }
+
+  // Resolve a squad (array of 15 player objects) for a draft at GW index idx.
+  // Returns null if it can't build a full 15-real-player squad.
+  function _resolveSquadForGw(blob, idx) {
+    var squads = (blob && blob.squads) || {};
+    var s = squads[idx] || squads[String(idx)];
+    var ids = null;
+    if (s && Array.isArray(s.xi)) {
+      ids = s.xi.concat(Array.isArray(s.bench) ? s.bench : []);
+    }
+    if (!ids || ids.length < 15) {
+      // Fall back to the live squad (plan didn't touch this GW).
+      var live = _squadData();
+      if (live.length === 15) return live.slice();
+      // Or reconstruct live ids.
+      if (live.length) return live.slice();
+      return null;
+    }
+    var players = ids.map(_byId);
+    if (players.length < 15 || !players.every(Boolean)) return null;
+    return players;
+  }
+
+  // Self-contained XI+captain fallback (used only if ApexSolver.pickOptimalXI
+  // isn't present). Greedy: best GK + fill to 11 by highest xP respecting FPL
+  // minimums (≥3 DEF, ≥1 FWD), captain = single best XI player doubled.
+  function _fallbackXiTotal(squad, idx) {
+    var by = { 1: [], 2: [], 3: [], 4: [] };
+    for (var i = 0; i < squad.length; i++) {
+      var code = squad[i].element_type || squad[i].pos || 0;
+      if (by[code]) by[code].push(squad[i]);
+    }
+    function sortXp(a, b) { return _xpAt(b, idx) - _xpAt(a, idx); }
+    by[1].sort(sortXp); by[2].sort(sortXp); by[3].sort(sortXp); by[4].sort(sortXp);
+    if (!by[1].length) return null;
+    var xi = [by[1][0]];
+    var defs = by[2].slice(), mids = by[3].slice(), fwds = by[4].slice();
+    // minimums
+    var pick = [];
+    pick = pick.concat(defs.slice(0, 3), fwds.slice(0, 1));
+    // remaining slots (7) from all outfield leftovers by xP
+    var used = {};
+    pick.forEach(function (p) { used[p.id] = 1; });
+    var rest = defs.concat(mids, fwds).filter(function (p) { return !used[p.id]; }).sort(sortXp);
+    while (pick.length < 10 && rest.length) pick.push(rest.shift());
+    xi = xi.concat(pick);
+    if (xi.length < 11) return null;
+    var xiXp = 0, capXp = 0;
+    for (var k = 0; k < xi.length; k++) { var v = _xpAt(xi[k], idx); xiXp += v; if (v > capXp) capXp = v; }
+    return { xi_xp: xiXp, captain_xp: capXp, total_xp: xiXp + capXp };
+  }
+
+  function _xiResult(squad, idx) {
+    var solver = _solver();
+    if (solver && typeof solver.pickOptimalXI === 'function') {
+      try {
+        var r = solver.pickOptimalXI(squad, idx);
+        if (r && typeof r.total_xp === 'number' && r.xi && r.xi.length >= 11) return r;
+      } catch (e) {}
+    }
+    return _fallbackXiTotal(squad, idx);
+  }
+
+  // Score one draft blob across the horizon. Returns { cells:[{gw,total,note}], total }.
+  function _scoreBlob(blob, gwRange, startGw) {
+    var chips = (blob && blob.chips) || {};
+    var bbGw = parseInt(chips.bb, 10); if (isNaN(bbGw)) bbGw = null;
+    var tcGw = parseInt(chips.tc, 10); if (isNaN(tcGw)) tcGw = null;
+    var fhGw = parseInt(chips.fh, 10); if (isNaN(fhGw)) fhGw = null;
+
+    var cells = [], total = 0, anyMissing = false;
+    for (var i = 0; i < gwRange.length; i++) {
+      var gw = gwRange[i];
+      var idx = gw - startGw;
+
+      // FH with no stored squad for this GW ⇒ unresolvable cell.
+      if (fhGw !== null && gw === fhGw) {
+        var fhSquads = (blob && blob.fhSquads) || null;
+        var fhSq = fhSquads ? (fhSquads[idx] || fhSquads[String(idx)]) : null;
+        if (!fhSq || !Array.isArray(fhSq) || fhSq.length < 11) {
+          cells.push({ gw: gw, total: null, note: '~' });
+          anyMissing = true;
+          continue;
+        }
+      }
+
+      var squad = _resolveSquadForGw(blob, idx);
+      if (!squad) { cells.push({ gw: gw, total: null, note: '~' }); anyMissing = true; continue; }
+
+      var cellTotal, note = '';
+      if (bbGw !== null && gw === bbGw) {
+        // Bench Boost: all 15 score + best captain doubled.
+        var sum = 0, cap = 0;
+        for (var b = 0; b < squad.length; b++) { var xp = _xpAt(squad[b], idx); sum += xp; if (xp > cap) cap = xp; }
+        cellTotal = sum + cap; note = 'BB';
+      } else if (tcGw !== null && gw === tcGw) {
+        // Triple Captain: XI + captain tripled (= xi_xp + 2·captain).
+        var rT = _xiResult(squad, idx);
+        if (!rT) { cells.push({ gw: gw, total: null, note: '~' }); anyMissing = true; continue; }
+        cellTotal = (rT.xi_xp || 0) + 2 * (rT.captain_xp || 0); note = 'TC';
+      } else {
+        var rN = _xiResult(squad, idx);
+        if (!rN) { cells.push({ gw: gw, total: null, note: '~' }); anyMissing = true; continue; }
+        cellTotal = rN.total_xp;
+        if (fhGw !== null && gw === fhGw) note = 'FH';
+      }
+      cellTotal = Math.round(cellTotal * 10) / 10;
+      cells.push({ gw: gw, total: cellTotal, note: note });
+      total += cellTotal;
+    }
+    return { cells: cells, total: Math.round(total * 10) / 10, incomplete: anyMissing };
+  }
+
+  // ── Public: compare() ─────────────────────────────────────────────────────
+  function compare() {
+    var meta = _meta();
+    var gwRange = (meta && Array.isArray(meta.gw_range)) ? meta.gw_range : [];
+    var startGw = (meta && meta.start_gw) ? meta.start_gw : (gwRange[0] || 1);
+
+    var drafts = _readDrafts();
+    var names = Object.keys(drafts).sort(function (a, b) {
+      return ((drafts[b] && drafts[b].savedAt) || 0) - ((drafts[a] && drafts[a].savedAt) || 0);
+    });
+
+    var out = [];
+    for (var i = 0; i < names.length; i++) {
+      var name = names[i];
+      var scored = _scoreBlob(drafts[name].blob || {}, gwRange, startGw);
+      out.push({ name: name, cells: scored.cells, total: scored.total, incomplete: scored.incomplete });
+    }
+
+    // Live "Current" row from the on-disk working plan (or a bare live squad).
+    var live = _readLivePlan() || { squads: {}, chips: {} };
+    var curScored = _scoreBlob(live, gwRange, startGw);
+    var current = { name: 'Current', cells: curScored.cells, total: curScored.total, incomplete: curScored.incomplete };
+
+    // Best total across drafts + current (ignore rows with no resolvable total).
+    var bestName = null, bestVal = -Infinity;
+    out.concat([current]).forEach(function (row) {
+      if (typeof row.total === 'number' && row.total > bestVal) { bestVal = row.total; bestName = row.name; }
+    });
+
+    return { gwRange: gwRange, startGw: startGw, drafts: out, current: current, bestName: bestName };
+  }
+
+  // ── Apply-a-draft (load blob → hand to the existing restore path) ─────────
+  // Writes the chosen blob into the live plan key and reloads so the solver's
+  // own _restorePlanState rebuilds the pitch/counters from it — reuses the
+  // audited restore path rather than re-implementing squad commit here.
+  window._apexDraftLoad = function (name) {
+    try {
+      var blob = load(name);
+      if (!blob) return;
+      localStorage.setItem(_planKey(), JSON.stringify(blob));
+      // Prefer an in-page restore if the solver exposes one; else reload.
+      if (typeof window._restorePlanStateForce === 'function') { window._restorePlanStateForce(); }
+      else { location.reload(); }
+    } catch (e) {}
+  };
+  window._apexDraftDelete = function (name) {
+    try { del(name); if (typeof window._apexDraftsRefresh === 'function') window._apexDraftsRefresh(); } catch (e) {}
+  };
+  window._apexDraftSaveFromPrompt = function () {
+    try {
+      var name = window.prompt('Name this draft:');
+      if (name == null) return;
+      var res = saveAs(name);
+      if (!res.ok && res.error) { try { alert(res.error); } catch (e) {} }
+      if (typeof window._apexDraftsRefresh === 'function') window._apexDraftsRefresh();
+    } catch (e) {}
+  };
+
+  // ── renderCompare(el) — the grid ──────────────────────────────────────────
+  function _fmt(x) { return (typeof x === 'number') ? (Math.round(x * 10) / 10).toFixed(1) : '~'; }
+
+  function renderCompare(el) {
+    if (!el) return;
+
+    // Feature gate: side-by-side comparison is the paid hook.
+    if (!_can('savedPlans')) {
+      el.innerHTML = _lockedHtml('Draft comparison',
+        'Save up to 10 plans and compare them side by side — every gameweek scored, so you pick the path with the most points before you commit.');
+      return;
+    }
+
+    var data = compare();
+    var ci = capInfo();
+    var capTxt = (ci.cap === Infinity) ? '' :
+      ' <span style="font-size:.66rem;font-weight:700;color:#7a8783;">· ' + ci.used + '/' + ci.cap + ' slots</span>';
+
+    var head = '<tr style="background:#F7F5EF;text-align:left;">' +
+      '<th style="padding:8px 10px;font-size:.66rem;letter-spacing:.5px;color:#7a8783;text-transform:uppercase;position:sticky;left:0;background:#F7F5EF;">Draft</th>';
+    for (var g = 0; g < data.gwRange.length; g++) {
+      head += '<th style="padding:8px 10px;text-align:right;font-size:.66rem;color:#7a8783;">GW' + data.gwRange[g] + '</th>';
+    }
+    head += '<th style="padding:8px 10px;text-align:right;font-size:.66rem;letter-spacing:.5px;color:#7a8783;text-transform:uppercase;">Total</th></tr>';
+
+    function rowHtml(row, isCurrent) {
+      var isBest = (row.name === data.bestName);
+      var bg = isBest ? 'background:rgba(29,158,117,.10);' : (isCurrent ? 'background:#FBFAF6;' : '');
+      var cellsHtml = '';
+      for (var c = 0; c < row.cells.length; c++) {
+        var cell = row.cells[c];
+        var val = (cell.total == null) ? '~' : _fmt(cell.total);
+        var tip = 'GW' + cell.gw + (cell.note ? ' · ' + cell.note : '') + ' · ' + val + ' xPts';
+        cellsHtml += '<td title="' + tip + '" style="padding:8px 10px;text-align:right;font-family:\'JetBrains Mono\',monospace;font-size:.78rem;' +
+          (cell.note && cell.note !== '~' ? 'color:#1D9E75;font-weight:700;' : '') + '">' + val +
+          (cell.note && cell.note !== '~' ? '<span style="font-size:.6rem;color:#a8a294;"> ' + cell.note + '</span>' : '') + '</td>';
+      }
+      var actions = isCurrent ? '' :
+        '<div style="display:inline-flex;gap:6px;margin-left:8px;">' +
+        '<button onclick="_apexDraftLoad(\'' + _esc(row.name) + '\')" title="Load this draft" style="background:#1D9E75;color:#fff;border:none;border-radius:6px;padding:3px 9px;font-size:.66rem;font-weight:800;cursor:pointer;font-family:inherit;">Load</button>' +
+        '<button onclick="_apexDraftDelete(\'' + _esc(row.name) + '\')" title="Delete this draft" style="background:#fff;color:#c0392b;border:1px solid #e0d9cc;border-radius:6px;padding:3px 8px;font-size:.66rem;font-weight:800;cursor:pointer;font-family:inherit;">✕</button>' +
+        '</div>';
+      return '<tr style="border-top:1px solid #E7E2D8;' + bg + '">' +
+        '<td style="padding:8px 10px;font-weight:' + (isBest ? '800' : '600') + ';position:sticky;left:0;' + (bg || 'background:#fff;') + '">' +
+          (isBest ? '★ ' : '') + _escText(row.name) + actions + '</td>' +
+        cellsHtml +
+        '<td style="padding:8px 10px;text-align:right;font-family:\'JetBrains Mono\',monospace;font-weight:800;' + (isBest ? 'color:#1D9E75;' : '') + '">' + _fmt(row.total) + '</td>' +
+        '</tr>';
+    }
+
+    var body = '';
+    for (var d = 0; d < data.drafts.length; d++) body += rowHtml(data.drafts[d], false);
+    body += rowHtml(data.current, true);
+
+    if (!data.drafts.length) {
+      body = '<tr><td colspan="' + (data.gwRange.length + 2) + '" style="padding:14px 10px;color:#7a8783;font-size:.82rem;">No saved drafts yet. Build a plan, then <b>Save draft</b> to compare alternatives here.</td></tr>' + rowHtml(data.current, true);
+    }
+
+    el.innerHTML =
+      '<div style="margin:8px 0 0;">' +
+      '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px;">' +
+      '<div style="font-weight:800;font-size:.92rem;">Compare plans' + capTxt + '</div>' +
+      '<button onclick="_apexDraftSaveFromPrompt()" style="background:#1D9E75;color:#fff;border:none;border-radius:8px;padding:6px 12px;font-size:.72rem;font-weight:800;cursor:pointer;font-family:inherit;">＋ Save current as draft</button>' +
+      '<span style="flex:1;"></span>' +
+      '<span style="font-size:.66rem;color:#7a8783;">★ = best total · ~ = not resolvable</span>' +
+      '</div>' +
+      '<div style="overflow-x:auto;"><table style="border-collapse:collapse;font-size:.82rem;min-width:520px;background:#fff;border:1px solid #E7E2D8;border-radius:12px;overflow:hidden;">' +
+      '<thead>' + head + '</thead><tbody>' + body + '</tbody></table></div>' +
+      '</div>';
+  }
+
+  function _esc(s)     { return String(s == null ? '' : s).replace(/\\/g, '\\\\').replace(/'/g, "\\'"); }
+  function _escText(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+  // Convenience refresh hook (UI button calls this after save/delete).
+  window._apexDraftsRefresh = function () {
+    try {
+      var el = document.getElementById('apex-drafts-panel');
+      if (el && el.style.display !== 'none') renderCompare(el);
+    } catch (e) {}
+  };
+
+  window.apexDrafts = {
+    saveAs: saveAs,
+    list: list,
+    load: load,
+    delete: del,
+    compare: compare,
+    renderCompare: renderCompare,
+    capInfo: capInfo,
+  };
+})();
+
+</script>
+
+<!-- Chip Timing (2026-07-07) — best-chip-weeks search over the existing
+     enumeration. assets/apex_chiptiming.js -->
+<script>
+// ═══════════════════════════════════════════════════════════════════════════
+// APEX CHIP TIMING (2026-07-07) — surface the browser's chip-sequence
+// enumeration as a ranked, one-tap "when to play your chips" table.
+//
+//   The solver ALREADY enumerates every valid chip sequence over the horizon
+//   (assets/apex_solver.js :: enumerateChipSequences, via computeChipPlanner
+//   which pre-solves the per-GW WC/FH squads). This module is a THIN surfacing
+//   layer: it runs that machinery for the currently-available chips, ranks the
+//   sequences by total xP, and renders the top N as rows like
+//
+//        WC GW34 + BB GW36  →  412.3 xPts  (+6.1 vs no chips)   [ Apply ]
+//
+//   Each Apply button sets the existing sel-wc/sel-fh/sel-bb/sel-tc dropdowns
+//   and dispatches change events — the SAME wiring the chip calendar uses
+//   (apex_premium.js :: _pxCcPlace), so the rest of the page reacts exactly as
+//   if the user picked the GWs by hand. The no-chip baseline is always shown.
+//
+// HOUSE RULES (mirrors assets/apex_paths.js header):
+//   • IIFE, 'use strict'. Every global read LAZILY at call time behind a
+//     typeof guard. This file must NEVER throw at load, whatever the bake
+//     shipped or in what order scripts evaluated.
+//   • Gate: capability 'chipTiming' (free=false / season=true, added to
+//     TIER_CAPS by the anchors doc). Inert (full access) while APEX_TIERS=false
+//     because apexCan() returns true for the seam-OFF "season" tier.
+//
+// PUBLIC API — window.apexChipTiming:
+//   .run(opts?)        → Promise<enumResult>  (chunked, progress-reported)
+//   .renderTop(el,n=5) → render latest run's top-n rows into el
+//   .lastResult()      → the cached enumResult (or null)
+// ═══════════════════════════════════════════════════════════════════════════
+(function () {
+  'use strict';
+
+  var _CHUNK_THRESHOLD = 200; // enumerated combos above which we yield/progress
+  var _lastResult = null;     // cached enumResult from the most recent run()
+  var _running    = null;     // in-flight run() promise (dedupe concurrent calls)
+
+  // ── Lazy global access (all guarded — never throw) ─────────────────────────
+  function _meta()  { return (typeof TEAM_META !== 'undefined' && TEAM_META) ? TEAM_META : null; }
+  function _pool()  { return (typeof POOL_DATA !== 'undefined' && Array.isArray(POOL_DATA)) ? POOL_DATA : []; }
+  function _squad() { return (typeof SQUAD_DATA !== 'undefined' && Array.isArray(SQUAD_DATA)) ? SQUAD_DATA : []; }
+  function _chipPlanner() { return (typeof CHIP_PLANNER !== 'undefined' && CHIP_PLANNER) ? CHIP_PLANNER : null; }
+  function _solver() { return (typeof window !== 'undefined' && window.ApexSolver) ? window.ApexSolver : null; }
+
+  function _can(feature) {
+    try { return (typeof window.apexCan === 'function') ? !!window.apexCan(feature) : true; }
+    catch (e) { return true; }
+  }
+  function _lockedHtml(title, blurb) {
+    try {
+      if (typeof window.apexLockedHtml === 'function') return window.apexLockedHtml(title, blurb);
+    } catch (e) {}
+    return '<div style="padding:14px;color:#7a8783;font-size:.85rem;">' + title + '</div>';
+  }
+
+  // Which chips are still available? Prefer the live _activeChips toggles (the
+  // user un-ticks burned chips in Step 1); fall back to CHIP_PLANNER.has_*.
+  function _availChips() {
+    var live = (typeof _activeChips === 'object' && _activeChips) ? _activeChips : null;
+    var cp = _chipPlanner();
+    function has(k, cpKey) {
+      if (live && typeof live[k] === 'boolean') return live[k];
+      if (cp && typeof cp[cpKey] === 'boolean') return cp[cpKey];
+      return false;
+    }
+    return {
+      wc: has('wc', 'has_wc'),
+      fh: has('fh', 'has_fh'),
+      bb: has('bb', 'has_bb'),
+      tc: has('tc', 'has_tc'),
+    };
+  }
+
+  // Rough combo count for the chunk/progress decision — sum over k of
+  // C(numChips,k)·P(numGws,k). Only used to decide whether to show progress;
+  // never a correctness input.
+  function _comboEstimate(numChips, numGws) {
+    function perm(n, k) { var r = 1; for (var i = 0; i < k; i++) r *= (n - i); return r; }
+    function comb(n, k) { if (k < 0 || k > n) return 0; var r = 1; for (var i = 0; i < k; i++) r = r * (n - i) / (i + 1); return Math.round(r); }
+    var total = 0, kmax = Math.min(numChips, numGws);
+    for (var k = 1; k <= kmax; k++) total += comb(numChips, k) * perm(numGws, k);
+    return total;
+  }
+
+  // ── run(): compute + rank chip sequences over the horizon ─────────────────
+  // Delegates the heavy lifting to ApexSolver.computeChipPlanner (which solves
+  // the per-GW WC/FH squads AND calls enumerateChipSequences internally). If
+  // that whole planner surface is unavailable, falls back to a direct
+  // enumerateChipSequences call with no WC/FH squads (BB/TC only), so a partial
+  // bake still yields a usable ranking rather than throwing.
+  function run(opts) {
+    opts = opts || {};
+    if (_running) return _running;
+
+    var meta = _meta();
+    var solver = _solver();
+    var gwRange = meta && Array.isArray(meta.gw_range) ? meta.gw_range : [];
+    var startGw = meta && meta.start_gw ? meta.start_gw : (gwRange[0] || 1);
+    var pool = _pool();
+    var mySquad = _squad();
+    var chips = _availChips();
+
+    var nChips = (chips.wc ? 1 : 0) + (chips.fh ? 1 : 0) + (chips.bb ? 1 : 0) + (chips.tc ? 1 : 0);
+    var combos = _comboEstimate(nChips, gwRange.length);
+    var chunked = combos > _CHUNK_THRESHOLD;
+    var onProg = (typeof opts.onProgress === 'function') ? opts.onProgress : null;
+    function prog(stage, pct) { if (onProg) { try { onProg(stage, pct, { combos: combos, chunked: chunked }); } catch (e) {} } }
+
+    // Nothing to plan.
+    if (!meta || !gwRange.length || nChips === 0) {
+      _lastResult = { sequences: [], best_sequence: null, baseline_total_xp: 0,
+                      _availChips: chips, _empty: true };
+      return Promise.resolve(_lastResult);
+    }
+
+    prog('Computing chip squads', 5);
+
+    // Path 1 — full planner (solves WC/FH squads then enumerates). Preferred.
+    if (solver && typeof solver.computeChipPlanner === 'function') {
+      var args = {
+        pool: pool,
+        mySquad: mySquad,
+        startGw: startGw,
+        gwRange: gwRange,
+        hasWc: chips.wc, hasFh: chips.fh, hasBb: chips.bb, hasTc: chips.tc,
+        budget: (meta.budget != null) ? meta.budget : 100.0,
+        dgwTeamsByGw: meta.dgw_teams_by_gw || {},
+        bgwTeamsByGw: meta.bgw_teams_by_gw || {},
+        rotationRisk: (_chipPlanner() && _chipPlanner().rotation_risk) || {},
+        onProgress: chunked ? function (stage, pct) { prog(stage, pct); } : null,
+      };
+      _running = Promise.resolve()
+        .then(function () { return solver.computeChipPlanner(args); })
+        .then(function (data) {
+          data = data || {};
+          data._availChips = chips;
+          _lastResult = data;
+          prog('Done', 100);
+          return data;
+        })
+        .catch(function (err) {
+          // Fall back to the direct enumerator (BB/TC only, no solved squads).
+          try { return _runDirect(chips, gwRange, startGw, pool, mySquad); }
+          catch (e) { _lastResult = { sequences: [], best_sequence: null, baseline_total_xp: 0, _availChips: chips, _error: (err && err.message) || String(err) }; return _lastResult; }
+        })
+        .then(function (r) { _running = null; return r; }, function (e) { _running = null; throw e; });
+      return _running;
+    }
+
+    // Path 2 — direct enumeration only (no computeChipPlanner available).
+    _running = Promise.resolve()
+      .then(function () { return _runDirect(chips, gwRange, startGw, pool, mySquad); })
+      .then(function (r) { _running = null; prog('Done', 100); return r; },
+            function (e) { _running = null; throw e; });
+    return _running;
+  }
+
+  // Direct enumerateChipSequences with only the squads we have (mySquad). WC/FH
+  // cells that need a solved squad will resolve to the baseline squad inside the
+  // enumerator — an honest lower bound, better than throwing.
+  function _runDirect(chips, gwRange, startGw, pool, mySquad) {
+    var solver = _solver();
+    if (!solver || typeof solver.enumerateChipSequences !== 'function') {
+      _lastResult = { sequences: [], best_sequence: null, baseline_total_xp: 0, _availChips: chips, _error: 'enumerator unavailable' };
+      return _lastResult;
+    }
+    var r = solver.enumerateChipSequences({
+      mySquad: mySquad, wcSquads: {}, fhSquads: {},
+      gwRange: gwRange, startGw: startGw,
+      hasWc: chips.wc, hasFh: chips.fh, hasBb: chips.bb, hasTc: chips.tc,
+      topN: 40, pool: pool,
+    }) || {};
+    r._availChips = chips;
+    r._direct = true;
+    _lastResult = r;
+    return r;
+  }
+
+  function lastResult() { return _lastResult; }
+
+  // ── Apply a sequence: set the sel-* dropdowns + fire change (calendar path) ─
+  function _applySeq(breakdown) {
+    try {
+      // Clear all four first so an Apply is authoritative (a previous pick on a
+      // chip not in THIS sequence must be removed, matching the row shown).
+      ['wc', 'fh', 'bb', 'tc'].forEach(function (k) {
+        var el = document.getElementById('sel-' + k);
+        if (el) { el.value = ''; el.dispatchEvent(new Event('change', { bubbles: true })); }
+      });
+      (breakdown || []).forEach(function (e) {
+        var k = String(e.chip || '').toLowerCase();
+        var el = document.getElementById('sel-' + k);
+        if (el) { el.value = String(e.gw); el.dispatchEvent(new Event('change', { bubbles: true })); }
+      });
+    } catch (e) {}
+  }
+  window._apexChipTimingApply = function (idx) {
+    try {
+      var r = _lastResult;
+      if (!r || !Array.isArray(r._rows) || !r._rows[idx]) return;
+      _applySeq(r._rows[idx].breakdown);
+    } catch (e) {}
+  };
+
+  // ── Render the top-n ranked rows (+ baseline) into el ─────────────────────
+  function _seqLabel(breakdown) {
+    if (!Array.isArray(breakdown) || !breakdown.length) return 'No chips';
+    return breakdown.slice()
+      .sort(function (a, b) { return a.gw - b.gw; })
+      .map(function (e) { return e.chip + ' GW' + e.gw; })
+      .join(' + ');
+  }
+  function _fmt(x) { return (Math.round((+x || 0) * 10) / 10).toFixed(1); }
+
+  function renderTop(el, n) {
+    if (!el) return;
+    n = (typeof n === 'number' && n > 0) ? n : 5;
+
+    // Gate: paid capability. Inert (passes) while tiers OFF.
+    if (!_can('chipTiming')) {
+      el.innerHTML = _lockedHtml('Chip timing optimiser',
+        'See every chip sequence ranked — the exact gameweeks that squeeze the most points out of your remaining chips, one tap to apply.');
+      return;
+    }
+
+    var r = _lastResult;
+    if (!r) {
+      el.innerHTML = '<div style="padding:12px;color:#7a8783;font-size:.85rem;">Computing best chip timing…</div>';
+      return;
+    }
+    if (r._empty) {
+      el.innerHTML = '<div style="padding:12px;color:#7a8783;font-size:.85rem;">No chips available to plan.</div>';
+      return;
+    }
+
+    var baseline = (typeof r.baseline_total_xp === 'number') ? r.baseline_total_xp : 0;
+    var seqs = Array.isArray(r.sequences) ? r.sequences.slice() : [];
+    // Enumerator already sorts by _seqKey; re-sort defensively by total_xp.
+    seqs.sort(function (a, b) { return (b.total_xp || 0) - (a.total_xp || 0); });
+    var top = seqs.slice(0, n);
+    // Cache the exact rows Apply will read (index-aligned with what we render).
+    r._rows = top.map(function (s) { return { breakdown: s.breakdown || [] }; });
+
+    var rows = '';
+    // Baseline row (no chips) — always first, non-applyable.
+    rows +=
+      '<tr style="border-top:1px solid #E7E2D8;">' +
+      '<td style="padding:9px 10px;font-weight:700;color:#7a8783;">No chips (baseline)</td>' +
+      '<td style="padding:9px 10px;text-align:right;font-family:\'JetBrains Mono\',monospace;font-weight:800;">' + _fmt(baseline) + '</td>' +
+      '<td style="padding:9px 10px;text-align:right;color:#7a8783;">—</td>' +
+      '<td style="padding:9px 10px;"></td></tr>';
+
+    top.forEach(function (s, i) {
+      var gain = (typeof s.gain === 'number') ? s.gain : ((s.total_xp || 0) - baseline);
+      var gainStr = (gain >= 0 ? '+' : '') + _fmt(gain);
+      var best = i === 0;
+      rows +=
+        '<tr style="border-top:1px solid #E7E2D8;' + (best ? 'background:rgba(29,158,117,.08);' : '') + '">' +
+        '<td style="padding:9px 10px;font-weight:' + (best ? '800' : '600') + ';">' +
+          (best ? '★ ' : '') + _seqLabel(s.breakdown) + '</td>' +
+        '<td style="padding:9px 10px;text-align:right;font-family:\'JetBrains Mono\',monospace;font-weight:800;">' + _fmt(s.total_xp) + '</td>' +
+        '<td style="padding:9px 10px;text-align:right;font-weight:700;color:' + (gain >= 0 ? '#1D9E75' : '#c0392b') + ';">' + gainStr + '</td>' +
+        '<td style="padding:9px 10px;text-align:right;">' +
+          '<button onclick="_apexChipTimingApply(' + i + ')" ' +
+          'style="background:#1D9E75;color:#fff;border:none;border-radius:8px;padding:6px 12px;font-size:.72rem;font-weight:800;cursor:pointer;font-family:inherit;">Apply</button>' +
+        '</td></tr>';
+    });
+
+    var note = r._direct
+      ? '<div style="font-size:.66rem;color:#a8a294;margin-top:6px;">Fast estimate — open the full Chip Planner for solved WC/FH squads.</div>'
+      : '';
+
+    el.innerHTML =
+      '<div style="margin:8px 0 0;">' +
+      '<div style="font-weight:800;font-size:.92rem;margin-bottom:6px;">Best chip timing <span style="font-size:.66rem;font-weight:700;color:#7a8783;">· ranked by total xPts over your horizon · tap Apply to set the gameweeks</span></div>' +
+      '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:.82rem;min-width:420px;background:#fff;border:1px solid #E7E2D8;border-radius:12px;overflow:hidden;">' +
+      '<thead><tr style="background:#F7F5EF;text-align:left;">' +
+      '<th style="padding:9px 10px;font-size:.68rem;letter-spacing:.5px;color:#7a8783;text-transform:uppercase;">Sequence</th>' +
+      '<th style="padding:9px 10px;text-align:right;font-size:.68rem;letter-spacing:.5px;color:#7a8783;text-transform:uppercase;">Total xPts</th>' +
+      '<th style="padding:9px 10px;text-align:right;font-size:.68rem;letter-spacing:.5px;color:#7a8783;text-transform:uppercase;">vs none</th>' +
+      '<th style="padding:9px 10px;"></th>' +
+      '</tr></thead><tbody>' + rows + '</tbody></table></div>' + note +
+      '</div>';
+  }
+
+  // ── run() then renderTop() convenience, used by the UI hook ───────────────
+  function runAndRender(el, n) {
+    if (!el) return;
+    // Gate first so we never spin the solver for a free user.
+    if (!_can('chipTiming')) { renderTop(el, n); return; }
+    el.innerHTML = '<div style="padding:12px;color:#7a8783;font-size:.85rem;">Ranking chip sequences…</div>';
+    run({
+      onProgress: function (stage, pct, info) {
+        try {
+          if (info && info.chunked) {
+            el.innerHTML = '<div style="padding:12px;color:#7a8783;font-size:.85rem;">' +
+              (stage || 'Computing') + '… ' + (pct || 0) + '%</div>';
+          }
+        } catch (e) {}
+      },
+    }).then(function () { renderTop(el, n); })
+      .catch(function () {
+        try { el.innerHTML = '<div style="padding:12px;color:#c0392b;font-size:.85rem;">Chip timing failed to compute.</div>'; } catch (e) {}
+      });
+  }
+
+  window.apexChipTiming = {
+    run: run,
+    renderTop: renderTop,
+    runAndRender: runAndRender,
+    lastResult: lastResult,
   };
 })();
 
@@ -10738,7 +12555,13 @@ html.apex-offseason #view-landing .hero-sub::after {
       var ev = (bs.events || []).filter(function (e) {
         return e.deadline_time && new Date(e.deadline_time).getTime() > now;
       })[0];
-      if (ev) _dlDeadline = { gw: ev.id, t: new Date(ev.deadline_time).getTime() };
+      if (ev) {
+        _dlDeadline = { gw: ev.id, t: new Date(ev.deadline_time).getTime() };
+        // Publish the next deadline (epoch ms) for the entitlement seam's
+        // apexDeadlineLocked() free-tier lockout. Read-only signal; never
+        // gates anything while APEX_TIERS=false.
+        try { window._apexNextDeadline = _dlDeadline.t; } catch (e) {}
+      }
       _dlRender();
     }).catch(function () { _dlRender(); });
   }
@@ -11145,7 +12968,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1783422373-GW32-420fc15a";
+const BUILD_VERSION = "1783429321-GW32-420fc15a";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -13418,6 +15241,27 @@ function computeTransfers(gwIdx) {
   const budget = TEAM_META.budget || 0;
   const transfers = [];
 
+  // ── Lock / Exclude forced decisions (2026-07-07) ──
+  // BANNED players are never suggested IN; LOCKED players are never suggested
+  // OUT. User beliefs override the model (same doctrine as editable minutes).
+  // Gated on 'lockBan' (0 free → filters off; Infinity season / tiers-OFF → on).
+  // Both guards no-op if apexLocks/apexCap are absent, so a missing bake keeps
+  // today's behaviour exactly.
+  const _lbOn = (function () {
+    try { return (typeof window.apexCap === 'function') ? (window.apexCap('lockBan') > 0) : true; }
+    catch (_e) { return true; }
+  })();
+  const _isBanned = (id) => {
+    if (!_lbOn) return false;
+    try { return (typeof window.apexLocks !== 'undefined') && window.apexLocks.isBanned(id); }
+    catch (_e) { return false; }
+  };
+  const _isLocked = (id) => {
+    if (!_lbOn) return false;
+    try { return (typeof window.apexLocks !== 'undefined') && window.apexLocks.isLocked(id); }
+    catch (_e) { return false; }
+  };
+
   // ──── Risk-preset differential weighting (added 2026-06-08) ────
   // High Risk → favour LOW-owned IN players (differentials); Low Risk →
   // favour HIGH-owned IN players (template). This is a RANKING preference
@@ -13487,6 +15331,7 @@ function computeTransfers(gwIdx) {
 
   // For each squad player, find the best same-position upgrade from the pool
   for (const outP of SQUAD_DATA) {
+    if (_isLocked(outP.id)) continue;   // locked = never suggested OUT
     const pos = outP.element_type || 3;
     const outIsDgw = dgwSet.has(outP.team || '');
     const outTeam = outP.team || '';
@@ -13511,6 +15356,7 @@ function computeTransfers(gwIdx) {
     for (const inP of POOL_DATA) {
       if (inP.element_type !== pos) continue;
       if (squadIds.has(inP.id)) continue;
+      if (_isBanned(inP.id)) continue;   // banned = never suggested IN
       if ((inP.cost || 99) > outCost + (TEAM_META.bank || 0) + 0.05) continue;
       // DGW guard: if we'd be selling a DGW player, only allow candidates
       // who ALSO have the DGW this week. Stops us throwing away a double
@@ -13569,6 +15415,7 @@ function computeTransfers(gwIdx) {
     const DGW_CLUSTER_WINDOW = 0.5;
 
     for (const outP of SQUAD_DATA) {
+      if (_isLocked(outP.id)) continue;   // locked = never suggested OUT
       const pos = outP.element_type || 3;
       const outIsDgw = dgwSet.has(outP.team || '');
       if (outIsDgw) continue;  // already on a DGW asset, skip
@@ -13583,6 +15430,7 @@ function computeTransfers(gwIdx) {
       for (const inP of POOL_DATA) {
         if (inP.element_type !== pos) continue;
         if (squadIds.has(inP.id)) continue;
+        if (_isBanned(inP.id)) continue;   // banned = never suggested IN
         if (!dgwSet.has(inP.team || '')) continue;
         if ((inP.cost || 99) > outCost + (TEAM_META.bank || 0) + 0.05) continue;
         const inTeam = inP.team || '';
@@ -13782,10 +15630,33 @@ function evaluateRollVsTransfer(thisGwIdx) {
 
 // ──── Transfer Recommendations ────
 function renderTransfers(recs) {
+  const section = document.getElementById('transfers-section');
+  // Deadline lockout (free tier). Choke point 3 of 3 — every path that renders
+  // the transfers list funnels through here; lock it and skip the paths cards.
+  if (_apexDeadlineLockActive()) { _apexRenderDeadlineLock(section, document.getElementById('solve-status')); return; }
   // Transfer Paths cards follow every recs re-render (GW nav, apply, roll,
   // preset change) — after this frame so they never block the recs paint.
   try { setTimeout(function () { if (window._renderTransferPaths) window._renderTransferPaths(); }, 0); } catch (_eTxp) {}
-  const section = document.getElementById('transfers-section');
+  // Sensitivity — wire the "stress-test this pick" button once, and clear any
+  // stale results when the recs change (a new GW/plan invalidates the old run).
+  try { setTimeout(function () {
+    var _sBtn = document.getElementById('sensitivity-btn');
+    var _sBody = document.getElementById('sensitivity-body');
+    if (_sBody) _sBody.innerHTML = '';   // clear stale table on every re-render
+    if (_sBtn && !_sBtn._apexWired) {
+      _sBtn._apexWired = true;
+      _sBtn.addEventListener('click', function () {
+        if (window.apexSensitivity && _sBody) window.apexSensitivity.runInto(_sBody, 30);
+      });
+    }
+    // Free tier: show the locked teaser immediately (no click needed to feel it).
+    if (_sBtn && typeof window.apexCan === 'function' && !window.apexCan('sensitivity') && _sBody) {
+      window.apexSensitivity.render(_sBody);
+      _sBtn.style.display = 'none';
+    } else if (_sBtn) {
+      _sBtn.style.display = '';
+    }
+  }, 0); } catch (_eSens) {}
   // 2026-06-11 P2 fix: when a FULL PLAN is applied (plan-ahead tree), this
   // tab's single-move recs are computed against a squad whose transfers are
   // already spent — it was recommending selling players the plan had sold
@@ -14104,6 +15975,9 @@ function runOptimize() {
   const status  = document.getElementById('solve-status');
   const section = document.getElementById('transfers-section');
   const activeGw = TEAM_META.gw_range[activeGwIdx];
+
+  // Deadline lockout (free tier). Choke point 2 of 3 — the Quick Optimise button.
+  if (_apexDeadlineLockActive()) { _apexRenderDeadlineLock(section, status); return; }
 
   // 2026-06-11 C2/C3 ambiguity resolved: with a FULL PLAN applied, a one-click
   // "best single move" is computed against a squad whose transfers the plan
@@ -14436,6 +16310,26 @@ window.addEventListener('load', function () { [900, 2200, 4000].forEach(function
 // declarations hoist across the whole script, so runSolve below can still
 // call them at click time.
 
+// Free-tier deadline lockout (entitlement seam — inert while APEX_TIERS=false).
+// Review-style: the free solver freezes transfer planning 1h before the FPL
+// deadline; Apex members plan right up to kickoff. One helper, called at the
+// 3 transfer choke points (runSolve / runOptimize / renderTransfers) so the
+// lock lands wherever the user tries to plan. Never throws; false = open.
+function _apexDeadlineLockActive() {
+  try { return (typeof window.apexDeadlineLocked === 'function') && window.apexDeadlineLocked(); }
+  catch (_e) { return false; }
+}
+function _apexRenderDeadlineLock(section, status) {
+  try {
+    const _lh = (typeof window.apexLockedHtml === 'function')
+      ? window.apexLockedHtml('Deadline lockout',
+          'The free solver locks 1 hour before the deadline — Apex members plan right up to kickoff.')
+      : '';
+    if (section) { section.innerHTML = _lh; section.style.display = 'block'; }
+    if (status) status.textContent = 'Free solver locked — 1h to deadline. Apex members plan to kickoff.';
+  } catch (_e) {}
+}
+
 function runSolve() {
   const wcGw  = parseInt(document.getElementById('sel-wc')?.value || 0);
   const fhGw  = parseInt(document.getElementById('sel-fh')?.value || 0);
@@ -14443,6 +16337,9 @@ function runSolve() {
   const status  = document.getElementById('solve-status');
   const section = document.getElementById('transfers-section');
   const confSquadWrap = document.getElementById('model-confidence-wrap-squad');
+
+  // Deadline lockout (free tier). Choke point 1 of 3.
+  if (_apexDeadlineLockActive()) { if (banner) banner.style.display = 'none'; _apexRenderDeadlineLock(section, status); return; }
 
   banner.style.display = 'none';
   section.style.display = 'none';
@@ -19379,6 +21276,25 @@ let _poolLastFilledId    = null; // id of most recent fill; used to detect same-
 
 function initPoolView() {
   if (_poolInitialised) { renderPoolTable(); return; }
+  // Custom Projections: rehydrate persisted overrides onto the freshly-loaded
+  // pool, then mount the upload panel. Re-render the pool + transfers whenever an
+  // override is applied/cleared so the new xP shows everywhere. All guarded — a
+  // missing bake is a silent no-op.
+  try {
+    if (window.apexCustomProj) {
+      window.apexCustomProj.rehydrate();
+      var _cpPanel = document.getElementById('customproj-panel');
+      if (_cpPanel) window.apexCustomProj.mount(_cpPanel);
+      if (!window._apexCpWired) {
+        window._apexCpWired = true;
+        window.apexCustomProj.onRecompute(function () {
+          try { if (typeof renderPoolTable === 'function') renderPoolTable(); } catch (_e1) {}
+          try { if (typeof computeTransfers === 'function' && typeof renderTransfers === 'function'
+                    && typeof activeGwIdx === 'number') renderTransfers(computeTransfers(activeGwIdx)); } catch (_e2) {}
+        });
+      }
+    }
+  } catch (_eCp) {}
 
   // 1. Inject per-GW columns into thead
   const theadRow = document.getElementById('pool-thead-row');
@@ -19716,6 +21632,53 @@ function _poolSort(rows) {
   });
 }
 
+// Lock / Exclude pool toggles (2026-07-07). Shown only when the tier carries
+// the lockBan capability (Infinity season / tiers-OFF) AND apex_locks.js baked.
+// With tiers OFF everyone sees them. Toggling repaints the pool + the transfers
+// list (if visible) — same refresh pattern as the xMins apply function.
+function _apexLockBanUiOn() {
+  try {
+    const cap = (typeof window.apexCap === 'function') ? window.apexCap('lockBan') : Infinity;
+    return (cap === Infinity || cap > 0) && (typeof window.apexLocks !== 'undefined');
+  } catch (_e) { return false; }
+}
+function _apexRepaintAfterLock() {
+  try { if (typeof renderPoolTable === 'function') renderPoolTable(); } catch (_e) {}
+  try {
+    const _tx = document.getElementById('transfers-section');
+    if (_tx && _tx.style.display !== 'none'
+        && typeof renderTransfers === 'function' && typeof computeTransfers === 'function') {
+      renderTransfers(computeTransfers(activeGwIdx || 0));
+    }
+  } catch (_e) {}
+}
+// Toggle then repaint. The repaint runs via the onRecompute registry below
+// (apexLocks fires it after persisting), so these handlers only toggle — no
+// direct repaint call, to avoid a double render. Fallback direct call kept for
+// the (stub) case where onRecompute isn't wired.
+window._apexToggleLock = function (id) {
+  try {
+    if (typeof window.apexLocks !== 'undefined') window.apexLocks.toggleLock(id);
+    if (!window._apexLocksRepaintBound) _apexRepaintAfterLock();
+  } catch (_e) { _apexRepaintAfterLock(); }
+};
+window._apexToggleBan = function (id) {
+  try {
+    if (typeof window.apexLocks !== 'undefined') window.apexLocks.toggleBan(id);
+    if (!window._apexLocksRepaintBound) _apexRepaintAfterLock();
+  } catch (_e) { _apexRepaintAfterLock(); }
+};
+// Register the pool/transfers repaint on the locks re-render registry (mirrors
+// apexEdits.onRecompute) so any external toggle — not just the pool buttons —
+// repaints the affected surfaces. Guarded once; no-op if the bake lacks locks.
+try {
+  if (typeof window.apexLocks !== 'undefined' && typeof window.apexLocks.onRecompute === 'function'
+      && !window._apexLocksRepaintBound) {
+    window._apexLocksRepaintBound = true;
+    window.apexLocks.onRecompute(function () { try { _apexRepaintAfterLock(); } catch (_e) {} });
+  }
+} catch (_e) {}
+
 function renderPoolTable() {
   const tbody = document.getElementById('pool-tbody');
   const pager = document.getElementById('pool-pager');
@@ -19725,12 +21688,18 @@ function renderPoolTable() {
   const filtered = _poolSort(_poolFiltered());
   const squadIds = new Set([..._xiPlayers, ..._benchPlayers].map(p => p.id));
   const rows = filtered.slice(0, _poolRowLimit);
+  const _lbUi = _apexLockBanUiOn();
 
   tbody.innerHTML = '';
   rows.forEach(p => {
     const tr = document.createElement('tr');
     tr.className = 'pool-row';
     const inSquad = squadIds.has(p.id);
+    // Forced-decision state (only meaningful when the UI is on).
+    const _locked = _lbUi ? (window.apexLocks.isLocked(p.id)) : false;
+    const _banned = _lbUi ? (window.apexLocks.isBanned(p.id)) : false;
+    if (_locked) tr.style.borderLeft = '3px solid #1D9E75';   // subtle teal edge
+    if (_banned) tr.style.opacity = '0.45';                    // greyed out
     const shirtImg = `<span style="display:inline-flex;align-items:center;vertical-align:middle;margin-right:8px;">${svgShirt(p.team, p.element_type === 1, 26)}</span>`;
     const gwCells = (p.xp_per_gw || []).slice(0, TEAM_META.gw_range.length).map(x =>
       `<td class="pool-xp" style="text-align:right;color:${x >= 4 ? '#4ade80' : x >= 2 ? 'var(--fg)' : 'var(--muted)'};">${x.toFixed(1)}</td>`
@@ -19745,8 +21714,12 @@ function renderPoolTable() {
       <td class="pool-xp">£${p.cost.toFixed(1)}</td>
       ${gwCells}
       <td class="pool-xp pool-xp-total">${p.total_xp.toFixed(1)}</td>
-      <td style="text-align:right;padding-right:16px;">
-        ${_poolRemovedPlayer
+      <td style="text-align:right;padding-right:16px;white-space:nowrap;">
+        ${_lbUi ? `<button title="${_locked ? 'Locked — never suggested to sell. Click to unlock.' : 'Lock: never suggest selling this player'}"
+              onclick="event.stopPropagation(); window._apexToggleLock(${p.id})"
+              style="background:${_locked ? '#1D9E75' : 'transparent'};border:1px solid ${_locked ? '#1D9E75' : 'var(--border)'};border-radius:6px;padding:3px 7px;margin-right:4px;cursor:pointer;font-size:.8rem;line-height:1;">🔒</button>` : ''}${_lbUi ? `<button title="${_banned ? 'Excluded — never suggested to buy. Click to allow.' : 'Exclude: never suggest buying this player'}"
+              onclick="event.stopPropagation(); window._apexToggleBan(${p.id})"
+              style="background:${_banned ? '#D93A2B' : 'transparent'};border:1px solid ${_banned ? '#D93A2B' : 'var(--border)'};border-radius:6px;padding:3px 7px;margin-right:8px;cursor:pointer;font-size:.8rem;line-height:1;">🚫</button>` : ''}${_poolRemovedPlayer
           ? (inSquad
             ? `<button class="pool-add-btn in-squad" disabled>✓ Squad</button>`
             : (p.element_type === _poolRemovedPlayer.element_type
@@ -20421,7 +22394,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1783422373-GW32-420fc15a</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1783429321-GW32-420fc15a</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
