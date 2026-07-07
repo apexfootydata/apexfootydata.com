@@ -820,59 +820,6 @@ a[href*="rank_milestones"] {
     window.__apexMobileRewrap = wrapAll;
 })();
 
-// ── Site footer injection (idempotent) ────────────────────────────────────
-// Builds and inserts a brand-stat-utility footer at the END of <body>.
-// Pulls the moat stat from the hero card's data-stat spans if present;
-// falls back to the static tagline otherwise. Re-runs are no-ops.
-(function () {
-    'use strict';
-    var FOOTER_ID = 'apex-site-footer';
-
-    function makeFooter() {
-        if (document.getElementById(FOOTER_ID)) return;
-        if (!document.body) return;
-
-        // 2026-05-09: moat claim hidden -- static tagline only.
-        var moatHTML = 'data-driven football analytics';
-
-        var f = document.createElement('footer');
-        f.id = FOOTER_ID;
-        f.className = 'apex-footer';
-        f.innerHTML =
-            '<div class="apex-footer-row">' +
-                '<div class="apex-footer-brand">' +
-                    '<span class="apex-footer-wordmark">' +
-                        '<span class="apex-footer-rest">FPL </span>' +
-                        '<span class="apex-footer-apex">Apex</span>' +
-                    '</span>' +
-                    '<span class="apex-footer-tagline">' + moatHTML + '</span>' +
-                '</div>' +
-                '<div class="apex-footer-links">' +
-                    '<a href="https://x.com/apexfootycom" target="_blank" rel="noopener">X / Twitter</a>' +
-                    '<a href="mailto:contact@apexfootydata.com">Email</a>' +
-                '</div>' +
-            '</div>' +
-            '<div class="apex-footer-row">' +
-                '<span class="apex-footer-copy">&copy; 2026 FPL Apex</span>' +
-                '<span class="apex-footer-legal">' +
-                    '<a href="mailto:contact@apexfootydata.com">Contact</a>' +
-                    '<span class="apex-footer-legal-sep">&middot;</span>' +
-                    '<a href="#" onclick="alert(\'Privacy: FPL Apex uses Cloudflare Analytics and Google Analytics 4 for traffic measurement only. No personal data sold or shared. Cookie consent collected on first visit. Contact: contact@apexfootydata.com to request data deletion.\'); return false;">Privacy</a>' +
-                '</span>' +
-            '</div>';
-        document.body.appendChild(f);
-    }
-
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', makeFooter);
-    } else {
-        makeFooter();
-    }
-    // Also run after a tick — moat-stat spans may be filled in by inject scripts after DCL.
-    setTimeout(makeFooter, 600);
-    // 2026-05-09: deferred moat-stat update disabled (claim hidden).
-})();
-
 // ── Mobile: abbreviate Team Ratings headers (2026-05-14) ──────────────────
 // CSS pseudo-element trick was unreliable (OVR going missing). Rewrite the
 // actual th text on narrow viewports. Idempotent — keeps original in data-*

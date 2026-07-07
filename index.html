@@ -1588,6 +1588,7 @@
 
 
 
+
     <!-- TAB 6: Leaders (25/26 season demo) -->
     <div class="tab-content">
         <div style="text-align:center;margin:6px 0 18px;">
@@ -2256,6 +2257,7 @@
             if (!iso) return null;
             const d = new Date(iso);
             if (isNaN(d.getTime())) return null;
+            if (d.getFullYear() < 2010) return null;
             const DAYS = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
             return {
                 dow: DAYS[d.getDay()],
