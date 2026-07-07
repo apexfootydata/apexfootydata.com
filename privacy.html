@@ -33,19 +33,29 @@
   <a class="home" href="/">← Back to FPL Apex</a>
   <div class="card">
     <h1>Privacy</h1>
-    <div class="updated">Last updated: 2 July 2026</div>
+    <div class="updated">Last updated: 7 July 2026</div>
 
     <h2>The short version</h2>
-    <p>FPL Apex has no accounts, no sign-ups, and no database of users. We don't sell,
-    share, or monetise personal data. Full stop.</p>
+    <p>FPL Apex has no accounts and no sign-ups. We don't sell, share, or monetise
+    personal data. Almost everything stays in your browser; the one small exception is
+    described below, so you know exactly what leaves your device.</p>
 
     <h2>Your FPL Team ID</h2>
     <p>When you enter your FPL Team ID, your squad is fetched directly from the official
     Fantasy Premier League API in your browser (via a proxy that adds no tracking). Your
-    team and any plans you build are processed on your device and saved only in your own
-    browser's local storage — never on our servers. Clearing your browser data removes them
-    completely. Note that FPL team information (team name, points, rank) is already public
-    via the official FPL API for anyone who knows a Team ID.</p>
+    team and the plans you build are processed on your device and saved in your own
+    browser's local storage. Clearing your browser data removes them. Note that FPL team
+    information (team name, points, rank) is already public via the official FPL API for
+    anyone who knows a Team ID.</p>
+
+    <h2>Expected-minutes sync (the one thing we store)</h2>
+    <p>If you edit a player's expected minutes, that single edit is saved to our
+    hosting provider (Cloudflare) so it can follow you between devices. We store only:
+    your FPL Team ID, the gameweek, and the minute values you set — nothing else, no name,
+    no email, no payment data. These records expire automatically after about 45 days. An
+    FPL Team ID is public but can be linked back to a person via the FPL API, so we treat
+    it as personal data; our basis for holding it is that it's needed to deliver a feature
+    you chose to use. To have yours removed, email us (below).</p>
 
     <h2>Analytics</h2>
     <p>We use Cloudflare Web Analytics and Google Analytics 4 to measure traffic — pages
@@ -58,9 +68,10 @@
     on your device.</p>
 
     <h2>Questions or deletion requests</h2>
-    <p>Email <a href="mailto:contact@fplapex.com">contact@fplapex.com</a>. Since we hold no
-    personal data server-side, "deletion" usually just means clearing your browser storage —
-    but write to us and we'll help either way.</p>
+    <p>Email <a href="mailto:contact@fplapex.com">contact@fplapex.com</a>. Most of your data
+    lives only in your browser, so "deletion" is usually just clearing your browser storage.
+    For the expected-minutes records described above, tell us your Team ID and we'll delete
+    them (they also expire on their own after ~45 days).</p>
   </div>
 </div>
 </body>

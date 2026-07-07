@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-07-07T20:09:18">
+<meta name="apex-gw" content="32" data-built-at="2026-07-07T20:41:42">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — FPL Apex</title>
-<meta name="description" content="Plan FPL transfers, chips, and Free Hit squads. Live xG-based projections and a mini-league simulator. Free FPL tool used by 100+ managers.">
+<meta name="description" content="Plan FPL transfers, chips, and Free Hit squads. Live xG-based projections, a rival head-to-head simulator, and a mini-league table. Free FPL tool.">
 <meta name="keywords" content="FPL solver, FPL chip planner, FPL Free Hit, FPL Wildcard, FPL transfer planner, FPL DGW, Fantasy Premier League tools">
 <link rel="canonical" href="https://fplapex.com/solver_app.html">
 <meta name="robots" content="index, follow">
@@ -6855,8 +6855,18 @@ html.apex-offseason #view-landing .hero-sub::after {
   // as full-access ("season") so no feature is ever restricted.
   function getTier() {
     if (!window.APEX_TIERS) return "season";          // ungated: full access
-    var t = (window.APEX_USER && window.APEX_USER.tier) || "free";
-    return TIER_CAPS[t] ? t : "free";                 // unknown tier -> free
+    // FAIL DIRECTION (adversarial audit 2026-07-07): distinguish "known to be
+    // free" from "entitlement not loaded yet / fetch failed". A PAYING user
+    // whose APEX_USER never populated must NOT be silently downgraded to free
+    // and lose what they paid for. Convention: the auth layer sets
+    //   window.APEX_USER = { tier: 'free'|'season' }      when it KNOWS, and
+    //   window.APEX_ENTITLEMENT_READY = true              once resolved.
+    // Until resolved, grant access (fail-open) — a bad network must never lock
+    // a subscriber out; client-side bypass was already an accepted risk.
+    if (window.APEX_USER && window.APEX_USER.tier) {
+      return TIER_CAPS[window.APEX_USER.tier] ? window.APEX_USER.tier : "season";
+    }
+    return window.APEX_ENTITLEMENT_READY ? "free" : "season";  // unresolved -> full access
   }
 
   function caps() { return TIER_CAPS[getTier()] || TIER_CAPS.free; }
@@ -12155,7 +12165,17 @@ html.apex-offseason #view-landing .hero-sub::after {
       '</div>';
   }
 
-  function _esc(s)     { return String(s == null ? '' : s).replace(/\\/g, '\\\\').replace(/'/g, "\\'"); }
+  // Draft name enters a DOUBLE-quoted onclick attribute wrapping a SINGLE-quoted
+  // JS string, so it must be safe in BOTH: HTML-attr-escape &<>" so it can't
+  // break out of the attribute, then JS-escape \ and ' so it can't break the
+  // string. (Adversarial audit 2026-07-07: the old JS-only escape let a name
+  // like `">...` break out.)
+  function _esc(s) {
+    return String(s == null ? '' : s)
+      .replace(/\\/g, '\\\\')
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+      .replace(/'/g, "\\'");
+  }
   function _escText(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
 
   // Convenience refresh hook (UI button calls this after save/delete).
@@ -12992,7 +13012,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1783451358-GW32-420fc15a";
+const BUILD_VERSION = "1783453302-GW32-420fc15a";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -13508,7 +13528,7 @@ async function initLeagueView() {
         return;
       }
       select.innerHTML = _leagueUserLeagues
-        .map(l => `<option value="${l.id}">${l.name} (${l.rank || '—'})</option>`)
+        .map(l => `<option value="${l.id}">${_lgEsc(l.name)} (${l.rank || '—'})</option>`)
         .join('');
       btn.disabled = false;
       btn.style.opacity = '1';
@@ -13539,7 +13559,7 @@ async function initLeagueView() {
     }
 
     select.innerHTML = _leagueUserLeagues
-      .map(l => `<option value="${l.id}">${l.name} (${l.rank || '—'} / ${l.entry_count || '—'})</option>`)
+      .map(l => `<option value="${l.id}">${_lgEsc(l.name)} (${l.rank || '—'} / ${l.entry_count || '—'})</option>`)
       .join('');
     btn.disabled = false;
     btn.style.opacity = '1';
@@ -13571,6 +13591,15 @@ function _chipClass(c) {
   return {'WC': 'lg-chip-wc', 'FH': 'lg-chip-fh', 'BB': 'lg-chip-bb', 'TC': 'lg-chip-tc'}[c] || '';
 }
 
+// HTML-escape any FPL-API-sourced string before it enters innerHTML. Team
+// names + manager names are USER-CONTROLLED (a manager can name their team
+// `<img src=x onerror=...>`) and render for every league-mate who opens the
+// sim → stored XSS. Escape at every such sink. (Adversarial audit 2026-07-07.)
+function _lgEsc(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
 function renderLeagueTable(data) {
   const standings = data.standings || [];
   const maxWin = Math.max(...standings.map(m => m.win_pct || 0), 1);
@@ -13666,8 +13695,8 @@ function renderLeagueTable(data) {
     tr.innerHTML = `
       <td class="${rankCls}">${rank}</td>
       <td>
-        <div class="lg-name">${m.player_name || '—'}${youTag}</div>
-        <div class="lg-team">${m.entry_name || ''} ${_ovrHtml}</div>
+        <div class="lg-name">${_lgEsc(m.player_name) || '—'}${youTag}</div>
+        <div class="lg-team">${_lgEsc(m.entry_name)} ${_ovrHtml}</div>
       </td>
       <td class="lg-pts">${(m.current_total || 0).toLocaleString()}</td>
       <td class="lg-proj">
@@ -22484,7 +22513,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1783451358-GW32-420fc15a</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1783453302-GW32-420fc15a</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
