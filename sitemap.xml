@@ -17,11 +17,8 @@
   </url>
   <!-- evaluation.html deliberately omitted while it carries noindex (preview
        scaffold until 26/27 real data lands) — add it back when noindex drops. -->
-  <url>
-    <loc>https://fplapex.com/defcon_tracker.html</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
+  <!-- defcon_tracker.html removed 2026-07-07 (Marcus: not needed for now;
+       may restore later — see push_site.py + RUN.bat [4e] restore notes). -->
   <url>
     <loc>https://fplapex.com/privacy.html</loc>
     <changefreq>yearly</changefreq>
