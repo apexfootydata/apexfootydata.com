@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-07-08T16:01:07">
+<meta name="apex-gw" content="32" data-built-at="2026-07-08T16:12:06">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -7420,10 +7420,13 @@ html.apex-offseason #view-landing .hero-sub::after {
   // Gated on 'lockBan' (0 free → no filtering; Infinity season / tiers-OFF → on).
   // Guards no-op if apexLocks / apexCap are absent, keeping today's behaviour.
   //
-  // TODO(v2): LOCKED-player FORCED INCLUSION in the WC/FH ILP — add a hard
-  // constraint x_i = 1 for every locked squad player. Not attempted here; v1
-  // covers exclusion (ban) only. Locked-out-of-suggestions already works in the
-  // weekly engine (computeTransfers / _txpBestMove) via the OUT skip.
+  // DONE 2026-07-07 (was TODO v2): LOCKED players are now FORCED INTO the
+  // WC/FH ILP via opts.lockInIds → x_i = 1 (see _solveSquadILP). The page
+  // passes locked SQUAD player ids through computeChipPlanner's
+  // lockWcIds/lockFhIds. A player both locked AND banned (tampered state):
+  // _filterBanned strips him from the pool first, so ban wins — no
+  // infeasibility. Locked-out-of-suggestions already works in the weekly
+  // engine (computeTransfers / _txpBestMove) via the OUT skip.
   function _lbGateOn() {
     try { return (typeof window !== 'undefined' && typeof window.apexCap === 'function')
       ? (window.apexCap('lockBan') > 0) : true; }
@@ -7469,6 +7472,9 @@ html.apex-offseason #view-landing .hero-sub::after {
     const excludeTeams  = _expandExcludeTeams(opts.excludeTeams);
     const excludeNames  = new Set((opts.excludePlayers || []).map(n => String(n).trim().toLowerCase()).filter(Boolean));
     const lockNames     = new Set((opts.lockIn || []).map(n => String(n).trim().toLowerCase()).filter(Boolean));
+    // 2026-07-07: id-based lock-in (locks feature) — exact, immune to the
+    // duplicate-web_name collisions the name path has.
+    const lockIds       = new Set((opts.lockInIds || []).map(Number).filter(v => isFinite(v)));
     const maxBank       = (opts.maxBank !== undefined && opts.maxBank !== null) ? +opts.maxBank : null;
     const minPerTeam    = opts.minPerTeam || null;
     const bbEV          = Array.isArray(opts.bbEV) ? opts.bbEV : null;
@@ -7587,7 +7593,7 @@ html.apex-offseason #view-landing .hero-sub::after {
       const name = _nameKey(pool[i]);
       const teamLow = (pool[i].team || '').toLowerCase();
 
-      if (lockNames.has(name)) {
+      if (lockNames.has(name) || lockIds.has(+pool[i].id)) {
         subjectTo.push({
           name: `lock_${forcedIdx++}`,
           vars: [{ name: `x_${i}`, coef: 1 }],
@@ -8491,6 +8497,9 @@ html.apex-offseason #view-landing .hero-sub::after {
     const budget     = (args.budget != null) ? +args.budget : 100.0;
     const lockWc     = args.lockWcNames || [];
     const lockFh     = args.lockFhNames || [];
+    // 2026-07-07: id-based locks from the Lock/Exclude feature (exact match).
+    const lockWcIds  = args.lockWcIds || [];
+    const lockFhIds  = args.lockFhIds || [];
     const dgwByGw    = args.dgwTeamsByGw || {};
     const bgwByGw    = args.bgwTeamsByGw || {};
     const rotRisk    = args.rotationRisk || {};
@@ -8538,7 +8547,7 @@ html.apex-offseason #view-landing .hero-sub::after {
         // forced consistent-SGW picks and crowded out DGW specialists.
         try {
           const wc = await solveWildcard(pool, idx, horizon, {
-            budget, lockIn: lockWc, chipMode: true,
+            budget, lockIn: lockWc, lockInIds: lockWcIds, chipMode: true,
             // undefined => solveWildcard falls back to FPL_RULES.BENCH_WEIGHT
             // (0.10) — the exact pre-preset behaviour for Balanced.
             benchWeight: ppWcBench,
@@ -8569,7 +8578,7 @@ html.apex-offseason #view-landing .hero-sub::after {
         }
         try {
           const fh = await solveFreeHit(pool, idx, {
-            budget, lockIn: lockFh, benchWeight: ppFhBench,
+            budget, lockIn: lockFh, lockInIds: lockFhIds, benchWeight: ppFhBench,
             excludeTeams: excl.length ? excl : undefined,
             differential: ppDiff,
           });
@@ -12588,6 +12597,16 @@ html.apex-offseason #view-landing .hero-sub::after {
     try { return (typeof window.apexCan === 'function') ? !!window.apexCan(feature) : true; }
     catch (e) { return true; }
   }
+  // Locked SQUAD player ids for the WC/FH ILP (2026-07-07): lock = keep, never
+  // force-buy, so squad members only. Gate-aware (lockBan cap 0 ⇒ none).
+  function _lockedSquadIds() {
+    try {
+      if (!(window.apexLocks && typeof window.apexLocks.isLocked === 'function')) return [];
+      if (typeof window.apexCap === 'function' && !(window.apexCap('lockBan') > 0)) return [];
+      return _squad().filter(function (p) { return window.apexLocks.isLocked(p.id); })
+                     .map(function (p) { return p.id; });
+    } catch (e) { return []; }
+  }
   function _lockedHtml(title, blurb) {
     try {
       if (typeof window.apexLockedHtml === 'function') return window.apexLockedHtml(title, blurb);
@@ -12675,6 +12694,9 @@ html.apex-offseason #view-landing .hero-sub::after {
         dgwTeamsByGw: meta.dgw_teams_by_gw || {},
         bgwTeamsByGw: meta.bgw_teams_by_gw || {},
         rotationRisk: (_chipPlanner() && _chipPlanner().rotation_risk) || {},
+        // 2026-07-07: locks bind the WC/FH ILP here too (squad players only).
+        lockWcIds: _lockedSquadIds(),
+        lockFhIds: _lockedSquadIds(),
         onProgress: chunked ? function (stage, pct) { prog(stage, pct); } : null,
       };
       _running = Promise.resolve()
@@ -13422,7 +13444,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1783522866-GW32-420fc15a";
+const BUILD_VERSION = "1783523526-GW32-420fc15a";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -21248,6 +21270,19 @@ function _applyChipPlannerData(data) {
   console.log(`[chip-planner] loaded in ${data._elapsed_s}s, ${(data.sequences||[]).length} sequences`);
 }
 
+// Locked SQUAD player ids for the WC/FH ILP (2026-07-07). Gate-aware: free
+// tier (lockBan cap 0) passes none. Squad-only — locking a pool player you
+// don't own must never force-buy him into a chip squad.
+function _apexLockedSquadIds() {
+  try {
+    if (!(window.apexLocks && typeof window.apexLocks.isLocked === 'function')) return [];
+    if (typeof window.apexCap === 'function' && !(window.apexCap('lockBan') > 0)) return [];
+    return (typeof SQUAD_DATA !== 'undefined' && Array.isArray(SQUAD_DATA) ? SQUAD_DATA : [])
+      .filter(p => window.apexLocks.isLocked(p.id))
+      .map(p => p.id);
+  } catch (_e) { return []; }
+}
+
 async function _runChipPlannerJS() {
   // Browser-side path: await GLPK, then call ApexSolver.computeChipPlanner.
   await window._apexGlpkReady;
@@ -21267,6 +21302,11 @@ async function _runChipPlannerJS() {
     dgwTeamsByGw: TEAM_META.dgw_teams_by_gw || {},
     bgwTeamsByGw: TEAM_META.bgw_teams_by_gw || {},
     rotationRisk: CHIP_PLANNER.rotation_risk || {},
+    // 2026-07-07: locks now BIND the WC/FH ILP (the lockIn plumbing existed
+    // all along — the page just never passed the locked players). Locked
+    // SQUAD players only: lock means "keep him", never "force-buy".
+    lockWcIds: _apexLockedSquadIds(),
+    lockFhIds: _apexLockedSquadIds(),
     // Risk-strategy preset levers. Balanced => pre-preset defaults (no change).
     presetParams: (typeof _presetParamsForSolve === 'function')
       ? _presetParamsForSolve() : undefined,
@@ -21391,7 +21431,9 @@ function renderBaselineStrip() {
     if (window.apexLocks && typeof window.apexLocks.counts === 'function') {
       const _lbCC = window.apexLocks.counts();
       if ((_lbCC.locked || 0) > 0) {
-        radarHtml += `<div style="margin-top:9px;font-size:.8rem;color:#f0b03a;font-weight:600;">🔒 Heads up: locks don't yet apply inside Wildcard / Free Hit squads — a locked player can still be swapped out there. Exclusions (🚫) are respected.</div>`;
+        // 2026-07-07 late: locks now BIND the WC/FH ILP (lockInIds constraint)
+        // — confirmation note, was a "doesn't apply yet" warning for ~an hour.
+        radarHtml += `<div style="margin-top:9px;font-size:.8rem;color:var(--muted);">🔒 ${_lbCC.locked} locked player${_lbCC.locked > 1 ? 's are' : ' is'} held in Wildcard / Free Hit squads too. Exclusions (🚫) respected.</div>`;
       }
     }
     if (window._apexBansDiscarded === true) {
@@ -23007,7 +23049,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1783522866-GW32-420fc15a</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1783523526-GW32-420fc15a</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
