@@ -2696,12 +2696,15 @@
     <!-- End Cloudflare Web Analytics -->
 
 <!-- APEX PRICING BAND -->
+<!-- Billing go-live flag (index.html copy) -- flipped ONLY by scripts/billing_flip.py.
+     While false: founder-list band as before, apex_billing_client.js a no-op. -->
+<script>window.APEX_BILLING_LIVE=false;</script>
 <section style="background:#0C1411;padding:52px 20px 58px;font-family:'Plus Jakarta Sans',sans-serif;">
   <div style="max-width:980px;margin:0 auto;text-align:center;">
     <div style="color:#2ED89C;font-size:12px;font-weight:800;letter-spacing:2px;">2026/27 SEASON</div>
     <div style="font-weight:800;color:#FAF7F1;font-size:30px;line-height:1.15;margin-top:10px;">The site stays free. The solver goes deeper.</div>
-    <div style="color:#B8C4BD;font-size:15px;font-weight:600;max-width:640px;margin:14px auto 0;line-height:1.55;">
-      Predictions, team ratings, leaders and the DefCon tracker &mdash; free, all season.
+    <div id="apex-band-blurb" style="color:#B8C4BD;font-size:15px;font-weight:600;max-width:640px;margin:14px auto 0;line-height:1.55;">
+      Predictions, team ratings and leaders &mdash; free, all season.
       The Apex Solver&rsquo;s full planning depth &mdash; multi-week transfer paths, chip planning
       and rival tracking &mdash; becomes the one paid tier before GW1.
     </div>
@@ -2718,18 +2721,32 @@
         <div style="color:#86847D;font-size:11.5px;font-weight:600;margin-top:4px;">about &pound;2.20 a month</div>
       </div>
       <div style="background:#111C16;border:1px solid #2ED89C;border-radius:14px;padding:20px 28px;min-width:200px;position:relative;">
-        <div style="position:absolute;top:-11px;left:50%;transform:translateX(-50%);background:#2ED89C;color:#0C1411;font-size:10.5px;font-weight:800;letter-spacing:1.5px;padding:3px 10px;border-radius:99px;white-space:nowrap;">FOUNDER LIST</div>
+        <div id="apex-band-founder-badge" style="position:absolute;top:-11px;left:50%;transform:translateX(-50%);background:#2ED89C;color:#0C1411;font-size:10.5px;font-weight:800;letter-spacing:1.5px;padding:3px 10px;border-radius:99px;white-space:nowrap;">FOUNDER LIST</div>
         <div style="color:#B8C4BD;font-size:12px;font-weight:800;letter-spacing:1.5px;">EARLY SUPPORTERS</div>
         <div style="color:#2ED89C;font-size:34px;font-weight:800;margin-top:6px;">&pound;15<span style="font-size:14px;color:#B8C4BD;font-weight:700;"> / season</span></div>
         <div style="color:#86847D;font-size:11.5px;font-weight:600;margin-top:4px;">your price, locked for every season</div>
       </div>
     </div>
     <div style="margin-top:30px;">
-      <a href="mailto:contact@fplapex.com?subject=Founder%20list&amp;body=Put%20me%20on%20the%20founder%20list%20for%20the%20Apex%20Solver." style="display:inline-block;background:#2ED89C;color:#0C1411;font-weight:800;font-size:15px;letter-spacing:1px;text-decoration:none;padding:14px 34px;border-radius:10px;">JOIN THE FOUNDER LIST</a>
-      <div style="color:#86847D;font-size:12.5px;font-weight:600;margin-top:12px;">One email when it opens. Founder price locked for the first cohort. Nothing on the site gets taken away.</div>
+      <a id="apex-band-cta" href="mailto:contact@fplapex.com?subject=Founder%20list&amp;body=Put%20me%20on%20the%20founder%20list%20for%20the%20Apex%20Solver." onclick="if(window.APEX_BILLING_LIVE===true&amp;&amp;window.apexBilling&amp;&amp;window.apexBilling.openModal){window.apexBilling.openModal('sub');return false;}return true;" style="display:inline-block;background:#2ED89C;color:#0C1411;font-weight:800;font-size:15px;letter-spacing:1px;text-decoration:none;padding:14px 34px;border-radius:10px;">JOIN THE FOUNDER LIST</a>
+      <div id="apex-band-sub" style="color:#86847D;font-size:12.5px;font-weight:600;margin-top:12px;">One email when it opens. Founder price locked for the first cohort. Nothing on the site gets taken away.</div>
+      <div id="apex-band-login" style="display:none;color:#86847D;font-size:12.5px;font-weight:600;margin-top:6px;">Already a member? <a href="#" onclick="if(window.apexBilling&amp;&amp;window.apexBilling.openModal){window.apexBilling.openModal('login');}return false;" style="color:#2ED89C;font-weight:700;text-decoration:none;">Log in / restore purchase</a></div>
     </div>
   </div>
 </section>
+<!-- Billing client (same file the solver bakes; published to site root by
+     push_site.py). Inert no-op while the flag above is false. When live it
+     also auto-mounts the floating Log in / Get Apex account chip top-right. -->
+<script src="apex_billing_client.js" defer></script>
+<script>
+if(window.APEX_BILLING_LIVE===true){
+  var _ac=document.getElementById('apex-band-cta');if(_ac){_ac.textContent='GET APEX →';}
+  var _as=document.getElementById('apex-band-sub');if(_as){_as.textContent='Founder price locked for the first cohort. Nothing on the site gets taken away.';}
+  var _al=document.getElementById('apex-band-login');if(_al){_al.style.display='';}
+  var _ab=document.getElementById('apex-band-blurb');if(_ab){_ab.innerHTML='Predictions, team ratings and leaders — free, all season. The Apex Solver’s full planning depth — multi-week transfer paths, chip planning and rival tracking — is the one paid tier.';}
+  var _af=document.getElementById('apex-band-founder-badge');if(_af){_af.textContent='FOUNDER';}
+}
+</script>
 <!-- /APEX PRICING BAND -->
 <!-- ## APEX_MOBILE_FIX:START ## -->
 <style>
