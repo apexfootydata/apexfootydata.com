@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-07-08T15:33:35">
+<meta name="apex-gw" content="32" data-built-at="2026-07-08T16:01:07">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -6894,9 +6894,14 @@ html.apex-offseason #view-landing .hero-sub::after {
 
   // Deadline lockout (Review-style). TRUE only when the seam is ON, the tier
   // carries a positive lockout window, the next FPL deadline is known, and we
-  // are now inside that window (deadline − lockoutMins ≤ now). Never throws;
-  // false on any missing/garbage data so a fetch failure can never lock a user
-  // out. window._apexNextDeadline (epoch ms) is published by apex_premium.js.
+  // are NOW INSIDE that window: deadline − lockoutMins ≤ now < deadline.
+  // 2026-07-07 audit fix: the missing upper bound meant that once locked, a
+  // free user STAYED locked for the whole session even days after the deadline
+  // passed (_apexNextDeadline is fetched once per page load) — only a reload
+  // cleared it. The lockout is "the final hour before the deadline", nothing
+  // more. Never throws; false on any missing/garbage data so a fetch failure
+  // can never lock a user out. window._apexNextDeadline (epoch ms) is
+  // published by apex_premium.js.
   window.apexDeadlineLocked = function () {
     try {
       if (!window.APEX_TIERS) return false;                 // seam OFF -> never
@@ -6904,7 +6909,8 @@ html.apex-offseason #view-landing .hero-sub::after {
       if (!(typeof mins === 'number' && mins > 0)) return false;
       var dl = window._apexNextDeadline;
       if (!(typeof dl === 'number' && isFinite(dl) && dl > 0)) return false;
-      return Date.now() >= (dl - mins * 60000);
+      var now = Date.now();
+      return now >= (dl - mins * 60000) && now < dl;
     } catch (e) { return false; }
   };
 })();
@@ -7431,7 +7437,14 @@ html.apex-offseason #view-landing .hero-sub::after {
       // Safety valve: never starve the ILP below a legal squad. If bans would
       // leave too few players, fall back to the unfiltered pool rather than
       // throwing "pool has N players" — a ban should shape, not break, a solve.
-      return (out.length >= FPL_RULES.SQUAD_SIZE) ? out : pool;
+      // 2026-07-07 audit fix: when the valve fires, SAY SO — bans were being
+      // silently discarded with zero notice. The UI reads this flag and warns.
+      if (out.length >= FPL_RULES.SQUAD_SIZE) {
+        try { window._apexBansDiscarded = false; } catch (e0) {}
+        return out;
+      }
+      try { window._apexBansDiscarded = true; } catch (e1) {}
+      return pool;
     } catch (e) { return pool; }
   }
 
@@ -11031,7 +11044,10 @@ html.apex-offseason #view-landing .hero-sub::after {
 
   // ── Tunables ───────────────────────────────────────────────────────────────
   var SIGMA        = 0.10;  // jitter SD: ~model per-player per-GW MAE/mean ratio
-  var DEFAULT_RUNS = 30;    // enough to separate ROBUST/SPLIT/FRAGILE cheaply
+  // 2026-07-07 audit fix: 30 runs gave ±8% sampling error on a verdict with
+  // 70/40 cutoffs — wider than the SPLIT band itself. 200 runs ⇒ SE ≈ 3% at
+  // p≈0.7, enough for the whole-percent display (shown as ≈N% regardless).
+  var DEFAULT_RUNS = 200;
   var SEED_BASE    = 0x9E3779B1; // fixed base → reproducible run sets
   var ROBUST_PCT   = 0.70;  // ≥70% survival = ROBUST
   var SPLIT_PCT    = 0.40;  // 40–70% = SPLIT, <40% = FRAGILE
@@ -11101,22 +11117,20 @@ html.apex-offseason #view-landing .hero-sub::after {
         var p = pool[i];
         var base = Array.isArray(p.xp_per_gw) ? p.xp_per_gw : null;
         snap.push({ p: p, xp_per_gw: base ? base.slice() : null, xp: p.xp });
-        // One multiplicative factor per player per GW cell (independent noise).
+        // 2026-07-07 audit fix: ONE factor per player, applied across ALL his
+        // GWs (was: fresh independent noise per GW cell). Projection error is
+        // correlated — a mis-rated player is wrong every week, not re-rolled
+        // weekly. Independent noise averaged out over the horizon sum the
+        // engine ranks on, making every pick look more robust than it is.
+        var f = 1 + SIGMA * _gauss(rng);
+        if (f < 0) f = 0;                           // xP can't go negative
         if (base) {
           var patched = new Array(base.length);
-          for (var g = 0; g < base.length; g++) {
-            var f = 1 + SIGMA * _gauss(rng);
-            if (f < 0) f = 0;                       // xP can't go negative
-            patched[g] = base[g] * f;
-          }
+          for (var g = 0; g < base.length; g++) patched[g] = base[g] * f;
           p.xp_per_gw = patched;
         }
-        // Keep the scalar xp consistent with cell 0 (engines that read p.xp).
-        if (typeof p.xp === 'number') {
-          var f0 = 1 + SIGMA * _gauss(rng);
-          if (f0 < 0) f0 = 0;
-          p.xp = snap[i].xp * f0;
-        }
+        // Scalar xp gets the SAME factor (was a second independent draw).
+        if (typeof p.xp === 'number') p.xp = snap[i].xp * f;
       }
       var recs = _computeTransfers(idx);
       return _topMove(recs);
@@ -11137,6 +11151,7 @@ html.apex-offseason #view-landing .hero-sub::after {
     token: 0,          // supersede guard: a new run() bumps this
     nRuns: 0,
     done: 0,
+    errors: 0,         // thrown engine runs — EXCLUDED from the denominator
     counts: {},        // key -> survival count
     labels: {},        // key -> {out_name,in_name}
     order: [],         // keys in first-seen order (stable display)
@@ -11151,6 +11166,7 @@ html.apex-offseason #view-landing .hero-sub::after {
     _state.token += 1;
     _state.nRuns = nRuns;
     _state.done = 0;
+    _state.errors = 0;
     _state.counts = {};
     _state.labels = {};
     _state.order = [];
@@ -11205,7 +11221,10 @@ html.apex-offseason #view-landing .hero-sub::after {
         if (typeof opts.onDone === 'function') { try { opts.onDone(res); } catch (e) {} }
         return;
       }
-      try { _record(_runOne(idx, rng)); } catch (e) { /* count as a no-move run */ }
+      // 2026-07-07 audit fix: a THROWN engine run is a measurement failure,
+      // not evidence the move is fragile — track it and exclude it from the
+      // survival denominator (was silently counted as "didn't survive").
+      try { _record(_runOne(idx, rng)); } catch (e) { _state.errors += 1; }
       _state.done += 1;
       if (typeof opts.onProgress === 'function') {
         try { opts.onProgress(_state.done, N); } catch (e) {}
@@ -11221,28 +11240,49 @@ html.apex-offseason #view-landing .hero-sub::after {
     _state.running = false;
   }
 
-  // ── Results snapshot (survival table + verdict on the top-surviving move) ────
+  // ── Results snapshot ─────────────────────────────────────────────────────────
+  // 2026-07-07 audit fix (the big one): the verdict is computed on THE MODEL'S
+  // ACTUAL PICK (unjittered), not on whichever move happened to win the most
+  // jittered worlds. The two diverge exactly when the pick is fragile — the old
+  // code would confidently headline a DIFFERENT move than the one on screen.
   function results() {
+    var valid = Math.max(0, _state.done - _state.errors);
     var moves = _state.order.map(function (k) {
       return {
         key: k,
         out_name: _state.labels[k].out_name,
         in_name: _state.labels[k].in_name,
         survived: _state.counts[k],
-        total: _state.done,
-        pct: _state.done > 0 ? (_state.counts[k] / _state.done) : 0,
+        total: valid,
+        pct: valid > 0 ? (_state.counts[k] / valid) : 0,
       };
     }).sort(function (a, b) { return b.survived - a.survived; });
 
-    var top = moves.length ? moves[0] : null;
+    // The row being verdict-ed: the model's real pick.
+    var pick = null;
+    if (_state.unjittered) {
+      var k0 = _state.unjittered.key;
+      pick = {
+        key: k0,
+        out_name: _state.unjittered.out_name,
+        in_name: _state.unjittered.in_name,
+        survived: _state.counts[k0] || 0,
+        total: valid,
+        pct: valid > 0 ? ((_state.counts[k0] || 0) / valid) : 0,
+      };
+    }
     return {
       locked: false,
       nRuns: _state.nRuns,
       done: _state.done,
+      errors: _state.errors,
+      // too many thrown runs = the measurement itself failed, don't verdict
+      broken: _state.finished && _state.done > 0 && (_state.errors / _state.done) > 0.25,
       finished: _state.finished,
       moves: moves,
       unjittered: _state.unjittered,   // {key,out_name,in_name} or null
-      verdict: top ? _verdict(top.pct) : null,
+      pick: pick,                      // the pick's own survival row (or null)
+      verdict: pick ? _verdict(pick.pct) : null,
     };
   }
 
@@ -11278,31 +11318,55 @@ html.apex-offseason #view-landing .hero-sub::after {
       return;
     }
 
-    if (!res.finished || !res.moves.length) {
+    // 2026-07-07 audit fix: no unjittered pick ⇒ nothing to verdict, even if
+    // jitter conjured moves in some worlds (was: confidently verdict-ing a
+    // move the model never recommended).
+    if (!res.finished || !res.unjittered || !res.pick) {
       containerEl.innerHTML =
         '<div style="padding:12px 14px;border:1px solid var(--border,#e5e2da);border-radius:12px;' +
         'background:var(--bg2,#faf8f3);font-size:.82rem;color:var(--muted,#7a8783);">' +
         'No transfer to stress-test — the engine has no top move this week.</div>';
       return;
     }
+    if (res.broken) {
+      containerEl.innerHTML =
+        '<div style="padding:12px 14px;border:1px solid var(--border,#e5e2da);border-radius:12px;' +
+        'background:var(--bg2,#faf8f3);font-size:.82rem;color:#c0392b;">' +
+        'Stress test couldn’t finish reliably this time — try again after the page settles.</div>';
+      return;
+    }
 
     var v = res.verdict;
+    var pick = res.pick;
     var rows = res.moves.map(function (m) {
-      var isPick = res.unjittered && m.key === res.unjittered.key;
+      var isPick = m.key === pick.key;
       var pct = Math.round(m.pct * 100);
-      return '<tr>' +
+      return '<tr' + (isPick ? ' style="background:rgba(29,158,117,.07);"' : '') + '>' +
         '<td style="padding:6px 10px;">' + _esc(m.out_name) + ' → ' + _esc(m.in_name) +
-        (isPick ? ' <span title="model\'s unjittered pick" style="color:#1D9E75;font-weight:800;">◆</span>' : '') +
+        (isPick ? ' <span title="the move the model actually recommends" style="color:#1D9E75;font-weight:800;">◆</span>' : '') +
         '</td>' +
         '<td style="padding:6px 10px;text-align:right;font-variant-numeric:tabular-nums;">' +
         m.survived + '/' + m.total + '</td>' +
         '<td style="padding:6px 10px;text-align:right;font-weight:700;font-variant-numeric:tabular-nums;">' +
-        pct + '%</td>' +
+        '≈' + pct + '%</td>' +
         '</tr>';
     }).join('');
 
-    var top = res.moves[0];
-    var topPct = Math.round(top.pct * 100);
+    var pickPct = Math.round(pick.pct * 100);
+    // Plain-English verdict line (UX audit: "survived 23/30 runs · noise ±10%
+    // per projection" was data-scientist language for a bet-slip audience).
+    var plain = 'In ' + pick.survived + ' of ' + pick.total +
+      ' slightly-different versions of the projections, the model still picked ' +
+      _esc(pick.out_name) + ' → ' + _esc(pick.in_name) + ' (≈' + pickPct + '%).';
+
+    // A challenger that beat the pick across worlds is worth naming honestly.
+    var challenger = '';
+    var top = res.moves.length ? res.moves[0] : null;
+    if (top && top.key !== pick.key && top.survived > pick.survived) {
+      challenger = '<div style="padding:0 14px 8px;font-size:.75rem;color:#D9932B;font-weight:600;">' +
+        'Note: ' + _esc(top.out_name) + ' → ' + _esc(top.in_name) + ' actually won more of the tested worlds (≈' +
+        Math.round(top.pct * 100) + '%) — the two moves are close; check the table.</div>';
+    }
 
     containerEl.innerHTML =
       '<div style="border:1px solid var(--border,#e5e2da);border-radius:12px;overflow:hidden;' +
@@ -11312,9 +11376,7 @@ html.apex-offseason #view-landing .hero-sub::after {
       '<span style="font-weight:800;font-size:.9rem;">Stress test</span>' +
       '<span style="background:' + v.color + ';color:#fff;font-weight:800;font-size:.72rem;' +
       'padding:3px 9px;border-radius:999px;letter-spacing:.04em;">' + v.label + '</span>' +
-      '<span style="color:var(--muted,#7a8783);font-size:.78rem;">' +
-      _esc(top.out_name) + ' → ' + _esc(top.in_name) + ' survived ' + top.survived + '/' +
-      top.total + ' runs (' + topPct + '%)</span>' +
+      '<span style="color:var(--muted,#7a8783);font-size:.78rem;">' + plain + '</span>' +
       '</div>' +
       '<table style="width:100%;border-collapse:collapse;font-size:.8rem;">' +
       '<thead><tr style="text-align:left;color:var(--muted,#7a8783);">' +
@@ -11322,9 +11384,10 @@ html.apex-offseason #view-landing .hero-sub::after {
       '<th style="padding:6px 10px;text-align:right;font-weight:700;">Survived</th>' +
       '<th style="padding:6px 10px;text-align:right;font-weight:700;">%</th>' +
       '</tr></thead><tbody>' + rows + '</tbody></table>' +
+      challenger +
       '<div style="padding:8px 14px;font-size:.72rem;color:var(--muted,#7a8783);">' +
-      '◆ = model\'s unjittered pick · noise ±' + Math.round(SIGMA * 100) +
-      '% per projection, ' + res.nRuns + ' runs</div>' +
+      '◆ = the model’s actual pick, which the verdict is about · each test world nudges every player’s projections by about ±' +
+      Math.round(SIGMA * 100) + '% (the model’s own typical error) · ' + pick.total + ' worlds tested</div>' +
       '</div>';
   }
 
@@ -11339,21 +11402,26 @@ html.apex-offseason #view-landing .hero-sub::after {
       if (!containerEl) return { cancel: function () {} };
       if (!_can()) { render(containerEl); return { cancel: function () {} }; }
       return run(nRuns, {
-        onProgress: function () { render(containerEl); },
+        // Throttled: a full re-render per world × 200 worlds is needless churn.
+        onProgress: function (done, total) { if (done % 10 === 0 || done === total) render(containerEl); },
         onDone: function () { render(containerEl); },
       });
     },
   };
 
-  // Test hooks (node harness only — harmless in the browser).
-  window._apexSensitivityTestHooks = {
-    mulberry32: _mulberry32,
-    gauss: _gauss,
-    runOne: _runOne,
-    topMove: _topMove,
-    verdict: _verdict,
-    SIGMA: SIGMA,
-  };
+  // Test hooks — 2026-07-07 audit fix: no longer shipped live (they bypassed
+  // the entitlement gate from the console). Harnesses set
+  // window.APEX_TEST_HOOKS = true BEFORE loading this file.
+  if (typeof window !== 'undefined' && window.APEX_TEST_HOOKS === true) {
+    window._apexSensitivityTestHooks = {
+      mulberry32: _mulberry32,
+      gauss: _gauss,
+      runOne: _runOne,
+      topMove: _topMove,
+      verdict: _verdict,
+      SIGMA: SIGMA,
+    };
+  }
 })();
 
 </script>
@@ -13354,7 +13422,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1783521214-GW32-420fc15a";
+const BUILD_VERSION = "1783522866-GW32-420fc15a";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -16086,11 +16154,16 @@ function renderTransfers(recs) {
   try { setTimeout(function () {
     var _sBtn = document.getElementById('sensitivity-btn');
     var _sBody = document.getElementById('sensitivity-body');
+    // 2026-07-07 audit fix: CANCEL any in-flight stress-test before clearing —
+    // recs changed, so later runs would jitter the NEW pool against a baseline
+    // from the OLD one (mixed, incoherent sample repainting into the cleared body).
+    try { if (window.apexSensitivity) window.apexSensitivity.cancel(); } catch (_eSc) {}
     if (_sBody) _sBody.innerHTML = '';   // clear stale table on every re-render
     if (_sBtn && !_sBtn._apexWired) {
       _sBtn._apexWired = true;
       _sBtn.addEventListener('click', function () {
-        if (window.apexSensitivity && _sBody) window.apexSensitivity.runInto(_sBody, 30);
+        // (2026-07-07: run count now the module default — 200 worlds, chunked)
+        if (window.apexSensitivity && _sBody) window.apexSensitivity.runInto(_sBody);
       });
     }
     // Free tier: show the locked teaser immediately (no click needed to feel it).
@@ -16165,7 +16238,22 @@ function renderTransfers(recs) {
       <div class="section-title" style="margin-top:2rem;">⚡ Recommended Transfers</div>
       ${_emptyPlanState}
       <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:24px;text-align:center;">
-        <p style="color:var(--muted);font-size:.9rem;margin:0;">No individual transfer upgrades found. Your squad is well-positioned.</p>
+        <p style="color:var(--muted);font-size:.9rem;margin:0;">${(function () {
+          // 2026-07-07 audit fix: when the USER'S OWN locks/exclusions starved
+          // the engine, this said "your squad is well-positioned" — a lie that
+          // hid the real cause. Say which it is.
+          try {
+            if (window.apexLocks && typeof window.apexLocks.counts === 'function') {
+              var _lbC = window.apexLocks.counts();
+              if ((_lbC.locked || 0) + (_lbC.banned || 0) > 0) {
+                return 'No moves available within your locks/exclusions (' +
+                  (_lbC.locked || 0) + ' locked, ' + (_lbC.banned || 0) + ' excluded) — ' +
+                  'try freeing one up via the 🔒/🚫 buttons in the player pool.';
+              }
+            }
+          } catch (_eLb) {}
+          return 'No individual transfer upgrades found. Your squad is well-positioned.';
+        })()}</p>
       </div>
     `;
     return;
@@ -16703,6 +16791,15 @@ function _renderRecoPreview() {
     const _reco = document.getElementById('engine-picks');
     if (!_reco || typeof computeTransfers !== 'function') return;
     if (_reco.dataset.applied === '1') return;
+    // Deadline lockout — choke point 4 of 4 (2026-07-07 audit fix): this
+    // always-on preview computed and painted the engine's top moves with NO
+    // lockout guard, handing free users the exact information the freeze
+    // withholds from Solve/Optimise/Transfers during the final hour.
+    if (_apexDeadlineLockActive()) {
+      _reco.innerHTML = '<div style="padding:10px 12px;font-size:.8rem;color:var(--muted);">' +
+        '🔒 Engine picks return after the deadline — Apex members plan right up to kickoff.</div>';
+      return;
+    }
     // Applied-plan boot gate (2026-06-11): the preview's load ladder (900ms)
     // can fire before _restorePlanState's (1100ms). If the saved blob says a
     // plan was applied this GW, don't paint stale pre-plan picks — restore
@@ -16770,12 +16867,23 @@ function _apexDeadlineLockActive() {
 }
 function _apexRenderDeadlineLock(section, status) {
   try {
+    // 2026-07-07 audit fix: say WHEN it reopens (the copy never did, and users
+    // couldn't tell a lockout from a bug). Reopens at the deadline itself —
+    // apexDeadlineLocked() is bounded to [deadline − window, deadline).
+    let _when = '';
+    try {
+      const _dl = window._apexNextDeadline;
+      if (typeof _dl === 'number' && isFinite(_dl) && _dl > 0) {
+        _when = ' Planning reopens at the deadline (' +
+          new Date(_dl).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ').';
+      }
+    } catch (_eW) {}
     const _lh = (typeof window.apexLockedHtml === 'function')
       ? window.apexLockedHtml('Deadline lockout',
-          'The free solver locks 1 hour before the deadline — Apex members plan right up to kickoff.')
+          'The free solver locks for the final hour before the deadline — Apex members plan right up to kickoff.' + _when)
       : '';
     if (section) { section.innerHTML = _lh; section.style.display = 'block'; }
-    if (status) status.textContent = 'Free solver locked — 1h to deadline. Apex members plan to kickoff.';
+    if (status) status.textContent = 'Free solver locked for the final hour.' + _when + ' Apex members plan to kickoff.';
   } catch (_e) {}
 }
 
@@ -21274,6 +21382,22 @@ function renderBaselineStrip() {
   // ── Season chip-timing radar (2026-07-01): this plan only sees its window.
   // Tell the user what's BEYOND it, or confirm nothing bigger is coming.
   let radarHtml = '';
+  // 2026-07-07 audit fix: honesty notes for locks/exclusions in chip solves.
+  // (1) Locks don't yet bind the WC/FH ILP (v2 TODO in apex_solver.js) — a
+  // locked player CAN be swapped out by a chip squad; say so instead of letting
+  // the user find out. (2) If the ban safety-valve discarded exclusions to keep
+  // a legal squad, that was previously silent.
+  try {
+    if (window.apexLocks && typeof window.apexLocks.counts === 'function') {
+      const _lbCC = window.apexLocks.counts();
+      if ((_lbCC.locked || 0) > 0) {
+        radarHtml += `<div style="margin-top:9px;font-size:.8rem;color:#f0b03a;font-weight:600;">🔒 Heads up: locks don't yet apply inside Wildcard / Free Hit squads — a locked player can still be swapped out there. Exclusions (🚫) are respected.</div>`;
+      }
+    }
+    if (window._apexBansDiscarded === true) {
+      radarHtml += `<div style="margin-top:5px;font-size:.8rem;color:#f0b03a;font-weight:600;">⚠ Too many exclusions to build a legal 15 — some were ignored for this solve. Free a few up (🚫 in the player pool) to make them all count.</div>`;
+    }
+  } catch (_eLbN) {}
   const _rad = CHIP_PLANNER.radar || null;
   if (_rad) {
     if (_rad.later_dgws && _rad.later_dgws.length) {
@@ -22883,7 +23007,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1783521214-GW32-420fc15a</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1783522866-GW32-420fc15a</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
