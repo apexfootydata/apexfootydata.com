@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-07-08T16:12:06">
+<meta name="apex-gw" content="32" data-built-at="2026-07-08T19:28:34">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -6648,6 +6648,9 @@ html.apex-offseason #view-landing .hero-sub::after {
             <span style="color:#ef4444;">LIVE</span>
             <span id="league-live-updated" style="color:var(--muted);font-weight:500;letter-spacing:0;text-transform:none;margin-left:4px;"></span>
           </span>
+          <!-- 2026-07-08 (matchday-quota hardening): shown when live polling hits
+               its per-page-load cap or is backing off — muted, near the LIVE badge. -->
+          <span id="league-live-note" style="display:none;margin-left:14px;font-size:.75rem;font-weight:500;color:var(--muted);"></span>
         </div>
         <button id="league-share-btn" onclick="shareLeagueTable()" title="Copy to clipboard"
           style="background:none;border:1px solid var(--border);border-radius:6px;color:var(--muted);padding:8px 14px;font-size:.85rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;font-family:inherit;">
@@ -9351,10 +9354,17 @@ html.apex-offseason #view-landing .hero-sub::after {
     for (const m of managers) G = Math.max(G, m.per_gw.length);
 
     // M × G mean matrix
+    // 2026-07-08 (NaN GUARD): a NaN mean feeds NaN into sigma and every draw
+    // for that manager; NaN comparisons are always false, so `fs[i] > wMax`
+    // never fires and a NaN manager wins 0 sims (mirror of the Python
+    // nan_to_num fix in league_sim.py). Coerce non-finite means/σ inputs to 0.
     const mean = Array.from({ length: M }, () => new Float64Array(G));
     for (let i = 0; i < M; i++) {
       const arr = managers[i].per_gw;
-      for (let g = 0; g < arr.length; g++) mean[i][g] = arr[g];
+      for (let g = 0; g < arr.length; g++) {
+        const v = arr[g];
+        mean[i][g] = Number.isFinite(v) ? v : 0;
+      }
     }
 
     // corrScale defaults to 0.85 (Apex correlation-aware). Setting to 0 makes
@@ -9493,7 +9503,9 @@ html.apex-offseason #view-landing .hero-sub::after {
     // corrScale: 0.85 = Apex correlation-aware (squad-overlap × scale).
     //            0.0  = independent managers (Copilot-style sim).
     // Dev A/B toggle drives this from the URL/localStorage on the page.
-    const corrScale = (args.corrScale != null) ? +args.corrScale : 0.85;
+    // 2026-07-08 (PSD GUARD): clamp to [0,1] — >1 inflates off-diagonals past
+    // overlap and can push the correlation matrix non-PSD (Cholesky fails).
+    const corrScale = Math.min(1, Math.max(0, (args.corrScale != null) ? +args.corrScale : 0.85));
     const onProg   = typeof args.onProgress === 'function' ? args.onProgress : null;
     const _prog = (stage, pct, detail) => { if (onProg) { try { onProg(stage, pct, detail); } catch (_) {} } };
 
@@ -9775,8 +9787,9 @@ html.apex-offseason #view-landing .hero-sub::after {
     const seed = (args.seed != null) ? +args.seed : 42;
     // Inherit corrScale from the original sim so live-poll updates stay
     // consistent with whatever the user was looking at (Apex or Independent).
-    const corrScale = (args.corrScale != null) ? +args.corrScale
-      : (prev.corr_scale != null ? +prev.corr_scale : 0.85);
+    // 2026-07-08 (PSD GUARD): clamp to [0,1] — see full sim above.
+    const corrScale = Math.min(1, Math.max(0, (args.corrScale != null) ? +args.corrScale
+      : (prev.corr_scale != null ? +prev.corr_scale : 0.85)));
 
     // Fresh live + fixture data
     const bs = await fetchBootstrap();
@@ -13444,7 +13457,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1783523526-GW32-420fc15a";
+const BUILD_VERSION = "1783535314-GW32-420fc15a";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -13561,7 +13574,11 @@ async function _apexStalePoolCheck() {
     // Only check on the deployed public site. Local dev regenerates the HTML
     // on every run_solver_local.py invocation, so a baked pool is always fresh.
     if (_IS_LOCAL) return;
-    const bsUrl = FPL_CORS_PROXY + '/api/bootstrap-static/';
+    // 2026-07-08 rollover-cluster fix: the proxy maps bare FPL paths (it adds
+    // /api/ itself — see fetchFpl('/entry/…')). The '/api/' prefix here double-
+    // prefixed the URL → permanent 404 → the stale-pool banner could NEVER
+    // fire, exactly when a July visitor needed "this page is out of date".
+    const bsUrl = FPL_CORS_PROXY + '/bootstrap-static/';
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), 6000);
     let bs;
@@ -13805,6 +13822,17 @@ let _leagueCeilingsPromise = null;
 const LIVE_POLL_MS = 60_000;   // 60s
 let _leaguePollTimer = null;
 let _leaguePollRunning = false;  // guard against overlapping refreshes
+// 2026-07-08 (matchday-quota hardening): the live poll could hammer the
+// Cloudflare CORS proxy for a whole afternoon with no backoff and no ceiling —
+// a bad day for the free quota. Add (a) exponential backoff on consecutive
+// failures (base → 2× → 4× → 8×, reset on success) and (b) a hard cap of 120
+// polls per page load (~2h at the base interval), after which we stop and tell
+// the user to reload. Self-scheduling setTimeout replaces the fixed setInterval.
+const LIVE_POLL_MAX = 120;        // hard cap: polls per page load
+const LIVE_POLL_BACKOFF_MAX = 8;  // interval multiplier ceiling
+let _leaguePollFails = 0;         // consecutive failures → backoff exponent
+let _leaguePollCount = 0;         // polls actually attempted this page load
+let _leaguePollStopped = false;   // set by _stopLeaguePoll / cap → no reschedule
 let _leagueLastRefreshTs = null;
 let _leagueUpdatedTicker = null; // 1s ticker that updates "Xs ago"
 
@@ -13848,6 +13876,7 @@ async function _leagueLivePollOnce() {
   if (!_leagueData || !_leagueData._live_state) return;
   if (!window.ApexSolver || !window.ApexSolver.refreshLeagueLive) return;
   _leaguePollRunning = true;
+  _leaguePollCount++;   // 2026-07-08: consumes one unit of the per-load budget
   try {
     _installFplFetcher();
     const fresh = await window.ApexSolver.refreshLeagueLive({
@@ -13857,7 +13886,8 @@ async function _leagueLivePollOnce() {
       cv: 0.33,
       seed: 42,
     });
-    if (!fresh) return;
+    if (!fresh) { _leaguePollFails++; return; }   // empty result = failure → backoff
+    _leaguePollFails = 0;   // 2026-07-08: success resets the backoff exponent
     _leagueData = fresh;
     _leagueLastRefreshTs = fresh._last_refreshed || Date.now();
     // Refresh the dev A/B alt sim too, so the comparison stays in step with
@@ -13882,6 +13912,7 @@ async function _leagueLivePollOnce() {
     // Auto-stop once every inflight fixture is done.
     if (fresh._all_inflight_finished) _stopLeaguePoll();
   } catch (e) {
+    _leaguePollFails++;   // 2026-07-08: exception = failure → backoff
     console.warn('live league refresh failed', e);
   } finally {
     _leaguePollRunning = false;
@@ -13894,14 +13925,43 @@ function _startLeaguePoll(data) {
   _leagueLastRefreshTs = data._last_refreshed || Date.now();
   _leagueLiveUpdateBadge();
   _leagueLiveStartTicker();
-  _leaguePollTimer = setInterval(() => {
-    if (document.hidden) return;  // pause on hidden tab
-    _leagueLivePollOnce();
-  }, LIVE_POLL_MS);
+  // Fresh per-page-load budget for this run (2026-07-08).
+  _leaguePollFails = 0;
+  _leaguePollCount = 0;
+  _leaguePollStopped = false;
+  const _note0 = document.getElementById('league-live-note');
+  if (_note0) { _note0.style.display = 'none'; _note0.textContent = ''; }
+  _scheduleNextLeaguePoll();
+}
+
+// Self-scheduling poll loop (2026-07-08 matchday-quota hardening): reschedules
+// itself with the current exponential-backoff interval, enforces the hard cap,
+// and pauses on a hidden tab without consuming the budget. Replaces the old
+// fixed setInterval so the interval can vary between ticks.
+function _scheduleNextLeaguePoll() {
+  if (_leaguePollStopped) return;
+  if (_leaguePollCount >= LIVE_POLL_MAX) {
+    // Cap reached — stop polling and surface a muted note near the live badge.
+    _stopLeaguePoll();
+    const note = document.getElementById('league-live-note');
+    if (note) {
+      note.textContent = 'Live updates paused — reload to resume.';
+      note.style.display = 'inline';
+    }
+    return;
+  }
+  const mult = Math.min(LIVE_POLL_BACKOFF_MAX, Math.pow(2, _leaguePollFails));
+  const wait = LIVE_POLL_MS * mult;
+  _leaguePollTimer = setTimeout(() => {
+    // Pause (don't poll) on a hidden tab, but keep the loop alive so it resumes.
+    const _tick = document.hidden ? Promise.resolve() : _leagueLivePollOnce();
+    Promise.resolve(_tick).catch(() => {}).then(_scheduleNextLeaguePoll);
+  }, wait);
 }
 
 function _stopLeaguePoll() {
-  if (_leaguePollTimer) { clearInterval(_leaguePollTimer); _leaguePollTimer = null; }
+  _leaguePollStopped = true;   // 2026-07-08: block any pending reschedule
+  if (_leaguePollTimer) { clearTimeout(_leaguePollTimer); _leaguePollTimer = null; }
   _leagueLiveStopTicker();
   const badge = document.getElementById('league-live-badge');
   if (badge) badge.style.display = 'none';
@@ -14052,7 +14112,9 @@ function renderLeagueTable(data) {
     document.getElementById('league-hero-sims').textContent = (data.n_sims || 5000).toLocaleString();
     document.getElementById('league-hero-name').textContent = leader.player_name || '—';
     document.getElementById('league-hero-team').textContent = leader.entry_name || '';
-    document.getElementById('league-hero-pct').textContent = (leader.win_pct || 0).toFixed(1) + '%';
+    // 2026-07-08 audit fix: MC standard error at 5k sims is ~0.65pp — the
+    // tenths digit was pure noise dressed as precision. Whole % with a ~.
+    document.getElementById('league-hero-pct').textContent = '~' + Math.round(leader.win_pct || 0) + '%';
     document.getElementById('league-hero-pct').style.color = _winColor(leader.win_pct);
     document.getElementById('league-hero').style.display = 'block';
 
@@ -14170,7 +14232,7 @@ function shareLeagueTable() {
 `;
   standings.forEach((m, i) => {
     const chips = (m.chips_remaining || []).map(c => ({wildcard:'WC',freehit:'FH',bboost:'BB','3xc':'TC'}[c] || c)).join(' ');
-    text += `${i+1}. ${m.player_name} — ${(m.win_pct||0).toFixed(1)}% win — ~${Math.round(m.projected_final_mean||0)} proj (${m.current_total||0} now) — ${chips || 'no chips'}
+    text += `${i+1}. ${m.player_name} — ~${Math.round(m.win_pct||0)}% win — ~${Math.round(m.projected_final_mean||0)} proj (${m.current_total||0} now) — ${chips || 'no chips'}
 `;
   });
   text += `
@@ -16715,6 +16777,106 @@ function _clearPlanState() {
   try { localStorage.removeItem(_planKey()); } catch (_e) {}
 }
 let _planRestoreTries = 0;
+// ── Hostile-blob hardening (2026-07-08, prerequisite for draft sharing) ──────
+// The saved-plan blob at localStorage 'apex_plan_v1:<id>' is written by this
+// page but ALSO verbatim by the drafts Load path (window._apexDraftLoad) and,
+// one day, by draft sharing — i.e. it can be attacker-influenced. The 2026-07-07
+// hostile audit flagged that _restorePlanState trusted the blob completely.
+// This layer runs right after JSON.parse and rebuilds a CLEAN object containing
+// only the exact shapes the restore + render consumers use: it drops __proto__
+// / prototype-polluting keys and absurd counters, and HTML-escapes the one
+// appliedCard string (moves) that reaches an unescaped innerHTML sink in
+// _apexRenderAppliedPicksCard (assets/apex_app.js). Any throw → null → the
+// caller treats it as "no plan".
+function _sanitizePlanBlob(plan) {
+  try {
+    if (!plan || typeof plan !== 'object' || Array.isArray(plan)) return null;
+    // Small-integer string key, 0-60 (GW index / counter range).
+    const _isIntKey = (k) => /^\d{1,2}$/.test(k) && +k >= 0 && +k <= 60;
+    const _escHtml = (s) => String(s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const _numOrNull = (v) => (v == null ? null : (isFinite(+v) ? +v : null));
+    const out = {};
+    // gw0 — the expiry gate reads +plan.gw0; keep only if finite.
+    if (isFinite(+plan.gw0)) out.gw0 = +plan.gw0;
+    // applied: { intKey: finite int 0-50 } — kills '__proto__' & absurd counts.
+    out.applied = {};
+    if (plan.applied && typeof plan.applied === 'object') {
+      for (const k of Object.keys(plan.applied)) {
+        if (!_isIntKey(k)) continue;
+        const v = plan.applied[k];
+        if (typeof v === 'number' && isFinite(v) && Number.isInteger(v) && v >= 0 && v <= 50) {
+          out.applied[k] = v;
+        }
+      }
+    }
+    // roll: { intKey: strictly boolean true }.
+    out.roll = {};
+    if (plan.roll && typeof plan.roll === 'object') {
+      for (const k of Object.keys(plan.roll)) {
+        if (_isIntKey(k) && plan.roll[k] === true) out.roll[k] = true;
+      }
+    }
+    // chips: only wc/fh/bb/tc, each a 1-2 digit string (GW) or ''.
+    out.chips = {};
+    if (plan.chips && typeof plan.chips === 'object') {
+      for (const k of ['wc', 'fh', 'bb', 'tc']) {
+        const v = plan.chips[k];
+        const s = (v == null) ? '' : String(v);
+        out.chips[k] = /^\d{1,2}$/.test(s) ? s : '';
+      }
+    }
+    // squads: { intKey: { xi:[ids], bench:[ids], cap, vc } }, ids coerced +id.
+    out.squads = {};
+    if (plan.squads && typeof plan.squads === 'object') {
+      for (const k of Object.keys(plan.squads)) {
+        if (!_isIntKey(k)) continue;
+        const s = plan.squads[k];
+        if (!s || typeof s !== 'object') continue;
+        const _ids = (arr) => (Array.isArray(arr) ? arr : [])
+          .map(x => +x).filter(n => isFinite(n));
+        out.squads[k] = {
+          xi: _ids(s.xi), bench: _ids(s.bench),
+          cap: _numOrNull(s.cap), vc: _numOrNull(s.vc),
+        };
+      }
+    }
+    // preset: whitelist (see _activePreset), else 'balanced'.
+    out.preset = (['balanced', 'high', 'low', 'custom'].indexOf(plan.preset) >= 0)
+      ? plan.preset : 'balanced';
+    // appliedCard: ONLY the fields the render consumes (renderTransfers +
+    // _apexRenderAppliedPicksCard): gwA/gwB/transfers/hits/totalPts as finite
+    // numbers; moves = up to 3 strings, capped 120 chars AND HTML-escaped
+    // (they hit an unescaped innerHTML template-literal in apex_app.js).
+    const ac = plan.appliedCard;
+    if (ac && typeof ac === 'object' && !Array.isArray(ac)) {
+      const _numF = (v) => (isFinite(+v) ? +v : 0);
+      out.appliedCard = {
+        gwA: _numF(ac.gwA), gwB: _numF(ac.gwB),
+        transfers: _numF(ac.transfers), hits: _numF(ac.hits),
+        totalPts: _numF(ac.totalPts),
+        moves: (Array.isArray(ac.moves) ? ac.moves : []).slice(0, 3)
+          .map(m => _escHtml(String(m).slice(0, 120))),
+      };
+    } else {
+      out.appliedCard = null;
+    }
+    // recMoves: plain { gwIdx, inId, outId, bankDelta } numeric records; else [].
+    out.recMoves = (Array.isArray(plan.recMoves) ? plan.recMoves : [])
+      .filter(m => m && typeof m === 'object' && !Array.isArray(m) && isFinite(+m.gwIdx))
+      .map(m => ({
+        gwIdx: +m.gwIdx,
+        inId: _numOrNull(m.inId), outId: _numOrNull(m.outId),
+        bankDelta: isFinite(+m.bankDelta) ? +m.bankDelta : 0,
+      }));
+    // ppChips: plain { gwIdx:int, chipType:'WC|BB|FH|TC' } records; else [].
+    out.ppChips = (Array.isArray(plan.ppChips) ? plan.ppChips : [])
+      .filter(c => c && typeof c === 'object' && !Array.isArray(c)
+                   && isFinite(+c.gwIdx) && /^(WC|BB|FH|TC)$/.test(String(c.chipType)))
+      .map(c => ({ gwIdx: +c.gwIdx, chipType: String(c.chipType) }));
+    return out;
+  } catch (_eSan) { return null; }
+}
 function _restorePlanState() {
   if (_planRestoreDone) return;
   // Tier gate (entitlement seam — inert while APEX_TIERS=false): free tier
@@ -16740,9 +16902,12 @@ function _restorePlanState() {
     }
     const raw = localStorage.getItem(_planKey());
     if (!raw) { _planRestoreDone = true; return; }
-    const plan = JSON.parse(raw);
+    // 2026-07-08 hostile-audit hardening: rebuild a clean, whitelisted blob
+    // before ANY of it is trusted below. A non-object / corrupt / hostile blob
+    // sanitizes to null → treat as no plan (drop the key, done).
+    const plan = _sanitizePlanBlob(JSON.parse(raw));
     if (!plan || +plan.gw0 !== +TEAM_META.gw_range[0]) {
-      localStorage.removeItem(_planKey());     // different GW — plan expired
+      localStorage.removeItem(_planKey());     // corrupt or different GW — expired
       _planRestoreDone = true; return;
     }
     const byId = (id) => (POOL_DATA.find(p => p.id === id)
@@ -23049,7 +23214,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1783523526-GW32-420fc15a</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1783535314-GW32-420fc15a</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
@@ -23089,10 +23254,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (offseason) {
-      // 2026-06-02 Marcus override — keep CTAs clickable in offseason.
-      // var b = document.getElementById('offseason-banner');
-      // if (b) b.style.display = 'block';
-      // document.documentElement.classList.add('apex-offseason');
+      // 2026-07-08 rollover-cluster fix: show the banner again — a July
+      // visitor with no explanation reads the empty solver as broken. The
+      // 2026-06-02 Marcus override was about keeping CTAs CLICKABLE, which
+      // the apex-offseason class broke — so the banner shows but the class
+      // (and its pointer-events lockdown) stays off.
+      var b = document.getElementById('offseason-banner');
+      if (b) b.style.display = 'block';
+      // document.documentElement.classList.add('apex-offseason');  // keep CTAs clickable
     }
   } catch (e) {
     // Detection is best-effort — never break the page if globals are absent.
@@ -23298,7 +23467,13 @@ document.addEventListener('DOMContentLoaded', () => {
         // settle the progress bar so the page doesn't look hung.
         var _m = String(err && err.message ? err.message : err || '');
         var _human;
-        if (_m.indexOf('404') !== -1 && _m.indexOf('/entry/') !== -1) {
+        if (_m.indexOf('404') !== -1 && _m.indexOf('/picks') !== -1) {
+          // 2026-07-08 rollover-cluster fix: a picks-404 (entry exists, GW
+          // picks don't — pre-season / FPL July reset) was falling into the
+          // generic "API may be down" bucket, making the annual reset look
+          // like an outage.
+          _human = 'Your FPL team exists, but this gameweek\u2019s picks aren\u2019t available yet \u2014 between seasons or before the first deadline, FPL hasn\u2019t published them. Try again once the gameweek opens.';
+        } else if (_m.indexOf('404') !== -1 && _m.indexOf('/entry/') !== -1) {
           _human = 'We couldn\u2019t find a team with that ID. Double-check it on the FPL site (Points page \u2192 the number in the URL) and try again.';
         } else if (_m.indexOf('Failed to fetch') !== -1 || _m.indexOf('NetworkError') !== -1 || _m.indexOf('timeout') !== -1) {
           _human = 'The FPL servers didn\u2019t answer \u2014 they wobble around deadlines. Give it a minute and refresh.';

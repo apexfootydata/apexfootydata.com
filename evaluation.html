@@ -137,6 +137,7 @@
             </div>
           </div>
           <div class="form" id="form"></div>
+          <div style="font-size:11px;color:var(--muted);line-height:1.55;margin-top:16px;">Scored on the players both tools published each week (Apex publishes its solver pool). Raw log downloadable.</div>
         </div>
 
         <div class="footer">
@@ -196,8 +197,16 @@ var EVAL_DATA = null;
                     : (fmt(EVAL_DATA.solio)+'<span style="font-size:14px;">&dagger;</span>');
 
     var head=document.getElementById('eval-heading');
-    if(head) head.textContent='SEASON RUNNING TOTAL · '+EVAL_DATA.weeks+
-                              ' gameweek'+(EVAL_DATA.weeks===1?'':'s')+' scored';
+    if(head){
+      // Show the sample size alongside the gameweek count (hostile-audit fix #3):
+      // 'N gameweeks · M player-projections scored'. Falls back to the old label
+      // if an older payload without EVAL_DATA.n is baked.
+      var nTxt=(EVAL_DATA.n!=null)
+        ? (' · '+EVAL_DATA.n+' player-projection'+(EVAL_DATA.n===1?'':'s')+' scored')
+        : ' scored';
+      head.textContent='SEASON RUNNING TOTAL · '+EVAL_DATA.weeks+
+                       ' gameweek'+(EVAL_DATA.weeks===1?'':'s')+nTxt;
+    }
     var badge=document.getElementById('eval-badge');
     if(badge){badge.textContent='LIVE';badge.style.color='var(--teal)';
               badge.style.background='rgba(29,158,117,.12)';}
