@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-07-07T21:40:55">
+<meta name="apex-gw" content="32" data-built-at="2026-07-08T14:46:46">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -5739,13 +5739,15 @@ html.apex-offseason #view-landing .hero-sub::after {
       <button class="btn" onclick="_apexToggleDrafts()" id="apex-drafts-btn"
         title="Save named plans and compare them side by side"
         style="background:transparent;color:var(--text);border:1px solid var(--border);padding:11px 18px;border-radius:8px;font-weight:600;font-size:.85rem;cursor:pointer;display:flex;align-items:center;gap:6px;">
-        ▤ Drafts
+        ▤ Saved plans
       </button>
       <span id="solve-status" class="muted" style="font-size:.82rem;"></span>
     </div>
-    <!-- Drafts (2026-07-07): named plan snapshots + compare grid (apex_drafts.js).
-         Hidden until the ▤ Drafts button is pressed; renderCompare gates itself
-         on apexCan('savedPlans') and shows a locked teaser to free users. -->
+    <!-- Drafts (2026-07-07; renamed "Saved plans" in UI 2026-07-07 eve — "Drafts"
+         collides with FPL's official Draft game mode per UX audit): named plan
+         snapshots + compare grid (apex_drafts.js). Hidden until the ▤ Saved plans
+         button is pressed; renderCompare gates itself on apexCan('savedPlans')
+         and shows a locked teaser to free users. -->
     <div id="apex-drafts-panel" style="display:none;margin:0 0 18px;"></div>
     <script>
       function _apexToggleDrafts() {
@@ -11745,9 +11747,11 @@ html.apex-offseason #view-landing .hero-sub::after {
      assets/apex_drafts.js -->
 <script>
 // ═══════════════════════════════════════════════════════════════════════════
-// APEX DRAFTS (2026-07-07) — named snapshots of the working plan + a
-// side-by-side comparison table (the Review-Premium "10 drafts + cross-draft
-// eval" feature, built on Apex's existing plan blob).
+// APEX DRAFTS (2026-07-07, maths+UX pass 2026-07-07 eve) — named snapshots of
+// the working plan + a side-by-side comparison table (the Review-Premium
+// "10 drafts + cross-draft eval" feature, built on Apex's existing plan blob).
+// User-facing wording is now "Saved plans" ("drafts" collides with FPL's
+// official Draft game mode); internal names/API keep "drafts".
 //
 //   The solver already persists ONE working plan per FPL id under
 //   localStorage 'apex_plan_v1:<fplid>' (see generate_solver_html.py
@@ -11763,38 +11767,66 @@ html.apex-offseason #view-landing .hero-sub::after {
 //   (anchors doc adds drafts:1 free / 10 season to TIER_CAPS; undefined ⇒ no
 //   cap while the seam is OFF, so nothing is limited in the live demo).
 //
-// COMPARE MATHS (per draft, per GW in TEAM_META.gw_range):
+// COMPARE MATHS (per draft, per GW in TEAM_META.gw_range) — audit-fixed
+// 2026-07-07 (3-agent adversarial audit; all four maths findings addressed):
 //   • Resolve the draft's stored squad for that GW from blob.squads[idx]
 //     (xi + bench id lists). If none stored for that idx, fall back to the live
 //     squad (SQUAD_DATA) so early GWs the plan didn't touch still score.
-//   • Look each id up in POOL_DATA / SQUAD_DATA to get xp_per_gw.
 //   • Normal GW  : ApexSolver.pickOptimalXI(squad, idx).total_xp
-//                  (XI + best captain doubled) — or, if the solver isn't
-//                  present, a self-contained XI+captain estimate.
-//   • BB GW (blob.chips.bb === gw): add the whole-15 sum + captain (bench
-//     scores). TC GW: add one extra captain (captain tripled). FH GW: if a FH
-//     squad is stored for that idx use it; else mark the cell '~' (unresolvable).
-//   • Any GW whose squad can't be resolved to 15 real players ⇒ cell '~'.
+//                  (XI + best attacker captain doubled) — or, if the solver
+//                  isn't present, a self-contained estimate mirroring it.
+//   • BB GW (blob.chips.bb === gw): ApexSolver.pickBenchBoostXI (all 15 +
+//     captain), or a mirrored fallback — captain from MID/FWD only, matching
+//     pickCaptainVC (AUDIT FIX: was best-of-15 incl GK/DEF, overstating BB).
+//   • TC GW: XI + captain tripled (xi_xp + 2·captain).
+//   • FH GW: the planner stores the Free-Hit week's squad in blob.squads[idx]
+//     like any other GW (there is NO separate fhSquads key — AUDIT FIX: the
+//     old code looked for one, so every FH week scored '~'/0 and FH plans
+//     could never win). Stored squad ⇒ note 'FH'. Not stored ⇒ score the
+//     fallback squad as a floor estimate, note 'FH?'.
+//   • HIT COSTS (AUDIT FIX: were ignored — gross vs net): per GW subtract
+//     4 × hits, where hits mirror the engine's getHitsForGw/getEffectiveFTs
+//     exactly: rolled GW ⇒ 0; else max(0, applied[idx] − effFTs), effFTs =
+//     (TEAM_META.free_transfers || 1) +1 if previous idx rolled, capped 5.
+//   • RANKING (AUDIT FIX: rows with '~' summed fewer GWs but competed on raw
+//     total): ★ is decided on the COMPARABLE-WEEKS subtotal — the GW columns
+//     where EVERY non-stale row has a real number. Display totals remain the
+//     full row sum; rows with unscored weeks get a '*' marker.
+//   • STALE DRAFTS (AUDIT FIX): a draft whose blob.gw0 ≠ current gw_range[0]
+//     no longer scores against the wrong weeks — it renders greyed with a
+//     "saved for GW<n>" tag, is excluded from ranking, and Load is blocked
+//     (the solver's own restore would expire it anyway and wipe the plan).
 //
 // HOUSE RULES (mirrors assets/apex_paths.js header): IIFE, 'use strict', every
 // global read LAZILY behind a typeof guard, never throw at load. Gated on
 // apexCan('savedPlans') for the feature + apexCap('drafts') for the slot count.
 //
 // PUBLIC API — window.apexDrafts:
-//   .saveAs(name)        → save current plan blob as <name>; returns {ok,error?}
+//   .saveAs(name, opts)  → save current plan blob as <name>; returns {ok,error?,
+//                          needsConfirm?} — pass {overwrite:true} to replace an
+//                          existing name (UI confirms first)
 //   .list()             → [{ name, savedAt }]  (newest first)
 //   .load(name)         → the raw blob (caller feeds it to the restore path)
 //   .delete(name)       → remove a draft
-//   .compare()          → { gwRange, drafts:[{name, cells:[{gw,total,note}], total}],
-//                           current:{...}, bestName }
+//   .compare()          → { gwRange, drafts:[{name, cells, total, cmp, stale...}],
+//                           current:{...}, bestName, comparableGws }
 //   .renderCompare(el)  → render the comparison grid into el
 //   .capInfo()          → { used, cap, room }
 // ═══════════════════════════════════════════════════════════════════════════
 (function () {
   'use strict';
 
-  var _DEFAULT_CAP = 10;   // used only if apexCap('drafts') is undefined AND we
-                           // still want a sane ceiling; see _cap().
+  // Names that collide with Object.prototype plumbing. '__proto__' in
+  // particular "saves" into the prototype setter and silently vanishes
+  // (adversarial audit LOW-1) — reject up front. NB: must be built with
+  // bracket-assignment on a null-prototype object — in an object LITERAL,
+  // '__proto__': 1 sets the prototype instead of creating the key (the very
+  // trap this list exists to guard; caught by suites_drafts.js check 7).
+  var _RESERVED_NAMES = Object.create(null);
+  _RESERVED_NAMES['__proto__'] = 1;
+  _RESERVED_NAMES['prototype'] = 1;
+  _RESERVED_NAMES['constructor'] = 1;
+  var _NAME_MAX = 60;
 
   // ── Lazy global access (guarded — never throw) ────────────────────────────
   function _meta()  { return (typeof TEAM_META !== 'undefined' && TEAM_META) ? TEAM_META : null; }
@@ -11859,19 +11891,28 @@ html.apex-offseason #view-landing .hero-sub::after {
   }
 
   // ── Public: saveAs / list / load / delete ─────────────────────────────────
-  function saveAs(name) {
+  function saveAs(name, opts) {
+    opts = opts || {};
     name = (name == null ? '' : String(name)).trim();
     if (!name) return { ok: false, error: 'Name required' };
+    if (name.length > _NAME_MAX) return { ok: false, error: 'Name too long (' + _NAME_MAX + ' characters max).' };
+    if (Object.prototype.hasOwnProperty.call(_RESERVED_NAMES, name)) {
+      return { ok: false, error: 'That name is reserved — pick another.' };
+    }
     var blob = _readLivePlan();
     if (!blob) return { ok: false, error: 'No plan to save yet — apply some moves first.' };
 
     var drafts = _readDrafts();
     var exists = Object.prototype.hasOwnProperty.call(drafts, name);
+    if (exists && !opts.overwrite) {
+      // UX audit fix: no more silent overwrite — the UI confirms first.
+      return { ok: false, needsConfirm: true, error: 'A plan called “' + name + '” already exists.' };
+    }
     if (!exists) {
       var cap = _cap();
       var used = Object.keys(drafts).length;
       if (used >= cap) {
-        return { ok: false, error: 'Draft limit reached (' + cap + '). Delete one first.', capped: true };
+        return { ok: false, error: 'Plan limit reached (' + cap + '). Tap the ✕ next to a saved plan below to free a slot.', capped: true };
       }
     }
     drafts[name] = { blob: blob, savedAt: Date.now() };
@@ -11922,21 +11963,29 @@ html.apex-offseason #view-landing .hero-sub::after {
     if (Array.isArray(arr) && idx < arr.length) return arr[idx] || 0;
     return p.xp || 0;
   }
+  function _isAttacker(p) {
+    var code = (p && (p.element_type || p.pos)) || 0;
+    return code === 3 || code === 4;
+  }
+
+  // Does the blob have a full stored squad (>=15 ids) for this idx?
+  function _storedIds(blob, idx) {
+    var squads = (blob && blob.squads) || {};
+    var s = squads[idx] || squads[String(idx)];
+    if (s && Array.isArray(s.xi)) {
+      var ids = s.xi.concat(Array.isArray(s.bench) ? s.bench : []);
+      if (ids.length >= 15) return ids;
+    }
+    return null;
+  }
 
   // Resolve a squad (array of 15 player objects) for a draft at GW index idx.
   // Returns null if it can't build a full 15-real-player squad.
   function _resolveSquadForGw(blob, idx) {
-    var squads = (blob && blob.squads) || {};
-    var s = squads[idx] || squads[String(idx)];
-    var ids = null;
-    if (s && Array.isArray(s.xi)) {
-      ids = s.xi.concat(Array.isArray(s.bench) ? s.bench : []);
-    }
-    if (!ids || ids.length < 15) {
+    var ids = _storedIds(blob, idx);
+    if (!ids) {
       // Fall back to the live squad (plan didn't touch this GW).
       var live = _squadData();
-      if (live.length === 15) return live.slice();
-      // Or reconstruct live ids.
       if (live.length) return live.slice();
       return null;
     }
@@ -11945,9 +11994,30 @@ html.apex-offseason #view-landing .hero-sub::after {
     return players;
   }
 
+  // Hit costs — mirrors the engine EXACTLY (generate_solver_html.py
+  // getEffectiveFTs/getHitsForGw): base FTs from TEAM_META.free_transfers,
+  // +1 if the PREVIOUS idx was explicitly rolled (capped at 5); a rolled GW
+  // itself has no transfers and no hits; hits = max(0, applied − effFTs).
+  function _keyed(obj, i) {
+    if (!obj || typeof obj !== 'object') return undefined;
+    return (obj[i] !== undefined) ? obj[i] : obj[String(i)];
+  }
+  function _hitsAt(blob, idx) {
+    var roll = (blob && blob.roll) || {};
+    if (_keyed(roll, idx)) return 0;
+    var applied = (blob && blob.applied) || {};
+    var t = +(_keyed(applied, idx) || 0);
+    if (!(t > 0)) return 0;
+    var meta = _meta();
+    var base = (meta && meta.free_transfers) || 1;
+    if (idx > 0 && _keyed(roll, idx - 1)) base = Math.min(5, base + 1);
+    return Math.max(0, t - base);
+  }
+
   // Self-contained XI+captain fallback (used only if ApexSolver.pickOptimalXI
   // isn't present). Greedy: best GK + fill to 11 by highest xP respecting FPL
-  // minimums (≥3 DEF, ≥1 FWD), captain = single best XI player doubled.
+  // minimums (≥3 DEF, ≥1 FWD). Captain mirrors pickCaptainVC: best ATTACKER
+  // (MID/FWD) in the XI, falling back to anyone only if <2 attackers.
   function _fallbackXiTotal(squad, idx) {
     var by = { 1: [], 2: [], 3: [], 4: [] };
     for (var i = 0; i < squad.length; i++) {
@@ -11969,9 +12039,19 @@ html.apex-offseason #view-landing .hero-sub::after {
     while (pick.length < 10 && rest.length) pick.push(rest.shift());
     xi = xi.concat(pick);
     if (xi.length < 11) return null;
-    var xiXp = 0, capXp = 0;
-    for (var k = 0; k < xi.length; k++) { var v = _xpAt(xi[k], idx); xiXp += v; if (v > capXp) capXp = v; }
-    return { xi_xp: xiXp, captain_xp: capXp, total_xp: xiXp + capXp };
+    var xiXp = 0;
+    for (var k = 0; k < xi.length; k++) xiXp += _xpAt(xi[k], idx);
+    return { xi_xp: xiXp, captain_xp: _bestCaptainXp(xi, idx), total_xp: xiXp + _bestCaptainXp(xi, idx) };
+  }
+
+  // Captain xP mirroring ApexSolver.pickCaptainVC: attackers (MID/FWD) only,
+  // full-list fallback when fewer than 2 attackers exist.
+  function _bestCaptainXp(players, idx) {
+    var att = players.filter(_isAttacker);
+    var pool = att.length >= 2 ? att : players;
+    var best = 0;
+    for (var i = 0; i < pool.length; i++) { var v = _xpAt(pool[i], idx); if (v > best) best = v; }
+    return best;
   }
 
   function _xiResult(squad, idx) {
@@ -11985,7 +12065,24 @@ html.apex-offseason #view-landing .hero-sub::after {
     return _fallbackXiTotal(squad, idx);
   }
 
-  // Score one draft blob across the horizon. Returns { cells:[{gw,total,note}], total }.
+  // BB total: prefer the engine's own pickBenchBoostXI (all 15 + attacker
+  // captain); fallback mirrors it. AUDIT FIX: previously captained the best
+  // of all 15 incl GK/DEF, diverging from the engine and inflating BB weeks.
+  function _bbTotal(squad, idx) {
+    var solver = _solver();
+    if (solver && typeof solver.pickBenchBoostXI === 'function') {
+      try {
+        var r = solver.pickBenchBoostXI(squad, idx);
+        if (r && typeof r.total_xp === 'number') return r.total_xp;
+      } catch (e) {}
+    }
+    var sum = 0;
+    for (var b = 0; b < squad.length; b++) sum += _xpAt(squad[b], idx);
+    return sum + _bestCaptainXp(squad, idx);
+  }
+
+  // Score one draft blob across the horizon.
+  // Returns { cells:[{gw,total,note,hits}], total, incomplete }.
   function _scoreBlob(blob, gwRange, startGw) {
     var chips = (blob && blob.chips) || {};
     var bbGw = parseInt(chips.bb, 10); if (isNaN(bbGw)) bbGw = null;
@@ -11997,39 +12094,37 @@ html.apex-offseason #view-landing .hero-sub::after {
       var gw = gwRange[i];
       var idx = gw - startGw;
 
-      // FH with no stored squad for this GW ⇒ unresolvable cell.
-      if (fhGw !== null && gw === fhGw) {
-        var fhSquads = (blob && blob.fhSquads) || null;
-        var fhSq = fhSquads ? (fhSquads[idx] || fhSquads[String(idx)]) : null;
-        if (!fhSq || !Array.isArray(fhSq) || fhSq.length < 11) {
-          cells.push({ gw: gw, total: null, note: '~' });
-          anyMissing = true;
-          continue;
-        }
-      }
-
       var squad = _resolveSquadForGw(blob, idx);
-      if (!squad) { cells.push({ gw: gw, total: null, note: '~' }); anyMissing = true; continue; }
+      if (!squad) { cells.push({ gw: gw, total: null, note: '~', hits: 0 }); anyMissing = true; continue; }
 
       var cellTotal, note = '';
       if (bbGw !== null && gw === bbGw) {
-        // Bench Boost: all 15 score + best captain doubled.
-        var sum = 0, cap = 0;
-        for (var b = 0; b < squad.length; b++) { var xp = _xpAt(squad[b], idx); sum += xp; if (xp > cap) cap = xp; }
-        cellTotal = sum + cap; note = 'BB';
+        cellTotal = _bbTotal(squad, idx); note = 'BB';
       } else if (tcGw !== null && gw === tcGw) {
         // Triple Captain: XI + captain tripled (= xi_xp + 2·captain).
         var rT = _xiResult(squad, idx);
-        if (!rT) { cells.push({ gw: gw, total: null, note: '~' }); anyMissing = true; continue; }
+        if (!rT) { cells.push({ gw: gw, total: null, note: '~', hits: 0 }); anyMissing = true; continue; }
         cellTotal = (rT.xi_xp || 0) + 2 * (rT.captain_xp || 0); note = 'TC';
       } else {
         var rN = _xiResult(squad, idx);
-        if (!rN) { cells.push({ gw: gw, total: null, note: '~' }); anyMissing = true; continue; }
+        if (!rN) { cells.push({ gw: gw, total: null, note: '~', hits: 0 }); anyMissing = true; continue; }
         cellTotal = rN.total_xp;
-        if (fhGw !== null && gw === fhGw) note = 'FH';
+        if (fhGw !== null && gw === fhGw) {
+          // The planner stores the FH week's squad in blob.squads[idx]
+          // (AUDIT FIX — no more '~'/0 for Free Hit weeks). If the FH squad
+          // was never planned, this scored the fallback squad: an honest
+          // floor, flagged 'FH?'.
+          note = _storedIds(blob, idx) ? 'FH' : 'FH?';
+        }
       }
+
+      // AUDIT FIX: net points, not gross — subtract -4s exactly like the
+      // engine's getHitPenaltyForGw.
+      var hits = _hitsAt(blob, idx);
+      cellTotal -= 4 * hits;
+
       cellTotal = Math.round(cellTotal * 10) / 10;
-      cells.push({ gw: gw, total: cellTotal, note: note });
+      cells.push({ gw: gw, total: cellTotal, note: note, hits: hits });
       total += cellTotal;
     }
     return { cells: cells, total: Math.round(total * 10) / 10, incomplete: anyMissing };
@@ -12040,6 +12135,7 @@ html.apex-offseason #view-landing .hero-sub::after {
     var meta = _meta();
     var gwRange = (meta && Array.isArray(meta.gw_range)) ? meta.gw_range : [];
     var startGw = (meta && meta.start_gw) ? meta.start_gw : (gwRange[0] || 1);
+    var nowGw0 = gwRange.length ? gwRange[0] : null;
 
     var drafts = _readDrafts();
     var names = Object.keys(drafts).sort(function (a, b) {
@@ -12049,22 +12145,53 @@ html.apex-offseason #view-landing .hero-sub::after {
     var out = [];
     for (var i = 0; i < names.length; i++) {
       var name = names[i];
-      var scored = _scoreBlob(drafts[name].blob || {}, gwRange, startGw);
-      out.push({ name: name, cells: scored.cells, total: scored.total, incomplete: scored.incomplete });
+      var blob = drafts[name].blob || {};
+      // AUDIT FIX: a draft saved for a different first-GW would be scored
+      // against the wrong weeks (idx misalignment after rollover). Flag it
+      // stale instead of producing plausible-but-scrambled numbers.
+      var stale = (nowGw0 != null) && (blob.gw0 == null || +blob.gw0 !== +nowGw0);
+      if (stale) {
+        var blank = gwRange.map(function (gw) { return { gw: gw, total: null, note: '~', hits: 0 }; });
+        out.push({ name: name, cells: blank, total: null, incomplete: true, stale: true, savedForGw: (blob.gw0 != null ? +blob.gw0 : null) });
+        continue;
+      }
+      var scored = _scoreBlob(blob, gwRange, startGw);
+      out.push({ name: name, cells: scored.cells, total: scored.total, incomplete: scored.incomplete, stale: false });
     }
 
     // Live "Current" row from the on-disk working plan (or a bare live squad).
     var live = _readLivePlan() || { squads: {}, chips: {} };
     var curScored = _scoreBlob(live, gwRange, startGw);
-    var current = { name: 'Current', cells: curScored.cells, total: curScored.total, incomplete: curScored.incomplete };
+    var current = { name: 'Current', cells: curScored.cells, total: curScored.total, incomplete: curScored.incomplete, stale: false };
 
-    // Best total across drafts + current (ignore rows with no resolvable total).
+    // AUDIT FIX: rank on the COMPARABLE-WEEKS subtotal — only GW columns where
+    // every non-stale row has a real number — so a row with unscored weeks
+    // can't win (or lose) by summing a different number of gameweeks.
+    var rows = out.concat([current]);
+    var ranked = rows.filter(function (r) { return !r.stale; });
+    var commonIdx = [];
+    for (var c = 0; c < gwRange.length; c++) {
+      var all = ranked.length > 0;
+      for (var r = 0; r < ranked.length; r++) {
+        var cell = ranked[r].cells[c];
+        if (!cell || typeof cell.total !== 'number') { all = false; break; }
+      }
+      if (all) commonIdx.push(c);
+    }
+    rows.forEach(function (row) {
+      if (row.stale) { row.cmp = null; return; }
+      if (!commonIdx.length) { row.cmp = null; return; }
+      var s = 0;
+      for (var k = 0; k < commonIdx.length; k++) s += row.cells[commonIdx[k]].total;
+      row.cmp = Math.round(s * 10) / 10;
+    });
     var bestName = null, bestVal = -Infinity;
-    out.concat([current]).forEach(function (row) {
-      if (typeof row.total === 'number' && row.total > bestVal) { bestVal = row.total; bestName = row.name; }
+    rows.forEach(function (row) {
+      if (typeof row.cmp === 'number' && row.cmp > bestVal) { bestVal = row.cmp; bestName = row.name; }
     });
 
-    return { gwRange: gwRange, startGw: startGw, drafts: out, current: current, bestName: bestName };
+    return { gwRange: gwRange, startGw: startGw, drafts: out, current: current,
+             bestName: bestName, comparableGws: commonIdx.length };
   }
 
   // ── Apply-a-draft (load blob → hand to the existing restore path) ─────────
@@ -12075,6 +12202,27 @@ html.apex-offseason #view-landing .hero-sub::after {
     try {
       var blob = load(name);
       if (!blob) return;
+      // Stale guard: the solver's restore expires a gw0-mismatched plan and
+      // DELETES it — loading a stale draft would silently wipe the working
+      // plan and restore nothing. Block with an explanation instead.
+      var meta = _meta();
+      var nowGw0 = (meta && Array.isArray(meta.gw_range) && meta.gw_range.length) ? +meta.gw_range[0] : null;
+      if (nowGw0 != null && (blob.gw0 == null || +blob.gw0 !== nowGw0)) {
+        try {
+          alert('“' + name + '” was saved for GW' + (blob.gw0 != null ? blob.gw0 : '?') +
+                ' — the weeks no longer line up with GW' + nowGw0 +
+                ', so it can’t be loaded. You can delete it with ✕.');
+        } catch (e) {}
+        return;
+      }
+      // UX audit fix (the one real data-loss risk): loading silently replaced
+      // the current unsaved plan. Confirm first.
+      var okGo = true;
+      try {
+        okGo = confirm('Load “' + name + '”?\n\nYour current plan will be replaced. ' +
+                       'If you want to keep it, cancel and save it as a plan first.');
+      } catch (e) {}
+      if (!okGo) return;
       localStorage.setItem(_planKey(), JSON.stringify(blob));
       // Prefer an in-page restore if the solver exposes one; else reload.
       if (typeof window._restorePlanStateForce === 'function') { window._restorePlanStateForce(); }
@@ -12086,9 +12234,15 @@ html.apex-offseason #view-landing .hero-sub::after {
   };
   window._apexDraftSaveFromPrompt = function () {
     try {
-      var name = window.prompt('Name this draft:');
+      var name = window.prompt('Name this plan (e.g. “Wildcard GW34”):');
       if (name == null) return;
       var res = saveAs(name);
+      if (!res.ok && res.needsConfirm) {
+        var ow = false;
+        try { ow = confirm('A plan called “' + String(name).trim() + '” already exists — overwrite it?'); } catch (e) {}
+        if (!ow) return;
+        res = saveAs(name, { overwrite: true });
+      }
       if (!res.ok && res.error) { try { alert(res.error); } catch (e) {} }
       if (typeof window._apexDraftsRefresh === 'function') window._apexDraftsRefresh();
     } catch (e) {}
@@ -12102,45 +12256,52 @@ html.apex-offseason #view-landing .hero-sub::after {
 
     // Feature gate: side-by-side comparison is the paid hook.
     if (!_can('savedPlans')) {
-      el.innerHTML = _lockedHtml('Draft comparison',
-        'Save up to 10 plans and compare them side by side — every gameweek scored, so you pick the path with the most points before you commit.');
+      el.innerHTML = _lockedHtml('Compare saved plans',
+        'Save up to 10 plans and compare them side by side — every gameweek scored in projected points, hits deducted, so you pick the best path before you commit.');
       return;
     }
 
     var data = compare();
     var ci = capInfo();
     var capTxt = (ci.cap === Infinity) ? '' :
-      ' <span style="font-size:.66rem;font-weight:700;color:#7a8783;">· ' + ci.used + '/' + ci.cap + ' slots</span>';
+      ' <span style="font-size:.66rem;font-weight:700;color:#7a8783;">· ' + ci.used + '/' + ci.cap + ' plans</span>';
 
     var head = '<tr style="background:#F7F5EF;text-align:left;">' +
-      '<th style="padding:8px 10px;font-size:.66rem;letter-spacing:.5px;color:#7a8783;text-transform:uppercase;position:sticky;left:0;background:#F7F5EF;">Draft</th>';
+      '<th style="padding:8px 10px;font-size:.66rem;letter-spacing:.5px;color:#7a8783;text-transform:uppercase;position:sticky;left:0;background:#F7F5EF;">Plan</th>';
     for (var g = 0; g < data.gwRange.length; g++) {
       head += '<th style="padding:8px 10px;text-align:right;font-size:.66rem;color:#7a8783;">GW' + data.gwRange[g] + '</th>';
     }
-    head += '<th style="padding:8px 10px;text-align:right;font-size:.66rem;letter-spacing:.5px;color:#7a8783;text-transform:uppercase;">Total</th></tr>';
+    head += '<th style="padding:8px 10px;text-align:right;font-size:.66rem;letter-spacing:.5px;color:#7a8783;text-transform:uppercase;">Total xPts</th></tr>';
 
     function rowHtml(row, isCurrent) {
-      var isBest = (row.name === data.bestName);
+      var isBest = (row.name === data.bestName) && !row.stale;
       var bg = isBest ? 'background:rgba(29,158,117,.10);' : (isCurrent ? 'background:#FBFAF6;' : '');
+      var dim = row.stale ? 'opacity:.55;' : '';
       var cellsHtml = '';
       for (var c = 0; c < row.cells.length; c++) {
         var cell = row.cells[c];
         var val = (cell.total == null) ? '~' : _fmt(cell.total);
-        var tip = 'GW' + cell.gw + (cell.note ? ' · ' + cell.note : '') + ' · ' + val + ' xPts';
+        var tip = 'GW' + cell.gw + (cell.note ? ' · ' + cell.note : '') + ' · ' + val + ' xPts' +
+                  (cell.hits ? ' (after −' + (cell.hits * 4) + ' hit pts)' : '');
         cellsHtml += '<td title="' + tip + '" style="padding:8px 10px;text-align:right;font-family:\'JetBrains Mono\',monospace;font-size:.78rem;' +
           (cell.note && cell.note !== '~' ? 'color:#1D9E75;font-weight:700;' : '') + '">' + val +
-          (cell.note && cell.note !== '~' ? '<span style="font-size:.6rem;color:#a8a294;"> ' + cell.note + '</span>' : '') + '</td>';
+          (cell.note && cell.note !== '~' ? '<span style="font-size:.6rem;color:#a8a294;"> ' + cell.note + '</span>' : '') +
+          (cell.hits ? '<span style="font-size:.6rem;color:#C0532F;"> −' + (cell.hits * 4) + '</span>' : '') + '</td>';
       }
       var actions = isCurrent ? '' :
         '<div style="display:inline-flex;gap:6px;margin-left:8px;">' +
-        '<button onclick="_apexDraftLoad(\'' + _esc(row.name) + '\')" title="Load this draft" style="background:#1D9E75;color:#fff;border:none;border-radius:6px;padding:3px 9px;font-size:.66rem;font-weight:800;cursor:pointer;font-family:inherit;">Load</button>' +
-        '<button onclick="_apexDraftDelete(\'' + _esc(row.name) + '\')" title="Delete this draft" style="background:#fff;color:#c0392b;border:1px solid #e0d9cc;border-radius:6px;padding:3px 8px;font-size:.66rem;font-weight:800;cursor:pointer;font-family:inherit;">✕</button>' +
+        '<button onclick="_apexDraftLoad(\'' + _esc(row.name) + '\')" title="Load this plan (replaces your current plan)" style="background:#1D9E75;color:#fff;border:none;border-radius:6px;padding:3px 9px;font-size:.66rem;font-weight:800;cursor:pointer;font-family:inherit;">Load</button>' +
+        '<button onclick="_apexDraftDelete(\'' + _esc(row.name) + '\')" title="Delete this plan" style="background:#fff;color:#c0392b;border:1px solid #e0d9cc;border-radius:6px;padding:3px 8px;font-size:.66rem;font-weight:800;cursor:pointer;font-family:inherit;">✕</button>' +
         '</div>';
-      return '<tr style="border-top:1px solid #E7E2D8;' + bg + '">' +
+      var staleTag = row.stale
+        ? ' <span style="font-size:.62rem;color:#a8a294;font-weight:700;">(saved for GW' + (row.savedForGw != null ? row.savedForGw : '?') + ' — outdated)</span>'
+        : '';
+      var totalTxt = _fmt(row.total) + (row.incomplete && !row.stale ? '<span style="color:#a8a294;">*</span>' : '');
+      return '<tr style="border-top:1px solid #E7E2D8;' + bg + dim + '">' +
         '<td style="padding:8px 10px;font-weight:' + (isBest ? '800' : '600') + ';position:sticky;left:0;' + (bg || 'background:#fff;') + '">' +
-          (isBest ? '★ ' : '') + _escText(row.name) + actions + '</td>' +
+          (isBest ? '★ ' : '') + _escText(row.name) + staleTag + actions + '</td>' +
         cellsHtml +
-        '<td style="padding:8px 10px;text-align:right;font-family:\'JetBrains Mono\',monospace;font-weight:800;' + (isBest ? 'color:#1D9E75;' : '') + '">' + _fmt(row.total) + '</td>' +
+        '<td title="Sum of the scored weeks in this row" style="padding:8px 10px;text-align:right;font-family:\'JetBrains Mono\',monospace;font-weight:800;' + (isBest ? 'color:#1D9E75;' : '') + '">' + totalTxt + '</td>' +
         '</tr>';
     }
 
@@ -12149,32 +12310,40 @@ html.apex-offseason #view-landing .hero-sub::after {
     body += rowHtml(data.current, true);
 
     if (!data.drafts.length) {
-      body = '<tr><td colspan="' + (data.gwRange.length + 2) + '" style="padding:14px 10px;color:#7a8783;font-size:.82rem;">No saved drafts yet. Build a plan, then <b>Save draft</b> to compare alternatives here.</td></tr>' + rowHtml(data.current, true);
+      body = '<tr><td colspan="' + (data.gwRange.length + 2) + '" style="padding:14px 10px;color:#7a8783;font-size:.82rem;">No saved plans yet. Build a plan, then tap <b>＋ Save current plan</b> to compare alternatives here.</td></tr>' + rowHtml(data.current, true);
     }
+
+    var rankedNote = (data.comparableGws && data.comparableGws < data.gwRange.length)
+      ? '<div style="font-size:.66rem;color:#7a8783;margin:4px 0 0;">★ ranked on the ' + data.comparableGws + ' week(s) every plan has scored — rows with * have unscored weeks.</div>'
+      : '';
 
     el.innerHTML =
       '<div style="margin:8px 0 0;">' +
-      '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px;">' +
-      '<div style="font-weight:800;font-size:.92rem;">Compare plans' + capTxt + '</div>' +
-      '<button onclick="_apexDraftSaveFromPrompt()" style="background:#1D9E75;color:#fff;border:none;border-radius:8px;padding:6px 12px;font-size:.72rem;font-weight:800;cursor:pointer;font-family:inherit;">＋ Save current as draft</button>' +
+      '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:2px;">' +
+      '<div style="font-weight:800;font-size:.92rem;">Compare saved plans' + capTxt + '</div>' +
+      '<button onclick="_apexDraftSaveFromPrompt()" style="background:#1D9E75;color:#fff;border:none;border-radius:8px;padding:6px 12px;font-size:.72rem;font-weight:800;cursor:pointer;font-family:inherit;">＋ Save current plan</button>' +
       '<span style="flex:1;"></span>' +
-      '<span style="font-size:.66rem;color:#7a8783;">★ = best total · ~ = not resolvable</span>' +
       '</div>' +
+      '<div style="font-size:.66rem;color:#7a8783;margin:0 0 6px;">Projected points (xPts) per gameweek, hits deducted · ★ = best plan · ~ = can’t score that week · FH? = Free Hit week not planned yet</div>' +
       '<div style="overflow-x:auto;"><table style="border-collapse:collapse;font-size:.82rem;min-width:520px;background:#fff;border:1px solid #E7E2D8;border-radius:12px;overflow:hidden;">' +
       '<thead>' + head + '</thead><tbody>' + body + '</tbody></table></div>' +
+      rankedNote +
       '</div>';
   }
 
   // Draft name enters a DOUBLE-quoted onclick attribute wrapping a SINGLE-quoted
   // JS string, so it must be safe in BOTH: HTML-attr-escape &<>" so it can't
   // break out of the attribute, then JS-escape \ and ' so it can't break the
-  // string. (Adversarial audit 2026-07-07: the old JS-only escape let a name
-  // like `">...` break out.)
+  // string, then kill literal line terminators (\n \r U+2028 U+2029) which
+  // would be a syntax error inside the JS string (adversarial audit LOW-2).
+  var _LSEP = String.fromCharCode(8232), _PSEP = String.fromCharCode(8233);
   function _esc(s) {
     return String(s == null ? '' : s)
       .replace(/\\/g, '\\\\')
       .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
-      .replace(/'/g, "\\'");
+      .replace(/'/g, "\\'")
+      .replace(/\r/g, '\\r').replace(/\n/g, '\\n')
+      .split(_LSEP).join('\\u2028').split(_PSEP).join('\\u2029');
   }
   function _escText(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
 
@@ -13012,7 +13181,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1783456855-GW32-420fc15a";
+const BUILD_VERSION = "1783518406-GW32-420fc15a";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -22513,7 +22682,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1783456855-GW32-420fc15a</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1783518406-GW32-420fc15a</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
