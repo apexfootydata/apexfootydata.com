@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-07-08T14:46:46">
+<meta name="apex-gw" content="32" data-built-at="2026-07-08T15:33:35">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -11363,9 +11363,10 @@ html.apex-offseason #view-landing .hero-sub::after {
      assets/apex_customproj.js -->
 <script>
 // ═══════════════════════════════════════════════════════════════════════════
-// APEX CUSTOM PROJECTIONS (2026-07-07) — "upload your own projections". A
-// Premium CSV-upload feature: a manager who trusts their own numbers (or another
-// source) can override the model's xP wholesale and let the solver plan on top.
+// APEX CUSTOM PROJECTIONS (2026-07-07; audit fix pass 2026-07-07 eve) —
+// "upload your own projections". A Premium CSV-upload feature: a manager who
+// trusts their own numbers (or another source) can override the model's xP
+// wholesale and let the solver plan on top.
 //
 // CSV SHAPE (two accepted forms; header row required):
 //   A) flat:      name_or_id, xp                → one value applied to EVERY GW
@@ -11375,23 +11376,34 @@ html.apex-offseason #view-landing .hero-sub::after {
 // beyond that exact-normalised name match — unmatched rows are reported, not
 // fuzzily forced onto the nearest name.
 //
-// APPLY (same pristine-snapshot discipline as the xMins editor, but its OWN base
-// key so the two never collide): the first time a player is overridden we stash
-// pp._cp_base = {xp_per_gw, xp} once; thereafter we write xp_per_gw / xp /
-// total_xp from the uploaded numbers. clearAll() restores every _cp_base and
-// deletes the stash → pool byte-identical to before.
+// VALUES (audit fix): strictly numeric ("12abc", "0x10", EU "12,5" are rejected,
+// not truncated) and clamped to a sane xP band [0, 30] — one absurd number used
+// to overflow total_xp to Infinity and poison the ILP objective. The SAME
+// validation runs in _load(), so a tampered/corrupt localStorage blob can no
+// longer re-poison the pool on every boot. A short per-GW row now KEEPS THE
+// MODEL'S VALUES for the weeks it doesn't list (was: silently zero-padded,
+// benching the player from those weeks).
 //
-// INTERACTION WITH THE xMINS EDITOR (documented rule): custom projections
-// REPLACE xP wholesale, so if BOTH systems touch the same player, CUSTOM PROJ
-// WINS and the xMins editor is bypassed for that player (its minutes edit would
-// only re-derive an xP we're about to overwrite). This is the simplest coherent
-// v1; the UI flags any such player so the user isn't surprised. Per-player, not
-// global: a player with a custom projection is "owned" by this module; every
-// other player still honours the xMins editor normally.
+// APPLY (pristine-snapshot discipline): the first time a player is overridden
+// we stash pp._cp_base once; thereafter we write xp_per_gw / xp / total_xp from
+// the uploaded numbers. clearAll() restores every _cp_base and deletes the
+// stash → pool byte-identical to before.
+//
+// INTERACTION WITH THE xMINS EDITOR (audit fix — now ACTUALLY WIRED both ways):
+//   • generator _applyXminsOverridesAndRender SKIPS any player isCustom()
+//     (custom wins; minutes edits bypassed for that player), and
+//   • _applyToPool stashes its pristine from pp._xp_base when the xMins editor
+//     got to the player first — _xp_base holds the true model numbers, the
+//     live pool holds scaled ones.
+//   Before this, each system captured the OTHER's values as "model pristine",
+//   so clearing one resurrected the other's numbers as phantoms that survived
+//   every clear until a full page reload (the CRITICAL from the 07-07 audit).
 //
 // PERSIST: localStorage 'apex_customproj_v1:<fplid>' stores the PARSED VALUES
-// (id → {perGw:[…]} or {flat:x}), never the file. Same id resolution as the
-// locks module (FPL_ID → apex_fpl_id → '0') so overrides follow the team.
+// (id → {perGw:[…], n:normalisedName}), never the file. The stored name lets
+// rehydrate() verify the id still belongs to the same player after a pool
+// rebuild/season rollover — reused FPL ids no longer inherit a stranger's
+// numbers (audit fix); stale entries are dropped, not misapplied.
 //
 // GATE: capability 'customProjections'. Free = teaser only (no upload); season /
 // tiers-OFF = full. mount() renders the locked teaser when not permitted.
@@ -11404,8 +11416,10 @@ html.apex-offseason #view-landing .hero-sub::after {
 
   var LS_PREFIX = 'apex_customproj_v1:';
   var BASE_KEY  = '_cp_base';        // per-player pristine stash (OUR key, not _xp_base)
+  var XP_MIN = 0, XP_MAX = 30;       // sane xP band — reject outside (audit fix)
+  var MAX_FILE_BYTES = 2 * 1024 * 1024;   // 2 MB upload cap (main-thread parse)
 
-  var _store = null;    // id(string) -> { perGw:[numbers] }  (flat is expanded to perGw at apply)
+  var _store = null;    // id(string) -> { perGw:[numbers|null], n:normName }
   var _recompute = [];  // solver "recompute + re-render" callbacks
   var _lastReport = null; // last parse report (for the harness / UI)
 
@@ -11447,7 +11461,37 @@ html.apex-offseason #view-landing .hero-sub::after {
       : String(s).toLowerCase().replace(/\s+/g, ' ').trim();
   }
 
+  // ── strict numeric validation (audit fix) ────────────────────────────────────
+  // parseFloat truncated garbage ("12abc"→12, "0x10"→0) and quoted EU decimals
+  // ("12,5"→12) into silently-wrong numbers. Accept ONLY a clean decimal, then
+  // clamp-check the band. Returns the number or null.
+  function _numStrict(raw) {
+    raw = String(raw == null ? '' : raw).trim();
+    if (!/^[+-]?(\d+\.?\d*|\.\d+)([eE][+-]?\d+)?$/.test(raw)) return null;
+    var v = Number(raw);
+    if (!isFinite(v) || v < XP_MIN || v > XP_MAX) return null;
+    return v;
+  }
+  function _looksEuroDecimal(raw) {
+    return /^\d+,\d+$/.test(String(raw == null ? '' : raw).trim());
+  }
+
   // ── persistence ──────────────────────────────────────────────────────────────
+  function _validStoredPerGw(arr) {
+    // Stored entries: numbers in-band, or null (= "keep the model's value for
+    // this week"). ANY invalid element ⇒ the whole entry is dropped (audit fix:
+    // _load had no guard, so a tampered blob NaN-poisoned the pool every boot).
+    if (!Array.isArray(arr) || !arr.length) return null;
+    var out = new Array(arr.length);
+    for (var i = 0; i < arr.length; i++) {
+      var x = arr[i];
+      if (x === null) { out[i] = null; continue; }
+      var v = Number(x);
+      if (!isFinite(v) || v < XP_MIN || v > XP_MAX) return null;
+      out[i] = v;
+    }
+    return out;
+  }
   function _load() {
     if (_store) return _store;
     _store = {};
@@ -11458,7 +11502,9 @@ html.apex-offseason #view-landing .hero-sub::after {
         if (o && typeof o === 'object') {
           Object.keys(o).forEach(function (id) {
             var v = o[id];
-            if (v && Array.isArray(v.perGw)) _store[String(id)] = { perGw: v.perGw.map(Number) };
+            if (!v) return;
+            var per = _validStoredPerGw(v.perGw);
+            if (per) _store[String(id)] = { perGw: per, n: (typeof v.n === 'string' ? v.n : null) };
           });
         }
       }
@@ -11466,10 +11512,14 @@ html.apex-offseason #view-landing .hero-sub::after {
     return _store;
   }
   function _persist() {
+    // Returns false on failure (e.g. quota) so callers can TELL the user the
+    // overrides are session-only (audit fix: silent desync — UI said "applied",
+    // reload lost everything with no explanation).
     try {
-      if (typeof localStorage === 'undefined') return;
+      if (typeof localStorage === 'undefined') return false;
       localStorage.setItem(_key(), JSON.stringify(_store || {}));
-    } catch (e) {}
+      return true;
+    } catch (e) { return false; }
   }
 
   // ── CSV parse (tiny, dependency-free) ────────────────────────────────────────
@@ -11519,12 +11569,11 @@ html.apex-offseason #view-landing .hero-sub::after {
     return h;
   }
 
-  // ── PARSE a CSV string → {applied, matched:[{id,perGw}], unmatched:[names] } ──
-  // Does NOT touch the pool; parseAndApply() does. Split so the harness can test
-  // parsing in isolation.
+  // ── PARSE a CSV string → report. Does NOT touch the pool; parseAndApply does. ─
   function parse(text) {
     var rows = _parseCsv(text);
-    var report = { rowsSeen: 0, matched: [], unmatched: [], skipped: [] };
+    var report = { rowsSeen: 0, matched: [], unmatched: [], skipped: [],
+                   padded: 0, euroHint: false };
     if (!rows.length) return report;
 
     var idx = _index();
@@ -11532,8 +11581,6 @@ html.apex-offseason #view-landing .hero-sub::after {
 
     // Header row: first cell is the key column; remaining cells are xp column(s).
     // We don't require exact header names — shape is inferred by column count.
-    var header = rows[0];
-    var nValCols = Math.max(0, header.length - 1);
     var body = rows.slice(1);
 
     for (var r = 0; r < body.length; r++) {
@@ -11549,30 +11596,36 @@ html.apex-offseason #view-landing .hero-sub::after {
       if (!pl) pl = idx.byName[_norm(keyRaw)] || null;
       if (!pl) { report.unmatched.push(keyRaw); continue; }
 
-      // collect numeric values from columns 1..n
+      // collect STRICTLY validated values from columns 1..n (audit fix).
       var vals = [];
       var bad = false;
       for (var c = 1; c < cells.length; c++) {
         var raw = String(cells[c] == null ? '' : cells[c]).trim();
         if (raw === '') continue;          // trailing empties ignored
-        var v = parseFloat(raw);
-        if (!isFinite(v)) { bad = true; break; }
+        var v = _numStrict(raw);
+        if (v === null) {
+          if (_looksEuroDecimal(raw)) report.euroHint = true;
+          bad = true; break;
+        }
         vals.push(v);
       }
       if (bad || vals.length === 0) { report.skipped.push(keyRaw); continue; }
 
-      // shape: 1 value = flat across horizon; >1 = per-GW (padded/truncated to H).
+      // shape: 1 value = flat across horizon; >1 = per-GW. A short per-GW row
+      // pads with null = "keep the model's value for that week" (audit fix:
+      // was zero-padded, silently benching the player from the tail weeks).
       var perGw;
       if (vals.length === 1) {
         perGw = new Array(H);
         for (var g = 0; g < H; g++) perGw[g] = vals[0];
       } else {
         perGw = new Array(H);
-        for (var g2 = 0; g2 < H; g2++) perGw[g2] = (g2 < vals.length) ? vals[g2] : 0;
+        var short = vals.length < H;
+        for (var g2 = 0; g2 < H; g2++) perGw[g2] = (g2 < vals.length) ? vals[g2] : null;
+        if (short) report.padded++;
       }
-      report.matched.push({ id: String(pl.id), name: pl.web_name, perGw: perGw });
+      report.matched.push({ id: String(pl.id), name: pl.web_name, n: _norm(pl.web_name), perGw: perGw });
     }
-    (void nValCols);
     return report;
   }
 
@@ -11583,15 +11636,27 @@ html.apex-offseason #view-landing .hero-sub::after {
       var p = pool[i];
       if (String(p.id) !== String(id)) continue;
       if (!p[BASE_KEY]) {
+        // AUDIT FIX (the CRITICAL): if the xMins editor scaled this player
+        // first, the live pool holds SCALED values — the true model-pristine
+        // numbers live in its stash (_xp_base). Snapshot from there, so
+        // clearing custom always restores the real model, never a phantom.
+        var xb = p._xp_base;
         p[BASE_KEY] = {
-          xp_per_gw: Array.isArray(p.xp_per_gw) ? p.xp_per_gw.slice() : null,
-          xp: p.xp,
-          total_xp: p.total_xp,
+          xp_per_gw: (xb && Array.isArray(xb.per_gw)) ? xb.per_gw.slice()
+                     : (Array.isArray(p.xp_per_gw) ? p.xp_per_gw.slice() : null),
+          xp: (xb && xb.gw0 != null) ? xb.gw0 : p.xp,
+          total_xp: (xb && xb.total != null) ? xb.total : p.total_xp,
         };
       }
-      p.xp_per_gw = perGw.slice();
-      p.xp = perGw.length ? perGw[0] : 0;
-      p.total_xp = perGw.reduce(function (a, b) { return a + b; }, 0);
+      // null slots = keep the model's (pristine) value for that week.
+      var basePer = p[BASE_KEY].xp_per_gw;
+      var eff = perGw.map(function (v, gi) {
+        if (v != null) return v;
+        return (basePer && gi < basePer.length && basePer[gi] != null) ? basePer[gi] : 0;
+      });
+      p.xp_per_gw = eff.slice();
+      p.xp = eff.length ? eff[0] : 0;
+      p.total_xp = eff.reduce(function (a, b) { return a + (+b || 0); }, 0);
       return true;
     }
     return false;
@@ -11608,9 +11673,27 @@ html.apex-offseason #view-landing .hero-sub::after {
   }
 
   // Re-apply everything in the store onto the (possibly re-loaded) pool.
+  // AUDIT FIX: verify the id still belongs to the same player (stored
+  // normalised name vs the pool's current web_name) — after a season rollover
+  // FPL reuses element ids, and a stale override must NOT be handed to a
+  // stranger. Mismatches are dropped from the store, not applied.
   function _syncPool() {
     var s = _load();
-    Object.keys(s).forEach(function (id) { _applyToPool(id, s[id].perGw); });
+    var idx = _index();
+    var droppedStale = [];
+    Object.keys(s).forEach(function (id) {
+      var entry = s[id];
+      var p = idx.byId[String(id)];
+      if (!p) return;   // id gone from pool — keep entry inert (may return)
+      if (entry.n && _norm(p.web_name) !== entry.n) {
+        droppedStale.push(entry.n);
+        delete s[id];
+        return;
+      }
+      _applyToPool(id, entry.perGw);
+    });
+    if (droppedStale.length) _persist();
+    return droppedStale;
   }
 
   // ── public API ───────────────────────────────────────────────────────────────
@@ -11628,10 +11711,10 @@ html.apex-offseason #view-landing .hero-sub::after {
       var s = _load();
       for (var i = 0; i < report.matched.length; i++) {
         var m = report.matched[i];
-        s[m.id] = { perGw: m.perGw.slice() };
+        s[m.id] = { perGw: m.perGw.slice(), n: m.n };
         _applyToPool(m.id, m.perGw);
       }
-      _persist();
+      report.persistFailed = !_persist();
       _lastReport = report;
       _fire();
       return report;
@@ -11642,7 +11725,8 @@ html.apex-offseason #view-landing .hero-sub::after {
 
     // Interaction rule helper: TRUE if the xMins editor should be bypassed for
     // this player (because custom proj owns its xP). The generator's recompute
-    // path consults this so the two systems compose deterministically.
+    // path consults this (WIRED 2026-07-07 eve) so the two systems compose
+    // deterministically.
     overridesMinutes: function (id) { return this.isCustom(id); },
 
     count: function () { return Object.keys(_load()).length; },
@@ -11695,6 +11779,13 @@ html.apex-offseason #view-landing .hero-sub::after {
         (n ? '<button id="apex-cp-clear" style="margin-left:auto;background:transparent;' +
              'border:1px solid var(--border,#e5e2da);border-radius:7px;padding:5px 10px;' +
              'font-size:.74rem;cursor:pointer;color:var(--muted,#7a8783);">Clear all</button>' : '') +
+        // 2026-07-07 UX audit: the CSV shape lived only in code comments — a
+        // non-technical user had no way to build the file. Spell it out.
+        '<div style="flex-basis:100%;color:var(--muted,#7a8783);font-size:.72rem;line-height:1.5;">' +
+        'Format — first row is headers, then one row per player: <b>Salah, 7.5</b> (one number for every week) ' +
+        'or <b>Salah, 7.5, 6.2, 8.1</b> (one per gameweek; unlisted weeks keep the model’s numbers). ' +
+        'FPL web names or player IDs. Values 0–30, decimal point not comma.' +
+        (n ? ' Players with custom numbers ignore the minutes editor.' : '') + '</div>' +
         '<div id="apex-cp-status" style="flex-basis:100%;color:var(--muted,#7a8783);font-size:.74rem;"></div>' +
         '</div>';
 
@@ -11707,6 +11798,10 @@ html.apex-offseason #view-landing .hero-sub::after {
         fileEl.addEventListener('change', function () {
           var f = fileEl.files && fileEl.files[0];
           if (!f) return;
+          if (f.size > MAX_FILE_BYTES) {
+            if (statusEl) statusEl.textContent = 'File too big (2 MB max) — is this really a projections CSV?';
+            return;
+          }
           var reader = new FileReader();
           reader.onload = function () {
             var rep;
@@ -11715,7 +11810,11 @@ html.apex-offseason #view-landing .hero-sub::after {
             var msg = rep.matched.length + ' applied';
             if (rep.unmatched.length) msg += ' · ' + rep.unmatched.length + ' unmatched (' +
               rep.unmatched.slice(0, 5).join(', ') + (rep.unmatched.length > 5 ? '…' : '') + ')';
-            if (rep.skipped.length) msg += ' · ' + rep.skipped.length + ' skipped';
+            if (rep.skipped.length) msg += ' · ' + rep.skipped.length + ' skipped (values must be plain numbers 0–30)';
+            if (rep.euroHint) msg += ' · looks like European decimals — use a dot: 7.5 not 7,5';
+            if (rep.padded) msg += ' · ' + rep.padded + ' row(s) shorter than the horizon — model values kept for the missing weeks';
+            if (rep.persistFailed) msg += ' · couldn’t save (storage full) — these overrides last this session only';
+            if (!rep.rowsSeen) msg = 'No player rows found — first row must be headers, then "player, points". Is this a CSV export?';
             self.mount(el);                          // re-render the count/clear button
             var s2 = el.querySelector('#apex-cp-status'); if (s2) s2.textContent = msg;
           };
@@ -11732,10 +11831,12 @@ html.apex-offseason #view-landing .hero-sub::after {
   window._apexCustomProjTestHooks = {
     parseCsv: _parseCsv,
     norm: _norm,
+    numStrict: _numStrict,
     key: _key,
     meId: _meId,
     applyToPool: _applyToPool,
     restoreOne: _restoreOne,
+    syncPool: _syncPool,
     baseKey: BASE_KEY,
     store: function () { return _load(); },
   };
@@ -12463,6 +12564,12 @@ html.apex-offseason #view-landing .hero-sub::after {
   // bake still yields a usable ranking rather than throwing.
   function run(opts) {
     opts = opts || {};
+    // Function-level gate (2026-07-07 audit: only the UI wrappers gated, so a
+    // free user could compute+apply from the console; align with customProj).
+    if (!_can('chipTiming')) {
+      _lastResult = { sequences: [], best_sequence: null, baseline_total_xp: 0, _locked: true };
+      return Promise.resolve(_lastResult);
+    }
     if (_running) return _running;
 
     var meta = _meta();
@@ -12554,6 +12661,10 @@ html.apex-offseason #view-landing .hero-sub::after {
   // ── Apply a sequence: set the sel-* dropdowns + fire change (calendar path) ─
   function _applySeq(breakdown) {
     try {
+      // 2026-07-07 audit: flag a scripted apply so the page's one-chip-per-GW
+      // collision alert (generator _onChipGwChanged) never fires against the
+      // half-applied intermediate state of our own sequence.
+      window._apexApplyingSeq = true;
       // Clear all four first so an Apply is authoritative (a previous pick on a
       // chip not in THIS sequence must be removed, matching the row shown).
       ['wc', 'fh', 'bb', 'tc'].forEach(function (k) {
@@ -12566,9 +12677,11 @@ html.apex-offseason #view-landing .hero-sub::after {
         if (el) { el.value = String(e.gw); el.dispatchEvent(new Event('change', { bubbles: true })); }
       });
     } catch (e) {}
+    finally { try { window._apexApplyingSeq = false; } catch (e2) {} }
   }
   window._apexChipTimingApply = function (idx) {
     try {
+      if (!_can('chipTiming')) return;   // paywall applies to Apply too
       var r = _lastResult;
       if (!r || !Array.isArray(r._rows) || !r._rows[idx]) return;
       _applySeq(r._rows[idx].breakdown);
@@ -12592,7 +12705,7 @@ html.apex-offseason #view-landing .hero-sub::after {
     // Gate: paid capability. Inert (passes) while tiers OFF.
     if (!_can('chipTiming')) {
       el.innerHTML = _lockedHtml('Chip timing optimiser',
-        'See every chip sequence ranked — the exact gameweeks that squeeze the most points out of your remaining chips, one tap to apply.');
+        'Every chip sequence in your planning window ranked by projected points — one tap to apply the best.');
       return;
     }
 
@@ -12605,11 +12718,30 @@ html.apex-offseason #view-landing .hero-sub::after {
       el.innerHTML = '<div style="padding:12px;color:#7a8783;font-size:.85rem;">No chips available to plan.</div>';
       return;
     }
+    // 2026-07-07 audit: a compute failure used to render as an empty "no
+    // benefit" table — indistinguishable from "chips don't help". Say so.
+    if (r._error && !(Array.isArray(r.sequences) && r.sequences.length)) {
+      el.innerHTML = '<div style="padding:12px;color:#c0392b;font-size:.85rem;">' +
+        'Chip timing couldn’t compute this time — close and reopen the panel to retry. ' +
+        'Your squad and plan are unaffected.</div>';
+      return;
+    }
 
     var baseline = (typeof r.baseline_total_xp === 'number') ? r.baseline_total_xp : 0;
     var seqs = Array.isArray(r.sequences) ? r.sequences.slice() : [];
     // Enumerator already sorts by _seqKey; re-sort defensively by total_xp.
     seqs.sort(function (a, b) { return (b.total_xp || 0) - (a.total_xp || 0); });
+    // 2026-07-07 audit: in the direct-enumeration fallback there are no solved
+    // WC/FH squads, so those sequences score ~+0.0 yet ranked as real options.
+    // Drop them and say why, rather than showing a misleading zero.
+    var droppedWcFh = false;
+    if (r._direct) {
+      var before = seqs.length;
+      seqs = seqs.filter(function (s) {
+        return !(s.breakdown || []).some(function (e) { return /^(wc|fh)$/i.test(String(e.chip || '')); });
+      });
+      droppedWcFh = seqs.length < before;
+    }
     var top = seqs.slice(0, n);
     // Cache the exact rows Apply will read (index-aligned with what we render).
     r._rows = top.map(function (s) { return { breakdown: s.breakdown || [] }; });
@@ -12640,19 +12772,60 @@ html.apex-offseason #view-landing .hero-sub::after {
     });
 
     var note = r._direct
-      ? '<div style="font-size:.66rem;color:#a8a294;margin-top:6px;">Fast estimate — open the full Chip Planner for solved WC/FH squads.</div>'
+      ? '<div style="font-size:.66rem;color:#a8a294;margin-top:6px;">Fast estimate — open the full Chip Planner for solved WC/FH squads.' +
+        (droppedWcFh ? ' Wildcard / Free Hit timing needs the full solve, so those options are hidden here.' : '') + '</div>'
       : '';
+
+    // 2026-07-07 audit: near-ties read as false precision ("THE week is GW34").
+    var tieNote = '';
+    if (top.length >= 2 && ((top[0].total_xp || 0) - (top[1].total_xp || 0)) < 0.5) {
+      tieNote = '<div style="font-size:.66rem;color:#7a8783;margin-top:6px;">The top options are effectively tied — the exact week barely matters; pick the one that suits your team news.</div>';
+    }
+
+    // 2026-07-07 audit: WC/FH gains compare against making NO transfers at all,
+    // so they include value a manager would capture with normal weekly moves.
+    var wcFhNote = '';
+    if (!r._direct && top.some(function (s) { return (s.breakdown || []).some(function (e) { return /^(wc|fh)$/i.test(String(e.chip || '')); }); })) {
+      wcFhNote = '<div style="font-size:.66rem;color:#a8a294;margin-top:6px;">Wildcard / Free Hit gains compare against making no transfers at all — treat them as a ceiling, not a promise.</div>';
+    }
+
+    // 2026-07-07 audit (H1): season radar — the ranking only sees this window,
+    // and the biggest chip weeks often sit beyond it. Same data the Chip
+    // Planner strip shows, now surfaced HERE where the ★ actually tempts you.
+    var radarHtml = '';
+    try {
+      var cp = _chipPlanner();
+      var rad = cp && cp.radar;
+      if (rad) {
+        var bits = [];
+        if (Array.isArray(rad.later_dgws) && rad.later_dgws.length) {
+          var picks = rad.later_dgws.slice(0, 2).map(function (d) { return 'GW' + d.gw; });
+          bits.push('⏳ Double gameweek' + (rad.later_dgws.length > 1 ? 's' : '') + ' at ' + picks.join(' and ') +
+                    ' — beyond this window. Holding TC/BB for a double often beats playing them now.');
+        }
+        if (Array.isArray(rad.later_blanks) && rad.later_blanks.length) {
+          bits.push('⚠ Blank gameweek at GW' + rad.later_blanks[0].gw + ' ahead — a Free Hit there may beat these options.');
+        }
+        if (rad.second_half_unlock) {
+          bits.push('A second set of chips unlocks at GW20 — not modelled in this window.');
+        }
+        if (bits.length) {
+          radarHtml = '<div style="margin-top:8px;padding:8px 10px;background:#FDF8EC;border:1px solid #F0DFB4;border-radius:8px;font-size:.74rem;color:#8a6d1d;font-weight:600;">' +
+            bits.join('<br>') + '</div>';
+        }
+      }
+    } catch (eRad) {}
 
     el.innerHTML =
       '<div style="margin:8px 0 0;">' +
-      '<div style="font-weight:800;font-size:.92rem;margin-bottom:6px;">Best chip timing <span style="font-size:.66rem;font-weight:700;color:#7a8783;">· ranked by total xPts over your horizon · tap Apply to set the gameweeks</span></div>' +
+      '<div style="font-weight:800;font-size:.92rem;margin-bottom:6px;">Best chip timing <span style="font-size:.66rem;font-weight:700;color:#7a8783;">· ranked over the next ' + (r.gwRange && r.gwRange.length ? r.gwRange.length : ((_meta() && _meta().gw_range) || []).length || '') + ' gameweeks shown — not the whole season · tap Apply to set the gameweeks</span></div>' +
       '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:.82rem;min-width:420px;background:#fff;border:1px solid #E7E2D8;border-radius:12px;overflow:hidden;">' +
       '<thead><tr style="background:#F7F5EF;text-align:left;">' +
       '<th style="padding:9px 10px;font-size:.68rem;letter-spacing:.5px;color:#7a8783;text-transform:uppercase;">Sequence</th>' +
       '<th style="padding:9px 10px;text-align:right;font-size:.68rem;letter-spacing:.5px;color:#7a8783;text-transform:uppercase;">Total xPts</th>' +
       '<th style="padding:9px 10px;text-align:right;font-size:.68rem;letter-spacing:.5px;color:#7a8783;text-transform:uppercase;">vs none</th>' +
       '<th style="padding:9px 10px;"></th>' +
-      '</tr></thead><tbody>' + rows + '</tbody></table></div>' + note +
+      '</tr></thead><tbody>' + rows + '</tbody></table></div>' + radarHtml + tieNote + wcFhNote + note +
       '</div>';
   }
 
@@ -13181,7 +13354,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1783518406-GW32-420fc15a";
+const BUILD_VERSION = "1783521214-GW32-420fc15a";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -14526,6 +14699,15 @@ function resetSolver() {
   for (const k of Object.keys(_rollFTByGw)) delete _rollFTByGw[k];
   window._appliedRecMoves = [];   // 2026-06-11: applied-move record (FT/bank debit)
   window._ppChipPlays = [];       // 2026-06-11: chips-in-tree play record
+
+  // 2026-07-07 audit fix: ↺ Reset left custom-projection overrides on the pool
+  // (everything else reverted; the pool kept planning on uploaded numbers).
+  // Reset now means reset — restores every player and wipes the stored blob.
+  try {
+    if (window.apexCustomProj && typeof window.apexCustomProj.clearAll === 'function') {
+      window.apexCustomProj.clearAll();
+    }
+  } catch (_eCp) {}
 
   // Zero deltas across every GW
   for (let i = 0; i < _xiDelta.length; i++)    _xiDelta[i] = 0;
@@ -19460,6 +19642,13 @@ function _syncTopPitchToChipState() {
 function _onChipGwChanged(el) {
   // 2026-06-19: one chip per gameweek (real FPL rule). If the GW just picked is
   // already taken by another chip, reject this change and reset the dropdown.
+  // 2026-07-07 audit fix: SKIP the collision check during a scripted sequence
+  // apply (chip-timing's Apply clears + sets several dropdowns in a burst —
+  // the alert would fire against our own half-applied intermediate state and
+  // silently blank a chip the user explicitly asked for).
+  try {
+    if (window._apexApplyingSeq === true) { updateChipTotal(); return; }
+  } catch (_eSeq) {}
   try {
     if (el && el.value) {
       const NAMES = { 'sel-wc': 'Wildcard', 'sel-bb': 'Bench Boost', 'sel-tc': 'Triple Captain', 'sel-fh': 'Free Hit' };
@@ -22417,6 +22606,18 @@ function _applyXminsOverridesAndRender() {
                        'xp_sv_per_gw','xp_bon_per_gw','xp_dc_per_gw','xp_card_per_gw'];
     const _CMP_SHORT = ['app','g','a','cs','sv','bon','dc','card'];
     POOL_DATA.forEach(pp => {
+      // 2026-07-07 audit fix (CRITICAL): custom projections own this player's
+      // xP wholesale — skip him here entirely. Before this guard, the two
+      // pristine stashes (_xp_base / _cp_base) captured each other's values as
+      // "model pristine", so clearing one system resurrected the other's
+      // numbers as phantoms that survived every clear until a full reload.
+      // Custom wins; minutes edits are bypassed per the documented rule
+      // (apex_customproj.js header). When custom clears, the next pass here
+      // processes the player normally again — including the ov==null restore.
+      try {
+        if (window.apexCustomProj && typeof window.apexCustomProj.isCustom === 'function'
+            && window.apexCustomProj.isCustom(pp.id)) return;
+      } catch (_eCp) {}
       const ov = _xminsOverrides[String(pp.id)];
       if (ov == null) {
         // Override REMOVED (↺ Reset in the editor) — roll the player back to
@@ -22682,7 +22883,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1783518406-GW32-420fc15a</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1783521214-GW32-420fc15a</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
