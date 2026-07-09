@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-07-08T19:28:34">
+<meta name="apex-gw" content="32" data-built-at="2026-07-09T11:39:45">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -13457,7 +13457,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1783535314-GW32-420fc15a";
+const BUILD_VERSION = "1783593585-GW32-420fc15a";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -13588,6 +13588,25 @@ async function _apexStalePoolCheck() {
       bs = await resp.json();
     } finally { clearTimeout(timer); }
     const events = (bs && bs.events) || [];
+    // 2026-07-09 offseason-aware: between seasons the red "Reload" banner is a
+    // lie — reload serves the same demo build. Two bootstrap shapes mean
+    // offseason: (a) every event finished (old season still being served, e.g.
+    // July before the new game launches), (b) no event started yet (new season
+    // launched, GW1 not kicked off). Either way: show the calm offseason
+    // banner, keep APEX_STALE honest (stale:true) so the league sim still
+    // refuses to run on the demo pool, and skip the red banner entirely.
+    const _allFinished = events.length > 0 && events.every(ev => ev.finished);
+    const _noneStarted = events.length > 0 &&
+      !events.some(ev => ev.finished || ev.is_current);
+    if (_allFinished || _noneStarted) {
+      window.APEX_STALE = { stale: true, offseason: true, live_gw: 0,
+        baked_gw: bakedGw, checked: true };
+      const ob = document.getElementById('offseason-banner');
+      if (ob) ob.style.display = 'block';
+      console.warn('[APEX OFFSEASON]', { allFinished: _allFinished,
+        noneStarted: _noneStarted, baked: bakedGw, build: BUILD_VERSION });
+      return;
+    }
     let liveGw = 0;
     for (const ev of events) { if (ev.is_next) { liveGw = ev.id; break; } }
     if (!liveGw) {
@@ -14260,9 +14279,13 @@ async function runLeagueSim() {
   // Class 1 — refuse to run the sim on a stale pool. Would produce wrong win%
   // (baked pool is from an earlier GW than FPL is actually on). Force reload.
   if (window.APEX_STALE && window.APEX_STALE.stale) {
-    errDiv.textContent = 'This page is out of date (built for GW' +
-      window.APEX_STALE.baked_gw + ', FPL is now on GW' + window.APEX_STALE.live_gw +
-      '). Reload to get fresh projections.';
+    // 2026-07-09: offseason gets its own message — "Reload" fixes nothing
+    // between seasons, the sim returns when the 26/27 build ships.
+    errDiv.textContent = window.APEX_STALE.offseason
+      ? 'Season complete — the league sim returns when the 2026/27 season starts.'
+      : ('This page is out of date (built for GW' + window.APEX_STALE.baked_gw +
+         ', FPL is now on GW' + window.APEX_STALE.live_gw +
+         '). Reload to get fresh projections.');
     errDiv.style.display = 'block';
     return;
   }
@@ -23214,7 +23237,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1783535314-GW32-420fc15a</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1783593585-GW32-420fc15a</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
