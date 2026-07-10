@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-07-10T18:19:22">
+<meta name="apex-gw" content="32" data-built-at="2026-07-10T18:41:51">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -6665,7 +6665,7 @@ html.apex-offseason #view-landing .hero-sub::after {
               <th class="lg-th" style="width:42px;">#</th>
               <th class="lg-th">MANAGER</th>
               <th class="lg-th lg-th-r">PTS</th>
-              <th class="lg-th lg-th-r">PROJECTED</th>
+              <th class="lg-th lg-th-r lg-proj-th">PROJECTED</th>
               <th class="lg-th lg-th-r" style="color:var(--accent,#1D9E75);">WIN %</th>
               <th class="lg-th">CHIPS</th>
             </tr>
@@ -6735,6 +6735,8 @@ html.apex-offseason #view-landing .hero-sub::after {
 }
 .lg-pts { text-align:right;font-variant-numeric:tabular-nums;font-size:1.05rem;font-weight:600; }
 .lg-proj { text-align:right;font-variant-numeric:tabular-nums; }
+/* 2026-07-10 offseason demo: projection column hidden (would double-count a finished season); win% stays */
+.lg-offseason-demo .lg-proj, .lg-offseason-demo .lg-proj-th { display:none; }
 .lg-proj-mean { font-weight:700;font-size:1.1rem;color:var(--fg); }
 .lg-proj-range { font-size:.8rem;color:var(--muted);margin-top:3px; }
 .lg-win-cell { text-align:right;min-width:160px; }
@@ -13487,7 +13489,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1783703962-GW32-420fc15a";
+const BUILD_VERSION = "1783705310-GW32-420fc15a";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -14333,6 +14335,13 @@ async function runLeagueSim() {
   } else if (_osNote) {
     _osNote.style.display = 'none';
   }
+  // Offseason demo: hide the projected-points column + toggle. The projection
+  // would double-count a finished season (PTS already contains GW32-38);
+  // win% is unaffected (gap + variance driven) so it stays — it IS the feature.
+  tableWrap.classList.toggle('lg-offseason-demo', _offseasonDemo);
+  var _projTgl = document.getElementById('lg-toggle-projected');
+  if (_projTgl) _projTgl.style.display = _offseasonDemo ? 'none' : '';
+  if (_offseasonDemo && typeof _leagueSortMode !== 'undefined' && _leagueSortMode === 'projected' && typeof toggleLeagueView === 'function') toggleLeagueView('current');
 
   errDiv.style.display = 'none';
   document.getElementById('league-hero').style.display = 'none';
@@ -23281,7 +23290,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1783703962-GW32-420fc15a</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1783705310-GW32-420fc15a</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
