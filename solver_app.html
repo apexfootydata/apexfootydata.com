@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-07-10T14:15:26">
+<meta name="apex-gw" content="32" data-built-at="2026-07-10T17:31:03">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -13487,7 +13487,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1783689326-GW32-420fc15a";
+const BUILD_VERSION = "1783701062-GW32-420fc15a";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -14306,22 +14306,32 @@ async function runLeagueSim() {
   const leagueId = select.value;
   if (!leagueId) return;
 
-  // Class 1 — refuse to run the sim on a stale pool. Would produce wrong win%
-  // (baked pool is from an earlier GW than FPL is actually on). Force reload.
-  // 2026-07-10: dev bypass — apex_dev=1 (set via ?compare=enable) skips the
-  // guard so Marcus can test the sim off-season. Visitors still get the banner.
-  if (window.APEX_STALE && window.APEX_STALE.stale && _leagueDevModeOn()) {
-    console.warn('[APEX DEV] offseason guard bypassed — league sim on demo pool; win% illustrative only.');
-  } else if (window.APEX_STALE && window.APEX_STALE.stale) {
-    // 2026-07-09: offseason gets its own message — "Reload" fixes nothing
-    // between seasons, the sim returns when the 26/27 build ships.
-    errDiv.textContent = window.APEX_STALE.offseason
-      ? 'Season complete — the league sim returns when the 2026/27 season starts.'
-      : ('This page is out of date (built for GW' + window.APEX_STALE.baked_gw +
-         ', FPL is now on GW' + window.APEX_STALE.live_gw +
-         '). Reload to get fresh projections.');
+  // Class 1 — refuse to run the sim on a stale IN-SEASON pool. Would produce
+  // wrong win% (baked pool is from an earlier GW than FPL is actually on).
+  // 2026-07-10 (Marcus): OFF-SEASON no longer refuses — the whole site is a
+  // demo between seasons, so the sim runs on last season's pool with an honest
+  // demo label instead of a dead end. Red refusal stays for in-season stale
+  // builds (protects GW1 visitors from a silently wrong win%).
+  if (window.APEX_STALE && window.APEX_STALE.stale && !window.APEX_STALE.offseason) {
+    errDiv.textContent = 'This page is out of date (built for GW' + window.APEX_STALE.baked_gw +
+       ', FPL is now on GW' + window.APEX_STALE.live_gw +
+       '). Reload to get fresh projections.';
     errDiv.style.display = 'block';
     return;
+  }
+  var _offseasonDemo = !!(window.APEX_STALE && window.APEX_STALE.stale && window.APEX_STALE.offseason);
+  var _osNote = document.getElementById('league-offseason-note');
+  if (_offseasonDemo) {
+    if (!_osNote) {
+      _osNote = document.createElement('div');
+      _osNote.id = 'league-offseason-note';
+      _osNote.style.cssText = 'background:rgba(29,158,117,0.08);border:1px solid rgba(29,158,117,0.35);border-radius:10px;padding:10px 14px;margin:10px 0;font-size:.85rem;';
+      errDiv.parentNode.insertBefore(_osNote, errDiv);
+    }
+    _osNote.textContent = 'Off-season demo — simulated on last season's final squads. Live projections return for 2026/27 GW1.';
+    _osNote.style.display = 'block';
+  } else if (_osNote) {
+    _osNote.style.display = 'none';
   }
 
   errDiv.style.display = 'none';
@@ -23271,7 +23281,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1783689326-GW32-420fc15a</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1783701062-GW32-420fc15a</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
