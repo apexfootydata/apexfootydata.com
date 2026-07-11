@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-07-11T16:12:18">
+<meta name="apex-gw" content="32" data-built-at="2026-07-11T16:26:49">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -13491,7 +13491,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1783782738-GW32-420fc15a";
+const BUILD_VERSION = "1783783608-GW32-420fc15a";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = true;
@@ -23292,7 +23292,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW32</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1783782738-GW32-420fc15a</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1783783608-GW32-420fc15a</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
@@ -23441,7 +23441,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function setStatus(txt, pct) {
       var s = document.getElementById('apex-status');
       var b = document.getElementById('apex-bar');
-      if (s) s.textContent = txt;
+      if (s && txt != null) s.textContent = txt;
       if (b && pct != null) b.style.width = pct + '%';
     }
     function fail(msg) {
@@ -23462,7 +23462,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     hydrateFromFPL(fplId, setStatus)
       .then(function () {
-        setStatus('Rendering\u2026', 95);
+        // 2026-07-10: no end-phase words (Ready./Rendering churned for ~0.5s
+        // on mobile and read as glitchy). Bar fills to 100, words stay put.
+        setStatus(null, 100);
         return new Promise(function (r) { setTimeout(r, 40); });
       })
       .then(function () {
@@ -23479,8 +23481,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (typeof _initCompareToggle === 'function') _initCompareToggle();
         setTimeout(function () {
           var ov = document.getElementById('apex-public-boot');
-          if (ov) ov.remove();
-        }, 250);
+          if (!ov) return;
+          ov.style.transition = 'opacity .3s ease';
+          ov.style.opacity = '0';
+          setTimeout(function () { ov.remove(); }, 320);
+        }, 150);
         // Eager-warm chip planner so FH_SQUADS / WC_SQUADS are populated before
         // the user clicks a chip GW pill. Without this, My Squad route + FH
         // selected shows the user's own squad (with 0 xP on BGW teams) instead
@@ -24019,7 +24024,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (typeof updateRollingTotal === 'function') updateRollingTotal();
     }
 
-    setStatus('Ready.', 92);
+    setStatus(null, 96);
   }
 })();
 </script>
