@@ -15,6 +15,23 @@
 {"@type":"Question","name":"Where do I find my FPL team ID?","acceptedAnswer":{"@type":"Answer","text":"Log in at fantasy.premierleague.com, open the Points page, and check the URL — your ID is the number after /entry/."}}
 ]}
 </script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<script>
+/* 2026-07-10: returning-visitor fast path decided BEFORE first paint, so the
+   ID entry form never flashes and then vanishes on the way to the solver. */
+(function () {
+  try {
+    var stay = /[?&]change=1\b/.test(location.search);
+    var saved = localStorage.getItem('apex_fpl_id');
+    if (!stay && saved && /^\d+$/.test(saved)) {
+      document.documentElement.style.visibility = 'hidden';
+      setTimeout(function () { document.documentElement.style.visibility = ''; }, 2500);
+      window.location.replace('/solver_app.html?id=' + saved);
+    }
+  } catch (_) {}
+})();
+</script>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
