@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="32" data-built-at="2026-07-11T16:26:37">
+<meta name="apex-gw" content="1" data-built-at="2026-07-23T13:53:23">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/x-icon" href="favicon.ico?v=4">
@@ -1454,7 +1454,7 @@
     <!-- TAB 2: Matchweek -->
     <div class="tab-content">
         <div class="subtab-nav" style="justify-content:center;">
-            <button class="subtab-button active" onclick="showSub(1, 0)">GW32 Final</button>
+            <button class="subtab-button active" onclick="showSub(1, 0)">GW1 Final</button>
         </div>
 
         <div class="subtab-content active" id="matchweekContainer"></div>
@@ -1495,16 +1495,15 @@
 
     <!-- TAB 4: Player Predictions -->
     <div class="tab-content">
-        <p style="margin:0 0 10px 0;font-size:0.78rem;font-style:italic;opacity:0.6;">2025/26 season totals — final figures by player.</p>
         <div class="subtab-nav">
-            <button class="subtab-button" onclick="showSub(3, 0)" style="display:none;">Current Game Week</button>
-            <button class="subtab-button active" onclick="showSub(3, 1)">Goals</button>
+            <button class="subtab-button active" onclick="showSub(3, 0)">Current Game Week</button>
+            <button class="subtab-button" onclick="showSub(3, 1)">Goals</button>
             <button class="subtab-button" onclick="showSub(3, 2)">Assists</button>
             <button class="subtab-button" onclick="showSub(3, 3)">Goal Involvements</button>
         </div>
 
         <!-- Sub-tab: Next GW (hidden offseason — no upcoming GW) -->
-        <div class="subtab-content" style="display:none;">
+        <div class="subtab-content active">
             <table class="nextgw-table">
                 <thead>
                     <tr id="playerNextGWHead">
@@ -1527,7 +1526,7 @@
         </div>
 
         <!-- Sub-tab: Goals (offseason default) -->
-        <div class="subtab-content active">
+        <div class="subtab-content">
             <table class="player-table">
                 <thead><tr id="playerGoalsHead"></tr></thead>
                 <tbody id="playerGoalsTable"></tbody>
@@ -1746,356 +1745,353 @@
 
         // ██ SITE_DATA:FIXTURES ██
         const FIXTURES = [
-            {home: "Arsenal", homeRating: 1.85, homeCS: 42.8, homeWin: 60.5, homeWinDisplay: 60.5, away: "Bournemouth", awayRating: 0.85, awayCS: 15.8, awayWin: 14.6, awayWinDisplay: 14.6, draw: 24.8, kickoff: "2000-01-01T19:00:00"},
-            {home: "Brentford", homeRating: 1.61, homeCS: 32.9, homeWin: 47.7, homeWinDisplay: 47.7, away: "Everton", awayRating: 1.11, awayCS: 20.1, awayWin: 24.3, awayWinDisplay: 24.3, draw: 28.0, kickoff: "2000-01-01T19:00:00"},
-            {home: "Burnley", homeRating: 0.98, homeCS: 17.9, homeWin: 19.3, homeWinDisplay: 19.3, away: "Brighton", awayRating: 1.72, awayCS: 37.5, awayWin: 54.0, awayWinDisplay: 54.0, draw: 26.7, kickoff: "2000-01-01T19:00:00"},
-            {home: "Chelsea", homeRating: 1.38, homeCS: 19.0, homeWin: 30.3, homeWinDisplay: 30.3, away: "Man City", awayRating: 1.66, awayCS: 25.1, awayWin: 43.0, awayWinDisplay: 43.0, draw: 26.7, kickoff: "2000-01-01T19:00:00"},
-            {home: "Crystal Palace", homeRating: 1.50, homeCS: 26.1, homeWin: 39.7, homeWinDisplay: 39.7, away: "Newcastle", awayRating: 1.34, awayCS: 22.3, awayWin: 32.2, awayWinDisplay: 32.2, draw: 28.1, kickoff: "2000-01-01T19:00:00"},
-            {home: "Liverpool", homeRating: 1.83, homeCS: 35.4, homeWin: 55.4, homeWinDisplay: 55.4, away: "Fulham", awayRating: 1.04, awayCS: 16.0, awayWin: 19.1, awayWinDisplay: 19.1, draw: 25.5, kickoff: "2000-01-01T19:00:00"},
-            {home: "Man Utd", homeRating: 1.76, homeCS: 32.9, homeWin: 51.8, homeWinDisplay: 51.8, away: "Leeds", awayRating: 1.11, awayCS: 17.2, awayWin: 21.9, awayWinDisplay: 21.9, draw: 26.3, kickoff: "2000-01-01T19:00:00"},
-            {home: "Nott'm Forest", homeRating: 1.35, homeCS: 25.9, homeWin: 35.5, homeWinDisplay: 35.5, away: "Aston Villa", awayRating: 1.35, awayCS: 25.8, awayWin: 35.4, awayWinDisplay: 35.4, draw: 29.1, kickoff: "2000-01-01T19:00:00"},
-            {home: "Sunderland", homeRating: 1.24, homeCS: 33.3, homeWin: 37.8, homeWinDisplay: 37.8, away: "Tottenham", awayRating: 1.10, awayCS: 28.9, awayWin: 30.5, awayWinDisplay: 30.5, draw: 31.7, kickoff: "2000-01-01T19:00:00"},
-            {home: "West Ham", homeRating: 1.57, homeCS: 38.6, homeWin: 50.8, homeWinDisplay: 50.8, away: "Wolves", awayRating: 0.95, awayCS: 20.7, awayWin: 20.7, awayWinDisplay: 20.7, draw: 28.5, kickoff: "2000-01-01T19:00:00"}
+            {home: "Brentford", homeRating: 1.46, homeCS: 29.0, homeWin: 40.7, homeWinDisplay: 40.7, away: "Tottenham", awayRating: 1.24, awayCS: 23.3, awayWin: 30.3, awayWinDisplay: 30.3, draw: 29.0, kickoff: "2000-01-01T19:00:00"},
+            {home: "Brighton", homeRating: 1.44, homeCS: 29.1, homeWin: 40.5, homeWinDisplay: 40.5, away: "Aston Villa", awayRating: 1.24, awayCS: 23.6, awayWin: 30.4, awayWinDisplay: 30.4, draw: 29.1, kickoff: "2000-01-01T19:00:00"},
+            {home: "Everton", homeRating: 1.37, homeCS: 35.1, homeWin: 42.9, homeWinDisplay: 42.9, away: "Crystal Palace", awayRating: 1.05, awayCS: 25.3, awayWin: 26.5, awayWinDisplay: 26.5, draw: 30.6, kickoff: "2000-01-01T19:00:00"},
+            {home: "Fulham", homeRating: 1.21, homeCS: 23.4, homeWin: 29.5, homeWinDisplay: 29.5, away: "Chelsea", awayRating: 1.45, awayCS: 29.8, awayWin: 41.3, awayWinDisplay: 41.3, draw: 29.2, kickoff: "2000-01-01T19:00:00"},
+            {home: "Man City", homeRating: 2.24, homeCS: 36.8, homeWin: 65.4, homeWinDisplay: 65.4, away: "Bournemouth", awayRating: 1.00, awayCS: 10.6, awayWin: 13.7, awayWinDisplay: 13.7, draw: 20.9, kickoff: "2000-01-01T19:00:00"},
+            {home: "Newcastle", homeRating: 1.35, homeCS: 21.2, homeWin: 31.5, homeWinDisplay: 31.5, away: "Liverpool", awayRating: 1.55, awayCS: 25.9, awayWin: 40.8, awayWinDisplay: 40.8, draw: 27.7, kickoff: "2000-01-01T19:00:00"},
+            {home: "Nott'm Forest", homeRating: 1.33, homeCS: 33.7, homeWin: 40.6, homeWinDisplay: 40.6, away: "Leeds", awayRating: 1.09, awayCS: 26.5, awayWin: 28.5, awayWinDisplay: 28.5, draw: 30.9, kickoff: "2000-01-01T19:00:00"}
         ];
         // ██ SITE_DATA:END ██
 
         // ██ SITE_DATA:TEAM_PREDICTIONS ██
         const TEAM_PREDICTIONS = {
-            "Arsenal": [61, 35, 64, 66, 59, 82],
-            "Man City": [43, 104, null, 49, 124, 42],
-            "Man Utd": [52, 35, 52, 44, 44, 56],
-            "Liverpool": [55, 41, 55, 29, 49, 35],
-            "Aston Villa": [35, 52, 35, 50, 54, 38],
-            "Brighton": [54, 78, null, 31, 61, 31],
-            "Leeds": [22, 85, null, 66, 34, 39],
-            "Brentford": [48, 48, 23, 53, 17, 47],
-            "Chelsea": [30, 68, null, 51, 25, 52],
-            "Crystal Palace": [40, 48, 20, 23, 58, 26],
-            "Bournemouth": [15, 81, null, 51, 37, 31],
-            "Newcastle": [32, 39, 12, 40, 34, 52],
-            "Nott'm Forest": [35, 61, 31, 23, 38, 18],
-            "Tottenham": [30, 34, 40, 22, 36, 22],
-            "Sunderland": [38, 20, 37, 37, 26, 25],
-            "Everton": [24, 30, 32, 23, 27, 43],
-            "West Ham": [51, 24, 38, 21, 15, 22],
-            "Fulham": [19, 25, 35, 10, 34, 41],
-            "Wolves": [21, 15, 29, 31, 14, 28],
-            "Burnley": [19, 26, null, 12, 19, 4]
+            "Arsenal": [null, 48, 62, 56, 47, 64],
+            "Man City": [65, 49, null, 37, 66, 38],
+            "Liverpool": [41, 56, null, 55, 33, 35],
+            "Brentford": [41, 30, 51, 26, 41, 28],
+            "Bournemouth": [14, 51, 33, 48, 40, 31],
+            "Leeds": [29, 42, 27, 43, 45, 12],
+            "Tottenham": [30, 37, 28, 40, 34, 18],
+            "Aston Villa": [30, 22, null, 49, 36, 45],
+            "Man Utd": [null, null, 41, 35, 41, 57],
+            "Brighton": [40, 29, 44, null, 22, 38],
+            "Chelsea": [41, 43, 14, null, 32, 42],
+            "Nott'm Forest": [41, 19, 42, 23, null, 27],
+            "Crystal Palace": [26, 25, 30, null, 27, 44],
+            "Fulham": [30, 31, 40, 19, 30, null],
+            "Newcastle": [31, 34, 39, 29, null, null],
+            "Everton": [43, 22, 29, 29, null, null],
+            "Sunderland": [null, 37, 21, 16, 12, 31],
+            "Burnley": [null, null, null, null, null, null],
+            "West Ham": [null, null, null, null, null, null],
+            "Wolves": [null, null, null, null, null, null]
         };
         // ██ SITE_DATA:END ██
 
         // ██ SITE_DATA:TEAM_GOALS ██
         const TEAM_GOALS = {
-            "Man City":       [1.66, 3.53, null, 1.64, 4.22, 1.61],
-            "Arsenal":        [1.85, 1.26, 1.95, 1.90, 1.75, 2.62],
-            "Man Utd":        [1.76, 1.46, 1.85, 1.69, 1.47, 1.87],
-            "Liverpool":      [1.83, 1.47, 1.90, 1.35, 1.84, 1.44],
-            "Aston Villa":    [1.35, 1.60, 1.29, 1.63, 1.78, 1.50],
-            "Crystal Palace": [1.50, 1.65, 1.12, 1.16, 2.41, 1.23],
-            "Brentford":      [1.61, 1.63, 1.20, 1.84, 1.08, 1.69],
-            "Chelsea":        [1.38, 2.81, null, 1.77, 1.30, 1.73],
-            "Brighton":       [1.72, 2.82, null, 1.29, 1.80, 1.23],
-            "Leeds":          [1.11, 2.97, null, 2.08, 1.26, 1.40],
-            "Bournemouth":    [0.85, 3.09, null, 1.76, 1.38, 1.39],
-            "Newcastle":      [1.34, 1.55, 0.79, 1.48, 1.35, 1.80],
-            "Nott'm Forest":  [1.35, 1.93, 1.15, 1.14, 1.44, 1.03],
-            "West Ham":       [1.57, 1.13, 1.32, 1.13, 0.82, 1.12],
-            "Everton":        [1.11, 1.25, 1.22, 1.08, 1.11, 1.33],
-            "Tottenham":      [1.10, 1.24, 1.28, 1.05, 1.32, 1.09],
-            "Fulham":         [1.04, 1.14, 1.30, 0.67, 1.31, 1.29],
-            "Sunderland":     [1.24, 0.95, 1.27, 1.16, 1.09, 0.97],
-            "Wolves":         [0.95, 0.83, 1.06, 1.04, 0.78, 1.03],
-            "Burnley":        [0.98, 1.76, null, 0.85, 1.02, 0.53]
+            "Man City":       [2.24, 1.72, null, 1.50, 2.05, 1.57],
+            "Bournemouth":    [1.00, 1.68, 1.42, 1.76, 1.60, 1.39],
+            "Brentford":      [1.46, 1.30, 1.64, 1.29, 1.63, 1.28],
+            "Arsenal":        [null, 1.49, 1.90, 1.56, 1.44, 1.87],
+            "Liverpool":      [1.55, 1.92, null, 1.83, 1.45, 1.50],
+            "Leeds":          [1.09, 1.56, 1.14, 1.55, 1.56, 0.75],
+            "Tottenham":      [1.24, 1.38, 1.14, 1.32, 1.29, 0.99],
+            "Chelsea":        [1.45, 1.57, 0.84, null, 1.43, 1.65],
+            "Aston Villa":    [1.24, 0.97, null, 1.66, 1.33, 1.64],
+            "Brighton":       [1.44, 1.25, 1.51, null, 0.94, 1.26],
+            "Man Utd":        [null, null, 1.44, 1.46, 1.46, 1.84],
+            "Crystal Palace": [1.05, 1.19, 1.19, null, 1.17, 1.53],
+            "Nott'm Forest":  [1.33, 1.08, 1.44, 1.10, null, 1.18],
+            "Fulham":         [1.21, 1.11, 1.40, 1.04, 1.22, null],
+            "Newcastle":      [1.35, 1.33, 1.55, 1.28, null, null],
+            "Sunderland":     [null, 1.21, 1.02, 0.74, 0.81, 1.12],
+            "Everton":        [1.37, 1.05, 1.19, 1.10, null, null],
+            "Burnley":        [null, null, null, null, null, null],
+            "West Ham":       [null, null, null, null, null, null],
+            "Wolves":         [null, null, null, null, null, null]
         };
         // ██ SITE_DATA:END ██
 
         // ██ SITE_DATA:TEAM_CS ██
         const TEAM_CS = {
-            "Arsenal":        [43, 29, 45, 51, 44, 59],
-            "Man City":       [25, 70, null, 34, 72, 25],
-            "Brighton":       [37, 57, null, 23, 46, 25],
-            "Aston Villa":    [26, 39, 27, 35, 36, 24],
-            "Man Utd":        [33, 22, 30, 26, 33, 36],
-            "Leeds":          [17, 62, null, 43, 27, 29],
-            "Sunderland":     [33, 20, 32, 35, 23, 26],
-            "Liverpool":      [35, 29, 33, 18, 27, 22],
-            "Tottenham":      [29, 28, 35, 20, 28, 18],
-            "Crystal Palace": [26, 32, 15, 17, 45, 19],
-            "Brentford":      [33, 32, 16, 32, 12, 29],
-            "Nott'm Forest":  [26, 41, 28, 17, 26, 15],
-            "Everton":        [20, 23, 27, 19, 24, 38],
-            "Chelsea":        [19, 45, null, 32, 16, 34],
-            "Bournemouth":    [16, 51, null, 31, 27, 20],
-            "Newcastle":      [22, 24, 14, 28, 24, 32],
-            "Wolves":         [21, 17, 28, 31, 17, 28],
-            "Fulham":         [16, 20, 27, 15, 25, 36],
-            "West Ham":       [39, 19, 30, 16, 17, 17],
-            "Burnley":        [18, 25, null, 12, 17, 7]
+            "Arsenal":        [null, 38, 43, 48, 39, 47],
+            "Man City":       [37, 30, null, 23, 45, 22],
+            "Leeds":          [27, 27, 22, 28, 31, 15],
+            "Tottenham":      [23, 26, 24, 33, 27, 16],
+            "Brentford":      [29, 21, 36, 17, 24, 19],
+            "Brighton":       [29, 21, 32, null, 24, 32],
+            "Bournemouth":    [11, 35, 21, 28, 23, 19],
+            "Liverpool":      [26, 34, null, 35, 20, 21],
+            "Aston Villa":    [24, 22, null, 33, 27, 28],
+            "Fulham":         [23, 30, 30, 16, 23, null],
+            "Nott'm Forest":  [34, 15, 32, 19, null, 22],
+            "Crystal Palace": [25, 18, 25, null, 21, 31],
+            "Man Utd":        [null, null, 30, 22, 30, 37],
+            "Chelsea":        [30, 29, 15, null, 20, 25],
+            "Sunderland":     [null, 33, 19, 21, 13, 28],
+            "Everton":        [35, 19, 24, 27, null, null],
+            "Newcastle":      [21, 25, 24, 21, null, null],
+            "Burnley":        [null, null, null, null, null, null],
+            "West Ham":       [null, null, null, null, null, null],
+            "Wolves":         [null, null, null, null, null, null]
         };
         // ██ SITE_DATA:END ██
 
-        // Blank GW32 teams: Arsenal, Aston Villa, Bournemouth, Brentford, Brighton, Burnley, Chelsea, Crystal Palace, Everton, Fulham, Leeds, Liverpool, Man City, Man Utd, Newcastle, Nott'm Forest, Sunderland, Tottenham, West Ham, Wolves
+        // Blank GW1 teams: Arsenal, Burnley, Man Utd, Sunderland, West Ham, Wolves
         // ██ SITE_DATA:PLAYER_ASSISTS ██
         const PLAYER_ASSISTS = [
-            {name: "Jéremy Doku", team: "Man City", gw: [0.21, 0.48, null, 0.30, 0.54, 0.30], total: 1.83},
-            {name: "Bruno Fernandes", team: "Man Utd", gw: [0.29, 0.24, 0.31, 0.28, 0.24, 0.31], total: 1.67},
-            {name: "Bryan Mbeumo", team: "Man Utd", gw: [0.28, 0.23, 0.29, 0.27, 0.23, 0.29], total: 1.59},
-            {name: "Bukayo Saka", team: "Arsenal", gw: [0.29, 0.29, 0.21, 0.22, 0.22, 0.29], total: 1.51},
-            {name: "Amad Diallo Traore", team: "Man Utd", gw: [0.29, 0.24, 0.31, 0.23, 0.19, 0.26], total: 1.51},
-            {name: "Mathis Cherki", team: "Man City", gw: [0.22, 0.41, null, 0.21, 0.51, 0.15], total: 1.5},
-            {name: "Brenden Aaronson", team: "Leeds", gw: [0.19, 0.48, null, 0.36, 0.22, 0.24], total: 1.49},
-            {name: "Mathias Jensen", team: "Brentford", gw: [0.24, 0.24, 0.24, 0.26, 0.24, 0.24], total: 1.46},
-            {name: "Jayden Bogle", team: "Leeds", gw: [0.19, 0.51, null, 0.36, 0.22, 0.14], total: 1.42},
-            {name: "Adam Wharton", team: "Crystal Palace", gw: [0.26, 0.21, 0.16, 0.19, 0.39, 0.21], total: 1.42},
-            {name: "Jaka Bijol", team: "Leeds", gw: [0.18, 0.47, null, 0.34, 0.20, 0.23], total: 1.42},
-            {name: "Ao Tanaka", team: "Leeds", gw: [0.13, 0.43, null, 0.36, 0.22, 0.24], total: 1.38},
-            {name: "Mikkel Damsgaard", team: "Brentford", gw: [0.24, 0.17, 0.21, 0.26, 0.24, 0.24], total: 1.36},
-            {name: "Declan Rice", team: "Arsenal", gw: [0.21, 0.21, 0.21, 0.21, 0.21, 0.28], total: 1.33},
-            {name: "Pascal Groß", team: "Brighton", gw: [0.24, 0.40, null, 0.22, 0.25, 0.22], total: 1.32},
-            {name: "Samuel Chukwueze", team: "Fulham", gw: [0.17, 0.14, 0.20, 0.22, 0.28, 0.28], total: 1.29},
-            {name: "Dango Ouattara", team: "Brentford", gw: [0.23, 0.23, 0.17, 0.26, 0.16, 0.24], total: 1.28},
-            {name: "Marcus Tavernier", team: "Bournemouth", gw: [0.15, 0.43, null, 0.27, 0.21, 0.21], total: 1.28},
-            {name: "Enzo Fernández", team: "Chelsea", gw: [0.21, 0.38, null, 0.23, 0.21, 0.23], total: 1.26},
-            {name: "Rayan", team: "Bournemouth", gw: [0.13, 0.43, null, 0.27, 0.21, 0.21], total: 1.26},
-            {name: "Jarrod Bowen", team: "West Ham", gw: [0.28, 0.20, 0.23, 0.20, 0.15, 0.20], total: 1.26},
-            {name: "Dominik Szoboszlai", team: "Liverpool", gw: [0.22, 0.19, 0.23, 0.19, 0.22, 0.19], total: 1.24},
-            {name: "Omari Hutchinson", team: "Nott'm Forest", gw: [0.15, 0.30, 0.21, 0.21, 0.23, 0.13], total: 1.23},
-            {name: "Yankuba Minteh", team: "Brighton", gw: [0.24, 0.35, null, 0.19, 0.25, 0.19], total: 1.21},
-            {name: "Morgan Gibbs-White", team: "Nott'm Forest", gw: [0.21, 0.30, 0.18, 0.18, 0.22, 0.11], total: 1.19},
-            {name: "Kiernan Dewsbury-Hall", team: "Everton", gw: [0.19, 0.21, 0.20, 0.18, 0.19, 0.22], total: 1.19},
-            {name: "Elliot Anderson", team: "Nott'm Forest", gw: [0.20, 0.28, 0.17, 0.17, 0.21, 0.15], total: 1.17},
-            {name: "Florian Wirtz", team: "Liverpool", gw: [0.19, 0.19, 0.19, 0.19, 0.19, 0.19], total: 1.14},
-            {name: "Cole Palmer", team: "Chelsea", gw: [0.18, 0.34, null, 0.23, 0.17, 0.22], total: 1.13},
-            {name: "Mateus Mané", team: "Wolves", gw: [0.19, 0.19, 0.19, 0.19, 0.19, 0.19], total: 1.13},
-            {name: "Rio Ngumoha", team: "Liverpool", gw: [0.19, 0.33, 0.16, 0.13, 0.12, 0.16], total: 1.1},
-            {name: "Enzo Le Fée", team: "Sunderland", gw: [0.16, 0.18, 0.19, 0.18, 0.18, 0.18], total: 1.07},
-            {name: "James Garner", team: "Everton", gw: [0.17, 0.19, 0.18, 0.16, 0.17, 0.20], total: 1.07},
-            {name: "Daniel Muñoz", team: "Crystal Palace", gw: [0.13, 0.17, 0.15, 0.16, 0.29, 0.15], total: 1.06},
-            {name: "Dominic Calvert-Lewin", team: "Leeds", gw: [0.14, 0.34, null, 0.25, 0.15, 0.17], total: 1.05},
-            {name: "Matheus Cunha", team: "Man Utd", gw: [0.18, 0.15, 0.19, 0.17, 0.15, 0.19], total: 1.05},
-            {name: "Morgan Rogers", team: "Aston Villa", gw: [0.15, 0.18, 0.15, 0.19, 0.20, 0.17], total: 1.05},
-            {name: "John McGinn", team: "Aston Villa", gw: [0.17, 0.17, 0.17, 0.17, 0.19, 0.17], total: 1.04},
-            {name: "Cody Gakpo", team: "Liverpool", gw: [0.19, 0.15, 0.20, 0.15, 0.19, 0.15], total: 1.03},
-            {name: "Martin Odegaard", team: "Arsenal", gw: [0.14, 0.06, 0.15, 0.24, 0.24, 0.20], total: 1.03},
-            {name: "Gabriel Martinelli", team: "Arsenal", gw: [0.17, 0.11, 0.18, 0.17, 0.16, 0.24], total: 1.02},
-            {name: "Dwight McNeil", team: "Everton", gw: [0.19, 0.21, 0.20, 0.18, 0.19, 0.05], total: 1.02},
-            {name: "Phil Foden", team: "Man City", gw: [0.17, 0.31, null, 0.11, 0.28, 0.14], total: 1.0},
-            {name: "Pedro Neto", team: "Chelsea", gw: [0.12, 0.35, null, 0.24, 0.17, 0.12], total: 1.0},
-            {name: "Maxim De Cuyper", team: "Brighton", gw: [0.23, 0.37, null, 0.16, 0.13, 0.09], total: 0.99},
-            {name: "Neco Williams", team: "Nott'm Forest", gw: [0.17, 0.23, 0.14, 0.14, 0.17, 0.12], total: 0.98},
-            {name: "Leandro Trossard", team: "Arsenal", gw: [0.15, 0.13, 0.15, 0.13, 0.15, 0.26], total: 0.96},
-            {name: "Harry Wilson", team: "Fulham", gw: [0.16, 0.16, 0.16, 0.16, 0.16, 0.16], total: 0.96},
-            {name: "Diogo Dalot", team: "Man Utd", gw: [0.17, 0.14, 0.17, 0.16, 0.14, 0.18], total: 0.95},
-            {name: "Mathys Tel", team: "Tottenham", gw: [0.16, 0.16, 0.15, 0.15, 0.16, 0.16], total: 0.94},
-            {name: "Jacob Murphy", team: "Newcastle", gw: [0.10, 0.18, 0.13, 0.17, 0.16, 0.21], total: 0.94},
-            {name: "Casemiro", team: "Man Utd", gw: [0.16, 0.14, 0.17, 0.16, 0.14, 0.17], total: 0.93},
-            {name: "Iliman Ndiaye", team: "Everton", gw: [0.14, 0.16, 0.16, 0.14, 0.14, 0.17], total: 0.92},
-            {name: "Omar Marmoush", team: "Man City", gw: [0.12, 0.21, null, 0.15, 0.35, 0.09], total: 0.91},
-            {name: "Ross Barkley", team: "Aston Villa", gw: [0.13, 0.16, 0.13, 0.16, 0.17, 0.15], total: 0.9},
-            {name: "Keane Lewis-Potter", team: "Brentford", gw: [0.16, 0.16, 0.12, 0.18, 0.11, 0.17], total: 0.9},
-            {name: "Granit Xhaka", team: "Sunderland", gw: [0.17, 0.13, 0.17, 0.15, 0.15, 0.13], total: 0.9},
-            {name: "Kevin Schade", team: "Brentford", gw: [0.16, 0.16, 0.12, 0.18, 0.11, 0.17], total: 0.89},
-            {name: "Pedro Porro", team: "Tottenham", gw: [0.14, 0.15, 0.16, 0.13, 0.16, 0.14], total: 0.88},
-            {name: "Pablo", team: "West Ham", gw: [0.19, 0.14, 0.16, 0.14, 0.10, 0.14], total: 0.87}
+            {name: "Loum Tchaouna", team: "Coventry", gw: [0.18, 1.00, 0.94, 0.94, 0.96, 1.00], total: 5.01},
+            {name: "Harrison Reed", team: "Fulham", gw: [0.04, 0.35, 0.45, 0.41, 0.41, 0.38], total: 2.05},
+            {name: "Nathaniel Clyne", team: "Crystal Palace", gw: [0.27, 0.30, 0.30, 0.25, 0.30, 0.39], total: 1.81},
+            {name: "Mohamed Salah", team: "Liverpool", gw: [0.29, 0.36, 0.19, 0.34, 0.27, 0.28], total: 1.73},
+            {name: "Kieran Trippier", team: "Newcastle", gw: [0.30, 0.30, 0.35, 0.28, 0.22, 0.22], total: 1.67},
+            {name: "Tyrique George", team: "Everton", gw: [0.06, 0.31, 0.31, 0.31, 0.31, 0.31], total: 1.61},
+            {name: "Maxence Lacroix", team: "Crystal Palace", gw: [0.07, 0.30, 0.27, 0.23, 0.30, 0.39], total: 1.56},
+            {name: "Florian Wirtz", team: "Liverpool", gw: [0.07, 0.36, 0.19, 0.34, 0.27, 0.28], total: 1.51},
+            {name: "Bernardo Silva", team: "Man City", gw: [0.33, 0.25, 0.15, 0.22, 0.30, 0.23], total: 1.47},
+            {name: "Marcos Senesi", team: "Bournemouth", gw: [0.17, 0.28, 0.23, 0.29, 0.27, 0.23], total: 1.46},
+            {name: "Lewis Hall", team: "Newcastle", gw: [0.06, 0.30, 0.35, 0.28, 0.22, 0.22], total: 1.43},
+            {name: "Rodri", team: "Man City", gw: [0.31, 0.24, 0.14, 0.21, 0.28, 0.22], total: 1.4},
+            {name: "Curtis Jones", team: "Liverpool", gw: [0.05, 0.33, 0.17, 0.32, 0.25, 0.26], total: 1.39},
+            {name: "Brennan Johnson", team: "Crystal Palace", gw: [0.05, 0.27, 0.20, 0.16, 0.27, 0.39], total: 1.35},
+            {name: "David Brooks", team: "Bournemouth", gw: [0.04, 0.23, 0.26, 0.29, 0.27, 0.26], total: 1.34},
+            {name: "Rayan", team: "Bournemouth", gw: [0.03, 0.28, 0.23, 0.29, 0.27, 0.23], total: 1.33},
+            {name: "Nico O&#039;Reilly", team: "Man City", gw: [0.16, 0.25, 0.15, 0.22, 0.30, 0.23], total: 1.3},
+            {name: "Bruno Guimarães", team: "Newcastle", gw: [0.07, 0.15, 0.32, 0.26, 0.22, 0.22], total: 1.24},
+            {name: "Mathias Jensen", team: "Brentford", gw: [0.04, 0.24, 0.24, 0.23, 0.23, 0.24], total: 1.23},
+            {name: "Jacob Murphy", team: "Newcastle", gw: [0.06, 0.28, 0.35, 0.24, 0.15, 0.14], total: 1.22},
+            {name: "Leandro Trossard", team: "Arsenal", gw: [0.12, 0.18, 0.23, 0.19, 0.17, 0.23], total: 1.13},
+            {name: "Bryan Mbeumo", team: "Man Utd", gw: [0.04, 0.15, 0.20, 0.21, 0.21, 0.26], total: 1.08},
+            {name: "Amad Diallo Traore", team: "Man Utd", gw: [0.03, 0.14, 0.21, 0.21, 0.21, 0.26], total: 1.06},
+            {name: "Kai Havertz", team: "Arsenal", gw: [0.03, 0.18, 0.23, 0.19, 0.17, 0.23], total: 1.02},
+            {name: "Erling Haaland", team: "Man City", gw: [0.21, 0.14, 0.10, 0.10, 0.25, 0.21], total: 1.01},
+            {name: "Andrey Santos", team: "Chelsea", gw: [0.18, 0.20, 0.11, 0.13, 0.18, 0.21], total: 1.0},
+            {name: "Bukayo Saka", team: "Arsenal", gw: [0.15, 0.15, 0.15, 0.15, 0.15, 0.25], total: 0.99},
+            {name: "Jadon Sancho", team: "Aston Villa", gw: [0.17, 0.12, 0.12, 0.20, 0.16, 0.20], total: 0.97},
+            {name: "Douglas Luiz", team: "Aston Villa", gw: [0.17, 0.12, 0.12, 0.20, 0.16, 0.20], total: 0.97},
+            {name: "Jordan Henderson", team: "Brentford", gw: [0.02, 0.19, 0.17, 0.18, 0.23, 0.18], total: 0.97},
+            {name: "Morgan Rogers", team: "Chelsea", gw: [0.05, 0.21, 0.12, 0.14, 0.20, 0.23], total: 0.96},
+            {name: "Estêvão", team: "Chelsea", gw: [0.04, 0.22, 0.12, 0.14, 0.20, 0.23], total: 0.96},
+            {name: "Nathan Collins", team: "Brentford", gw: [0.05, 0.18, 0.19, 0.16, 0.21, 0.17], total: 0.96},
+            {name: "Anton Stach", team: "Leeds", gw: [0.03, 0.19, 0.17, 0.19, 0.19, 0.17], total: 0.93},
+            {name: "Adam Smith", team: "Bournemouth", gw: [0.02, 0.19, 0.16, 0.20, 0.18, 0.16], total: 0.92},
+            {name: "Keane Lewis-Potter", team: "Brentford", gw: [0.04, 0.18, 0.20, 0.15, 0.20, 0.15], total: 0.92},
+            {name: "Sávio", team: "Man City", gw: [0.20, 0.15, 0.09, 0.13, 0.18, 0.14], total: 0.9},
+            {name: "Harry Wilson", team: "Leeds", gw: [0.03, 0.17, 0.16, 0.19, 0.19, 0.16], total: 0.9},
+            {name: "Alejandro Garnacho", team: "Chelsea", gw: [0.04, 0.19, 0.12, 0.14, 0.20, 0.20], total: 0.9},
+            {name: "Aaron Hickey", team: "Brentford", gw: [0.03, 0.19, 0.22, 0.16, 0.17, 0.13], total: 0.89},
+            {name: "Kiernan Dewsbury-Hall", team: "Everton", gw: [0.04, 0.18, 0.17, 0.17, 0.18, 0.14], total: 0.88},
+            {name: "Thiago", team: "Brentford", gw: [0.04, 0.14, 0.19, 0.15, 0.19, 0.15], total: 0.87},
+            {name: "Brajan Gruda", team: "Brighton", gw: [0.17, 0.15, 0.18, 0.12, 0.11, 0.15], total: 0.87},
+            {name: "Alex Iwobi", team: "Fulham", gw: [0.03, 0.15, 0.17, 0.17, 0.17, 0.17], total: 0.86},
+            {name: "Chris Richards", team: "Crystal Palace", gw: [0.05, 0.11, 0.20, 0.18, 0.16, 0.13], total: 0.84},
+            {name: "Ryan Gravenberch", team: "Liverpool", gw: [0.03, 0.14, 0.12, 0.21, 0.17, 0.17], total: 0.84},
+            {name: "Granit Xhaka", team: "Sunderland", gw: [0.03, 0.21, 0.18, 0.13, 0.14, 0.15], total: 0.84},
+            {name: "Eliezer Mayenda", team: "Sunderland", gw: [0.14, 0.17, 0.14, 0.10, 0.11, 0.16], total: 0.83},
+            {name: "Randal Kolo Muani", team: "Tottenham", gw: [0.14, 0.15, 0.13, 0.15, 0.15, 0.11], total: 0.83},
+            {name: "Jack Grealish", team: "Man City", gw: [0.07, 0.12, 0.15, 0.18, 0.18, 0.11], total: 0.82},
+            {name: "James Maddison", team: "Tottenham", gw: [0.03, 0.14, 0.16, 0.16, 0.16, 0.16], total: 0.81},
+            {name: "Pascal Groß", team: "Brighton", gw: [0.04, 0.08, 0.15, 0.17, 0.18, 0.19], total: 0.8},
+            {name: "Casemiro", team: "Man Utd", gw: [0.10, 0.10, 0.14, 0.14, 0.14, 0.17], total: 0.78},
+            {name: "Samuel Chukwueze", team: "Fulham", gw: [0.14, 0.12, 0.16, 0.12, 0.14, 0.11], total: 0.78},
+            {name: "Milos Kerkez", team: "Liverpool", gw: [0.04, 0.22, 0.11, 0.18, 0.11, 0.10], total: 0.76},
+            {name: "Enzo Le Fée", team: "Sunderland", gw: [0.03, 0.13, 0.18, 0.15, 0.12, 0.13], total: 0.75},
+            {name: "Dilane Bakwa", team: "Nott'm Forest", gw: [0.03, 0.17, 0.17, 0.14, 0.12, 0.11], total: 0.75},
+            {name: "Dwight McNeil", team: "Everton", gw: [0.03, 0.14, 0.13, 0.15, 0.15, 0.15], total: 0.75},
+            {name: "Adama Traoré", team: "Fulham", gw: [0.13, 0.12, 0.15, 0.11, 0.13, 0.11], total: 0.74},
+            {name: "Ian Maatsen", team: "Aston Villa", gw: [0.03, 0.10, 0.11, 0.18, 0.15, 0.17], total: 0.74}
         ];
         // ██ SITE_DATA:END ██
 
         // ██ SITE_DATA:PLAYER_GI ██
         const PLAYER_GI = [
-            {name: "Erling Haaland", team: "Man City", gw: [0.88, 1.64, null, 0.88, 1.69, 0.88], total: 5.97},
-            {name: "Dominic Calvert-Lewin", team: "Leeds", gw: [0.68, 1.69, null, 1.23, 0.77, 0.86], total: 5.24},
-            {name: "Bryan Mbeumo", team: "Man Utd", gw: [0.69, 0.64, 0.71, 0.68, 0.64, 0.71], total: 4.06},
-            {name: "Cole Palmer", team: "Chelsea", gw: [0.67, 1.22, null, 0.72, 0.66, 0.71], total: 3.98},
-            {name: "Thiago", team: "Brentford", gw: [0.62, 0.63, 0.47, 0.70, 0.42, 0.65], total: 3.49},
-            {name: "Ismaila Sarr", team: "Crystal Palace", gw: [0.60, 0.61, 0.43, 0.48, 0.91, 0.43], total: 3.47},
-            {name: "Danny Welbeck", team: "Brighton", gw: [0.60, 1.08, null, 0.57, 0.61, 0.57], total: 3.44},
-            {name: "Ollie Watkins", team: "Aston Villa", gw: [0.56, 0.57, 0.55, 0.57, 0.58, 0.56], total: 3.4},
-            {name: "Kai Havertz", team: "Arsenal", gw: [0.53, 0.56, 0.65, 0.57, 0.49, 0.52], total: 3.33},
-            {name: "Kevin Schade", team: "Brentford", gw: [0.56, 0.56, 0.52, 0.58, 0.51, 0.57], total: 3.29},
-            {name: "Viktor Gyokeres", team: "Arsenal", gw: [0.54, 0.58, 0.48, 0.52, 0.53, 0.63], total: 3.27},
-            {name: "Enzo Fernández", team: "Chelsea", gw: [0.54, 0.98, null, 0.56, 0.54, 0.56], total: 3.17},
-            {name: "Bruno Fernandes", team: "Man Utd", gw: [0.55, 0.46, 0.58, 0.53, 0.46, 0.58], total: 3.16},
-            {name: "Dango Ouattara", team: "Brentford", gw: [0.54, 0.54, 0.48, 0.57, 0.47, 0.55], total: 3.14},
-            {name: "Morgan Gibbs-White", team: "Nott'm Forest", gw: [0.53, 0.73, 0.49, 0.49, 0.56, 0.33], total: 3.11},
-            {name: "Bukayo Saka", team: "Arsenal", gw: [0.60, 0.60, 0.43, 0.45, 0.45, 0.58], total: 3.11},
-            {name: "Marcus Tavernier", team: "Bournemouth", gw: [0.45, 0.97, null, 0.57, 0.52, 0.52], total: 3.03},
-            {name: "Brenden Aaronson", team: "Leeds", gw: [0.38, 0.94, null, 0.69, 0.43, 0.48], total: 2.91},
-            {name: "Omar Marmoush", team: "Man City", gw: [0.40, 0.68, null, 0.51, 1.00, 0.32], total: 2.91},
-            {name: "Matheus Cunha", team: "Man Utd", gw: [0.49, 0.41, 0.51, 0.47, 0.41, 0.52], total: 2.8},
-            {name: "Jéremy Doku", team: "Man City", gw: [0.31, 0.71, null, 0.45, 0.82, 0.45], total: 2.74},
-            {name: "Florian Wirtz", team: "Liverpool", gw: [0.45, 0.45, 0.45, 0.45, 0.45, 0.45], total: 2.7},
-            {name: "Antoine Semenyo", team: "Man City", gw: [0.40, 0.73, null, 0.40, 0.76, 0.40], total: 2.69},
-            {name: "Rayan", team: "Bournemouth", gw: [0.28, 0.91, null, 0.58, 0.45, 0.46], total: 2.68},
-            {name: "William Osula", team: "Newcastle", gw: [0.15, 0.32, 0.55, 0.55, 0.55, 0.55], total: 2.67},
-            {name: "Cody Gakpo", team: "Liverpool", gw: [0.46, 0.42, 0.47, 0.42, 0.46, 0.42], total: 2.65},
-            {name: "Harvey Barnes", team: "Newcastle", gw: [0.45, 0.47, 0.45, 0.45, 0.40, 0.42], total: 2.64},
-            {name: "Valentín Castellanos", team: "West Ham", gw: [0.45, 0.42, 0.43, 0.42, 0.42, 0.42], total: 2.57},
-            {name: "Zian Flemming", team: "Burnley", gw: [0.44, 0.80, null, 0.43, 0.44, 0.43], total: 2.54},
-            {name: "Amad Diallo Traore", team: "Man Utd", gw: [0.49, 0.40, 0.51, 0.38, 0.33, 0.43], total: 2.54},
-            {name: "Richarlison", team: "Tottenham", gw: [0.41, 0.46, 0.47, 0.32, 0.46, 0.40], total: 2.52},
-            {name: "Evanilson", team: "Bournemouth", gw: [0.27, 0.86, null, 0.53, 0.42, 0.43], total: 2.51},
-            {name: "Jarrod Bowen", team: "West Ham", gw: [0.47, 0.39, 0.42, 0.39, 0.34, 0.39], total: 2.4},
-            {name: "Beto", team: "Everton", gw: [0.38, 0.42, 0.41, 0.37, 0.38, 0.45], total: 2.4},
-            {name: "Eberechi Eze", team: "Arsenal", gw: [0.38, 0.38, 0.38, 0.38, 0.38, 0.43], total: 2.33},
-            {name: "Casemiro", team: "Man Utd", gw: [0.41, 0.34, 0.43, 0.39, 0.34, 0.43], total: 2.32},
-            {name: "Brian Brobbey", team: "Sunderland", gw: [0.42, 0.36, 0.43, 0.39, 0.37, 0.36], total: 2.32},
-            {name: "Jack Hinshelwood", team: "Brighton", gw: [0.41, 0.71, null, 0.38, 0.42, 0.38], total: 2.3},
-            {name: "Gabriel Martinelli", team: "Arsenal", gw: [0.38, 0.26, 0.40, 0.39, 0.35, 0.52], total: 2.29},
-            {name: "Ao Tanaka", team: "Leeds", gw: [0.21, 0.70, null, 0.58, 0.36, 0.40], total: 2.25},
-            {name: "Iliman Ndiaye", team: "Everton", gw: [0.36, 0.38, 0.38, 0.36, 0.36, 0.39], total: 2.24},
-            {name: "Mathis Cherki", team: "Man City", gw: [0.32, 0.61, null, 0.32, 0.75, 0.22], total: 2.23},
-            {name: "Morgan Rogers", team: "Aston Villa", gw: [0.34, 0.37, 0.34, 0.38, 0.41, 0.36], total: 2.21},
-            {name: "Leandro Trossard", team: "Arsenal", gw: [0.35, 0.33, 0.34, 0.30, 0.38, 0.51], total: 2.21},
-            {name: "Phil Foden", team: "Man City", gw: [0.38, 0.69, null, 0.24, 0.57, 0.31], total: 2.19},
-            {name: "Anthony Gordon", team: "Newcastle", gw: [0.61, 0.61, 0.61, 0.13, 0.15, 0.08], total: 2.19},
-            {name: "Mohamed Salah", team: "Liverpool", gw: [0.27, 0.32, 0.63, 0.58, 0.25, 0.11], total: 2.17},
-            {name: "Harry Wilson", team: "Fulham", gw: [0.36, 0.36, 0.36, 0.36, 0.36, 0.36], total: 2.16},
-            {name: "Kiernan Dewsbury-Hall", team: "Everton", gw: [0.34, 0.37, 0.36, 0.33, 0.34, 0.40], total: 2.13},
-            {name: "Dominik Szoboszlai", team: "Liverpool", gw: [0.38, 0.32, 0.39, 0.32, 0.38, 0.32], total: 2.11},
-            {name: "Samuel Chukwueze", team: "Fulham", gw: [0.27, 0.23, 0.32, 0.36, 0.46, 0.46], total: 2.11},
-            {name: "Yankuba Minteh", team: "Brighton", gw: [0.40, 0.60, null, 0.33, 0.42, 0.33], total: 2.07},
-            {name: "Mikkel Damsgaard", team: "Brentford", gw: [0.36, 0.26, 0.30, 0.40, 0.35, 0.37], total: 2.04},
-            {name: "Enzo Le Fée", team: "Sunderland", gw: [0.30, 0.34, 0.35, 0.34, 0.34, 0.34], total: 2.01},
-            {name: "Mathias Jensen", team: "Brentford", gw: [0.33, 0.33, 0.33, 0.35, 0.33, 0.33], total: 2.0},
-            {name: "Mathys Tel", team: "Tottenham", gw: [0.33, 0.34, 0.32, 0.31, 0.36, 0.33], total: 1.99},
-            {name: "Igor Jesus", team: "Nott'm Forest", gw: [0.34, 0.47, 0.29, 0.29, 0.32, 0.26], total: 1.97},
-            {name: "Chris Wood", team: "Nott'm Forest", gw: [0.12, 0.17, 0.41, 0.48, 0.49, 0.30], total: 1.96},
-            {name: "Ross Barkley", team: "Aston Villa", gw: [0.30, 0.33, 0.30, 0.34, 0.36, 0.32], total: 1.95},
-            {name: "Adam Armstrong", team: "Wolves", gw: [0.32, 0.31, 0.33, 0.33, 0.30, 0.33], total: 1.93}
+            {name: "Loum Tchaouna", team: "Coventry", gw: [0.37, 2.00, 1.90, 1.88, 1.91, 1.99], total: 10.04},
+            {name: "Mohamed Salah", team: "Liverpool", gw: [0.93, 1.15, 0.60, 1.10, 0.88, 0.91], total: 5.57},
+            {name: "Erling Haaland", team: "Man City", gw: [0.78, 0.56, 0.62, 0.47, 0.95, 0.93], total: 4.3},
+            {name: "Bruno Guimarães", team: "Newcastle", gw: [0.22, 0.48, 1.07, 0.86, 0.74, 0.74], total: 4.1},
+            {name: "David Brooks", team: "Bournemouth", gw: [0.09, 0.71, 0.73, 0.88, 0.80, 0.72], total: 3.94},
+            {name: "Thiago", team: "Brentford", gw: [0.17, 0.64, 0.85, 0.67, 0.85, 0.67], total: 3.86},
+            {name: "Kai Havertz", team: "Arsenal", gw: [0.13, 0.68, 0.75, 0.71, 0.69, 0.75], total: 3.72},
+            {name: "James Maddison", team: "Tottenham", gw: [0.15, 0.65, 0.71, 0.72, 0.72, 0.72], total: 3.67},
+            {name: "Brennan Johnson", team: "Crystal Palace", gw: [0.14, 0.75, 0.54, 0.44, 0.74, 1.05], total: 3.66},
+            {name: "Lukas Nmecha", team: "Leeds", gw: [0.12, 0.65, 0.72, 0.66, 0.73, 0.69], total: 3.56},
+            {name: "Rayan", team: "Bournemouth", gw: [0.08, 0.69, 0.58, 0.72, 0.66, 0.57], total: 3.3},
+            {name: "Maxence Lacroix", team: "Crystal Palace", gw: [0.14, 0.64, 0.57, 0.49, 0.62, 0.81], total: 3.27},
+            {name: "Bryan Mbeumo", team: "Man Utd", gw: [0.15, 0.50, 0.60, 0.62, 0.62, 0.67], total: 3.17},
+            {name: "Florian Wirtz", team: "Liverpool", gw: [0.13, 0.68, 0.45, 0.65, 0.53, 0.54], total: 2.99},
+            {name: "Danny Welbeck", team: "Brighton", gw: [0.11, 0.54, 0.62, 0.57, 0.53, 0.53], total: 2.91},
+            {name: "Mathias Jensen", team: "Brentford", gw: [0.10, 0.51, 0.59, 0.49, 0.56, 0.51], total: 2.76},
+            {name: "Nico O&#039;Reilly", team: "Man City", gw: [0.34, 0.52, 0.30, 0.46, 0.62, 0.48], total: 2.71},
+            {name: "Lewis Hall", team: "Newcastle", gw: [0.11, 0.55, 0.65, 0.53, 0.42, 0.42], total: 2.68},
+            {name: "Jacob Murphy", team: "Newcastle", gw: [0.12, 0.61, 0.76, 0.54, 0.32, 0.32], total: 2.66},
+            {name: "Harrison Reed", team: "Fulham", gw: [0.05, 0.45, 0.58, 0.53, 0.53, 0.49], total: 2.63},
+            {name: "Nathaniel Clyne", team: "Crystal Palace", gw: [0.37, 0.42, 0.42, 0.35, 0.41, 0.54], total: 2.51},
+            {name: "Sávio", team: "Man City", gw: [0.55, 0.42, 0.25, 0.37, 0.51, 0.39], total: 2.49},
+            {name: "Tyrique George", team: "Everton", gw: [0.09, 0.47, 0.47, 0.47, 0.47, 0.47], total: 2.44},
+            {name: "Chris Wood", team: "Nott'm Forest", gw: [0.10, 0.52, 0.55, 0.43, 0.41, 0.34], total: 2.35},
+            {name: "Emiliano Buendía", team: "Aston Villa", gw: [0.13, 0.09, 0.48, 0.60, 0.41, 0.45], total: 2.16},
+            {name: "Brian Brobbey", team: "Sunderland", gw: [0.07, 0.44, 0.42, 0.38, 0.39, 0.43], total: 2.13},
+            {name: "Cole Palmer", team: "Chelsea", gw: [0.36, 0.36, 0.31, 0.32, 0.35, 0.37], total: 2.08},
+            {name: "Joshua Zirkzee", team: "Man Utd", gw: [0.09, 0.31, 0.51, 0.51, 0.38, 0.28], total: 2.06},
+            {name: "Bukayo Saka", team: "Arsenal", gw: [0.31, 0.31, 0.31, 0.31, 0.31, 0.52], total: 2.05},
+            {name: "Curtis Jones", team: "Liverpool", gw: [0.07, 0.49, 0.27, 0.46, 0.37, 0.38], total: 2.05},
+            {name: "Lorenzo Lucca", team: "Nott'm Forest", gw: [0.41, 0.30, 0.40, 0.31, 0.28, 0.33], total: 2.03},
+            {name: "Mason Mount", team: "Man Utd", gw: [0.07, 0.23, 0.37, 0.40, 0.48, 0.46], total: 2.0},
+            {name: "Leandro Trossard", team: "Arsenal", gw: [0.21, 0.32, 0.41, 0.33, 0.31, 0.40], total: 1.98},
+            {name: "Thierno Barry", team: "Everton", gw: [0.08, 0.45, 0.36, 0.36, 0.35, 0.37], total: 1.97},
+            {name: "Morgan Rogers", team: "Chelsea", gw: [0.09, 0.40, 0.31, 0.33, 0.39, 0.42], total: 1.94},
+            {name: "Harry Wilson", team: "Leeds", gw: [0.07, 0.36, 0.36, 0.39, 0.39, 0.36], total: 1.93},
+            {name: "Bernardo Silva", team: "Man City", gw: [0.43, 0.33, 0.19, 0.29, 0.39, 0.30], total: 1.93},
+            {name: "Liam Delap", team: "Chelsea", gw: [0.08, 0.38, 0.32, 0.37, 0.37, 0.39], total: 1.9},
+            {name: "Casemiro", team: "Man Utd", gw: [0.23, 0.23, 0.33, 0.34, 0.33, 0.41], total: 1.86},
+            {name: "Joël Piroe", team: "Leeds", gw: [0.05, 0.31, 0.34, 0.38, 0.38, 0.38], total: 1.84},
+            {name: "Amad Diallo Traore", team: "Man Utd", gw: [0.05, 0.24, 0.35, 0.36, 0.35, 0.45], total: 1.79},
+            {name: "Marcos Senesi", team: "Bournemouth", gw: [0.20, 0.34, 0.29, 0.36, 0.33, 0.28], total: 1.79},
+            {name: "Kiernan Dewsbury-Hall", team: "Everton", gw: [0.08, 0.35, 0.37, 0.35, 0.34, 0.26], total: 1.76},
+            {name: "Iliman Ndiaye", team: "Everton", gw: [0.08, 0.35, 0.32, 0.30, 0.36, 0.36], total: 1.76},
+            {name: "Rodri", team: "Man City", gw: [0.39, 0.30, 0.18, 0.26, 0.36, 0.27], total: 1.76},
+            {name: "Wilson Isidor", team: "Sunderland", gw: [0.07, 0.35, 0.32, 0.31, 0.35, 0.36], total: 1.75},
+            {name: "Estêvão", team: "Chelsea", gw: [0.08, 0.41, 0.22, 0.26, 0.37, 0.42], total: 1.75},
+            {name: "Samuel Chukwueze", team: "Fulham", gw: [0.30, 0.28, 0.35, 0.26, 0.31, 0.25], total: 1.74},
+            {name: "Kieran Trippier", team: "Newcastle", gw: [0.31, 0.31, 0.36, 0.30, 0.23, 0.23], total: 1.74},
+            {name: "Adam Smith", team: "Bournemouth", gw: [0.03, 0.36, 0.31, 0.38, 0.35, 0.30], total: 1.74},
+            {name: "Keane Lewis-Potter", team: "Brentford", gw: [0.07, 0.32, 0.38, 0.27, 0.36, 0.28], total: 1.69},
+            {name: "Andrey Santos", team: "Chelsea", gw: [0.31, 0.33, 0.18, 0.21, 0.30, 0.35], total: 1.68},
+            {name: "Viktor Gyokeres", team: "Arsenal", gw: [0.12, 0.13, 0.31, 0.22, 0.49, 0.40], total: 1.66},
+            {name: "Alejandro Garnacho", team: "Chelsea", gw: [0.07, 0.35, 0.23, 0.26, 0.37, 0.38], total: 1.66},
+            {name: "Jadon Sancho", team: "Aston Villa", gw: [0.29, 0.20, 0.21, 0.34, 0.27, 0.34], total: 1.65},
+            {name: "Eliezer Mayenda", team: "Sunderland", gw: [0.27, 0.33, 0.27, 0.20, 0.22, 0.30], total: 1.59},
+            {name: "Nathan Collins", team: "Brentford", gw: [0.08, 0.31, 0.32, 0.26, 0.35, 0.27], total: 1.58},
+            {name: "Douglas Luiz", team: "Aston Villa", gw: [0.27, 0.19, 0.19, 0.32, 0.26, 0.32], total: 1.55},
+            {name: "Randal Kolo Muani", team: "Tottenham", gw: [0.26, 0.29, 0.24, 0.28, 0.27, 0.21], total: 1.54},
+            {name: "Brajan Gruda", team: "Brighton", gw: [0.30, 0.26, 0.31, 0.21, 0.20, 0.26], total: 1.53}
         ];
         // ██ SITE_DATA:END ██
 
         // Next GW — blank GW teams show — for all stats, sorted by xGI
-        // GW32 fixtures (from FIXTURES array): Bournemouth vs Man Utd, Brighton vs Liverpool,
+        // GW1 fixtures (from FIXTURES array): Bournemouth vs Man Utd, Brighton vs Liverpool,
         // Fulham vs Burnley, Everton vs Chelsea, Leeds vs Brentford, Newcastle vs Sunderland,
         // Aston Villa vs West Ham, Tottenham vs Nott'm Forest
         // ██ SITE_DATA:PLAYER_NEXTGW ██
         const PLAYER_NEXTGW = [
-            {name: "Erling Haaland", team: "Man City", xG: 0.78, xA: 0.10, xGI: 0.88, fixture: "Chelsea vs Man City"},
-            {name: "Bryan Mbeumo", team: "Man Utd", xG: 0.41, xA: 0.28, xGI: 0.69, fixture: "Man Utd vs Leeds"},
-            {name: "Dominic Calvert-Lewin", team: "Leeds", xG: 0.55, xA: 0.14, xGI: 0.68, fixture: "Man Utd vs Leeds"},
-            {name: "Cole Palmer", team: "Chelsea", xG: 0.49, xA: 0.18, xGI: 0.67, fixture: "Chelsea vs Man City"},
-            {name: "Thiago", team: "Brentford", xG: 0.51, xA: 0.11, xGI: 0.62, fixture: "Brentford vs Everton"},
-            {name: "Anthony Gordon", team: "Newcastle", xG: 0.44, xA: 0.17, xGI: 0.61, fixture: "Crystal Palace vs Newcastle"},
-            {name: "Danny Welbeck", team: "Brighton", xG: 0.49, xA: 0.11, xGI: 0.60, fixture: "Burnley vs Brighton"},
-            {name: "Bukayo Saka", team: "Arsenal", xG: 0.31, xA: 0.29, xGI: 0.60, fixture: "Arsenal vs Bournemouth"},
-            {name: "Ismaila Sarr", team: "Crystal Palace", xG: 0.45, xA: 0.15, xGI: 0.60, fixture: "Crystal Palace vs Newcastle"},
-            {name: "Ollie Watkins", team: "Aston Villa", xG: 0.49, xA: 0.07, xGI: 0.56, fixture: "Nott'm Forest vs Aston Villa"},
-            {name: "Kevin Schade", team: "Brentford", xG: 0.40, xA: 0.16, xGI: 0.56, fixture: "Brentford vs Everton"},
-            {name: "Bruno Fernandes", team: "Man Utd", xG: 0.26, xA: 0.29, xGI: 0.55, fixture: "Man Utd vs Leeds"},
-            {name: "Viktor Gyokeres", team: "Arsenal", xG: 0.46, xA: 0.08, xGI: 0.54, fixture: "Arsenal vs Bournemouth"},
-            {name: "Enzo Fernández", team: "Chelsea", xG: 0.33, xA: 0.21, xGI: 0.54, fixture: "Chelsea vs Man City"},
-            {name: "Dango Ouattara", team: "Brentford", xG: 0.31, xA: 0.23, xGI: 0.54, fixture: "Brentford vs Everton"},
-            {name: "Kai Havertz", team: "Arsenal", xG: 0.43, xA: 0.10, xGI: 0.53, fixture: "Arsenal vs Bournemouth"},
-            {name: "Morgan Gibbs-White", team: "Nott'm Forest", xG: 0.32, xA: 0.21, xGI: 0.53, fixture: "Nott'm Forest vs Aston Villa"},
-            {name: "Matheus Cunha", team: "Man Utd", xG: 0.31, xA: 0.18, xGI: 0.49, fixture: "Man Utd vs Leeds"},
-            {name: "Amad Diallo Traore", team: "Man Utd", xG: 0.20, xA: 0.29, xGI: 0.49, fixture: "Man Utd vs Leeds"},
-            {name: "Jarrod Bowen", team: "West Ham", xG: 0.19, xA: 0.28, xGI: 0.47, fixture: "West Ham vs Wolves"},
-            {name: "Cody Gakpo", team: "Liverpool", xG: 0.27, xA: 0.19, xGI: 0.46, fixture: "Liverpool vs Fulham"},
-            {name: "Harvey Barnes", team: "Newcastle", xG: 0.32, xA: 0.13, xGI: 0.45, fixture: "Crystal Palace vs Newcastle"},
-            {name: "Florian Wirtz", team: "Liverpool", xG: 0.26, xA: 0.19, xGI: 0.45, fixture: "Liverpool vs Fulham"},
-            {name: "Marcus Tavernier", team: "Bournemouth", xG: 0.30, xA: 0.15, xGI: 0.45, fixture: "Arsenal vs Bournemouth"},
-            {name: "Valentín Castellanos", team: "West Ham", xG: 0.37, xA: 0.08, xGI: 0.45, fixture: "West Ham vs Wolves"},
-            {name: "Zian Flemming", team: "Burnley", xG: 0.41, xA: 0.03, xGI: 0.44, fixture: "Burnley vs Brighton"},
-            {name: "Brian Brobbey", team: "Sunderland", xG: 0.32, xA: 0.10, xGI: 0.42, fixture: "Sunderland vs Tottenham"},
-            {name: "Jack Hinshelwood", team: "Brighton", xG: 0.26, xA: 0.15, xGI: 0.41, fixture: "Burnley vs Brighton"},
-            {name: "Nick Woltemade", team: "Newcastle", xG: 0.31, xA: 0.10, xGI: 0.41, fixture: "Crystal Palace vs Newcastle"},
-            {name: "Richarlison", team: "Tottenham", xG: 0.27, xA: 0.14, xGI: 0.41, fixture: "Sunderland vs Tottenham"},
-            {name: "Casemiro", team: "Man Utd", xG: 0.24, xA: 0.16, xGI: 0.41, fixture: "Man Utd vs Leeds"},
-            {name: "Omar Marmoush", team: "Man City", xG: 0.28, xA: 0.12, xGI: 0.40, fixture: "Chelsea vs Man City"},
-            {name: "Antoine Semenyo", team: "Man City", xG: 0.31, xA: 0.09, xGI: 0.40, fixture: "Chelsea vs Man City"},
-            {name: "Yankuba Minteh", team: "Brighton", xG: 0.16, xA: 0.24, xGI: 0.40, fixture: "Burnley vs Brighton"},
-            {name: "Phil Foden", team: "Man City", xG: 0.21, xA: 0.17, xGI: 0.38, fixture: "Chelsea vs Man City"},
-            {name: "Eberechi Eze", team: "Arsenal", xG: 0.25, xA: 0.13, xGI: 0.38, fixture: "Arsenal vs Bournemouth"},
-            {name: "Dominik Szoboszlai", team: "Liverpool", xG: 0.16, xA: 0.22, xGI: 0.38, fixture: "Liverpool vs Fulham"},
-            {name: "Brenden Aaronson", team: "Leeds", xG: 0.19, xA: 0.19, xGI: 0.38, fixture: "Man Utd vs Leeds"},
-            {name: "Beto", team: "Everton", xG: 0.32, xA: 0.06, xGI: 0.38, fixture: "Brentford vs Everton"},
-            {name: "Gabriel Martinelli", team: "Arsenal", xG: 0.21, xA: 0.17, xGI: 0.38, fixture: "Arsenal vs Bournemouth"},
-            {name: "Iliman Ndiaye", team: "Everton", xG: 0.22, xA: 0.14, xGI: 0.36, fixture: "Brentford vs Everton"},
-            {name: "Habib Diarra", team: "Sunderland", xG: 0.23, xA: 0.14, xGI: 0.36, fixture: "Sunderland vs Tottenham"},
-            {name: "Mikkel Damsgaard", team: "Brentford", xG: 0.12, xA: 0.24, xGI: 0.36, fixture: "Brentford vs Everton"},
-            {name: "Harry Wilson", team: "Fulham", xG: 0.20, xA: 0.16, xGI: 0.36, fixture: "Liverpool vs Fulham"},
-            {name: "João Pedro", team: "Chelsea", xG: 0.25, xA: 0.10, xGI: 0.36, fixture: "Chelsea vs Man City"},
-            {name: "Leandro Trossard", team: "Arsenal", xG: 0.20, xA: 0.15, xGI: 0.35, fixture: "Arsenal vs Bournemouth"},
-            {name: "Morgan Rogers", team: "Aston Villa", xG: 0.19, xA: 0.15, xGI: 0.34, fixture: "Nott'm Forest vs Aston Villa"},
-            {name: "Igor Jesus", team: "Nott'm Forest", xG: 0.21, xA: 0.13, xGI: 0.34, fixture: "Nott'm Forest vs Aston Villa"},
-            {name: "Kiernan Dewsbury-Hall", team: "Everton", xG: 0.15, xA: 0.19, xGI: 0.34, fixture: "Brentford vs Everton"},
-            {name: "Mathys Tel", team: "Tottenham", xG: 0.17, xA: 0.16, xGI: 0.33, fixture: "Sunderland vs Tottenham"},
-            {name: "Mathias Jensen", team: "Brentford", xG: 0.09, xA: 0.24, xGI: 0.33, fixture: "Brentford vs Everton"},
-            {name: "Mathis Cherki", team: "Man City", xG: 0.10, xA: 0.22, xGI: 0.32, fixture: "Chelsea vs Man City"},
-            {name: "Adam Armstrong", team: "Wolves", xG: 0.22, xA: 0.10, xGI: 0.32, fixture: "West Ham vs Wolves"},
-            {name: "Rio Ngumoha", team: "Liverpool", xG: 0.13, xA: 0.19, xGI: 0.32, fixture: "Liverpool vs Fulham"},
-            {name: "Maxim De Cuyper", team: "Brighton", xG: 0.09, xA: 0.23, xGI: 0.32, fixture: "Burnley vs Brighton"},
-            {name: "Alejandro Garnacho", team: "Chelsea", xG: 0.13, xA: 0.19, xGI: 0.32, fixture: "Chelsea vs Man City"},
-            {name: "Pascal Groß", team: "Brighton", xG: 0.08, xA: 0.24, xGI: 0.32, fixture: "Burnley vs Brighton"},
-            {name: "Jéremy Doku", team: "Man City", xG: 0.10, xA: 0.21, xGI: 0.31, fixture: "Chelsea vs Man City"},
-            {name: "Adam Wharton", team: "Crystal Palace", xG: 0.05, xA: 0.26, xGI: 0.31, fixture: "Crystal Palace vs Newcastle"},
-            {name: "Oscar Bobb", team: "Fulham", xG: 0.13, xA: 0.18, xGI: 0.31, fixture: "Liverpool vs Fulham"}
+            {name: "Mohamed Salah", team: "Liverpool", xG: 0.64, xA: 0.29, xGI: 0.93, fixture: "Newcastle vs Liverpool"},
+            {name: "Erling Haaland", team: "Man City", xG: 0.57, xA: 0.21, xGI: 0.78, fixture: "Man City vs Bournemouth"},
+            {name: "Sávio", team: "Man City", xG: 0.35, xA: 0.20, xGI: 0.55, fixture: "Man City vs Bournemouth"},
+            {name: "Bernardo Silva", team: "Man City", xG: 0.10, xA: 0.33, xGI: 0.43, fixture: "Man City vs Bournemouth"},
+            {name: "Lorenzo Lucca", team: "Nott'm Forest", xG: 0.36, xA: 0.04, xGI: 0.41, fixture: "Nott'm Forest vs Leeds"},
+            {name: "Rodri", team: "Man City", xG: 0.08, xA: 0.31, xGI: 0.39, fixture: "Man City vs Bournemouth"},
+            {name: "Nathaniel Clyne", team: "Crystal Palace", xG: 0.10, xA: 0.27, xGI: 0.37, fixture: "Everton vs Crystal Palace"},
+            {name: "Cole Palmer", team: "Chelsea", xG: 0.25, xA: 0.10, xGI: 0.36, fixture: "Fulham vs Chelsea"},
+            {name: "Nico O&#039;Reilly", team: "Man City", xG: 0.17, xA: 0.16, xGI: 0.34, fixture: "Man City vs Bournemouth"},
+            {name: "Kieran Trippier", team: "Newcastle", xG: 0.01, xA: 0.30, xGI: 0.31, fixture: "Newcastle vs Liverpool"},
+            {name: "Andrey Santos", team: "Chelsea", xG: 0.12, xA: 0.18, xGI: 0.31, fixture: "Fulham vs Chelsea"},
+            {name: "Samuel Chukwueze", team: "Fulham", xG: 0.17, xA: 0.14, xGI: 0.30, fixture: "Fulham vs Chelsea"},
+            {name: "Brajan Gruda", team: "Brighton", xG: 0.13, xA: 0.17, xGI: 0.30, fixture: "Brighton vs Aston Villa"},
+            {name: "Jadon Sancho", team: "Aston Villa", xG: 0.12, xA: 0.17, xGI: 0.29, fixture: "Brighton vs Aston Villa"},
+            {name: "Douglas Luiz", team: "Aston Villa", xG: 0.10, xA: 0.17, xGI: 0.27, fixture: "Brighton vs Aston Villa"},
+            {name: "Randal Kolo Muani", team: "Tottenham", xG: 0.12, xA: 0.14, xGI: 0.26, fixture: "Brentford vs Tottenham"},
+            {name: "Adama Traoré", team: "Fulham", xG: 0.10, xA: 0.13, xGI: 0.23, fixture: "Fulham vs Chelsea"},
+            {name: "Bruno Guimarães", team: "Newcastle", xG: 0.15, xA: 0.07, xGI: 0.22, fixture: "Newcastle vs Liverpool"},
+            {name: "João Palhinha", team: "Tottenham", xG: 0.16, xA: 0.05, xGI: 0.21, fixture: "Brentford vs Tottenham"},
+            {name: "Marcos Senesi", team: "Bournemouth", xG: 0.04, xA: 0.17, xGI: 0.20, fixture: "Man City vs Bournemouth"},
+            {name: "Thiago", team: "Brentford", xG: 0.13, xA: 0.04, xGI: 0.17, fixture: "Brentford vs Tottenham"},
+            {name: "James Milner", team: "Brighton", xG: 0.08, xA: 0.09, xGI: 0.17, fixture: "Brighton vs Aston Villa"},
+            {name: "Idrissa Gueye", team: "Everton", xG: 0.07, xA: 0.09, xGI: 0.15, fixture: "Everton vs Crystal Palace"},
+            {name: "James Maddison", team: "Tottenham", xG: 0.12, xA: 0.03, xGI: 0.15, fixture: "Brentford vs Tottenham"},
+            {name: "Maxence Lacroix", team: "Crystal Palace", xG: 0.07, xA: 0.07, xGI: 0.14, fixture: "Everton vs Crystal Palace"},
+            {name: "Brennan Johnson", team: "Crystal Palace", xG: 0.09, xA: 0.05, xGI: 0.14, fixture: "Everton vs Crystal Palace"},
+            {name: "Florian Wirtz", team: "Liverpool", xG: 0.06, xA: 0.07, xGI: 0.13, fixture: "Newcastle vs Liverpool"},
+            {name: "Yehor Yarmolyuk", team: "Brentford", xG: 0.04, xA: 0.08, xGI: 0.13, fixture: "Brentford vs Tottenham"},
+            {name: "Emiliano Buendía", team: "Aston Villa", xG: 0.10, xA: 0.03, xGI: 0.13, fixture: "Brighton vs Aston Villa"},
+            {name: "Jacob Murphy", team: "Newcastle", xG: 0.07, xA: 0.06, xGI: 0.12, fixture: "Newcastle vs Liverpool"},
+            {name: "Lukas Nmecha", team: "Leeds", xG: 0.10, xA: 0.02, xGI: 0.12, fixture: "Nott'm Forest vs Leeds"},
+            {name: "Ibrahima Konaté", team: "Liverpool", xG: 0.07, xA: 0.05, xGI: 0.12, fixture: "Newcastle vs Liverpool"},
+            {name: "Lewis Hall", team: "Newcastle", xG: 0.05, xA: 0.06, xGI: 0.11, fixture: "Newcastle vs Liverpool"},
+            {name: "Danny Welbeck", team: "Brighton", xG: 0.09, xA: 0.02, xGI: 0.11, fixture: "Brighton vs Aston Villa"},
+            {name: "Jack Grealish", team: "Man City", xG: 0.04, xA: 0.07, xGI: 0.11, fixture: "Man City vs Bournemouth"},
+            {name: "Chris Wood", team: "Nott'm Forest", xG: 0.08, xA: 0.02, xGI: 0.10, fixture: "Nott'm Forest vs Leeds"},
+            {name: "Virgil van Dijk", team: "Liverpool", xG: 0.09, xA: 0.01, xGI: 0.10, fixture: "Newcastle vs Liverpool"},
+            {name: "Mathias Jensen", team: "Brentford", xG: 0.06, xA: 0.04, xGI: 0.10, fixture: "Brentford vs Tottenham"},
+            {name: "Marc Guehi", team: "Man City", xG: 0.05, xA: 0.05, xGI: 0.10, fixture: "Man City vs Bournemouth"},
+            {name: "David Brooks", team: "Bournemouth", xG: 0.06, xA: 0.04, xGI: 0.09, fixture: "Man City vs Bournemouth"},
+            {name: "Morgan Rogers", team: "Chelsea", xG: 0.04, xA: 0.05, xGI: 0.09, fixture: "Fulham vs Chelsea"},
+            {name: "Chris Richards", team: "Crystal Palace", xG: 0.04, xA: 0.05, xGI: 0.09, fixture: "Everton vs Crystal Palace"},
+            {name: "Joël Veltman", team: "Brighton", xG: 0.06, xA: 0.03, xGI: 0.09, fixture: "Brighton vs Aston Villa"},
+            {name: "Tyrique George", team: "Everton", xG: 0.03, xA: 0.06, xGI: 0.09, fixture: "Everton vs Crystal Palace"},
+            {name: "Rayan", team: "Bournemouth", xG: 0.05, xA: 0.03, xGI: 0.08, fixture: "Man City vs Bournemouth"},
+            {name: "Kiernan Dewsbury-Hall", team: "Everton", xG: 0.05, xA: 0.04, xGI: 0.08, fixture: "Everton vs Crystal Palace"},
+            {name: "Jack Hinshelwood", team: "Brighton", xG: 0.05, xA: 0.03, xGI: 0.08, fixture: "Brighton vs Aston Villa"},
+            {name: "Thierno Barry", team: "Everton", xG: 0.06, xA: 0.01, xGI: 0.08, fixture: "Everton vs Crystal Palace"},
+            {name: "Estêvão", team: "Chelsea", xG: 0.04, xA: 0.04, xGI: 0.08, fixture: "Fulham vs Chelsea"},
+            {name: "Nathan Collins", team: "Brentford", xG: 0.03, xA: 0.05, xGI: 0.08, fixture: "Brentford vs Tottenham"},
+            {name: "Iliman Ndiaye", team: "Everton", xG: 0.04, xA: 0.03, xGI: 0.08, fixture: "Everton vs Crystal Palace"},
+            {name: "Liam Delap", team: "Chelsea", xG: 0.06, xA: 0.02, xGI: 0.08, fixture: "Fulham vs Chelsea"},
+            {name: "Alexis Mac Allister", team: "Liverpool", xG: 0.03, xA: 0.05, xGI: 0.08, fixture: "Newcastle vs Liverpool"},
+            {name: "Harry Wilson", team: "Leeds", xG: 0.04, xA: 0.03, xGI: 0.07, fixture: "Nott'm Forest vs Leeds"},
+            {name: "Alejandro Garnacho", team: "Chelsea", xG: 0.03, xA: 0.04, xGI: 0.07, fixture: "Fulham vs Chelsea"},
+            {name: "Curtis Jones", team: "Liverpool", xG: 0.02, xA: 0.05, xGI: 0.07, fixture: "Newcastle vs Liverpool"},
+            {name: "Keane Lewis-Potter", team: "Brentford", xG: 0.03, xA: 0.04, xGI: 0.07, fixture: "Brentford vs Tottenham"},
+            {name: "Kaoru Mitoma", team: "Brighton", xG: 0.03, xA: 0.04, xGI: 0.07, fixture: "Brighton vs Aston Villa"},
+            {name: "Jamie Bynoe-Gittens", team: "Chelsea", xG: 0.03, xA: 0.04, xGI: 0.07, fixture: "Fulham vs Chelsea"},
+            {name: "Rodrigo Muniz", team: "Fulham", xG: 0.04, xA: 0.02, xGI: 0.06, fixture: "Fulham vs Chelsea"}
         ];
         // ██ SITE_DATA:END ██
 
         // ██ SITE_DATA:PLAYER_GOALS ██
         const PLAYER_GOALS = [
-            {name: "Erling Haaland", team: "Man City", gw: [0.78, 1.44, null, 0.78, 1.44, 0.78], total: 5.23},
-            {name: "Dominic Calvert-Lewin", team: "Leeds", gw: [0.55, 1.35, null, 0.98, 0.61, 0.69], total: 4.18},
-            {name: "Ollie Watkins", team: "Aston Villa", gw: [0.49, 0.49, 0.49, 0.49, 0.49, 0.49], total: 2.94},
-            {name: "Thiago", team: "Brentford", gw: [0.51, 0.52, 0.38, 0.58, 0.35, 0.53], total: 2.87},
-            {name: "Danny Welbeck", team: "Brighton", gw: [0.49, 0.91, null, 0.49, 0.49, 0.49], total: 2.87},
-            {name: "Cole Palmer", team: "Chelsea", gw: [0.49, 0.89, null, 0.49, 0.49, 0.49], total: 2.85},
-            {name: "Viktor Gyokeres", team: "Arsenal", gw: [0.46, 0.50, 0.40, 0.44, 0.45, 0.50], total: 2.75},
-            {name: "Ismaila Sarr", team: "Crystal Palace", gw: [0.45, 0.45, 0.35, 0.39, 0.74, 0.35], total: 2.73},
-            {name: "Kai Havertz", team: "Arsenal", gw: [0.43, 0.47, 0.52, 0.46, 0.40, 0.39], total: 2.66},
-            {name: "Bryan Mbeumo", team: "Man Utd", gw: [0.41, 0.41, 0.41, 0.41, 0.41, 0.42], total: 2.47},
-            {name: "Kevin Schade", team: "Brentford", gw: [0.40, 0.40, 0.40, 0.40, 0.40, 0.40], total: 2.4},
-            {name: "Zian Flemming", team: "Burnley", gw: [0.41, 0.76, null, 0.41, 0.41, 0.41], total: 2.4},
-            {name: "William Osula", team: "Newcastle", gw: [0.13, 0.28, 0.48, 0.48, 0.48, 0.48], total: 2.33},
-            {name: "Valentín Castellanos", team: "West Ham", gw: [0.37, 0.37, 0.37, 0.37, 0.37, 0.37], total: 2.22},
-            {name: "Antoine Semenyo", team: "Man City", gw: [0.31, 0.56, null, 0.31, 0.56, 0.31], total: 2.05},
-            {name: "Beto", team: "Everton", gw: [0.32, 0.36, 0.34, 0.31, 0.32, 0.38], total: 2.02},
-            {name: "Omar Marmoush", team: "Man City", gw: [0.28, 0.47, null, 0.36, 0.65, 0.23], total: 1.99},
-            {name: "Enzo Fernández", team: "Chelsea", gw: [0.33, 0.60, null, 0.33, 0.33, 0.33], total: 1.92},
-            {name: "Morgan Gibbs-White", team: "Nott'm Forest", gw: [0.32, 0.43, 0.31, 0.31, 0.34, 0.22], total: 1.92},
-            {name: "Dango Ouattara", team: "Brentford", gw: [0.31, 0.31, 0.31, 0.31, 0.31, 0.31], total: 1.86},
-            {name: "Evanilson", team: "Bournemouth", gw: [0.20, 0.64, null, 0.39, 0.31, 0.32], total: 1.86},
-            {name: "Harvey Barnes", team: "Newcastle", gw: [0.32, 0.32, 0.32, 0.31, 0.28, 0.27], total: 1.83},
-            {name: "Brian Brobbey", team: "Sunderland", gw: [0.32, 0.28, 0.32, 0.29, 0.28, 0.28], total: 1.77},
-            {name: "Matheus Cunha", team: "Man Utd", gw: [0.31, 0.25, 0.32, 0.29, 0.26, 0.32], total: 1.75},
-            {name: "Marcus Tavernier", team: "Bournemouth", gw: [0.30, 0.54, null, 0.30, 0.30, 0.30], total: 1.74},
-            {name: "Chris Wood", team: "Nott'm Forest", gw: [0.11, 0.14, 0.36, 0.43, 0.43, 0.27], total: 1.74},
-            {name: "Richarlison", team: "Tottenham", gw: [0.27, 0.31, 0.31, 0.21, 0.30, 0.27], total: 1.67},
-            {name: "Cody Gakpo", team: "Liverpool", gw: [0.27, 0.27, 0.27, 0.27, 0.27, 0.27], total: 1.62},
-            {name: "Bukayo Saka", team: "Arsenal", gw: [0.31, 0.31, 0.22, 0.23, 0.23, 0.29], total: 1.6},
-            {name: "Anthony Gordon", team: "Newcastle", gw: [0.44, 0.44, 0.44, 0.10, 0.11, 0.05], total: 1.58},
-            {name: "Florian Wirtz", team: "Liverpool", gw: [0.26, 0.26, 0.26, 0.26, 0.26, 0.26], total: 1.56},
-            {name: "Eberechi Eze", team: "Arsenal", gw: [0.25, 0.25, 0.25, 0.25, 0.25, 0.26], total: 1.51},
-            {name: "Jack Hinshelwood", team: "Brighton", gw: [0.26, 0.47, null, 0.26, 0.26, 0.26], total: 1.51},
-            {name: "Bruno Fernandes", team: "Man Utd", gw: [0.26, 0.21, 0.27, 0.25, 0.22, 0.28], total: 1.49},
-            {name: "Thierno Barry", team: "Everton", gw: [0.21, 0.22, 0.24, 0.33, 0.24, 0.21], total: 1.45},
-            {name: "Tomas Soucek", team: "West Ham", gw: [0.24, 0.24, 0.24, 0.24, 0.24, 0.24], total: 1.44},
-            {name: "Callum Wilson", team: "West Ham", gw: [0.25, 0.30, 0.29, 0.22, 0.21, 0.18], total: 1.44},
-            {name: "Brenden Aaronson", team: "Leeds", gw: [0.19, 0.46, null, 0.33, 0.21, 0.23], total: 1.42},
-            {name: "Rayan", team: "Bournemouth", gw: [0.15, 0.48, null, 0.30, 0.24, 0.24], total: 1.42},
-            {name: "Casemiro", team: "Man Utd", gw: [0.24, 0.20, 0.25, 0.23, 0.20, 0.26], total: 1.39},
-            {name: "Mohamed Salah", team: "Liverpool", gw: [0.17, 0.20, 0.40, 0.35, 0.16, 0.07], total: 1.34},
-            {name: "Iliman Ndiaye", team: "Everton", gw: [0.22, 0.22, 0.22, 0.22, 0.22, 0.22], total: 1.32},
-            {name: "Adam Armstrong", team: "Wolves", gw: [0.22, 0.22, 0.22, 0.22, 0.22, 0.22], total: 1.32},
-            {name: "Nick Woltemade", team: "Newcastle", gw: [0.31, 0.31, 0.18, 0.17, 0.15, 0.20], total: 1.32},
-            {name: "João Pedro", team: "Chelsea", gw: [0.25, 0.47, null, 0.10, 0.14, 0.31], total: 1.28},
-            {name: "Gabriel Martinelli", team: "Arsenal", gw: [0.21, 0.14, 0.22, 0.21, 0.19, 0.28], total: 1.26},
-            {name: "Leandro Trossard", team: "Arsenal", gw: [0.20, 0.20, 0.19, 0.17, 0.23, 0.25], total: 1.25},
-            {name: "Igor Jesus", team: "Nott'm Forest", gw: [0.21, 0.29, 0.18, 0.18, 0.20, 0.17], total: 1.24},
-            {name: "Alexander Isak", team: "Liverpool", gw: [0.06, 0.08, 0.23, 0.34, 0.35, 0.15], total: 1.22},
-            {name: "Harry Wilson", team: "Fulham", gw: [0.20, 0.20, 0.20, 0.20, 0.20, 0.20], total: 1.2},
-            {name: "Phil Foden", team: "Man City", gw: [0.21, 0.38, null, 0.13, 0.29, 0.17], total: 1.19},
-            {name: "Habib Diarra", team: "Sunderland", gw: [0.23, 0.21, 0.23, 0.21, 0.21, 0.10], total: 1.19},
-            {name: "David Brooks", team: "Bournemouth", gw: [0.18, 0.36, null, 0.25, 0.21, 0.18], total: 1.18},
-            {name: "Morgan Rogers", team: "Aston Villa", gw: [0.19, 0.19, 0.19, 0.19, 0.20, 0.19], total: 1.16},
-            {name: "Jarrod Bowen", team: "West Ham", gw: [0.19, 0.19, 0.19, 0.19, 0.19, 0.19], total: 1.14},
-            {name: "Emile Smith-Rowe", team: "Fulham", gw: [0.14, 0.16, 0.17, 0.22, 0.22, 0.22], total: 1.13},
-            {name: "Mathys Tel", team: "Tottenham", gw: [0.17, 0.18, 0.17, 0.16, 0.19, 0.17], total: 1.05},
-            {name: "Ross Barkley", team: "Aston Villa", gw: [0.17, 0.18, 0.17, 0.18, 0.19, 0.17], total: 1.05},
-            {name: "Amad Diallo Traore", team: "Man Utd", gw: [0.20, 0.16, 0.21, 0.15, 0.13, 0.17], total: 1.02},
-            {name: "Liam Delap", team: "Chelsea", gw: [0.06, 0.11, null, 0.37, 0.37, 0.12], total: 1.02}
+            {name: "Loum Tchaouna", team: "Coventry", gw: [0.19, 1.00, 0.96, 0.94, 0.95, 0.99], total: 5.03},
+            {name: "Mohamed Salah", team: "Liverpool", gw: [0.64, 0.79, 0.41, 0.76, 0.60, 0.63], total: 3.84},
+            {name: "Erling Haaland", team: "Man City", gw: [0.57, 0.43, 0.52, 0.36, 0.69, 0.72], total: 3.3},
+            {name: "Thiago", team: "Brentford", gw: [0.13, 0.49, 0.66, 0.52, 0.66, 0.52], total: 2.99},
+            {name: "Bruno Guimarães", team: "Newcastle", gw: [0.15, 0.34, 0.74, 0.60, 0.52, 0.52], total: 2.86},
+            {name: "James Maddison", team: "Tottenham", gw: [0.12, 0.50, 0.55, 0.56, 0.56, 0.56], total: 2.85},
+            {name: "Lukas Nmecha", team: "Leeds", gw: [0.10, 0.50, 0.59, 0.51, 0.56, 0.57], total: 2.84},
+            {name: "Kai Havertz", team: "Arsenal", gw: [0.11, 0.51, 0.52, 0.52, 0.52, 0.52], total: 2.69},
+            {name: "David Brooks", team: "Bournemouth", gw: [0.06, 0.47, 0.47, 0.59, 0.54, 0.46], total: 2.59},
+            {name: "Danny Welbeck", team: "Brighton", gw: [0.09, 0.44, 0.49, 0.49, 0.46, 0.44], total: 2.4},
+            {name: "Brennan Johnson", team: "Crystal Palace", gw: [0.09, 0.48, 0.34, 0.28, 0.47, 0.66], total: 2.32},
+            {name: "Bryan Mbeumo", team: "Man Utd", gw: [0.10, 0.36, 0.40, 0.41, 0.41, 0.41], total: 2.09},
+            {name: "Rayan", team: "Bournemouth", gw: [0.05, 0.41, 0.35, 0.43, 0.39, 0.34], total: 1.97},
+            {name: "Chris Wood", team: "Nott'm Forest", gw: [0.08, 0.43, 0.43, 0.35, 0.34, 0.28], total: 1.91},
+            {name: "Lorenzo Lucca", team: "Nott'm Forest", gw: [0.36, 0.27, 0.36, 0.28, 0.25, 0.29], total: 1.81},
+            {name: "Maxence Lacroix", team: "Crystal Palace", gw: [0.07, 0.34, 0.30, 0.26, 0.33, 0.42], total: 1.71},
+            {name: "Thierno Barry", team: "Everton", gw: [0.06, 0.38, 0.30, 0.31, 0.30, 0.32], total: 1.67},
+            {name: "Emiliano Buendía", team: "Aston Villa", gw: [0.10, 0.07, 0.36, 0.45, 0.30, 0.34], total: 1.62},
+            {name: "Wilson Isidor", team: "Sunderland", gw: [0.06, 0.33, 0.29, 0.28, 0.32, 0.33], total: 1.61},
+            {name: "Joël Piroe", team: "Leeds", gw: [0.04, 0.27, 0.29, 0.33, 0.33, 0.33], total: 1.6},
+            {name: "Sávio", team: "Man City", gw: [0.35, 0.27, 0.16, 0.24, 0.32, 0.25], total: 1.59},
+            {name: "Mathias Jensen", team: "Brentford", gw: [0.06, 0.27, 0.34, 0.26, 0.33, 0.27], total: 1.53},
+            {name: "Liam Delap", team: "Chelsea", gw: [0.06, 0.29, 0.28, 0.31, 0.29, 0.30], total: 1.53},
+            {name: "Cole Palmer", team: "Chelsea", gw: [0.25, 0.25, 0.25, 0.25, 0.25, 0.25], total: 1.51},
+            {name: "Florian Wirtz", team: "Liverpool", gw: [0.06, 0.32, 0.26, 0.31, 0.26, 0.26], total: 1.47},
+            {name: "Joshua Zirkzee", team: "Man Utd", gw: [0.07, 0.24, 0.36, 0.36, 0.27, 0.18], total: 1.47},
+            {name: "Jacob Murphy", team: "Newcastle", gw: [0.07, 0.33, 0.41, 0.29, 0.17, 0.17], total: 1.45},
+            {name: "Brian Brobbey", team: "Sunderland", gw: [0.05, 0.28, 0.28, 0.28, 0.28, 0.28], total: 1.45},
+            {name: "Nico O&#039;Reilly", team: "Man City", gw: [0.17, 0.27, 0.16, 0.24, 0.32, 0.25], total: 1.41},
+            {name: "Mason Mount", team: "Man Utd", gw: [0.04, 0.14, 0.26, 0.28, 0.33, 0.32], total: 1.36},
+            {name: "Viktor Gyokeres", team: "Arsenal", gw: [0.10, 0.10, 0.23, 0.17, 0.39, 0.30], total: 1.28},
+            {name: "Lewis Hall", team: "Newcastle", gw: [0.05, 0.26, 0.30, 0.25, 0.19, 0.19], total: 1.25},
+            {name: "Casemiro", team: "Man Utd", gw: [0.13, 0.13, 0.19, 0.20, 0.19, 0.24], total: 1.08},
+            {name: "Bukayo Saka", team: "Arsenal", gw: [0.16, 0.16, 0.16, 0.16, 0.16, 0.27], total: 1.06},
+            {name: "Iliman Ndiaye", team: "Everton", gw: [0.04, 0.21, 0.19, 0.18, 0.22, 0.22], total: 1.06},
+            {name: "Harry Wilson", team: "Leeds", gw: [0.04, 0.19, 0.20, 0.20, 0.20, 0.20], total: 1.03},
+            {name: "Morgan Rogers", team: "Chelsea", gw: [0.04, 0.18, 0.19, 0.19, 0.19, 0.19], total: 0.99},
+            {name: "João Palhinha", team: "Tottenham", gw: [0.16, 0.18, 0.15, 0.17, 0.17, 0.13], total: 0.97},
+            {name: "Samuel Chukwueze", team: "Fulham", gw: [0.17, 0.15, 0.19, 0.14, 0.17, 0.14], total: 0.96},
+            {name: "Kiernan Dewsbury-Hall", team: "Everton", gw: [0.05, 0.17, 0.19, 0.17, 0.16, 0.12], total: 0.87},
+            {name: "Leandro Trossard", team: "Arsenal", gw: [0.09, 0.14, 0.18, 0.14, 0.13, 0.17], total: 0.86},
+            {name: "Tyrique George", team: "Everton", gw: [0.03, 0.16, 0.16, 0.16, 0.16, 0.16], total: 0.83},
+            {name: "Adam Smith", team: "Bournemouth", gw: [0.02, 0.17, 0.15, 0.18, 0.17, 0.14], total: 0.82},
+            {name: "Estêvão", team: "Chelsea", gw: [0.04, 0.18, 0.10, 0.12, 0.16, 0.19], total: 0.79},
+            {name: "Mateus Fernandes", team: "Tottenham", gw: [0.04, 0.15, 0.14, 0.17, 0.16, 0.13], total: 0.79},
+            {name: "Virgil van Dijk", team: "Liverpool", gw: [0.09, 0.08, 0.12, 0.21, 0.15, 0.13], total: 0.79},
+            {name: "Jack Hinshelwood", team: "Brighton", gw: [0.05, 0.26, 0.22, 0.14, 0.06, 0.05], total: 0.78},
+            {name: "Keane Lewis-Potter", team: "Brentford", gw: [0.03, 0.15, 0.17, 0.12, 0.17, 0.13], total: 0.77},
+            {name: "Alejandro Garnacho", team: "Chelsea", gw: [0.03, 0.16, 0.11, 0.12, 0.17, 0.18], total: 0.77},
+            {name: "Eliezer Mayenda", team: "Sunderland", gw: [0.13, 0.15, 0.13, 0.10, 0.10, 0.14], total: 0.76},
+            {name: "Gabriel Martinelli", team: "Arsenal", gw: [0.08, 0.12, 0.15, 0.13, 0.12, 0.15], total: 0.76},
+            {name: "Habib Diarra", team: "Sunderland", gw: [0.04, 0.16, 0.16, 0.13, 0.15, 0.11], total: 0.75},
+            {name: "Amad Diallo Traore", team: "Man Utd", gw: [0.02, 0.10, 0.14, 0.15, 0.14, 0.18], total: 0.73},
+            {name: "Igor Jesus", team: "Nott'm Forest", gw: [0.03, 0.13, 0.17, 0.13, 0.12, 0.14], total: 0.73},
+            {name: "Daniel James", team: "Leeds", gw: [0.02, 0.12, 0.14, 0.15, 0.15, 0.15], total: 0.73},
+            {name: "Nathaniel Clyne", team: "Crystal Palace", gw: [0.10, 0.12, 0.12, 0.10, 0.12, 0.15], total: 0.71},
+            {name: "Randal Kolo Muani", team: "Tottenham", gw: [0.12, 0.13, 0.11, 0.13, 0.12, 0.10], total: 0.71},
+            {name: "Boubacar Kamara", team: "Aston Villa", gw: [0.01, 0.09, 0.09, 0.20, 0.16, 0.15], total: 0.71},
+            {name: "Mikel Merino", team: "Arsenal", gw: [0.02, 0.18, 0.18, 0.12, 0.09, 0.10], total: 0.69},
+            {name: "Andrey Santos", team: "Chelsea", gw: [0.12, 0.14, 0.07, 0.09, 0.12, 0.14], total: 0.68}
         ];
         // ██ SITE_DATA:END ██
 
@@ -2125,7 +2121,7 @@
         // ██ SITE_DATA:END ██
 
         // ██ SITE_DATA:GW_LABELS ██
-        const GW_LABELS = ["GW32", "GW33", "GW34", "GW35", "GW36", "GW37"];
+        const GW_LABELS = ["GW1", "GW2", "GW3", "GW4", "GW5", "GW6"];
         // ██ SITE_DATA:END ██
 
         // ██ SITE_DATA:TRENDS ██
@@ -2644,61 +2640,6 @@
         }
 
         // Initialize
-        // ── 2026-06-02: Offseason renderer overrides ───────────
-        // Default renderers expect per-GW heatmap shape ({gw:[...], total}).
-        // Offseason data is flat season totals. Override the three player renderers.
-        function _offsHead() {
-            return '<tr>' +
-                '<th style="text-align:left;padding:14px 12px;">Player</th>' +
-                '<th style="text-align:left;padding:14px 12px;">Team</th>' +
-                '<th style="text-align:center;padding:14px 12px;">Pos</th>' +
-                '<th style="text-align:right;padding:14px 12px;">G</th>' +
-                '<th style="text-align:right;padding:14px 12px;">A</th>' +
-                '<th style="text-align:right;padding:14px 12px;">GI</th>' +
-                '<th style="text-align:right;padding:14px 12px;">xG</th>' +
-                '<th style="text-align:right;padding:14px 12px;">xA</th>' +
-                '<th style="text-align:right;padding:14px 12px;">Min</th></tr>';
-        }
-        function _offsRow(p, hl) {
-            function cell(v, bold) { return '<td style="text-align:right;padding:14px 12px;font-variant-numeric:tabular-nums;' + (bold?'font-weight:800;color:#1D9E75;':'color:#475569;') + '">' + v + '</td>'; }
-            var pb = p.pos==='GKP'?'#fef3c7':p.pos==='DEF'?'#dbeafe':p.pos==='MID'?'#dcfce7':'#fce7f3';
-            var pf = p.pos==='GKP'?'#92400e':p.pos==='DEF'?'#1e40af':p.pos==='MID'?'#166534':'#9d174d';
-            return '<tr style="border-bottom:1px solid #e5e7eb;">' +
-                '<td style="padding:14px 12px;font-weight:700;color:#0f172a;">' + p.name + '</td>' +
-                '<td style="padding:14px 12px;">' + getTeamNameWithBadge(p.team) + '</td>' +
-                '<td style="text-align:center;padding:14px 12px;"><span style="background:'+pb+';color:'+pf+';font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;">'+p.pos+'</span></td>' +
-                cell(p.goals, hl==='goals') + cell(p.assists, hl==='assists') + cell(p.gi, hl==='gi') +
-                cell(p.xG.toFixed(1)) + cell(p.xA.toFixed(1)) + cell(p.min) + '</tr>';
-        }
-        function _offsRender(arr, hi, bi, hl, pi) {
-            var he=document.getElementById(hi), be=document.getElementById(bi);
-            if(he) he.innerHTML = _offsHead();
-            if(be) be.innerHTML = arr.map(function(p){return _offsRow(p,hl);}).join('');
-            var pe=document.getElementById(pi); if(pe) pe.style.display='none';
-        }
-        window.renderPlayerGoals   = function(){ _offsRender(PLAYER_GOALS,   'playerGoalsHead',   'playerGoalsTable',   'goals',   'paginationGoals'); };
-        window.renderPlayerAssists = function(){ _offsRender(PLAYER_ASSISTS, 'playerAssistsHead', 'playerAssistsTable', 'assists', 'paginationAssists'); };
-        window.renderPlayerGI      = function(){ _offsRender(PLAYER_GI,      'playerGIHead',      'playerGITable',      'gi',      'paginationGI'); };
-        window.renderPlayerNextGW  = function(){};
-        window.changePlayerPage    = function(){};
-
-        // Team Predictions offseason — replace heatmap of per-GW %s with a clean team list.
-        // Numbers are meaningless without an upcoming GW; team names alone are still useful as the directory.
-        function _offsTeamList(headId, bodyId) {
-            var headEl = document.getElementById(headId);
-            var bodyEl = document.getElementById(bodyId);
-            if (headEl) headEl.innerHTML = '<tr><th style="text-align:left;padding:14px 18px;font-size:12px;font-weight:700;color:#64748b;letter-spacing:0.04em;text-transform:uppercase;background:#f8fafc;">Team</th></tr>';
-            if (bodyEl && typeof TEAM_PREDICTIONS !== 'undefined') {
-                var teams = Object.keys(TEAM_PREDICTIONS).sort();
-                bodyEl.innerHTML = teams.map(function(t){
-                    return '<tr style="border-bottom:1px solid #e5e7eb;"><td style="padding:14px 18px;font-weight:700;color:#0f172a;">' + getTeamNameWithBadge(t) + '</td></tr>';
-                }).join('');
-            }
-        }
-        window.renderTeamPredictions = function(){ _offsTeamList('teamPredHeadline', 'teamPredBody'); };
-        window.renderTeamGoals       = function(){ _offsTeamList('teamGoalsHeadline','teamGoalsBody'); };
-        window.renderTeamCS          = function(){ _offsTeamList('teamCSHeadline',   'teamCSBody'); };
-
         // Isolated init — one failure no longer cascades
         function safeRun(fn, name) { try { fn(); } catch (e) { console.warn('[render] '+name+' failed:', e); } }
         safeRun(renderRatings,         'Ratings');
