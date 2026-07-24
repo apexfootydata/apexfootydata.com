@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="1" data-built-at="2026-07-24T23:45:35">
+<meta name="apex-gw" content="1" data-built-at="2026-07-25T00:06:17">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -13491,7 +13491,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1784933134-GW1-cdb49b0a";
+const BUILD_VERSION = "1784934377-GW1-cdb49b0a";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = false;
@@ -13574,7 +13574,7 @@ const FPL_CORS_PROXY = 'https://fpl-proxy.weathered-bird-16f4.workers.dev';
 // the synthetic-squad path below is dead code in production. True only when
 // built via TEST_SOLVER.bat (--test-entry) for pre-deadline feature QA.
 const APEX_TEST_ENTRY = false;
-const APEX_TEST_SQUAD = {"picks": [["Lammens", "Manchester United"], ["Tarkowski", "Everton"], ["N.Williams", "Nott'm Forest"], ["Ballard", "Sunderland"], ["B.Fernandes", "Manchester United"], ["Ndiaye", "Everton"], ["Bruno G.", "Newcastle United"], ["Schade", "Brentford"], ["Haaland", "Manchester City"], ["Thiago", "Brentford"], ["Welbeck", "Brighton"], ["Verbruggen", "Brighton"], ["Aina", "Nott'm Forest"], ["Bassey", "Fulham"], ["Sangar\u00e9", "Nott'm Forest"]], "captain": "B.Fernandes", "vice": "Haaland"};
+const APEX_TEST_SQUAD = {"picks": [["Lammens", "Manchester United"], ["Tarkowski", "Everton"], ["N.Williams", "Nottingham Forest"], ["Ballard", "Sunderland"], ["B.Fernandes", "Manchester United"], ["Ndiaye", "Everton"], ["Bruno G.", "Newcastle United"], ["Schade", "Brentford"], ["Haaland", "Manchester City"], ["Thiago", "Brentford"], ["Welbeck", "Brighton"], ["Verbruggen", "Brighton"], ["Aina", "Nottingham Forest"], ["Bassey", "Fulham"], ["Sangar\u00e9", "Nottingham Forest"]], "captain": "B.Fernandes", "vice": "Haaland"};
 const APEX_BLANK_ENTRY = false;
 // xMins edits cross-device sync — Cloudflare Worker + KV (free tier). Worker
 // source: cloudflare_worker/apex_edits_sync.js. Empty string = sync disabled
@@ -23298,7 +23298,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW1</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1784933134-GW1-cdb49b0a</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1784934377-GW1-cdb49b0a</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
