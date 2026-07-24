@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="1" data-built-at="2026-07-24T15:57:54">
+<meta name="apex-gw" content="1" data-built-at="2026-07-24T16:16:26">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/x-icon" href="favicon.ico?v=4">
@@ -1235,6 +1235,17 @@
         .data-table, .heatmap-table, .matchweek-table, .player-table, .final-table, .nextgw-table {
             background: #ffffff !important;
         }
+
+        /* Heat tints restored over the light-theme td whitewash (2026-07-24).
+           The global `td { background:#ffffff !important }` above was silently
+           killing BOTH heat families. These selectors carry higher specificity,
+           so among !important rules they win. Team tabs = .levelN, player
+           tabs = .hm-N. Brand teal ramp; readable dark text throughout. */
+        td.heatmap-cell.level0, td.hm-1 { background: rgba(29,158,117,0.07) !important; }
+        td.heatmap-cell.level1, td.hm-2 { background: rgba(29,158,117,0.16) !important; }
+        td.heatmap-cell.level2, td.hm-3 { background: rgba(29,158,117,0.30) !important; }
+        td.heatmap-cell.level3, td.hm-4 { background: rgba(29,158,117,0.46) !important; }
+        td.heatmap-cell.level4, td.hm-5 { background: rgba(29,158,117,0.66) !important; color: #06251b !important; }
 
         /* Hero stat card */
         .hero-stat-card { background: #ffffff !important; border-color: rgba(29,158,117,0.4) !important; padding: 22px 28px !important; border-radius: 14px !important; }
