@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="1" data-built-at="2026-07-27T11:05:46">
+<meta name="apex-gw" content="1" data-built-at="2026-07-27T11:35:00">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -8237,6 +8237,16 @@ html.apex-offseason #view-landing .hero-sub::after {
           // Pair each GW with a chip; sort by GW for canonical order.
           const seq = gwPerm.map((gw, i) => ({ gw, chip: chipCombo[i] }))
                             .sort((a, b) => a.gw - b.gw);
+          // ── FREE HIT IS NEVER OFFERED IN THE UNLIMITED WEEK ──────────────
+          // 2026-07-27 (Marcus: "no free hit should be offered in gw1"). Twin
+          // of the same guard in generate_solver_html.py and
+          // chip_planner_compute.py. Before the GW1 deadline every transfer is
+          // free and unlimited, so a Free Hit buys nothing you cannot already
+          // have. It topped the board because chip gains compare against
+          // "make no transfers at all", which is not a constraint pre-GW1. The
+          // 07-25 tie-break could not demote it: that only fires within 0.05
+          // and these rows led by 0.2-0.6.
+          if (startGw === 1 && seq.some(e => e.gw === 1 && e.chip === 'FH')) continue;
           const seqStr = seq.map(e => `${e.chip}${e.gw}`).join(' · ');
           if (seen.has(seqStr)) continue;
           seen.add(seqStr);
@@ -14017,7 +14027,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1785146746-GW1-2d2b324f";
+const BUILD_VERSION = "1785148500-GW1-2d2b324f";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = false;
@@ -25976,7 +25986,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW1</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1785146746-GW1-2d2b324f</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1785148500-GW1-2d2b324f</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
