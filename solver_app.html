@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="1" data-built-at="2026-07-27T17:50:43">
+<meta name="apex-gw" content="1" data-built-at="2026-07-27T18:03:47">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -14069,7 +14069,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1785171043-GW1-5766e9ee";
+const BUILD_VERSION = "1785171827-GW1-5766e9ee";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = false;
@@ -14172,13 +14172,13 @@ const FPL_CORS_PROXY = 'https://fpl-proxy.weathered-bird-16f4.workers.dev';
 // the synthetic-squad path below is dead code in production. True only when
 // built via TEST_SOLVER.bat (--test-entry) for pre-deadline feature QA.
 const APEX_TEST_ENTRY = false;
-const APEX_TEST_SQUAD = {"picks": [["Petrovi\u0107", "Bournemouth"], ["Mosquera", "Arsenal"], ["Thiaw", "Newcastle United"], ["Virgil", "Liverpool"], ["B.Fernandes", "Manchester United"], ["Ndiaye", "Everton"], ["Tavernier", "Bournemouth"], ["Sarr", "Crystal Palace"], ["Haaland", "Manchester City"], ["Thiago", "Brentford"], ["Calvert-Lewin", "Leeds"], ["Leno", "Fulham"], ["Shaw", "Manchester United"], ["Rodon", "Leeds"], ["Iroegbunam", "Everton"]], "captain": "Haaland", "vice": "B.Fernandes"};
+const APEX_TEST_SQUAD = {"picks": [["Petrovi\u0107", "Bournemouth"], ["Gabriel", "Arsenal"], ["Mosquera", "Arsenal"], ["Tarkowski", "Everton"], ["Virgil", "Liverpool"], ["Ndiaye", "Everton"], ["Gibbs-White", "Nottingham Forest"], ["Sarr", "Crystal Palace"], ["Haaland", "Manchester City"], ["Thiago", "Brentford"], ["Calvert-Lewin", "Leeds"], ["Leno", "Fulham"], ["Thiaw", "Newcastle United"], ["Sangar\u00e9", "Nottingham Forest"], ["Iroegbunam", "Everton"]], "captain": "Haaland", "vice": "Gabriel"};
 const APEX_BLANK_ENTRY = false;
 // Owner force-in / force-out list (data/preseason/seed_locks.csv). Consumed by
 // _ppSeedLockOpts() in assets/apex_app.js and passed to EVERY pre-GW1 wildcard
 // solve, so the tree, the pitch reveal and the Engine picks card cannot
 // disagree with each other or with the seeded squad. Empty lists in-season.
-const APEX_SEED_LOCKS = {"in": ["Haaland", "B.Fernandes"], "out": ["Saka", "J.Timber", "Gabriel", "Dubravka"]};
+const APEX_SEED_LOCKS = {"in": [], "out": ["J.Timber", "Dubravka"]};
 // xMins edits cross-device sync — Cloudflare Worker + KV (free tier). Worker
 // source: cloudflare_worker/apex_edits_sync.js. Empty string = sync disabled
 // (everything still works, edits just stay per-device).
@@ -26350,7 +26350,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW1</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1785171043-GW1-5766e9ee</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1785171827-GW1-5766e9ee</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
@@ -26688,6 +26688,63 @@ document.addEventListener('DOMContentLoaded', () => {
       });
   });
 
+  // ── Seed-squad pool fallback (2026-07-27) ─────────────────────────────────
+  // The pre-deadline seed matches APEX_TEST_SQUAD against POOL_DATA on
+  // web_name + team and needs ALL FIFTEEN. The squad BUILDER picks from a
+  // fuller list than the page ships (POOL_DATA drops third-choice keepers and
+  // low-minute players), so one mismatch was enough to make the seed fall
+  // through to a thrown picks error -- which the boot classifier turned into
+  // the pre-season splash. The whole site went down over one backup goalkeeper.
+  //
+  // A missing player should cost you a bench slot, not the product. Work out
+  // which POSITIONS are short of a legal 2/5/5/3 and fill each from POOL_DATA:
+  // cheapest first, nobody already picked, never a fourth from one club, never
+  // over the remaining budget. Returns the filled picks or null when it cannot
+  // make a legal 15 -- in which case the caller behaves exactly as before.
+  function _seedFillMissing(matched, missingSlots, pool, budget) {
+    var NEED = { 1: 2, 2: 5, 3: 5, 4: 3 };
+    var have = { 1: 0, 2: 0, 3: 0, 4: 0 };
+    var perTeam = {};
+    var takenIds = {};
+    var spend = 0;
+    for (var i = 0; i < matched.length; i++) {
+      var mp = matched[i].pool;
+      have[mp.element_type] = (have[mp.element_type] || 0) + 1;
+      perTeam[mp.team] = (perTeam[mp.team] || 0) + 1;
+      takenIds[mp.id] = 1;
+      spend += (+mp.cost || 0);
+    }
+    var deficits = [];
+    for (var et = 1; et <= 4; et++) {
+      for (var d = 0; d < (NEED[et] - (have[et] || 0)); d++) deficits.push(et);
+    }
+    if (deficits.length !== missingSlots.length) return null;
+    var out = matched.slice();
+    var subs = [];
+    for (var k = 0; k < deficits.length; k++) {
+      var want = deficits[k];
+      var budgetLeft = (budget || 100) - spend;
+      var cands = pool.filter(function (q) {
+        return q.element_type === want && !takenIds[q.id]
+               && (perTeam[q.team] || 0) < 3 && (+q.cost || 0) <= budgetLeft;
+      }).sort(function (a, b) { return (+a.cost || 0) - (+b.cost || 0); });
+      if (!cands.length) return null;
+      var pick = cands[0];
+      takenIds[pick.id] = 1;
+      perTeam[pick.team] = (perTeam[pick.team] || 0) + 1;
+      spend += (+pick.cost || 0);
+      subs.push(pick.web_name + ' (' + pick.team + ')');
+      out.push({ slot: missingSlots[k].slot, pool: pick });
+    }
+    out.sort(function (a, b) { return a.slot - b.slot; });
+    try {
+      console.warn('[seed-fallback] substituted ' + subs.length +
+                   ' player(s) the page could not resolve: ' + subs.join(', '));
+      window._apexSeedSubstituted = subs;
+    } catch (_eF) {}
+    return out;
+  }
+
   async function hydrateFromFPL(id, setStatus) {
     var proxy = (typeof FPL_CORS_PROXY === 'string' && FPL_CORS_PROXY) ? FPL_CORS_PROXY : '';
     if (!proxy) throw new Error('FPL proxy not configured');
@@ -26739,12 +26796,19 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!picks && typeof APEX_TEST_SQUAD !== 'undefined' && APEX_TEST_SQUAD) {
       var _tsPicks = [];
       var _tsMissing = [];
+      var _tsMatched = [];
+      var _tsMissingSlots = [];
       for (var _ti = 0; _ti < APEX_TEST_SQUAD.picks.length; _ti++) {
         var _spec = APEX_TEST_SQUAD.picks[_ti];
         var _pp2 = POOL_DATA.find(function (q) {
           return q.web_name === _spec[0] && q.team === _spec[1];
         });
-        if (!_pp2) { _tsMissing.push(_spec[0] + ' (' + _spec[1] + ')'); continue; }
+        if (!_pp2) {
+          _tsMissing.push(_spec[0] + ' (' + _spec[1] + ')');
+          _tsMissingSlots.push({ slot: _ti + 1, spec: _spec });
+          continue;
+        }
+        _tsMatched.push({ slot: _ti + 1, pool: _pp2 });
         _tsPicks.push({
           element: _pp2.id,
           position: _ti + 1,
@@ -26755,6 +26819,17 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       if (_tsMissing.length) {
         console.warn('[test-entry] not in POOL_DATA (name/team drift?):', _tsMissing.join(', '));
+        // 2026-07-27: do not let one unresolvable player sink the whole boot.
+        var _filled = _seedFillMissing(_tsMatched, _tsMissingSlots, POOL_DATA,
+                                       (TEAM_META && TEAM_META.budget) || 100);
+        if (_filled && _filled.length === 15) {
+          _tsPicks = _filled.map(function (m) {
+            return { element: m.pool.id, position: m.slot,
+                     is_captain: m.pool.web_name === APEX_TEST_SQUAD.captain,
+                     is_vice_captain: m.pool.web_name === APEX_TEST_SQUAD.vice,
+                     multiplier: m.pool.web_name === APEX_TEST_SQUAD.captain ? 2 : 1 };
+          });
+        }
       }
       if (_tsPicks.length === 15) {
         console.log('[pre-deadline] picks API empty — hydrating model GW1 squad');
