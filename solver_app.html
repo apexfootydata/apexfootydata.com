@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="1" data-built-at="2026-07-27T17:42:51">
+<meta name="apex-gw" content="1" data-built-at="2026-07-27T17:50:43">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -14069,7 +14069,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1785170571-GW1-5766e9ee";
+const BUILD_VERSION = "1785171043-GW1-5766e9ee";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = false;
@@ -14172,13 +14172,13 @@ const FPL_CORS_PROXY = 'https://fpl-proxy.weathered-bird-16f4.workers.dev';
 // the synthetic-squad path below is dead code in production. True only when
 // built via TEST_SOLVER.bat (--test-entry) for pre-deadline feature QA.
 const APEX_TEST_ENTRY = false;
-const APEX_TEST_SQUAD = {"picks": [["Petrovi\u0107", "Bournemouth"], ["Gabriel", "Arsenal"], ["Tarkowski", "Everton"], ["Virgil", "Liverpool"], ["Ndiaye", "Everton"], ["Gibbs-White", "Nottingham Forest"], ["Szoboszlai", "Liverpool"], ["Sarr", "Crystal Palace"], ["Haaland", "Manchester City"], ["Thiago", "Brentford"], ["Calvert-Lewin", "Leeds"], ["Dubravka", "Tottenham"], ["Shaw", "Manchester United"], ["Rodon", "Leeds"], ["Iroegbunam", "Everton"]], "captain": "Haaland", "vice": "Gabriel"};
+const APEX_TEST_SQUAD = {"picks": [["Petrovi\u0107", "Bournemouth"], ["Mosquera", "Arsenal"], ["Thiaw", "Newcastle United"], ["Virgil", "Liverpool"], ["B.Fernandes", "Manchester United"], ["Ndiaye", "Everton"], ["Tavernier", "Bournemouth"], ["Sarr", "Crystal Palace"], ["Haaland", "Manchester City"], ["Thiago", "Brentford"], ["Calvert-Lewin", "Leeds"], ["Leno", "Fulham"], ["Shaw", "Manchester United"], ["Rodon", "Leeds"], ["Iroegbunam", "Everton"]], "captain": "Haaland", "vice": "B.Fernandes"};
 const APEX_BLANK_ENTRY = false;
 // Owner force-in / force-out list (data/preseason/seed_locks.csv). Consumed by
 // _ppSeedLockOpts() in assets/apex_app.js and passed to EVERY pre-GW1 wildcard
 // solve, so the tree, the pitch reveal and the Engine picks card cannot
 // disagree with each other or with the seeded squad. Empty lists in-season.
-const APEX_SEED_LOCKS = {"in": [], "out": []};
+const APEX_SEED_LOCKS = {"in": ["Haaland", "B.Fernandes"], "out": ["Saka", "J.Timber", "Gabriel", "Dubravka"]};
 // xMins edits cross-device sync — Cloudflare Worker + KV (free tier). Worker
 // source: cloudflare_worker/apex_edits_sync.js. Empty string = sync disabled
 // (everything still works, edits just stay per-device).
@@ -26350,7 +26350,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW1</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1785170571-GW1-5766e9ee</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1785171043-GW1-5766e9ee</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
@@ -26529,6 +26529,23 @@ document.addEventListener('DOMContentLoaded', () => {
     // this state ("Press Optimise to build your opening 15").
     // So: explain, then get out of the way. Only genuine failures dead-end now.
     function softLand(msg) {
+      // 2026-07-27, second pass: only land the user in the solver if there is
+      // actually a squad to land ON. The seed block above needs all 15 of
+      // APEX_TEST_SQUAD to resolve in POOL_DATA; when one does not it falls
+      // through silently, and softLand was then dropping people onto a
+      // completely empty pitch -- 0.0m squad value, no shirts, nothing to
+      // Optimise. An honest message beats a broken screen, so hand back to
+      // fail() in that case. (The build-time coherence gate should stop this
+      // reaching production at all; this is the belt to its braces.)
+      var _seeded = false;
+      try {
+        _seeded = (typeof _xiPlayers !== 'undefined' && typeof _benchPlayers !== 'undefined'
+                   && (_xiPlayers.length + _benchPlayers.length) === 15);
+      } catch (_eS) { _seeded = false; }
+      if (!_seeded) {
+        fail(msg + ' (The model squad could not be loaded for this build -- please tell Marcus.)');
+        return;
+      }
       try {
         var s = document.getElementById('apex-status');
         if (s) { s.textContent = msg; s.style.opacity = '1'; }
