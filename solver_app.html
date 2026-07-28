@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="1" data-built-at="2026-07-28T12:08:50">
+<meta name="apex-gw" content="1" data-built-at="2026-07-28T12:33:04">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -7368,22 +7368,10 @@ html.apex-offseason #view-landing .hero-sub::after {
     if (!Array.isArray(players) || players.length === 0) {
       return { captain: null, vice: null };
     }
-    // Captain/vice from attackers only (MID/FWD) - never a keeper or defender.
-    // Fall back to the full XI only if there aren't 2 attackers available.
-    const attackers = players.filter(p => {
-      const code = p.element_type || p.pos || 0;
-      return code === 3 || code === 4;
-    });
-    const pool = attackers.length >= 2 ? attackers : players;
-    // 2026-07-28 (patch 9): same armband rule as the baked page's pickBestXi —
-    // at the current GW, prefer cap_score among attackers; ties and future GWs
-    // fall through to xP. Keep the two pickers IDENTICAL.
-    const useCapScore = (gwIdx === 0) && pool.some(p => (p.cap_score || 0) > 0);
-    const sorted = pool.slice().sort((a, b) => {
-      if (useCapScore) {
-        const cs = (b.cap_score || 0) - (a.cap_score || 0);
-        if (cs !== 0) return cs;
-      }
+    // 2026-07-28 (patch 11): captain = highest xP, ANY position (Marcus's
+    // rule — max-xP is the EV-max captain; the attackers-only filter and the
+    // patch-9 cap_score ranking are retired). Identical to pickBestXi.
+    const sorted = players.slice().sort((a, b) => {
       const diff = _xpAt(b, gwIdx) - _xpAt(a, gwIdx);
       if (diff !== 0) return diff;
       return (a.id || 0) - (b.id || 0);
@@ -14077,7 +14065,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1785236930-GW1-00ef0f93";
+const BUILD_VERSION = "1785238384-GW1-00ef0f93";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = false;
@@ -15899,24 +15887,12 @@ function pickBestXi(squad, gwIdx) {
 
   if (bestXi.length === 0) bestXi = squad.slice(0, 11);
 
-  // 2026-07-28 (patch 8): armband from ATTACKERS (MID/FWD) only, matching
-  // ApexSolver.pickCaptainVC in assets/apex_solver.js — never a keeper or
-  // defender; fall back to the full XI only if fewer than 2 attackers. This
-  // page previously took highest plain xP of ANY position, which handed the
-  // (C) to a CS+DefCon-driven defender over the premium striker while the
-  // other picker disagreed. Same id tie-break as the shared module.
-  const _capAtt = bestXi.filter(p => p.element_type === 3 || p.element_type === 4);
-  const _capPool = _capAtt.length >= 2 ? _capAtt : bestXi;
-  // 2026-07-28 (patch 9): at the current GW, rank the armband by the captain
-  // regression's cap_score (June holdout: +2pt over actual picks) — attackers
-  // only, so a DEF-smelling score can never take the C. cap_score is a
-  // start-GW scalar: future GWs keep plain xP. Guard-zeroed file => xP rule.
-  const _useCapScore = (gwIdx === 0) && _capPool.some(p => (p.cap_score || 0) > 0);
-  const _capSorted = [..._capPool].sort((a, b) => {
-    if (_useCapScore) {
-      const cs = (b.cap_score || 0) - (a.cap_score || 0);
-      if (cs !== 0) return cs;
-    }
+  // 2026-07-28 (patch 11, FINAL after patches 8/9): captain = highest xP in
+  // the XI, ANY position; vice = 2nd. Marcus: a solver must never captain a
+  // lower-xP player — doubling is linear, so max-xP IS the EV-max captain.
+  // If a premium deserves the armband, the market anchor (patch 10) raises
+  // his NUMBER; the rule stays neutral. cap_score is data, not a rule.
+  const _capSorted = [...bestXi].sort((a, b) => {
     const d = xpMap[b.id] - xpMap[a.id];
     if (d !== 0) return d;
     return (a.id || 0) - (b.id || 0);
@@ -26376,7 +26352,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW1</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1785236930-GW1-00ef0f93</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1785238384-GW1-00ef0f93</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
