@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="1" data-built-at="2026-07-30T14:42:32">
+<meta name="apex-gw" content="1" data-built-at="2026-07-30T15:05:36">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -15416,7 +15416,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1785418952-GW1-21434322";
+const BUILD_VERSION = "1785420336-GW1-21434322";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = false;
@@ -15561,7 +15561,7 @@ const FPL_CORS_PROXY = 'https://fpl-proxy.weathered-bird-16f4.workers.dev';
 // the synthetic-squad path below is dead code in production. True only when
 // built via TEST_SOLVER.bat (--test-entry) for pre-deadline feature QA.
 const APEX_TEST_ENTRY = false;
-const APEX_TEST_SQUAD = {"picks": [["Raya", "Arsenal"], ["Gabriel", "Arsenal"], ["Mosquera", "Arsenal"], ["Virgil", "Liverpool"], ["B.Fernandes", "Manchester United"], ["Ndiaye", "Everton"], ["Palmer", "Chelsea"], ["Tavernier", "Bournemouth"], ["Sarr", "Crystal Palace"], ["Thiago", "Brentford"], ["Calvert-Lewin", "Leeds"], ["Verbruggen", "Brighton"], ["Thiaw", "Newcastle United"], ["Canvot", "Crystal Palace"], ["Beto", "Everton"]], "captain": "B.Fernandes", "vice": "Gabriel"};
+const APEX_TEST_SQUAD = {"picks": [["Raya", "Arsenal"], ["Gabriel", "Arsenal"], ["Tarkowski", "Everton"], ["Virgil", "Liverpool"], ["B.Fernandes", "Manchester United"], ["Ndiaye", "Everton"], ["Palmer", "Chelsea"], ["Tavernier", "Bournemouth"], ["Sarr", "Crystal Palace"], ["Thiago", "Brentford"], ["Calvert-Lewin", "Leeds"], ["Verbruggen", "Brighton"], ["Thiaw", "Newcastle United"], ["Beto", "Everton"], ["Rodon", "Leeds"]], "captain": "B.Fernandes", "vice": "Gabriel"};
 const APEX_BLANK_ENTRY = false;
 // Owner force-in / force-out list (data/preseason/seed_locks.csv). Consumed by
 // _ppSeedLockOpts() in assets/apex_app.js and passed to EVERY pre-GW1 wildcard
@@ -29051,7 +29051,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW1</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1785418952-GW1-21434322</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1785420336-GW1-21434322</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
