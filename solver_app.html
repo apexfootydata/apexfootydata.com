@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="1" data-built-at="2026-07-30T17:48:12">
+<meta name="apex-gw" content="1" data-built-at="2026-07-30T18:12:52">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -5571,7 +5571,7 @@ html.apex-offseason #view-landing .hero-sub::after {
   <nav class="nav">
     <a href="/" class="nav-link">← FPL Apex</a>
     <a href="#" class="nav-link" onclick="switchView('team'); return false;">My Squad</a>
-    <a href="#" class="nav-link" onclick="switchView('chip-select'); return false;">Chip Planner</a>
+    <a href="#" id="nav-chip-planner" class="nav-link" onclick="switchView('chip-select'); return false;">Chip Planner</a>
     <a href="#" class="nav-link" onclick="switchView('league'); return false;">Mini-League</a>
     <!-- 2026-07-25: the in-solver League Data tab is RETIRED. It mirrored the
          homepage's RATINGS / FIXTURES / FINAL_TABLE arrays and had never once
@@ -5605,7 +5605,7 @@ html.apex-offseason #view-landing .hero-sub::after {
     </div>
 
     <div class="landing-cta-row">
-      <button class="landing-cta landing-cta-primary" onclick="_landingGo('chip-select')">
+      <button id="landing-cta-chips" class="landing-cta landing-cta-primary" onclick="_landingGo('chip-select')">
         <span class="cta-icon">⚡</span>
         <span class="cta-body">
           <span class="cta-title">Optimise My Chips</span>
@@ -15431,7 +15431,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1785430092-GW1-128dab7e";
+const BUILD_VERSION = "1785431571-GW1-128dab7e";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = false;
@@ -15493,6 +15493,39 @@ function _apexDeadlineGuard(TEAM_META) {
   } catch (_eDlGuard) {}
 }
 _apexDeadlineGuard(TEAM_META);
+// ── APEX_CHIP_PLANNER_GATE ──────────────────────────────────────────────
+// Precedence: URL > localStorage > build default. The URL form writes
+// through to localStorage so it survives the next navigation.
+const _APEX_CHIP_PLANNER_BUILD = false;
+function _apexChipPlannerOn() {
+  try {
+    const q = new URLSearchParams(window.location.search).get('chipplanner');
+    if (q === 'on' || q === '1') {
+      try { localStorage.setItem('apex_chip_planner', 'on'); } catch (_e1) {}
+      return true;
+    }
+    if (q === 'off' || q === '0') {
+      try { localStorage.setItem('apex_chip_planner', 'off'); } catch (_e2) {}
+      return false;
+    }
+    const ls = localStorage.getItem('apex_chip_planner');
+    if (ls === 'on') return true;
+    if (ls === 'off') return false;
+  } catch (_e) {}
+  return _APEX_CHIP_PLANNER_BUILD;
+}
+// Hide the entry points that promise a recommendation. The chip
+// AVAILABILITY link stays — the decision tree needs to know which chips
+// are still in hand — but it no longer advertises optimisation.
+function _apexApplyChipPlannerGate() {
+  try {
+    if (_apexChipPlannerOn()) return;
+    const cta = document.getElementById('landing-cta-chips');
+    if (cta) cta.style.display = 'none';
+    const nav = document.getElementById('nav-chip-planner');
+    if (nav) nav.textContent = 'Chips';
+  } catch (_e) {}
+}
 // ── Horizon: tier ceiling + user choice (2026-07-26) ─────────────────────
 // Was a fixed tier cap. Now the user picks the depth and the tier sets the
 // MAXIMUM they may pick — free 5, paid 12.
@@ -15576,7 +15609,7 @@ const FPL_CORS_PROXY = 'https://fpl-proxy.weathered-bird-16f4.workers.dev';
 // the synthetic-squad path below is dead code in production. True only when
 // built via TEST_SOLVER.bat (--test-entry) for pre-deadline feature QA.
 const APEX_TEST_ENTRY = false;
-const APEX_TEST_SQUAD = {"picks": [["Raya", "Arsenal"], ["Gabriel", "Arsenal"], ["Tarkowski", "Everton"], ["Virgil", "Liverpool"], ["B.Fernandes", "Manchester United"], ["Ndiaye", "Everton"], ["Palmer", "Chelsea"], ["Tavernier", "Bournemouth"], ["Sarr", "Crystal Palace"], ["Thiago", "Brentford"], ["Calvert-Lewin", "Leeds"], ["Verbruggen", "Brighton"], ["Thiaw", "Newcastle United"], ["Beto", "Everton"], ["Rodon", "Leeds"]], "captain": "B.Fernandes", "vice": "Gabriel"};
+const APEX_TEST_SQUAD = {"picks": [["Raya", "Arsenal"], ["Gabriel", "Arsenal"], ["Thiaw", "Newcastle United"], ["Virgil", "Liverpool"], ["B.Fernandes", "Manchester United"], ["Ndiaye", "Everton"], ["Gibbs-White", "Nottingham Forest"], ["Palmer", "Chelsea"], ["Tavernier", "Bournemouth"], ["Thiago", "Brentford"], ["Calvert-Lewin", "Leeds"], ["Verbruggen", "Brighton"], ["Beto", "Everton"], ["Rodon", "Leeds"], ["Cash", "Aston Villa"]], "captain": "B.Fernandes", "vice": "Gabriel"};
 const APEX_BLANK_ENTRY = false;
 // Owner force-in / force-out list (data/preseason/seed_locks.csv). Consumed by
 // _ppSeedLockOpts() in assets/apex_app.js and passed to EVERY pre-GW1 wildcard
@@ -16537,7 +16570,9 @@ function applyChipSelection() {
     const chk = document.getElementById(`chk-${c}`);
     _activeChips[c] = chk ? chk.checked : true;
   });
-  switchView('optimal');
+  // APEX_CHIP_PLANNER_GATE — with the recommendation surface off, step 2 is
+  // not "here is your optimal sequence", it is "get on with your squad".
+  switchView(_apexChipPlannerOn() ? 'optimal' : 'team');
 }
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -18326,6 +18361,7 @@ function _apexSyncHorizonLabel() {
 }
 document.addEventListener('DOMContentLoaded', function () {
   _apexBuildHorizonPicker();
+  _apexApplyChipPlannerGate();   // APEX_CHIP_PLANNER_GATE
   _apexSyncHorizonLabel();
   _apexChipSet2Note();
 });
@@ -27183,6 +27219,32 @@ function _ensureChipPlannerLoadedServer() {
 }
 
 function initOptimalView() {
+  // ── APEX_CHIP_PLANNER_GATE ────────────────────────────────────────────
+  // Return BEFORE _ensureChipPlannerLoaded(): that call is one Free Hit ILP
+  // plus one Wildcard ILP per gameweek (38 solves at a 19-GW horizon), and
+  // running it to render a panel nobody should act on is the worst of both.
+  if (!_apexChipPlannerOn()) {
+    const _w = document.getElementById('optimal-top-wrap');
+    if (_w) {
+      _w.innerHTML = '<div style="background:var(--bg2);border:1px solid var(--border);'
+        + 'border-radius:12px;padding:22px;line-height:1.55;">'
+        + '<div style="font-weight:800;margin-bottom:6px;">Chip strategy is off for now</div>'
+        + '<div style="color:var(--muted);font-size:.9rem;">Chip timing is mostly decided by '
+        + 'double and blank gameweeks, and the fixture calendar that creates them has not been '
+        + 'published yet. Ranking sequences against a schedule nobody has seen would look precise '
+        + 'and be guesswork, so this page is switched off until those weeks are known.'
+        + '<br><br>Your chips are still yours to place by hand: mark them on the squad page and '
+        + 'the transfer planner will price and play them week by week.</div></div>';
+    }
+    ['baseline-strip-wrap', 'chip-status-row', 'rotation-risk-wrap',
+     'model-confidence-wrap'].forEach(function (id) {
+      const _e = document.getElementById(id);
+      if (_e) _e.innerHTML = '';
+    });
+    const _sb = document.getElementById('sequences-tbody');
+    if (_sb) _sb.innerHTML = '';
+    return;
+  }
   if (CHIP_PLANNER && CHIP_PLANNER._lazy && !_chipPlannerLoaded) {
     _ensureChipPlannerLoaded().then(() => initOptimalView()).catch(() => {});
     return;
@@ -29139,7 +29201,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW1</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1785430092-GW1-128dab7e</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1785431571-GW1-128dab7e</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
