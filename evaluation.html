@@ -194,8 +194,8 @@ var EVAL_DATA = null;
     document.getElementById('eval-apex').textContent  = fmt(EVAL_DATA.apex);
     document.getElementById('eval-toolA').textContent = fmt(EVAL_DATA.review);
     var bEl=document.getElementById('eval-toolB');
-    bEl.innerHTML = (EVAL_DATA.solio==null) ? '—'
-                    : (fmt(EVAL_DATA.solio)+'<span style="font-size:14px;">&dagger;</span>');
+    bEl.innerHTML = (EVAL_DATA.bench_b==null) ? '—'
+                    : (fmt(EVAL_DATA.bench_b)+'<span style="font-size:14px;">&dagger;</span>');
 
     var head=document.getElementById('eval-heading');
     if(head){
