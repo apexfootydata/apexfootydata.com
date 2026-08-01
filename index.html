@@ -82,16 +82,16 @@
         .card p{color:var(--ink2); font-size:14.5px;}
         .card .k{display:inline-block; font-size:11.5px; font-weight:800; letter-spacing:1px; color:var(--green); margin-bottom:10px;}
         /* receipts strip */
-        .receipts{background:var(--dark); color:#e9e6df; border-radius:16px; padding:34px 34px; margin:40px 0;}
+        .receipts{background:var(--card); color:var(--ink); border:1px solid var(--line); border-radius:16px; padding:34px 34px; margin:40px 0; box-shadow:0 1px 2px rgba(12,12,15,.04);}
         .receipts h2{font-size:24px; margin-bottom:6px;}
-        .receipts .sub2{color:#9ca3af; font-size:14.5px; margin-bottom:22px;}
+        .receipts .sub2{color:var(--ink2); font-size:14.5px; margin-bottom:22px;}
         .rgrid{display:grid; grid-template-columns:repeat(4,1fr); gap:14px;}
-        .rbox{background:#1b1b22; border:1px solid #2a2a35; border-radius:12px; padding:16px;}
-        .rbox .lab{font-size:11.5px; letter-spacing:1px; color:#9ca3af; font-weight:700; min-height:30px;}
-        .rbox .val{font-size:26px; font-weight:800; margin-top:6px; color:#fff;}
-        .rbox .val.g{color:#3ecf9a;}
-        .rfoot{color:#9ca3af; font-size:13px; margin-top:18px;}
-        .rfoot a{color:#3ecf9a; font-weight:700; text-decoration:none;}
+        .rbox{background:#F6F2EA; border:1px solid var(--line); border-radius:12px; padding:16px;}
+        .rbox .lab{font-size:11.5px; letter-spacing:1px; color:var(--mut); font-weight:700; min-height:30px;}
+        .rbox .val{font-size:26px; font-weight:800; margin-top:6px; color:var(--ink);}
+        .rbox .val.g{color:var(--green);}
+        .rfoot{color:var(--mut); font-size:13px; margin-top:18px;}
+        .rfoot a{color:var(--green); font-weight:700; text-decoration:none;}
         /* founder band */
         .founder{background:#fff; border:1px solid var(--line); border-radius:16px; padding:30px 34px; margin:0 0 40px;
                  display:flex; align-items:center; gap:24px; flex-wrap:wrap;}
@@ -113,10 +113,18 @@
             .receipts{padding:26px 20px;}
             .founder-cta{margin-left:0; text-align:left;}
         }
+        @media (max-width:640px){
+            .topbar{position:static;}
+            .topbar-in{flex-direction:column; gap:8px; padding-top:12px; padding-bottom:12px;}
+            .brand-sm{height:38px;}
+            nav{justify-content:center; gap:16px;}
+            nav a{font-size:13.5px;}
+        }
         @media (max-width:460px){
-            .brand-sm{height:40px;}
-            nav{gap:14px;}
-            nav a{font-size:13px;}
+            .pill{font-size:10.5px; letter-spacing:.5px; padding:6px 12px; white-space:nowrap;}
+            .pill-pre{display:none;}
+            #apex-hero-fplid{width:100% !important;}
+            #apex-hero-go{width:100%; padding:13px 24px !important;}
             h1{font-size:28px;}
             .sub{font-size:16.5px;}
             .cards{grid-template-columns:1fr;}
@@ -141,7 +149,7 @@
 
     <div class="wrap">
         <section class="hero">
-            <span class="pill"><i></i>&nbsp;FPL SOLVER &middot; ANCHORED TO THE SHARP BETTING MARKET</span>
+            <span class="pill"><i></i>&nbsp;<span class="pill-pre">FPL SOLVER &middot;&nbsp;</span>ANCHORED TO THE SHARP BETTING MARKET</span>
             <h1>Don't chase last week's points.<br><span class="g">Project next week's returns.</span></h1>
             <p class="sub">The solver that turns the betting market's prices into FPL points &mdash; transfers, captain and chips, every pick scored in public.</p>
             <div style="display:flex;gap:10px;justify-content:center;align-items:stretch;flex-wrap:wrap;margin-bottom:10px;">
@@ -201,23 +209,20 @@
 
     <div id="leaders"></div>
     <!-- APEX LEADERS BAND -->
-    <section style="background:#0C1411;padding:46px 20px 54px;font-family:'Plus Jakarta Sans',sans-serif;">
+    <section style="background:#FAF7F1;padding:46px 20px 54px;font-family:'Plus Jakarta Sans',sans-serif;">
       <div style="max-width:1240px;margin:0 auto;">
         <div style="display:flex;align-items:center;gap:14px;">
           <img src="favicon-256.png?v=4" alt="FPL Apex" width="54" height="54" style="border-radius:50%;">
           <div>
-            <div style="font-weight:800;color:#FAF7F1;font-size:28px;line-height:1.1;">Last season's final Apex leaders</div>
-            <div style="color:#2ED89C;font-size:13px;font-weight:700;letter-spacing:1.5px;margin-top:4px;">GW38 &middot; FINAL 2025/26 SEASON &middot; OPTA DATA</div>
+            <div style="font-weight:800;color:#0c0c0f;font-size:28px;line-height:1.1;">Last season's final Apex leaders</div>
+            <div style="color:#1D9E75;font-size:13px;font-weight:700;letter-spacing:1.5px;margin-top:4px;">GW38 &middot; FINAL 2025/26 SEASON &middot; OPTA DATA</div>
           </div>
         </div>
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:24px;">
-          <img src="leaders/gw_xg.png?v=4" alt="Top xG this gameweek" style="width:100%;border-radius:12px;display:block;">
-          <img src="leaders/gw_xa.png?v=4" alt="Top creator (xA) this gameweek" style="width:100%;border-radius:12px;display:block;">
-          <img src="leaders/gw_defcon.png?v=4" alt="Top defensive contribution this gameweek" style="width:100%;border-radius:12px;display:block;">
-          <img src="leaders/gw_gk.png?v=4" alt="Goalkeeper of the week" style="width:100%;border-radius:12px;display:block;">
-        </div>
-        <div style="text-align:center;margin-top:28px;">
-          <a href="#" onclick="showTab(5);document.querySelector('.tab-nav').scrollIntoView({behavior:'smooth'});return false;" style="color:#2ED89C;font-weight:800;font-size:15px;letter-spacing:1.5px;text-decoration:none;">SEE THE FULL LEADERBOARD &rarr;</a>
+          <img src="leaders/gw_xg.png?v=4" alt="Top xG this gameweek" style="width:100%;border-radius:12px;display:block;box-shadow:0 4px 14px rgba(12,12,15,.10);">
+          <img src="leaders/gw_xa.png?v=4" alt="Top creator (xA) this gameweek" style="width:100%;border-radius:12px;display:block;box-shadow:0 4px 14px rgba(12,12,15,.10);">
+          <img src="leaders/gw_defcon.png?v=4" alt="Top defensive contribution this gameweek" style="width:100%;border-radius:12px;display:block;box-shadow:0 4px 14px rgba(12,12,15,.10);">
+          <img src="leaders/gw_gk.png?v=4" alt="Goalkeeper of the week" style="width:100%;border-radius:12px;display:block;box-shadow:0 4px 14px rgba(12,12,15,.10);">
         </div>
       </div>
     </section>
@@ -233,10 +238,10 @@
             <h2>The receipts</h2>
             <div class="sub2">Updated after every gameweek. Season 26/27 starts GW1 &mdash; the log is empty until the whistle, and that's the point.</div>
             <div class="rgrid">
-                <div class="rbox"><div class="lab">GWS SCORED</div><div class="val"><span class="num" data-stat="total">0</span><span style="font-size:14px;color:#9ca3af;font-weight:700;"> / 38</span></div></div>
-                <div class="rbox"><div class="lab">CALLS THAT BEAT THE FIELD</div><div class="val g"><span class="num" data-stat="wins">&mdash;</span></div><div style="font-size:11px;color:#6b7280;font-weight:700;letter-spacing:.8px;margin-top:6px;">FROM GW1</div></div>
-                <div class="rbox"><div class="lab">EDGE (GOALS / MATCH)</div><div class="val g"><span class="num" data-stat="edge">&mdash;</span></div><div style="font-size:11px;color:#6b7280;font-weight:700;letter-spacing:.8px;margin-top:6px;">FROM GW1</div></div>
-                <div class="rbox"><div class="lab">VS THE TEMPLATE</div><div class="val">&mdash;</div><div style="font-size:11px;color:#6b7280;font-weight:700;letter-spacing:.8px;margin-top:6px;">FROM GW1</div></div>
+                <div class="rbox"><div class="lab">GWS SCORED</div><div class="val"><span class="num" data-stat="total">0</span><span style="font-size:14px;color:#6b6b7b;font-weight:700;"> / 38</span></div></div>
+                <div class="rbox"><div class="lab">CALLS THAT BEAT THE FIELD</div><div class="val g"><span class="num" data-stat="wins">&mdash;</span></div><div style="font-size:11px;color:#9a958a;font-weight:700;letter-spacing:.8px;margin-top:6px;">FROM GW1</div></div>
+                <div class="rbox"><div class="lab">EDGE (GOALS / MATCH)</div><div class="val g"><span class="num" data-stat="edge">&mdash;</span></div><div style="font-size:11px;color:#9a958a;font-weight:700;letter-spacing:.8px;margin-top:6px;">FROM GW1</div></div>
+                <div class="rbox"><div class="lab">VS THE TEMPLATE</div><div class="val">&mdash;</div><div style="font-size:11px;color:#9a958a;font-weight:700;letter-spacing:.8px;margin-top:6px;">FROM GW1</div></div>
             </div>
             <div class="rfoot">Full methodology and every logged pick &rarr; <a href="/evaluation.html">Model Evaluation</a></div>
         </section>
