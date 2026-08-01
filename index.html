@@ -129,7 +129,7 @@
 
     <div class="wrap">
         <nav>
-            <a href="/solver_app.html">Solver</a>
+            <a href="#" onclick="var i=document.getElementById('apex-hero-fplid');if(i){i.scrollIntoView({behavior:'smooth',block:'center'});setTimeout(function(){i.focus();},350);}return false;">Solver</a>
             <a href="#leaders">Leaders</a>
             <a href="#receipts">Receipts</a>
             <a href="/evaluation.html">Model Evaluation</a>
@@ -247,12 +247,12 @@
         <section class="founder">
             <div>
                 <span id="apex-band-founder-badge" class="free">FREE THIS SEASON</span>
-                <h2>Founder list</h2>
-                <p id="apex-band-blurb">The solver is free while the public log fills up. Founders lock the launch price forever when billing opens &mdash; after the receipts exist, not before.</p>
+                <h2 style="font-size:20px;">The weekly cards</h2>
+                <p id="apex-band-blurb">The solver is free while the public log fills up. The gameweek leader cards drop on X after every round &mdash; follow along.</p>
             </div>
             <div class="founder-cta">
-                <a id="apex-band-cta" class="btn" href="mailto:contact@fplapex.com?subject=Founder%20list&amp;body=Put%20me%20on%20the%20founder%20list%20for%20the%20Apex%20Solver." onclick="if(window.APEX_BILLING_LIVE===true&amp;&amp;window.apexBilling&amp;&amp;window.apexBilling.openModal){window.apexBilling.openModal('sub');return false;}return true;">Join the founder list</a>
-                <div id="apex-band-sub" class="founder-sub">One email when it opens. Founder price locked for the first cohort. Nothing on the site gets taken away.</div>
+                <a id="apex-band-cta" class="btn" href="https://x.com/FPLApexHQ" target="_blank" rel="noopener" onclick="if(window.APEX_BILLING_LIVE===true&amp;&amp;window.apexBilling&amp;&amp;window.apexBilling.openModal){window.apexBilling.openModal('sub');return false;}return true;">Follow @FPLApexHQ</a>
+                <div id="apex-band-sub" class="founder-sub">Numbers over narratives, every gameweek.</div>
                 <div id="apex-band-login" class="founder-sub" style="display:none;">Already a member? <a href="#" onclick="if(window.apexBilling&amp;&amp;window.apexBilling.openModal){window.apexBilling.openModal('login');}return false;" style="color:#1D9E75;font-weight:700;text-decoration:none;">Log in / restore purchase</a></div>
             </div>
         </section>
@@ -270,7 +270,6 @@ if(window.APEX_BILLING_LIVE===true){
   var _af=document.getElementById('apex-band-founder-badge');if(_af){_af.textContent='FOUNDER';}
 }
 </script>
-
 <!-- /APEX PRICING BAND -->
 
     <div class="wrap">
