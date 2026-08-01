@@ -57,16 +57,17 @@
              font-family:'Plus Jakarta Sans',-apple-system,"Segoe UI",Inter,Arial,sans-serif;
              line-height:1.5; -webkit-text-size-adjust:100%;}
         .wrap{max-width:1060px; margin:0 auto; padding:0 24px;}
-        /* Brand banner header (carried from previous page) */
-        .header{background:#FAF7F1; padding:26px 24px 8px; display:flex; align-items:center;
-                justify-content:center; overflow:hidden;}
-        /* nav */
-        nav{display:flex; align-items:center; justify-content:center; gap:26px; padding:12px 0 16px;
-            border-bottom:1px solid var(--line); flex-wrap:wrap;}
+        /* Compact top bar: brand left, nav right (aug02 tighten) */
+        .topbar{border-bottom:1px solid var(--line); background:var(--bg);
+                position:sticky; top:0; z-index:50;}
+        .topbar-in{display:flex; align-items:center; justify-content:space-between;
+                   gap:18px; padding-top:10px; padding-bottom:10px;}
+        .brand-sm{display:block; height:52px; width:auto;}
+        nav{display:flex; align-items:center; gap:24px; flex-wrap:wrap;}
         nav a{color:var(--ink2); text-decoration:none; font-size:14.5px; font-weight:600;}
         nav a:hover{color:var(--green);}
         /* hero */
-        .hero{text-align:center; padding:64px 0 30px;}
+        .hero{text-align:center; padding:52px 0 24px;}
         .pill{display:inline-flex; align-items:center; gap:8px; background:#fff; border:1px solid var(--line);
               border-radius:999px; padding:7px 16px; font-size:12.5px; font-weight:700; letter-spacing:.8px; color:var(--ink2);}
         .pill i{width:8px; height:8px; border-radius:50%; background:var(--green); display:inline-block; flex-shrink:0;}
@@ -74,24 +75,25 @@
         h1 .g{color:var(--green);}
         .sub{color:var(--ink2); font-size:19px; max-width:640px; margin:14px auto 26px;}
         /* cards */
-        .cards{display:grid; grid-template-columns:repeat(3,1fr); gap:18px; margin:56px 0 8px;}
-        .card{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:26px 24px; text-align:left;}
+        .cards{display:grid; grid-template-columns:repeat(3,1fr); gap:18px; margin:40px 0 40px;}
+        .card{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:26px 24px; text-align:left; box-shadow:0 1px 2px rgba(12,12,15,.04); transition:transform .15s ease, box-shadow .15s ease;}
+        .card:hover{transform:translateY(-2px); box-shadow:0 6px 18px rgba(12,12,15,.07);}
         .card h3{font-size:17px; margin-bottom:8px;}
         .card p{color:var(--ink2); font-size:14.5px;}
         .card .k{display:inline-block; font-size:11.5px; font-weight:800; letter-spacing:1px; color:var(--green); margin-bottom:10px;}
         /* receipts strip */
-        .receipts{background:var(--dark); color:#e9e6df; border-radius:16px; padding:34px 34px; margin:46px 0;}
+        .receipts{background:var(--dark); color:#e9e6df; border-radius:16px; padding:34px 34px; margin:40px 0;}
         .receipts h2{font-size:24px; margin-bottom:6px;}
         .receipts .sub2{color:#9ca3af; font-size:14.5px; margin-bottom:22px;}
         .rgrid{display:grid; grid-template-columns:repeat(4,1fr); gap:14px;}
         .rbox{background:#1b1b22; border:1px solid #2a2a35; border-radius:12px; padding:16px;}
-        .rbox .lab{font-size:11.5px; letter-spacing:1px; color:#9ca3af; font-weight:700;}
+        .rbox .lab{font-size:11.5px; letter-spacing:1px; color:#9ca3af; font-weight:700; min-height:30px;}
         .rbox .val{font-size:26px; font-weight:800; margin-top:6px; color:#fff;}
         .rbox .val.g{color:#3ecf9a;}
         .rfoot{color:#9ca3af; font-size:13px; margin-top:18px;}
         .rfoot a{color:#3ecf9a; font-weight:700; text-decoration:none;}
         /* founder band */
-        .founder{background:#fff; border:1px solid var(--line); border-radius:16px; padding:30px 34px; margin:10px 0 46px;
+        .founder{background:#fff; border:1px solid var(--line); border-radius:16px; padding:30px 34px; margin:0 0 40px;
                  display:flex; align-items:center; gap:24px; flex-wrap:wrap;}
         .founder h2{font-size:20px;}
         .founder p{color:var(--ink2); font-size:14.5px; max-width:560px;}
@@ -112,6 +114,9 @@
             .founder-cta{margin-left:0; text-align:left;}
         }
         @media (max-width:460px){
+            .brand-sm{height:40px;}
+            nav{gap:14px;}
+            nav a{font-size:13px;}
             h1{font-size:28px;}
             .sub{font-size:16.5px;}
             .cards{grid-template-columns:1fr;}
@@ -121,19 +126,17 @@
     </style>
 </head>
 <body>
-    <!-- Header — FPL Apex brand banner (literal banner image, cream blends with header bg) -->
-    <div class="header" style="padding:0">
-        <img src="brand_banner.png?v=4" alt="FPL Apex — numbers over narratives"
-             style="display:block;width:100%;max-width:540px;height:auto;margin:0 auto">
-    </div>
-
-    <div class="wrap">
-        <nav>
+    <!-- Header — compact single bar: brand left, nav right -->
+    <div class="topbar">
+        <div class="wrap topbar-in">
+            <img src="brand_banner.png?v=4" alt="FPL Apex — numbers over narratives" class="brand-sm">
+            <nav>
             <a href="#" onclick="var i=document.getElementById('apex-hero-fplid');if(i){i.scrollIntoView({behavior:'smooth',block:'center'});setTimeout(function(){i.focus();},350);}return false;">Solver</a>
             <a href="#leaders">Leaders</a>
             <a href="#receipts">Receipts</a>
             <a href="/evaluation.html">Model Evaluation</a>
-        </nav>
+            </nav>
+        </div>
     </div>
 
     <div class="wrap">
@@ -181,17 +184,17 @@
             <div class="card">
                 <span class="k">THE SOLVER</span>
                 <h3>Your team, solved</h3>
-                <p>Optimal 15, transfers, captain, bench order and chip timing over a 19-gameweek horizon &mdash; recomputed in your browser, editable minute by minute.</p>
+                <p>The optimal 15, transfers, captain, bench order and chip timing over a 19-gameweek horizon &mdash; solved in your browser, and re-solved the moment you change a player&rsquo;s expected minutes.</p>
             </div>
             <div class="card">
                 <span class="k">THE ANCHOR</span>
                 <h3>We don't argue with the market</h3>
-                <p>Team goals come from de-vigged sharp prices, re-anchored every week as fixtures are priced. The work is the conversion: prices into minutes, minutes into points, points into picks.</p>
+                <p>Team goals come from de-vigged sharp prices, re-anchored every week as fixtures are priced. The work is the conversion: market prices into team goals, team goals into player points, player points into picks.</p>
             </div>
             <div class="card">
                 <span class="k">THE RECEIPTS</span>
                 <h3>Scored in public</h3>
-                <p>Every projection is logged before kickoff and scored after the whistle &mdash; hits and misses alike, all season, in the open.</p>
+                <p>Every projection is logged before kickoff and scored after the final whistle &mdash; hits and misses alike, every gameweek.</p>
             </div>
         </section>
     </div>
