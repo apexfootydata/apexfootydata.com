@@ -78,7 +78,7 @@
       <div class="left">
         <span class="preview">PREVIEW · ILLUSTRATIVE</span>
         <h1>How accurate is Apex?</h1>
-        <p class="lede">We score Apex against the leading paid tools every gameweek, in the open —
+        <p class="lede" id="eval-lede">We score Apex against the leading paid tools every gameweek, in the open —
           same players, same metric, no cherry-picking. Live tracking begins 2026/27.</p>
 
         <div class="explain">
@@ -99,25 +99,25 @@
           <div class="tag">NUMBERS over NARRATIVES</div>
         </div>
         <div class="rule"></div>
-        <div class="ttl">ILLUSTRATIVE EXAMPLE · PROJECTION ACCURACY (template players)</div>
+        <div class="ttl" id="eval-ttl">ILLUSTRATIVE EXAMPLE · PROJECTION ACCURACY (template players)</div>
         <div class="sub">Average miss per pick · <b style="color:var(--ink)">lower = closer</b></div>
 
         <div class="bars">
           <div class="barrow">
-            <div class="lab"><span style="font-weight:700;">Apex</span><span class="v" style="color:var(--teal)">3.15</span></div>
-            <div class="track"><div class="fill" style="width:95%;background:#1D9E75"></div></div>
+            <div class="lab"><span style="font-weight:700;">Apex</span><span class="v" style="color:var(--teal)" id="exbar-apex-v">3.15</span></div>
+            <div class="track"><div class="fill" style="width:95%;background:#1D9E75" id="exbar-apex-f"></div></div>
           </div>
           <div class="barrow">
-            <div class="lab"><span>Tool A <span style="font-size:12px;font-weight:700;color:var(--muted)">&middot; example</span></span><span class="v">3.11</span></div>
-            <div class="track"><div class="fill" style="width:94%;background:#3f4d47"></div></div>
+            <div class="lab"><span>Tool A <span style="font-size:12px;font-weight:700;color:var(--muted)" id="exbar-a-tag">&middot; example</span></span><span class="v" id="exbar-a-v">3.11</span></div>
+            <div class="track"><div class="fill" style="width:94%;background:#3f4d47" id="exbar-a-f"></div></div>
           </div>
           <div class="barrow">
-            <div class="lab"><span>Tool B</span><span class="v">3.17</span></div>
-            <div class="track"><div class="fill" style="width:96%;background:#b8c2bc"></div></div>
+            <div class="lab"><span>Tool B</span><span class="v" id="exbar-b-v">3.17</span></div>
+            <div class="track"><div class="fill" style="width:96%;background:#b8c2bc" id="exbar-b-f"></div></div>
           </div>
         </div>
 
-        <div class="readline">Illustrative only — no comparison has been measured yet.</div>
+        <div class="readline" id="eval-readline">Illustrative only — no comparison has been measured yet.</div>
 
         <div class="season">
           <span class="exbadge" id="eval-badge">EXAMPLE LAYOUT</span>
@@ -148,7 +148,7 @@
 
     </div>
 
-    <p class="caveat"><b>Preview.</b> The figures above are <b>illustrative placeholders</b>, not measured
+    <p class="caveat" id="eval-caveat"><b>Preview.</b> The figures above are <b>illustrative placeholders</b>, not measured
       results — they show what this page will look like, not how anything has performed. Real scoring starts
       with GW1 of 2026/27 and the running total fills in automatically from then. Rivals shown as
       Tool A / Tool B for now. Only aggregate accuracy is ever shown — never any tool's individual projections.</p>
@@ -218,6 +218,31 @@ var EVAL_DATA = null;
     if(vEl && EVAL_DATA.verdict){vEl.innerHTML=EVAL_DATA.verdict;vEl.style.display='block';}
 
     (EVAL_DATA.form||[]).forEach(function(k){bar(k,true);});
+
+    /* APEX-EVAL-FULLFLIP-v1: the bars card, lede and caveat must flip too. */
+    function setTxt(id,t){var e=document.getElementById(id);if(e)e.textContent=t;}
+    setTxt('eval-ttl','PROJECTION ACCURACY (template players) · SEASON TO DATE');
+    setTxt('eval-readline','Measured live — season running total, updated after every scored gameweek.');
+    var lede=document.getElementById('eval-lede');
+    if(lede) lede.innerHTML='We score Apex against the leading paid tools every gameweek, in the open — '+
+      'same players, same metric, no cherry-picking. <b>Live: '+EVAL_DATA.weeks+' gameweek'+
+      (EVAL_DATA.weeks===1?'':'s')+' scored so far.</b>';
+    var cav=document.getElementById('eval-caveat');
+    if(cav) cav.innerHTML='<b>Live.</b> The figures above are measured results from the season to date, '+
+      'scored after each gameweek on the 20%+-owned template players. Rivals shown as Tool A / Tool B. '+
+      'Only aggregate accuracy is ever shown — never any tool\u2019s individual projections.';
+    var aTag=document.getElementById('exbar-a-tag'); if(aTag) aTag.textContent='';
+    var vals=[['apex',EVAL_DATA.apex],['a',EVAL_DATA.review],['b',EVAL_DATA.bench_b]];
+    var best=null;
+    vals.forEach(function(p){ if(p[1]!=null&&(best==null||p[1]<best)) best=p[1]; });
+    vals.forEach(function(p){
+      var v=document.getElementById('exbar-'+p[0]+'-v'), f=document.getElementById('exbar-'+p[0]+'-f');
+      if(!v||!f) return;
+      if(p[1]==null){ var row=v.closest('.barrow'); if(row) row.style.display='none'; return; }
+      v.textContent=Number(p[1]).toFixed(2);
+      /* lower miss = closer = wider bar; best gets 96% */
+      f.style.width=(best?Math.max(30,Math.round(96*best/p[1])):50)+'%';
+    });
   })();
 </script>
 </body>
