@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="1" data-built-at="2026-08-04T12:08:49">
+<meta name="apex-gw" content="1" data-built-at="2026-08-04T12:26:48">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -15808,7 +15808,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1785841729-GW1-95776477";
+const BUILD_VERSION = "1785842807-GW1-95776477";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = false;
@@ -27409,6 +27409,9 @@ function _renderBlankPitch(wrap) {
 }
 
 function _renderPitchFromState() {
+  // APEX-BENCH-COVER-v2 -- every pitch paint refreshes the bench-cover line
+  // (hides itself on blank canvas / BB view; no-ops before the helper exists).
+  try { if (typeof _apexRenderBenchCover === 'function') _apexRenderBenchCover(); } catch (_eBcp) {}
   const wrap = document.getElementById('pitch-wrap');
   // ── BLANK CANVAS (2026-07-25) ──
   // Curtain over a legal seeded 15 — see _apexBlankCanvasOn in apex_app.js.
@@ -27963,6 +27966,30 @@ function _apexBenchCoverEv(idx) {
   } catch (_eBc) { return null; }
 }
 
+// APEX-BENCH-COVER-v2 (2026-08-04) -- standalone renderer. v1 only ran inside
+// updateChipTotal, but on boot/Optimise the headline paints from the baked
+// arrays while _xiPlayers fills later on the pitch path -- so the line never
+// appeared until the NEXT state change. This derives everything from globals
+// and is called from BOTH updateChipTotal and _renderPitchFromState (which
+// runs on every pitch paint, exactly when _xiPlayers is populated).
+function _apexRenderBenchCover() {
+  try {
+    var _bcEl = document.getElementById('gw-xp-bench');
+    if (!_bcEl) return;
+    var _blank = (typeof _apexBlankCanvasOn === 'function') && _apexBlankCanvasOn();
+    var _gwHere = (typeof TEAM_META !== 'undefined' && TEAM_META.gw_range) ? TEAM_META.gw_range[activeGwIdx] : null;
+    var _bbSel = (document.getElementById('sel-bb') || {}).value;
+    var _bbOn = (_bbSel && _gwHere != null && parseInt(_bbSel) === _gwHere) || (window.apexViewChip === 'bb');
+    var _cov = (_blank || _bbOn) ? null : _apexBenchCoverEv(activeGwIdx);
+    if (_cov != null && _cov > 0.05) {
+      _bcEl.textContent = '+' + _cov.toFixed(1) + ' bench cover if a starter misses';
+      _bcEl.style.display = '';
+    } else {
+      _bcEl.style.display = 'none';
+    }
+  } catch (_eBcr) {}
+}
+
 function getTotal(idx, bbGw, tcGw) {
   // Use pre-computed Python baselines + per-GW deltas from any manual swaps.
   // This preserves Python ILP precision for the baseline while still reflecting
@@ -28326,22 +28353,8 @@ function updateChipTotal() {
   document.getElementById('gw-xp-val').textContent = _bcOn ? '—' : newTotal.toFixed(1);
   const _lblEl = document.getElementById('gw-xp-label');
   if (_lblEl) _lblEl.textContent = 'GW' + TEAM_META.gw_range[activeGwIdx] + ' xPts';
-  // APEX-BENCH-COVER-v1 -- honest bench safety-net line. Hidden on the blank
-  // canvas and on a Bench Boost view (bench already counts in the total there).
-  try {
-    var _bcEl = document.getElementById('gw-xp-bench');
-    if (_bcEl) {
-      var _bcGwHere = TEAM_META.gw_range[activeGwIdx];
-      var _bcBbOn = (bbGw && parseInt(bbGw) === _bcGwHere) || (_vc === 'bb');
-      var _bcCov = (_bcOn || _bcBbOn) ? null : _apexBenchCoverEv(activeGwIdx);
-      if (_bcCov != null && _bcCov > 0.05) {
-        _bcEl.textContent = '+' + _bcCov.toFixed(1) + ' bench cover if a starter misses';
-        _bcEl.style.display = '';
-      } else {
-        _bcEl.style.display = 'none';
-      }
-    }
-  } catch (_eBcw) {}
+  // APEX-BENCH-COVER-v2 -- render via the standalone helper (see its comment).
+  try { _apexRenderBenchCover(); } catch (_eBcw) {}
   try { _apexViewChipNote(); } catch (_eVn) {}
   _gwTotals[activeGwIdx] = newTotal;
   updateRollingTotal();
@@ -30633,7 +30646,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW1</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1785841729-GW1-95776477</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1785842807-GW1-95776477</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
