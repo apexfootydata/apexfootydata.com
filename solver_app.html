@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="1" data-built-at="2026-08-04T12:26:48">
+<meta name="apex-gw" content="1" data-built-at="2026-08-04T12:34:45">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -5819,7 +5819,6 @@ html.apex-offseason #view-landing .hero-sub::after {
           <div class="va-hero-text">
             <div class="va-card-label" id="gw-xp-label">GW1 PROJECTED</div>
             <div class="va-card-value va-card-value-hero" id="gw-xp-val">0</div>
-            <div class="va-card-sub" id="gw-xp-bench" style="display:none" title="APEX-BENCH-COVER-v1: if a starter misses, the first bench player in that slot steps in. This is the expected points that safety net adds. Counted separately so the headline stays honest: 11 players + captain, nothing else."></div>
             <div class="va-card-sub" title="xPts = expected points: what our model projects your team to score">Projected points (xPts) this gameweek</div>
           </div>
           <div class="va-hero-spark" id="va-hero-spark" aria-label="Projected xPts trajectory"></div>
@@ -15808,7 +15807,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1785842807-GW1-95776477";
+const BUILD_VERSION = "1785843284-GW1-95776477";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = false;
@@ -27966,27 +27965,28 @@ function _apexBenchCoverEv(idx) {
   } catch (_eBc) { return null; }
 }
 
-// APEX-BENCH-COVER-v2 (2026-08-04) -- standalone renderer. v1 only ran inside
-// updateChipTotal, but on boot/Optimise the headline paints from the baked
-// arrays while _xiPlayers fills later on the pitch path -- so the line never
-// appeared until the NEXT state change. This derives everything from globals
-// and is called from BOTH updateChipTotal and _renderPitchFromState (which
-// runs on every pitch paint, exactly when _xiPlayers is populated).
+// APEX-BENCH-COVER-v3 (2026-08-04, Marcus: fold it into the big number like
+// the rival tools do, no separate line). DISPLAY-ONLY: rewrites the gw-xp-val
+// text as getTotal(...) + bench cover. getTotal itself, _gwTotals, the rolling
+// total, chip maths and every solver decision stay on the uncovered value.
+// Called from updateChipTotal AND the top of _renderPitchFromState, so it
+// re-fires the moment _xiPlayers is populated (the v1 wiring bug). Cover is
+// forced to 0 on a Bench Boost week -- the bench is already inside the total
+// there and adding cover would double-count.
 function _apexRenderBenchCover() {
   try {
-    var _bcEl = document.getElementById('gw-xp-bench');
-    if (!_bcEl) return;
-    var _blank = (typeof _apexBlankCanvasOn === 'function') && _apexBlankCanvasOn();
+    var _el = document.getElementById('gw-xp-val');
+    if (!_el) return;
+    if ((typeof _apexBlankCanvasOn === 'function') && _apexBlankCanvasOn()) return;
     var _gwHere = (typeof TEAM_META !== 'undefined' && TEAM_META.gw_range) ? TEAM_META.gw_range[activeGwIdx] : null;
-    var _bbSel = (document.getElementById('sel-bb') || {}).value;
-    var _bbOn = (_bbSel && _gwHere != null && parseInt(_bbSel) === _gwHere) || (window.apexViewChip === 'bb');
-    var _cov = (_blank || _bbOn) ? null : _apexBenchCoverEv(activeGwIdx);
-    if (_cov != null && _cov > 0.05) {
-      _bcEl.textContent = '+' + _cov.toFixed(1) + ' bench cover if a starter misses';
-      _bcEl.style.display = '';
-    } else {
-      _bcEl.style.display = 'none';
-    }
+    var _bb = (document.getElementById('sel-bb') || {}).value;
+    var _tc = (document.getElementById('sel-tc') || {}).value;
+    if (window.apexViewChip === 'bb' && _gwHere != null) _bb = String(_gwHere);
+    if (window.apexViewChip === 'tc' && _gwHere != null) _tc = String(_gwHere);
+    var _t = getTotal(activeGwIdx, _bb, _tc);
+    var _bbOn = (_bb && _gwHere != null && parseInt(_bb) === _gwHere);
+    var _cov = _bbOn ? 0 : (_apexBenchCoverEv(activeGwIdx) || 0);
+    _el.textContent = (_t + _cov).toFixed(1);
   } catch (_eBcr) {}
 }
 
@@ -30646,7 +30646,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW1</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1785842807-GW1-95776477</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1785843284-GW1-95776477</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
