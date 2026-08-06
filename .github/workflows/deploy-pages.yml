@@ -5,13 +5,20 @@ name: Deploy site to Pages
 # (this morning's success: 9m43s), so afternoon deploys all died with
 # 'Timeout reached, aborting!' and the live site went stale. Here WE own
 # the timeout (30 min). Pure static site - no build step, just upload+deploy.
+#
+# 2026-08-06: deploys started failing at 5-10 min with a misleading
+# "Ensure GITHUB_TOKEN has permission id-token: write" (the permission is
+# present, three lines below). They were exiting via error_count, not the
+# timeout: deploy-pages polls ~10s and quits after N consecutive errors,
+# so 30 = give up after ~5 min. Raised to 120. Also cancel-in-progress
+# false, so a second push no longer kills the deploy already running.
 on:
   push:
     branches: [main]
   workflow_dispatch:
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 permissions:
   contents: read
   pages: write
@@ -31,4 +38,4 @@ jobs:
         uses: actions/deploy-pages@v4
         with:
           timeout: 1800000
-          error_count: 30
+          error_count: 120
