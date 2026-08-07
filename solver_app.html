@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="1" data-built-at="2026-08-07T09:59:47">
+<meta name="apex-gw" content="1" data-built-at="2026-08-07T15:53:09">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
@@ -37,7 +37,7 @@
 })();
 </script>
 <meta http-equiv="Pragma" content="no-cache">
-<meta name="apex-build" content="20260807-095947">
+<meta name="apex-build" content="20260807-155309">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — FPL Apex</title>
 <meta name="description" content="Plan FPL transfers, chips, and Free Hit squads. Live xG-based projections, a rival head-to-head simulator, and a mini-league table. Free FPL tool.">
@@ -8618,6 +8618,33 @@ html.apex-offseason #view-landing .hero-sub::after {
       const teamLow = (pool[i].team || '').toLowerCase();
 
       if (lockIdx.has(i) || lockIds.has(+pool[i].id)) {
+        // ── APEX_FIX_AUG07_S1_LOCK_EXCLUDE_CONTRADICTION (2026-08-07) ──────
+        // The PRECEDENCE below is deliberate and documented (apex_app.js
+        // :256-257): a name that appears in both lists must not be able to
+        // make the ILP infeasible, so force-in wins. That is not the defect.
+        // The defect is that it won in SILENCE — `lock_issues` came back empty
+        // and nothing was logged, so a seed CSV that contradicts itself looked
+        // exactly like a seed CSV that does not. Report it, keep the outcome.
+        const _exclHere = excludeIdx.has(i);
+        let _exclTeamHere = '';
+        if (!_exclHere) {
+          for (const ef of excludeTeams) {
+            if (teamLow.includes(ef)) { _exclTeamHere = ef; break; }
+          }
+        }
+        if (_exclHere || _exclTeamHere) {
+          lockIssues.push({
+            kind: 'lockIn',
+            token: `${pool[i].web_name} (${pool[i].team})`,
+            player_id: +pool[i].id,
+            problem: 'lock-vs-exclude',
+            excluded_by: _exclHere ? 'excludePlayers' : 'excludeTeams',
+            resolution: 'force-in won',
+            detail: _exclHere
+              ? `${pool[i].web_name} (${pool[i].team}) is in BOTH lockIn and excludePlayers — force-in won, he is in the squad. Your list disagrees with itself.`
+              : `${pool[i].web_name} (${pool[i].team}) is locked IN while his team is in excludeTeams ("${_exclTeamHere}") — force-in won, he is in the squad. Your list disagrees with itself.`,
+          });
+        }
         subjectTo.push({
           name: `lock_${forcedIdx++}`,
           vars: [{ name: `x_${i}`, coef: 1 }],
@@ -8643,6 +8670,23 @@ html.apex-offseason #view-landing .hero-sub::after {
           vars: [{ name: `x_${i}`, coef: 1 }],
           bnds: { type: glpk.GLP_FX, ub: 0, lb: 0 },
         });
+      }
+    }
+
+    // ── APEX_FIX_AUG07_S1_LOCK_EXCLUDE_REPORT (2026-08-07) ────────────────
+    // The contradictions found in the loop above land after the one-shot
+    // reporting block at the top of this function has already run, so they get
+    // their own announcement. Console + window + the returned `lock_issues`,
+    // the same three surfaces the resolution issues use. NOT fatal: force-in
+    // winning is the documented behaviour, and this is a report of it.
+    {
+      const _contra = lockIssues.filter(x => x.problem === 'lock-vs-exclude');
+      if (_contra.length) {
+        try {
+          console.error('[apex-solver] lock/exclude CONTRADICTION (force-in won, squad unchanged):\n  '
+            + _contra.map(x => x.detail).join('\n  '));
+        } catch (_e) {}
+        try { if (typeof window !== 'undefined') window._apexLockIssues = lockIssues.slice(); } catch (_e) {}
       }
     }
 
@@ -9498,6 +9542,72 @@ html.apex-offseason #view-landing .hero-sub::after {
       if (args.hasFh && fhSquads[gw] && _sameSquad(fhSquads[gw], _h, _i0)) _chipNoGain.fh.push(gw);
     }
 
+    // ── APEX_FIX_AUG07_S3_NEG_EV_CHIP_NEVER_STARRED (2026-08-07) ──────────
+    // A CHIP WORTH NOTHING IS NOT A PLAN — AND NEITHER IS ONE WORTH LESS THAN
+    // NOTHING. 44B above refuses a placement only when the chip's 15 IS the 15
+    // the plan already holds (`_sameSquad` exactly true). That is the EV == 0
+    // case and nothing else, so a chip whose own published value is strictly
+    // NEGATIVE sailed straight through.
+    // MEASURED 2026-08-07 (live pool, riskMode=low, all four chips enabled,
+    // before this guard): the #1 recommendation was `WC5 · FH10 · BB13 · TC16`
+    // while ALL EIGHTEEN published wc_ev values were negative — best -1.6, at
+    // the very week being starred. The planner was recommending a Wildcard its
+    // own table priced at minus one and a half points.
+    //
+    // `_chipEvOnTraj` is the SAME arithmetic as the published tables further
+    // down, against the SAME trajectory the 44B guard already picks (an
+    // earlier Wildcard's future if the plan plays one, otherwise the base):
+    //   tr = base  -> wc_ev / fh_ev / bb_ev / tc_ev
+    //   tr = wc[g] -> bb_ev_for_wc / tc_ev_for_wc
+    // and it is compared ROUNDED, exactly as published, so the guard and the
+    // screen can never disagree about the sign of a number the user can read.
+    // The 44B `_sameSquad` test is kept: it also ALIASES trajectories, which
+    // is a separate job from pricing.
+    const _evGw1Blocked = (gw) => (startGw === 1 && gw === 1);
+    const _evTcCapAt = (squad, idx) => {
+      if (!squad || squad.length < 11) {
+        let m = 0;
+        for (const p of (squad || [])) { const v = _xpAt(p, idx); if (v > m) m = v; }
+        return m;
+      }
+      return pickOptimalXI(squad, idx).captain_xp || 0;
+    };
+    const _chipEvOnTraj = (chip, gw, tr) => {
+      const idx = gw - startGw;
+      if (chip === 'BB') return round2(_benchUplift(_trajSquadAt(tr, idx) || [], idx));
+      if (chip === 'TC') return round2(_evTcCapAt(_trajSquadAt(tr, idx) || [], idx));
+      if (chip === 'FH') {
+        if (!fhSquads[gw] || _evGw1Blocked(gw)) return null;
+        return round1(_seqXiXp(fhSquads[gw], idx) - (tr.xi[idx] || 0));
+      }
+      if (chip === 'WC') {
+        if (_evGw1Blocked(gw)) return null;
+        const wcTraj = _trajs.wc[gw];
+        if (wcTraj) {
+          let tail = 0;
+          for (const g2 of gwRange) {
+            if (g2 < gw) continue;
+            const i2 = g2 - startGw;
+            tail += (wcTraj.xi[i2] || 0) - (tr.xi[i2] || 0);
+          }
+          return round1(tail);
+        }
+        if (wcSquads[gw]) return round1(_seqXiXp(wcSquads[gw], idx) - (tr.xi[idx] || 0));
+        return null;
+      }
+      return null;
+    };
+    // Published (standalone, base-trajectory) weeks this guard refuses, so a
+    // surface can say "we looked and it was worth less than nothing" instead
+    // of rendering an unexplained absence. Twin of `chip_no_gain`.
+    const _chipNegEv = { wc: [], fh: [], bb: [], tc: [] };
+    for (const gw of _enumLegal) {
+      for (const _c of availChips) {
+        const _v = _chipEvOnTraj(_c, gw, _trajs.base);
+        if (_v !== null && _v <= 0) _chipNegEv[_c.toLowerCase()].push(gw);
+      }
+    }
+
     for (let num = 1; num <= Math.min(availChips.length, _enumLegal.length); num++) {
       for (const chipCombo of _combinations(availChips, num)) {
         for (const gwPerm of _permutations(_enumLegal, num)) {
@@ -9562,6 +9672,19 @@ html.apex-offseason #view-landing .hero-sub::after {
                 const _tr = (_pw && _trajs.wc[_pw.gw]) ? _trajs.wc[_pw.gw] : _trajs.base;
                 const _sq = (e.chip === 'WC') ? wcSquads[e.gw] : fhSquads[e.gw];
                 return _sameSquad(_sq, _trajSquadAt(_tr, _i), _i);
+              })) continue;
+          // APEX_FIX_AUG07_S3_NEG_EV_CHIP_NEVER_STARRED — same refusal, on
+          // VALUE rather than on squad identity, and for all four chips rather
+          // than the two squad chips. BB and TC are structurally non-negative
+          // (bench uplift = full-15 minus XI; TC = the captain's own xP), so on
+          // the live pool this arm fires for neither of them — measured, not
+          // assumed: 0 of 19 weeks each. It is here because "<= 0" is the rule,
+          // not "WC and FH are the risky ones".
+          if (seq.some(e => {
+                const _pw = seq.find(x => x.chip === 'WC' && x.gw < e.gw);
+                const _tr = (_pw && _trajs.wc[_pw.gw]) ? _trajs.wc[_pw.gw] : _trajs.base;
+                const _v = _chipEvOnTraj(e.chip, e.gw, _tr);
+                return (_v !== null && _v <= 0);
               })) continue;
           const seqStr = seq.map(e => `${e.chip}${e.gw}`).join(' · ');
           if (seen.has(seqStr)) continue;
@@ -9868,6 +9991,33 @@ html.apex-offseason #view-landing .hero-sub::after {
         _m[e.chip] = round1(s._total_raw - _computeSeqTotal(_sub, gwRange, startGw, _trajs, fhSquads));
       }
       s.marginals = _m;
+      // ── APEX_FIX_AUG07_S3_EV_BRIDGE (2026-08-07) ───────────────────────
+      // WHY THE HEADLINE AND THE TABLES DO NOT ADD UP, as a number.
+      // MEASURED 2026-08-07 (live pool, before S2/S3): the starred plan
+      // `WC5 · FH10 · BB13 · TC16` showed gain +18.4 while its own per-chip
+      // tables summed to 15.13 (-1.6 + 1.4 + 8.84 + 6.49). INVESTIGATED: not
+      // a maths error — the missing 3.27 is entirely the Wildcard→Bench Boost
+      // interaction, which this planner ALREADY publishes as `bb_ev_for_wc`
+      // (BB13 is worth 12.19 on the post-WC5 squad against 8.84 on the base
+      // squad, +3.35). 15.13 + 3.35 = 18.48 against a round1'd headline of
+      // 18.4 — the whole gap, closed to rounding. Control: every num_chips=1
+      // row equals its published table entry exactly (BB13 8.8/8.84, TC16
+      // 6.5/6.49, FH12 1.8/1.8, WC5 -1.6/-1.6), so the tables are not wrong.
+      // So it is a DISPLAY artefact, not a real inconsistency: the headline is
+      // the JOINT value of the set, the tables are STANDALONE values, and the
+      // bridging term was published only as a nested map nobody sums. It is
+      // emitted here as a scalar so the row reconciles on screen:
+      //   gain  ==  ev_standalone_sum + ev_interaction   (to rounding)
+      // Pure reporting — no sequence total, ranking or table value moves.
+      {
+        let _stand = 0;
+        for (const e of (s.breakdown || [])) {
+          const _v = _chipEvOnTraj(e.chip, e.gw, _trajs.base);
+          if (_v !== null) _stand += _v;
+        }
+        s.ev_standalone_sum = round1(_stand);
+        s.ev_interaction    = round1((s._total_raw - baselineRaw) - _stand);
+      }
       s.tied_with_best = Math.abs(_bestKeyT - s._rank_raw) <= _SEQ_TIE_BAND;
       return s;
     });
@@ -9908,6 +10058,11 @@ html.apex-offseason #view-landing .hero-sub::after {
       // and no sequence above places it there. Reported rather than silent: a
       // missing row and a worthless row look identical on screen otherwise.
       chip_no_gain: _chipNoGain,
+      // APEX_FIX_AUG07_S3_NEG_EV_CHIP_NEVER_STARRED — gameweeks where the
+      // chip's OWN published EV is <= 0, so no sequence above places it there.
+      // Reported for the same reason chip_no_gain is: a missing row and a
+      // worthless row look identical on screen otherwise.
+      chip_negative_ev: _chipNegEv,
     };
   }
 
@@ -10348,7 +10503,23 @@ html.apex-offseason #view-landing .hero-sub::after {
       let done = 0;
       for (const gw of gwRange) {
         const idx = gw - startGw;
-        const horizon = Math.max(1, Math.min(ppHorzCap, 38 - gw + 1));
+        // ── APEX_FIX_AUG07_S4_CHIP_WC_HORIZON (2026-08-07) ────────────────
+        // FOLLOW THE BAKE, NOT THE SEASON. `38 - gw + 1` is the number of
+        // gameweeks left in a 38-GW season; this bake carries 19. Over the
+        // whole of GW1-19 that expression is >= 20, so it never bound and the
+        // horizon was ppHorzCap (= gwRange.length = 19) at EVERY gameweek —
+        // including GW19, where exactly one slot of xp_per_gw remains. The
+        // decay curve and the FIX 8 evWeights vector were therefore stretched
+        // across 19 slots when only `19 - idx` exist, so the far end of the
+        // window weighted gameweeks that are not in the bake at all.
+        // (_computeRollingEV breaks at `gi >= arr.length`, so no phantom xP
+        // was ever summed — the damage is confined to the WEIGHTS.)
+        // Same defect and same fix as the opening-15 builder took on
+        // 2026-07-25 (apex_app.js ~:490, `Math.max(1, gwR.length - gwIdx)`).
+        // MEASURED 2026-08-07 on the live pool, on top of S2: wc_ev moves at
+        // GW14-19 only, max 2.8 xP (GW16 -1.7 -> -4.5); alone, without S2, it
+        // moves 16 of 18 weeks, max 7.8 xP (GW14 -5.0 -> -12.8).
+        const horizon = Math.max(1, Math.min(ppHorzCap, (args.gwRange || []).length - idx));
 
         // BB coupling REMOVED (2026-04-29 per Marcus): WC squad shown to user
         // is the standalone WC-optimal squad under chip-mode decay. Chip-
@@ -10359,6 +10530,29 @@ html.apex-offseason #view-landing .hero-sub::after {
           const wc = await solveWildcard(pool, idx, horizon, {
             budget, lockIn: lockWc, lockInIds: lockWcIds,
             excludePlayers: excludeWc, chipMode: true,
+            // ── APEX_FIX_AUG07_S2_CHIP_WC_FLAT (2026-08-07) ───────────────
+            // BUILD AND SCORE ON THE SAME METRIC. `chipMode: true` alone
+            // stretches the authored CHIP_DECAY shape across the horizon, so
+            // the first weeks own most of the objective — while every number
+            // this planner then publishes (baseline_total_xp, wc_ev, every
+            // sequence total) is an UNDECAYED sum over the whole baked range.
+            // The squad was optimised for one number and graded on another.
+            // Identical defect to the one _ppBuildUnlimitedSquad was fixed for
+            // on 2026-07-28 ("+4.12 xPts to GW12, 5/15 different"); the chip
+            // planner was missed. flatObjective (solver FIX 7) weights every
+            // gameweek at 1.0, which IS the advertised metric. chipMode stays
+            // as the fallback for a bundle without the switch.
+            // MEASURED 2026-08-07, live pool, riskMode=low, all four chips:
+            //   wcSquads[GW1] — the pre-GW1 baseline squad (unlimitedFirstGw)
+            //   — was 13/15 of the opening 15 the product actually recommends
+            //   on the pitch. With this line it is 15/15 IDENTICAL to the
+            //   shipped Low-risk build (ids 1,31,109,165,175,237,289,305,346,
+            //   356,368,388,411,426,542). The planner was pricing every chip
+            //   against a squad the user will never own.
+            //   Best sequence: WC5 · FH10 · BB13 · TC16 (+18.4)
+            //              ->  FH10 · BB14 · TC16       (+22.0)
+            //   wc_ev GW2: -7.4 -> -1.5 (+5.9). Baseline 1075.7 -> 1069.2.
+            flatObjective: true,
             // undefined => solveWildcard falls back to FPL_RULES.BENCH_WEIGHT
             // (0.10) — the exact pre-preset behaviour for Balanced.
             benchWeight: ppWcBench,
@@ -10477,6 +10671,9 @@ html.apex-offseason #view-landing .hero-sub::after {
       // allow-list (see the 42H note below); a field the enumerator adds and
       // this list does not name is dropped in silence.
       chip_no_gain: enumR.chip_no_gain,
+      // APEX_FIX_AUG07_S3_NEG_EV_CHIP_NEVER_STARRED — named here on purpose:
+      // this object is an explicit allow-list (see the 42H note below).
+      chip_negative_ev: enumR.chip_negative_ev,
       wc_squads_json,
       fh_squads_json,
       // FIX 12 (2026-07-28) — surfaced, never swallowed. `chip_unavailable`
@@ -12432,10 +12629,12 @@ html.apex-offseason #view-landing .hero-sub::after {
 // squad MINUS the same for the untouched squad, NET of explicit −4 hits —
 // so all three cards are honestly comparable, banking included.
 //
-// APPLY stages MOVE ONE only: a this-week move goes through the existing
-// _applyTransferRec (FT/hit accounting, plan tracking, pitch — all standard);
-// a this-week bank goes through _rollFT. Future moves are advisory and are
-// re-computed each week (prices move, news lands).
+// APEX_FIX_AUG07_R1_NO_APPLY (2026-08-07): Routes no longer stages a
+// transfer — Apply lived here AND in computeTransfers, disagreeing with the
+// plan-ahead tree on the same decision. Owner call: the tree is the single
+// source of truth for transfer verdicts. This file stays a planning view —
+// three staged paths, honestly totalled — and links out to the tree to act.
+// Must never throw at load, whatever the bake shipped.
 //
 // WIRING (generator): read+inject like apex_rival.js; one setTimeout hook at
 // the top of renderTransfers calls window._renderTransferPaths; container
@@ -12452,8 +12651,10 @@ html.apex-offseason #view-landing .hero-sub::after {
   var TXP_MIN_GAIN      = 0.5;  // absolute floor for a FREE move, in decayed
                                 // best-XI swap-gain units (the active preset's
                                 // FT floor raises it — see _txpBars)
-  var TXP_HIT_NET_MIN   = 2.0;  // absolute floor for a −4 AFTER the hit, same
-                                // units (preset hit-aversion raises it)
+  // APEX_FIX_AUG07_R2_SHARED_HIT_BAR (2026-08-07): TXP_HIT_NET_MIN removed.
+  // It set a private hit-aversion floor found nowhere else in the product;
+  // a −4 now has to clear the SAME floor a free move does (_bars.ft) — see
+  // _txpBars below.
   var TXP_EO_DIFF_MAX   = 15;   // rank swing: incoming EO (or own%) ≤ this
   var TXP_DIFF_MIN_PERGW = 3.0; // rank swing: per-GW xP floor (no punts)
   var TXP_MAX_FT        = 5;    // FPL stored-FT cap
@@ -12569,7 +12770,8 @@ html.apex-offseason #view-landing .hero-sub::after {
         if (t && isFinite(t.hit)) hit = t.hit;
       }
     } catch (e) {}
-    return { ft: Math.max(ft, TXP_MIN_GAIN), hitNet: Math.max(ft + hit, TXP_HIT_NET_MIN) };
+    var floor = Math.max(ft, TXP_MIN_GAIN);
+    return { ft: floor, hitNet: floor }; // APEX_FIX_AUG07_R2_SHARED_HIT_BAR: one shared bar, no private hit tax
   }
   // Top-10k EO when the sampler file was baked; plain ownership otherwise.
   function _txpEo(p) {
@@ -12742,7 +12944,7 @@ html.apex-offseason #view-landing .hero-sub::after {
         if (fts > 0) {
           if (mv.gain < _bars.ft) break;
           _txpApplyMove(state, mv, w, gwIdx); fts--; made++;
-        } else if (allowHit && mv.gain - 4 >= _bars.hitNet) {
+        } else if (allowHit && mv.gain - 4 >= _bars.hitNet) {  // APEX_FIX_AUG07_R2_SHARED_HIT_BAR: hitNet === ft now (see _txpBars)
           _txpApplyMove(state, mv, w, gwIdx); state.hits++; made++;
         } else break;
       }
@@ -12883,21 +13085,9 @@ html.apex-offseason #view-landing .hero-sub::after {
       + ' — the route if you’re chasing rank, not protecting it.';
   }
 
-  // First actionable step of a route → Apply button descriptor.
-  function _txpApplyDescriptor(R, startIdx) {
-    var w0moves = R.state.moves.filter(function (m) { return m.w === 0; });
-    if (_txpRolledNow(startIdx)) return { kind: 'none', label: 'FT already rolled this week ✓' };
-    if (w0moves.length > 0) {
-      var mv = w0moves[0];
-      var hit = (_txpFtsNow(startIdx) === 0);
-      return {
-        kind: 'move', inId: mv.in.id, outId: mv.out.id,
-        label: 'Apply GW' + _txpMeta().gw_range[startIdx] + ' move: '
-          + (mv.out.web_name || '?') + ' → ' + (mv.in.web_name || '?') + (hit ? ' (−4 hit)' : ''),
-      };
-    }
-    return { kind: 'roll', label: 'Roll the FT now' };
-  }
+  // APEX_FIX_AUG07_R1_NO_APPLY (2026-08-07): _txpApplyDescriptor removed.
+  // Routes no longer offers an Apply affordance — the plan-ahead tree owns
+  // the verdict and the commit action; see _txpCardHtml below.
 
   function _txpCardHtml(key, R, routes, startIdx, lastGw, best) {
     var tags = {
@@ -12907,17 +13097,9 @@ html.apex-offseason #view-landing .hero-sub::after {
     };
     var tag = tags[key];
     var stepsHtml = R.state.steps.map(function (s) { return _txpStepHtml(s, key === 'swing'); }).join('');
-    var ad = _txpApplyDescriptor(R, startIdx);
-    var btn;
-    if (ad.kind === 'none') {
-      btn = '<div style="margin-top:10px;font-size:.75rem;color:var(--muted);font-weight:700;">' + _txpEsc(ad.label) + '</div>';
-    } else {
-      btn = '<button class="txp-apply" data-kind="' + ad.kind + '"'
-        + (ad.kind === 'move' ? ' data-in="' + ad.inId + '" data-out="' + ad.outId + '"' : '')
-        + ' style="margin-top:10px;width:100%;border:none;border-radius:7px;padding:8px 12px;font-size:.78rem;font-weight:800;cursor:pointer;'
-        + (best ? 'background:#1D9E75;color:#fff;' : 'background:var(--bg);color:var(--text);border:1px solid var(--border);')
-        + '">' + _txpEsc(ad.label) + '</button>';
-    }
+    // APEX_FIX_AUG07_R1_NO_APPLY: no Apply button — the plan-ahead tree
+    // decides; this surface only shows the shape of a path.
+    var btn = '<div style="margin-top:10px;font-size:.75rem;color:var(--muted);font-weight:700;">The plan-ahead tree decides — open it to act.</div>';
     var deltaTxt = (R.delta >= 0 ? '+' : '−') + Math.abs(R.delta).toFixed(1);
     return '<div style="flex:1 1 240px;min-width:230px;background:var(--bg2);border:1px solid '
       + (best ? '#1D9E75' : 'var(--border)') + ';border-radius:12px;padding:16px 18px;position:relative;'
@@ -13026,7 +13208,7 @@ html.apex-offseason #view-landing .hero-sub::after {
       }).join('');
       body.innerHTML = head
         + '<p class="muted" style="font-size:.8rem;margin:0 0 12px;">Staged over the next ' + routes.window
-        + ' gameweeks · totals run to GW' + routes.lastGw + ' vs making no transfers, hits already netted · Apply stages the first step only — later moves are re-checked every week as prices and news land.</p>'
+        + ' gameweeks · totals run to GW' + routes.lastGw + ' vs making no transfers, hits already netted · the plan-ahead tree decides what to apply — these routes show the shape of a path, re-checked every week as prices and news land.</p>'
         + '<div style="display:flex;gap:12px;flex-wrap:wrap;align-items:stretch;">' + cards + '</div>'
         + '<p style="font-size:.76rem;color:var(--muted);margin:10px 0 0;">Want to branch it yourself? '
         + '<a href="#" class="txp-tree-link" style="color:#1D9E75;font-weight:700;">Open the full plan-ahead tree →</a></p>';
@@ -13044,19 +13226,8 @@ html.apex-offseason #view-landing .hero-sub::after {
       var t = ev.target;
       var link = t.closest ? t.closest('.txp-tree-link') : null;
       if (link) { ev.preventDefault(); _txpOpenTree(); return; }
-      var btn = t.closest ? t.closest('.txp-apply') : null;
-      if (!btn) return;
-      ev.preventDefault();
-      var kind = btn.getAttribute('data-kind');
-      try {
-        if (kind === 'move' && typeof _applyTransferRec === 'function') {
-          _applyTransferRec(parseInt(btn.getAttribute('data-in'), 10), parseInt(btn.getAttribute('data-out'), 10));
-        } else if (kind === 'roll' && typeof _rollFT === 'function') {
-          _rollFT();
-        }
-        // Both paths call renderTransfers → the hook re-renders these cards
-        // against the new live state; move two becomes next week's move one.
-      } catch (e) {}
+      // APEX_FIX_AUG07_R1_NO_APPLY: no .txp-apply handler — Apply now lives
+      // only in the plan-ahead tree.
     });
   }
 
@@ -15931,7 +16102,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1786093187-GW1-cc946f14";
+const BUILD_VERSION = "1786114389-GW1-bd9e9f25";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = false;
@@ -15939,9 +16110,9 @@ window.APEX_SQUAD_ROLLBACK = false;
 let FPL_ID = null;
 let SQUAD_DATA = [];
 </script>
-<script src="/apex_pool.js?v=1786093187-GW1-cc946f14"></script>
+<script src="/apex_pool.js?v=1786114389-GW1-bd9e9f25"></script>
 <script>
-const PLAYER_NAMES = {"1": "Raya", "2": "Arrizabalaga", "3": "Meslier", "4": "Gabriel", "5": "J.Timber", "6": "Saliba", "7": "Lewis-Skelly", "8": "Calafiori", "9": "Hincapie", "10": "White", "11": "Mosquera", "12": "Saka", "13": "Rice", "14": "Eze", "15": "\u00d8degaard", "16": "Madueke", "17": "Merino", "18": "Martinelli", "19": "Zubimendi", "20": "Dowman", "21": "N\u00f8rgaard", "22": "Nwaneri", "23": "F\u00e1bio Vieira", "24": "Nelson", "25": "Gy\u00f6keres", "26": "Havertz", "27": "G.Jesus", "557": "Tzolis", "28": "Martinez", "29": "M.Bizot", "30": "Digne", "31": "Konsa", "32": "Cash", "33": "Mings", "34": "Pau", "35": "Bogarde", "36": "Maatsen", "37": "Lindel\u00f6f", "38": "A.Garc\u00eda", "39": "Nedeljkovic", "41": "Buend\u00eda", "42": "Guessand", "44": "Bailey", "45": "McGinn", "46": "Barkley", "47": "Kamara", "48": "Onana", "49": "Iling Jr", "50": "Burrowes", "51": "George Hemmings", "52": "Alysson", "53": "Manzambi", "54": "Gomes", "55": "Watkins", "56": "Abraham", "160": "Garnacho", "57": "Petrovi\u0107", "58": "Forster", "59": "Dennis", "60": "Hill", "61": "Truffert", "62": "Diakit\u00e9", "63": "Milosavljevi\u0107", "64": "Smith", "65": "J.Araujo", "66": "Soler", "67": "Rayan", "68": "Tavernier", "69": "Scott", "70": "Kluivert", "71": "Cook", "72": "Gannon-Doak", "73": "Adams", "74": "Brooks", "75": "Christie", "76": "T\u00f3th.A", "77": "Adli", "78": "Kroupi.Jr", "79": "Evanilson", "80": "Enes \u00dcnal", "81": "Rodr\u00edguez", "566": "Silva", "82": "Kelleher", "83": "Valdimarsson", "84": "Collins", "85": "Van den Berg", "86": "Lewis-Potter", "87": "Ajer", "88": "Kayode", "89": "Henry", "90": "Hickey", "91": "Pinnock", "92": "Ji-soo", "93": "Schuster", "94": "Schade", "95": "O.Dango", "96": "Damsgaard", "97": "Jensen", "98": "Janelt", "99": "Milambo", "100": "Carvalho", "102": "Yarmoliuk", "103": "Dasilva", "105": "Anthony", "106": "Thiago", "107": "Furo", "108": "Wilson", "565": "Sangar\u00e9", "109": "Verbruggen", "111": "Steele", "113": "F.Kad\u0131o\u011flu", "114": "Boscagli", "115": "De Cuyper", "116": "Dunk", "117": "Coppola", "118": "Igor", "119": "Costinha", "120": "Svoboda", "121": "Mitoma", "122": "Minteh", "123": "Hinshelwood", "124": "Gro\u00df", "125": "Georginio", "126": "O'Riley", "127": "Gomez", "128": "Buonanotte", "129": "Ayari", "130": "Wieffer", "131": "Baleba", "132": "Howell", "133": "Watson", "134": "Oriola", "135": "Yohanna", "137": "Tzimas", "138": "Kostoulas", "139": "Ferguson", "328": "Struijk", "504": "Vuskovic", "40": "Rogers", "101": "Henderson", "136": "Welbeck", "140": "S\u00e1nchez", "141": "J\u00f6rgensen", "142": "James", "143": "Chalobah", "144": "Gusto", "145": "Fofana", "146": "B.Badiashile", "147": "Tosin", "148": "Hato", "149": "Colwill", "150": "M.Sarr", "151": "Acheampong", "152": "Palestra", "153": "Disasi", "154": "Palmer", "155": "Enzo", "156": "Neto", "157": "Est\u00eav\u00e3o", "158": "Gittens", "159": "Caicedo", "161": "Lavia", "163": "D.Essugo", "164": "Quenda", "165": "Jo\u00e3o Pedro", "166": "N.Jackson", "167": "Delap", "168": "Marc Guiu", "169": "Mheuka", "170": "Emegha", "200": "Lacroix", "560": "Penders", "561": "Anselmino", "568": "Barco", "104": "Onyeka", "110": "Rushworth", "171": "Dovin", "172": "Wilson", "173": "Thomas", "174": "Kitching", "175": "van Ewijk", "176": "Dasilva", "177": "Kesler-Hayden", "178": "Bidwell", "179": "Latibeaudiere", "180": "Woolfenden", "181": "Brau", "182": "Amenda", "183": "Rudoni", "184": "Grimes", "185": "Sakamoto", "186": "Mason-Clark", "187": "Eccles", "188": "Torp", "189": "Shepherd", "190": "Tchaouna", "191": "Borges Rodrigues", "192": "Andrews", "193": "Wright", "194": "Thomas-Asante", "195": "Simms", "196": "Markelo", "197": "Bassette", "198": "Henderson", "199": "Benitez", "201": "Mu\u00f1oz", "202": "Richards", "203": "Canvot", "204": "Mitchell", "205": "Sosa", "206": "Chadi Riad", "207": "Mingueza", "208": "Sarr", "209": "Johnson", "210": "Wharton", "211": "Yeremy", "212": "Hughes", "213": "Lerma", "214": "Kamada", "215": "Devenny", "216": "Esse", "217": "M.Fran\u00e7a", "218": "Doucour\u00e9", "219": "J.Rak-Sakyi", "220": "Cardines", "221": "Drakes-Thomas", "222": "Strand Larsen", "223": "Mateta", "224": "Nketiah", "225": "Uche", "555": "Matthews", "226": "Pickford", "227": "Travers", "228": "King", "229": "Tarkowski", "230": "Branthwaite", "231": "Keane", "232": "O'Brien", "233": "Mykolenko", "234": "Patterson", "235": "Aznou", "236": "Dewsbury-Hall", "237": "Ndiaye", "239": "Garner", "240": "Iroegbunam", "241": "McNeil", "242": "George", "243": "Alcaraz", "244": "Armstrong", "245": "Dibling", "246": "R\u00f6hl", "247": "Hackney", "248": "Beto", "249": "Barry", "250": "Leno", "251": "Lecomte", "252": "McNally", "253": "Andersen", "254": "Robinson", "255": "J.Cuenca", "256": "Tete", "257": "Bassey", "258": "Castagne", "261": "Iwobi", "262": "Smith Rowe", "263": "Kevin", "264": "Bobb", "265": "Berge", "266": "Cairney", "267": "Luki\u0107", "268": "King", "269": "Sessegnon", "270": "Reed", "271": "Muniz", "272": "Kusi-Asare", "569": "Garc\u00eda", "570": "Palacios", "273": "Phillips", "274": "Butland", "275": "Cartwright", "276": "Lo-Tutala", "277": "Egan", "278": "Hughes", "279": "Ajayi", "280": "Coyle", "281": "Drameh", "282": "Giles", "283": "Jacob", "284": "McCarthy", "285": "McNair", "286": "Belloumi", "287": "Millar", "288": "Dowell", "289": "Crooks", "290": "Slater", "291": "Matazo", "292": "\u00d6m\u00fcr", "293": "Kamara", "294": "Zambrano", "295": "McBurnie", "296": "Akintola", "297": "Gyabi", "298": "Destan", "299": "Burstow", "556": "Targett", "563": "Morita", "572": "Tzolakis", "259": "Diop", "300": "Walton", "301": "Palmer", "302": "Button", "303": "Kipr\u00e9", "304": "O'Shea", "305": "Davis", "306": "Greaves", "307": "Johnson", "308": "Furlong", "309": "N\u00fa\u00f1ez", "310": "Matusiwa", "311": "Burns", "312": "Taylor", "313": "Clarke", "314": "Ogbene", "315": "Fatawu", "316": "Emersonn", "317": "Hirst", "318": "Philogene", "319": "Szmodics", "320": "Akpom", "321": "Walle Egeli", "322": "Al-Hamadi", "323": "McAteer", "324": "Mehmeti", "554": "Van Oevelen", "562": "Maeda", "564": "Scherpen", "571": "Florentino", "260": "Wilson", "326": "Perri", "327": "Bijol", "329": "Rodon", "330": "Bogle", "331": "Gudmundsson", "332": "Justin", "333": "Bornauw", "334": "Muharemovi\u0107", "335": "Stach", "336": "Okafor", "337": "Aaronson", "338": "Ampadu", "339": "Longstaff", "340": "Gelhardt", "341": "Gnonto", "342": "Harrison", "343": "James", "344": "Gruev", "345": "Tanaka", "346": "Calvert-Lewin", "347": "Nmecha", "348": "Piroe", "349": "Mateo Joseph", "350": "A.Becker", "351": "Mamardashvili", "352": "Woodman", "353": "Pecsi", "354": "Jaros", "355": "Davies", "356": "Virgil", "357": "Frimpong", "358": "Kerkez", "359": "Gomez", "360": "Bradley", "361": "Lucky", "362": "Jacquet", "363": "Leoni", "364": "Tsimikas", "365": "Ramsay", "366": "Wirtz", "367": "Gakpo", "368": "Szoboszlai", "369": "Ngumoha", "370": "Chiesa", "371": "Gravenberch", "372": "Mac Allister", "373": "C.Jones", "374": "Endo", "375": "Nyoni", "376": "Bajcetic", "377": "Munoz", "378": "McConnell", "379": "Isak", "380": "Ekitik\u00e9", "381": "Koumas", "382": "Danns", "383": "Elliott", "238": "Grealish", "384": "Donnarumma", "385": "Trafford", "386": "Bettinelli", "387": "O'Reilly", "388": "Gu\u00e9hi", "389": "Matheus N.", "390": "R\u00faben", "391": "Gvardiol", "392": "A\u00eft-Nouri", "393": "Khusanov", "394": "Alleyne", "395": "Lewis", "396": "Vitor Reis", "397": "Semenyo", "398": "Foden", "399": "Cherki", "400": "Doku", "401": "Marmoush", "402": "Rodrigo", "403": "Savinho", "404": "Reijnders", "405": "N.Gonzalez", "406": "Kova\u010di\u0107", "407": "Echeverri", "408": "Phillips", "409": "Mukasa", "410": "Monga", "411": "Haaland", "481": "Anderson", "43": "Tielemans", "162": "Andrey Santos", "325": "Darlow", "412": "Lammens", "413": "Bayindir", "414": "Heaton", "415": "Dorgu", "416": "De Ligt", "417": "Dalot", "418": "Maguire", "419": "Martinez", "420": "Yoro", "421": "Heaven", "422": "Mazraoui", "423": "Shaw", "424": "Amass", "425": "Fredricson", "426": "B.Fernandes", "427": "Mbeumo", "428": "Cunha", "429": "Rashford", "430": "Mount", "431": "Amad", "432": "Mainoo", "433": "Ugarte", "434": "J.Fletcher", "435": "Lacey", "436": "Collyer", "437": "Bendito Mantato", "438": "Fletcher", "439": "\u0160e\u0161ko", "440": "Zirkzee", "441": "Obi", "442": "Pope", "443": "Gillespie", "444": "Jaouen", "445": "Thiaw", "446": "Sch\u00e4r", "447": "Botman", "448": "Burn", "449": "Hall", "450": "Livramento", "451": "A.Murphy", "452": "Bruno G.", "453": "Barnes", "454": "Elanga", "456": "J.Ramsey", "457": "J.Murphy", "458": "Joelinton", "459": "L.Miley", "460": "Willock", "461": "Tour\u00e9", "462": "Steur", "463": "Woltemade", "464": "Wissa", "465": "Osula", "466": "Neave", "559": "Bamba", "567": "Horn\u00ed\u010dek", "467": "Sels", "468": "John", "469": "N.Williams", "470": "Morato", "471": "Milenkovi\u0107", "472": "Murillo", "473": "Aina", "474": "Jair Cunha", "475": "Savona", "476": "O.Richards", "477": "Abbott", "478": "Netz", "479": "Bindon", "480": "Gibbs-White", "482": "Hudson-Odoi", "483": "Ndoye", "484": "Hutchinson", "485": "Bakwa", "486": "McAtee", "487": "Dominguez", "488": "Sangar\u00e9", "489": "Yates", "490": "Wood", "491": "Igor Jesus", "492": "Awoniyi", "493": "Kalimuendo", "558": "Schlager", "112": "Van Hecke", "455": "Tonali", "494": "Vicario", "495": "Austin", "496": "Kinsky", "497": "Dubravka", "498": "Senesi", "499": "Pedro Porro", "500": "Romero", "501": "Danso", "502": "Robertson", "503": "Van de Ven", "505": "Spence", "506": "Udogie", "507": "Phillips", "508": "Davies", "509": "Byfield", "510": "Rowswell", "511": "Souza", "512": "Kudus", "513": "Xavi", "514": "Tel", "515": "Maddison", "516": "Bentancur", "517": "Odobert", "518": "P.M.Sarr", "519": "Gallagher", "520": "Bergvall", "521": "Kulusevski", "522": "Gray", "523": "Moore", "524": "Olusesi", "525": "Fernandes", "526": "Solanke", "527": "Richarlison", "528": "Scarlett", "529": "Roefs", "530": "Patterson", "531": "Ellborg", "532": "Ballard", "533": "Mukiele", "534": "Hume", "535": "Alderete", "536": "Reinildo", "537": "Seelt", "538": "Hjelde", "539": "O'Nien", "540": "Masuaku", "541": "Meunier", "542": "E.Le F\u00e9e", "543": "Diarra", "544": "Xhaka", "545": "Sadiki", "546": "Adingra", "547": "Mundle", "548": "Rigg", "549": "Talbi", "550": "Jocelin.T", "551": "Angulo", "552": "Brobbey", "553": "Isidor"};
+const PLAYER_NAMES = {"1": "Raya", "2": "Arrizabalaga", "3": "Meslier", "4": "Gabriel", "5": "J.Timber", "6": "Saliba", "7": "Lewis-Skelly", "8": "Calafiori", "9": "Hincapie", "10": "White", "11": "Mosquera", "12": "Saka", "13": "Rice", "14": "Eze", "15": "\u00d8degaard", "16": "Madueke", "17": "Merino", "18": "Martinelli", "19": "Zubimendi", "20": "Dowman", "22": "Nwaneri", "23": "F\u00e1bio Vieira", "24": "Nelson", "25": "Gy\u00f6keres", "26": "Havertz", "27": "G.Jesus", "557": "Tzolis", "28": "Martinez", "29": "M.Bizot", "30": "Digne", "31": "Konsa", "32": "Cash", "33": "Mings", "34": "Pau", "35": "Bogarde", "36": "Maatsen", "37": "Lindel\u00f6f", "38": "A.Garc\u00eda", "39": "Nedeljkovic", "41": "Buend\u00eda", "42": "Guessand", "44": "Bailey", "45": "McGinn", "46": "Barkley", "47": "Kamara", "48": "Onana", "49": "Iling Jr", "50": "Burrowes", "51": "George Hemmings", "52": "Alysson", "53": "Manzambi", "54": "Gomes", "55": "Watkins", "56": "Abraham", "160": "Garnacho", "57": "Petrovi\u0107", "58": "Forster", "59": "Dennis", "60": "Hill", "61": "Truffert", "62": "Diakit\u00e9", "63": "Milosavljevi\u0107", "64": "Smith", "65": "J.Araujo", "66": "Soler", "67": "Rayan", "68": "Tavernier", "69": "Scott", "70": "Kluivert", "71": "Cook", "72": "Gannon-Doak", "73": "Adams", "74": "Brooks", "75": "Christie", "76": "T\u00f3th.A", "77": "Adli", "78": "Kroupi.Jr", "79": "Evanilson", "80": "Enes \u00dcnal", "81": "Rodr\u00edguez", "566": "Silva", "573": "Sanchez", "82": "Kelleher", "83": "Valdimarsson", "84": "Collins", "85": "Van den Berg", "86": "Lewis-Potter", "87": "Ajer", "88": "Kayode", "89": "Henry", "90": "Hickey", "91": "Pinnock", "92": "Ji-soo", "93": "Schuster", "94": "Schade", "95": "O.Dango", "96": "Damsgaard", "97": "Jensen", "98": "Janelt", "99": "Milambo", "100": "Carvalho", "102": "Yarmoliuk", "103": "Dasilva", "105": "Anthony", "106": "Thiago", "107": "Furo", "108": "Wilson", "565": "Sangar\u00e9", "109": "Verbruggen", "111": "Steele", "113": "F.Kad\u0131o\u011flu", "114": "Boscagli", "115": "De Cuyper", "116": "Dunk", "117": "Coppola", "118": "Igor", "119": "Costinha", "120": "Svoboda", "121": "Mitoma", "122": "Minteh", "123": "Hinshelwood", "124": "Gro\u00df", "125": "Georginio", "126": "O'Riley", "127": "Gomez", "128": "Buonanotte", "129": "Ayari", "130": "Wieffer", "131": "Baleba", "132": "Howell", "133": "Watson", "134": "Oriola", "135": "Yohanna", "137": "Tzimas", "138": "Kostoulas", "139": "Ferguson", "328": "Struijk", "504": "Vuskovic", "40": "Rogers", "101": "Henderson", "136": "Welbeck", "140": "S\u00e1nchez", "141": "J\u00f6rgensen", "142": "James", "143": "Chalobah", "144": "Gusto", "145": "Fofana", "146": "B.Badiashile", "147": "Tosin", "148": "Hato", "149": "Colwill", "150": "M.Sarr", "151": "Acheampong", "152": "Palestra", "153": "Disasi", "154": "Palmer", "155": "Enzo", "156": "Neto", "157": "Est\u00eav\u00e3o", "158": "Gittens", "159": "Caicedo", "161": "Lavia", "163": "D.Essugo", "164": "Quenda", "165": "Jo\u00e3o Pedro", "166": "N.Jackson", "167": "Delap", "168": "Marc Guiu", "169": "Mheuka", "170": "Emegha", "200": "Lacroix", "560": "Penders", "561": "Anselmino", "568": "Barco", "104": "Onyeka", "110": "Rushworth", "171": "Dovin", "172": "Wilson", "173": "Thomas", "174": "Kitching", "175": "van Ewijk", "176": "Dasilva", "177": "Kesler-Hayden", "178": "Bidwell", "179": "Latibeaudiere", "180": "Woolfenden", "181": "Brau", "182": "Amenda", "183": "Rudoni", "184": "Grimes", "185": "Sakamoto", "186": "Mason-Clark", "187": "Eccles", "188": "Torp", "189": "Shepherd", "190": "Tchaouna", "191": "Borges Rodrigues", "192": "Andrews", "193": "Wright", "194": "Thomas-Asante", "195": "Simms", "196": "Markelo", "197": "Bassette", "198": "Henderson", "199": "Benitez", "201": "Mu\u00f1oz", "202": "Richards", "203": "Canvot", "204": "Mitchell", "205": "Sosa", "206": "Chadi Riad", "207": "Mingueza", "208": "Sarr", "209": "Johnson", "210": "Wharton", "211": "Yeremy", "212": "Hughes", "213": "Lerma", "214": "Kamada", "215": "Devenny", "216": "Esse", "217": "M.Fran\u00e7a", "218": "Doucour\u00e9", "219": "J.Rak-Sakyi", "220": "Cardines", "221": "Drakes-Thomas", "222": "Strand Larsen", "223": "Mateta", "224": "Nketiah", "225": "Uche", "555": "Matthews", "21": "N\u00f8rgaard", "226": "Pickford", "227": "Travers", "228": "King", "229": "Tarkowski", "230": "Branthwaite", "231": "Keane", "232": "O'Brien", "233": "Mykolenko", "234": "Patterson", "235": "Aznou", "236": "Dewsbury-Hall", "237": "Ndiaye", "239": "Garner", "240": "Iroegbunam", "241": "McNeil", "242": "George", "243": "Alcaraz", "244": "Armstrong", "245": "Dibling", "246": "R\u00f6hl", "247": "Hackney", "248": "Beto", "249": "Barry", "250": "Leno", "251": "Lecomte", "252": "McNally", "253": "Andersen", "254": "Robinson", "255": "J.Cuenca", "256": "Tete", "257": "Bassey", "258": "Castagne", "261": "Iwobi", "262": "Smith Rowe", "263": "Kevin", "264": "Bobb", "265": "Berge", "266": "Cairney", "267": "Luki\u0107", "268": "King", "269": "Sessegnon", "270": "Reed", "271": "Muniz", "272": "Kusi-Asare", "569": "Garc\u00eda", "570": "Palacios", "273": "Phillips", "274": "Butland", "275": "Cartwright", "276": "Lo-Tutala", "277": "Egan", "278": "Hughes", "279": "Ajayi", "280": "Coyle", "281": "Drameh", "282": "Giles", "283": "Jacob", "284": "McCarthy", "285": "McNair", "286": "Belloumi", "287": "Millar", "288": "Dowell", "289": "Crooks", "290": "Slater", "291": "Matazo", "292": "\u00d6m\u00fcr", "293": "Kamara", "294": "Zambrano", "295": "McBurnie", "296": "Akintola", "297": "Gyabi", "298": "Destan", "299": "Burstow", "556": "Targett", "563": "Morita", "572": "Tzolakis", "259": "Diop", "300": "Walton", "301": "Palmer", "302": "Button", "303": "Kipr\u00e9", "304": "O'Shea", "305": "Davis", "306": "Greaves", "307": "Johnson", "308": "Furlong", "309": "N\u00fa\u00f1ez", "310": "Matusiwa", "311": "Burns", "312": "Taylor", "313": "Clarke", "314": "Ogbene", "315": "Fatawu", "316": "Emersonn", "317": "Hirst", "318": "Philogene", "319": "Szmodics", "320": "Akpom", "321": "Walle Egeli", "322": "Al-Hamadi", "323": "McAteer", "324": "Mehmeti", "554": "Van Oevelen", "562": "Maeda", "564": "Scherpen", "571": "Florentino", "260": "Wilson", "326": "Perri", "327": "Bijol", "329": "Rodon", "330": "Bogle", "331": "Gudmundsson", "332": "Justin", "333": "Bornauw", "334": "Muharemovi\u0107", "335": "Stach", "336": "Okafor", "337": "Aaronson", "338": "Ampadu", "339": "Longstaff", "340": "Gelhardt", "341": "Gnonto", "342": "Harrison", "343": "James", "344": "Gruev", "345": "Tanaka", "346": "Calvert-Lewin", "347": "Nmecha", "348": "Piroe", "349": "Mateo Joseph", "385": "Trafford", "350": "A.Becker", "351": "Mamardashvili", "352": "Woodman", "353": "Pecsi", "354": "Jaros", "355": "Davies", "356": "Virgil", "357": "Frimpong", "358": "Kerkez", "359": "Gomez", "360": "Bradley", "361": "Lucky", "362": "Jacquet", "363": "Leoni", "364": "Tsimikas", "365": "Ramsay", "366": "Wirtz", "367": "Gakpo", "368": "Szoboszlai", "369": "Ngumoha", "370": "Chiesa", "371": "Gravenberch", "372": "Mac Allister", "373": "C.Jones", "374": "Endo", "375": "Nyoni", "376": "Bajcetic", "377": "Munoz", "378": "McConnell", "379": "Isak", "380": "Ekitik\u00e9", "381": "Koumas", "382": "Danns", "383": "Elliott", "238": "Grealish", "384": "Donnarumma", "386": "Bettinelli", "387": "O'Reilly", "388": "Gu\u00e9hi", "389": "Matheus N.", "390": "R\u00faben", "391": "Gvardiol", "392": "A\u00eft-Nouri", "393": "Khusanov", "394": "Alleyne", "395": "Lewis", "396": "Vitor Reis", "397": "Semenyo", "398": "Foden", "399": "Cherki", "400": "Doku", "401": "Marmoush", "402": "Rodrigo", "403": "Savinho", "404": "Reijnders", "405": "N.Gonzalez", "406": "Kova\u010di\u0107", "407": "Echeverri", "408": "Phillips", "409": "Mukasa", "410": "Monga", "411": "Haaland", "481": "Anderson", "43": "Tielemans", "162": "Andrey Santos", "325": "Darlow", "412": "Lammens", "413": "Bayindir", "414": "Heaton", "415": "Dorgu", "416": "De Ligt", "417": "Dalot", "418": "Maguire", "419": "Martinez", "420": "Yoro", "421": "Heaven", "422": "Mazraoui", "423": "Shaw", "424": "Amass", "425": "Fredricson", "426": "B.Fernandes", "427": "Mbeumo", "428": "Cunha", "429": "Rashford", "430": "Mount", "431": "Amad", "432": "Mainoo", "433": "Ugarte", "434": "J.Fletcher", "435": "Lacey", "436": "Collyer", "437": "Bendito Mantato", "438": "Fletcher", "439": "\u0160e\u0161ko", "440": "Zirkzee", "441": "Obi", "442": "Pope", "443": "Gillespie", "444": "Jaouen", "445": "Thiaw", "446": "Sch\u00e4r", "447": "Botman", "448": "Burn", "449": "Hall", "450": "Livramento", "451": "A.Murphy", "452": "Bruno G.", "453": "Barnes", "454": "Elanga", "456": "J.Ramsey", "457": "J.Murphy", "458": "Joelinton", "459": "L.Miley", "460": "Willock", "461": "Tour\u00e9", "462": "Steur", "463": "Woltemade", "464": "Wissa", "465": "Osula", "466": "Neave", "559": "Bamba", "567": "Horn\u00ed\u010dek", "467": "Sels", "468": "John", "469": "N.Williams", "470": "Morato", "471": "Milenkovi\u0107", "472": "Murillo", "473": "Aina", "474": "Jair Cunha", "475": "Savona", "476": "O.Richards", "477": "Abbott", "478": "Netz", "479": "Bindon", "480": "Gibbs-White", "482": "Hudson-Odoi", "483": "Ndoye", "484": "Hutchinson", "485": "Bakwa", "486": "McAtee", "487": "Dominguez", "488": "Sangar\u00e9", "489": "Yates", "490": "Wood", "491": "Igor Jesus", "492": "Awoniyi", "493": "Kalimuendo", "558": "Schlager", "112": "Van Hecke", "455": "Tonali", "494": "Vicario", "495": "Austin", "496": "Kinsky", "497": "Dubravka", "498": "Senesi", "499": "Pedro Porro", "500": "Romero", "501": "Danso", "502": "Robertson", "503": "Van de Ven", "505": "Spence", "506": "Udogie", "507": "Phillips", "508": "Davies", "509": "Byfield", "510": "Rowswell", "511": "Souza", "512": "Kudus", "513": "Xavi", "514": "Tel", "515": "Maddison", "516": "Bentancur", "517": "Odobert", "518": "P.M.Sarr", "519": "Gallagher", "520": "Bergvall", "521": "Kulusevski", "522": "Gray", "523": "Moore", "524": "Olusesi", "525": "Fernandes", "526": "Solanke", "527": "Richarlison", "528": "Scarlett", "529": "Roefs", "530": "Patterson", "531": "Ellborg", "532": "Ballard", "533": "Mukiele", "534": "Hume", "535": "Alderete", "536": "Reinildo", "537": "Seelt", "538": "Hjelde", "539": "O'Nien", "540": "Masuaku", "541": "Meunier", "542": "E.Le F\u00e9e", "543": "Diarra", "544": "Xhaka", "545": "Sadiki", "546": "Adingra", "547": "Mundle", "548": "Rigg", "549": "Talbi", "550": "Jocelin.T", "551": "Angulo", "552": "Brobbey", "553": "Isidor"};
 const TRANSFER_RECS = [];
 let WC_SQUADS = {};
 let FH_SQUADS = {};
@@ -17296,6 +17467,37 @@ function _apexOwnTag(p) {
   } catch (_e) { return ''; }
 }
 
+// INSERTED APEX_FIX_AUG07_F6_PRESETFAIL (2026-08-07) -- one visible failure
+// surface for the risk-preset rebuild. selectPreset's failure branch used to
+// just clear the status text, so a genuinely infeasible build (real budget,
+// zero user locks) produced a full set of console errors and a completely
+// blank screen. _apexRenderSolverAlert already exists, already owns its own
+// element and is already verified to survive the reveal repaint -- call it
+// EVERY time, not only when the user happens to be holding locks. The lock
+// count only changes the wording of the advice.
+function _apexPresetBuildFailed(_name, _statusEl) {
+  try {
+    var _nLocks = 0;
+    try {
+      var _lo = (typeof window._ppUserLockOpts === 'function') ? window._ppUserLockOpts() : null;
+      _nLocks = (_lo && _lo.lockInIds) ? _lo.lockInIds.length : 0;
+    } catch (_eNl) {}
+    var _lines = [
+      'The optimiser could not build a legal 15 for the ' + _name + ' profile under your budget, the 2-5-5-3 formation and the 3-per-team rule.',
+      'Your squad has NOT been changed - what is on the pitch is the build you already had.',
+    ];
+    _lines.push(_nLocks > 0
+      ? ('You have ' + _nLocks + ' locked player' + (_nLocks === 1 ? '' : 's')
+         + ' forced in. Unlock one or more with the lock button in the player pool, then pick the profile again.')
+      : 'Try a different risk profile, or free up an exclusion in the player pool, then pick the profile again.');
+    if (typeof window._apexRenderSolverAlert === 'function') {
+      window._apexRenderSolverAlert('error', 'Could not rebuild your 15 for the ' + _name + ' profile', _lines);
+    }
+    if (_statusEl) {
+      _statusEl.textContent = 'Could not rebuild for the ' + _name + ' profile - your existing squad is unchanged.';
+    }
+  } catch (_ePf) {}
+}
 function selectPreset(name) {
   if (!window.APEX_PRESETS) return;
   if (!_PRESET_PARAMS[name]) return;
@@ -17376,9 +17578,15 @@ function selectPreset(name) {
           _applyFullSquad(sq, activeGwIdx || 0);
           if (typeof _apexRepaintRail === 'function') _apexRepaintRail();
           if (_st) _st.textContent = 'Your opening 15 · ' + name + ' profile';
-        } else if (_st) {
-          _st.textContent = '';
+        } else {
+          // INSERTED APEX_FIX_AUG07_F6_BRANCH -- was `else if (_st) _st.textContent = ''`.
+          _apexPresetBuildFailed(name, _st);
         }
+      }).catch(function (_ePb) {
+        // INSERTED APEX_FIX_AUG07_F6_BRANCH -- an outright rejection blanked the
+        // screen the same way; it now lands on the same visible surface.
+        try { console.error('[apex] preset rebuild failed:', _ePb); } catch (_eCn) {}
+        _apexPresetBuildFailed(name, _st);
       });
     }
   } catch (_e) {}
@@ -17515,13 +17723,56 @@ const _rollFTByGw = {};
 // The `typeof` fallback repeats the same recurrence rather than the old
 // one-step peek: if apex_app.js ever fails to load we must not silently revert
 // to the broken ledger.
+// INSERTED APEX_FIX_AUG07_F1_CHIPWEEK (2026-08-07) -- WHICH gameweek has a chip
+// PLAYED on it. _activeChips is chip AVAILABILITY (which chips you still hold),
+// not "a chip is played this week"; the state that records a chip played AT a
+// gameweek is the chip plan itself -- the sel-wc / sel-fh / sel-bb / sel-tc
+// dropdowns, the same source _ppPlannedChipAt (assets/apex_app.js) reads.
+function _apexChipPlayedAtGw(gwIdx) {
+  try {
+    var _gwR = (typeof TEAM_META !== 'undefined' && TEAM_META && TEAM_META.gw_range) || [];
+    var _gw = _gwR[gwIdx];
+    if (_gw == null) return '';
+    var _cs = ['wc', 'fh', 'bb', 'tc'];
+    for (var _ci2 = 0; _ci2 < _cs.length; _ci2++) {
+      var _el2 = (typeof document !== 'undefined') ? document.getElementById('sel-' + _cs[_ci2]) : null;
+      var _v2 = _el2 ? parseInt(_el2.value || '0', 10) : 0;
+      if (_v2 && _v2 === parseInt(_gw, 10)) return _cs[_ci2].toUpperCase();
+    }
+    return '';
+  } catch (_eCp) { return ''; }
+}
+// INSERTED APEX_FIX_AUG07_F1_CHIPWEEK -- does the chip played at this gameweek
+// SUSPEND the transfer rules? Wildcard and Free Hit do: unlimited transfers, no
+// hit, and the FT bank is untouched (the ledger header below already asserts
+// "a chip week does not wipe banked FTs" -- this is what makes that true).
+// Measured before this fix: mark a Wildcard, apply transfers in that week via
+// the weekly Transfers tab, and the bank drained 4 -> 1 at four transfers while
+// five transfers invented a -4 and eight invented a -16.
+// Bench Boost and Triple Captain are deliberately NOT in this set: they change
+// what the squad SCORES, not what you may TRANSFER, so a transfer made in a
+// BB/TC week still spends a free transfer and still takes the hit. Widening
+// this predicate to all four chips would swap one wrong number for another.
+function _apexFreeTransferChipGw(gwIdx) {
+  var _c = _apexChipPlayedAtGw(gwIdx);
+  return _c === 'WC' || _c === 'FH';
+}
 function getEffectiveFTs(gwIdx) {
   const _n = Math.max(0, Math.min(
     Math.floor(+gwIdx || 0),
     ((TEAM_META && TEAM_META.gw_range) || []).length));
   let ft = (TEAM_META && TEAM_META.free_transfers) || 1;
   for (let _i = 0; _i < _n; _i++) {
-    const _tx = _rollFTByGw[_i] ? 0 : (_transfersAppliedByGw[_i] || 0);
+    // INSERTED APEX_FIX_AUG07_F1_FTWALK -- a WC/FH week uses no transfers at
+    // all, so it banks like an untouched week instead of draining the bank.
+    // APEX_FIX_AUG07_EXTRACT: typeof-guarded, the same idiom _ppNextFt uses two
+    // lines below. In the browser this is always defined; in a context that
+    // extracted getEffectiveFTs without it, the ledger degrades to the pre-fix
+    // answer instead of throwing and halting the build chain.
+    const _chipFree = (typeof _apexFreeTransferChipGw === 'function')
+      && _apexFreeTransferChipGw(_i);
+    const _tx = (_rollFTByGw[_i] || _chipFree)
+      ? 0 : (_transfersAppliedByGw[_i] || 0);
     ft = (typeof _ppNextFt === 'function')
       ? _ppNextFt(_i, ft, _tx)
       : Math.min(5, Math.max(0, ft - _tx) + 1);
@@ -17531,6 +17782,11 @@ function getEffectiveFTs(gwIdx) {
 
 function getHitsForGw(gwIdx) {
   if (_rollFTByGw[gwIdx]) return 0;   // explicit roll = no transfers, no hit
+  // INSERTED APEX_FIX_AUG07_F1_HITS -- Wildcard / Free Hit week: unlimited
+  // transfers, so no count of transfers can ever produce a hit.
+  // APEX_FIX_AUG07_EXTRACT: typeof-guarded — see getEffectiveFTs above.
+  if ((typeof _apexFreeTransferChipGw === 'function')
+      && _apexFreeTransferChipGw(gwIdx)) return 0;
   const transfers = _transfersAppliedByGw[gwIdx] || 0;
   const fts = getEffectiveFTs(gwIdx);
   return Math.max(0, transfers - fts);
@@ -17581,6 +17837,9 @@ function _updateFTDisplay() {
       return;
     }
   } catch (_eFt2) {}
+  // INSERTED APEX_FIX_AUG07_F1_BADGE -- a Wildcard / Free Hit week does not
+  // spend the allowance, so there is nothing to count down.
+  if (_apexFreeTransferChipGw(activeGwIdx)) { el.textContent = 'Unlimited'; return; }
   const _usedFt = _transfersAppliedByGw[activeGwIdx] || 0;
   el.textContent = Math.max(0, getEffectiveFTs(activeGwIdx) - _usedFt);
 }
@@ -19754,7 +20013,10 @@ function renderTransfers(recs) {
     + `
     <p class="muted" style="font-size:.8rem;margin-bottom:1rem;">
       Ranked by xPts gain from GW${TEAM_META.gw_range[activeGwIdx]} onwards.
-      Each Apply consumes one transfer slot — first ${_effFTs} are free, then −4 per extra.
+      <!-- APEX_FIX_AUG07_F5_COPY -->
+      <span id="apex-tx-informational">This list is informational. Open <strong>plan ahead →</strong> to make a transfer:
+      the planner is the only surface that prices the hit and the cost of giving up a banked free transfer,
+      so it — not this list — decides which move to make and when.</span>
     </p>
     <div class="transfers" style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
   `;
@@ -19820,10 +20082,13 @@ function renderTransfers(recs) {
           }
           ${hitCost}
           <span class="${badgeCls}" style="${badgeStyle}font-size:.68rem;font-weight:700;padding:2px 8px;border-radius:4px;">${badgeLabel}</span>
-          <button onclick="_applyTransferRec(${t.in_id}, ${t.out_id})"
-            style="margin-top:4px;background:var(--accent,#1D9E75);color:#000;border:none;border-radius:5px;padding:5px 12px;font-size:.75rem;font-weight:700;cursor:pointer;width:100%;">
-            ⚡ Apply
-          </button>
+          <!-- APEX_FIX_AUG07_F5_APPLY (2026-08-07): the Apply button is gone.
+               computeTransfers takes no free-transfer argument, does no hit
+               arithmetic and no opportunity cost, yet this rendered live Apply
+               buttons -- including at 0 FTs, directly under a header reading
+               "-4 hit". The planner tree is the single source of truth for
+               transfer verdicts; this tab stays as the informational list it
+               is good at being. -->
           ${_whyPanelEnabled() ? `
             <button onclick="_showOverrideModal(${t.out_id}, ${t.in_id}, ${t.in_xp.toFixed(2)}, ${t.out_xp.toFixed(2)}, ${t.gain.toFixed(2)})"
               style="margin-top:4px;background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:5px;padding:4px 10px;font-size:.7rem;font-weight:600;cursor:pointer;width:100%;">
@@ -21498,10 +21763,83 @@ function _ppNextFt(gwIdx, ft, txUsed) {
 // selling-price map (generate_solver_html.py ~590); pre-season there are no
 // owned players, so it can land at 0 and silently produce an unaffordable
 // (empty-bank) build. Fall back to the FPL starting budget.
+// ── APEX_FIX_AUG07_A4 — what the cheapest legal 15 actually costs ──────────
+// A LOWER BOUND on the cost of any legal squad: the 2 cheapest GKs + 5 cheapest
+// DEFs + 5 cheapest MIDs + 3 cheapest FWDs. It ignores the 3-per-team cap, so
+// the true minimum is >= this — which is the right direction for a guard: it
+// can never reject a budget that is in fact affordable.
+// DERIVED FROM POOL_DATA AT RUN TIME, deliberately NOT a constant, because the
+// number is POOL-DEPENDENT: it moves with every price change and every rebake.
+// MEASURED 2026-08-07 on the shipped 438-player GW1-19 pool it comes out at
+// £64.0m. The old guard was `b > 50`, so every budget in (50, 64) was accepted,
+// was genuinely infeasible, and then failed invisibly (that silence is A3).
+// Cached: the pool does not change within a page life.
+let _ppMinLegalCost = null;
+function _ppMinLegalSquadCost() {
+  if (_ppMinLegalCost != null) return _ppMinLegalCost;
+  try {
+    const pool = (typeof POOL_DATA !== 'undefined' && Array.isArray(POOL_DATA)) ? POOL_DATA : [];
+    if (!pool.length) return null;
+    const need = { 1: 2, 2: 5, 3: 5, 4: 3 };
+    let total = 0;
+    for (const et of [1, 2, 3, 4]) {
+      const costs = pool.filter(p => +(p && p.element_type) === et)
+                        .map(p => +(p.cost || 0))
+                        .filter(c => c > 0)
+                        .sort((x, y) => x - y);
+      if (costs.length < need[et]) return null;   // this pool cannot make a 15 at all
+      for (let k = 0; k < need[et]; k++) total += costs[k];
+    }
+    _ppMinLegalCost = Math.round(total * 10) / 10;
+    return _ppMinLegalCost;
+  } catch (_e) { return null; }
+}
+
+// Budget available for a pre-GW1 build. TEAM_META.budget is derived from the
+// selling-price map (generate_solver_html.py ~590); pre-season there are no
+// owned players, so it can land at 0 and silently produce an unaffordable
+// (empty-bank) build. Fall back to the FPL starting budget.
+// APEX_FIX_AUG07_A4: `b > 50` was too weak by £14m on the live pool. A budget
+// below the cheapest legal 15 is not a small budget, it is an IMPOSSIBLE one:
+// the ILP returns infeasible and (before A3) nothing reached the screen. Now it
+// is corrected to the FPL starting budget AND reported.
+let _ppBudgetWarned = false;
+const _PP_DEFAULT_BUDGET = 100.0;
 function _ppUnlimitedBudget() {
   const tm = (typeof TEAM_META !== 'undefined' && TEAM_META) ? TEAM_META : {};
   const b = +(tm.budget || ((tm.squad_value || 0) + (tm.bank || 0))) || 0;
-  return b > 50 ? b : 100.0;
+  const floor = _ppMinLegalSquadCost();
+  // Nothing measurable about the pool — keep the old, weaker guard rather than
+  // inventing a threshold we cannot justify.
+  if (floor == null) return b > 50 ? b : _PP_DEFAULT_BUDGET;
+  if (b >= floor) return b;
+  if (!_ppBudgetWarned) {
+    _ppBudgetWarned = true;
+    const _msg = 'budget \u00A3' + b.toFixed(1) + 'm is below the cheapest legal 15 on this pool '
+               + '(\u00A3' + floor.toFixed(1) + 'm)';
+    try { console.warn('[apex] ' + _msg + ' — using \u00A3' + _PP_DEFAULT_BUDGET.toFixed(1) + 'm instead'); } catch (_e) {}
+    try {
+      if (typeof _apexRenderSolverAlert === 'function') {
+        if (_PP_DEFAULT_BUDGET >= floor) {
+          _apexRenderSolverAlert('warn', 'That budget cannot buy a legal 15', [
+            'The budget on this page is \u00A3' + b.toFixed(1) + 'm, but the cheapest legal 15 in the '
+            + 'current player pool costs \u00A3' + floor.toFixed(1) + 'm (2 GK, 5 DEF, 5 MID, 3 FWD).',
+            'The build has been run at the FPL starting budget of \u00A3'
+            + _PP_DEFAULT_BUDGET.toFixed(1) + 'm instead, so the squad below is affordable — but it is '
+            + 'NOT priced against the budget this page was given.',
+          ], _msg);
+        } else {
+          _apexRenderSolverAlert('error', 'No legal 15 exists at any budget on this pool', [
+            'The cheapest legal 15 in the current player pool costs \u00A3' + floor.toFixed(1)
+            + 'm, which is more than the FPL starting budget of \u00A3'
+            + _PP_DEFAULT_BUDGET.toFixed(1) + 'm. No opening squad can be built from this data.',
+            'This is a data problem, not something you can fix on this page — the pool needs rebaking.',
+          ], _msg);
+        }
+      }
+    } catch (_e) {}
+  }
+  return _PP_DEFAULT_BUDGET;
 }
 
 // Is the wildcard ILP reachable on this page? Guarded so the build branch is
@@ -21732,10 +22070,40 @@ function _ppBuiltFor(gwIdx) {
 // solver library never loaded" from "the ILP found no legal squad" and said
 // nothing about either. Recorded on window so the UI, the tests and the
 // console all read the same record. Cleared on every success.
-function _apexNoteBuildFailure(reason, detail) {
+function _apexNoteBuildFailure(reason, detail, opts) {
   try {
     window._apexBuildFailure = { reason, detail: detail || null, at: Date.now() };
     console.warn('[apex] opening-15 build failed: ' + reason + (detail ? ' — ' + detail : ''));
+  } catch (_e) {}
+  // ── APEX_FIX_AUG07_A3 — every failure path reaches the SCREEN ────────────
+  // Before this, exactly ONE branch alerted: 'not-optimal' AND _nUserLocks > 0,
+  // where _nUserLocks counts window.apexLocks only. MEASURED 2026-08-07: a
+  // genuinely infeasible build with zero user locks produced console errors and
+  // a completely blank screen. This function is the chokepoint — every failure
+  // return in _ppBuildUnlimitedSquad comes through here — so alerting here
+  // covers the prefetch, the tree's build branch, _ppApplyUnlimitedEdit and the
+  // reveal alike. Doctrine: fail toward noise, never toward silence.
+  //   'superseded' is NOT a failure (a newer solve owns the screen) -> silent.
+  //   opts.alerted   = a richer, more specific alert was already rendered by
+  //                    the caller (the locked-players wording) -> do not
+  //                    overwrite it with this generic one.
+  //   _apexRevealGw1Squad still renders its own, even richer alert after we
+  //   return null; that one lands last and wins, exactly as before.
+  try {
+    if (reason !== 'superseded' && !(opts && opts.alerted)
+        && typeof _apexRenderSolverAlert === 'function') {
+      const _why = {
+        'no-solver': 'The optimiser is not available on this page — the solver bundle did not load, or the player pool is empty.',
+        'glpk-unavailable': 'The optimiser library could not be loaded. It is fetched from a CDN when the page opens.',
+        'not-optimal': 'The optimiser ran but found no legal 15 under the current budget, locks and squad rules (2-5-5-3, max 3 per team).',
+        'short-squad': 'The optimiser returned an incomplete squad, so it was rejected rather than painted onto the pitch.',
+        'threw': 'The optimiser stopped with an internal error.',
+      }[reason] || ('The optimiser did not complete (' + reason + ').');
+      _apexRenderSolverAlert('error', 'Could not build a legal 15', [
+        _why,
+        'Nothing has been saved or lost — your squad is unchanged. Adjust your locks or your budget and try again.',
+      ], detail);
+    }
   } catch (_e) {}
   return null;
 }
@@ -21808,20 +22176,44 @@ async function _ppBuildUnlimitedSquad(gwIdx) {
     // APEX_FIX_AUG03E_USERLOCKS — resolved before the solve so the
     // failure branch can name the locks it actually passed.
     if (!res || res.status !== 'optimal') {
-      if (_nUserLocks > 0) {
+      // APEX_FIX_AUG07_A3 — _nUserLocks counts window.apexLocks ONLY. The
+      // seed-locks CSV (data/preseason/seed_locks.csv -> APEX_SEED_LOCKS ->
+      // lockIn / excludePlayers) forces players in and out of this same solve
+      // and is just as capable of making the 15 infeasible, so it belongs in
+      // the "locks are involved" test and in the wording the user reads.
+      const _slk    = _ppSeedLockOpts(gwIdx) || {};
+      const _nSeedIn  = (_slk.lockIn || []).length;
+      const _nSeedOut = (_slk.excludePlayers || []).length;
+      const _anyLocks = (_nUserLocks > 0) || (_nSeedIn > 0) || (_nSeedOut > 0);
+      if (_anyLocks) {
         try {
-          _apexRenderSolverAlert('error', 'Could not build a legal 15 with your locked players', [
-            'You have ' + _nUserLocks + ' locked player' + (_nUserLocks === 1 ? '' : 's')
-            + ' forced into the squad, and no legal 15 fits them all under the budget, the'
-            + ' 2-5-5-3 formation and the 3-per-team rule.',
-            'Unlock one or more players and run the solve again.',
-          ], 'ILP status "' + ((res && res.status) || 'no-result') + '"');
+          const _lines = [];
+          if (_nUserLocks > 0) {
+            _lines.push('You have ' + _nUserLocks + ' locked player' + (_nUserLocks === 1 ? '' : 's')
+              + ' forced into the squad, and no legal 15 fits them all under the budget, the'
+              + ' 2-5-5-3 formation and the 3-per-team rule.');
+          }
+          if (_nSeedIn > 0 || _nSeedOut > 0) {
+            _lines.push('This build also carries the pre-season seed locks: '
+              + _nSeedIn + ' forced in' + (_nSeedIn ? ' (' + _slk.lockIn.join(', ') + ')' : '')
+              + ', ' + _nSeedOut + ' forced out'
+              + (_nSeedOut ? ' (' + _slk.excludePlayers.join(', ') + ')' : '')
+              + '. Those come from seed_locks.csv, not from anything you clicked.');
+          }
+          _lines.push(_nUserLocks > 0
+            ? 'Unlock one or more players and run the solve again.'
+            : 'Nothing you can unlock on this page will change it — the constraints come from the build.');
+          _apexRenderSolverAlert('error', 'Could not build a legal 15 with the locked players', _lines,
+            'ILP status "' + ((res && res.status) || 'no-result') + '"');
         } catch (_eUL) {}
       }
       return _apexNoteBuildFailure('not-optimal',
         'ILP status "' + ((res && res.status) || 'no-result') + '"'
         + ((res && res.reason) ? ' — ' + res.reason : '')
-        + (_nUserLocks > 0 ? ' — with ' + _nUserLocks + ' user-locked players forced in' : ''));
+        + (_nUserLocks > 0 ? ' — with ' + _nUserLocks + ' user-locked players forced in' : '')
+        + ((_nSeedIn || _nSeedOut) ? ' — with ' + _nSeedIn + ' seed-locked in / '
+                                     + _nSeedOut + ' seed-locked out' : ''),
+        { alerted: _anyLocks });   // APEX_FIX_AUG07_A3 — richer wording already on screen
     }
     // 2026-07-28 (solver handoff) — lock_issues is now always present on an
     // optimal result. A force-in / force-out that matched NOBODY is a dead
@@ -22702,7 +23094,20 @@ async function _ppApplyUnlimitedEdit(gwIdx, opt) {
   let newSquad = null, newBank = null;
   if (opt.type === 'build') {
     newSquad = await _ppBuildUnlimitedSquad(gwIdx);
-    if (!newSquad) return false;
+    if (!newSquad) {
+      // APEX_FIX_AUG07_A3 — this returned false in silence: the tap did
+      // nothing and the screen said nothing about why. The reason is now
+      // already on screen (_apexNoteBuildFailure alerts at the chokepoint);
+      // all this branch adds is the retry control, because the user got here
+      // by ASKING for a rebuild and needs a way to ask again. 'superseded' is
+      // not a failure — a newer solve owns the screen — so it stays silent.
+      try {
+        const _bf = (typeof window !== 'undefined' && window._apexBuildFailure) || {};
+        if (_bf.reason && _bf.reason !== 'superseded'
+            && typeof _apexAlertAddRetry === 'function') _apexAlertAddRetry();
+      } catch (_eAE) {}
+      return false;
+    }
     const spend = newSquad.reduce((sum, p) => sum + _ppEffCost(p), 0);
     const raw   = _ppUnlimitedBudget() - spend;
     newBank = Math.abs(raw) < 0.05 ? 0 : Math.max(0, raw);
@@ -22783,6 +23188,90 @@ function _ppSwapGain(squad, gwIdx, pairs, skipIdxs) {
     g += _ppHorizonXp(pr.in, gwIdx) - _ppHorizonXp(pr.out, gwIdx);
   }
   return g;
+}
+
+// ── APEX_FIX_AUG07_A1 — the -4 hit, judged on the plan's own horizon ────────
+// The DECISION quantity (_ppSwapGain -> _apexSwapGain) is a 3-gameweek DECAYED
+// squad-value delta: its weights sum to 1 + 0.85 + 0.7225 = 2.5725
+// gameweek-equivalents. The plan HEADLINE (_pathPlanner.totalXp / _ppNetXp) is
+// an UNDECAYED total over every displayed gameweek — 19 of them at GW1.
+// Subtracting a flat 4 from the first and the same flat 4 from the second is a
+// ~7.4x currency mismatch, and it is why no transfer has ever cleared a hit.
+// MEASURED 2026-08-07 on the shipped 438-player GW1-19 pool, balanced build:
+// 1322 legal single transfers at GW1 and 0 of them have a 3-GW gain above 4 —
+// the pool's best is 2.75 (at GW10). Same at GW5, GW10, GW15.
+//
+// WHICH OF THE TWO FIXES: convert the hit into the decision's currency, NOT
+// extend the evaluation horizon. Extending the horizon rebases evGain itself,
+// and evGain is the unit of every dial in this file (_HIT_TAX 1.5/3.0,
+// _FT_MIN_GAIN 0.8/1.0, APEX_DIFF_EPS 0.5, the _PP_DECISION_FLOOR 0.5) AND of
+// the weekly Transfers tab, which prices swaps through the same shared
+// _apexSwapGain in solver_core. Rebasing it is a recalibration of the whole
+// product, not a fix. Converting the hit touches the hit and nothing else.
+//
+// WHY THE CONVERSION IS PER-SWAP AND NOT A FLAT 2.5725/19 FACTOR: a flat factor
+// assumes a swap's per-gameweek gain is constant across the horizon. MEASURED,
+// it is not even close — over the candidates with a 3-GW gain above 0.2 the
+// ratio (true full-horizon gain)/(3-GW decayed gain) ran p10 -12.5, p50 -0.69,
+// p90 +6.1 at GW5 and p50 +0.37 at GW10. A flat factor at GW1 hit-funds
+// Joao Pedro»McBurnie (3-GW gain 0.77, TRUE 19-GW value +1.7 — a BAD hit) and
+// still refuses Szoboszlai»Sarr (3-GW gain 0.09, TRUE 19-GW value +10.5). So
+// the conversion is done exactly, per swap.
+//
+// THE SAFETY PROPERTY, and the reason this cannot become a churn machine: with
+//   s = evGain / gFull        (this swap's own window-to-horizon ratio)
+//   netEv = evGain - hitCost*s = s * (gFull - hitCost)
+// so for any candidate with evGain > 0 the SIGN of netEv is exactly the sign of
+// (true full-horizon gain - the real 4-point hit). A hit can only ever be
+// accepted for a move genuinely worth more than 4 points over the horizon the
+// plan is displayed on. Magnitudes stay in the 3-GW currency, so every dial
+// above keeps the scale it was fitted on.
+//
+// hitCost is NOT touched: the -4 badge, _pathPlanner.totalHits and _ppNetXp
+// keep charging the real, full 4. Only the ranking/decision quantity moves.
+function _ppFullHorizonSwapGain(squad, gwIdx, pairs, skipIdxs) {
+  try {
+    if (typeof _apexSquadValueAt !== 'function') return null;
+    if (!Array.isArray(squad) || !squad.length || !Array.isArray(pairs) || !pairs.length) return null;
+    const outIds = new Set(pairs.map(x => x.out && x.out.id));
+    const after = squad.filter(p => !outIds.has(p.id)).concat(pairs.map(x => x.in));
+    if (after.length !== squad.length) return null;   // illegal swap — no opinion
+    const nGws = ((typeof TEAM_META === 'object' && TEAM_META && TEAM_META.gw_range) || []).length;
+    const skip = (skipIdxs instanceof Set) ? skipIdxs : new Set(skipIdxs || []);
+    let g = 0;
+    // UNDECAYED, to the end of the displayed horizon — the headline's currency.
+    // Same squad-value metric _apexSwapGain uses (best XI + captain, bench at a
+    // tenth) so the ratio below is a pure horizon ratio, not a metric change.
+    for (let i = gwIdx; i < nGws; i++) {
+      if (skip.has(i)) continue;
+      g += _apexSquadValueAt(after, i) - _apexSquadValueAt(squad, i);
+    }
+    return g;
+  } catch (_e) { return null; }
+}
+
+// The hit, expressed in the decision's currency. Returns the OLD flat hitCost
+// whenever the conversion cannot be made honestly, so no path silently gets a
+// cheaper hit than it had before this patch.
+//
+// THE CLAMP IS NOT COSMETIC — it was MEASURED. netEv and lookaheadEv are
+// DISPLAYED (the big +X.X on a hit card, the "now …" sub-line), and evGain/gFull
+// blows up as gFull approaches 0. A first cut of this patch used a 1e6 sentinel
+// for "never hit-fund this" and put a card reading -1000000.0 into the GW10
+// branch fan (Guehi»Richards, gFull < 0). Charging at most (hitCost + evGain)
+// floors netEv at exactly -hitCost — "you paid the hit and got nothing", which
+// is both legible and true. The clamp can only engage when
+// gFull < evGain*hitCost/(hitCost+evGain) < hitCost, i.e. deep inside the
+// reject region where the clamped value is still > evGain, so netEv stays
+// negative: it cannot flip a decision, only the number printed on a card.
+function _ppHitAdj(hitCost, evGain, squad, gwIdx, pairs) {
+  if (!(hitCost > 0)) return 0;                 // free move — identical to before
+  if (!(evGain > 0)) return hitCost;            // no window gain — old behaviour
+  const gFull = _ppFullHorizonSwapGain(squad, gwIdx, pairs, _ppFhSkipSet());
+  if (gFull == null) return hitCost;            // helper unavailable — old behaviour
+  const worthless = hitCost + evGain;           // -> netEv === -hitCost exactly
+  if (!(gFull > 0)) return worthless;           // no value over the horizon at all
+  return Math.min(hitCost * (evGain / gFull), worthless);
 }
 
 // Best-XI sum (XI + cap) for a working squad at gwIdx — same logic as
@@ -23402,7 +23891,10 @@ async function _ppComputeOptions(workingSquad, gwIdx, bank, workingFt) {
       out: c.out,
       in: c.in,
       evGain: c.evGain,
-      netEv: c.evGain - hit1,
+      // APEX_FIX_AUG07_A1 — hit charged in the decision's currency. hitCost
+      // below is untouched: that is the real -4 the user actually pays.
+      netEv: c.evGain - _ppHitAdj(hit1, c.evGain, workingSquad, gwIdx,
+                                  [{ out: c.out, in: c.in }]),
       hitCost: hit1,
       horizonAfter: baseHorizonXp + c.evGain,
       newSquad,
@@ -23444,7 +23936,9 @@ async function _ppComputeOptions(workingSquad, gwIdx, bank, workingFt) {
       // additive version pays for the bench one at starter rates.
       const evGain = _ppSwapGain(workingSquad, gwIdx,
         [{ out: a.out, in: a.in }, { out: b.out, in: b.in }]);
-      const netEv  = evGain - hit2;
+      // APEX_FIX_AUG07_A1 — hit charged in the decision's currency (joint swap).
+      const netEv  = evGain - _ppHitAdj(hit2, evGain, workingSquad, gwIdx,
+                                        [{ out: a.out, in: a.in }, { out: b.out, in: b.in }]);
       if (netEv <= 0.05) continue;  // skip if hit eats the gain
 
       twoOpts.push({
@@ -23506,7 +24000,9 @@ async function _ppComputeOptions(workingSquad, gwIdx, bank, workingFt) {
         if (!(_hg > 0.05)) continue;
         options.push({
           type: 'one', out: c.out, in: c.in, evGain: _hg,
-          netEv: _hg - hit1, hitCost: hit1,
+          netEv: _hg - _ppHitAdj(hit1, _hg, workingSquad, gwIdx,      // APEX_FIX_AUG07_A1
+                                 [{ out: c.out, in: c.in }]),
+          hitCost: hit1,
           horizonAfter: baseHorizonXp + _hg,
           newSquad: workingSquad.map(p => p.id === c.out.id ? c.in : p),
           newBank: bank + c.outSell - c.inCost,
@@ -23703,7 +24199,16 @@ async function _ppFutureBest(squad, gwIdx, bank, ft) {
   // future — lookaheadEv displayed upstream stays honest maths. With taxes 0
   // (balanced/high) taxed === true and this is byte-identical to the old
   // max-of-true-totals.
-  let bestTaxed = -Infinity, bestTrue = 0;
+  // APEX_FIX_AUG07_A2 — bestTrue is now tracked INDEPENDENTLY of bestTaxed.
+  // It used to be "the true total of whichever branch the TAXED score picked",
+  // which made the returned (and displayed) lookaheadEv/futureEv a function of
+  // _FT_MIN_GAIN and _HIT_TAX — contradicting the header at :1869 and the
+  // comment below, both of which promise the taxes only reorder. It also made
+  // the anti-churn dial run BACKWARDS: raising _FT_MIN_GAIN pushed the
+  // recursion onto a branch whose reported TRUE total was lower, so Roll's
+  // future shrank and the engine rolled LESS. A max over true totals cannot do
+  // either: it is the honest "best xP reachable from here" the name claims.
+  let bestTaxed = -Infinity, bestTrue = -Infinity;
   // D3 (2026-07-25): the slice took the top 3 by taxed rank, and Roll scores a
   // flat 0 while every transfer scores evGain - 0.8. In any week with three
   // options clearing the threshold, Roll sat at index >= 3 and was never
@@ -23729,10 +24234,14 @@ async function _ppFutureBest(squad, gwIdx, bank, ft) {
     // TAXED future, so a projected round trip pays for BOTH of its legs.
     // trueTotal stays pure xP: it is what lookaheadEv/futureEv display.
     const taxedTotal = _ppRankEv(opt) + _PP_GAMMA * _fb.x;
-    if (taxedTotal > bestTaxed) { bestTaxed = taxedTotal; bestTrue = trueTotal; }
+    // APEX_FIX_AUG07_A2 — two independent maxima: the taxed one still drives
+    // the branch CHOICE (policy), the true one is the value we report.
+    if (taxedTotal > bestTaxed) bestTaxed = taxedTotal;
+    if (trueTotal  > bestTrue)  bestTrue  = trueTotal;
   }
 
-  const _fbRes = { t: bestTrue, x: (bestTaxed === -Infinity ? 0 : bestTaxed) };
+  const _fbRes = { t: (bestTrue === -Infinity ? 0 : bestTrue),          // APEX_FIX_AUG07_A2
+                   x: (bestTaxed === -Infinity ? 0 : bestTaxed) };
   _ppLookaheadCache[key] = _fbRes;
   return _fbRes;
 }
@@ -23805,7 +24314,9 @@ function _ppComputeOptionsLocal(workingSquad, gwIdx, bank, workingFt) {
     const newBank  = bank + c.outSell - c.inCost;
     options.push({
       type: 'one', out: c.out, in: c.in, evGain: c.evGain,
-      netEv: c.evGain - hit1, hitCost: hit1,
+      netEv: c.evGain - _ppHitAdj(hit1, c.evGain, workingSquad, gwIdx,   // APEX_FIX_AUG07_A1
+                                  [{ out: c.out, in: c.in }]),
+      hitCost: hit1,
       horizonAfter: baseHorizonXp + c.evGain,
       newSquad, newBank,
     });
@@ -23835,7 +24346,10 @@ function _ppComputeOptionsLocal(workingSquad, gwIdx, bank, workingFt) {
       if (!ok) continue;
       const evGain = _ppSwapGain(workingSquad, gwIdx,
         [{ out: a.out, in: a.in }, { out: b.out, in: b.in }]);
-      const netEv  = evGain - hit2;
+      // APEX_FIX_AUG07_A1 — twin of the visible pass, or the recursion would
+      // price hits in a different currency from the cards it feeds.
+      const netEv  = evGain - _ppHitAdj(hit2, evGain, workingSquad, gwIdx,
+                                        [{ out: a.out, in: a.in }, { out: b.out, in: b.in }]);
       if (netEv <= 0.05) continue;
       twoOptsR.push({
         type: 'two', out: a.out, in: a.in, out2: b.out, in2: b.in,
@@ -24424,7 +24938,28 @@ function _ppCoverDecidedDisplay() {
     var _t = 0;
     (_pathPlanner.selections || []).forEach(function (sel) {
       if (sel && String(sel.chipType || '').toUpperCase() === 'BB') return;
-      if (typeof _apexBenchCoverEv === 'function') _t += (_apexBenchCoverEv(sel.gwIdx) || 0);
+      // INSERTED APEX_FIX_AUG07_F4_PLAN (2026-08-07) -- this summed
+      // _apexBenchCoverEv(sel.gwIdx), i.e. the pitch-pinned globals again, and
+      // it feeds #pp-total-xp, which is VISIBLE and tooltipped 'net of hits'.
+      // Measured: one unchanged plan read 4.19 points apart depending only on
+      // which gameweek pill the pitch happened to be sitting on. Price each
+      // decided week from THAT week's own fifteen.
+      var _sq15 = null;
+      try {
+        var _sv4 = (typeof _savedGwSquads !== 'undefined' && _savedGwSquads) ? _savedGwSquads[sel.gwIdx] : null;
+        if (_sv4 && Array.isArray(_sv4.xi) && Array.isArray(_sv4.bench)) _sq15 = _sv4.xi.concat(_sv4.bench);
+      } catch (_eS4) {}
+      if ((!_sq15 || _sq15.length !== 15) && sel.gwIdx === _pathPlanner.startGwIdx
+          && Array.isArray(_pathPlanner.initialChipSquad) && _pathPlanner.initialChipSquad.length === 15) {
+        _sq15 = _pathPlanner.initialChipSquad.slice();
+      }
+      if ((!_sq15 || _sq15.length !== 15) && Array.isArray(_pathPlanner.workingSquad)
+          && _pathPlanner.workingSquad.length === 15) {
+        _sq15 = _pathPlanner.workingSquad.slice();
+      }
+      if (_sq15 && _sq15.length === 15 && typeof window._apexCoverForSquadAtGw === 'function') {
+        _t += (window._apexCoverForSquadAtGw(_sq15, sel.gwIdx) || 0);
+      }
     });
     return _t;
   } catch (_eCt) { return 0; }
@@ -25291,7 +25826,7 @@ async function _buildActiveCard(gwIdx) {
       evDisplay = `<div class="pp-option-ev ${evClass}">
            <div class="pp-ev-hit-badge">−${opt.hitCost} hit (2 transfers, 1 FT)</div>
            <div class="pp-ev-num">${_signed(lookahead)}</div>
-           <div class="pp-ev-label">now ${_signed(localNet)} (after hit) · future ${_signed(future)}</div>
+           <div class="pp-ev-label">now ${_signed(localNet)} (hit spread over the plan) · future ${_signed(future)}</div>
          </div>`;
     } else if (opt.type === 'two') {
       evDisplay = `<div class="pp-option-ev ${evClass}">
@@ -25390,7 +25925,8 @@ function _buildSummaryCard() {
       <span class="pp-locked-badge">${totalTransfers} transfer${totalTransfers === 1 ? '' : 's'}</span>
     </div>
     <div style="font-size:0.92rem;line-height:1.5;color:var(--muted);margin-bottom:14px;">
-      Total projected xPts across the planned horizon: <strong style="color:var(--fg);font-family:'JetBrains Mono',monospace;">${_pathPlanner.totalXp.toFixed(1)}</strong>
+      Total projected xPts across the planned horizon, net of hits: <strong style="color:var(--fg);font-family:'JetBrains Mono',monospace;">${_ppNetXp().toFixed(1)}</strong>
+      <!-- APEX_FIX_AUG07_A5: was _pathPlanner.totalXp (RAW). The header #pp-total-xp has printed _ppNetXp() since the 2026-06-11 find-#4 fix; this card kept printing the raw total, so one plan showed two totals (measured: 451.3 here vs 443.3 in the header, 2 hits). Same function, same number. -->
     </div>
     <div class="pp-summary-stat"><span class="pp-stat-label">Hits taken</span><span class="pp-stat-value">${_pathPlanner.totalHits}</span></div>
     <div class="pp-summary-stat"><span class="pp-stat-label">Bank end-of-horizon</span><span class="pp-stat-value">£${_pathPlanner.workingBank.toFixed(1)}m</span></div>
@@ -28476,6 +29012,32 @@ function _apexRenderArmbandNote() {
   el.textContent = 'Model would captain: ' + best.web_name + ' (+' + d.toFixed(1) + ' xPts vs your pick)';
   el.style.display = '';
 }
+// INSERTED APEX_FIX_AUG07_F2_COVERLINE (2026-08-07) -- bench cover's own small
+// line. Created next to the hero at render time so no template change is needed
+// and #gw-xp-val keeps its id (updateChipTotal, the blank-canvas dash writer and
+// the sparkline all still read it).
+function _apexBenchCoverLineEl() {
+  var _el = document.getElementById('apex-bench-cover-line');
+  if (_el) return _el;
+  var _hero = document.getElementById('gw-xp-val');
+  if (!_hero || !_hero.parentNode) return null;
+  _el = document.createElement('div');
+  _el.id = 'apex-bench-cover-line';
+  _el.style.cssText = 'display:none;font-size:.72rem;color:var(--muted);margin-top:2px;';
+  // appended to the hero block, so it sits BENEATH the number and its caption
+  // rather than between them.
+  _hero.parentNode.appendChild(_el);
+  return _el;
+}
+function _apexRenderBenchCoverLine(_cov, _off) {
+  try {
+    var _el = _apexBenchCoverLineEl();
+    if (!_el) return;
+    if (_off || !(+_cov > 0.05)) { _el.textContent = ''; _el.style.display = 'none'; return; }
+    _el.textContent = '+' + (+_cov).toFixed(1) + ' bench cover (autosub safety net, not in the total above)';
+    _el.style.display = '';
+  } catch (_eBcl) {}
+}
 function _apexRenderBenchCover() {
   try {
     // INSERTED APEX_FIX_AUG04H_REAL_ARMBAND_BOOT — one-shot: the first paint
@@ -28488,7 +29050,11 @@ function _apexRenderBenchCover() {
     }
     var _el = document.getElementById('gw-xp-val');
     if (!_el) return;
-    if ((typeof _apexBlankCanvasOn === 'function') && _apexBlankCanvasOn()) return;
+    // INSERTED APEX_FIX_AUG07_F2_BLANK -- behind the curtain there is no total,
+    // so there is no cover line either (it would otherwise go stale).
+    if ((typeof _apexBlankCanvasOn === 'function') && _apexBlankCanvasOn()) {
+      _apexRenderBenchCoverLine(0, true); return;
+    }
     var _gwHere = (typeof TEAM_META !== 'undefined' && TEAM_META.gw_range) ? TEAM_META.gw_range[activeGwIdx] : null;
     var _bb = (document.getElementById('sel-bb') || {}).value;
     var _tc = (document.getElementById('sel-tc') || {}).value;
@@ -28497,7 +29063,14 @@ function _apexRenderBenchCover() {
     var _t = getTotal(activeGwIdx, _bb, _tc);
     var _bbOn = (_bb && _gwHere != null && parseInt(_bb) === _gwHere);
     var _cov = _bbOn ? 0 : (_apexBenchCoverEv(activeGwIdx) || 0);
-    _el.textContent = (_t + _cov).toFixed(1);
+    // INSERTED APEX_FIX_AUG07_F2_HERO (2026-08-07) -- restore the contract
+    // this function was shipped with, still written in the comment at the top
+    // of the bench-cover section: cover is NEVER added to the headline total,
+    // it is rendered as its own small line. v3 folded it in and nothing on the
+    // page said so. Measured: shirts 51.0 + captain 6.4 = 57.4 with a hero of
+    // 58.1 and no text anywhere explaining the 0.74.
+    _el.textContent = _t.toFixed(1);
+    _apexRenderBenchCoverLine(_cov, _bbOn);
     try { _apexRenderArmbandNote(); } catch (_eAn) {}  // INSERTED APEX_FIX_AUG04H_REAL_ARMBAND_NOTEHOOK
   } catch (_eBcr) {}
 }
@@ -28881,6 +29454,24 @@ function updateChipTotal() {
   _renderPitchFromState(); // re-render handles BB label + TC badge
 }
 
+// INSERTED APEX_FIX_AUG07_F3_ROLLING (2026-08-07) -- the fifteen that is really
+// held at gameweek idx (that week's saved squad if the planner committed one,
+// otherwise the live pitch fifteen), priced through the per-gameweek re-split
+// window._apexCoverForSquadAtGw already performs with pickBestXi. Returns 0, so
+// call sites can add it unconditionally.
+function _apexCoverAtGwFromSquad(idx) {
+  try {
+    var _sq = null;
+    var _sv = (typeof _savedGwSquads !== 'undefined' && _savedGwSquads) ? _savedGwSquads[idx] : null;
+    if (_sv && Array.isArray(_sv.xi) && Array.isArray(_sv.bench)) _sq = _sv.xi.concat(_sv.bench);
+    if ((!_sq || _sq.length !== 15) && Array.isArray(_xiPlayers) && Array.isArray(_benchPlayers)) {
+      _sq = _xiPlayers.concat(_benchPlayers);
+    }
+    if (!_sq || _sq.length !== 15) return 0;
+    return (typeof window._apexCoverForSquadAtGw === 'function')
+      ? (window._apexCoverForSquadAtGw(_sq, idx) || 0) : 0;
+  } catch (_eCg) { return 0; }
+}
 function updateRollingTotal() {
   // APEX_AUDIT_43C_HORIZON_TOTAL_CHIPS (2026-07-29) — this summed _gwTotals,
   // whose only chip-aware writer is updateChipTotal, and that writes exactly
@@ -28911,7 +29502,13 @@ function updateRollingTotal() {
     const _gwR0 = (TEAM_META && TEAM_META.gw_range) || [];
     for (let _ci = 0; _ci < _gwTotals.length; _ci++) {
       if (_bbGwR && parseInt(_bbGwR) > 0 && parseInt(_bbGwR) === _gwR0[_ci]) continue;
-      _covSumR += (_apexBenchCoverEv(_ci) || 0);
+      // INSERTED APEX_FIX_AUG07_F3_LOOP (2026-08-07) -- _apexBenchCoverEv reads
+      // the module globals _xiPlayers / _benchPlayers, which are pinned to the
+      // gameweek the PITCH is showing, and this loop runs over all 19. The best
+      // XI differs from the GW1 XI in 18 of 19 weeks, so a player who STARTS in
+      // GW5 was also billed as GW5 bench cover. Re-split per gameweek instead.
+      // Measured: pinned 19.2204 vs honest 13.9712 over the horizon.
+      _covSumR += _apexCoverAtGwFromSquad(_ci);
     }
   } catch (_eCvR) { _covSumR = 0; }
   const _bcR = (typeof _apexBlankCanvasOn === 'function') && _apexBlankCanvasOn();
@@ -29327,11 +29924,30 @@ function renderBaselineStrip() {
   // a legal squad, that was previously silent.
   try {
     if (window.apexLocks && typeof window.apexLocks.counts === 'function') {
+      // INSERTED APEX_FIX_AUG07_F7_STALELOCK (2026-08-07) -- this was gated on
+      // counts().locked alone. counts() is a count of STORED ids; a lock on a
+      // player id that is no longer in POOL_DATA never reaches the ILP
+      // (_ppUserLockOpts resolves lockInIds against POOL_DATA), so it can never
+      // be honoured -- and the strip still said it was held in the Wildcard and
+      // Free Hit squads. Count only the ids that actually resolve; when none
+      // resolve, say the locks are stale instead of claiming a dead constraint.
       const _lbCC = window.apexLocks.counts();
-      if ((_lbCC.locked || 0) > 0) {
-        // 2026-07-07 late: locks now BIND the WC/FH ILP (lockInIds constraint)
-        // — confirmation note, was a "doesn't apply yet" warning for ~an hour.
-        radarHtml += `<div style="margin-top:9px;font-size:.8rem;color:var(--muted);">🔒 ${_lbCC.locked} locked player${_lbCC.locked > 1 ? 's are' : ' is'} held in Wildcard / Free Hit squads too. Exclusions (🚫) respected.</div>`;
+      const _lbPool = (typeof POOL_DATA !== 'undefined' && Array.isArray(POOL_DATA)) ? POOL_DATA : [];
+      let _lbLive = 0;
+      if (typeof window.apexLocks.isLocked === 'function') {
+        for (let _lp = 0; _lp < _lbPool.length; _lp++) {
+          try {
+            if (_lbPool[_lp] && window.apexLocks.isLocked(_lbPool[_lp].id)) _lbLive++;
+          } catch (_eLp) {}
+        }
+      }
+      const _lbStale = Math.max(0, (_lbCC.locked || 0) - _lbLive);
+      if (_lbLive > 0) {
+        // locks BIND the WC/FH ILP (lockInIds constraint) -- confirmation note.
+        radarHtml += `<div style="margin-top:9px;font-size:.8rem;color:var(--muted);">🔒 ${_lbLive} locked player${_lbLive > 1 ? 's are' : ' is'} held in Wildcard / Free Hit squads too. Exclusions (🚫) respected.</div>`;
+      }
+      if (_lbStale > 0) {
+        radarHtml += `<div style="margin-top:9px;font-size:.8rem;color:#f0b03a;font-weight:600;">🔒 ${_lbStale} locked player${_lbStale > 1 ? 's are' : ' is'} no longer in the player pool, so ${_lbStale > 1 ? 'those locks were' : 'that lock was'} NOT applied to the Wildcard / Free Hit squads — clear and re-set ${_lbStale > 1 ? 'them' : 'it'}.</div>`;
       }
     }
     if (window._apexBansDiscarded === true) {
@@ -31216,7 +31832,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW1</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1786093187-GW1-cc946f14</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1786114389-GW1-bd9e9f25</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
