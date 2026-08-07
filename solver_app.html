@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="1" data-built-at="2026-08-07T22:08:10">
+<meta name="apex-gw" content="1" data-built-at="2026-08-07T22:25:48">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
@@ -37,7 +37,7 @@
 })();
 </script>
 <meta http-equiv="Pragma" content="no-cache">
-<meta name="apex-build" content="20260807-220810">
+<meta name="apex-build" content="20260807-222548">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — FPL Apex</title>
 <meta name="description" content="Plan FPL transfers, chips, and Free Hit squads. Live xG-based projections, a rival head-to-head simulator, and a mini-league table. Free FPL tool.">
@@ -5644,22 +5644,6 @@ body[data-apex-view="team"] #topbar .va-tabs { display: flex; }
 .apex-optd-chart { flex:1 1 220px; min-width:0; }
 .apex-optd-svg { display:block; width:100%; height:auto; }
 .apex-optd-ax { font-size:12px; fill:#94a3b8; font-variant-numeric:tabular-nums; }
-/* APEX_FIX_AUG07C_BELL — Mock F. .apex-optd-vl is the band-share / mean label
-   inside the SVG; these sizes are USER units in a 470-wide viewBox, so the
-   phone bump lives in the media query at the bottom of this sheet. */
-.apex-optd-vl { font-size:13px; fill:#16201C; font-weight:650; font-variant-numeric:tabular-nums; }
-.apex-optd-leg { font-size:10px; }
-.apex-optd-bt {
-  width:100%; border-collapse:collapse; margin:8px 0 0;
-  font-size:11.5px; font-variant-numeric:tabular-nums;
-}
-.apex-optd-bt th, .apex-optd-bt td { text-align:right; padding:3px 0 3px 8px; border-bottom:1px solid #eceeed; }
-.apex-optd-bt th:first-child, .apex-optd-bt td:first-child { text-align:left; padding-left:0; }
-.apex-optd-bt th { font-weight:600; color:#8A938D; font-size:10.5px; text-transform:uppercase; letter-spacing:.04em; }
-.apex-optd-bt td b { color:#0f172a; }
-.apex-optd-help p { margin:0 0 7px; }
-.apex-optd-help p:last-child { margin-bottom:0; }
-.apex-optd-help-fine { color:#8A938D; font-size:11px; }
 .apex-optd-rule { font-size:11px; fill:#4A554F; font-variant-numeric:tabular-nums; }
 .apex-optd-stats { flex:0 0 auto; min-width:150px; max-width:100%; }
 .apex-optd-stats div { display:flex; justify-content:space-between; gap:16px; padding:3px 0; }
@@ -5701,21 +5685,11 @@ body[data-apex-view="team"] #topbar .va-tabs { display: flex; }
 .apex-optd-wrap .va-range-foot { font-size:12.5px; color:#94a3b8; margin-top:8px; }
 /* Phones: curve full width on top, stats as a 2-up grid, buttons as a row
    underneath. Everything min-width:0 so nothing can push past the viewport. */
-/* APEX_FIX_AUG07B_MERGE1_ + APEX_FIX_AUG07C_BELL — phones. Breakpoint 560.
-   Pill row 1, bell full width row 2, buttons row 3. (.apex-optd-stats is no
-   longer rendered — Mock F's bands replaced it — but the rule is harmless and
-   left in place so reverting the bell is a one-anchor job.)
-
-   The SVG type is bumped because text inside a viewBox is in USER units: at
-   470 wide rendered into ~250px the 13px band labels paint at ~7px. Raising
-   the user-unit size is the only lever. MEASURED at 320/360/390/430 with a
-   pairwise bounding-box audit of every <text> in the chart — no collisions at
-   these sizes.
-
-   The dashed symmetric bell and its legend are HIDDEN below 560. The 6-4 dash
-   pattern renders sub-pixel at phone scale and reads as a grey smudge over the
-   peak rather than as a comparison — a confusing extra line is worse than no
-   line. It stays on desktop, where it is the whole point of the picture. */
+/* APEX_FIX_AUG07B_MERGE1_ — phones. Breakpoint moved 440 -> 560 (merge.html's).
+   Pill first on its own row, then the curve full width, then the odds, then the
+   buttons: neither the pill nor the odds can squeeze the curve to nothing.
+   The odds stay label-left / value-right rows rather than becoming a grid —
+   at 320px three grid cells would be ~95px each and the values would collide. */
 @media (max-width: 560px) {
   .apex-optd { gap:16px; }
   .apex-optd-hero { order:1; flex:0 0 auto; }
@@ -5723,10 +5697,7 @@ body[data-apex-view="team"] #topbar .va-tabs { display: flex; }
   .apex-optd-chart { flex:1 1 100%; order:2; min-width:0; }
   .apex-optd-stats { flex:1 1 100%; order:3; min-width:0; }
   .apex-optd-stats div { padding:2.5px 0; }
-  .apex-optd-icons { flex-direction:row; order:3; }
-  .apex-optd-ax { font-size:16px; }
-  .apex-optd-vl { font-size:17px; }
-  .apex-optd-normal, .apex-optd-leg { display:none; }
+  .apex-optd-icons { flex-direction:row; order:4; }
 }
 
 </style>
@@ -16228,7 +16199,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1786136890-GW1-b6de80e4";
+const BUILD_VERSION = "1786137948-GW1-5578c321";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = false;
@@ -16236,7 +16207,7 @@ window.APEX_SQUAD_ROLLBACK = false;
 let FPL_ID = null;
 let SQUAD_DATA = [];
 </script>
-<script src="/apex_pool.js?v=1786136890-GW1-b6de80e4"></script>
+<script src="/apex_pool.js?v=1786137948-GW1-5578c321"></script>
 <script>
 const PLAYER_NAMES = {"1": "Raya", "2": "Arrizabalaga", "3": "Meslier", "4": "Gabriel", "5": "J.Timber", "6": "Saliba", "7": "Lewis-Skelly", "8": "Calafiori", "9": "Hincapie", "10": "White", "11": "Mosquera", "12": "Saka", "13": "Rice", "14": "Eze", "15": "\u00d8degaard", "16": "Madueke", "17": "Merino", "18": "Martinelli", "19": "Zubimendi", "20": "Dowman", "22": "Nwaneri", "23": "F\u00e1bio Vieira", "24": "Nelson", "25": "Gy\u00f6keres", "26": "Havertz", "27": "G.Jesus", "557": "Tzolis", "28": "Martinez", "29": "M.Bizot", "30": "Digne", "31": "Konsa", "32": "Cash", "33": "Mings", "34": "Pau", "35": "Bogarde", "36": "Maatsen", "37": "Lindel\u00f6f", "38": "A.Garc\u00eda", "39": "Nedeljkovic", "41": "Buend\u00eda", "42": "Guessand", "44": "Bailey", "45": "McGinn", "46": "Barkley", "47": "Kamara", "48": "Onana", "49": "Iling Jr", "50": "Burrowes", "51": "George Hemmings", "52": "Alysson", "53": "Manzambi", "54": "Gomes", "55": "Watkins", "56": "Abraham", "160": "Garnacho", "57": "Petrovi\u0107", "58": "Forster", "59": "Dennis", "60": "Hill", "61": "Truffert", "62": "Diakit\u00e9", "63": "Milosavljevi\u0107", "64": "Smith", "65": "J.Araujo", "66": "Soler", "67": "Rayan", "68": "Tavernier", "69": "Scott", "70": "Kluivert", "71": "Cook", "72": "Gannon-Doak", "73": "Adams", "74": "Brooks", "75": "Christie", "76": "T\u00f3th.A", "77": "Adli", "78": "Kroupi.Jr", "79": "Evanilson", "80": "Enes \u00dcnal", "81": "Rodr\u00edguez", "566": "Silva", "573": "Sanchez", "82": "Kelleher", "83": "Valdimarsson", "84": "Collins", "85": "Van den Berg", "86": "Lewis-Potter", "87": "Ajer", "88": "Kayode", "89": "Henry", "90": "Hickey", "91": "Pinnock", "92": "Ji-soo", "93": "Schuster", "94": "Schade", "95": "O.Dango", "96": "Damsgaard", "97": "Jensen", "98": "Janelt", "99": "Milambo", "100": "Carvalho", "102": "Yarmoliuk", "103": "Dasilva", "105": "Anthony", "106": "Thiago", "107": "Furo", "108": "Wilson", "565": "Sangar\u00e9", "109": "Verbruggen", "111": "Steele", "113": "F.Kad\u0131o\u011flu", "114": "Boscagli", "115": "De Cuyper", "116": "Dunk", "117": "Coppola", "118": "Igor", "119": "Costinha", "120": "Svoboda", "121": "Mitoma", "122": "Minteh", "123": "Hinshelwood", "124": "Gro\u00df", "125": "Georginio", "126": "O'Riley", "127": "Gomez", "128": "Buonanotte", "129": "Ayari", "130": "Wieffer", "131": "Baleba", "132": "Howell", "133": "Watson", "134": "Oriola", "135": "Yohanna", "137": "Tzimas", "138": "Kostoulas", "139": "Ferguson", "328": "Struijk", "504": "Vuskovic", "40": "Rogers", "101": "Henderson", "136": "Welbeck", "140": "S\u00e1nchez", "141": "J\u00f6rgensen", "142": "James", "143": "Chalobah", "144": "Gusto", "145": "Fofana", "146": "B.Badiashile", "147": "Tosin", "148": "Hato", "149": "Colwill", "150": "M.Sarr", "151": "Acheampong", "152": "Palestra", "153": "Disasi", "154": "Palmer", "155": "Enzo", "156": "Neto", "157": "Est\u00eav\u00e3o", "158": "Gittens", "159": "Caicedo", "161": "Lavia", "163": "D.Essugo", "164": "Quenda", "165": "Jo\u00e3o Pedro", "166": "N.Jackson", "167": "Delap", "168": "Marc Guiu", "169": "Mheuka", "170": "Emegha", "200": "Lacroix", "560": "Penders", "561": "Anselmino", "568": "Barco", "104": "Onyeka", "110": "Rushworth", "171": "Dovin", "172": "Wilson", "173": "Thomas", "174": "Kitching", "175": "van Ewijk", "176": "Dasilva", "177": "Kesler-Hayden", "178": "Bidwell", "179": "Latibeaudiere", "180": "Woolfenden", "181": "Brau", "182": "Amenda", "183": "Rudoni", "184": "Grimes", "185": "Sakamoto", "186": "Mason-Clark", "187": "Eccles", "188": "Torp", "189": "Shepherd", "190": "Tchaouna", "191": "Borges Rodrigues", "192": "Andrews", "193": "Wright", "194": "Thomas-Asante", "195": "Simms", "196": "Markelo", "197": "Bassette", "198": "Henderson", "199": "Benitez", "201": "Mu\u00f1oz", "202": "Richards", "203": "Canvot", "204": "Mitchell", "205": "Sosa", "206": "Chadi Riad", "207": "Mingueza", "208": "Sarr", "209": "Johnson", "210": "Wharton", "211": "Yeremy", "212": "Hughes", "213": "Lerma", "214": "Kamada", "215": "Devenny", "216": "Esse", "217": "M.Fran\u00e7a", "218": "Doucour\u00e9", "219": "J.Rak-Sakyi", "220": "Cardines", "221": "Drakes-Thomas", "222": "Strand Larsen", "223": "Mateta", "224": "Nketiah", "225": "Uche", "555": "Matthews", "21": "N\u00f8rgaard", "226": "Pickford", "227": "Travers", "228": "King", "229": "Tarkowski", "230": "Branthwaite", "231": "Keane", "232": "O'Brien", "233": "Mykolenko", "234": "Patterson", "235": "Aznou", "236": "Dewsbury-Hall", "237": "Ndiaye", "239": "Garner", "240": "Iroegbunam", "241": "McNeil", "242": "George", "243": "Alcaraz", "244": "Armstrong", "245": "Dibling", "246": "R\u00f6hl", "247": "Hackney", "248": "Beto", "249": "Barry", "250": "Leno", "251": "Lecomte", "252": "McNally", "253": "Andersen", "254": "Robinson", "255": "J.Cuenca", "256": "Tete", "257": "Bassey", "258": "Castagne", "261": "Iwobi", "262": "Smith Rowe", "263": "Kevin", "264": "Bobb", "265": "Berge", "266": "Cairney", "267": "Luki\u0107", "268": "King", "269": "Sessegnon", "270": "Reed", "271": "Muniz", "272": "Kusi-Asare", "569": "Garc\u00eda", "570": "Palacios", "273": "Phillips", "274": "Butland", "275": "Cartwright", "276": "Lo-Tutala", "277": "Egan", "278": "Hughes", "279": "Ajayi", "280": "Coyle", "281": "Drameh", "282": "Giles", "283": "Jacob", "284": "McCarthy", "285": "McNair", "286": "Belloumi", "287": "Millar", "288": "Dowell", "289": "Crooks", "290": "Slater", "291": "Matazo", "292": "\u00d6m\u00fcr", "293": "Kamara", "294": "Zambrano", "295": "McBurnie", "296": "Akintola", "297": "Gyabi", "298": "Destan", "299": "Burstow", "556": "Targett", "563": "Morita", "572": "Tzolakis", "259": "Diop", "300": "Walton", "301": "Palmer", "302": "Button", "303": "Kipr\u00e9", "304": "O'Shea", "305": "Davis", "306": "Greaves", "307": "Johnson", "308": "Furlong", "309": "N\u00fa\u00f1ez", "310": "Matusiwa", "311": "Burns", "312": "Taylor", "313": "Clarke", "314": "Ogbene", "315": "Fatawu", "316": "Emersonn", "317": "Hirst", "318": "Philogene", "319": "Szmodics", "320": "Akpom", "321": "Walle Egeli", "322": "Al-Hamadi", "323": "McAteer", "324": "Mehmeti", "554": "Van Oevelen", "562": "Maeda", "564": "Scherpen", "571": "Florentino", "260": "Wilson", "326": "Perri", "327": "Bijol", "329": "Rodon", "330": "Bogle", "331": "Gudmundsson", "332": "Justin", "333": "Bornauw", "334": "Muharemovi\u0107", "335": "Stach", "336": "Okafor", "337": "Aaronson", "338": "Ampadu", "339": "Longstaff", "340": "Gelhardt", "341": "Gnonto", "342": "Harrison", "343": "James", "344": "Gruev", "345": "Tanaka", "346": "Calvert-Lewin", "347": "Nmecha", "348": "Piroe", "349": "Mateo Joseph", "385": "Trafford", "350": "A.Becker", "351": "Mamardashvili", "352": "Woodman", "353": "Pecsi", "354": "Jaros", "355": "Davies", "356": "Virgil", "357": "Frimpong", "358": "Kerkez", "359": "Gomez", "360": "Bradley", "361": "Lucky", "362": "Jacquet", "363": "Leoni", "364": "Tsimikas", "365": "Ramsay", "366": "Wirtz", "367": "Gakpo", "368": "Szoboszlai", "369": "Ngumoha", "370": "Chiesa", "371": "Gravenberch", "372": "Mac Allister", "373": "C.Jones", "374": "Endo", "375": "Nyoni", "376": "Bajcetic", "377": "Munoz", "378": "McConnell", "379": "Isak", "380": "Ekitik\u00e9", "381": "Koumas", "382": "Danns", "383": "Elliott", "238": "Grealish", "384": "Donnarumma", "386": "Bettinelli", "387": "O'Reilly", "388": "Gu\u00e9hi", "389": "Matheus N.", "390": "R\u00faben", "391": "Gvardiol", "392": "A\u00eft-Nouri", "393": "Khusanov", "394": "Alleyne", "395": "Lewis", "396": "Vitor Reis", "397": "Semenyo", "398": "Foden", "399": "Cherki", "400": "Doku", "401": "Marmoush", "402": "Rodrigo", "403": "Savinho", "404": "Reijnders", "405": "N.Gonzalez", "406": "Kova\u010di\u0107", "407": "Echeverri", "408": "Phillips", "409": "Mukasa", "410": "Monga", "411": "Haaland", "481": "Anderson", "43": "Tielemans", "162": "Andrey Santos", "325": "Darlow", "412": "Lammens", "413": "Bayindir", "414": "Heaton", "415": "Dorgu", "416": "De Ligt", "417": "Dalot", "418": "Maguire", "419": "Martinez", "420": "Yoro", "421": "Heaven", "422": "Mazraoui", "423": "Shaw", "424": "Amass", "425": "Fredricson", "426": "B.Fernandes", "427": "Mbeumo", "428": "Cunha", "429": "Rashford", "430": "Mount", "431": "Amad", "432": "Mainoo", "433": "Ugarte", "434": "J.Fletcher", "435": "Lacey", "436": "Collyer", "437": "Bendito Mantato", "438": "Fletcher", "439": "\u0160e\u0161ko", "440": "Zirkzee", "441": "Obi", "442": "Pope", "443": "Gillespie", "444": "Jaouen", "445": "Thiaw", "446": "Sch\u00e4r", "447": "Botman", "448": "Burn", "449": "Hall", "450": "Livramento", "451": "A.Murphy", "452": "Bruno G.", "453": "Barnes", "454": "Elanga", "456": "J.Ramsey", "457": "J.Murphy", "458": "Joelinton", "459": "L.Miley", "460": "Willock", "461": "Tour\u00e9", "462": "Steur", "463": "Woltemade", "464": "Wissa", "465": "Osula", "466": "Neave", "559": "Bamba", "567": "Horn\u00ed\u010dek", "467": "Sels", "468": "John", "469": "N.Williams", "470": "Morato", "471": "Milenkovi\u0107", "472": "Murillo", "473": "Aina", "474": "Jair Cunha", "475": "Savona", "476": "O.Richards", "477": "Abbott", "478": "Netz", "479": "Bindon", "480": "Gibbs-White", "482": "Hudson-Odoi", "483": "Ndoye", "484": "Hutchinson", "485": "Bakwa", "486": "McAtee", "487": "Dominguez", "488": "Sangar\u00e9", "489": "Yates", "490": "Wood", "491": "Igor Jesus", "492": "Awoniyi", "493": "Kalimuendo", "558": "Schlager", "112": "Van Hecke", "455": "Tonali", "494": "Vicario", "495": "Austin", "496": "Kinsky", "497": "Dubravka", "498": "Senesi", "499": "Pedro Porro", "500": "Romero", "501": "Danso", "502": "Robertson", "503": "Van de Ven", "505": "Spence", "506": "Udogie", "507": "Phillips", "508": "Davies", "509": "Byfield", "510": "Rowswell", "511": "Souza", "512": "Kudus", "513": "Xavi", "514": "Tel", "515": "Maddison", "516": "Bentancur", "517": "Odobert", "518": "P.M.Sarr", "519": "Gallagher", "520": "Bergvall", "521": "Kulusevski", "522": "Gray", "523": "Moore", "524": "Olusesi", "525": "Fernandes", "526": "Solanke", "527": "Richarlison", "528": "Scarlett", "529": "Roefs", "530": "Patterson", "531": "Ellborg", "532": "Ballard", "533": "Mukiele", "534": "Hume", "535": "Alderete", "536": "Reinildo", "537": "Seelt", "538": "Hjelde", "539": "O'Nien", "540": "Masuaku", "541": "Meunier", "542": "E.Le F\u00e9e", "543": "Diarra", "544": "Xhaka", "545": "Sadiki", "546": "Adingra", "547": "Mundle", "548": "Rigg", "549": "Talbi", "550": "Jocelin.T", "551": "Angulo", "552": "Brobbey", "553": "Isidor"};
 const TRANSFER_RECS = [];
@@ -19014,36 +18985,9 @@ function _apexSimDist(xi, capId, idx, nSims, bench, vcId) {
     hist[bi]++;
   }
   for (let i = 0; i < NB; i++) hist[i] /= N;
-  // ── APEX_FIX_AUG07C_BANDS (2026-08-07) ────────────────────────────────
-  // Mock F draws the distribution as six bands one standard deviation wide and
-  // labels each with the share of weeks that actually landed in it. All three
-  // of those things are measurements, not assumptions, so they are taken here
-  // off the same draws rather than re-derived from the histogram by the
-  // renderer (which would only ever be an approximation of this).
-  //   sd    — population sd of the simulated totals.
-  //   cuts  — mean-2sd, mean-1sd, mean, mean+1sd, mean+2sd, full precision.
-  //   bands — EXACT counts, six fractions summing to 1. The whole point of
-  //           the picture is that these are NOT the textbook
-  //           2.1/13.6/34.1/34.1/13.6/2.1: the distribution is right-skewed,
-  //           so the bottom band is rarer and the top band commoner than a
-  //           symmetric bell would claim.
-  const mean = sum / N;
-  let ss = 0;
-  for (let i = 0; i < N; i++) { const dv = totals[i] - mean; ss += dv * dv; }
-  const sd = Math.sqrt(ss / N);
-  const cuts = [mean - 2 * sd, mean - sd, mean, mean + sd, mean + 2 * sd];
-  const bands = [0, 0, 0, 0, 0, 0];
-  for (let i = 0; i < N; i++) {
-    const v = totals[i];
-    let b = 0;
-    while (b < 5 && v >= cuts[b]) b++;
-    bands[b]++;
-  }
-  for (let i = 0; i < 6; i++) bands[i] /= N;
   _apexRng = _prevRng;
-  return { mean: mean, floor: pct(0.10), median: pct(0.50), ceiling: pct(0.90), p60: ge60 / N,
-           p40: ge40 / N, p80: ge80 / N, lo: blo, hi: bhi, hist: hist, n: N, autosubs: !!_bn,
-           sd: sd, cuts: cuts, bands: bands };
+  return { mean: sum / N, floor: pct(0.10), median: pct(0.50), ceiling: pct(0.90), p60: ge60 / N,
+           p40: ge40 / N, p80: ge80 / N, lo: blo, hi: bhi, hist: hist, n: N, autosubs: !!_bn };
 }
 
 // ── Decision layer (2026-06-25): turn each transfer rec into a DECISION with
@@ -19180,37 +19124,20 @@ function _apexSimCached(xi, capId, idx, n, bench, vcId) {
 //      snapped out to a round tick), not the mock's fixed 0–150, two thirds
 //      of which is empty.
 function _apexOptDHtml(d, gwLabel, headlineE) {
-  // ══ APEX_FIX_AUG07C_BELL — Mock F, the banded bell ══════════════════
-  // Six bands one sd wide, dark in the middle and lightening outward, each
-  // labelled with the TRUE share of weeks in it; the mean as a vertical rule;
-  // a dashed symmetric normal over the top for contrast. Axis in POINTS at the
-  // band edges, not sigma. Geometry follows REFERENCE_mockF.html's `sF`.
-  //
-  // 470x180, not the mock's 560x210: the chart shares its row with the pill, so
-  // it renders ~450px on the desktop rail and ~250-320px on a phone. SVG text
-  // is in USER units, so a smaller viewBox at the same rendered width means
-  // bigger effective type — at 560 the axis would have painted around 5px on a
-  // 320px screen. The phone font bumps live in the CSS media query for the
-  // same reason: raising the user-unit size is the only way to raise the
-  // rendered size inside a scaled viewBox.
-  // mb is 40, not 30: the bottom margin has to hold TWO rows of type — the
-  // band-edge numbers and the legend under them. At 30 the pairwise bounding
-  // box audit caught the last axis label overlapping the legend by 16x1.6px at
-  // 1440. 40 clears it with ~11px to spare.
-  var W = 470, H = 180, ml = 20, mr = 20, mb = 40, mt = 36;
-  var M = d.mean;
-  // sd fallback: floor/ceiling are the 10th/90th, and z(0.9)-z(0.1) = 2.5631.
-  // Only reachable if a stale dist object predates the sd field.
-  var SD = (d.sd > 0) ? d.sd : Math.max(0.5, (d.ceiling - d.floor) / 2.5631);
-  var cuts = (d.cuts && d.cuts.length === 5) ? d.cuts
-           : [M - 2 * SD, M - SD, M, M + SD, M + 2 * SD];
-  var lo = d.lo, hi = d.hi;
-  // The axis has to give the two OUTER bands visible width, so it is driven by
-  // the cuts, not by the binned range: the histogram stops at the 0.5th/99.5th
-  // percentile and the -2sd cut can sit almost on top of that. Snapped out to a
-  // round 5 so the printed edges stay tidy.
-  var XLO = Math.floor(Math.min(lo, cuts[0] - 0.85 * SD) / 5) * 5;
-  var XHI = Math.ceil(Math.max(hi, cuts[4] + 0.55 * SD) / 5) * 5;
+  // APEX_FIX_AUG07B_MERGE1_: 470x150, the proportions of merge.html's Merge 1.
+  // The chart column shares its row with the pill now, so it lands around
+  // 250px wide in the rail; at the old 620x176 the curve rendered ~70px tall
+  // and the tick labels scaled down to about 6px. Smaller viewBox = bigger
+  // effective type at the same rendered width.
+  // ml/mr are 14, not the mock's 6: the axis labels are text-anchor:middle on
+  // the first and last tick, so at 12px in a 470-unit box the outer half of
+  // "30" and "110" falls outside the viewBox and an SVG clips to its viewBox.
+  // Measured: "110" painted as "11(" at 6.
+  var W = 470, H = 150, ml = 14, mr = 14, mb = 30, mt = 16;
+  var lo = d.lo, hi = d.hi, rng = Math.max(1, hi - lo);
+  var step = (rng > 80) ? 20 : ((rng > 34) ? 10 : 5);
+  var XLO = Math.floor(lo / step) * step, XHI = Math.ceil(hi / step) * step;
+  if (XHI - XLO < step * 2) XHI = XLO + step * 2;
   var x = function (v) { return ml + (v - XLO) / (XHI - XLO) * (W - ml - mr); };
   var hh = (d.hist && d.hist.length) ? d.hist : [1], NB = hh.length;
   var sm = [], i, k, j, acc, cnt2;
@@ -19223,94 +19150,22 @@ function _apexOptDHtml(d, gwLabel, headlineE) {
   for (i = 0; i < NB; i++) if (sm[i] > peak) peak = sm[i];
   var y = function (p) { return mt + (1 - p / peak) * (H - mt - mb); };
   var y0 = y(0);
-  var bw = (hi - lo) / NB;
-  // Height of the shape at any score. ZERO outside the binned range rather than
-  // the mock's clamp-to-end-bin: clamping would draw a flat plateau at the
-  // first bin's height all the way out to the axis edge, which is a claim the
-  // data does not make. The outermost 0.5% each side therefore shades as a
-  // sliver that slightly understates its labelled share — the label is the
-  // honest number and the shape is the honest shape; where they disagree the
-  // label wins, and it says so in the help panel.
-  var at = function (v) {
-    if (v <= lo || v >= hi) return 0;
-    var bi = Math.round((v - lo) / bw - 0.5);
-    return sm[Math.max(0, Math.min(NB - 1, bi))] || 0;
-  };
-  var bandsArr = (d.bands && d.bands.length === 6) ? d.bands : null;
-  if (!bandsArr) {
-    // Fallback only: integrate the histogram between the cuts.
-    bandsArr = [0, 0, 0, 0, 0, 0];
-    for (i = 0; i < NB; i++) {
-      var cv = lo + (i + 0.5) * bw, bi2 = 0;
-      while (bi2 < 5 && cv >= cuts[bi2]) bi2++;
-      bandsArr[bi2] += hh[i];
-    }
-  }
-  var edges = [XLO, cuts[0], cuts[1], cuts[2], cuts[3], cuts[4], XHI];
-  // lightest at the extremes, darkest either side of the mean — the textbook
-  // shading, on the product's own ramp.
-  var fills = ['var(--apexd-g1)', 'var(--apexd-g2)', 'var(--apexd-g4)',
-               'var(--apexd-g5)', 'var(--apexd-g3)', 'var(--apexd-g1)'];
+  var path = 'M ' + x(lo).toFixed(1) + ' ' + y0.toFixed(1);
+  for (i = 0; i < NB; i++) path += ' L ' + x(lo + (i + 0.5) * (hi - lo) / NB).toFixed(1) + ' ' + y(sm[i]).toFixed(1);
+  path += ' L ' + x(hi).toFixed(1) + ' ' + y0.toFixed(1);
+  var mx = x(d.median), ry = (y0 - 7).toFixed(1), rx = (mx - 6).toFixed(1);
   var s = '';
-  var aria = gwLabel + ' simulated score distribution in six bands one standard deviation wide. '
-           + 'Mean ' + M.toFixed(1) + ', standard deviation ' + SD.toFixed(1) + ' points. Shares: '
-           + bandsArr.map(function (b) { return (b * 100).toFixed(1) + '%'; }).join(', ') + '.';
   s += '<svg class="apex-optd-svg" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="xMidYMid meet"'
-     + ' xmlns="http://www.w3.org/2000/svg" role="img" aria-label="' + aria + '">';
-  for (var b = 0; b < 6; b++) {
-    var a0 = Math.max(edges[b], XLO), a1 = Math.min(edges[b + 1], XHI);
-    if (!(a1 > a0)) continue;
-    var dd = 'M ' + x(a0).toFixed(1) + ' ' + y0.toFixed(1);
-    for (var v = a0; v < a1; v += 0.5) dd += ' L ' + x(v).toFixed(1) + ' ' + y(at(v)).toFixed(1);
-    dd += ' L ' + x(a1).toFixed(1) + ' ' + y(at(a1)).toFixed(1);
-    dd += ' L ' + x(a1).toFixed(1) + ' ' + y0.toFixed(1) + ' Z';
-    s += '<path d="' + dd + '" fill="' + fills[b] + '"/>';
-  }
-  // outline of the real shape
-  var ol = '';
-  for (v = XLO; v <= XHI; v += 0.5) ol += (ol ? ' L ' : 'M ') + x(v).toFixed(1) + ' ' + y(at(v)).toFixed(1);
-  s += '<path d="' + ol + '" fill="none" stroke="var(--apexd-g7)" stroke-width="1.6" stroke-linejoin="round"/>';
-  // the textbook symmetric bell, same mean and sd, scaled to the same peak
-  var npdf = function (t) { var z = (t - M) / SD; return Math.exp(-0.5 * z * z); };
-  var nl = '';
-  for (v = XLO; v <= XHI; v += 0.5) nl += (nl ? ' L ' : 'M ') + x(v).toFixed(1) + ' ' + y(peak * npdf(v)).toFixed(1);
-  s += '<path class="apex-optd-normal" d="' + nl + '" fill="none" stroke="#8A938D" stroke-width="1.5" stroke-dasharray="6 4"/>';
-  // hairlines at the band edges so the shading reads as six discrete bands
-  for (i = 0; i < 5; i++) {
-    s += '<line x1="' + x(cuts[i]).toFixed(1) + '" x2="' + x(cuts[i]).toFixed(1) + '" y1="'
-       + y(at(cuts[i])).toFixed(1) + '" y2="' + y0.toFixed(1) + '" stroke="#ffffff" stroke-width="1.4" opacity="0.85"/>';
-  }
-  // Band shares. Big bands sit inside the shape; a small one would not fit
-  // inside its own sliver, so it goes above the baseline instead.
-  // All labels stay dark. The mock flips the two central bands to white, but
-  // that is a presentation ATTRIBUTE and .apex-optd-vl's fill is a CSS rule,
-  // which wins — so the white never applied. Measured before restoring it:
-  // against the darkest band (#1D9E75, relative luminance 0.258) dark #16201C
-  // scores 4.93:1 and white only 3.41:1. Dark is both what renders and the
-  // more legible of the two, so the dead branch is gone rather than fixed.
-  for (b = 0; b < 6; b++) {
-    var e0 = Math.max(edges[b], XLO), e1 = Math.min(edges[b + 1], XHI);
-    if (!(e1 > e0)) continue;
-    var mid = (e0 + e1) / 2, pctv = bandsArr[b] * 100;
-    var small = pctv < 6;
-    var cls = 'apex-optd-vl' + (small ? ' apex-optd-vl-sm' : '');
-    var ty = small ? (y0 - 5) : (y(at(mid)) + 19);
-    s += '<text class="' + cls + '" x="' + x(mid).toFixed(1) + '" y="' + ty.toFixed(1)
-       + '" text-anchor="middle">' + pctv.toFixed(1) + '%</text>';
-  }
-  // the mean
-  s += '<line x1="' + x(M).toFixed(1) + '" x2="' + x(M).toFixed(1) + '" y1="' + (mt - 13)
-     + '" y2="' + y0.toFixed(1) + '" stroke="var(--apexd-g7)" stroke-width="2"/>';
-  s += '<text class="apex-optd-vl" x="' + x(M).toFixed(1) + '" y="' + (mt - 18) + '" text-anchor="middle">mean '
-     + M.toFixed(1) + '</text>';
-  // baseline + the five band edges, in points
+     + ' xmlns="http://www.w3.org/2000/svg" role="img" aria-label="' + gwLabel
+     + ' simulated score distribution. Mean ' + d.mean.toFixed(1) + ', median ' + d.median.toFixed(1) + ' points.">';
+  s += '<path d="' + path + ' Z" fill="var(--apexd-g1)"/>';
+  s += '<path d="' + path + '" fill="none" stroke="var(--apexd-g5)" stroke-width="1.8" stroke-linejoin="round"/>';
   s += '<line x1="' + ml + '" x2="' + (W - mr) + '" y1="' + y0.toFixed(1) + '" y2="' + y0.toFixed(1) + '" stroke="#e2ddd3" stroke-width="1"/>';
-  for (i = 0; i < 5; i++) {
-    s += '<text class="apex-optd-ax" x="' + x(cuts[i]).toFixed(1) + '" y="' + (y0 + 16).toFixed(1)
-       + '" text-anchor="middle">' + cuts[i].toFixed(0) + '</text>';
+  for (var v = XLO; v <= XHI + 1e-9; v += step) {
+    s += '<text class="apex-optd-ax" x="' + x(v).toFixed(1) + '" y="' + (y0 + 17).toFixed(1) + '" text-anchor="middle">' + Math.round(v) + '</text>';
   }
-  s += '<text class="apex-optd-ax apex-optd-leg" x="' + (W - mr) + '" y="' + (H - 3)
-     + '" text-anchor="end">dashed = a symmetric bell</text>';
+  s += '<line x1="' + mx.toFixed(1) + '" x2="' + mx.toFixed(1) + '" y1="' + (mt - 9) + '" y2="' + y0.toFixed(1) + '" stroke="var(--apexd-g6)" stroke-width="1.2"/>';
+  s += '<text class="apex-optd-rule" x="' + rx + '" y="' + ry + '" transform="rotate(-90 ' + rx + ' ' + ry + ')">median ' + d.median.toFixed(1) + '</text>';
   s += '</svg>';
   var pc = function (p) { return (p * 100).toFixed(1) + '%'; };
   var h = '';
@@ -19337,47 +19192,18 @@ function _apexOptDHtml(d, gwLabel, headlineE) {
   h +=       '<button type="button" class="apex-optd-sq apex-optd-rd" onclick="_apexOptDHelp(this)" title="How to read this" aria-label="How to read this chart" aria-expanded="false">?</button>';
   h +=     '</div>';
   h +=     '<div class="apex-optd-chart">' + s + '</div>';
-  // APEX_FIX_AUG07C_BELL: the 40+/60+/80+ column is gone from the row — the
-  // bands are the numbers now, and a second column of percentages beside them
-  // reads as two answers to the same question. The three thresholds are NOT
-  // dropped: they move into the help panel below, with the band table and the
-  // textbook comparison.
+  h +=     '<div class="apex-optd-stats">';
+  // APEX_FIX_AUG07B_MERGE1_: the mean row is GONE — it is the pill now. Printing it
+  // in both places would be the same number twice on one block.
+  h +=       '<div><span>40+ pts</span><b>' + pc(d.p40) + '</b></div>';
+  h +=       '<div><span>60+ pts</span><b>' + pc(d.p60) + '</b></div>';
+  h +=       '<div><span>80+ pts</span><b>' + pc(d.p80) + '</b></div>';
+  h +=     '</div>';
   h +=   '</div>';
-  // APEX_FIX_AUG07C_BELL: the help panel now carries everything the row no
-  // longer prints — the three thresholds that used to be a column, the six band
-  // shares against what a symmetric bell would have claimed, and the standing
-  // note about what the simulation includes.
-  var TEXTBOOK = [2.1, 13.6, 34.1, 34.1, 13.6, 2.1];
-  var BANDNAME = ['below &minus;2 sd', '&minus;2 to &minus;1 sd', '&minus;1 sd to mean',
-                  'mean to +1 sd', '+1 to +2 sd', 'above +2 sd'];
-  var bl = (d.bands && d.bands.length === 6) ? d.bands : null;
-  var hb = '';
-  if (bl) {
-    hb += '<table class="apex-optd-bt"><thead><tr><th>band</th><th>points</th><th>yours</th><th>a symmetric bell</th></tr></thead><tbody>';
-    for (var q = 0; q < 6; q++) {
-      var lop = (q === 0) ? '&ndash;' : d.cuts[q - 1].toFixed(0);
-      var hip = (q === 5) ? '&ndash;' : d.cuts[q].toFixed(0);
-      var rng2 = (q === 0) ? ('under ' + hip) : (q === 5 ? (lop + ' and up') : (lop + '&ndash;' + hip));
-      hb += '<tr><td>' + BANDNAME[q] + '</td><td>' + rng2 + '</td><td><b>' + (bl[q] * 100).toFixed(1)
-          + '%</b></td><td>' + TEXTBOOK[q].toFixed(1) + '%</td></tr>';
-    }
-    hb += '</tbody></table>';
-  }
-  h +=   '<div class="apex-optd-help" hidden>'
-     +   '<p>' + (d.n || 0).toLocaleString() + ' simulated gameweeks from your fifteen, '
+  h +=   '<div class="apex-optd-help" hidden>' + (d.n || 0).toLocaleString() + ' simulated gameweeks from your fifteen, '
      +   'autosubs included — so the mean already carries the bench cover that used to be printed under the total. '
-     +   'The line under the pill is your <b>median</b>: half the simulated weeks land either side of it. Neither is a '
-     +   'crowd average — nobody has played ' + (gwLabel || 'this gameweek') + ' yet, so there is nothing to average.</p>'
-     +   '<p><b>Chance of at least:</b> ' + pc(d.p40) + ' reach 40 pts &middot; ' + pc(d.p60)
-     +   ' reach 60 &middot; ' + pc(d.p80) + ' reach 80.</p>'
-     +   '<p>Each band is one standard deviation wide (sd ' + ((d.sd > 0) ? d.sd.toFixed(1) : '—')
-     +   ' pts). The percentages are the real share of simulated weeks, counted; the last column is what a '
-     +   'perfectly symmetric bell would have claimed. Your distribution leans right, so a bad week is rarer '
-     +   'than the textbook says and a haul is commoner. The dashed outline on the chart is that symmetric '
-     +   'bell, drawn from your own mean and sd.</p>'
-     +   hb
-     +   '<p class="apex-optd-help-fine">The shaded shape stops at the 0.5th and 99.5th percentile, so the two '
-     +   'outer bands shade thinner than their share; the printed percentage is the honest number.</p></div>';
+     +   'The rule is your <b>median</b>: half the simulated weeks land either side of it. It is not a crowd average — '
+     +   'nobody has played ' + (gwLabel || 'this gameweek') + ' yet, so there is nothing to average.</div>';
   h +=   '<div class="va-range-foot">' + (d.n || 0).toLocaleString() + ' simulated gameweeks · autosubs included</div>';
   h += '</div>';
   return h;
@@ -19399,19 +19225,7 @@ window._apexOptDDownload = function () {
                 'median,' + d.median.toFixed(4), 'p10_floor,' + d.floor.toFixed(4),
                 'p90_ceiling,' + d.ceiling.toFixed(4), 'pct_40_plus,' + (d.p40 * 100).toFixed(2),
                 'pct_60_plus,' + (d.p60 * 100).toFixed(2), 'pct_80_plus,' + (d.p80 * 100).toFixed(2),
-                'sd,' + ((d.sd > 0) ? d.sd.toFixed(4) : '')];
-    // APEX_FIX_AUG07C_BELL: the bands are what the block draws now, so they
-    // belong in the file it hands you.
-    if (d.cuts && d.bands) {
-      rows.push('', 'band,low,high,share_pct');
-      var BN = ['below_-2sd', '-2sd_to_-1sd', '-1sd_to_mean', 'mean_to_+1sd', '+1sd_to_+2sd', 'above_+2sd'];
-      for (var q = 0; q < 6; q++) {
-        rows.push(BN[q] + ',' + ((q === 0) ? '' : d.cuts[q - 1].toFixed(2))
-                + ',' + ((q === 5) ? '' : d.cuts[q].toFixed(2))
-                + ',' + (d.bands[q] * 100).toFixed(2));
-      }
-    }
-    rows.push('', 'bin_low,bin_high,share');
+                '', 'bin_low,bin_high,share'];
     var NB = (d.hist || []).length, w = (d.hi - d.lo) / (NB || 1);
     for (var i = 0; i < NB; i++) {
       rows.push((d.lo + i * w).toFixed(2) + ',' + (d.lo + (i + 1) * w).toFixed(2) + ',' + d.hist[i].toFixed(6));
@@ -32405,7 +32219,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW1</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1786136890-GW1-b6de80e4</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1786137948-GW1-5578c321</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
