@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="1" data-built-at="2026-08-07T15:53:09">
+<meta name="apex-gw" content="1" data-built-at="2026-08-07T17:28:21">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
@@ -37,7 +37,7 @@
 })();
 </script>
 <meta http-equiv="Pragma" content="no-cache">
-<meta name="apex-build" content="20260807-155309">
+<meta name="apex-build" content="20260807-172820">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — FPL Apex</title>
 <meta name="description" content="Plan FPL transfers, chips, and Free Hit squads. Live xG-based projections, a rival head-to-head simulator, and a mini-league table. Free FPL tool.">
@@ -5622,6 +5622,66 @@ body[data-apex-view="team"] #topbar .va-tabs { display: flex; }
   .va-tabs::-webkit-scrollbar { display: none; }
 }
 
+/* APEX_FIX_AUG07B_OPTD (2026-08-07) — option-D hero distribution block.
+   Sequential green ramp derived from the product accent #1D9E75; the rival's
+   orange stays in REFERENCE_optionD.html. Scoped to .apex-optd so nothing
+   else can inherit these names. */
+.apex-optd {
+  --apexd-g1:#E8F5EF; --apexd-g2:#BEE3D3; --apexd-g3:#8ECDB4; --apexd-g4:#57B393;
+  --apexd-g5:#1D9E75; --apexd-g6:#14795A; --apexd-g7:#0E5942;
+  display:flex; gap:14px; align-items:center; flex-wrap:wrap;
+  width:100%; min-width:0; margin:6px 0 2px;
+}
+.apex-optd-wrap { min-width:0; }
+.apex-optd-icons { display:flex; flex-direction:column; gap:8px; flex:0 0 auto; }
+.apex-optd-sq {
+  width:30px; height:30px; padding:0; line-height:1; cursor:pointer;
+  border:1px solid #e2ddd3; border-radius:7px; background:#fff; color:#4A554F;
+  font:inherit; font-size:14px; display:grid; place-items:center;
+}
+.apex-optd-sq:hover { border-color:var(--apexd-g4,#57B393); color:var(--apexd-g6,#14795A); }
+.apex-optd-sq.apex-optd-rd { border-radius:999px; }
+.apex-optd-chart { flex:1 1 220px; min-width:0; }
+.apex-optd-svg { display:block; width:100%; height:auto; }
+.apex-optd-ax { font-size:11px; fill:#94a3b8; font-variant-numeric:tabular-nums; }
+.apex-optd-rule { font-size:11px; fill:#4A554F; font-variant-numeric:tabular-nums; }
+.apex-optd-stats { flex:0 0 auto; min-width:132px; max-width:100%; }
+.apex-optd-stats div { display:flex; justify-content:space-between; gap:16px; padding:3px 0; }
+.apex-optd-stats span { font-size:13px; color:#4A554F; }
+.apex-optd-stats b {
+  font-size:14px; font-weight:650; color:#0f172a;
+  font-variant-numeric:tabular-nums; font-family:'JetBrains Mono', ui-monospace, monospace;
+}
+.apex-optd-stats div:first-child b { font-size:19px; color:var(--accent,#1D9E75); }
+.apex-optd-help {
+  font-size:12px; line-height:1.45; color:#4A554F; margin:6px 0 0;
+  padding-top:8px; border-top:1px solid #e2ddd3;
+}
+.apex-optd-help[hidden] { display:none; }
+/* The retheme hides .va-range-foot inside the rail wholesale
+   (`.va-twopane-rail .va-range-foot { display:none !important }`) — that was
+   aimed at the old "% chance of 60+ pts" line, which option D now prints as a
+   stat. Ours carries the draw count and the autosubs disclosure that replaces
+   the retired cover line, so it has to survive: one more class beats that
+   selector, and this sheet is concatenated after it. The "Live" pill stays
+   hidden — that hide was a design decision about the rail, not a casualty. */
+.va-twopane-rail .apex-optd-wrap .va-range-foot {
+  display:block !important; font-size:12.5px !important; padding-top:8px !important; margin-top:8px !important;
+}
+.apex-optd-wrap .va-range-foot { font-size:12.5px; color:#94a3b8; margin-top:8px; }
+/* Phones: curve full width on top, stats as a 2-up grid, buttons as a row
+   underneath. Everything min-width:0 so nothing can push past the viewport. */
+@media (max-width: 440px) {
+  .apex-optd { gap:10px; }
+  .apex-optd-chart { flex:1 1 100%; order:1; }
+  .apex-optd-stats {
+    flex:1 1 100%; order:2; min-width:0;
+    display:grid; grid-template-columns:1fr 1fr; gap:0 14px;
+  }
+  .apex-optd-stats div { gap:8px; }
+  .apex-optd-icons { flex-direction:row; order:3; }
+}
+
 </style>
 <!-- Cookie consent + conditional Google Analytics 4 loader -->
 <script>
@@ -5857,8 +5917,21 @@ html.apex-offseason #view-landing .hero-sub::after {
         <div class="va-hero-inner">
           <div class="va-hero-text">
             <div class="va-card-label" id="gw-xp-label">GW1 PROJECTED</div>
-            <div class="va-card-value va-card-value-hero" id="gw-xp-val">0</div>
-            <div class="va-card-sub" title="xPts = expected points: what our model projects your team to score">Projected points (xPts) this gameweek</div>
+            <!-- INSERTED APEX_FIX_AUG07B_OPTD: option D below carries the
+                 headline now, and its `mean` honestly includes the autosub
+                 cover the sim rolls — which is why APEX_FIX_AUG07_F2's
+                 separate cover line is retired in the same patch.
+                 #gw-xp-val is NOT deleted — it is hidden and kept as a live
+                 data sink. updateChipTotal dereferences it with no null
+                 guard, _apexRenderBenchCover and the blank-canvas dash writer
+                 both write it, and assets/apex_planner.js parses
+                 .va-card-value-hero's textContent for its planning baseline.
+                 display:none changes none of that.
+                 !important is not decoration: .va-card-value-hero carries
+                 `display: inline-block !important` from the retheme block, and
+                 a plain inline display:none loses to it. -->
+            <div class="va-card-value va-card-value-hero" id="gw-xp-val" style="display:none !important">0</div>
+            <div class="va-card-sub" style="display:none !important" title="xPts = expected points: what our model projects your team to score">Projected points (xPts) this gameweek</div>
             <!-- INSERTED APEX_FIX_AUG04H_REAL_ARMBAND_NOTE_EL -->
             <div id="apex-armband-note" style="display:none;font-size:.72rem;color:var(--muted);margin-top:2px;"></div>
           </div>
@@ -16102,7 +16175,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1786114389-GW1-bd9e9f25";
+const BUILD_VERSION = "1786120100-GW1-c1f3c68b";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = false;
@@ -16110,7 +16183,7 @@ window.APEX_SQUAD_ROLLBACK = false;
 let FPL_ID = null;
 let SQUAD_DATA = [];
 </script>
-<script src="/apex_pool.js?v=1786114389-GW1-bd9e9f25"></script>
+<script src="/apex_pool.js?v=1786120100-GW1-c1f3c68b"></script>
 <script>
 const PLAYER_NAMES = {"1": "Raya", "2": "Arrizabalaga", "3": "Meslier", "4": "Gabriel", "5": "J.Timber", "6": "Saliba", "7": "Lewis-Skelly", "8": "Calafiori", "9": "Hincapie", "10": "White", "11": "Mosquera", "12": "Saka", "13": "Rice", "14": "Eze", "15": "\u00d8degaard", "16": "Madueke", "17": "Merino", "18": "Martinelli", "19": "Zubimendi", "20": "Dowman", "22": "Nwaneri", "23": "F\u00e1bio Vieira", "24": "Nelson", "25": "Gy\u00f6keres", "26": "Havertz", "27": "G.Jesus", "557": "Tzolis", "28": "Martinez", "29": "M.Bizot", "30": "Digne", "31": "Konsa", "32": "Cash", "33": "Mings", "34": "Pau", "35": "Bogarde", "36": "Maatsen", "37": "Lindel\u00f6f", "38": "A.Garc\u00eda", "39": "Nedeljkovic", "41": "Buend\u00eda", "42": "Guessand", "44": "Bailey", "45": "McGinn", "46": "Barkley", "47": "Kamara", "48": "Onana", "49": "Iling Jr", "50": "Burrowes", "51": "George Hemmings", "52": "Alysson", "53": "Manzambi", "54": "Gomes", "55": "Watkins", "56": "Abraham", "160": "Garnacho", "57": "Petrovi\u0107", "58": "Forster", "59": "Dennis", "60": "Hill", "61": "Truffert", "62": "Diakit\u00e9", "63": "Milosavljevi\u0107", "64": "Smith", "65": "J.Araujo", "66": "Soler", "67": "Rayan", "68": "Tavernier", "69": "Scott", "70": "Kluivert", "71": "Cook", "72": "Gannon-Doak", "73": "Adams", "74": "Brooks", "75": "Christie", "76": "T\u00f3th.A", "77": "Adli", "78": "Kroupi.Jr", "79": "Evanilson", "80": "Enes \u00dcnal", "81": "Rodr\u00edguez", "566": "Silva", "573": "Sanchez", "82": "Kelleher", "83": "Valdimarsson", "84": "Collins", "85": "Van den Berg", "86": "Lewis-Potter", "87": "Ajer", "88": "Kayode", "89": "Henry", "90": "Hickey", "91": "Pinnock", "92": "Ji-soo", "93": "Schuster", "94": "Schade", "95": "O.Dango", "96": "Damsgaard", "97": "Jensen", "98": "Janelt", "99": "Milambo", "100": "Carvalho", "102": "Yarmoliuk", "103": "Dasilva", "105": "Anthony", "106": "Thiago", "107": "Furo", "108": "Wilson", "565": "Sangar\u00e9", "109": "Verbruggen", "111": "Steele", "113": "F.Kad\u0131o\u011flu", "114": "Boscagli", "115": "De Cuyper", "116": "Dunk", "117": "Coppola", "118": "Igor", "119": "Costinha", "120": "Svoboda", "121": "Mitoma", "122": "Minteh", "123": "Hinshelwood", "124": "Gro\u00df", "125": "Georginio", "126": "O'Riley", "127": "Gomez", "128": "Buonanotte", "129": "Ayari", "130": "Wieffer", "131": "Baleba", "132": "Howell", "133": "Watson", "134": "Oriola", "135": "Yohanna", "137": "Tzimas", "138": "Kostoulas", "139": "Ferguson", "328": "Struijk", "504": "Vuskovic", "40": "Rogers", "101": "Henderson", "136": "Welbeck", "140": "S\u00e1nchez", "141": "J\u00f6rgensen", "142": "James", "143": "Chalobah", "144": "Gusto", "145": "Fofana", "146": "B.Badiashile", "147": "Tosin", "148": "Hato", "149": "Colwill", "150": "M.Sarr", "151": "Acheampong", "152": "Palestra", "153": "Disasi", "154": "Palmer", "155": "Enzo", "156": "Neto", "157": "Est\u00eav\u00e3o", "158": "Gittens", "159": "Caicedo", "161": "Lavia", "163": "D.Essugo", "164": "Quenda", "165": "Jo\u00e3o Pedro", "166": "N.Jackson", "167": "Delap", "168": "Marc Guiu", "169": "Mheuka", "170": "Emegha", "200": "Lacroix", "560": "Penders", "561": "Anselmino", "568": "Barco", "104": "Onyeka", "110": "Rushworth", "171": "Dovin", "172": "Wilson", "173": "Thomas", "174": "Kitching", "175": "van Ewijk", "176": "Dasilva", "177": "Kesler-Hayden", "178": "Bidwell", "179": "Latibeaudiere", "180": "Woolfenden", "181": "Brau", "182": "Amenda", "183": "Rudoni", "184": "Grimes", "185": "Sakamoto", "186": "Mason-Clark", "187": "Eccles", "188": "Torp", "189": "Shepherd", "190": "Tchaouna", "191": "Borges Rodrigues", "192": "Andrews", "193": "Wright", "194": "Thomas-Asante", "195": "Simms", "196": "Markelo", "197": "Bassette", "198": "Henderson", "199": "Benitez", "201": "Mu\u00f1oz", "202": "Richards", "203": "Canvot", "204": "Mitchell", "205": "Sosa", "206": "Chadi Riad", "207": "Mingueza", "208": "Sarr", "209": "Johnson", "210": "Wharton", "211": "Yeremy", "212": "Hughes", "213": "Lerma", "214": "Kamada", "215": "Devenny", "216": "Esse", "217": "M.Fran\u00e7a", "218": "Doucour\u00e9", "219": "J.Rak-Sakyi", "220": "Cardines", "221": "Drakes-Thomas", "222": "Strand Larsen", "223": "Mateta", "224": "Nketiah", "225": "Uche", "555": "Matthews", "21": "N\u00f8rgaard", "226": "Pickford", "227": "Travers", "228": "King", "229": "Tarkowski", "230": "Branthwaite", "231": "Keane", "232": "O'Brien", "233": "Mykolenko", "234": "Patterson", "235": "Aznou", "236": "Dewsbury-Hall", "237": "Ndiaye", "239": "Garner", "240": "Iroegbunam", "241": "McNeil", "242": "George", "243": "Alcaraz", "244": "Armstrong", "245": "Dibling", "246": "R\u00f6hl", "247": "Hackney", "248": "Beto", "249": "Barry", "250": "Leno", "251": "Lecomte", "252": "McNally", "253": "Andersen", "254": "Robinson", "255": "J.Cuenca", "256": "Tete", "257": "Bassey", "258": "Castagne", "261": "Iwobi", "262": "Smith Rowe", "263": "Kevin", "264": "Bobb", "265": "Berge", "266": "Cairney", "267": "Luki\u0107", "268": "King", "269": "Sessegnon", "270": "Reed", "271": "Muniz", "272": "Kusi-Asare", "569": "Garc\u00eda", "570": "Palacios", "273": "Phillips", "274": "Butland", "275": "Cartwright", "276": "Lo-Tutala", "277": "Egan", "278": "Hughes", "279": "Ajayi", "280": "Coyle", "281": "Drameh", "282": "Giles", "283": "Jacob", "284": "McCarthy", "285": "McNair", "286": "Belloumi", "287": "Millar", "288": "Dowell", "289": "Crooks", "290": "Slater", "291": "Matazo", "292": "\u00d6m\u00fcr", "293": "Kamara", "294": "Zambrano", "295": "McBurnie", "296": "Akintola", "297": "Gyabi", "298": "Destan", "299": "Burstow", "556": "Targett", "563": "Morita", "572": "Tzolakis", "259": "Diop", "300": "Walton", "301": "Palmer", "302": "Button", "303": "Kipr\u00e9", "304": "O'Shea", "305": "Davis", "306": "Greaves", "307": "Johnson", "308": "Furlong", "309": "N\u00fa\u00f1ez", "310": "Matusiwa", "311": "Burns", "312": "Taylor", "313": "Clarke", "314": "Ogbene", "315": "Fatawu", "316": "Emersonn", "317": "Hirst", "318": "Philogene", "319": "Szmodics", "320": "Akpom", "321": "Walle Egeli", "322": "Al-Hamadi", "323": "McAteer", "324": "Mehmeti", "554": "Van Oevelen", "562": "Maeda", "564": "Scherpen", "571": "Florentino", "260": "Wilson", "326": "Perri", "327": "Bijol", "329": "Rodon", "330": "Bogle", "331": "Gudmundsson", "332": "Justin", "333": "Bornauw", "334": "Muharemovi\u0107", "335": "Stach", "336": "Okafor", "337": "Aaronson", "338": "Ampadu", "339": "Longstaff", "340": "Gelhardt", "341": "Gnonto", "342": "Harrison", "343": "James", "344": "Gruev", "345": "Tanaka", "346": "Calvert-Lewin", "347": "Nmecha", "348": "Piroe", "349": "Mateo Joseph", "385": "Trafford", "350": "A.Becker", "351": "Mamardashvili", "352": "Woodman", "353": "Pecsi", "354": "Jaros", "355": "Davies", "356": "Virgil", "357": "Frimpong", "358": "Kerkez", "359": "Gomez", "360": "Bradley", "361": "Lucky", "362": "Jacquet", "363": "Leoni", "364": "Tsimikas", "365": "Ramsay", "366": "Wirtz", "367": "Gakpo", "368": "Szoboszlai", "369": "Ngumoha", "370": "Chiesa", "371": "Gravenberch", "372": "Mac Allister", "373": "C.Jones", "374": "Endo", "375": "Nyoni", "376": "Bajcetic", "377": "Munoz", "378": "McConnell", "379": "Isak", "380": "Ekitik\u00e9", "381": "Koumas", "382": "Danns", "383": "Elliott", "238": "Grealish", "384": "Donnarumma", "386": "Bettinelli", "387": "O'Reilly", "388": "Gu\u00e9hi", "389": "Matheus N.", "390": "R\u00faben", "391": "Gvardiol", "392": "A\u00eft-Nouri", "393": "Khusanov", "394": "Alleyne", "395": "Lewis", "396": "Vitor Reis", "397": "Semenyo", "398": "Foden", "399": "Cherki", "400": "Doku", "401": "Marmoush", "402": "Rodrigo", "403": "Savinho", "404": "Reijnders", "405": "N.Gonzalez", "406": "Kova\u010di\u0107", "407": "Echeverri", "408": "Phillips", "409": "Mukasa", "410": "Monga", "411": "Haaland", "481": "Anderson", "43": "Tielemans", "162": "Andrey Santos", "325": "Darlow", "412": "Lammens", "413": "Bayindir", "414": "Heaton", "415": "Dorgu", "416": "De Ligt", "417": "Dalot", "418": "Maguire", "419": "Martinez", "420": "Yoro", "421": "Heaven", "422": "Mazraoui", "423": "Shaw", "424": "Amass", "425": "Fredricson", "426": "B.Fernandes", "427": "Mbeumo", "428": "Cunha", "429": "Rashford", "430": "Mount", "431": "Amad", "432": "Mainoo", "433": "Ugarte", "434": "J.Fletcher", "435": "Lacey", "436": "Collyer", "437": "Bendito Mantato", "438": "Fletcher", "439": "\u0160e\u0161ko", "440": "Zirkzee", "441": "Obi", "442": "Pope", "443": "Gillespie", "444": "Jaouen", "445": "Thiaw", "446": "Sch\u00e4r", "447": "Botman", "448": "Burn", "449": "Hall", "450": "Livramento", "451": "A.Murphy", "452": "Bruno G.", "453": "Barnes", "454": "Elanga", "456": "J.Ramsey", "457": "J.Murphy", "458": "Joelinton", "459": "L.Miley", "460": "Willock", "461": "Tour\u00e9", "462": "Steur", "463": "Woltemade", "464": "Wissa", "465": "Osula", "466": "Neave", "559": "Bamba", "567": "Horn\u00ed\u010dek", "467": "Sels", "468": "John", "469": "N.Williams", "470": "Morato", "471": "Milenkovi\u0107", "472": "Murillo", "473": "Aina", "474": "Jair Cunha", "475": "Savona", "476": "O.Richards", "477": "Abbott", "478": "Netz", "479": "Bindon", "480": "Gibbs-White", "482": "Hudson-Odoi", "483": "Ndoye", "484": "Hutchinson", "485": "Bakwa", "486": "McAtee", "487": "Dominguez", "488": "Sangar\u00e9", "489": "Yates", "490": "Wood", "491": "Igor Jesus", "492": "Awoniyi", "493": "Kalimuendo", "558": "Schlager", "112": "Van Hecke", "455": "Tonali", "494": "Vicario", "495": "Austin", "496": "Kinsky", "497": "Dubravka", "498": "Senesi", "499": "Pedro Porro", "500": "Romero", "501": "Danso", "502": "Robertson", "503": "Van de Ven", "505": "Spence", "506": "Udogie", "507": "Phillips", "508": "Davies", "509": "Byfield", "510": "Rowswell", "511": "Souza", "512": "Kudus", "513": "Xavi", "514": "Tel", "515": "Maddison", "516": "Bentancur", "517": "Odobert", "518": "P.M.Sarr", "519": "Gallagher", "520": "Bergvall", "521": "Kulusevski", "522": "Gray", "523": "Moore", "524": "Olusesi", "525": "Fernandes", "526": "Solanke", "527": "Richarlison", "528": "Scarlett", "529": "Roefs", "530": "Patterson", "531": "Ellborg", "532": "Ballard", "533": "Mukiele", "534": "Hume", "535": "Alderete", "536": "Reinildo", "537": "Seelt", "538": "Hjelde", "539": "O'Nien", "540": "Masuaku", "541": "Meunier", "542": "E.Le F\u00e9e", "543": "Diarra", "544": "Xhaka", "545": "Sadiki", "546": "Adingra", "547": "Mundle", "548": "Rigg", "549": "Talbi", "550": "Jocelin.T", "551": "Angulo", "552": "Brobbey", "553": "Isidor"};
 const TRANSFER_RECS = [];
@@ -18731,6 +18804,14 @@ function _apexDrawPlayer(player, idx) {
   const g = _apexPois(lg), a = _apexPois(la);
   const cs = (_apexRng() < pcs) ? 1 : 0;
   const app = (_apexRng() < pplay) ? 2 : 0;
+  // APEX_FIX_AUG07B_AUTOSUB: record the appearance draw. The RETURN of this
+  // function is deliberately unchanged — the calibrated-sd stretch below still
+  // runs, so a non-appearing player's number is NOT zero and every existing
+  // caller (_apexMoveDist, the 4-argument _apexSimDist, suites_variance's
+  // byte-for-byte drift replica) sees exactly what it saw before. Only the
+  // bench-aware sim path reads this flag, and it throws the number away and
+  // scores the player 0, which is what FPL does.
+  _apexLastApp = (app > 0) ? 1 : 0;
   const d = g * pg + a * 3 + cs * csp + app + c.konst;
   // Calibrated-sd alignment (2026-07-07): stretch the draw's deviation from the
   // local mean so the per-player sd matches the baked xp_sd_per_gw (full
@@ -18750,29 +18831,139 @@ function _apexDrawPlayer(player, idx) {
   }
   return d;
 }
+// ══ APEX_FIX_AUG07B_AUTOSUB (2026-08-07) ══════════════════════════════
+// Did the LAST _apexDrawPlayer call's appearance draw succeed? Set there,
+// read only by the bench-aware branch of _apexSimDist below. Declared as a
+// module-level var so the extracted verify core binds the same slot.
+var _apexLastApp = 1;
+// Resolve one simulated gameweek's autosubs. FPL's rules, in FPL's order:
+//   * a starter who did not appear scores 0 (that is the whole point — the
+//     component draw's goals/assists/CS for a man who never played are a
+//     modelling artefact, and real FPL gives him nothing);
+//   * the bench GK replaces the starting GK and nobody else, and does not
+//     count against the outfield allowance;
+//   * at most 3 OUTFIELD subs, considered in bench order (the array order IS
+//     the bench order — _orderBench puts the keeper first, then outfield by
+//     xP, which is what the pitch shows);
+//   * a substitute who did not appear himself cannot come on;
+//   * the finished XI must still be 1 GK / >=3 DEF / >=2 MID / >=1 FWD, so a
+//     same-position swap is taken first and any other blank only if the
+//     formation survives it;
+//   * if the captain did not appear the armband passes to the vice; if the
+//     vice blanked too there is no double at all.
+// Pure function of the already-drawn values — it consumes no randomness, so
+// the seeded common-random-numbers property of the sim is untouched.
+function _apexAutosubTotal(xi, xv, xa, bench, bv, ba, capId, vcId) {
+  var n = xi.length, i, b;
+  var on = new Array(n), val = new Array(n);
+  for (i = 0; i < n; i++) { on[i] = xi[i]; val[i] = xa[i] ? xv[i] : 0; }
+  var gkI = -1;
+  for (i = 0; i < n; i++) if (xi[i].element_type === 1) { gkI = i; break; }
+  if (gkI >= 0 && !xa[gkI]) {
+    for (b = 0; b < bench.length; b++) {
+      if (bench[b].element_type === 1 && ba[b]) { on[gkI] = bench[b]; val[gkI] = bv[b]; break; }
+    }
+  }
+  var used = 0, cnt = { 1: 0, 2: 0, 3: 0, 4: 0 };
+  for (i = 0; i < n; i++) cnt[on[i].element_type] = (cnt[on[i].element_type] || 0) + 1;
+  for (b = 0; b < bench.length && used < 3; b++) {
+    var sub = bench[b];
+    if (sub.element_type === 1 || !ba[b]) continue;
+    var pick = -1, pickSame = -1;
+    for (i = 0; i < n; i++) {
+      if (xa[i] || on[i] !== xi[i] || xi[i].element_type === 1) continue;
+      var outEt = xi[i].element_type;
+      if (outEt === sub.element_type) { pickSame = i; break; }
+      if (pick < 0) {
+        var d2 = (cnt[2] || 0) - (outEt === 2 ? 1 : 0) + (sub.element_type === 2 ? 1 : 0);
+        var d3 = (cnt[3] || 0) - (outEt === 3 ? 1 : 0) + (sub.element_type === 3 ? 1 : 0);
+        var d4 = (cnt[4] || 0) - (outEt === 4 ? 1 : 0) + (sub.element_type === 4 ? 1 : 0);
+        if (d2 >= 3 && d3 >= 2 && d4 >= 1) pick = i;
+      }
+    }
+    var tI = (pickSame >= 0) ? pickSame : pick;
+    if (tI < 0) continue;
+    cnt[xi[tI].element_type] = (cnt[xi[tI].element_type] || 0) - 1;
+    cnt[sub.element_type] = (cnt[sub.element_type] || 0) + 1;
+    on[tI] = sub; val[tI] = bv[b]; used++;
+  }
+  var capI = -1, vcI = -1;
+  for (i = 0; i < n; i++) {
+    if (xi[i].id === capId) capI = i;
+    if (vcId != null && xi[i].id === vcId) vcI = i;
+  }
+  var dblI = (capI >= 0 && xa[capI]) ? capI : ((vcI >= 0 && xa[vcI]) ? vcI : -1);
+  var total = 0;
+  for (i = 0; i < n; i++) total += val[i];
+  if (dblI >= 0) total += val[dblI];
+  return total;
+}
 // Monte-Carlo the XI total (captain doubled) → real percentiles + P(60+).
-function _apexSimDist(xi, capId, idx, nSims) {
+// APEX_FIX_AUG07B_AUTOSUB: `bench` and `vcId` are OPTIONAL. Omit them (the
+// historic four-argument call, which is what the transfer re-rank at N=800 and
+// suites_variance's drift replica both use) and the loop below is the original
+// one, draw for draw, same RNG sequence, same answer.
+function _apexSimDist(xi, capId, idx, nSims, bench, vcId) {
   if (!Array.isArray(xi) || xi.length === 0) return null;
   const N = nSims || 2000;
   // Re-seed per GW: same dice every call → stable range + reproducible re-rank,
   // and common random numbers across candidates. Restored to Math.random after.
   const _prevRng = _apexRng;
   _apexRng = _apexMulberry32((((idx | 0) + 1) * 2654435761) >>> 0);
+  // typeof-guard, the local idiom (getEffectiveFTs guards _ppNextFt and
+  // _apexFreeTransferChipGw the same way): if a context ever extracts this
+  // function without _apexAutosubTotal it degrades to the XI-only answer
+  // instead of throwing and halting a build.
+  const _bn = (Array.isArray(bench) && bench.length
+               && typeof _apexAutosubTotal === 'function') ? bench : null;
+  let _vc = null;
+  if (_bn) {
+    if (vcId != null) _vc = vcId;
+    else if (typeof _xpAt === 'function') {
+      // pickBestXi's own rule: vice = second-highest xP in the XI.
+      const _s = xi.slice().sort((a, b) => (_xpAt(b, idx) - _xpAt(a, idx)) || ((a.id || 0) - (b.id || 0)));
+      const _c = _s.find(p => p.id !== capId);
+      _vc = _c ? _c.id : null;
+    }
+  }
   const totals = new Array(N);
+  const _xv = _bn ? new Array(xi.length) : null, _xa = _bn ? new Array(xi.length) : null;
+  const _bv = _bn ? new Array(_bn.length) : null, _ba = _bn ? new Array(_bn.length) : null;
   for (let s = 0; s < N; s++) {
     let t = 0;
-    for (let i = 0; i < xi.length; i++) {
-      const d = _apexDrawPlayer(xi[i], idx);
-      t += (xi[i].id === capId) ? d * 2 : d;
+    if (_bn) {
+      for (let i = 0; i < xi.length; i++) { _xv[i] = _apexDrawPlayer(xi[i], idx); _xa[i] = _apexLastApp; }
+      for (let i = 0; i < _bn.length; i++) { _bv[i] = _apexDrawPlayer(_bn[i], idx); _ba[i] = _apexLastApp; }
+      t = _apexAutosubTotal(xi, _xv, _xa, _bn, _bv, _ba, capId, _vc);
+    } else {
+      for (let i = 0; i < xi.length; i++) {
+        const d = _apexDrawPlayer(xi[i], idx);
+        t += (xi[i].id === capId) ? d * 2 : d;
+      }
     }
     totals[s] = t;
   }
   totals.sort((x, y) => x - y);
   const pct = (q) => totals[Math.min(N - 1, Math.max(0, Math.floor(q * N)))];
   let sum = 0; for (let i = 0; i < N; i++) sum += totals[i];
-  let ge60 = 0; for (let i = 0; i < N; i++) if (totals[i] >= 60) ge60++;
+  let ge40 = 0, ge60 = 0, ge80 = 0;
+  for (let i = 0; i < N; i++) { const v = totals[i]; if (v >= 40) ge40++; if (v >= 60) ge60++; if (v >= 80) ge80++; }
+  // APEX_FIX_AUG07B_OPTD: the option-D curve is the distribution this loop
+  // just paid for. Binned here (0.5th–99.5th percentile, so one freak draw
+  // cannot stretch the axis) rather than re-simulated by the renderer.
+  const NB = 48, blo = pct(0.005), bhi = pct(0.995);
+  const bspan = Math.max(1e-6, bhi - blo);
+  const hist = new Array(NB);
+  for (let i = 0; i < NB; i++) hist[i] = 0;
+  for (let i = 0; i < N; i++) {
+    let bi = Math.floor((totals[i] - blo) / bspan * NB);
+    if (bi < 0) bi = 0; if (bi > NB - 1) bi = NB - 1;
+    hist[bi]++;
+  }
+  for (let i = 0; i < NB; i++) hist[i] /= N;
   _apexRng = _prevRng;
-  return { mean: sum / N, floor: pct(0.10), median: pct(0.50), ceiling: pct(0.90), p60: ge60 / N };
+  return { mean: sum / N, floor: pct(0.10), median: pct(0.50), ceiling: pct(0.90), p60: ge60 / N,
+           p40: ge40 / N, p80: ge80 / N, lo: blo, hi: bhi, hist: hist, n: N, autosubs: !!_bn };
 }
 
 // ── Decision layer (2026-06-25): turn each transfer rec into a DECISION with
@@ -18860,6 +19051,145 @@ function _apexDecisionCardHtml(t, c) {
 }
 // APEX_AUDIT_37B2_PRESET_UNIFORM: the three shipped labels, and only those.
 // Used by the "Re-solving chip strategy for the ... profile" overlay, which is
+// ══ APEX_FIX_AUG07B_OPTD (2026-08-07) ═══════════════════════════════════
+// DRAW COUNT. Measured, not guessed. Reported-mean sd over 60 independent
+// seeds on this pool's GW1 XI: 2,000 draws -> 0.368, 8,000 -> 0.179,
+// 12,000 -> 0.138, 20,000 -> 0.117. Error falls as sqrt(N), so past ~12k the
+// number stops buying anything. Cost, median of 7 runs in headless Chromium
+// on the build box, bench-aware (15 draws per simulated week, not 11):
+// 2,000 -> 16ms, 8,000 -> 61ms, 12,000 -> 90ms, 20,000 -> 151ms, 40,000 -> 304ms.
+// _renderHeroSparkline runs on EVERY pitch paint (four timed calls on load, a
+// debounced MutationObserver, and every resize), so 20,000 would put a 151ms
+// block on this box — roughly half a second on a mid-range phone — on the
+// critical path of a hydrating pitch. That is janky, and the wobble it buys
+// over 12,000 is 0.02 of a point. 12,000 it is: ~90ms once, and the memo below
+// makes every repeat paint free, so the page does LESS total simulation work
+// than it did at 2,000 uncached.
+var _APEX_SIM_DRAWS = 12000;
+var _apexSimMemo = null;
+function _apexSimCached(xi, capId, idx, n, bench, vcId) {
+  try {
+    var k = idx + '|' + n + '|' + capId + '|' + (vcId == null ? '-' : vcId)
+          + '|' + xi.map(function (p) { return p.id; }).join(',')
+          + '|' + (bench ? bench.map(function (p) { return p.id; }).join(',') : '-');
+    // The dice are seeded on idx alone, so the key must also notice a change in
+    // the DATA — an xMins override rewrites xp_per_gw under the same player ids
+    // and would otherwise be served a stale curve.
+    var sx = 0, i;
+    if (typeof _xpAt === 'function') {
+      for (i = 0; i < xi.length; i++) sx += _xpAt(xi[i], idx);
+      if (bench) for (i = 0; i < bench.length; i++) sx += _xpAt(bench[i], idx);
+    }
+    k += '|' + sx.toFixed(4);
+    if (_apexSimMemo && _apexSimMemo.k === k) return _apexSimMemo.v;
+    var v = _apexSimDist(xi, capId, idx, n, bench, vcId);
+    _apexSimMemo = { k: k, v: v };
+    return v;
+  } catch (_eMc) { return _apexSimDist(xi, capId, idx, n, bench, vcId); }
+}
+// Option D, the layout Marcus picked (REFERENCE_optionD.html, card D): curve
+// left, four stats stacked and right-aligned, a vertical rule standing in the
+// curve, ticks along the bottom, download / help buttons down the left edge.
+// Three deliberate departures from that mock:
+//   1. the product's own green ramp (#1D9E75), never the rival's orange —
+//      that was only in the mock so the two could be compared like for like;
+//   2. the rule is the MEDIAN and says so. The rival's rule is a crowd
+//      average. Nobody has played GW1, so we do not have one and will not
+//      invent one;
+//   3. the x-axis is fitted to the simulated range (0.5th–99.5th percentile,
+//      snapped out to a round tick), not the mock's fixed 0–150, two thirds
+//      of which is empty.
+function _apexOptDHtml(d, gwLabel, headlineE) {
+  var W = 620, H = 176, ml = 10, mr = 10, mb = 30, mt = 18;
+  var lo = d.lo, hi = d.hi, rng = Math.max(1, hi - lo);
+  var step = (rng > 80) ? 20 : ((rng > 34) ? 10 : 5);
+  var XLO = Math.floor(lo / step) * step, XHI = Math.ceil(hi / step) * step;
+  if (XHI - XLO < step * 2) XHI = XLO + step * 2;
+  var x = function (v) { return ml + (v - XLO) / (XHI - XLO) * (W - ml - mr); };
+  var hh = (d.hist && d.hist.length) ? d.hist : [1], NB = hh.length;
+  var sm = [], i, k, j, acc, cnt2;
+  for (i = 0; i < NB; i++) {
+    acc = 0; cnt2 = 0;
+    for (k = -3; k <= 3; k++) { j = i + k; if (j >= 0 && j < NB) { acc += hh[j]; cnt2++; } }
+    sm.push(acc / cnt2);
+  }
+  var peak = 1e-9;
+  for (i = 0; i < NB; i++) if (sm[i] > peak) peak = sm[i];
+  var y = function (p) { return mt + (1 - p / peak) * (H - mt - mb); };
+  var y0 = y(0);
+  var path = 'M ' + x(lo).toFixed(1) + ' ' + y0.toFixed(1);
+  for (i = 0; i < NB; i++) path += ' L ' + x(lo + (i + 0.5) * (hi - lo) / NB).toFixed(1) + ' ' + y(sm[i]).toFixed(1);
+  path += ' L ' + x(hi).toFixed(1) + ' ' + y0.toFixed(1);
+  var mx = x(d.median), ry = (y0 - 7).toFixed(1), rx = (mx - 6).toFixed(1);
+  var s = '';
+  s += '<svg class="apex-optd-svg" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="xMidYMid meet"'
+     + ' xmlns="http://www.w3.org/2000/svg" role="img" aria-label="' + gwLabel
+     + ' simulated score distribution. Mean ' + d.mean.toFixed(1) + ', median ' + d.median.toFixed(1) + ' points.">';
+  s += '<path d="' + path + ' Z" fill="var(--apexd-g1)"/>';
+  s += '<path d="' + path + '" fill="none" stroke="var(--apexd-g5)" stroke-width="1.8" stroke-linejoin="round"/>';
+  s += '<line x1="' + ml + '" x2="' + (W - mr) + '" y1="' + y0.toFixed(1) + '" y2="' + y0.toFixed(1) + '" stroke="#e2ddd3" stroke-width="1"/>';
+  for (var v = XLO; v <= XHI + 1e-9; v += step) {
+    s += '<text class="apex-optd-ax" x="' + x(v).toFixed(1) + '" y="' + (y0 + 17).toFixed(1) + '" text-anchor="middle">' + Math.round(v) + '</text>';
+  }
+  s += '<line x1="' + mx.toFixed(1) + '" x2="' + mx.toFixed(1) + '" y1="' + (mt - 9) + '" y2="' + y0.toFixed(1) + '" stroke="var(--apexd-g6)" stroke-width="1.2"/>';
+  s += '<text class="apex-optd-rule" x="' + rx + '" y="' + ry + '" transform="rotate(-90 ' + rx + ' ' + ry + ')">median ' + d.median.toFixed(1) + '</text>';
+  s += '</svg>';
+  var pc = function (p) { return (p * 100).toFixed(1) + '%'; };
+  var h = '';
+  h += '<div class="va-range apex-optd-wrap">';
+  h +=   '<div class="va-range-head"><span class="va-range-title">' + gwLabel + ' range · '
+     +   d.floor.toFixed(1) + '–' + d.ceiling.toFixed(1) + '</span><span class="va-range-pill">Live</span></div>';
+  h +=   '<div class="apex-optd">';
+  h +=     '<div class="apex-optd-icons">';
+  h +=       '<button type="button" class="apex-optd-sq" onclick="_apexOptDDownload()" title="Download this distribution as CSV" aria-label="Download this distribution as CSV">&#8595;</button>';
+  h +=       '<button type="button" class="apex-optd-sq apex-optd-rd" onclick="_apexOptDHelp(this)" title="How to read this" aria-label="How to read this chart" aria-expanded="false">?</button>';
+  h +=     '</div>';
+  h +=     '<div class="apex-optd-chart">' + s + '</div>';
+  h +=     '<div class="apex-optd-stats">';
+  h +=       '<div><span>mean</span><b>' + d.mean.toFixed(1) + ' pts</b></div>';
+  h +=       '<div><span>40+ pts</span><b>' + pc(d.p40) + '</b></div>';
+  h +=       '<div><span>60+ pts</span><b>' + pc(d.p60) + '</b></div>';
+  h +=       '<div><span>80+ pts</span><b>' + pc(d.p80) + '</b></div>';
+  h +=     '</div>';
+  h +=   '</div>';
+  h +=   '<div class="apex-optd-help" hidden>' + (d.n || 0).toLocaleString() + ' simulated gameweeks from your fifteen, '
+     +   'autosubs included — so the mean already carries the bench cover that used to be printed under the total. '
+     +   'The rule is your <b>median</b>: half the simulated weeks land either side of it. It is not a crowd average — '
+     +   'nobody has played ' + (gwLabel || 'this gameweek') + ' yet, so there is nothing to average.</div>';
+  h +=   '<div class="va-range-foot">' + (d.n || 0).toLocaleString() + ' simulated gameweeks · autosubs included</div>';
+  h += '</div>';
+  return h;
+}
+window._apexOptDHelp = function (btn) {
+  try {
+    var box = btn.closest('.apex-optd-wrap').querySelector('.apex-optd-help');
+    if (!box) return;
+    var open = box.hasAttribute('hidden');
+    if (open) box.removeAttribute('hidden'); else box.setAttribute('hidden', '');
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  } catch (_eH) {}
+};
+window._apexOptDDownload = function () {
+  try {
+    var d = window._apexOptDLast;
+    if (!d) return;
+    var rows = ['metric,value', 'draws,' + d.n, 'mean,' + d.mean.toFixed(4),
+                'median,' + d.median.toFixed(4), 'p10_floor,' + d.floor.toFixed(4),
+                'p90_ceiling,' + d.ceiling.toFixed(4), 'pct_40_plus,' + (d.p40 * 100).toFixed(2),
+                'pct_60_plus,' + (d.p60 * 100).toFixed(2), 'pct_80_plus,' + (d.p80 * 100).toFixed(2),
+                '', 'bin_low,bin_high,share'];
+    var NB = (d.hist || []).length, w = (d.hi - d.lo) / (NB || 1);
+    for (var i = 0; i < NB; i++) {
+      rows.push((d.lo + i * w).toFixed(2) + ',' + (d.lo + (i + 1) * w).toFixed(2) + ',' + d.hist[i].toFixed(6));
+    }
+    var blob = new Blob([rows.join('\n')], { type: 'text/csv' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'apex_gw_distribution.csv';
+    document.body.appendChild(a); a.click();
+    setTimeout(function () { try { URL.revokeObjectURL(a.href); a.remove(); } catch (_e2) {} }, 0);
+  } catch (_eD) {}
+};
 // the one place a preset's NAME is spoken back to the user outside the buttons.
 const _HERO_PRESET_LABEL = {
   balanced: 'Model optimal', high: 'Punt', low: 'Template', diff: 'Differential',
@@ -18884,37 +19214,30 @@ function _renderHeroSparkline() {
       E = (GW_XI_BASE[idx] || 0) + ((GW_CAP_XP || [])[idx] || 0);
     }
     if (!(E > 0)) { sp.innerHTML = ''; return; }
-    // --- APEX_FIX_AUG06B_RANGE_INCLUDES_COVER (2026-08-06) -------------------------
-    // The HEADLINE is getTotal + bench cover (APEX-BENCH-COVER-v3, Marcus
-    // 2026-08-04: "fold it into the big number like the rival tools do").
-    // This band was pinned to getTotal ALONE, so the green number sat above
-    // the middle of its own range by exactly the cover -- Marcus spotted it:
-    // headline 60.8, range 40.8-78.8, midpoint 59.8. Two numbers on one card
-    // measuring different things.
-    // Same guard as the headline (_apexRenderBenchCover): cover is 0 on a
-    // Bench Boost week because the bench is already inside the total there.
-    // NOTE this shifts the band; it does not widen it. The simulation runs on
-    // the XI only, so autosub VARIANCE is still unmodelled -- right centre,
-    // unchanged width. Better than a band centred on a number we do not show.
-    try {
-      var _gwHereR = (tm.gw_range && tm.gw_range[idx] != null) ? tm.gw_range[idx] : null;
-      var _bbSelR = (document.getElementById('sel-bb') || {}).value;
-      var _bbOnR = (_bbSelR && _gwHereR != null && parseInt(_bbSelR) === _gwHereR);
-      var _covR = _bbOnR ? 0
-                : ((typeof _apexBenchCoverEv === 'function') ? (_apexBenchCoverEv(idx) || 0) : 0);
-      if (isFinite(_covR)) E = E + _covR;
-    } catch (_eCovR) {}
-    // --- end APEX_FIX_AUG06B_RANGE_INCLUDES_COVER ---------------------------------
-    // Real distribution from the live XI; centre it on the headline so the
-    // green number stays the "expected". Falls back to a light symmetric band
-    // only if XI / component data isn't available (cold public load).
+    // --- APEX_FIX_AUG06B_RANGE_INCLUDES_COVER (2026-08-06), RETIRED by
+    // --- APEX_FIX_AUG07B_OPTD -----------------------------------------------
+    // AUG06B added the bench cover to E so the band's centre matched a headline
+    // that was, at the time, getTotal + cover. APEX_FIX_AUG07_F2 has since put
+    // the headline back to getTotal ALONE and disclosed the cover on its own
+    // line, so this block had been centring the band on a number the page no
+    // longer shows. Both are moot now: the sim brings substitutes on, so the
+    // cover is INSIDE the distribution, and option D centres nothing on E —
+    // the curve, the median rule, the four thresholds and the "GWn range" head
+    // are all read off one dist object, so no two of them can disagree about
+    // what was simulated. E survives only as the "is there anything to draw"
+    // guard above and as the pre-option-D fallback below.
+    // Real distribution from the live XI AND THE BENCH (APEX_FIX_AUG07B_AUTOSUB):
+    // the honest expected score of the fifteen you own, not of eleven names
+    // that cannot blank. Falls back to nothing at all if XI / component data
+    // isn't available (cold public load).
     let floor, ceiling, p60 = null;
     const _xi = (typeof _xiPlayers !== 'undefined' && Array.isArray(_xiPlayers) && _xiPlayers.length) ? _xiPlayers : null;
     const _cap = (typeof _capId !== 'undefined') ? _capId : null;
-    const dist = _xi ? _apexSimDist(_xi, _cap, idx, 2000) : null;
+    const _bench = (typeof _benchPlayers !== 'undefined' && Array.isArray(_benchPlayers) && _benchPlayers.length) ? _benchPlayers : null;
+    const _vc = (typeof _vcId !== 'undefined') ? _vcId : null;
+    const dist = _xi ? _apexSimCached(_xi, _cap, idx, _APEX_SIM_DRAWS, _bench, _vc) : null;
     if (dist && isFinite(dist.mean) && dist.ceiling > dist.floor) {
-      const offset = E - dist.mean;        // pin distribution mean to headline
-      floor = dist.floor + offset; ceiling = dist.ceiling + offset; p60 = dist.p60;
+      floor = dist.floor; ceiling = dist.ceiling; p60 = dist.p60;
     } else {
       // 2026-07-25: this branch used to FABRICATE the band — floor = E * 0.86,
       // ceiling = E * 1.20 — and then render it with a "Live" pill above it and
@@ -18928,8 +19251,18 @@ function _renderHeroSparkline() {
       sp.innerHTML = '';
       return;
     }
-    floor = Math.min(floor, E - 0.1); ceiling = Math.max(ceiling, E + 0.1);
     const gwLabel = (tm.gw_range && tm.gw_range[idx] != null) ? ('GW' + tm.gw_range[idx]) : '';
+    // APEX_FIX_AUG07B_OPTD: option D replaces the hump / track / three-cell
+    // panel outright. Guarded so a context without the renderer still paints
+    // the old panel instead of throwing inside the hero.
+    if (typeof _apexOptDHtml === 'function') {
+      try {
+        sp.innerHTML = _apexOptDHtml(dist, gwLabel, E);
+        try { window._apexOptDLast = dist; } catch (_eSt) {}
+        return;
+      } catch (_eOd) {}
+    }
+    floor = Math.min(floor, E - 0.1); ceiling = Math.max(ceiling, E + 0.1);
     // Map floor..ceiling onto track x = 20..340; expected dot sits proportionally.
     const span = Math.max(ceiling - floor, 0.001);
     const fr = Math.max(0, Math.min(1, (E - floor) / span));
@@ -29016,26 +29349,32 @@ function _apexRenderArmbandNote() {
 // line. Created next to the hero at render time so no template change is needed
 // and #gw-xp-val keeps its id (updateChipTotal, the blank-canvas dash writer and
 // the sparkline all still read it).
+// APEX_FIX_AUG07_F2_COVERLINE RETIRED by APEX_FIX_AUG07B_OPTD (2026-08-07).
+// The line read "+X.X bench cover (autosub safety net, not in the total
+// above)". It existed because the simulator could not bring a substitute on,
+// so the cover had to be DISCLOSED beside the total instead of being IN it.
+// _apexSimDist now rolls autosubs (APEX_FIX_AUG07B_AUTOSUB) and option D's
+// mean is that simulation's mean, so the cover is inside the number the user
+// reads. Printing it a second time, in a different unit, on the same card,
+// would now be a contradiction rather than a disclosure.
+//
+// Both functions are KEPT BY NAME so _apexRenderBenchCover's two call sites
+// need no edit at all, and the element is now REMOVED rather than merely
+// hidden: an earlier paint (or a stale bfcache restore) could otherwise leave
+// a node behind that nothing ever updates again.
+//
+// This retires the LINE only. F2's other half — #gw-xp-val going back to
+// getTotal() alone, with the cover NOT folded into it — is deliberately left
+// exactly as F2 left it: that is the number assets/apex_planner.js reads as
+// its planning baseline, and it is what getTotal and every chip surface agree
+// on. Restore the two bodies from git if the line ever needs to come back.
 function _apexBenchCoverLineEl() {
-  var _el = document.getElementById('apex-bench-cover-line');
-  if (_el) return _el;
-  var _hero = document.getElementById('gw-xp-val');
-  if (!_hero || !_hero.parentNode) return null;
-  _el = document.createElement('div');
-  _el.id = 'apex-bench-cover-line';
-  _el.style.cssText = 'display:none;font-size:.72rem;color:var(--muted);margin-top:2px;';
-  // appended to the hero block, so it sits BENEATH the number and its caption
-  // rather than between them.
-  _hero.parentNode.appendChild(_el);
-  return _el;
+  return document.getElementById('apex-bench-cover-line');
 }
 function _apexRenderBenchCoverLine(_cov, _off) {
   try {
     var _el = _apexBenchCoverLineEl();
-    if (!_el) return;
-    if (_off || !(+_cov > 0.05)) { _el.textContent = ''; _el.style.display = 'none'; return; }
-    _el.textContent = '+' + (+_cov).toFixed(1) + ' bench cover (autosub safety net, not in the total above)';
-    _el.style.display = '';
+    if (_el && _el.parentNode) _el.parentNode.removeChild(_el);
   } catch (_eBcl) {}
 }
 function _apexRenderBenchCover() {
@@ -31832,7 +32171,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW1</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1786114389-GW1-bd9e9f25</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1786120100-GW1-c1f3c68b</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
