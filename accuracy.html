@@ -274,7 +274,7 @@
   <section id="benchmarks">
     <h2>How Apex compares to the leading paid tools</h2>
     <p class="section-intro">
-      FPL Review and Solio are the benchmark paid projection tools in the FPL community &mdash;
+      Tool A and Tool B are the two benchmark paid projection tools in the FPL community &mdash;
       the strongest competition we know of. Here is where Apex stands against them, measured
       on the same players, the same gameweeks, the same data. MAE is mean absolute error:
       the average size of the miss. Lower is better.
@@ -293,7 +293,7 @@
             <span class="bn-unit">MAE, pts</span>
           </div>
           <div class="bn">
-            <span class="bn-label">FPL Review</span>
+            <span class="bn-label">Tool A</span>
             <span class="bn-val">1.842</span>
             <span class="bn-unit">MAE, pts</span>
           </div>
@@ -302,32 +302,28 @@
           Paired difference <strong>+0.038</strong> points, 95% CI
           <strong>[−0.004, +0.085]</strong>. The interval spans zero:
           <strong>statistically indistinguishable</strong>. We do not claim to beat
-          Review on points &mdash; we claim to match a leading paid tool, for free.
+          Tool A on points &mdash; we claim to match a leading paid tool, for free.
         </p>
       </div>
 
       <div class="bench-card">
         <div class="bench-head">
           <div class="bench-title">Expected minutes</div>
-          <span class="badge badge-coral">REVIEW LEADS</span>
+          <span class="badge badge-coral">BEING RE-MEASURED</span>
         </div>
         <div class="bench-nums">
           <div class="bn">
-            <span class="bn-label">Apex</span>
-            <span class="bn-val">24.41</span>
-            <span class="bn-unit">MAE, mins</span>
-          </div>
-          <div class="bn">
-            <span class="bn-label">FPL Review</span>
-            <span class="bn-val">20.65</span>
-            <span class="bn-unit">MAE, mins</span>
+            <span class="bn-label">Verdict</span>
+            <span class="bn-val">Tool A led</span>
+            <span class="bn-unit">at the June 2026 benchmark</span>
           </div>
         </div>
         <p class="bench-note">
-          Review is genuinely better at predicting minutes. The gap is concentrated in
-          <strong>team-news rows</strong> &mdash; late injury and lineup calls &mdash; which is
-          exactly what the 2026/27 news pipeline is built to close. Published because
-          honest beats flattering.
+          At the June 2026 benchmark Tool A was clearly better than Apex at predicting
+          minutes, and we published that. The minutes model has been rebuilt since, so
+          the old figure no longer describes what ships &mdash; quoting it either way
+          would mislead. A fresh, point-in-time number lands in the live forward test
+          below from GW1. Published because honest beats flattering.
         </p>
       </div>
 
@@ -340,7 +336,7 @@
           <div class="bn">
             <span class="bn-label">Verdict</span>
             <span class="bn-val">Best of 3</span>
-            <span class="bn-unit">Apex / Review / Solio</span>
+            <span class="bn-unit">Apex / Tool A / Tool B</span>
           </div>
         </div>
         <p class="bench-note">
@@ -351,7 +347,7 @@
       </div>
 
     </div>
-    <p class="source-note">Validated 2026-06-10 · 1,707 player-gameweek sample (Apex_vs_Review_test_v2.xlsx) · uncertainty via cluster bootstrap, 10,000 resamples by gameweek.</p>
+    <p class="source-note">Validated 2026-06-10 · 1,707 player-gameweek sample (held-out benchmark workbook) · uncertainty via cluster bootstrap, 10,000 resamples by gameweek.</p>
   </section>
 
   <!-- 2025/26 season tracker — generated from outputs/accuracy_history.json -->
@@ -436,8 +432,8 @@
           <tr>
             <th>GW</th>
             <th>Apex MAE</th>
-            <th>Review MAE</th>
-            <th>Solio MAE</th>
+            <th>Tool A MAE</th>
+            <th>Tool B MAE</th>
             <th>Closest</th>
           </tr>
         </thead>
@@ -450,8 +446,8 @@
     </div>
     <p class="table-foot">
       Scored by scripts/forward_test/forward_log.py &mdash; snapshot before the deadline,
-      score after the final whistle, publish either way. Apex and Review are compared on
-      the shared set of players both tools project. &dagger;&nbsp;Solio has no bulk export,
+      score after the final whistle, publish either way. Apex and Tool A are compared on
+      the shared set of players both tools project. &dagger;&nbsp;Tool B has no bulk export,
       so it is scored on a hand-transcribed weekly sample (~30 template players) &mdash;
       shown for reference, never decides the Closest column.
     </p>
