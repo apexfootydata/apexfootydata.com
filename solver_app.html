@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="1" data-built-at="2026-08-14T13:38:01">
+<meta name="apex-gw" content="1" data-built-at="2026-08-14T14:51:49">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
@@ -37,7 +37,7 @@
 })();
 </script>
 <meta http-equiv="Pragma" content="no-cache">
-<meta name="apex-build" content="20260814-133801">
+<meta name="apex-build" content="20260814-145149">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — FPL Apex</title>
 <meta name="description" content="Plan FPL transfers, chips, and Free Hit squads. Live xG-based projections, a rival head-to-head simulator, and a mini-league table. Free FPL tool.">
@@ -2566,7 +2566,7 @@ body {
   background: rgba(255,255,255,0.1);
 }
 
-/* ── Apex / Review compare toggle (diagnostic, ?compare=1 only) ─────────── */
+/* ── Apex / Tool A compare toggle (diagnostic, ?compare=1 only) ─────────── */
 .va-strip-toggle .va-toggle {
   display: inline-flex;
   border: 1px solid rgba(255,255,255,0.16);
@@ -2594,11 +2594,11 @@ body {
   background: var(--brand, var(--accent));
   color: #ffffff;
 }
-/* Tint the body subtly when Review is active so the user always knows */
-body.compare-review .va-card-hero {
+/* Tint the body subtly when Tool A is active so the user always knows */
+body.compare-alt .va-card-hero {
   border-color: rgba(96,165,250,0.32);
 }
-body.compare-review .va-card-hero::before {
+body.compare-alt .va-card-hero::before {
   content: 'COMPARISON PROJECTIONS';
   position: absolute;
   top: 8px;
@@ -6220,12 +6220,12 @@ html.apex-offseason #view-landing .hero-sub::after {
         <span class="va-strip-label">Budget</span>
         <span class="va-strip-val" id="squad-value-val">£0.0m</span>
       </div>
-      <!-- Apex/Review compare toggle — hidden unless ?compare=1 is in URL -->
+      <!-- Apex/Tool A compare toggle — hidden unless ?compare=1 is in URL -->
       <div id="va-compare-toggle" class="va-strip-cell va-strip-toggle" style="display:none;" title="Diagnostic: flip the pitch xP labels and player pool to the comparison projection source. Solve/WC/FH always use Apex.">
         <span class="va-strip-label">Projection</span>
         <div class="va-toggle">
           <button type="button" id="va-toggle-apex" class="va-toggle-btn va-toggle-active" onclick="_setProjectionSource('apex')">APEX</button>
-          <button type="button" id="va-toggle-review" class="va-toggle-btn" onclick="_setProjectionSource('review')">COMPARE</button>
+          <button type="button" id="va-toggle-compare" class="va-toggle-btn" onclick="_setProjectionSource('compare')">COMPARE</button>
         </div>
       </div>
     </section>
@@ -7666,7 +7666,7 @@ html.apex-offseason #view-landing .hero-sub::after {
       '</div></div>';
   };
 
-  // Deadline lockout (Review-style). TRUE only when the seam is ON, the tier
+  // Deadline lockout (Tool A-style). TRUE only when the seam is ON, the tier
   // carries a positive lockout window, the next FPL deadline is known, and we
   // are NOW INSIDE that window: deadline − lockoutMins ≤ now < deadline.
   // 2026-07-07 audit fix: the missing upper bound meant that once locked, a
@@ -14609,7 +14609,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 <script>
 // ═══════════════════════════════════════════════════════════════════════════
 // APEX DRAFTS (2026-07-07, maths+UX pass 2026-07-07 eve) — named snapshots of
-// the working plan + a side-by-side comparison table (the Review-Premium
+// the working plan + a side-by-side comparison table (the Tool A-Premium
 // "10 drafts + cross-draft eval" feature, built on Apex's existing plan blob).
 // User-facing wording is now "Saved plans" ("drafts" collides with FPL's
 // official Draft game mode); internal names/API keep "drafts".
@@ -16611,7 +16611,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1786711081-GW1-478469be";
+const BUILD_VERSION = "1786715509-GW1-741396bb";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = false;
@@ -16619,19 +16619,19 @@ window.APEX_SQUAD_ROLLBACK = false;
 let FPL_ID = null;
 let SQUAD_DATA = [];
 </script>
-<script src="/apex_pool.js?v=1786711081-GW1-478469be"></script>
+<script src="/apex_pool.js?v=1786715509-GW1-741396bb"></script>
 <script>
 const PLAYER_NAMES = {"1": "Raya", "2": "Arrizabalaga", "3": "Meslier", "4": "Gabriel", "5": "J.Timber", "6": "Saliba", "7": "Lewis-Skelly", "8": "Calafiori", "9": "Hincapie", "10": "White", "11": "Mosquera", "12": "Saka", "13": "Rice", "14": "Eze", "15": "\u00d8degaard", "16": "Madueke", "17": "Merino", "18": "Martinelli", "19": "Zubimendi", "20": "Dowman", "22": "Nwaneri", "23": "F\u00e1bio Vieira", "24": "Nelson", "25": "Gy\u00f6keres", "26": "Havertz", "27": "G.Jesus", "452": "Bruno G.", "557": "Tzolis", "28": "Martinez", "29": "M.Bizot", "30": "Digne", "31": "Konsa", "32": "Cash", "33": "Mings", "34": "Pau", "35": "Bogarde", "36": "Maatsen", "37": "Lindel\u00f6f", "38": "A.Garc\u00eda", "39": "Nedeljkovic", "41": "Buend\u00eda", "44": "Bailey", "45": "McGinn", "46": "Barkley", "47": "Kamara", "48": "Onana", "49": "Iling Jr", "50": "Burrowes", "51": "George Hemmings", "52": "Alysson", "53": "Manzambi", "54": "Gomes", "55": "Watkins", "56": "Abraham", "160": "Garnacho", "582": "Madjo", "57": "Petrovi\u0107", "58": "Forster", "59": "Dennis", "60": "Hill", "61": "Truffert", "62": "Diakit\u00e9", "63": "Milosavljevi\u0107", "64": "Smith", "65": "J.Araujo", "66": "Soler", "67": "Rayan", "68": "Tavernier", "69": "Scott", "70": "Kluivert", "71": "Cook", "72": "Gannon-Doak", "73": "Adams", "74": "Brooks", "75": "Christie", "76": "T\u00f3th.A", "77": "Adli", "78": "Kroupi.Jr", "79": "Evanilson", "80": "Enes \u00dcnal", "81": "Rodr\u00edguez", "566": "Silva", "573": "Sanchez", "82": "Kelleher", "83": "Valdimarsson", "84": "Collins", "85": "Van den Berg", "86": "Lewis-Potter", "87": "Ajer", "88": "Kayode", "89": "Henry", "90": "Hickey", "91": "Pinnock", "92": "Ji-soo", "93": "Schuster", "94": "Schade", "95": "O.Dango", "96": "Damsgaard", "97": "Jensen", "98": "Janelt", "99": "Milambo", "100": "Carvalho", "102": "Yarmoliuk", "103": "Dasilva", "105": "Anthony", "106": "Thiago", "107": "Furo", "108": "Wilson", "565": "Sangar\u00e9", "109": "Verbruggen", "111": "Steele", "113": "F.Kad\u0131o\u011flu", "114": "Boscagli", "115": "De Cuyper", "116": "Dunk", "117": "Coppola", "118": "Igor", "119": "Costinha", "120": "Svoboda", "121": "Mitoma", "122": "Minteh", "123": "Hinshelwood", "124": "Gro\u00df", "125": "Georginio", "126": "O'Riley", "127": "Gomez", "128": "Buonanotte", "129": "Ayari", "130": "Wieffer", "131": "Baleba", "132": "Howell", "133": "Watson", "134": "Oriola", "135": "Yohanna", "137": "Tzimas", "138": "Kostoulas", "139": "Ferguson", "328": "Struijk", "504": "Vuskovic", "40": "Rogers", "101": "Henderson", "136": "Welbeck", "140": "S\u00e1nchez", "141": "J\u00f6rgensen", "142": "James", "143": "Chalobah", "144": "Gusto", "145": "Fofana", "146": "B.Badiashile", "147": "Tosin", "148": "Hato", "149": "Colwill", "150": "M.Sarr", "151": "Acheampong", "152": "Palestra", "153": "Disasi", "154": "Palmer", "155": "Enzo", "156": "Neto", "157": "Est\u00eav\u00e3o", "158": "Gittens", "159": "Caicedo", "161": "Lavia", "163": "D.Essugo", "164": "Quenda", "165": "Jo\u00e3o Pedro", "166": "N.Jackson", "167": "Delap", "168": "Marc Guiu", "169": "Mheuka", "170": "Emegha", "200": "Lacroix", "560": "Penders", "561": "Anselmino", "568": "Barco", "578": "Mudryk", "583": "Chavarria", "104": "Onyeka", "110": "Rushworth", "171": "Dovin", "172": "Wilson", "173": "Thomas", "174": "Kitching", "175": "van Ewijk", "176": "Dasilva", "177": "Kesler-Hayden", "178": "Bidwell", "179": "Latibeaudiere", "180": "Woolfenden", "181": "Brau", "182": "Amenda", "183": "Rudoni", "184": "Grimes", "185": "Sakamoto", "186": "Mason-Clark", "187": "Eccles", "188": "Torp", "189": "Shepherd", "190": "Tchaouna", "191": "Borges Rodrigues", "192": "Andrews", "193": "Wright", "194": "Thomas-Asante", "195": "Simms", "196": "Markelo", "197": "Bassette", "575": "Yirenkyi", "584": "Hamer", "42": "Guessand", "198": "Henderson", "199": "Benitez", "201": "Mu\u00f1oz", "202": "Richards", "203": "Canvot", "204": "Mitchell", "205": "Sosa", "206": "Chadi Riad", "207": "Mingueza", "208": "Sarr", "210": "Wharton", "211": "Yeremy", "212": "Hughes", "213": "Lerma", "214": "Kamada", "215": "Devenny", "216": "Esse", "217": "M.Fran\u00e7a", "218": "Doucour\u00e9", "219": "J.Rak-Sakyi", "220": "Cardines", "221": "Drakes-Thomas", "222": "Strand Larsen", "223": "Mateta", "224": "Nketiah", "225": "Uche", "241": "McNeil", "555": "Matthews", "577": "Tomiyasu", "21": "N\u00f8rgaard", "209": "Johnson", "226": "Pickford", "227": "Travers", "228": "King", "229": "Tarkowski", "230": "Branthwaite", "231": "Keane", "232": "O'Brien", "233": "Mykolenko", "234": "Patterson", "235": "Aznou", "236": "Dewsbury-Hall", "237": "Ndiaye", "239": "Garner", "240": "Iroegbunam", "242": "George", "243": "Alcaraz", "244": "Armstrong", "245": "Dibling", "246": "R\u00f6hl", "247": "Hackney", "248": "Beto", "249": "Barry", "250": "Leno", "251": "Lecomte", "252": "McNally", "253": "Andersen", "254": "Robinson", "255": "J.Cuenca", "256": "Tete", "257": "Bassey", "258": "Castagne", "261": "Iwobi", "262": "Smith Rowe", "263": "Kevin", "264": "Bobb", "265": "Berge", "266": "Cairney", "268": "King", "269": "Sessegnon", "270": "Reed", "271": "Muniz", "272": "Kusi-Asare", "569": "Garc\u00eda", "570": "Palacios", "580": "Charles", "273": "Phillips", "274": "Butland", "275": "Cartwright", "276": "Lo-Tutala", "277": "Egan", "278": "Hughes", "279": "Ajayi", "280": "Coyle", "281": "Drameh", "282": "Giles", "283": "Jacob", "284": "McCarthy", "285": "McNair", "286": "Belloumi", "287": "Millar", "288": "Dowell", "289": "Crooks", "290": "Slater", "291": "Matazo", "292": "\u00d6m\u00fcr", "293": "Kamara", "294": "Zambrano", "295": "McBurnie", "296": "Akintola", "297": "Gyabi", "298": "Destan", "299": "Burstow", "556": "Targett", "563": "Morita", "572": "Tzolakis", "574": "Hjert\u00f8-Dahl", "576": "Stroud", "259": "Diop", "267": "Luki\u0107", "300": "Walton", "301": "Palmer", "302": "Button", "303": "Kipr\u00e9", "304": "O'Shea", "305": "Davis", "306": "Greaves", "307": "Johnson", "308": "Furlong", "309": "N\u00fa\u00f1ez", "310": "Matusiwa", "311": "Burns", "312": "Taylor", "313": "Clarke", "314": "Ogbene", "315": "Fatawu", "316": "Emersonn", "317": "Hirst", "318": "Philogene", "319": "Szmodics", "320": "Akpom", "321": "Walle Egeli", "322": "Al-Hamadi", "323": "McAteer", "324": "Mehmeti", "554": "Van Oevelen", "562": "Maeda", "564": "Scherpen", "571": "Florentino", "260": "Wilson", "326": "Perri", "327": "Bijol", "329": "Rodon", "330": "Bogle", "331": "Gudmundsson", "332": "Justin", "333": "Bornauw", "334": "Muharemovi\u0107", "335": "Stach", "336": "Okafor", "337": "Aaronson", "338": "Ampadu", "339": "Longstaff", "340": "Gelhardt", "341": "Gnonto", "342": "Harrison", "343": "James", "344": "Gruev", "345": "Tanaka", "346": "Calvert-Lewin", "347": "Nmecha", "348": "Piroe", "349": "Mateo Joseph", "385": "Trafford", "350": "A.Becker", "351": "Mamardashvili", "352": "Woodman", "353": "Pecsi", "354": "Jaros", "355": "Davies", "356": "Virgil", "357": "Frimpong", "358": "Kerkez", "359": "Gomez", "360": "Bradley", "361": "Lucky", "362": "Jacquet", "363": "Leoni", "364": "Tsimikas", "365": "Ramsay", "366": "Wirtz", "367": "Gakpo", "368": "Szoboszlai", "369": "Ngumoha", "370": "Chiesa", "371": "Gravenberch", "372": "Mac Allister", "373": "C.Jones", "374": "Endo", "375": "Nyoni", "376": "Bajcetic", "377": "Munoz", "378": "McConnell", "379": "Isak", "380": "Ekitik\u00e9", "381": "Koumas", "382": "Danns", "383": "Elliott", "579": "Araujo", "238": "Grealish", "384": "Donnarumma", "386": "Bettinelli", "387": "O'Reilly", "388": "Gu\u00e9hi", "389": "Matheus N.", "390": "R\u00faben", "391": "Gvardiol", "392": "A\u00eft-Nouri", "393": "Khusanov", "394": "Alleyne", "395": "Lewis", "396": "Vitor Reis", "397": "Semenyo", "398": "Foden", "399": "Cherki", "400": "Doku", "401": "Marmoush", "402": "Rodrigo", "403": "Savinho", "404": "Reijnders", "405": "N.Gonzalez", "406": "Kova\u010di\u0107", "407": "Echeverri", "408": "Phillips", "409": "Mukasa", "410": "Monga", "411": "Haaland", "481": "Anderson", "43": "Tielemans", "162": "Andrey Santos", "325": "Darlow", "412": "Lammens", "413": "Bayindir", "414": "Heaton", "415": "Dorgu", "416": "De Ligt", "417": "Dalot", "418": "Maguire", "419": "Martinez", "420": "Yoro", "421": "Heaven", "422": "Mazraoui", "423": "Shaw", "424": "Amass", "425": "Fredricson", "426": "B.Fernandes", "427": "Mbeumo", "428": "Cunha", "429": "Rashford", "430": "Mount", "431": "Amad", "432": "Mainoo", "433": "Ugarte", "434": "J.Fletcher", "435": "Lacey", "436": "Collyer", "437": "Bendito Mantato", "438": "Fletcher", "439": "\u0160e\u0161ko", "440": "Zirkzee", "441": "Obi", "442": "Pope", "443": "Gillespie", "444": "Jaouen", "445": "Thiaw", "446": "Sch\u00e4r", "447": "Botman", "448": "Burn", "449": "Hall", "450": "Livramento", "451": "A.Murphy", "453": "Barnes", "454": "Elanga", "456": "J.Ramsey", "457": "J.Murphy", "458": "Joelinton", "459": "L.Miley", "460": "Willock", "461": "Tour\u00e9", "462": "Steur", "463": "Woltemade", "464": "Wissa", "465": "Osula", "466": "Neave", "559": "Bamba", "567": "Horn\u00ed\u010dek", "467": "Sels", "468": "John", "469": "N.Williams", "470": "Morato", "471": "Milenkovi\u0107", "472": "Murillo", "473": "Aina", "474": "Jair Cunha", "475": "Savona", "476": "O.Richards", "477": "Abbott", "478": "Netz", "479": "Bindon", "480": "Gibbs-White", "482": "Hudson-Odoi", "483": "Ndoye", "484": "Hutchinson", "485": "Bakwa", "486": "McAtee", "487": "Dominguez", "488": "Sangar\u00e9", "489": "Yates", "490": "Wood", "491": "Igor Jesus", "492": "Awoniyi", "493": "Kalimuendo", "558": "Schlager", "581": "Diomande", "112": "Van Hecke", "455": "Tonali", "494": "Vicario", "495": "Austin", "496": "Kinsky", "497": "Dubravka", "498": "Senesi", "499": "Pedro Porro", "500": "Romero", "501": "Danso", "502": "Robertson", "503": "Van de Ven", "505": "Spence", "506": "Udogie", "507": "Phillips", "508": "Davies", "509": "Byfield", "510": "Rowswell", "511": "Souza", "512": "Kudus", "513": "Xavi", "514": "Tel", "515": "Maddison", "516": "Bentancur", "517": "Odobert", "518": "P.M.Sarr", "519": "Gallagher", "520": "Bergvall", "521": "Kulusevski", "522": "Gray", "523": "Moore", "524": "Olusesi", "525": "Fernandes", "526": "Solanke", "527": "Richarlison", "528": "Scarlett", "529": "Roefs", "530": "Patterson", "531": "Ellborg", "532": "Ballard", "533": "Mukiele", "534": "Hume", "535": "Alderete", "536": "Reinildo", "537": "Seelt", "538": "Hjelde", "539": "O'Nien", "540": "Masuaku", "541": "Meunier", "542": "E.Le F\u00e9e", "543": "Diarra", "544": "Xhaka", "545": "Sadiki", "546": "Adingra", "547": "Mundle", "548": "Rigg", "549": "Talbi", "550": "Jocelin.T", "551": "Angulo", "552": "Brobbey", "553": "Isidor"};
 const TRANSFER_RECS = [];
 let WC_SQUADS = {};
 let FH_SQUADS = {};
-// V2 compare toggle — Review-pool variants of WC/FH baked squads. Toggle
+// V2 compare toggle — Tool A-pool variants of WC/FH baked squads. Toggle
 // handler swaps WC_SQUADS / FH_SQUADS contents in-place on flip. Stays
 // hidden from public visitors (gated behind ?compare=1 + localStorage flag).
 const _APEX_WC_SQUADS_BACKUP = JSON.parse(JSON.stringify(WC_SQUADS));
 const _APEX_FH_SQUADS_BACKUP = JSON.parse(JSON.stringify(FH_SQUADS));
-const REVIEW_WC_SQUADS = {};
-const REVIEW_FH_SQUADS = {};
+const COMPARE_WC_SQUADS = {};
+const COMPARE_FH_SQUADS = {};
 let TEAM_META = {"team_name": "", "manager": "", "overall_rank": 0, "bank": 0.0, "free_transfers": 1, "squad_value": 0.0, "budget": 100.0, "start_gw": 1, "gw_range": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19], "gw_labels": ["GW1", "GW2", "GW3", "GW4", "GW5", "GW6", "GW7", "GW8", "GW9", "GW10", "GW11", "GW12", "GW13", "GW14", "GW15", "GW16", "GW17", "GW18", "GW19"], "dgw_teams_by_gw": {}, "bgw_teams_by_gw": {}, "deadlines_by_gw": {"1": 1787333400, "2": 1787938200, "3": 1788543000, "4": 1789216200, "5": 1789752600, "6": 1791635400, "7": 1792240200, "8": 1792845000, "9": 1793453400, "10": 1794058200, "11": 1795267800, "12": 1795872600, "13": 1796236200, "14": 1796477400, "15": 1797082200, "16": 1797687000, "17": 1798291800, "18": 1798655400, "19": 1798896600, "20": 1799260200, "21": 1800106200, "22": 1800711000, "23": 1801315800, "24": 1801920600, "25": 1802284200, "26": 1803130200, "27": 1803735000, "28": 1804098600, "29": 1804944600, "30": 1805549400, "31": 1807360200, "32": 1807965000, "33": 1808569800, "34": 1809174600, "35": 1809779400, "36": 1810384200, "37": 1811075400, "38": 1811683800}, "season": "2026/27"};
 // ── APEX-DEADLINE-GUARD-v1 (2026-07-28, audit K1) ────────────────────────
 // The pre-GW1 "unlimited free transfers" window is opened by _ppUnlimitedGw
@@ -16768,10 +16768,10 @@ const INFLIGHT_GW = 0;
 // to these instead. Local mode bakes both for diagnostic use.
 const APEX_FR_SCALE = 1.0;
 const INFLIGHT_XP_BY_ID = {};
-// REVIEW_XP_LOOKUP — for the Apex↔Review compare toggle (?compare=1).
+// COMPARE_XP_LOOKUP — for the Apex↔Tool A compare toggle (?compare=1).
 // {fpl_id: [xp_gw0, xp_gw1, ...]} matching POOL_DATA[i].xp_per_gw shape.
-// When toggle = 'review', POOL_DATA + SQUAD_DATA xP fields swap to these.
-const REVIEW_XP_LOOKUP = {};
+// When toggle = 'compare', POOL_DATA + SQUAD_DATA xP fields swap to these.
+const COMPARE_XP_LOOKUP = {};
 // {gw: {canonical_team_name: "OPP (H)"}} — used by _shirtHtml to show
 // each player's upcoming opponent + venue under their name on the pitch.
 const FIXTURES_BY_GW_TEAM = {"1": {"Arsenal": "COV (H)", "Coventry": "ARS (A)", "Hull": "MUN (H)", "Manchester United": "HUL (A)", "Everton": "CRY (H)", "Crystal Palace": "EVE (A)", "Ipswich": "SUN (H)", "Sunderland": "IPS (A)", "Nottingham Forest": "LEE (H)", "Leeds": "NFO (A)", "Brentford": "TOT (H)", "Tottenham": "BRE (A)", "Brighton": "AVL (H)", "Aston Villa": "BHA (A)", "Manchester City": "BOU (H)", "Bournemouth": "MCI (A)", "Newcastle United": "LIV (H)", "Liverpool": "NEW (A)", "Fulham": "CHE (H)", "Chelsea": "FUL (A)"}, "2": {"Crystal Palace": "MCI (H)", "Manchester City": "CRY (A)", "Liverpool": "NFO (H)", "Nottingham Forest": "LIV (A)", "Bournemouth": "EVE (H)", "Everton": "BOU (A)", "Coventry": "HUL (H)", "Hull": "COV (A)", "Tottenham": "NEW (H)", "Newcastle United": "TOT (A)", "Chelsea": "BHA (H)", "Brighton": "CHE (A)", "Leeds": "BRE (H)", "Brentford": "LEE (A)", "Sunderland": "FUL (H)", "Fulham": "SUN (A)", "Manchester United": "IPS (H)", "Ipswich": "MUN (A)", "Aston Villa": "ARS (H)", "Arsenal": "AVL (A)"}, "3": {"Ipswich": "LIV (H)", "Liverpool": "IPS (A)", "Newcastle United": "BOU (H)", "Bournemouth": "NEW (A)", "Brentford": "SUN (H)", "Sunderland": "BRE (A)", "Brighton": "LEE (H)", "Leeds": "BHA (A)", "Fulham": "CRY (H)", "Crystal Palace": "FUL (A)", "Manchester City": "COV (H)", "Coventry": "MCI (A)", "Nottingham Forest": "TOT (H)", "Tottenham": "NFO (A)", "Hull": "AVL (H)", "Aston Villa": "HUL (A)", "Everton": "MUN (H)", "Manchester United": "EVE (A)", "Arsenal": "CHE (H)", "Chelsea": "ARS (A)"}, "4": {"Aston Villa": "NFO (H)", "Nottingham Forest": "AVL (A)", "Bournemouth": "BRE (H)", "Brentford": "BOU (A)", "Chelsea": "HUL (H)", "Hull": "CHE (A)", "Crystal Palace": "IPS (H)", "Ipswich": "CRY (A)", "Liverpool": "FUL (H)", "Fulham": "LIV (A)", "Tottenham": "EVE (H)", "Everton": "TOT (A)", "Sunderland": "ARS (H)", "Arsenal": "SUN (A)", "Coventry": "BHA (H)", "Brighton": "COV (A)", "Manchester United": "MCI (H)", "Manchester City": "MUN (A)", "Leeds": "NEW (H)", "Newcastle United": "LEE (A)"}, "5": {"Brentford": "CHE (H)", "Chelsea": "BRE (A)", "Tottenham": "AVL (H)", "Aston Villa": "TOT (A)", "Brighton": "ARS (H)", "Arsenal": "BHA (A)", "Everton": "IPS (H)", "Ipswich": "EVE (A)", "Leeds": "CRY (H)", "Crystal Palace": "LEE (A)", "Manchester City": "SUN (H)", "Sunderland": "MCI (A)", "Newcastle United": "HUL (H)", "Hull": "NEW (A)", "Nottingham Forest": "COV (H)", "Coventry": "NFO (A)", "Bournemouth": "LIV (H)", "Liverpool": "BOU (A)", "Fulham": "MUN (H)", "Manchester United": "FUL (A)"}, "6": {"Arsenal": "LEE (H)", "Leeds": "ARS (A)", "Aston Villa": "BRE (H)", "Brentford": "AVL (A)", "Chelsea": "BOU (H)", "Bournemouth": "CHE (A)", "Coventry": "NEW (H)", "Newcastle United": "COV (A)", "Crystal Palace": "NFO (H)", "Nottingham Forest": "CRY (A)", "Hull": "EVE (H)", "Everton": "HUL (A)", "Ipswich": "FUL (H)", "Fulham": "IPS (A)", "Liverpool": "MCI (H)", "Manchester City": "LIV (A)", "Manchester United": "TOT (H)", "Tottenham": "MUN (A)", "Sunderland": "BHA (H)", "Brighton": "SUN (A)"}, "7": {"Bournemouth": "SUN (H)", "Sunderland": "BOU (A)", "Brentford": "LIV (H)", "Liverpool": "BRE (A)", "Brighton": "CRY (H)", "Crystal Palace": "BHA (A)", "Everton": "CHE (H)", "Chelsea": "EVE (A)", "Fulham": "HUL (H)", "Hull": "FUL (A)", "Leeds": "MUN (H)", "Manchester United": "LEE (A)", "Manchester City": "IPS (H)", "Ipswich": "MCI (A)", "Newcastle United": "AVL (H)", "Aston Villa": "NEW (A)", "Nottingham Forest": "ARS (H)", "Arsenal": "NFO (A)", "Tottenham": "COV (H)", "Coventry": "TOT (A)"}, "8": {"Arsenal": "EVE (H)", "Everton": "ARS (A)", "Aston Villa": "MCI (H)", "Manchester City": "AVL (A)", "Chelsea": "TOT (H)", "Tottenham": "CHE (A)", "Coventry": "FUL (H)", "Fulham": "COV (A)", "Crystal Palace": "NEW (H)", "Newcastle United": "CRY (A)", "Hull": "BRE (H)", "Brentford": "HUL (A)", "Ipswich": "NFO (H)", "Nottingham Forest": "IPS (A)", "Liverpool": "BHA (H)", "Brighton": "LIV (A)", "Manchester United": "BOU (H)", "Bournemouth": "MUN (A)", "Sunderland": "LEE (H)", "Leeds": "SUN (A)"}, "9": {"Aston Villa": "FUL (H)", "Fulham": "AVL (A)", "Bournemouth": "LEE (H)", "Leeds": "BOU (A)", "Brentford": "NFO (H)", "Nottingham Forest": "BRE (A)", "Chelsea": "MUN (H)", "Manchester United": "CHE (A)", "Coventry": "SUN (H)", "Sunderland": "COV (A)", "Hull": "IPS (H)", "Ipswich": "HUL (A)", "Liverpool": "ARS (H)", "Arsenal": "LIV (A)", "Manchester City": "BHA (H)", "Brighton": "MCI (A)", "Newcastle United": "EVE (H)", "Everton": "NEW (A)", "Tottenham": "CRY (H)", "Crystal Palace": "TOT (A)"}, "10": {"Arsenal": "HUL (H)", "Hull": "ARS (A)", "Brighton": "BRE (H)", "Brentford": "BHA (A)", "Crystal Palace": "LIV (H)", "Liverpool": "CRY (A)", "Everton": "COV (H)", "Coventry": "EVE (A)", "Fulham": "NEW (H)", "Newcastle United": "FUL (A)", "Ipswich": "BOU (H)", "Bournemouth": "IPS (A)", "Leeds": "TOT (H)", "Tottenham": "LEE (A)", "Manchester United": "AVL (H)", "Aston Villa": "MUN (A)", "Nottingham Forest": "MCI (H)", "Manchester City": "NFO (A)", "Sunderland": "CHE (H)", "Chelsea": "SUN (A)"}, "11": {"Aston Villa": "SUN (H)", "Sunderland": "AVL (A)", "Bournemouth": "NFO (H)", "Nottingham Forest": "BOU (A)", "Brentford": "EVE (H)", "Everton": "BRE (A)", "Chelsea": "LEE (H)", "Leeds": "CHE (A)", "Coventry": "CRY (H)", "Crystal Palace": "COV (A)", "Hull": "BHA (H)", "Brighton": "HUL (A)", "Liverpool": "MUN (H)", "Manchester United": "LIV (A)", "Manchester City": "FUL (H)", "Fulham": "MCI (A)", "Newcastle United": "ARS (H)", "Arsenal": "NEW (A)", "Tottenham": "IPS (H)", "Ipswich": "TOT (A)"}, "12": {"Arsenal": "MCI (H)", "Manchester City": "ARS (A)", "Brighton": "NEW (H)", "Newcastle United": "BHA (A)", "Crystal Palace": "HUL (H)", "Hull": "CRY (A)", "Everton": "LIV (H)", "Liverpool": "EVE (A)", "Fulham": "BOU (H)", "Bournemouth": "FUL (A)", "Ipswich": "AVL (H)", "Aston Villa": "IPS (A)", "Leeds": "COV (H)", "Coventry": "LEE (A)", "Manchester United": "BRE (H)", "Brentford": "MUN (A)", "Nottingham Forest": "CHE (H)", "Chelsea": "NFO (A)", "Sunderland": "TOT (H)", "Tottenham": "SUN (A)"}, "13": {"Aston Villa": "EVE (H)", "Everton": "AVL (A)", "Bournemouth": "BHA (H)", "Brighton": "BOU (A)", "Brentford": "ARS (H)", "Arsenal": "BRE (A)", "Chelsea": "CRY (H)", "Crystal Palace": "CHE (A)", "Coventry": "IPS (H)", "Ipswich": "COV (A)", "Hull": "NFO (H)", "Nottingham Forest": "HUL (A)", "Liverpool": "SUN (H)", "Sunderland": "LIV (A)", "Manchester City": "LEE (H)", "Leeds": "MCI (A)", "Newcastle United": "MUN (H)", "Manchester United": "NEW (A)", "Tottenham": "FUL (H)", "Fulham": "TOT (A)"}, "14": {"Aston Villa": "CRY (H)", "Crystal Palace": "AVL (A)", "Bournemouth": "HUL (H)", "Hull": "BOU (A)", "Brentford": "MCI (H)", "Manchester City": "BRE (A)", "Chelsea": "LIV (H)", "Liverpool": "CHE (A)", "Everton": "FUL (H)", "Fulham": "EVE (A)", "Leeds": "IPS (H)", "Ipswich": "LEE (A)", "Manchester United": "COV (H)", "Coventry": "MUN (A)", "Newcastle United": "SUN (H)", "Sunderland": "NEW (A)", "Nottingham Forest": "BHA (H)", "Brighton": "NFO (A)", "Tottenham": "ARS (H)", "Arsenal": "TOT (A)"}, "15": {"Arsenal": "BOU (H)", "Bournemouth": "ARS (A)", "Brighton": "EVE (H)", "Everton": "BHA (A)", "Coventry": "AVL (H)", "Aston Villa": "COV (A)", "Crystal Palace": "MUN (H)", "Manchester United": "CRY (A)", "Fulham": "BRE (H)", "Brentford": "FUL (A)", "Hull": "TOT (H)", "Tottenham": "HUL (A)", "Ipswich": "NEW (H)", "Newcastle United": "IPS (A)", "Liverpool": "LEE (H)", "Leeds": "LIV (A)", "Manchester City": "CHE (H)", "Chelsea": "MCI (A)", "Sunderland": "NFO (H)", "Nottingham Forest": "SUN (A)"}, "16": {"Arsenal": "MUN (H)", "Manchester United": "ARS (A)", "Bournemouth": "COV (H)", "Coventry": "BOU (A)", "Brentford": "NEW (H)", "Newcastle United": "BRE (A)", "Brighton": "IPS (H)", "Ipswich": "BHA (A)", "Chelsea": "AVL (H)", "Aston Villa": "CHE (A)", "Leeds": "FUL (H)", "Fulham": "LEE (A)", "Liverpool": "TOT (H)", "Tottenham": "LIV (A)", "Manchester City": "HUL (H)", "Hull": "MCI (A)", "Nottingham Forest": "EVE (H)", "Everton": "NFO (A)", "Sunderland": "CRY (H)", "Crystal Palace": "SUN (A)"}, "17": {"Aston Villa": "LEE (H)", "Leeds": "AVL (A)", "Coventry": "CHE (H)", "Chelsea": "COV (A)", "Crystal Palace": "ARS (H)", "Arsenal": "CRY (A)", "Everton": "SUN (H)", "Sunderland": "EVE (A)", "Fulham": "BHA (H)", "Brighton": "FUL (A)", "Hull": "LIV (H)", "Liverpool": "HUL (A)", "Ipswich": "BRE (H)", "Brentford": "IPS (A)", "Manchester United": "NFO (H)", "Nottingham Forest": "MUN (A)", "Newcastle United": "MCI (H)", "Manchester City": "NEW (A)", "Tottenham": "BOU (H)", "Bournemouth": "TOT (A)"}, "18": {"Aston Villa": "LIV (H)", "Liverpool": "AVL (A)", "Coventry": "BRE (H)", "Brentford": "COV (A)", "Crystal Palace": "BOU (H)", "Bournemouth": "CRY (A)", "Everton": "MCI (H)", "Manchester City": "EVE (A)", "Fulham": "ARS (H)", "Arsenal": "FUL (A)", "Hull": "LEE (H)", "Leeds": "HUL (A)", "Ipswich": "CHE (H)", "Chelsea": "IPS (A)", "Manchester United": "SUN (H)", "Sunderland": "MUN (A)", "Newcastle United": "NFO (H)", "Nottingham Forest": "NEW (A)", "Tottenham": "BHA (H)", "Brighton": "TOT (A)"}, "19": {"Arsenal": "IPS (H)", "Ipswich": "ARS (A)", "Bournemouth": "AVL (H)", "Aston Villa": "BOU (A)", "Brentford": "CRY (H)", "Crystal Palace": "BRE (A)", "Brighton": "MUN (H)", "Manchester United": "BHA (A)", "Chelsea": "NEW (H)", "Newcastle United": "CHE (A)", "Leeds": "EVE (H)", "Everton": "LEE (A)", "Liverpool": "COV (H)", "Coventry": "LIV (A)", "Manchester City": "TOT (H)", "Tottenham": "MCI (A)", "Nottingham Forest": "FUL (H)", "Fulham": "NFO (A)", "Sunderland": "HUL (H)", "Hull": "SUN (A)"}, "20": {"Arsenal": "BRE (H)", "Brentford": "ARS (A)", "Brighton": "BOU (H)", "Bournemouth": "BHA (A)", "Crystal Palace": "CHE (H)", "Chelsea": "CRY (A)", "Everton": "AVL (H)", "Aston Villa": "EVE (A)", "Fulham": "TOT (H)", "Tottenham": "FUL (A)", "Ipswich": "COV (H)", "Coventry": "IPS (A)", "Leeds": "MCI (H)", "Manchester City": "LEE (A)", "Manchester United": "NEW (H)", "Newcastle United": "MUN (A)", "Nottingham Forest": "HUL (H)", "Hull": "NFO (A)", "Sunderland": "LIV (H)", "Liverpool": "SUN (A)"}, "21": {"Aston Villa": "MUN (H)", "Manchester United": "AVL (A)", "Bournemouth": "IPS (H)", "Ipswich": "BOU (A)", "Brentford": "BHA (H)", "Brighton": "BRE (A)", "Chelsea": "SUN (H)", "Sunderland": "CHE (A)", "Coventry": "EVE (H)", "Everton": "COV (A)", "Hull": "ARS (H)", "Arsenal": "HUL (A)", "Liverpool": "CRY (H)", "Crystal Palace": "LIV (A)", "Manchester City": "NFO (H)", "Nottingham Forest": "MCI (A)", "Newcastle United": "FUL (H)", "Fulham": "NEW (A)", "Tottenham": "LEE (H)", "Leeds": "TOT (A)"}, "22": {"Arsenal": "NEW (H)", "Newcastle United": "ARS (A)", "Brighton": "MCI (H)", "Manchester City": "BHA (A)", "Crystal Palace": "TOT (H)", "Tottenham": "CRY (A)", "Everton": "BRE (H)", "Brentford": "EVE (A)", "Fulham": "AVL (H)", "Aston Villa": "FUL (A)", "Ipswich": "HUL (H)", "Hull": "IPS (A)", "Leeds": "CHE (H)", "Chelsea": "LEE (A)", "Manchester United": "LIV (H)", "Liverpool": "MUN (A)", "Nottingham Forest": "BOU (H)", "Bournemouth": "NFO (A)", "Sunderland": "COV (H)", "Coventry": "SUN (A)"}, "23": {"Aston Villa": "IPS (H)", "Ipswich": "AVL (A)", "Bournemouth": "FUL (H)", "Fulham": "BOU (A)", "Brentford": "MUN (H)", "Manchester United": "BRE (A)", "Chelsea": "NFO (H)", "Nottingham Forest": "CHE (A)", "Coventry": "LEE (H)", "Leeds": "COV (A)", "Hull": "CRY (H)", "Crystal Palace": "HUL (A)", "Liverpool": "EVE (H)", "Everton": "LIV (A)", "Manchester City": "ARS (H)", "Arsenal": "MCI (A)", "Newcastle United": "BHA (H)", "Brighton": "NEW (A)", "Tottenham": "SUN (H)", "Sunderland": "TOT (A)"}, "24": {"Arsenal": "LIV (H)", "Liverpool": "ARS (A)", "Brighton": "HUL (H)", "Hull": "BHA (A)", "Crystal Palace": "COV (H)", "Coventry": "CRY (A)", "Everton": "NEW (H)", "Newcastle United": "EVE (A)", "Fulham": "MCI (H)", "Manchester City": "FUL (A)", "Ipswich": "TOT (H)", "Tottenham": "IPS (A)", "Leeds": "BOU (H)", "Bournemouth": "LEE (A)", "Manchester United": "CHE (H)", "Chelsea": "MUN (A)", "Nottingham Forest": "BRE (H)", "Brentford": "NFO (A)", "Sunderland": "AVL (H)", "Aston Villa": "SUN (A)"}, "25": {"Aston Villa": "BOU (H)", "Bournemouth": "AVL (A)", "Coventry": "LIV (H)", "Liverpool": "COV (A)", "Crystal Palace": "BRE (H)", "Brentford": "CRY (A)", "Everton": "LEE (H)", "Leeds": "EVE (A)", "Fulham": "NFO (H)", "Nottingham Forest": "FUL (A)", "Hull": "SUN (H)", "Sunderland": "HUL (A)", "Ipswich": "ARS (H)", "Arsenal": "IPS (A)", "Manchester United": "BHA (H)", "Brighton": "MUN (A)", "Newcastle United": "CHE (H)", "Chelsea": "NEW (A)", "Tottenham": "MCI (H)", "Manchester City": "TOT (A)"}, "26": {"Arsenal": "FUL (H)", "Fulham": "ARS (A)", "Bournemouth": "CRY (H)", "Crystal Palace": "BOU (A)", "Brentford": "COV (H)", "Coventry": "BRE (A)", "Brighton": "TOT (H)", "Tottenham": "BHA (A)", "Chelsea": "IPS (H)", "Ipswich": "CHE (A)", "Leeds": "AVL (H)", "Aston Villa": "LEE (A)", "Liverpool": "HUL (H)", "Hull": "LIV (A)", "Manchester City": "NEW (H)", "Newcastle United": "MCI (A)", "Nottingham Forest": "MUN (H)", "Manchester United": "NFO (A)", "Sunderland": "EVE (H)", "Everton": "SUN (A)"}, "27": {"Aston Villa": "CHE (H)", "Chelsea": "AVL (A)", "Coventry": "BOU (H)", "Bournemouth": "COV (A)", "Crystal Palace": "SUN (H)", "Sunderland": "CRY (A)", "Everton": "NFO (H)", "Nottingham Forest": "EVE (A)", "Fulham": "LEE (H)", "Leeds": "FUL (A)", "Hull": "MCI (H)", "Manchester City": "HUL (A)", "Ipswich": "BHA (H)", "Brighton": "IPS (A)", "Manchester United": "ARS (H)", "Arsenal": "MUN (A)", "Newcastle United": "BRE (H)", "Brentford": "NEW (A)", "Tottenham": "LIV (H)", "Liverpool": "TOT (A)"}, "28": {"Arsenal": "CRY (H)", "Crystal Palace": "ARS (A)", "Bournemouth": "TOT (H)", "Tottenham": "BOU (A)", "Brentford": "IPS (H)", "Ipswich": "BRE (A)", "Brighton": "FUL (H)", "Fulham": "BHA (A)", "Chelsea": "COV (H)", "Coventry": "CHE (A)", "Leeds": "HUL (H)", "Hull": "LEE (A)", "Liverpool": "AVL (H)", "Aston Villa": "LIV (A)", "Manchester City": "EVE (H)", "Everton": "MCI (A)", "Nottingham Forest": "NEW (H)", "Newcastle United": "NFO (A)", "Sunderland": "MUN (H)", "Manchester United": "SUN (A)"}, "29": {"Aston Villa": "HUL (H)", "Hull": "AVL (A)", "Bournemouth": "NEW (H)", "Newcastle United": "BOU (A)", "Chelsea": "ARS (H)", "Arsenal": "CHE (A)", "Coventry": "MCI (H)", "Manchester City": "COV (A)", "Crystal Palace": "FUL (H)", "Fulham": "CRY (A)", "Leeds": "BHA (H)", "Brighton": "LEE (A)", "Liverpool": "IPS (H)", "Ipswich": "LIV (A)", "Manchester United": "EVE (H)", "Everton": "MUN (A)", "Tottenham": "NFO (H)", "Nottingham Forest": "TOT (A)", "Sunderland": "BRE (H)", "Brentford": "SUN (A)"}, "30": {"Arsenal": "SUN (H)", "Sunderland": "ARS (A)", "Brentford": "BOU (H)", "Bournemouth": "BRE (A)", "Brighton": "COV (H)", "Coventry": "BHA (A)", "Everton": "TOT (H)", "Tottenham": "EVE (A)", "Fulham": "LIV (H)", "Liverpool": "FUL (A)", "Hull": "CHE (H)", "Chelsea": "HUL (A)", "Ipswich": "CRY (H)", "Crystal Palace": "IPS (A)", "Manchester City": "MUN (H)", "Manchester United": "MCI (A)", "Newcastle United": "LEE (H)", "Leeds": "NEW (A)", "Nottingham Forest": "AVL (H)", "Aston Villa": "NFO (A)"}, "31": {"Aston Villa": "BHA (H)", "Brighton": "AVL (A)", "Bournemouth": "MCI (H)", "Manchester City": "BOU (A)", "Chelsea": "FUL (H)", "Fulham": "CHE (A)", "Coventry": "ARS (H)", "Arsenal": "COV (A)", "Crystal Palace": "EVE (H)", "Everton": "CRY (A)", "Leeds": "NFO (H)", "Nottingham Forest": "LEE (A)", "Liverpool": "NEW (H)", "Newcastle United": "LIV (A)", "Manchester United": "HUL (H)", "Hull": "MUN (A)", "Tottenham": "BRE (H)", "Brentford": "TOT (A)", "Sunderland": "IPS (H)", "Ipswich": "SUN (A)"}, "32": {"Arsenal": "AVL (H)", "Aston Villa": "ARS (A)", "Brentford": "LEE (H)", "Leeds": "BRE (A)", "Brighton": "CHE (H)", "Chelsea": "BHA (A)", "Everton": "BOU (H)", "Bournemouth": "EVE (A)", "Fulham": "SUN (H)", "Sunderland": "FUL (A)", "Hull": "COV (H)", "Coventry": "HUL (A)", "Ipswich": "MUN (H)", "Manchester United": "IPS (A)", "Manchester City": "CRY (H)", "Crystal Palace": "MCI (A)", "Newcastle United": "TOT (H)", "Tottenham": "NEW (A)", "Nottingham Forest": "LIV (H)", "Liverpool": "NFO (A)"}, "33": {"Aston Villa": "COV (H)", "Coventry": "AVL (A)", "Bournemouth": "ARS (H)", "Arsenal": "BOU (A)", "Brentford": "FUL (H)", "Fulham": "BRE (A)", "Chelsea": "MCI (H)", "Manchester City": "CHE (A)", "Everton": "BHA (H)", "Brighton": "EVE (A)", "Leeds": "LIV (H)", "Liverpool": "LEE (A)", "Manchester United": "CRY (H)", "Crystal Palace": "MUN (A)", "Newcastle United": "IPS (H)", "Ipswich": "NEW (A)", "Nottingham Forest": "SUN (H)", "Sunderland": "NFO (A)", "Tottenham": "HUL (H)", "Hull": "TOT (A)"}, "34": {"Arsenal": "TOT (H)", "Tottenham": "ARS (A)", "Brighton": "NFO (H)", "Nottingham Forest": "BHA (A)", "Coventry": "MUN (H)", "Manchester United": "COV (A)", "Crystal Palace": "AVL (H)", "Aston Villa": "CRY (A)", "Fulham": "EVE (H)", "Everton": "FUL (A)", "Hull": "BOU (H)", "Bournemouth": "HUL (A)", "Ipswich": "LEE (H)", "Leeds": "IPS (A)", "Liverpool": "CHE (H)", "Chelsea": "LIV (A)", "Manchester City": "BRE (H)", "Brentford": "MCI (A)", "Sunderland": "NEW (H)", "Newcastle United": "SUN (A)"}, "35": {"Bournemouth": "MUN (H)", "Manchester United": "BOU (A)", "Brentford": "AVL (H)", "Aston Villa": "BRE (A)", "Brighton": "SUN (H)", "Sunderland": "BHA (A)", "Everton": "HUL (H)", "Hull": "EVE (A)", "Fulham": "IPS (H)", "Ipswich": "FUL (A)", "Leeds": "ARS (H)", "Arsenal": "LEE (A)", "Manchester City": "LIV (H)", "Liverpool": "MCI (A)", "Newcastle United": "COV (H)", "Coventry": "NEW (A)", "Nottingham Forest": "CRY (H)", "Crystal Palace": "NFO (A)", "Tottenham": "CHE (H)", "Chelsea": "TOT (A)"}, "36": {"Arsenal": "NFO (H)", "Nottingham Forest": "ARS (A)", "Aston Villa": "NEW (H)", "Newcastle United": "AVL (A)", "Chelsea": "EVE (H)", "Everton": "CHE (A)", "Coventry": "TOT (H)", "Tottenham": "COV (A)", "Crystal Palace": "BHA (H)", "Brighton": "CRY (A)", "Hull": "FUL (H)", "Fulham": "HUL (A)", "Ipswich": "MCI (H)", "Manchester City": "IPS (A)", "Liverpool": "BRE (H)", "Brentford": "LIV (A)", "Manchester United": "LEE (H)", "Leeds": "MUN (A)", "Sunderland": "BOU (H)", "Bournemouth": "SUN (A)"}, "37": {"Bournemouth": "CHE (H)", "Chelsea": "BOU (A)", "Brentford": "HUL (H)", "Hull": "BRE (A)", "Brighton": "LIV (H)", "Liverpool": "BHA (A)", "Everton": "ARS (H)", "Arsenal": "EVE (A)", "Fulham": "COV (H)", "Coventry": "FUL (A)", "Leeds": "SUN (H)", "Sunderland": "LEE (A)", "Manchester City": "AVL (H)", "Aston Villa": "MCI (A)", "Newcastle United": "CRY (H)", "Crystal Palace": "NEW (A)", "Nottingham Forest": "IPS (H)", "Ipswich": "NFO (A)", "Tottenham": "MUN (H)", "Manchester United": "TOT (A)"}, "38": {"Arsenal": "BHA (H)", "Brighton": "ARS (A)", "Aston Villa": "TOT (H)", "Tottenham": "AVL (A)", "Chelsea": "BRE (H)", "Brentford": "CHE (A)", "Coventry": "NFO (H)", "Nottingham Forest": "COV (A)", "Crystal Palace": "LEE (H)", "Leeds": "CRY (A)", "Hull": "NEW (H)", "Newcastle United": "HUL (A)", "Ipswich": "EVE (H)", "Everton": "IPS (A)", "Liverpool": "BOU (H)", "Bournemouth": "LIV (A)", "Manchester United": "FUL (H)", "Fulham": "MUN (A)", "Sunderland": "MCI (H)", "Manchester City": "SUN (A)"}};
@@ -18890,9 +18890,9 @@ function updatePillChipTags() {
 // Hero sparkline — bars representing projected xPts per GW in the horizon.
 // Current GW gets the orange highlight so the user sees "where I am vs trajectory".
 // Called on init AND on every pill change so the highlight follows activeGwIdx.
-// ── Apex/Review compare toggle (diagnostic only, gated by ?compare=1) ─────
+// ── Apex/Tool A compare toggle (diagnostic only, gated by ?compare=1) ─────
 // When active, swaps the per-player xP values in POOL_DATA + SQUAD_DATA
-// between Apex (default) and Review. Pitch labels, pool list, hero stat,
+// between Apex (default) and Tool A. Pitch labels, pool list, hero stat,
 // per-GW XI baseline all reflect the active source. Solve / WC / FH stay
 // Apex-baked — flip back to Apex before clicking those.
 window._PROJECTION_SOURCE = 'apex';
@@ -18931,10 +18931,10 @@ function _applyXpFromSource(src) {
   // Apply xP fields in-place across both POOL_DATA and SQUAD_DATA so that
   // every existing reader (pitch, pool list, captain pick, optimal XI) sees
   // the new values without any further changes.
-  if (src === 'review') {
-    // For each player in pool, lookup their Review xP. Fall back to cached
-    // Apex value if the player isn't in Review's CSV.
-    const lookup = (typeof REVIEW_XP_LOOKUP === 'object' && REVIEW_XP_LOOKUP) ? REVIEW_XP_LOOKUP : {};
+  if (src === 'compare') {
+    // For each player in pool, lookup their Tool A xP. Fall back to cached
+    // Apex value if the player isn't in Tool A's CSV.
+    const lookup = (typeof COMPARE_XP_LOOKUP === 'object' && COMPARE_XP_LOOKUP) ? COMPARE_XP_LOOKUP : {};
     const apply = function (arr) {
       if (!Array.isArray(arr)) return;
       arr.forEach(function (p) {
@@ -18944,7 +18944,7 @@ function _applyXpFromSource(src) {
           p.xp_per_gw = rv.slice();
           p.xp = Math.round(rv.reduce(function (s, x) { return s + (x || 0); }, 0) * 100) / 100;
         }
-        // else: keep Apex (no Review record). Tag for diagnostics.
+        // else: keep Apex (no Tool A record). Tag for diagnostics.
       });
     };
     apply(POOL_DATA);
@@ -19031,7 +19031,7 @@ function _recomputeGwBaselinesFromSquad() {
 }
 
 function _setProjectionSource(src) {
-  if (src !== 'apex' && src !== 'review') return;
+  if (src !== 'apex' && src !== 'compare') return;
   if (window._PROJECTION_SOURCE === src) return;
   _cacheApexXp();
   window._PROJECTION_SOURCE = src;
@@ -19045,13 +19045,13 @@ function _setProjectionSource(src) {
     else if (typeof updateRollingTotal === 'function') updateRollingTotal();
   } catch (_e) {}
   // V2: also swap baked chip squads (FH/WC) so chip pills show the active
-  // source's recommendations. Falls back to no-op if Review variant is empty.
+  // source's recommendations. Falls back to no-op if Tool A variant is empty.
   // The static _APEX_*_BACKUP consts can be empty on the public site (chip
   // planner is fetched async AFTER bake), so we lazy-capture a LIVE snapshot
-  // on the first toggle to Review — at that moment WC_SQUADS reflects the
+  // on the first toggle to Tool A — at that moment WC_SQUADS reflects the
   // current Apex state (post chip-planner fetch).
   try {
-    if (src === 'review') {
+    if (src === 'compare') {
       // Lazy-capture current Apex squads BEFORE swapping
       if (!window._APEX_WC_SQUADS_BACKUP_LIVE && typeof WC_SQUADS !== 'undefined') {
         window._APEX_WC_SQUADS_BACKUP_LIVE = JSON.parse(JSON.stringify(WC_SQUADS));
@@ -19059,8 +19059,8 @@ function _setProjectionSource(src) {
       if (!window._APEX_FH_SQUADS_BACKUP_LIVE && typeof FH_SQUADS !== 'undefined') {
         window._APEX_FH_SQUADS_BACKUP_LIVE = JSON.parse(JSON.stringify(FH_SQUADS));
       }
-      const rwc = (typeof REVIEW_WC_SQUADS === 'object') ? REVIEW_WC_SQUADS : null;
-      const rfh = (typeof REVIEW_FH_SQUADS === 'object') ? REVIEW_FH_SQUADS : null;
+      const rwc = (typeof COMPARE_WC_SQUADS === 'object') ? COMPARE_WC_SQUADS : null;
+      const rfh = (typeof COMPARE_FH_SQUADS === 'object') ? COMPARE_FH_SQUADS : null;
       if (rwc && Object.keys(rwc).length > 0 && typeof WC_SQUADS !== 'undefined') {
         _swapKeyedSquadMap(WC_SQUADS, rwc);
       }
@@ -19070,7 +19070,7 @@ function _setProjectionSource(src) {
     } else {
       // Restore Apex — prefer the LIVE snapshot (post chip-planner fetch).
       // Fall back to bake-time _APEX_*_BACKUP if the live snapshot doesn't
-      // exist (e.g. user toggled back without ever toggling to Review).
+      // exist (e.g. user toggled back without ever toggling to Tool A).
       const wcRestore = window._APEX_WC_SQUADS_BACKUP_LIVE
         || (typeof _APEX_WC_SQUADS_BACKUP === 'object' ? _APEX_WC_SQUADS_BACKUP : null);
       const fhRestore = window._APEX_FH_SQUADS_BACKUP_LIVE
@@ -19087,13 +19087,13 @@ function _setProjectionSource(src) {
   }
   // Update toggle button visual state
   const btnA = document.getElementById('va-toggle-apex');
-  const btnR = document.getElementById('va-toggle-review');
+  const btnR = document.getElementById('va-toggle-compare');
   if (btnA && btnR) {
     btnA.classList.toggle('va-toggle-active', src === 'apex');
-    btnR.classList.toggle('va-toggle-active', src === 'review');
+    btnR.classList.toggle('va-toggle-active', src === 'compare');
   }
   // Mark <body> so styling can react (e.g. tinted hero card)
-  document.body.classList.toggle('compare-review', src === 'review');
+  document.body.classList.toggle('compare-alt', src === 'compare');
   document.body.classList.toggle('compare-apex',   src === 'apex');
   // Re-render the active view. initTeamView is the cheapest broad refresh;
   // the user can flip back and forth without state loss because the toggle
@@ -19110,7 +19110,7 @@ function _setProjectionSource(src) {
 
 // Module-scoped functions are NOT visible to inline onclick attributes
 // (which resolve names against window). The toggle buttons in va-strip use
-// onclick="_setProjectionSource('review')" — so we must explicitly hoist
+// onclick="_setProjectionSource('compare')" — so we must explicitly hoist
 // the handler onto window. Otherwise the click silently no-ops.
 window._setProjectionSource = _setProjectionSource;
 
@@ -21913,7 +21913,7 @@ window.addEventListener('load', function () { [900, 2200, 4000].forEach(function
 // call them at click time.
 
 // Free-tier deadline lockout (entitlement seam — inert while APEX_TIERS=false).
-// Review-style: the free solver freezes transfer planning 1h before the FPL
+// Tool A-style: the free solver freezes transfer planning 1h before the FPL
 // deadline; Apex members plan right up to kickoff. One helper, called at the
 // 3 transfer choke points (runSolve / runOptimize / renderTransfers) so the
 // lock lands wherever the user tries to plan. Never throws; false = open.
@@ -33536,7 +33536,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW1</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1786711081-GW1-478469be</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1786715509-GW1-741396bb</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
@@ -33789,7 +33789,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Re-bind saved xMins edits to this manager's bucket now the ID is
         // known (hydration replaced SQUAD_DATA, so re-apply on top of it).
         if (typeof window._xminsAdoptId === 'function') window._xminsAdoptId(fplId);
-        // Surface the Apex/Review compare toggle if URL has ?compare=1.
+        // Surface the Apex/Tool A compare toggle if URL has ?compare=1.
         if (typeof _initCompareToggle === 'function') _initCompareToggle();
         setTimeout(function () {
           var ov = document.getElementById('apex-public-boot');
@@ -34533,7 +34533,7 @@ document.addEventListener('DOMContentLoaded', () => {
       // FPL's entry_history.value snapshot — what the FPL app and other tools
       // header display as "team value". Includes bank already. Set per Marcus
       // 2026-04-30 so the top-strip "Initial Bank" reads the same number as
-      // Review for the same FPL ID. The live-recomputed `budget` field above
+      // Tool A for the same FPL ID. The live-recomputed `budget` field above
       // is still used internally for FH/WC transfer-budget validation — only
       // the headline display switched to the snapshot.
       initial_bank: Math.round(apiValue * 10) / 10,
@@ -34580,741 +34580,5 @@ document.addEventListener('DOMContentLoaded', () => {
 })();
 </script>
 
-<!-- ## APEX_MOBILE_FIX:START ## -->
-<style>
-/* ============================================================================
- * apex_mobile.css — universal mobile fixes for fplapex.com
- *
- * Loaded by: outputs/index.html, outputs/solver.html, outputs/solver_app.html,
- * outputs/rank_milestones.html. Generated outputs include this via the
- * generators (generate_solver_html.py); index.html and solver.html include it
- * as a static reference.
- *
- * Design intent — "quick responsive pass":
- *   - Stop horizontal overflow at the body level (the killer that forces
- *     mobile browsers to zoom out and make everything tiny).
- *   - Containerise wide tables into horizontal scroll rather than letting
- *     them push the page.
- *   - Bump tap targets to 44px min on the most-used controls.
- *
- * Breakpoint: <= 600px is the primary mobile pass.
- * ========================================================================== */
-
-/* Universal — applies at every width to prevent silent breaks */
-.apex-table-scroll {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    max-width: 100%;
-    /* fade-out hint that there's more horizontal content */
-    background:
-        linear-gradient(to right, transparent 0, transparent 30px),
-        linear-gradient(to left,  transparent 0, transparent 30px);
-}
-.apex-table-scroll > table {
-    min-width: max-content;
-}
-
-/* ───────────────────────────────────────────────────────────────────────────
- * <= 600px — phone breakpoint
- * ──────────────────────────────────────────────────────────────────────── */
-@media (max-width: 600px) {
-
-    /* Stop the body from being pushed wider than the viewport. */
-    html, body {
-        max-width: 100vw;
-        overflow-x: hidden;
-    }
-
-    /* Header / tab-nav: respect parent width, allow internal scroll */
-    .header,
-    .tab-nav {
-        width: 100% !important;
-        max-width: 100% !important;
-        min-width: 0 !important;
-        box-sizing: border-box;
-    }
-    .tab-nav {
-        overflow-x: auto !important;
-        -webkit-overflow-scrolling: touch;
-        scrollbar-width: thin;
-        justify-content: flex-start !important;
-        /* visual cue that there's more to the right */
-        mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent);
-        -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent);
-    }
-    .tab-nav::-webkit-scrollbar { height: 3px; }
-    .tab-nav::-webkit-scrollbar-thumb { background: #2a2a35; border-radius: 2px; }
-
-    /* Tap target floor for primary nav */
-    .tab-button {
-        min-height: 44px;
-        padding-top: 12px !important;
-        padding-bottom: 12px !important;
-    }
-
-    /* Auto-wrapped tables (set by apex_mobile.js) */
-    .apex-table-scroll {
-        margin-left: -8px;
-        margin-right: -8px;
-        padding-left: 8px;
-        padding-right: 8px;
-        /* gradient affordance: subtle right-edge fade */
-        -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 18px), rgba(0,0,0,.5));
-                mask-image: linear-gradient(to right, #000 calc(100% - 18px), rgba(0,0,0,.5));
-    }
-    /* When user has scrolled to the end, drop the fade */
-    .apex-table-scroll.is-scrolled-end,
-    .apex-table-scroll.is-fits {
-        -webkit-mask-image: none;
-                mask-image: none;
-    }
-
-    /* Tighter cell padding so tables feel less hostile on narrow screens */
-    .apex-table-scroll table th,
-    .apex-table-scroll table td {
-        padding-left: 8px !important;
-        padding-right: 8px !important;
-    }
-
-    /* Cookie banner — already fixed-bottom by inline JS. Just make the buttons
-       full-width on tiny screens so they don't crash into each other. */
-    #apex-cookie-banner {
-        flex-wrap: wrap !important;
-        gap: 10px !important;
-    }
-    #apex-cookie-banner > div {
-        width: 100%;
-        justify-content: stretch !important;
-    }
-    #apex-cookie-banner > div > button {
-        flex: 1;
-        min-height: 40px;
-    }
-
-    /* Footer — keep readable on narrow screens */
-    footer {
-        padding-left: 16px !important;
-        padding-right: 16px !important;
-    }
-}
-
-/* ───────────────────────────────────────────────────────────────────────────
- * <= 380px — extra-narrow tightening
- * ──────────────────────────────────────────────────────────────────────── */
-@media (max-width: 380px) {
-    .tab-button {
-        font-size: 12.5px !important;
-        padding-left: 14px !important;
-        padding-right: 14px !important;
-    }
-    .apex-table-scroll table th,
-    .apex-table-scroll table td {
-        font-size: 11.5px !important;
-        padding-left: 6px !important;
-        padding-right: 6px !important;
-    }
-}
-
-/* ============================================================================
- * Solver pitch — shrink shirts to fit 5-per-row in a 390px viewport.
- * Default sizes (.shirt=130, .shirt-wrap=96, gap=14) overflow on mobile.
- * Target row width with 5 shirts: 5*64 + 4*4 = 336px (+ pitch padding) <= 360px.
- * ========================================================================== */
-@media (max-width: 480px) {
-    /* 2026-06-06: top padding clears the absolute cost badge so it no longer
-       overlaps the GK; was 22px. */
-    /* 2026-06-10: side padding 8→14px — the absolute ⊗/⏱ controls hang
-       outside the kits and were clipping at both screen edges on 5-man rows. */
-    .pitch { padding: 94px 16px 14px !important; }
-    /* 2026-06-19: the ⏱ clock button is pinned right:-6px so it pokes past
-       every shirt; on the outermost players (5-man row) that clips at the
-       screen edge. Tuck both edge controls inside the shirt on phones. */
-    .pitch .pp-xmins-btn.pp-xmins-btn, .bench-row .pp-xmins-btn.pp-xmins-btn { right: 1px !important; }
-    .pitch .pp-remove-btn.pp-remove-btn, .bench-row .pp-remove-btn.pp-remove-btn { left: 1px !important; }
-    .pitch-row { gap: 3px !important; margin-bottom: 10px !important; }
-
-    /* doubled-class selectors out-rank the desktop XL rules
-       (.pitch .shirt 140px !important + min-width) on phones */
-    /* 2026-06-19: size shirts to the viewport so 5-per-row + the absolute
-       ⊗/⏱ controls ALWAYS fit — fixed 66px overflowed ~375px phones (SE/mini).
-       (100vw − 60px)/5 reserves 60px for pitch padding + control overhang.
-       Capped 72px so big phones don't balloon. */
-    .pitch .shirt.shirt, .bench-row .shirt.shirt, .shirt {
-        width: calc((100vw - 105px) / 5) !important; min-width: 0 !important; max-width: 60px !important; }
-    .pitch .shirt-wrap.shirt-wrap, .bench-row .shirt-wrap.shirt-wrap,
-    .pitch-bench .shirt-wrap.shirt-wrap, .shirt-wrap {
-        width: 44px !important; min-width: 0 !important; }
-    .pitch .svg-shirt.svg-shirt, .bench-row .svg-shirt.svg-shirt,
-    .pitch-bench .svg-shirt.svg-shirt, .svg-shirt, .shirt-fallback {
-        width: 44px !important; height: 44px !important; min-width: 0 !important; }
-
-    .shirt-name {
-        max-width: 56px !important;
-        font-size: 0.6rem !important;
-        padding: 2px 3px !important;
-    }
-    .shirt-fix {
-        max-width: 66px !important;
-        font-size: 0.6rem !important;
-        /* 2026-06-06: wrap to two lines so the xMins ("· 85'") isn't
-           swallowed by the ellipsis on phones. */
-        white-space: normal !important;
-        line-height: 1.15 !important;
-        text-align: center !important;
-    }
-    .shirt-xp { font-size: 0.92rem !important; margin-top: 2px !important; }
-    /* 2026-06-10: the June-08 "polished xPts" block (.pitch .shirt-xp 26px
-       !important, specificity 0,2,0) beats the single-class rule above —
-       that's the huge numbers on phones. Doubled classes out-rank it.
-       Fixture pill + name pill get the same armour. */
-    .pitch .shirt-xp.shirt-xp, .bench-row .shirt-xp.shirt-xp,
-    .pitch-bench .shirt-xp.shirt-xp {
-        font-size: 0.9rem !important; font-weight: 800 !important; }
-    .pitch .shirt-fix.shirt-fix, .bench-row .shirt-fix.shirt-fix,
-    .pitch-bench .shirt-fix.shirt-fix { font-size: 0.6rem !important; }
-    .pitch .shirt-name.shirt-name, .bench-row .shirt-name.shirt-name {
-        font-size: 0.6rem !important; max-width: 56px !important; padding: 2px 3px !important; }
-
-    .shirt-badge {
-        width: 18px !important; height: 18px !important;
-        font-size: 0.62rem !important;
-        bottom: 2px !important; left: -2px !important;
-    }
-
-    /* Pitch markings — scale down so they don't dominate the smaller pitch */
-    .pitch-goal-top   { width: 38px !important; height: 8px !important; }
-    .pitch-penalty-top { width: 90px !important; height: 38px !important; }
-    .pitch-centre-circle { transform: translate(-50%, -50%) scale(0.7) !important; }
-
-    /* Cost badge can wrap into 2 cols on mobile to stay readable */
-    .pitch-cost-badge { min-width: 0 !important; padding: 7px 10px !important; }
-    .pcb-row { gap: 8px !important; }
-    .pcb-label { font-size: 0.62rem !important; }
-    .pcb-val { font-size: 0.78rem !important; }
-}
-
-@media (max-width: 360px) {
-    /* Extra-narrow phones — shrink one more notch for 5-shirt rows */
-    .pitch .shirt.shirt, .bench-row .shirt.shirt, .shirt {
-        width: calc((100vw - 95px) / 5) !important; min-width: 0 !important; max-width: 52px !important; }
-    .pitch .shirt-wrap.shirt-wrap, .bench-row .shirt-wrap.shirt-wrap,
-    .pitch .svg-shirt.svg-shirt, .bench-row .svg-shirt.svg-shirt,
-    .shirt-wrap, .svg-shirt, .shirt-fallback {
-        width: 40px !important; min-width: 0 !important; }
-    .pitch .svg-shirt.svg-shirt, .bench-row .svg-shirt.svg-shirt,
-    .svg-shirt, .shirt-fallback { height: 40px !important; }
-    .shirt-name { max-width: 56px !important; font-size: 0.66rem !important; }
-    .shirt-xp { font-size: 0.86rem !important; }
-}
-
-/* ============================================================================
- * Tap-to-reveal shirt actions (touch only) — 2026-07-06.
- * The ✕ remove + ⏱ minutes buttons are hover-revealed on desktop but were
- * forced always-on for touch, so on the shrunk mobile shirts they sat on top
- * of the xPts number (Gabriel ".6", Haaland ".7"). Now they're hidden by
- * default — pitch reads clean — and a tap on a shirt adds .pp-revealed (JS in
- * _onShirtClick) to show that one player's buttons.
- * ========================================================================== */
-@media (hover: none) {
-    .shirt .pp-remove-btn.pp-remove-btn,
-    .shirt .pp-xmins-btn.pp-xmins-btn {
-        opacity: 0 !important;
-        pointer-events: none !important;
-    }
-    .shirt.pp-revealed .pp-remove-btn.pp-remove-btn,
-    .shirt.pp-revealed .pp-xmins-btn.pp-xmins-btn {
-        opacity: 1 !important;
-        pointer-events: auto !important;
-    }
-}
-
-/* ============================================================================
- * Solver top-nav swipe fix — 2026-07-06.
- * The solver header nav uses <nav class="nav"> / <a class="nav-link">, NOT the
- * .tab-nav/.tab-button the earlier mobile rules targeted — so it never became
- * scrollable and tabs past the edge (Evaluation) were unreachable, while the
- * labels wrapped to two lines. Make it a single-line horizontal-scroll strip.
- * ========================================================================== */
-@media (max-width: 760px) {
-    header.topbar { flex-wrap: wrap; }          /* logo row, then nav on its own row */
-    header.topbar .nav {
-        position: static;
-        transform: none;
-        flex: 1 1 100%;
-        min-width: 0;                            /* allow the flex item to shrink so overflow scrolls */
-        max-width: 100%;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        flex-wrap: nowrap;
-        justify-content: flex-start;
-        scrollbar-width: thin;
-        /* fade cue that there's more to the right */
-        -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent);
-                mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent);
-    }
-    header.topbar .nav .nav-link {
-        white-space: nowrap;                     /* stops "My / Squad" wrapping to two lines */
-        flex: 0 0 auto;
-    }
-    header.topbar .nav::-webkit-scrollbar { height: 3px; }
-    header.topbar .nav::-webkit-scrollbar-thumb { background: #C9C7BB; border-radius: 2px; }
-}
-
-/* ============================================================================
- * Shirt controls — neat right-hand column on mobile, like desktop. 2026-07-06.
- * The old mobile rules scattered them (⏱ shoved mid-right, ✕ pushed left and
- * lost). Stack all three down the right edge, same size, scaled to fit the
- * small shirt: status badge on top (always on), ⏱ below, ✕ at the bottom
- * (⏱/✕ revealed on tap via .pp-revealed). Also hide the halfway markings,
- * which cut through the middle row's fixture labels on the compressed pitch.
- * ========================================================================== */
-@media (max-width: 480px) {
-    .pitch .prof-badge, .bench-row .prof-badge,
-    .pitch .pp-xmins-btn.pp-xmins-btn, .bench-row .pp-xmins-btn.pp-xmins-btn,
-    .pitch .pp-remove-btn.pp-remove-btn, .bench-row .pp-remove-btn.pp-remove-btn {
-        width: 15px !important;
-        height: 15px !important;
-        min-width: 0 !important;
-        right: -1px !important;
-        left: auto !important;
-        font-size: 0.5rem !important;
-        line-height: 15px !important;
-    }
-    .pitch .prof-badge, .bench-row .prof-badge { top: -3px !important; }
-    .pitch .pp-xmins-btn.pp-xmins-btn, .bench-row .pp-xmins-btn.pp-xmins-btn { top: 13px !important; }
-    .pitch .pp-remove-btn.pp-remove-btn, .bench-row .pp-remove-btn.pp-remove-btn { top: 29px !important; }
-
-    /* Only the solid halfway LINE cut through the middle row's fixture text —
-       hide just that. Keep the centre circle + dot (a faint ring under text
-       reads fine, and the pitch looks bare without it). */
-    .pitch-halfway { display: none !important; }
-}
-
-/* ============================================================================
- * Site footer — injected on every page by apex_mobile.js (idempotent).
- * Two rows: brand + tagline/moat-stat | utility links. Collapses to single
- * column on mobile.
- * ========================================================================== */
-.apex-footer {
-    border-top: 1px solid #D9D7CC;
-    background: #F1EFE8;
-    color: #5F5E5A;
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 0.82rem;
-    padding: 22px 28px 24px;
-    margin-top: 48px;
-}
-.apex-footer-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 16px;
-    max-width: 1200px;
-    margin: 0 auto;
-}
-.apex-footer-row + .apex-footer-row { margin-top: 8px; }
-.apex-footer-brand {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-.apex-footer-wordmark { font-weight: 600; font-size: 0.95rem; line-height: 1; }
-.apex-footer-apex { color: #1D9E75; font-weight: 500; }
-.apex-footer-rest { color: #1E1E1A; font-weight: 700; }
-.apex-footer-tagline {
-    color: #5F5E5A;   /* 2026-07-25: #8a8a95 was 2.97:1 on the cream footer */
-    font-size: 0.74rem;
-    font-family: 'JetBrains Mono', ui-monospace, monospace;
-}
-.apex-footer-tagline .ftr-stat {
-    color: #1D9E75;
-    font-weight: 600;
-}
-.apex-footer-links { display: flex; gap: 18px; align-items: center; }
-.apex-footer-links a {
-    color: #5F5E5A;   /* 2026-07-25: 2.97:1 -> 7.0:1 */
-    text-decoration: none;
-    font-weight: 500;
-    transition: color 0.15s;
-}
-.apex-footer-links a:hover { color: #1D9E75; }
-.apex-footer-copy { color: #4a4a55; font-size: 0.72rem; }
-.apex-footer-legal { display: flex; gap: 12px; }
-.apex-footer-legal a {
-    color: #6b6b7b;
-    text-decoration: none;
-    font-size: 0.72rem;
-}
-.apex-footer-legal a:hover { color: #c8c8d0; }
-.apex-footer-legal-sep { color: #2a2a35; }
-
-@media (max-width: 600px) {
-    .apex-footer { padding: 18px 16px 22px; margin-top: 32px; }
-    .apex-footer-row {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 8px;
-    }
-    .apex-footer-tagline { font-size: 0.7rem; }
-    .apex-footer-links { gap: 16px; }
-}
-/* ============================================================================
- * 2026-05-09: Marcus paused Form Trends sub-tab.
- * 2026-05-15: Hero stat card restored — Pinnacle moat now 29/35 weeks · +0.074.
- * ========================================================================== */
-.subtab-button[onclick*="showSub(0, 1)"] { display: none !important; }
-
-/* ============================================================================
- * Public tools offline (2026-05-13): hide all nav links to /rank-milestones
- * and /solver/solver_app across solver/site until Marcus re-enables. Removing
- * this block restores the links without code changes.
- * ========================================================================== */
-/* Rank Predictor stays hidden (scrap). Solver links restored 2026-05-14. */
-a[href*="rank-milestones"],
-a[href*="rank_milestones"] {
-    display: none !important;
-}
-
-/* ============================================================================
- * Team Ratings table — fit cleanly in 390px viewport.
- * Scoped to .data-table only (Player Predictions uses .player-table, Matchweek
- * uses .matchweek-table, Team Predictions uses .heatmap-table / .nextgw-table,
- * Final Table uses .final-table — all left untouched here).
- * ========================================================================== */
-@media (max-width: 480px) {
-    .data-table {
-        table-layout: fixed !important;
-        width: 100% !important;
-    }
-    .data-table th.rank,
-    .data-table td.rank {
-        width: 28px !important;
-        padding-left: 4px !important;
-        padding-right: 2px !important;
-        font-size: 0.78rem !important;
-        text-align: left !important;
-    }
-    .data-table td.team-name,
-    .data-table th:nth-child(2) {
-        width: auto !important;
-        max-width: none !important;
-    }
-    .data-table .team-badge {
-        width: 18px !important;
-        height: 18px !important;
-        margin-right: 4px !important;
-    }
-    .data-table td.team-name {
-        font-size: 0.8rem !important;
-        padding-left: 4px !important;
-        padding-right: 4px !important;
-        white-space: nowrap !important;
-        overflow: hidden !important;
-        text-overflow: ellipsis !important;
-    }
-    .data-table th:nth-child(3),
-    .data-table td:nth-child(3),
-    .data-table th:nth-child(4),
-    .data-table td:nth-child(4) {
-        width: 60px !important;
-    }
-    .data-table th:nth-child(5),
-    .data-table td:nth-child(5) {
-        width: 68px !important;
-    }
-    .data-table thead th {
-        font-size: 0.62rem !important;
-        letter-spacing: 0.04em !important;
-        padding: 8px 4px !important;
-        white-space: nowrap !important;
-        text-align: right !important;
-        overflow: hidden !important;
-    }
-    .data-table thead th:nth-child(1),
-    .data-table thead th:nth-child(2) {
-        text-align: left !important;
-    }
-    .data-table thead th:nth-child(3),
-    .data-table thead th:nth-child(4),
-    .data-table thead th:nth-child(5) {
-        font-size: 11px !important;
-        letter-spacing: 0.05em !important;
-        text-align: right !important;
-    }
-    .data-table td:nth-child(n+3) {
-        padding-left: 4px !important;
-        padding-right: 6px !important;
-        font-size: 0.82rem !important;
-        text-align: right !important;
-        vertical-align: middle !important;
-    }
-    .data-table .bar-container {
-        position: relative !important;
-        display: flex !important;
-        flex-direction: column !important;
-        align-items: stretch !important;
-        gap: 3px !important;
-        background: transparent !important;
-        padding: 4px 0 !important;
-        min-width: 0 !important;
-        width: 100% !important;
-        height: auto !important;
-        box-sizing: border-box !important;
-    }
-    .data-table .bar-label {
-        position: static !important;
-        display: block !important;
-        order: -1 !important;
-        font-size: 0.82rem !important;
-        text-align: right !important;
-        padding-right: 4px !important;
-        font-family: 'JetBrains Mono', ui-monospace, monospace !important;
-        white-space: nowrap !important;
-        line-height: 1.1 !important;
-    }
-    .data-table .bar-container .bar {
-        display: block !important;
-        position: static !important;
-        height: 3px !important;
-        border-radius: 1px !important;
-        opacity: 0.9 !important;
-        max-width: 100% !important;
-    }
-}
-
-/* ============================================================================
- * Wide tables (Player Predictions, Matchweek, Team Predictions, Final Table) —
- * force natural width on mobile so they overflow their container and the
- * auto-wrap JS triggers horizontal scroll instead of squashing columns.
- * ========================================================================== */
-@media (max-width: 480px) {
-    .player-table,
-    .nextgw-table,
-    .matchweek-table,
-    .heatmap-table,
-    .final-table {
-        width: max-content !important;
-        min-width: 100% !important;
-        table-layout: auto !important;
-    }
-    /* Tighter cell padding for these wide tables on mobile */
-    .player-table th, .player-table td,
-    .nextgw-table th, .nextgw-table td,
-    .matchweek-table th, .matchweek-table td,
-    .final-table th, .final-table td {
-        padding: 8px 8px !important;
-        font-size: 12px !important;
-        white-space: nowrap !important;
-    }
-    /* Heatmap cells stay compact */
-    .heatmap-table th, .heatmap-table td {
-        padding: 8px 6px !important;
-        font-size: 11px !important;
-    }
-}
-</style>
-<script>
-/* ============================================================================
- * apex_mobile.js -- runtime mobile fixes for fplapex.com
- *
- * Wraps any <table> wider than its parent in a .apex-table-scroll div so it
- * scrolls horizontally inside the page rather than pushing the body wider
- * (which would force mobile browsers to zoom out).
- *
- * Idempotent. Re-runs on tab/data renders via MutationObserver.
- * ========================================================================== */
-(function () {
-    'use strict';
-    var WRAP_CLASS = 'apex-table-scroll';
-    var WRAPPED_ATTR = 'data-apex-wrapped';
-
-    function wrapOne(table) {
-        if (!table || table.getAttribute(WRAPPED_ATTR) === '1') return false;
-        var parent = table.parentElement;
-        if (!parent) return false;
-        if (parent.classList && parent.classList.contains(WRAP_CLASS)) return false;
-        if (table.hasAttribute('data-no-scroll')) return false;
-
-        var tableW = table.scrollWidth || table.offsetWidth || 0;
-        var availW = parent.clientWidth || window.innerWidth || 0;
-        if (tableW <= availW + 1) return false;
-
-        var wrap = document.createElement('div');
-        wrap.className = WRAP_CLASS;
-        parent.insertBefore(wrap, table);
-        wrap.appendChild(table);
-        table.setAttribute(WRAPPED_ATTR, '1');
-        attachScrollState(wrap);
-        return true;
-    }
-
-    function attachScrollState(wrap) {
-        function update() {
-            var fits = wrap.scrollWidth <= wrap.clientWidth + 2;
-            var atEnd = wrap.scrollLeft + wrap.clientWidth >= wrap.scrollWidth - 2;
-            wrap.classList.toggle('is-fits', fits);
-            wrap.classList.toggle('is-scrolled-end', !fits && atEnd);
-        }
-        update();
-        wrap.addEventListener('scroll', update, { passive: true });
-        setTimeout(update, 600);
-        setTimeout(update, 2000);
-        if (window.ResizeObserver) {
-            try { new ResizeObserver(update).observe(wrap); } catch (e) {}
-        } else {
-            window.addEventListener('resize', update);
-        }
-    }
-
-    function wrapAll() {
-        var tables = document.querySelectorAll('table');
-        for (var i = 0; i < tables.length; i++) wrapOne(tables[i]);
-    }
-
-    function boot() {
-        wrapAll();
-        setTimeout(wrapAll, 500);
-        setTimeout(wrapAll, 1500);
-        setTimeout(wrapAll, 4000);
-
-        if (window.MutationObserver) {
-            var pending = false;
-            var mo = new MutationObserver(function () {
-                if (pending) return;
-                pending = true;
-                requestAnimationFrame(function () {
-                    pending = false;
-                    wrapAll();
-                });
-            });
-            mo.observe(document.body, { childList: true, subtree: true });
-        }
-    }
-
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', boot);
-    } else {
-        boot();
-    }
-
-    window.__apexMobileRewrap = wrapAll;
-})();
-
-// ── Site footer injection (idempotent) ────────────────────────────────────
-// Builds and inserts a brand-stat-utility footer at the END of <body>.
-// Pulls the moat stat from the hero card's data-stat spans if present;
-// falls back to the static tagline otherwise. Re-runs are no-ops.
-(function () {
-    'use strict';
-    var FOOTER_ID = 'apex-site-footer';
-
-    function makeFooter() {
-        if (document.getElementById(FOOTER_ID)) return;
-        if (!document.body) return;
-
-        // 2026-05-09: moat claim hidden -- static tagline only.
-        var moatHTML = 'data-driven football analytics';
-
-        var f = document.createElement('footer');
-        f.id = FOOTER_ID;
-        f.className = 'apex-footer';
-        f.innerHTML =
-            '<div class="apex-footer-row">' +
-                '<div class="apex-footer-brand">' +
-                    '<span class="apex-footer-wordmark">' +
-                        '<span class="apex-footer-rest">FPL </span>' +
-                        '<span class="apex-footer-apex">APEX</span>' +
-                    '</span>' +
-                    '<span class="apex-footer-tagline">' + moatHTML + '</span>' +
-                '</div>' +
-                '<div class="apex-footer-links">' +
-                    '<a href="/evaluation.html">Model Evaluation</a>' +
-                    '<a href="https://x.com/FPLApexHQ" target="_blank" rel="noopener">X / Twitter</a>' +
-                    // 2026-07-02: contact moved to the live domain (ImprovMX forward).
-                    // The old apexfootydata.com inbox dies with the O365 cancellation.
-                    '<a href="mailto:contact@fplapex.com">Email</a>' +
-                '</div>' +
-            '</div>' +
-            '<div class="apex-footer-row">' +
-                '<span class="apex-footer-copy">&copy; 2026 FPL Apex</span>' +
-                '<span class="apex-footer-legal">' +
-                    '<a href="mailto:contact@fplapex.com">Contact</a>' +
-                    '<span class="apex-footer-legal-sep">&middot;</span>' +
-                    // 2026-07-02: real privacy page replaces the alert() popup
-                    // (looked broken/dev-mode; not linkable; blocked by some browsers).
-                    '<a href="/privacy.html">Privacy</a>' +
-                '</span>' +
-            '</div>';
-        document.body.appendChild(f);
-    }
-
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', makeFooter);
-    } else {
-        makeFooter();
-    }
-    // Also run after a tick — moat-stat spans may be filled in by inject scripts after DCL.
-    setTimeout(makeFooter, 600);
-    // 2026-05-09: deferred moat-stat update disabled (claim hidden).
-})();
-
-// ── Mobile: abbreviate Team Ratings headers (2026-05-14) ──────────────────
-// CSS pseudo-element trick was unreliable (OVR going missing). Rewrite the
-// actual th text on narrow viewports. Idempotent — keeps original in data-*
-// so it can be restored if window widens.
-(function () {
-    'use strict';
-    var ABBREV = { 'ATTACK': 'ATT', 'DEFENCE': 'DEF', 'DEFENSE': 'DEF', 'OVERALL': 'OVR' };
-    var ATTR_ORIG = 'data-apex-orig-th';
-
-    function shouldAbbrev() { return window.innerWidth <= 480; }
-
-    function applyHeaderAbbrev() {
-        var tables = document.querySelectorAll('table.data-table');
-        for (var i = 0; i < tables.length; i++) {
-            var ths = tables[i].querySelectorAll('thead th');
-            for (var j = 0; j < ths.length; j++) {
-                var th = ths[j];
-                var txt = (th.textContent || '').trim().toUpperCase();
-                if (shouldAbbrev()) {
-                    if (ABBREV[txt] && !th.hasAttribute(ATTR_ORIG)) {
-                        th.setAttribute(ATTR_ORIG, th.textContent);
-                        th.textContent = ABBREV[txt];
-                    }
-                } else if (th.hasAttribute(ATTR_ORIG)) {
-                    th.textContent = th.getAttribute(ATTR_ORIG);
-                    th.removeAttribute(ATTR_ORIG);
-                }
-            }
-        }
-    }
-
-    function boot() {
-        applyHeaderAbbrev();
-        setTimeout(applyHeaderAbbrev, 500);
-        setTimeout(applyHeaderAbbrev, 1500);
-        window.addEventListener('resize', applyHeaderAbbrev);
-        if (window.MutationObserver) {
-            var pending = false;
-            var mo = new MutationObserver(function () {
-                if (pending) return;
-                pending = true;
-                requestAnimationFrame(function () {
-                    pending = false;
-                    applyHeaderAbbrev();
-                });
-            });
-            mo.observe(document.body, { childList: true, subtree: true });
-        }
-    }
-
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', boot);
-    } else {
-        boot();
-    }
-})();
-</script>
-<!-- ## APEX_MOBILE_FIX:END ## -->
 </body>
 </html>
