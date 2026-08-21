@@ -282,11 +282,15 @@
   </a>
 </div>
 <div class="tab-nav">
-  <a class="tab-button" href="/#tab0">Team Ratings</a>
-  <a class="tab-button" href="/#tab1">Matchweek Predictions</a>
-  <a class="tab-button" href="/#tab2">Team Predictions</a>
-  <a class="tab-button" href="/#tab3">Player Predictions</a>
-  <a class="tab-button" href="/#tab4">Simulated Final Table</a>
+  <!-- APEX_LANDING_NAV_v1 (2026-08-21): this static landing kept the
+       pre-redesign tab bar (#tab0-4 anchors that no longer exist) long after
+       the rest of the site moved on - visitors only reach this page via the
+       logo / Back-to-solver / error routes, so nobody noticed until the GW1
+       post-deadline lockout bounced everyone here. Mirror index.html's nav. -->
+  <a class="tab-button" href="/solver.html">Solver</a>
+  <a class="tab-button" href="/#leaders">Leaders</a>
+  <a class="tab-button" href="/#receipts">Receipts</a>
+  <a class="tab-button" href="/evaluation.html">Model Evaluation</a>
 </div>
 <main>
   <div class="card">
