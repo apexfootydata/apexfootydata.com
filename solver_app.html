@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="2" data-built-at="2026-08-22T00:29:08">
+<meta name="apex-gw" content="2" data-built-at="2026-08-22T00:49:24">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
@@ -37,7 +37,7 @@
 })();
 </script>
 <meta http-equiv="Pragma" content="no-cache">
-<meta name="apex-build" content="20260822-002908">
+<meta name="apex-build" content="20260822-004924">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — FPL Apex</title>
 <meta name="description" content="Plan FPL transfers, chips, and Free Hit squads. Live xG-based projections, a rival head-to-head simulator, and a mini-league table. Free FPL tool.">
@@ -12572,6 +12572,24 @@ html.apex-offseason #view-landing .hero-sub::after {
     const ft0 = Math.max(1, Math.min(5, opts.freeTransfers || 1));
     const bank0 = Math.max(0, +opts.bank || 0);
     const sellOf = opts.sellingPrices || {};   // id -> selling price
+    // APEX_MILP_ROUTES_v1 (2026-08-22, Marcus: "keep the page and execute the
+    // engine"): solve-lines support. forceRollWeeks pins T=0 at those weeks
+    // (Patient = [0]; a full-roll baseline = all weeks); maxOwnIn caps the
+    // ownership of INCOMING candidates (Rank swing = 15) by filtering the
+    // extras pool — owned players are unaffected. Same objective throughout:
+    // routes generated this way cannot disagree with the optimal plan's
+    // maths, only differ by their stated constraint.
+    const forceRoll = new Set((opts.forceRollWeeks || []).map(Number));
+    // maxOwnIn is a CONSTRAINT (incoming transfers banned for candidates over
+    // the cap), never a candidate filter — and candidateUnionOwnCap widens the
+    // shared universe with the best low-owned extras so every solve line sees
+    // the same players. Harness-measured why: filtering extras instead let the
+    // swing solve see value picks the pick's pruning missed and "outscore" the
+    // unconstrained plan by +0.76 — a pruning artifact masquerading as an
+    // objective violation. One universe, constraints only ⇒ the coherence
+    // guarantee (constrained ≤ unconstrained) is mathematical again.
+    const maxOwnIn = (typeof opts.maxOwnIn === 'number') ? opts.maxOwnIn : null;
+    const unionCap = (typeof opts.candidateUnionOwnCap === 'number') ? opts.candidateUnionOwnCap : null;
 
     // ── candidate pruning: squad ∪ top-N per position by horizon pts ──────
     const sqIds = new Set(squad.map(p => p.id));
@@ -12585,8 +12603,14 @@ html.apex-offseason #view-landing .hero-sub::after {
     const cap = (typeof opts.candidateCap === 'number') ? opts.candidateCap : 40;
     let extras = [];
     for (const et of [1, 2, 3, 4]) {
-      const cs = pool.filter(p => p.element_type === et && !sqIds.has(p.id))
-        .sort((a, b) => hxp(b) - hxp(a)).slice(0, extrasPerPos[et]);
+      const byXp = pool.filter(p => p.element_type === et && !sqIds.has(p.id))
+        .sort((a, b) => hxp(b) - hxp(a));
+      let cs = byXp.slice(0, extrasPerPos[et]);
+      if (unionCap !== null) {
+        const low = byXp.filter(p => (+p.own || 0) <= unionCap).slice(0, extrasPerPos[et]);
+        const seen = new Set(cs.map(p => p.id));
+        for (const p of low) if (!seen.has(p.id)) { cs.push(p); seen.add(p.id); }
+      }
       extras = extras.concat(cs);
     }
     extras.sort((a, b) => hxp(b) - hxp(a));
@@ -12648,6 +12672,15 @@ html.apex-offseason #view-landing .hero-sub::after {
         subjectTo.push({ name: `cont_${i}_${w}`, vars: cont, bnds: { type: glpk.GLP_FX, ub: rhs, lb: rhs } });
         // tin + tout <= 1
         subjectTo.push({ name: `tio_${i}_${w}`, vars: [{ name: vin(i, w), coef: 1 }, { name: vout(i, w), coef: 1 }], bnds: { type: glpk.GLP_UP, ub: 1, lb: 0 } });
+        // maxOwnIn: high-owned non-squad candidates cannot be BOUGHT (pure
+        // constraint on the shared universe — owned players unaffected).
+        // A CONSTRAINT row, not a bounds entry: glpk.js silently ignores
+        // bounds on BINARY variables (harness-caught — the swing line bought
+        // 25%-owned Virgil straight through the "ban").
+        if (maxOwnIn !== null && !sqIds.has(p.id) && (+p.own || 0) > maxOwnIn) {
+          subjectTo.push({ name: `ownban_${i}_${w}`, vars: [{ name: vin(i, w), coef: 1 }],
+                           bnds: { type: glpk.GLP_UP, ub: 0, lb: 0 } });
+        }
         // objective: lineup + captain + bench
         const pw = ptsAt(p, w);
         if (pw) {
@@ -12678,7 +12711,8 @@ html.apex-offseason #view-landing .hero-sub::after {
       const tVars = C.map((p, i) => ({ name: vin(i, w), coef: 1 }));
       tVars.push({ name: vT(w), coef: -1 });
       subjectTo.push({ name: `tcnt_${w}`, vars: tVars, bnds: { type: glpk.GLP_FX, ub: 0, lb: 0 } });
-      bounds.push({ name: vT(w), type: tail ? glpk.GLP_FX : glpk.GLP_DB, ub: tail ? 0 : 5, lb: 0 });
+      const _rollPinned = tail || forceRoll.has(w);
+      bounds.push({ name: vT(w), type: _rollPinned ? glpk.GLP_FX : glpk.GLP_DB, ub: _rollPinned ? 0 : 5, lb: 0 });
       bounds.push({ name: vP(w), type: glpk.GLP_DB, ub: 5, lb: 0 });
 
       // FT stock: vF(0) fixed; hits P_w >= T_w - ft_w
@@ -12752,26 +12786,33 @@ html.apex-offseason #view-landing .hero-sub::after {
     if (!ok) return { status: 'infeasible', glpkStatus: st };
     const V = res.result.vars || {};
     const weeks = [];
+    let xpTotal = 0;
     for (let w = 0; w < H; w++) {
-      const inNames = [], outNames = [], xi = [], bench = [];
-      let capName = null;
+      const inNames = [], outNames = [], inIds = [], outIds = [], xi = [], bench = [];
+      let capName = null, xiXp = 0;
       for (let i = 0; i < N; i++) {
-        if ((V[vin(i, w)] || 0) > 0.5) inNames.push(C[i].web_name);
-        if ((V[vout(i, w)] || 0) > 0.5) outNames.push(C[i].web_name);
+        if ((V[vin(i, w)] || 0) > 0.5) { inNames.push(C[i].web_name); inIds.push(C[i].id); }
+        if ((V[vout(i, w)] || 0) > 0.5) { outNames.push(C[i].web_name); outIds.push(C[i].id); }
         if ((V[vx(i, w)] || 0) > 0.5) {
-          if ((V[vs(i, w)] || 0) > 0.5) xi.push(C[i].web_name); else bench.push(C[i].web_name);
-          if ((V[vc(i, w)] || 0) > 0.5) capName = C[i].web_name;
+          const _pw = ptsAt(C[i], w);
+          if ((V[vs(i, w)] || 0) > 0.5) { xi.push(C[i].web_name); xiXp += _pw; }
+          else bench.push(C[i].web_name);
+          if ((V[vc(i, w)] || 0) > 0.5) { capName = C[i].web_name; xiXp += _pw; }
         }
       }
+      xpTotal += xiXp;
       weeks.push({
         week: w, gwIdx: startIdx + w,
         transfersIn: inNames, transfersOut: outNames,
+        transfersInIds: inIds, transfersOutIds: outIds,
         roll: inNames.length === 0,
         ft: Math.round(V[vF(w)] || 0), hits: Math.round(V[vP(w)] || 0),
         bank: round2(V[vB(w)] || 0), captain: capName, xi, bench,
+        xiXp: round2(xiXp),
       });
     }
     return { status: 'optimal', objective: round2(res.result.z || 0), weeks,
+             xpTotal: round2(xpTotal),
              candidates: N, binariesCount: prob.binaries.length };
   }
 
@@ -13315,6 +13356,21 @@ html.apex-offseason #view-landing .hero-sub::after {
       var m = moments(nm, theirs), obj = objFromMoments(m.mean, m.sd, stance, margin);
       out.push({ label: 'Captain ' + info(p.id).name, sub: 'instead of ' + info(curCap).name, obj: obj, mine: nm });
     });
+    // APEX_RIVAL_WC_AWARE_v1 (2026-08-22, Marcus: "does the solver not know i
+    // wildcarded this week"): it CANNOT know on its own — FPL's public API
+    // only reveals active_chip in the picks endpoint AFTER the deadline (the
+    // same reason the rival banner says "using their GW1 team"). The user's
+    // signal is the WC pill: when sel-wc is set to the CURRENT gameweek,
+    // moves are free and unlimited, so the "(1 free transfer)" framing is
+    // wrong. v1: honest labels + a banner; a multi-move duel cover-set is a
+    // solveMultiPeriod job (queued with the MILP wiring).
+    var wcNow = false;
+    try {
+      var _wcGw = parseInt((document.getElementById('sel-wc') || {}).value || 0, 10);
+      var _curGw = (window.TEAM_META && TEAM_META.gw_range && typeof activeGwIdx === 'number')
+        ? TEAM_META.gw_range[activeGwIdx] : null;
+      wcNow = !!(_wcGw && _curGw && _wcGw === _curGw);
+    } catch (eWc) {}
     // (2) single transfers (no hit — 1 FT). block=cover their diffs; chase=high-upside non-owned.
     // Legality: exclude ALL 15 owned players (not just XI), enforce 3-per-club, use SELLING price not buy price.
     var ownedIds = {}; try { if (typeof SQUAD_DATA !== 'undefined' && SQUAD_DATA) SQUAD_DATA.forEach(function (q) { ownedIds[q.id] = 1; }); } catch (e) {}
@@ -13338,7 +13394,7 @@ html.apex-offseason #view-landing .hero-sub::after {
       considered++;
       var nm2 = mine.map(function (q) { return q.id === outCand.id ? { id: B.id, cap: false } : { id: q.id, cap: q.cap }; });
       var mm = moments(nm2, theirs), obj2 = objFromMoments(mm.mean, mm.sd, stance, margin);
-      out.push({ label: B.d.name + ' in', sub: 'for ' + A.name + ' (1 free transfer)', obj: obj2, mine: nm2 });
+      out.push({ label: B.d.name + ' in', sub: 'for ' + A.name + (wcNow ? ' (free — wildcard week)' : ' (1 free transfer)'), obj: obj2, mine: nm2 });
     }
     out.forEach(function (o) { o.delta = o.obj - baseObj; });
     out.sort(function (a, b) { return b.obj - a.obj; });
@@ -13349,7 +13405,17 @@ html.apex-offseason #view-landing .hero-sub::after {
     var box = $('rival-suggest'); if (!box) return;
     var sug = suggestions(mine, theirs, stance, margin);
     if (!sug.length) { box.innerHTML = '<div style="color:var(--muted);font-size:.85rem">No move beats standing pat this week — your current team is the play.</div>'; return; }
-    box.innerHTML = '<div style="font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:8px;">Suggested moves for this duel</div>' +
+    // APEX_RIVAL_WC_AWARE_v1: say so when the WC pill covers this week.
+    var _wcNote = '';
+    try {
+      var _wg = parseInt((document.getElementById('sel-wc') || {}).value || 0, 10);
+      var _cg = (window.TEAM_META && TEAM_META.gw_range && typeof activeGwIdx === 'number')
+        ? TEAM_META.gw_range[activeGwIdx] : null;
+      if (_wg && _cg && _wg === _cg) {
+        _wcNote = '<div style="font-size:.78rem;color:var(--muted);margin-bottom:8px;">Wildcard set for this week — every move below is FREE and you are not limited to one; these are the best single covers, ranked. (The site only learns your chip from FPL after the deadline — the WC pill is what tells it now.)</div>';
+      }
+    } catch (eWn) {}
+    box.innerHTML = '<div style="font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:8px;">Suggested moves for this duel</div>' + _wcNote +
       '<div style="display:flex;gap:10px;flex-wrap:wrap;">' + sug.map(function (o, i) {
         return '<button data-i="' + i + '" onclick="rivalApply(' + i + ')" style="flex:1;min-width:200px;text-align:left;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:11px 14px;cursor:pointer;color:var(--fg);font-family:inherit;">' +
           '<div style="font-weight:800;font-size:.92rem;">' + o.label + '</div>' +
@@ -13835,7 +13901,108 @@ html.apex-offseason #view-landing .hero-sub::after {
     return _txpRouteTotal({ moves: [], hits: 0 }, startIdx);
   }
 
-  // ── Compute all three routes ──────────────────────────────────────────────
+  // ── APEX_MILP_ROUTES_v1 (2026-08-22, Marcus: "keep the page and execute the
+  // engine") — the routes are now SOLVE LINES from the one-planner MILP
+  // (ApexSolver.solveMultiPeriod): the same objective solved three times under
+  // three constraints, plus a full-roll baseline for the honest xP totals.
+  //   Model's pick  = unconstrained optimal plan
+  //   Patient       = week-0 transfers pinned to 0
+  //   Rank swing    = incoming players capped at 15% ownership
+  // Because it is ONE objective, "a constrained route quietly beating the
+  // pick on the pick's own maths" is structurally impossible — the exact
+  // incoherence Marcus screenshotted on 08-22. Displayed totals stay PURE
+  // xP vs no transfers (comparable, no economics units); the BEST badge is
+  // awarded on the full objective (xP + FT/bank economics), so Patient can
+  // honestly show more raw xP while the pick explains what the early move
+  // buys. Legacy staged heuristic (_txpComputeRoutes below) is the fail-soft
+  // fallback and the kill switch: window.APEX_MILP_ROUTES = false.
+  var _txpMilpCache = { key: null, routes: null, inflight: false };
+  function _txpMilpOn() {
+    try {
+      if (typeof window !== 'undefined' && window.APEX_MILP_ROUTES === false) return false;
+      return !!(typeof window !== 'undefined' && window.ApexSolver
+        && typeof window.ApexSolver.solveMultiPeriod === 'function');
+    } catch (e) { return false; }
+  }
+  function _txpMilpKey(startIdx) {
+    var sq = _txpLiveSquad() || [];
+    return startIdx + '|' + sq.map(function (p) { return p.id; }).sort().join(',');
+  }
+  function _txpPoolById(id) {
+    var pool = _txpPool();
+    for (var i = 0; i < pool.length; i++) if (pool[i].id === id) return pool[i];
+    return null;
+  }
+  // Adapt one MILP plan to the legacy route-state shape the renderer reads:
+  // steps [{w, gw, moves:[{out, in, w}]}], hits. Outs are paired with ins by
+  // position (display pairing only — the MILP itself needs no pairing).
+  function _txpMilpAdapt(plan, startIdx, stepsShown) {
+    var tm = _txpMeta();
+    var steps = [], hits = 0, later = 0;
+    for (var w = 0; w < plan.weeks.length; w++) {
+      var wk = plan.weeks[w];
+      hits += wk.hits || 0;
+      var outs = (wk.transfersOutIds || []).map(_txpPoolById).filter(Boolean);
+      var ins = (wk.transfersInIds || []).map(_txpPoolById).filter(Boolean);
+      if (w >= stepsShown) { later += ins.length; continue; }
+      var moves = [];
+      for (var j = 0; j < ins.length; j++) {
+        var inP = ins[j];
+        var k = -1;
+        for (var q = 0; q < outs.length; q++) if (outs[q] && outs[q].element_type === inP.element_type) { k = q; break; }
+        var outP = (k >= 0) ? outs.splice(k, 1)[0] : outs.shift();
+        if (outP) moves.push({ out: outP, in: inP, w: w });
+      }
+      steps.push({ w: w, gw: tm.gw_range[startIdx + w], moves: moves });
+    }
+    return { steps: steps, hits: hits, laterMoves: later, milp: true };
+  }
+  function _txpMilpRoutes(startIdx) {
+    var tm = _txpMeta();
+    var sq = _txpLiveSquad();
+    if (!tm || !sq || sq.length !== 15) return Promise.resolve(null);
+    var ft = 1, bank = 0;
+    try {
+      var preTx = (typeof _transfersAppliedByGw !== 'undefined'
+        && _transfersAppliedByGw && _transfersAppliedByGw[startIdx]) || 0;
+      ft = Math.max(1, ((tm.free_transfers || 1) - preTx));
+      bank = Math.max(0, tm.bank || 0);
+    } catch (e) {}
+    var base = {
+      horizon: 6, startIdx: startIdx, freeTransfers: ft, bank: bank,
+      sellingPrices: tm.selling_prices || {}, timeLimitSec: 45,
+      // One shared candidate universe for all four solves (incl. the best
+      // low-owned extras), so the coherence guarantee is mathematical and the
+      // pick gets the same value picks the swing sees. gap tightened so the
+      // displayed plans don't wobble between renders.
+      candidateUnionOwnCap: TXP_EO_DIFF_MAX, gap: 0.005,
+    };
+    var S = window.ApexSolver;
+    var allRoll = [0, 1, 2, 3, 4, 5];
+    return (async function () {
+      var model = await S.solveMultiPeriod(_txpPool(), sq, base);
+      if (!model || model.status !== 'optimal') return null;
+      // Patient: if the pick already rolls week 0, it IS the patient plan.
+      var patient = (model.weeks[0] && model.weeks[0].roll)
+        ? model
+        : await S.solveMultiPeriod(_txpPool(), sq, Object.assign({}, base, { forceRollWeeks: [0] }));
+      var swing = await S.solveMultiPeriod(_txpPool(), sq, Object.assign({}, base, { maxOwnIn: TXP_EO_DIFF_MAX }));
+      var baseline = await S.solveMultiPeriod(_txpPool(), sq, Object.assign({}, base, { forceRollWeeks: allRoll }));
+      if (!patient || patient.status !== 'optimal' || !swing || swing.status !== 'optimal'
+          || !baseline || baseline.status !== 'optimal') return null;
+      var W = Math.min(TXP_WINDOW, model.weeks.length);
+      return {
+        startIdx: startIdx, window: W,
+        lastGw: tm.gw_range[Math.min(startIdx + model.weeks.length - 1, tm.gw_range.length - 1)],
+        milp: true,
+        model:   { state: _txpMilpAdapt(model, startIdx, W),   delta: model.xpTotal - baseline.xpTotal,   objective: model.objective },
+        patient: { state: _txpMilpAdapt(patient, startIdx, W), delta: patient.xpTotal - baseline.xpTotal, objective: patient.objective },
+        swing:   { state: _txpMilpAdapt(swing, startIdx, W),   delta: swing.xpTotal - baseline.xpTotal,   objective: swing.objective },
+      };
+    })();
+  }
+
+  // ── Compute all three routes (LEGACY staged heuristic — the MILP fallback) ─
   function _txpComputeRoutes() {
     var tm = _txpMeta();
     var startIdx = _txpGwIdx();
@@ -14031,16 +14198,53 @@ html.apex-offseason #view-landing .hero-sub::after {
         _txpBind(body);
         return;
       }
-      var routes = _txpComputeRoutes();
+      var routes = null;
+      if (_txpMilpOn()) {
+        var mk = _txpMilpKey(startIdx);
+        if (_txpMilpCache.key === mk && _txpMilpCache.routes) {
+          routes = _txpMilpCache.routes;
+        } else {
+          if (!_txpMilpCache.inflight) {
+            _txpMilpCache.inflight = true;
+            _txpMilpRoutes(startIdx).then(function (r) {
+              _txpMilpCache.inflight = false;
+              if (r) { _txpMilpCache.key = mk; _txpMilpCache.routes = r;
+                       try { window._renderTransferPaths(); } catch (e3) {} }
+              else { _txpMilpCache.key = 'FAILED|' + mk; _txpMilpCache.routes = null;
+                     try { window._renderTransferPaths(); } catch (e4) {} }
+            }).catch(function () {
+              _txpMilpCache.inflight = false;
+              _txpMilpCache.key = 'FAILED|' + mk; _txpMilpCache.routes = null;
+              try { window._renderTransferPaths(); } catch (e5) {} });
+          }
+          if (_txpMilpCache.key !== 'FAILED|' + mk) {
+            body.innerHTML = head
+              + '<div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:18px 20px;font-size:.85rem;color:var(--muted);">'
+              + 'Solving the three routes with the one-planner optimiser\u2026</div>';
+            return;
+          }
+          // MILP failed — fall through to the legacy engine, loudly.
+          try { console.warn('[txp] MILP routes failed — legacy staged engine serving this render'); } catch (e6) {}
+        }
+      }
+      if (!routes) routes = _txpComputeRoutes();
       if (!routes) { body.innerHTML = ''; return; }
       var order = ['model', 'patient', 'swing'];
-      var bestKey = order.reduce(function (a, b) { return routes[b].delta > routes[a].delta ? b : a; }, 'model');
+      // APEX_MILP_ROUTES_v1: with one objective, the BEST badge is decided on
+      // the FULL objective (xP + FT/bank economics) — a constrained line can
+      // show more raw xP (Patient keeps the FT's value, which is not xP) but
+      // it can never out-SCORE the pick on the pick's own maths.
+      var bestKey = routes.milp
+        ? order.reduce(function (a, b) { return routes[b].objective > routes[a].objective ? b : a; }, 'model')
+        : order.reduce(function (a, b) { return routes[b].delta > routes[a].delta ? b : a; }, 'model');
       var cards = order.map(function (k) {
         return _txpCardHtml(k, routes[k], routes, routes.startIdx, routes.lastGw, k === bestKey);
       }).join('');
+      var subtitle = routes.milp
+        ? ('All three routes solved by the ONE planner — same objective, different constraint (pick = unconstrained · patient = bank this week · swing = incoming under ' + TXP_EO_DIFF_MAX + '% owned) · totals to GW' + routes.lastGw + ' are pure xPts vs making no transfers, hits netted · best badge decided on the full objective incl. the banked transfer\u2019s value · the plan-ahead tree decides what to apply.')
+        : ('Staged over the next ' + routes.window + ' gameweeks · totals run to GW' + routes.lastGw + ' vs making no transfers, hits already netted · the plan-ahead tree decides what to apply — these routes show the shape of a path, re-checked every week as prices and news land.');
       body.innerHTML = head
-        + '<p class="muted" style="font-size:.8rem;margin:0 0 12px;">Staged over the next ' + routes.window
-        + ' gameweeks · totals run to GW' + routes.lastGw + ' vs making no transfers, hits already netted · the plan-ahead tree decides what to apply — these routes show the shape of a path, re-checked every week as prices and news land.</p>'
+        + '<p class="muted" style="font-size:.8rem;margin:0 0 12px;">' + subtitle + '</p>'
         + '<div style="display:flex;gap:12px;flex-wrap:wrap;align-items:stretch;">' + cards + '</div>'
         + '<p style="font-size:.76rem;color:var(--muted);margin:10px 0 0;">Want to branch it yourself? '
         + '<a href="#" class="txp-tree-link" style="color:#1D9E75;font-weight:700;">Open the full plan-ahead tree →</a></p>';
@@ -14086,6 +14290,7 @@ html.apex-offseason #view-landing .hero-sub::after {
     bestMove: _txpBestMove, buildRoute: _txpBuildRoute, routeTotal: _txpRouteTotal,
     newState: _txpNewState, computeRoutes: _txpComputeRoutes, eo: _txpEo, sell: _txpSell,
     banned: _txpBanned, locked: _txpLocked, lbOn: _txpLbOn,
+    milpRoutes: _txpMilpRoutes, milpAdapt: _txpMilpAdapt, milpOn: _txpMilpOn,   // APEX_MILP_ROUTES_v1
   };
 })();
 
@@ -17011,7 +17216,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1787354947-GW2-c6f0c128";
+const BUILD_VERSION = "1787356164-GW2-c6f0c128";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = false;
@@ -17019,7 +17224,7 @@ window.APEX_SQUAD_ROLLBACK = false;
 let FPL_ID = null;
 let SQUAD_DATA = [];
 </script>
-<script src="/apex_pool.js?v=1787354947-GW2-c6f0c128"></script>
+<script src="/apex_pool.js?v=1787356164-GW2-c6f0c128"></script>
 <script>
 const PLAYER_NAMES = {"1": "Raya", "2": "Arrizabalaga", "3": "Meslier", "4": "Gabriel", "5": "J.Timber", "6": "Saliba", "7": "Lewis-Skelly", "8": "Calafiori", "9": "Hincapie", "10": "White", "11": "Mosquera", "12": "Saka", "13": "Rice", "14": "Eze", "15": "\u00d8degaard", "16": "Madueke", "17": "Merino", "18": "Martinelli", "19": "Zubimendi", "20": "Dowman", "22": "Nwaneri", "23": "F\u00e1bio Vieira", "24": "Nelson", "25": "Gy\u00f6keres", "26": "Havertz", "27": "G.Jesus", "31": "Konsa", "452": "Bruno G.", "557": "Tzolis", "28": "Martinez", "29": "M.Bizot", "30": "Digne", "32": "Cash", "33": "Mings", "34": "Pau", "35": "Bogarde", "36": "Maatsen", "37": "Lindel\u00f6f", "38": "A.Garc\u00eda", "39": "Nedeljkovic", "41": "Buend\u00eda", "44": "Bailey", "45": "McGinn", "46": "Barkley", "47": "Kamara", "48": "Onana", "49": "Iling Jr", "50": "Burrowes", "51": "George Hemmings", "52": "Alysson", "53": "Manzambi", "54": "Gomes", "55": "Watkins", "56": "Abraham", "160": "Garnacho", "582": "Madjo", "596": "Ruggeri", "597": "Suzuki", "57": "Petrovi\u0107", "58": "Forster", "59": "Dennis", "60": "Hill", "61": "Truffert", "62": "Diakit\u00e9", "63": "Milosavljevi\u0107", "64": "Smith", "65": "J.Araujo", "66": "Soler", "67": "Rayan", "68": "Tavernier", "69": "Scott", "70": "Kluivert", "71": "Cook", "72": "Gannon-Doak", "73": "Adams", "74": "Brooks", "75": "Christie", "76": "T\u00f3th.A", "77": "Adli", "78": "Kroupi.Jr", "79": "Evanilson", "80": "Enes \u00dcnal", "81": "Rodr\u00edguez", "566": "Silva", "573": "Sanchez", "82": "Kelleher", "83": "Valdimarsson", "84": "Collins", "85": "Van den Berg", "86": "Lewis-Potter", "87": "Ajer", "88": "Kayode", "89": "Henry", "90": "Hickey", "91": "Pinnock", "92": "Ji-soo", "93": "Schuster", "94": "Schade", "95": "O.Dango", "96": "Damsgaard", "97": "Jensen", "98": "Janelt", "99": "Milambo", "100": "Carvalho", "102": "Yarmoliuk", "103": "Dasilva", "105": "Anthony", "106": "Thiago", "107": "Furo", "108": "Wilson", "565": "M.Sangar\u00e9", "109": "Verbruggen", "111": "Steele", "113": "F.Kad\u0131o\u011flu", "114": "Boscagli", "115": "De Cuyper", "116": "Dunk", "117": "Coppola", "118": "Igor", "119": "Costinha", "120": "Svoboda", "121": "Mitoma", "122": "Minteh", "123": "Hinshelwood", "124": "Gro\u00df", "125": "Georginio", "126": "O'Riley", "127": "Gomez", "128": "Buonanotte", "129": "Ayari", "130": "Wieffer", "131": "Baleba", "132": "Howell", "133": "Watson", "134": "Oriola", "135": "Yohanna", "137": "Tzimas", "138": "Kostoulas", "139": "Ferguson", "328": "Struijk", "504": "Vuskovic", "594": "David", "600": "Osman", "40": "Rogers", "101": "Henderson", "136": "Welbeck", "140": "S\u00e1nchez", "141": "J\u00f6rgensen", "142": "James", "143": "Chalobah", "144": "Gusto", "145": "Fofana", "146": "B.Badiashile", "147": "Tosin", "148": "Hato", "149": "Colwill", "150": "M.Sarr", "151": "Acheampong", "152": "Palestra", "153": "Disasi", "154": "Palmer", "155": "Enzo", "156": "Neto", "157": "Est\u00eav\u00e3o", "158": "Gittens", "159": "Caicedo", "161": "Lavia", "163": "D.Essugo", "164": "Quenda", "165": "Jo\u00e3o Pedro", "166": "N.Jackson", "167": "Delap", "168": "Marc Guiu", "169": "Mheuka", "170": "Emegha", "200": "Lacroix", "560": "Penders", "561": "Anselmino", "568": "Barco", "578": "Mudryk", "583": "Chavarria", "104": "Onyeka", "110": "Rushworth", "171": "Dovin", "172": "Wilson", "173": "Thomas", "174": "Kitching", "175": "van Ewijk", "176": "Dasilva", "177": "Kesler-Hayden", "178": "Bidwell", "179": "Latibeaudiere", "180": "Woolfenden", "181": "Brau", "182": "Amenda", "183": "Rudoni", "184": "Grimes", "185": "Sakamoto", "186": "Mason-Clark", "187": "Eccles", "188": "Torp", "189": "Shepherd", "190": "Tchaouna", "191": "Borges Rodrigues", "192": "Andrews", "193": "Wright", "194": "Thomas-Asante", "195": "Simms", "196": "Markelo", "197": "Bassette", "492": "Awoniyi", "575": "Yirenkyi", "584": "Hamer", "599": "Cherif", "42": "Guessand", "198": "Henderson", "199": "Benitez", "201": "Mu\u00f1oz", "202": "Richards", "203": "Canvot", "204": "Mitchell", "205": "Sosa", "206": "Chadi Riad", "207": "Mingueza", "208": "Sarr", "210": "Wharton", "211": "Yeremy", "212": "Hughes", "213": "Lerma", "214": "Kamada", "215": "Devenny", "216": "Esse", "217": "M.Fran\u00e7a", "218": "Doucour\u00e9", "219": "J.Rak-Sakyi", "220": "Cardines", "221": "Drakes-Thomas", "222": "Strand Larsen", "223": "Mateta", "224": "Nketiah", "225": "Uche", "241": "McNeil", "555": "Matthews", "577": "Tomiyasu", "588": "Khalaili", "595": "Gozo", "21": "N\u00f8rgaard", "209": "Johnson", "226": "Pickford", "227": "Travers", "228": "King", "229": "Tarkowski", "230": "Branthwaite", "231": "Keane", "232": "O'Brien", "233": "Mykolenko", "234": "Patterson", "235": "Aznou", "236": "Dewsbury-Hall", "237": "Ndiaye", "239": "Garner", "240": "Iroegbunam", "242": "George", "243": "Alcaraz", "244": "Armstrong", "245": "Dibling", "246": "R\u00f6hl", "247": "Hackney", "248": "Beto", "249": "Barry", "250": "Leno", "251": "Lecomte", "252": "McNally", "253": "Andersen", "254": "Robinson", "255": "J.Cuenca", "256": "Tete", "257": "Bassey", "258": "Castagne", "261": "Iwobi", "262": "Smith Rowe", "263": "Kevin", "264": "Bobb", "265": "Berge", "266": "Cairney", "268": "King", "269": "Sessegnon", "270": "Reed", "271": "Muniz", "272": "Kusi-Asare", "569": "Gonzalo", "570": "Palacios", "580": "Charles", "273": "Phillips", "274": "Butland", "275": "Cartwright", "276": "Lo-Tutala", "277": "Egan", "278": "Hughes", "279": "Ajayi", "280": "Coyle", "281": "Drameh", "282": "Giles", "283": "Jacob", "284": "McCarthy", "285": "McNair", "286": "Belloumi", "287": "Millar", "288": "Dowell", "289": "Crooks", "290": "Slater", "291": "Matazo", "292": "\u00d6m\u00fcr", "293": "Kamara", "294": "Zambrano", "295": "McBurnie", "296": "Akintola", "297": "Gyabi", "298": "Destan", "299": "Burstow", "340": "Gelhardt", "556": "Targett", "563": "Morita", "572": "Tzolakis", "574": "Hjert\u00f8-Dahl", "576": "Stroud", "585": "Herrington", "586": "Mendy", "589": "Gourna-Douath", "259": "Diop", "267": "Luki\u0107", "300": "Walton", "301": "Palmer", "302": "Button", "303": "Kipr\u00e9", "304": "O'Shea", "305": "Davis", "306": "Greaves", "307": "Johnson", "308": "Furlong", "309": "N\u00fa\u00f1ez", "310": "Matusiwa", "311": "Burns", "312": "Taylor", "313": "Clarke", "314": "Ogbene", "315": "Fatawu", "316": "Emersonn", "317": "Hirst", "318": "Philogene", "319": "Szmodics", "320": "Akpom", "321": "Walle Egeli", "322": "Al-Hamadi", "323": "McAteer", "324": "Mehmeti", "554": "Van Oevelen", "562": "Maeda", "564": "Scherpen", "571": "Florentino", "591": "Enciso", "592": "Ouattara", "260": "Wilson", "326": "Perri", "327": "Bijol", "329": "Rodon", "330": "Bogle", "331": "Gudmundsson", "332": "Justin", "333": "Bornauw", "334": "Muharemovi\u0107", "335": "Stach", "336": "Okafor", "337": "Aaronson", "338": "Ampadu", "339": "Longstaff", "341": "Gnonto", "342": "Harrison", "343": "James", "344": "Gruev", "345": "Tanaka", "346": "Calvert-Lewin", "347": "Nmecha", "348": "Piroe", "349": "Mateo Joseph", "385": "Trafford", "598": "Elvedi", "350": "A.Becker", "351": "Mamardashvili", "352": "Woodman", "353": "Pecsi", "354": "Jaros", "355": "Davies", "356": "Virgil", "357": "Frimpong", "358": "Kerkez", "359": "Gomez", "360": "Bradley", "361": "Lucky", "362": "Jacquet", "363": "Leoni", "364": "Tsimikas", "365": "Ramsay", "366": "Wirtz", "367": "Gakpo", "368": "Szoboszlai", "369": "Ngumoha", "370": "Chiesa", "371": "Gravenberch", "372": "Mac Allister", "373": "C.Jones", "374": "Endo", "375": "Nyoni", "376": "Bajcetic", "377": "Munoz", "378": "McConnell", "379": "Isak", "380": "Ekitik\u00e9", "381": "Koumas", "382": "Danns", "383": "Elliott", "579": "Araujo", "238": "Grealish", "384": "Donnarumma", "386": "Bettinelli", "387": "O'Reilly", "388": "Gu\u00e9hi", "389": "Matheus N.", "390": "R\u00faben", "391": "Gvardiol", "392": "A\u00eft-Nouri", "393": "Khusanov", "394": "Alleyne", "395": "Lewis", "396": "Vitor Reis", "397": "Semenyo", "398": "Foden", "399": "Cherki", "400": "Doku", "401": "Marmoush", "402": "Rodrigo", "403": "Savinho", "404": "Reijnders", "405": "N.Gonzalez", "406": "Kova\u010di\u0107", "407": "Echeverri", "408": "Phillips", "409": "Mukasa", "410": "Monga", "411": "Haaland", "481": "Anderson", "587": "Rulli", "43": "Tielemans", "162": "Andrey Santos", "325": "Darlow", "412": "Lammens", "413": "Bayindir", "414": "Heaton", "415": "Dorgu", "416": "De Ligt", "417": "Dalot", "418": "Maguire", "419": "Martinez", "420": "Yoro", "421": "Heaven", "422": "Mazraoui", "423": "Shaw", "424": "Amass", "425": "Fredricson", "426": "B.Fernandes", "427": "Mbeumo", "428": "Cunha", "429": "Rashford", "430": "Mount", "431": "Amad", "432": "Mainoo", "433": "Ugarte", "434": "J.Fletcher", "435": "Lacey", "436": "Collyer", "437": "Bendito Mantato", "438": "Fletcher", "439": "\u0160e\u0161ko", "440": "Zirkzee", "441": "Obi", "442": "Pope", "443": "Gillespie", "444": "Jaouen", "445": "Thiaw", "446": "Sch\u00e4r", "447": "Botman", "448": "Burn", "449": "Hall", "450": "Livramento", "451": "A.Murphy", "453": "Barnes", "454": "Elanga", "456": "J.Ramsey", "457": "J.Murphy", "458": "Joelinton", "459": "L.Miley", "460": "Willock", "461": "Tour\u00e9", "462": "Steur", "463": "Woltemade", "464": "Wissa", "465": "Osula", "466": "Neave", "559": "Bamba", "567": "Horn\u00ed\u010dek", "593": "Dedi\u0107", "467": "Sels", "468": "John", "469": "N.Williams", "470": "Morato", "471": "Milenkovi\u0107", "472": "Murillo", "473": "Aina", "474": "Jair Cunha", "475": "Savona", "476": "O.Richards", "477": "Abbott", "478": "Netz", "479": "Bindon", "480": "Gibbs-White", "482": "Hudson-Odoi", "483": "Ndoye", "484": "Hutchinson", "485": "Bakwa", "486": "McAtee", "487": "Dominguez", "488": "I.Sangar\u00e9", "489": "Yates", "490": "Wood", "491": "Igor Jesus", "493": "Kalimuendo", "558": "Schlager", "581": "Diomande", "590": "Benda", "112": "Van Hecke", "455": "Tonali", "494": "Vicario", "495": "Austin", "496": "Kinsky", "497": "Dubravka", "498": "Senesi", "499": "Pedro Porro", "500": "Romero", "501": "Danso", "502": "Robertson", "503": "Van de Ven", "505": "Spence", "506": "Udogie", "507": "Phillips", "508": "Davies", "509": "Byfield", "510": "Rowswell", "511": "Souza", "512": "Kudus", "513": "Xavi", "514": "Tel", "515": "Maddison", "516": "Bentancur", "517": "Odobert", "518": "P.M.Sarr", "519": "Gallagher", "520": "Bergvall", "521": "Kulusevski", "522": "Gray", "523": "Moore", "524": "Olusesi", "525": "Fernandes", "526": "Solanke", "527": "Richarlison", "528": "Scarlett", "529": "Roefs", "530": "Patterson", "531": "Ellborg", "532": "Ballard", "533": "Mukiele", "534": "Hume", "535": "Alderete", "536": "Reinildo", "537": "Seelt", "538": "Hjelde", "539": "O'Nien", "540": "Masuaku", "541": "Meunier", "542": "E.Le F\u00e9e", "543": "Diarra", "544": "Xhaka", "545": "Sadiki", "546": "Adingra", "547": "Mundle", "548": "Rigg", "549": "Talbi", "550": "Jocelin.T", "551": "Angulo", "552": "Brobbey", "553": "Isidor"};
 const TRANSFER_RECS = [];
@@ -35424,7 +35629,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW2</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1787354947-GW2-c6f0c128</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1787356164-GW2-c6f0c128</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
