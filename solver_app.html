@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="2" data-built-at="2026-08-21T21:00:08">
+<meta name="apex-gw" content="2" data-built-at="2026-08-21T22:37:25">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
@@ -37,7 +37,7 @@
 })();
 </script>
 <meta http-equiv="Pragma" content="no-cache">
-<meta name="apex-build" content="20260821-210008">
+<meta name="apex-build" content="20260821-223724">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — FPL Apex</title>
 <meta name="description" content="Plan FPL transfers, chips, and Free Hit squads. Live xG-based projections, a rival head-to-head simulator, and a mini-league table. Free FPL tool.">
@@ -8142,7 +8142,7 @@ html.apex-offseason #view-landing .hero-sub::after {
     BUDGET:         100.0,
     POS_QUOTAS:     { 1: 2, 2: 5, 3: 5, 4: 3 },
     MAX_PER_TEAM:   3,
-    BENCH_WEIGHT:   0.10,    // FH default — bench still matters for auto-subs
+    BENCH_WEIGHT:   0.20,    // APEX_BENCH_WEIGHT_020_v1 (2026-08-21, Marcus's registered after-GW1 call; was 0.10) — bench still matters for auto-subs
     XI_SIZE:        11,
     XI_FORM_MIN:    { 1: 1, 2: 3, 3: 2, 4: 1 },
     XI_FORM_MAX:    { 1: 1, 2: 5, 3: 5, 4: 3 },
@@ -16772,7 +16772,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1787342408-GW2-e99b0439";
+const BUILD_VERSION = "1787348244-GW2-4be8d502";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = false;
@@ -16780,7 +16780,7 @@ window.APEX_SQUAD_ROLLBACK = false;
 let FPL_ID = null;
 let SQUAD_DATA = [];
 </script>
-<script src="/apex_pool.js?v=1787342408-GW2-e99b0439"></script>
+<script src="/apex_pool.js?v=1787348244-GW2-4be8d502"></script>
 <script>
 const PLAYER_NAMES = {"1": "Raya", "2": "Arrizabalaga", "3": "Meslier", "4": "Gabriel", "5": "J.Timber", "6": "Saliba", "7": "Lewis-Skelly", "8": "Calafiori", "9": "Hincapie", "10": "White", "11": "Mosquera", "12": "Saka", "13": "Rice", "14": "Eze", "15": "\u00d8degaard", "16": "Madueke", "17": "Merino", "18": "Martinelli", "19": "Zubimendi", "20": "Dowman", "22": "Nwaneri", "23": "F\u00e1bio Vieira", "24": "Nelson", "25": "Gy\u00f6keres", "26": "Havertz", "27": "G.Jesus", "31": "Konsa", "452": "Bruno G.", "557": "Tzolis", "28": "Martinez", "29": "M.Bizot", "30": "Digne", "32": "Cash", "33": "Mings", "34": "Pau", "35": "Bogarde", "36": "Maatsen", "37": "Lindel\u00f6f", "38": "A.Garc\u00eda", "39": "Nedeljkovic", "41": "Buend\u00eda", "44": "Bailey", "45": "McGinn", "46": "Barkley", "47": "Kamara", "48": "Onana", "49": "Iling Jr", "50": "Burrowes", "51": "George Hemmings", "52": "Alysson", "53": "Manzambi", "54": "Gomes", "55": "Watkins", "56": "Abraham", "160": "Garnacho", "582": "Madjo", "596": "Ruggeri", "597": "Suzuki", "57": "Petrovi\u0107", "58": "Forster", "59": "Dennis", "60": "Hill", "61": "Truffert", "62": "Diakit\u00e9", "63": "Milosavljevi\u0107", "64": "Smith", "65": "J.Araujo", "66": "Soler", "67": "Rayan", "68": "Tavernier", "69": "Scott", "70": "Kluivert", "71": "Cook", "72": "Gannon-Doak", "73": "Adams", "74": "Brooks", "75": "Christie", "76": "T\u00f3th.A", "77": "Adli", "78": "Kroupi.Jr", "79": "Evanilson", "80": "Enes \u00dcnal", "81": "Rodr\u00edguez", "566": "Silva", "573": "Sanchez", "82": "Kelleher", "83": "Valdimarsson", "84": "Collins", "85": "Van den Berg", "86": "Lewis-Potter", "87": "Ajer", "88": "Kayode", "89": "Henry", "90": "Hickey", "91": "Pinnock", "92": "Ji-soo", "93": "Schuster", "94": "Schade", "95": "O.Dango", "96": "Damsgaard", "97": "Jensen", "98": "Janelt", "99": "Milambo", "100": "Carvalho", "102": "Yarmoliuk", "103": "Dasilva", "105": "Anthony", "106": "Thiago", "107": "Furo", "108": "Wilson", "565": "M.Sangar\u00e9", "109": "Verbruggen", "111": "Steele", "113": "F.Kad\u0131o\u011flu", "114": "Boscagli", "115": "De Cuyper", "116": "Dunk", "117": "Coppola", "118": "Igor", "119": "Costinha", "120": "Svoboda", "121": "Mitoma", "122": "Minteh", "123": "Hinshelwood", "124": "Gro\u00df", "125": "Georginio", "126": "O'Riley", "127": "Gomez", "128": "Buonanotte", "129": "Ayari", "130": "Wieffer", "131": "Baleba", "132": "Howell", "133": "Watson", "134": "Oriola", "135": "Yohanna", "137": "Tzimas", "138": "Kostoulas", "139": "Ferguson", "328": "Struijk", "504": "Vuskovic", "594": "David", "600": "Osman", "40": "Rogers", "101": "Henderson", "136": "Welbeck", "140": "S\u00e1nchez", "141": "J\u00f6rgensen", "142": "James", "143": "Chalobah", "144": "Gusto", "145": "Fofana", "146": "B.Badiashile", "147": "Tosin", "148": "Hato", "149": "Colwill", "150": "M.Sarr", "151": "Acheampong", "152": "Palestra", "153": "Disasi", "154": "Palmer", "155": "Enzo", "156": "Neto", "157": "Est\u00eav\u00e3o", "158": "Gittens", "159": "Caicedo", "161": "Lavia", "163": "D.Essugo", "164": "Quenda", "165": "Jo\u00e3o Pedro", "166": "N.Jackson", "167": "Delap", "168": "Marc Guiu", "169": "Mheuka", "170": "Emegha", "200": "Lacroix", "560": "Penders", "561": "Anselmino", "568": "Barco", "578": "Mudryk", "583": "Chavarria", "104": "Onyeka", "110": "Rushworth", "171": "Dovin", "172": "Wilson", "173": "Thomas", "174": "Kitching", "175": "van Ewijk", "176": "Dasilva", "177": "Kesler-Hayden", "178": "Bidwell", "179": "Latibeaudiere", "180": "Woolfenden", "181": "Brau", "182": "Amenda", "183": "Rudoni", "184": "Grimes", "185": "Sakamoto", "186": "Mason-Clark", "187": "Eccles", "188": "Torp", "189": "Shepherd", "190": "Tchaouna", "191": "Borges Rodrigues", "192": "Andrews", "193": "Wright", "194": "Thomas-Asante", "195": "Simms", "196": "Markelo", "197": "Bassette", "492": "Awoniyi", "575": "Yirenkyi", "584": "Hamer", "599": "Cherif", "42": "Guessand", "198": "Henderson", "199": "Benitez", "201": "Mu\u00f1oz", "202": "Richards", "203": "Canvot", "204": "Mitchell", "205": "Sosa", "206": "Chadi Riad", "207": "Mingueza", "208": "Sarr", "210": "Wharton", "211": "Yeremy", "212": "Hughes", "213": "Lerma", "214": "Kamada", "215": "Devenny", "216": "Esse", "217": "M.Fran\u00e7a", "218": "Doucour\u00e9", "219": "J.Rak-Sakyi", "220": "Cardines", "221": "Drakes-Thomas", "222": "Strand Larsen", "223": "Mateta", "224": "Nketiah", "225": "Uche", "241": "McNeil", "555": "Matthews", "577": "Tomiyasu", "588": "Khalaili", "595": "Gozo", "21": "N\u00f8rgaard", "209": "Johnson", "226": "Pickford", "227": "Travers", "228": "King", "229": "Tarkowski", "230": "Branthwaite", "231": "Keane", "232": "O'Brien", "233": "Mykolenko", "234": "Patterson", "235": "Aznou", "236": "Dewsbury-Hall", "237": "Ndiaye", "239": "Garner", "240": "Iroegbunam", "242": "George", "243": "Alcaraz", "244": "Armstrong", "245": "Dibling", "246": "R\u00f6hl", "247": "Hackney", "248": "Beto", "249": "Barry", "250": "Leno", "251": "Lecomte", "252": "McNally", "253": "Andersen", "254": "Robinson", "255": "J.Cuenca", "256": "Tete", "257": "Bassey", "258": "Castagne", "261": "Iwobi", "262": "Smith Rowe", "263": "Kevin", "264": "Bobb", "265": "Berge", "266": "Cairney", "268": "King", "269": "Sessegnon", "270": "Reed", "271": "Muniz", "272": "Kusi-Asare", "569": "Gonzalo", "570": "Palacios", "580": "Charles", "273": "Phillips", "274": "Butland", "275": "Cartwright", "276": "Lo-Tutala", "277": "Egan", "278": "Hughes", "279": "Ajayi", "280": "Coyle", "281": "Drameh", "282": "Giles", "283": "Jacob", "284": "McCarthy", "285": "McNair", "286": "Belloumi", "287": "Millar", "288": "Dowell", "289": "Crooks", "290": "Slater", "291": "Matazo", "292": "\u00d6m\u00fcr", "293": "Kamara", "294": "Zambrano", "295": "McBurnie", "296": "Akintola", "297": "Gyabi", "298": "Destan", "299": "Burstow", "340": "Gelhardt", "556": "Targett", "563": "Morita", "572": "Tzolakis", "574": "Hjert\u00f8-Dahl", "576": "Stroud", "585": "Herrington", "586": "Mendy", "589": "Gourna-Douath", "259": "Diop", "267": "Luki\u0107", "300": "Walton", "301": "Palmer", "302": "Button", "303": "Kipr\u00e9", "304": "O'Shea", "305": "Davis", "306": "Greaves", "307": "Johnson", "308": "Furlong", "309": "N\u00fa\u00f1ez", "310": "Matusiwa", "311": "Burns", "312": "Taylor", "313": "Clarke", "314": "Ogbene", "315": "Fatawu", "316": "Emersonn", "317": "Hirst", "318": "Philogene", "319": "Szmodics", "320": "Akpom", "321": "Walle Egeli", "322": "Al-Hamadi", "323": "McAteer", "324": "Mehmeti", "554": "Van Oevelen", "562": "Maeda", "564": "Scherpen", "571": "Florentino", "591": "Enciso", "592": "Ouattara", "260": "Wilson", "326": "Perri", "327": "Bijol", "329": "Rodon", "330": "Bogle", "331": "Gudmundsson", "332": "Justin", "333": "Bornauw", "334": "Muharemovi\u0107", "335": "Stach", "336": "Okafor", "337": "Aaronson", "338": "Ampadu", "339": "Longstaff", "341": "Gnonto", "342": "Harrison", "343": "James", "344": "Gruev", "345": "Tanaka", "346": "Calvert-Lewin", "347": "Nmecha", "348": "Piroe", "349": "Mateo Joseph", "385": "Trafford", "598": "Elvedi", "350": "A.Becker", "351": "Mamardashvili", "352": "Woodman", "353": "Pecsi", "354": "Jaros", "355": "Davies", "356": "Virgil", "357": "Frimpong", "358": "Kerkez", "359": "Gomez", "360": "Bradley", "361": "Lucky", "362": "Jacquet", "363": "Leoni", "364": "Tsimikas", "365": "Ramsay", "366": "Wirtz", "367": "Gakpo", "368": "Szoboszlai", "369": "Ngumoha", "370": "Chiesa", "371": "Gravenberch", "372": "Mac Allister", "373": "C.Jones", "374": "Endo", "375": "Nyoni", "376": "Bajcetic", "377": "Munoz", "378": "McConnell", "379": "Isak", "380": "Ekitik\u00e9", "381": "Koumas", "382": "Danns", "383": "Elliott", "579": "Araujo", "238": "Grealish", "384": "Donnarumma", "386": "Bettinelli", "387": "O'Reilly", "388": "Gu\u00e9hi", "389": "Matheus N.", "390": "R\u00faben", "391": "Gvardiol", "392": "A\u00eft-Nouri", "393": "Khusanov", "394": "Alleyne", "395": "Lewis", "396": "Vitor Reis", "397": "Semenyo", "398": "Foden", "399": "Cherki", "400": "Doku", "401": "Marmoush", "402": "Rodrigo", "403": "Savinho", "404": "Reijnders", "405": "N.Gonzalez", "406": "Kova\u010di\u0107", "407": "Echeverri", "408": "Phillips", "409": "Mukasa", "410": "Monga", "411": "Haaland", "481": "Anderson", "587": "Rulli", "43": "Tielemans", "162": "Andrey Santos", "325": "Darlow", "412": "Lammens", "413": "Bayindir", "414": "Heaton", "415": "Dorgu", "416": "De Ligt", "417": "Dalot", "418": "Maguire", "419": "Martinez", "420": "Yoro", "421": "Heaven", "422": "Mazraoui", "423": "Shaw", "424": "Amass", "425": "Fredricson", "426": "B.Fernandes", "427": "Mbeumo", "428": "Cunha", "429": "Rashford", "430": "Mount", "431": "Amad", "432": "Mainoo", "433": "Ugarte", "434": "J.Fletcher", "435": "Lacey", "436": "Collyer", "437": "Bendito Mantato", "438": "Fletcher", "439": "\u0160e\u0161ko", "440": "Zirkzee", "441": "Obi", "442": "Pope", "443": "Gillespie", "444": "Jaouen", "445": "Thiaw", "446": "Sch\u00e4r", "447": "Botman", "448": "Burn", "449": "Hall", "450": "Livramento", "451": "A.Murphy", "453": "Barnes", "454": "Elanga", "456": "J.Ramsey", "457": "J.Murphy", "458": "Joelinton", "459": "L.Miley", "460": "Willock", "461": "Tour\u00e9", "462": "Steur", "463": "Woltemade", "464": "Wissa", "465": "Osula", "466": "Neave", "559": "Bamba", "567": "Horn\u00ed\u010dek", "593": "Dedi\u0107", "467": "Sels", "468": "John", "469": "N.Williams", "470": "Morato", "471": "Milenkovi\u0107", "472": "Murillo", "473": "Aina", "474": "Jair Cunha", "475": "Savona", "476": "O.Richards", "477": "Abbott", "478": "Netz", "479": "Bindon", "480": "Gibbs-White", "482": "Hudson-Odoi", "483": "Ndoye", "484": "Hutchinson", "485": "Bakwa", "486": "McAtee", "487": "Dominguez", "488": "I.Sangar\u00e9", "489": "Yates", "490": "Wood", "491": "Igor Jesus", "493": "Kalimuendo", "558": "Schlager", "581": "Diomande", "590": "Benda", "112": "Van Hecke", "455": "Tonali", "494": "Vicario", "495": "Austin", "496": "Kinsky", "497": "Dubravka", "498": "Senesi", "499": "Pedro Porro", "500": "Romero", "501": "Danso", "502": "Robertson", "503": "Van de Ven", "505": "Spence", "506": "Udogie", "507": "Phillips", "508": "Davies", "509": "Byfield", "510": "Rowswell", "511": "Souza", "512": "Kudus", "513": "Xavi", "514": "Tel", "515": "Maddison", "516": "Bentancur", "517": "Odobert", "518": "P.M.Sarr", "519": "Gallagher", "520": "Bergvall", "521": "Kulusevski", "522": "Gray", "523": "Moore", "524": "Olusesi", "525": "Fernandes", "526": "Solanke", "527": "Richarlison", "528": "Scarlett", "529": "Roefs", "530": "Patterson", "531": "Ellborg", "532": "Ballard", "533": "Mukiele", "534": "Hume", "535": "Alderete", "536": "Reinildo", "537": "Seelt", "538": "Hjelde", "539": "O'Nien", "540": "Masuaku", "541": "Meunier", "542": "E.Le F\u00e9e", "543": "Diarra", "544": "Xhaka", "545": "Sadiki", "546": "Adingra", "547": "Mundle", "548": "Rigg", "549": "Talbi", "550": "Jocelin.T", "551": "Angulo", "552": "Brobbey", "553": "Isidor"};
 const TRANSFER_RECS = [];
@@ -19101,7 +19101,21 @@ function _apexSquadValueAt(squad, gwIdx) {
   const r = pickBestXi(squad, gwIdx);
   let v = r.xi.reduce((s, p) => s + _xpAt(p, gwIdx), 0);
   if (r.cap) v += _xpAt(r.cap, gwIdx);
-  v += APEX_BENCH_TRANSFER_WEIGHT * r.bench.reduce((s, p) => s + _xpAt(p, gwIdx), 0);
+  // APEX_SQUADVALUE_BB_AWARE_v1 (2026-08-21, backlog J closed): flat 0.10
+  // bench made the weekly engine chip-blind -- in the planned Bench Boost
+  // week all 15 score, so a transfer that upgrades the BENCH was underpriced
+  // by 90% exactly where it matters most. Same sel-bb read + same
+  // APEX_BB_AWARE_SQUAD gate as every other chip-aware term. TC needs no
+  // term here (captain already counted; ranking unchanged by tripling).
+  let _bwJ = APEX_BENCH_TRANSFER_WEIGHT;
+  try {
+    if (!(typeof window !== 'undefined' && window.APEX_BB_AWARE_SQUAD === false)) {
+      const _bbGJ = parseInt(document.getElementById('sel-bb')?.value || 0, 10);
+      if (Number.isFinite(_bbGJ) && _bbGJ > 0
+          && (TEAM_META.gw_range || []).indexOf(_bbGJ) === gwIdx) _bwJ = 1.0;
+    }
+  } catch (_eJ) {}
+  v += _bwJ * r.bench.reduce((s, p) => s + _xpAt(p, gwIdx), 0);
   return v;
 }
 
@@ -20932,6 +20946,12 @@ function computeTransfers(gwIdx) {
 }
 
 // ──── Roll-vs-Transfer evaluator (added 2026-04-28) ────
+// DEAD CODE — ZERO CALLERS (verified 2026-08-21, APEX_ONE_VERDICT_v1). Its
+// card was removed 2026-04-28 and nothing has called it since. DO NOT wire
+// this back up: it is exactly the kind of parallel roll opinion (own
+// threshold, own plan-B maths) that the 2026-08-07 ruling retired — every
+// roll verdict now comes from the tree via _apexTreeBranch0. Kept only so
+// old references in notes/diffs still resolve; delete on the next big sweep.
 // Decide whether the user should USE their FT this GW or ROLL it to bank
 // 2 FTs for next GW. Critical when next GW is a DGW (Palace GW36 etc.)
 // because 2 swaps capturing the DGW spike often beats one rolling-horizon
@@ -21007,6 +21027,156 @@ function evaluateRollVsTransfer(thisGwIdx) {
     thisGw: thisGw,
     nextGw: nextGw,
   };
+}
+
+// ── APEX_ONE_VERDICT_v1 (2026-08-21) ──────────────────────────────────────────
+// Marcus, GW2: "why would the model be recommending bruno f to palmer... the
+// whole transfer logic is not correct in my opinion. investigate."
+// Root cause: this panel had NO Roll concept — any swap clearing the FT bar
+// was listed, while the plan-ahead tree (same swap metric PLUS the recursive
+// lookahead, which is where a banked FT's option value lives) ranked Roll
+// first on the SAME squad. One page, two verdicts. A roll-vs-transfer banner
+// was built and rejected the same night ("plaster fix"): it was a THIRD
+// opinion with its own maths. This is the opposite — the panel now ASKS THE
+// TREE: the same _ppComputeOptions + _ppInjectChipOptions the tree runs at
+// its root, seeded exactly like _openPathPlannerFromCurrent (live squad,
+// FT/bank net of already-applied moves). Branch 0 IS the verdict — the strip
+// prints it, and when it is a move that exists in the list, that row gets a
+// 🌳 badge. Per the 2026-08-07 ruling (assets/apex_paths.js header): the
+// tree is the single source of truth for transfer verdicts; this panel now
+// QUOTES it instead of contradicting it. No new maths anywhere in this block.
+//
+// _ppInjectChipOptions prices a planner-marked chip against
+// _pathPlanner.workingSquad/workingBank — stale when the planner is closed —
+// so those two fields are swapped to the live seeds for the SYNCHRONOUS
+// injection call only, then restored in the same tick (the await happens
+// BEFORE the mutation; nothing else can observe it).
+// Shared branch-0 resolver — ONE compute consumed by the verdict strip AND
+// Quick Optimise, so the two cannot drift. Returns { options, top } or null
+// (squad not hydrated / planner assets absent). No DOM here.
+async function _apexTreeBranch0(gwIdx) {
+  if (typeof _ppComputeOptions !== 'function' || typeof _ppInjectChipOptions !== 'function') return null;
+  const liveSquad = [..._xiPlayers, ..._benchPlayers];
+  if (liveSquad.length !== 15) return null;
+  // Same seeds as _openPathPlannerFromCurrent: this GW's applied moves are
+  // already IN the live squad, so debit the FT and compensate the bank.
+  const _preTx = (typeof _transfersAppliedByGw !== 'undefined'
+    && _transfersAppliedByGw && _transfersAppliedByGw[gwIdx]) || 0;
+  const _preMoves = (window._appliedRecMoves || []).filter(m => m && m.gwIdx === gwIdx);
+  const _preBankDelta = _preMoves.reduce((s, m) => s + (m.bankApplied === true ? 0 : (+m.bankDelta || 0)), 0);
+  const ft   = Math.max(0, ((TEAM_META && TEAM_META.free_transfers) || 1) - _preTx);
+  const bank = ((TEAM_META && TEAM_META.bank) || 0) + _preBankDelta;
+  // Verdict memo — three consumers (verdict strip, Model-picks preview, Quick
+  // Optimise) ask far more often than the answer changes. Key = the decision's
+  // real inputs (squad ids, FT, bank, preset, chip pills, lock/ban counts);
+  // any mismatch recomputes, so this can serve stale data only when none of
+  // those inputs moved — which is when the answer hasn't either.
+  let _vKey = null;
+  try {
+    const _ids = liveSquad.map(p => p.id).sort((a, b) => a - b).join(',');
+    const _chipsK = ['wc', 'fh', 'bb', 'tc'].map(c => (document.getElementById('sel-' + c) || {}).value || 0).join('|');
+    const _lbK = (function () {
+      try {
+        const c = window.apexLocks && window.apexLocks.counts && window.apexLocks.counts();
+        return c ? ((c.locked || 0) + ':' + (c.banned || 0)) : '';
+      } catch (_e) { return ''; }
+    })();
+    _vKey = gwIdx + '|' + _ids + '|' + ft + '|' + (+bank).toFixed(1) + '|'
+      + ((typeof _activePreset !== 'undefined') ? _activePreset : '') + '|' + _chipsK + '|' + _lbK;
+    const _vc = window._apexVerdictMemo;
+    if (_vc && _vc.key === _vKey) return _vc.val;
+  } catch (_eVk) { _vKey = null; }
+  const rawOpts = await _ppComputeOptions(liveSquad, gwIdx, bank, ft);
+  // _ppInjectChipOptions prices a marked chip against _pathPlanner.working*
+  // (stale when the planner is closed) — swap in the live seeds for the
+  // SYNCHRONOUS injection only, restore in the same tick.
+  let options;
+  const _pp = (typeof _pathPlanner !== 'undefined' && _pathPlanner) ? _pathPlanner : null;
+  if (_pp) {
+    const _sWS = _pp.workingSquad, _sWB = _pp.workingBank;
+    try {
+      _pp.workingSquad = liveSquad; _pp.workingBank = bank;
+      options = _ppInjectChipOptions(rawOpts, gwIdx);
+    } finally {
+      _pp.workingSquad = _sWS; _pp.workingBank = _sWB;
+    }
+  } else {
+    options = _ppInjectChipOptions(rawOpts, gwIdx);
+  }
+  if (!options || !options.length) return null;
+  const _vVal = { options: options, top: options[0] };
+  if (_vKey) { try { window._apexVerdictMemo = { key: _vKey, val: _vVal }; } catch (_eVm) {} }
+  return _vVal;
+}
+
+let _apexVerdictSeq = 0;
+async function _apexResolveTreeVerdict(gwIdx) {
+  const seq = ++_apexVerdictSeq;
+  const box = document.getElementById('apex-tree-verdict');
+  if (!box) return;
+  if (typeof _ppComputeOptions !== 'function' || typeof _ppInjectChipOptions !== 'function') return;
+  try {
+    box.innerHTML = `<div style="margin:0 0 12px 0;padding:10px 14px;border-radius:12px;background:var(--bg2);border:1px dashed var(--border);font-size:.78rem;color:var(--muted);">🌳 Asking the plan-ahead tree…</div>`;
+    const _tv = await _apexTreeBranch0(gwIdx);
+    if (seq !== _apexVerdictSeq) return;   // a newer render owns the box
+    if (!_tv) { box.innerHTML = ''; return; }
+    const options = _tv.options;
+    const top = _tv.top;
+    const _ev = (o) => {
+      const v = (o && o.lookaheadEv != null) ? o.lookaheadEv : ((o && o.netEv != null) ? o.netEv : ((o && o.evGain) || 0));
+      return (v >= 0 ? '+' : '') + (+v).toFixed(2);
+    };
+    let inner = '';
+    let borderCol = '#1D9E75';
+    if (top.type === 'none') {
+      borderCol = '#D85A30';
+      const bestMove = options.find(o => o && (o.type === 'one' || o.type === 'two'));
+      const vs = bestMove
+        ? ` vs <strong style="color:var(--text);">${_ev(bestMove)}</strong> for the best move (${bestMove.out ? bestMove.out.web_name : '?'} → ${bestMove.in ? bestMove.in.web_name : '?'})`
+        : '';
+      const noise = top._withinNoise ? ' The best move’s edge is inside model noise, so Roll wins.' : '';
+      inner = `
+        <div style="font-weight:800;color:#D85A30;font-size:.92rem;margin-bottom:4px;">🌳 Tree verdict — Roll (bank the FT)</div>
+        <div style="color:var(--muted);font-size:.8rem;">Holding prices <strong style="color:var(--text);">${_ev(top)}</strong> across the horizon${vs} — the banked transfer’s future value decides it.${noise} Moves below beat the bar on their own 3-GW maths, but the tree ranks rolling above all of them this week.</div>`;
+    } else if (top.type === 'one' || top.type === 'two') {
+      const hitNote = (top.hitCost > 0) ? ` <span style="color:#ef4444;">(−${top.hitCost} hit priced in)</span>` : '';
+      const moveTxt = (top.type === 'two')
+        ? `${top.out.web_name} → ${top.in.web_name} · ${top.out2.web_name} → ${top.in2.web_name}`
+        : `${top.out.web_name} → ${top.in.web_name}`;
+      inner = `
+        <div style="font-weight:800;color:#0F6E56;font-size:.92rem;margin-bottom:4px;">🌳 Tree verdict — ${moveTxt}${hitNote}</div>
+        <div style="color:var(--muted);font-size:.8rem;"><strong style="color:var(--text);">${_ev(top)}</strong> including what it sets up in later weeks — the plan-ahead tree’s first branch on your live squad. Open <strong>plan ahead →</strong> to make it.</div>`;
+    } else if (top.type === 'chip') {
+      const _cn = { WC: 'Wildcard', FH: 'Free Hit', BB: 'Bench Boost', TC: 'Triple Captain' };
+      inner = `
+        <div style="font-weight:800;color:#0F6E56;font-size:.92rem;margin-bottom:4px;">🌳 Tree verdict — play the ${_cn[top.chipType] || top.chipType} this week</div>
+        <div style="color:var(--muted);font-size:.8rem;">Worth <strong style="color:var(--text);">${_ev(top)}</strong> on your live squad — the tree’s first branch. Open <strong>plan ahead →</strong> to play it (nothing is applied automatically).</div>`;
+    } else if (top.type === 'build') {
+      inner = `
+        <div style="font-weight:800;color:#0F6E56;font-size:.92rem;margin-bottom:4px;">🌳 Tree verdict — build the optimal 15</div>
+        <div style="color:var(--muted);font-size:.8rem;">Unlimited free changes until the GW1 deadline — nothing to bank, nothing to pay.</div>`;
+    } else {
+      box.innerHTML = '';
+      return;
+    }
+    box.innerHTML = `<div style="margin:0 0 12px 0;padding:12px 14px;border-radius:12px;background:var(--bg2);border:1px solid ${borderCol};">${inner}</div>`;
+    // Badge the matching row(s) so list and strip agree at a glance.
+    if (top.type === 'one' || top.type === 'two') {
+      const pairs = [[top.out, top.in]].concat(top.type === 'two' ? [[top.out2, top.in2]] : []);
+      for (const pr of pairs) {
+        try {
+          const meta = document.querySelector('.transfer-row[data-out="' + pr[0].id + '"][data-in="' + pr[1].id + '"] .transfer-meta');
+          if (meta && !meta.querySelector('.apex-tree-badge')) {
+            const b = document.createElement('span');
+            b.className = 'apex-tree-badge';
+            b.style.cssText = 'background:#1D9E75;color:#000;font-size:.62rem;font-weight:700;padding:2px 6px;border-radius:4px;letter-spacing:0.4px;';
+            b.textContent = '🌳 TREE PICK';
+            meta.insertBefore(b, meta.firstChild);
+          }
+        } catch (_eBg) {}
+      }
+    }
+  } catch (_eTv) { try { box.innerHTML = ''; } catch (_e2) {} }
 }
 
 // ──── Transfer Recommendations ────
@@ -21105,6 +21275,7 @@ function renderTransfers(recs) {
     `;
     section.innerHTML = `
       <div class="section-title" style="margin-top:2rem;">⚡ Recommended Transfers</div>
+      <div id="apex-tree-verdict"></div>
       ${_emptyPlanState}
       <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:24px;text-align:center;">
         <p style="color:var(--muted);font-size:.9rem;margin:0;">${(function () {
@@ -21125,6 +21296,9 @@ function renderTransfers(recs) {
         })()}</p>
       </div>
     `;
+    // APEX_ONE_VERDICT_v1 — no recs still gets the tree's branch 0 (Roll,
+    // a chip week, or a move this panel's bar screened out).
+    try { setTimeout(function () { _apexResolveTreeVerdict(activeGwIdx); }, 0); } catch (_eV1) {}
     return;
   }
 
@@ -21181,6 +21355,7 @@ function renderTransfers(recs) {
   // needed to make the decision.
 
   let html = `<div class="section-title" style="margin-top:2rem;">⚡ Recommended Transfers</div>`
+    + `<div id="apex-tree-verdict"></div>`
     + planStateCard
     + `
     <p class="muted" style="font-size:.8rem;margin-bottom:1rem;">
@@ -21212,7 +21387,7 @@ function renderTransfers(recs) {
     // LABEL fixed to say what the number is; the maths is untouched.
 
     html += `
-      <div class="transfer-row">
+      <div class="transfer-row" data-out="${t.out_id}" data-in="${t.in_id}">
         <div class="transfer-main">
           <div class="swap">
             <div class="swap-out">
@@ -21274,6 +21449,8 @@ function renderTransfers(recs) {
 
   html += '</div>';
   section.innerHTML = html;
+  // APEX_ONE_VERDICT_v1 — after the list paints, ask the tree for branch 0.
+  try { setTimeout(function () { _apexResolveTreeVerdict(activeGwIdx); }, 0); } catch (_eV2) {}
 }
 
 // Apply a specific transfer rec: swap outId for inId
@@ -21586,6 +21763,86 @@ function runOptimize() {
     return;
   }
 
+  // APEX_ONE_VERDICT_QO_v1 (2026-08-21) — Quick Optimise applied this panel's
+  // top row with NO Roll concept: one press committed the move while the
+  // plan-ahead tree ranked Roll first on the same squad (the GW2 Bruno→Palmer
+  // defect Marcus reported: "the whole transfer logic is not correct").
+  // Same rule as the verdict strip: the tree's branch 0 decides. Roll / chip /
+  // 2-transfer branches BLOCK the auto-apply with an honest card (the user can
+  // still act — user outranks the model, standing rule); a 1-transfer branch
+  // is what gets applied, preferring the tree's pair over this panel's when
+  // they differ. Tree unavailable → legacy behaviour, the button never bricks.
+  if (typeof _apexTreeBranch0 === 'function') {
+    if (status) status.textContent = 'Checking the plan-ahead tree…';
+    _apexTreeBranch0(activeGwIdx)
+      .then(function (tv) { _qoActOnVerdict(best, recs, tv, activeGw, section, status); })
+      .catch(function (_eQv) { _qoActOnVerdict(best, recs, null, activeGw, section, status); });
+    return;
+  }
+  _qoActOnVerdict(best, recs, null, activeGw, section, status);
+}
+
+// The action half of Quick Optimise (split out by APEX_ONE_VERDICT_QO_v1 so
+// the tree consult above can be async). tv = _apexTreeBranch0 result or null;
+// null falls through to the legacy apply-the-panel-leader path unchanged.
+function _qoActOnVerdict(best, recs, tv, activeGw, section, status) {
+  const top = tv && tv.top;
+  const _evTxt = (o) => {
+    const v = (o && o.lookaheadEv != null) ? o.lookaheadEv : ((o && o.netEv != null) ? o.netEv : ((o && o.evGain) || 0));
+    return (v >= 0 ? '+' : '') + (+v).toFixed(2);
+  };
+  const _qoCard = (borderCol, title, sub, extra) => {
+    if (!section) return;
+    const cardHtml = `
+      <div id="optimize-result" style="margin:0 0 14px 0;padding:12px 16px;border-radius:12px;
+            background:var(--bg2);border:1px solid ${borderCol};font-size:.85rem;">
+        <div style="font-weight:800;color:${borderCol};margin-bottom:4px;">${title}</div>
+        <div style="color:var(--muted);font-size:.8rem;">${sub}</div>
+        ${extra || ''}
+      </div>`;
+    const _oldQo = document.getElementById('optimize-result');
+    if (_oldQo) _oldQo.remove();
+    section.insertAdjacentHTML('afterbegin', cardHtml);
+    section.style.display = 'block';
+  };
+  if (top && top.type === 'none') {
+    const bestMove = tv.options.find(o => o && (o.type === 'one' || o.type === 'two'));
+    const vs = bestMove ? ` vs ${_evTxt(bestMove)} for the best move` : '';
+    _qoCard('#D85A30', '🌳 Tree verdict — Roll (bank the FT)',
+      `Holding prices <strong style="color:var(--text);">${_evTxt(top)}</strong> across the horizon${vs} — nothing applied.${top._withinNoise ? ' (Best move within model noise.)' : ''}`,
+      `<div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
+         <button onclick="_rollFT()" style="background:#D85A30;color:#000;border:none;border-radius:6px;padding:6px 12px;font-size:.75rem;font-weight:700;cursor:pointer;">🚫 Roll FT</button>
+         <button onclick="_applyTransferRec(${best.in_id}, ${best.out_id})" style="background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:6px 12px;font-size:.75rem;font-weight:600;cursor:pointer;">Apply ${best.out_name} → ${best.in_name} anyway</button>
+       </div>`);
+    if (status) status.textContent = `Roll — the plan-ahead tree ranks banking the FT above every move for GW${activeGw}`;
+    return;
+  }
+  if (top && top.type === 'chip') {
+    const _cnQ = { WC: 'Wildcard', FH: 'Free Hit', BB: 'Bench Boost', TC: 'Triple Captain' };
+    _qoCard('#1D9E75', `🌳 Tree verdict — play the ${_cnQ[top.chipType] || top.chipType} this week`,
+      `Worth <strong style="color:var(--text);">${_evTxt(top)}</strong> on your live squad — nothing applied. Open <strong>plan ahead →</strong> to play it.`);
+    if (status) status.textContent = `The tree ranks the ${_cnQ[top.chipType] || top.chipType} first for GW${activeGw} — open plan ahead to play it`;
+    return;
+  }
+  if (top && top.type === 'two') {
+    _qoCard('#1D9E75', '🌳 Tree verdict — a 2-transfer plan',
+      `${top.out.web_name} → ${top.in.web_name} · ${top.out2.web_name} → ${top.in2.web_name} (<strong style="color:var(--text);">${_evTxt(top)}</strong>${top.hitCost > 0 ? `, −${top.hitCost} hit priced in` : ''}) — a one-press button doesn’t commit two moves. Open <strong>plan ahead →</strong> to make them.`);
+    if (status) status.textContent = `The tree’s first branch is a 2-transfer plan for GW${activeGw} — open plan ahead to make it`;
+    return;
+  }
+  if (top && top.type === 'one' && best && !(best.out_id === top.out.id && best.in_id === top.in.id)) {
+    // The tree's pair outranks this panel's leader — apply THE TREE'S pair.
+    const _rowMatch = (recs || []).find(r => r.out_id === top.out.id && r.in_id === top.in.id);
+    if (_rowMatch) {
+      best = _rowMatch;   // fall through to the legacy apply with the tree's row
+    } else {
+      _applyTransferRec(top.in.id, top.out.id);
+      _qoCard('#22c55e', `✓ Optimized — ${top.out.web_name} → ${top.in.web_name}`,
+        `The plan-ahead tree’s first branch (<strong style="color:var(--text);">${_evTxt(top)}</strong> incl. what it sets up later). ↺ Reset (squad view) undoes it.`);
+      if (status) status.textContent = `Applied the tree’s pick for GW${activeGw}: ${top.out.web_name} → ${top.in.web_name}`;
+      return;
+    }
+  }
   // Apply the #1 path directly via the existing per-path apply logic. This
   // swaps out→in in the live squad, re-picks best XI, updates deltas + cap,
   // re-renders the pitch + header totals, and re-renders the recs panel.
@@ -22299,38 +22556,18 @@ function _renderRecoPreview() {
     const recs = computeTransfers(activeGwIdx || 0) || [];
     if (!recs.length) { _reco.innerHTML = ''; return; }
     let h = `<div class="va-reco-title">Model picks · GW${TEAM_META.gw_range[activeGwIdx || 0]}</div>`;
-    // ── APEX_ROLL_ADVICE_v1 (2026-08-21, Marcus: "i deffo think it should be
-    // recommending roll" — Bruno→Palmer ranked top while Bruno had IPS (H)
-    // and the whole gain lived in GW4). The engine prices "move now vs
-    // hold"; it never asks "is this same move better made NEXT week?". The
-    // test is one subtraction: deferring keeps the OUT player's THIS-week
-    // points (doubled if he wears the armband) and forfeits the IN player's;
-    // everything from next week onward is identical either way, and the
-    // banked FT is free optionality on top. When the top move's outgoing
-    // player OUTSCORES the incoming one this week, say ROLL, loudly, above
-    // the list. Suppressed at the 5-FT cap (rolling would waste the bank).
-    try {
-      const _gi0 = activeGwIdx || 0;
-      const _top = recs[0];
-      const _ftNow = (TEAM_META && TEAM_META.free_transfers) || 1;
-      const _pOut = (typeof POOL_DATA !== 'undefined') ? POOL_DATA.find(p => p.id === _top.out_id) : null;
-      const _pIn  = (typeof POOL_DATA !== 'undefined') ? POOL_DATA.find(p => p.id === _top.in_id) : null;
-      if (_pOut && _pIn && _ftNow < 5) {
-        const _o0 = (_pOut.xp_per_gw || [])[_gi0] || 0;
-        const _i0 = (_pIn.xp_per_gw || [])[_gi0] || 0;
-        const _isCap = (typeof _capId !== 'undefined' && _capId === _top.out_id);
-        const _o0eff = _isCap ? _o0 * 2 : _o0;
-        const _deferEdge = _o0eff - _i0;
-        if (_deferEdge > 0.05) {
-          h += `<div class="va-reco-row" style="background:rgba(29,158,117,.10);border:1px solid rgba(29,158,117,.35);border-radius:8px;padding:8px 10px;margin-bottom:6px;">`
-            + `<span class="va-reco-move">🏦 <b>Roll this week</b> — ${_top.out_name}`
-            + (_isCap ? ' (your captain)' : '')
-            + ` outscores ${_top.in_name} this GW by ${_deferEdge.toFixed(1)}. `
-            + `Make ${_top.out_name} → ${_top.in_name} next week with ${Math.min(_ftNow + 1, 5)} free transfers `
-            + `— you keep almost all of the gain below.</span></div>`;
-        }
-      }
-    } catch (_eRoll) {}
+    // APEX_ROLL_ADVICE_v1 RETIRED same evening it shipped (2026-08-21, Marcus:
+    // "this looks like a plaster fix... the whole transfer logic is not
+    // correct"). He was right, twice over: (1) the 2026-08-07 owner ruling
+    // already made the TREE the single source of truth for transfer verdicts
+    // (see assets/apex_paths.js header -- APEX_FIX_AUG07_R1_NO_APPLY), and the
+    // tree ALREADY prices a Roll branch with real banked-FT EV; (2) this
+    // banner answered the wrong question -- it tested only whether the CARD's
+    // top move was better deferred, when the correct roll test is "does ANY
+    // move beat rolling", which the tree answers (tonight: Gabriel->O'Reilly
+    // +7.3 EV beat Roll +5.8 while this banner shouted ROLL). A third opinion
+    // on a screen that already had two. The real fix is ONE shared move-EV
+    // callee for card+tree+QO -- see the transfer-logic unification plan.
     const _dcOn = (typeof _apexDecisionOn === 'function') && _apexDecisionOn();
     recs.slice(0, 3).forEach((t, i) => {
       let _c = null;
@@ -22344,9 +22581,49 @@ function _renderRecoPreview() {
           + `<span class="va-reco-gain">+${(+(t.gain ?? 0)).toFixed(2)} xPts to GW${TEAM_META.gw_range[TEAM_META.gw_range.length - 1]}</span></div>`;
       }
     });
-    h += `<div style="font-size:.8rem;color:var(--muted);margin-top:6px;">⚡ Quick Optimise applies the top move · risk boxes re-rank this list</div>`;
+    h += `<div style="font-size:.8rem;color:var(--muted);margin-top:6px;">⚡ Quick Optimise acts on the tree's verdict · risk boxes re-rank this list</div>`;
     _reco.style.display = 'block';
     _reco.innerHTML = h;
+    // APEX_ONE_VERDICT_PREVIEW_v1 (2026-08-21) — this card is where Marcus
+    // read "Bruno F → Palmer" while the tree ranked Roll on the same squad.
+    // Same shared resolver as the strip and Quick Optimise; one line, quoted.
+    try {
+      window._apexRecoVerdictSeq = (window._apexRecoVerdictSeq || 0) + 1;
+      const _vSeq = window._apexRecoVerdictSeq;
+      if (typeof _apexTreeBranch0 === 'function') {
+        _apexTreeBranch0(activeGwIdx || 0).then(function (tv) {
+          if (_vSeq !== window._apexRecoVerdictSeq) return;
+          if (!tv || !tv.top || !_reco || _reco.dataset.applied === '1') return;
+          const top = tv.top;
+          const _vv = (top.lookaheadEv != null) ? top.lookaheadEv : ((top.netEv != null) ? top.netEv : (top.evGain || 0));
+          const _vn = (_vv >= 0 ? '+' : '') + (+_vv).toFixed(2);
+          let line = null, col = '#1D9E75';
+          if (top.type === 'none') {
+            col = '#D85A30';
+            line = '🌳 Tree verdict: <b>Roll — bank the FT</b> (' + _vn + ' holding beats every move'
+              + (top._withinNoise ? ', best move within noise' : '') + ')';
+          } else if (top.type === 'one') {
+            const _agree = recs.length && recs[0].out_id === top.out.id && recs[0].in_id === top.in.id;
+            line = _agree
+              ? '🌳 Tree agrees: <b>' + top.out.web_name + ' → ' + top.in.web_name + '</b> leads (' + _vn + ' incl. lookahead)'
+              : '🌳 Tree verdict: <b>' + top.out.web_name + ' → ' + top.in.web_name + '</b> (' + _vn + ') — the tree outranks this list';
+          } else if (top.type === 'two') {
+            line = '🌳 Tree verdict: <b>' + top.out.web_name + ' → ' + top.in.web_name + ' · '
+              + top.out2.web_name + ' → ' + top.in2.web_name + '</b> (' + _vn + ') — open plan ahead to make both';
+          } else if (top.type === 'chip') {
+            const _cnP = { WC: 'Wildcard', FH: 'Free Hit', BB: 'Bench Boost', TC: 'Triple Captain' };
+            line = '🌳 Tree verdict: <b>play the ' + (_cnP[top.chipType] || top.chipType) + '</b> this week (' + _vn + ')';
+          }
+          if (!line) return;
+          const _vd = document.createElement('div');
+          _vd.style.cssText = 'font-size:.78rem;font-weight:600;color:' + col + ';margin:2px 0 8px;';
+          _vd.innerHTML = line;
+          const _t0 = _reco.querySelector('.va-reco-title');
+          if (_t0 && _t0.nextSibling) _reco.insertBefore(_vd, _t0.nextSibling);
+          else _reco.insertBefore(_vd, _reco.firstChild);
+        }).catch(function (_eVp) {});
+      }
+    } catch (_eVv) {}
   } catch (_e) {}
 }
 window._renderRecoPreview = _renderRecoPreview;
@@ -22853,6 +23130,21 @@ const _savedGwSquads = {};
 
 // Apply entire WC/FH squad to pitch
 function _applyFullSquad(squad, gwIdx) {
+  // APEX_APPLY_SNAP_GW_v1 (2026-08-21, candidate L closed): this function
+  // picks the XI for gwIdx but writes every delta and _savedGwSquads entry
+  // under the GLOBAL activeGwIdx -- callers had to guarantee the two matched,
+  // and two did not (the chip-panel Apply button via _lastChipGwIdx, and the
+  // FH confirm path), so a future-GW chip squad could be written into
+  // whichever week was being VIEWED. The QO branch solved this on 08-19 by
+  // snapping the pill first (defect C's proven pattern) -- doing it HERE
+  // makes every caller inherit the guarantee instead of each re-learning it.
+  try {
+    if (typeof activeGwIdx === 'number' && gwIdx !== activeGwIdx
+        && typeof setBaseGw === 'function') {
+      const _pillL = document.querySelector('.gw-pill[data-idx="' + gwIdx + '"]');
+      if (_pillL) setBaseGw(_pillL);
+    }
+  } catch (_eSnapL) {}
   // APEX_MULTI_REMOVE_v1 — a wholesale squad apply ends any open Remove slots.
   try { if (typeof _poolDropped !== 'undefined' && _poolDropped.length) _poolDropped = []; } catch (_eMr) {}
   const result = pickBestXi(squad, gwIdx);
@@ -25183,8 +25475,34 @@ function _ppChipEvAt(chipType, squad, gwIdx) {
         && Array.isArray(squad) && squad.length === 15) {
       const _nGws = (TEAM_META.gw_range || []).length;
       let _tail = 0;
+      // APEX_CHIP_EV_TAIL_CHIPS_v1 (2026-08-21, backlog G closed): this tail
+      // summed XI+captain only, so a BB/TC planned INSIDE the tail priced
+      // both squads as if the chip did not exist. Same terms, same gate as
+      // _apexRankNoCover (defect E, 08-19): bench sum at the BB week, one
+      // extra captain at the TC week -- taken as a DIFFERENCE so both squads
+      // are treated alike. Kill: window.APEX_BB_AWARE_SQUAD = false.
+      let _bbIt = -1, _tcIt = -1;
+      try {
+        if (!(typeof window !== 'undefined' && window.APEX_BB_AWARE_SQUAD === false)) {
+          const _bbG = parseInt(document.getElementById('sel-bb')?.value || 0, 10);
+          const _tcG = parseInt(document.getElementById('sel-tc')?.value || 0, 10);
+          if (Number.isFinite(_bbG) && _bbG > 0) _bbIt = (TEAM_META.gw_range || []).indexOf(_bbG);
+          if (Number.isFinite(_tcG) && _tcG > 0) _tcIt = (TEAM_META.gw_range || []).indexOf(_tcG);
+        }
+      } catch (_eCt) {}
       for (let _i = gwIdx; _i < _nGws; _i++) {
-        _tail += _ppBestXiTotal(_wcSq, _i).total - _ppBestXiTotal(squad, _i).total;
+        const _rw = _ppBestXiTotal(_wcSq, _i);
+        const _rs = _ppBestXiTotal(squad, _i);
+        _tail += _rw.total - _rs.total;
+        if (_i === _tcIt) _tail += (_rw.cap || 0) - (_rs.cap || 0);
+        if (_i === _bbIt && typeof _xpAt === 'function') {
+          const _bx = {}; (_rw.xiPlayers || []).forEach(function (p) { _bx[p.id] = 1; });
+          const _sx = {}; (_rs.xiPlayers || []).forEach(function (p) { _sx[p.id] = 1; });
+          let _bw = 0, _bs = 0;
+          _wcSq.forEach(function (p) { if (p && !_bx[p.id]) _bw += _xpAt(p, _i); });
+          squad.forEach(function (p) { if (p && !_sx[p.id]) _bs += _xpAt(p, _i); });
+          _tail += _bw - _bs;
+        }
       }
       // The Wildcard's optimal 15 IS the 15 you hold, and it scores the same
       // every remaining week. Nothing to buy. Both halves are asserted, not
@@ -31656,6 +31974,12 @@ async function _apexViewChipSolve(kind) {
     const horizon = Math.max(1, gwR.length - activeGwIdx);
     const opts = Object.assign(
       { budget: money.budget, benchWeight: 0.05, chipMode: true,
+         // APEX_BB_AWARE_SQUAD_v1 completion (2026-08-21, backlog F's last
+         // caller): every other solveWildcard call has carried bbGwOffset
+         // since 08-19/20 -- this WC view-solve was the one still blind, so a
+         // WC built here ignored a planned Bench Boost inside its window.
+         bbGwOffset: (typeof _ppBbGwOffset === 'function')
+           ? _ppBbGwOffset(activeGwIdx, horizon) : undefined,
          captainEV: true },   // APEX_CHIP_CAPTAIN_EV_v1
       (typeof _ppPresetSolveOpts === 'function') ? _ppPresetSolveOpts() : {});
     // APEX_EVIDENCE_POLICY_CHIPS_v1: same evidence rules as the squad builder.
@@ -34664,7 +34988,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW2</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1787342408-GW2-e99b0439</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1787348244-GW2-4be8d502</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
@@ -35504,7 +35828,12 @@ document.addEventListener('DOMContentLoaded', () => {
       var cost = g.event_transfers_cost || 0;
       var chip = chipMap[g.event] || '';
       if (AFCON_TOPUP_ON && g.event === AFCON_TOPUP_GW) ft = 5;
-      if (chip === 'wildcard' || chip === 'freehit') continue;
+      if (chip === 'wildcard' || chip === 'freehit') {
+        // APEX_FT_CHIP_PLUS1_v1: saved FTs persist through a chip AND the
+        // following week's +1 still arrives (rule-checked 2026-08-21).
+        ft = Math.min(ft + 1, 5);
+        continue;
+      }
       var hits = Math.floor(cost / 4);
       if (hits > 0) ft = 1;
       else if (made === 0) ft = Math.min(ft + 1, 5);
