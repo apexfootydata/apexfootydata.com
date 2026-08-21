@@ -21,15 +21,21 @@
 /* 2026-07-10: returning-visitor fast path decided BEFORE first paint, so the
    ID entry form never flashes and then vanishes on the way to the solver. */
 (function () {
+  /* APEX_NO_STUB_LANDING_v1 (2026-08-21): this standalone ID-entry page is
+     retired -- the solver app renders its own landing now. This shell only
+     forwards old links/bookmarks: with a remembered id straight into the
+     app, otherwise to the app's landing (?change=1 preserved). */
   try {
+    document.documentElement.style.visibility = 'hidden';
     var stay = /[?&]change=1\b/.test(location.search);
-    var saved = localStorage.getItem('apex_fpl_id');
+    var saved = null;
+    try { saved = localStorage.getItem('apex_fpl_id'); } catch (_s) {}
     if (!stay && saved && /^\d+$/.test(saved)) {
-      document.documentElement.style.visibility = 'hidden';
-      setTimeout(function () { document.documentElement.style.visibility = ''; }, 2500);
       window.location.replace('/solver_app.html?id=' + saved);
+    } else {
+      window.location.replace('/');   // THE HOMEPAGE IS THE LANDING PAGE
     }
-  } catch (_) {}
+  } catch (_) { window.location.replace('/'); }
 })();
 </script>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
