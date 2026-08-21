@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="2" data-built-at="2026-08-22T00:03:07">
+<meta name="apex-gw" content="2" data-built-at="2026-08-22T00:29:08">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
@@ -37,7 +37,7 @@
 })();
 </script>
 <meta http-equiv="Pragma" content="no-cache">
-<meta name="apex-build" content="20260822-000307">
+<meta name="apex-build" content="20260822-002908">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — FPL Apex</title>
 <meta name="description" content="Plan FPL transfers, chips, and Free Hit squads. Live xG-based projections, a rival head-to-head simulator, and a mini-league table. Free FPL tool.">
@@ -12537,6 +12537,244 @@ html.apex-offseason #view-landing .hero-sub::after {
       _all_inflight_finished: allFinished,
     };
   }
+  // ═══════════════════════════════════════════════════════════════════════
+  // APEX_MILP_v1 (2026-08-22, Marcus: "fix the milp") — ONE-PLANNER multi-
+  // period transfer MILP: the vendor architecture (sertalpbilal lineage /
+  // Solio's open solver, formulation read from dev/solver.py + settings on
+  // 08-22). One objective decides transfers, XI, captain, rolls, hits and
+  // bank across every week of the window JOINTLY — the structural answer to
+  // "I didn't pick a 15 man squad to transfer players out the next week":
+  // a squad this model just built prices "no transfers" as optimal by
+  // construction unless the numbers really moved.
+  //
+  // Economics (all = the constants adopted 08-22, one source of truth):
+  //   decay 0.9 · FT marginals {1:1.5,2:2.0,3:1.6,4:1.3,5:1.1} as STATE
+  //   FLOWS (gw_ft_gain) · 0.2 use penalty per FT leg · itb 0.08/£1m ·
+  //   hits −4 · bench weight flat (FPL_RULES.BENCH_WEIGHT; per-slot order
+  //   variables = v2, documented gap) · no transfers in the tail 2 weeks.
+  //
+  // v1 surface: EXPERIMENTAL, flag-gated (window.APEX_MILP) — run it, read
+  // its plan, compare with the tree. Pool is pruned to the squad + top
+  // horizon scorers per position (opts.candidateCap, default 40 extras) so
+  // glpk stays tractable in the browser; opts.timeLimitSec caps the solve.
+  async function solveMultiPeriod(pool, squad, opts) {
+    opts = opts || {};
+    const glpk = _needGLPK();
+    const H = Math.max(2, Math.min(8, opts.horizon || 6));
+    const startIdx = opts.startIdx || 0;
+    const DECAY = (typeof opts.decay === 'number') ? opts.decay : 0.9;
+    const FT_M = opts.ftMarginals || { 1: 1.5, 2: 2.0, 3: 1.6, 4: 1.3, 5: 1.1 };
+    const FT_USE_PEN = (typeof opts.ftUsePen === 'number') ? opts.ftUsePen : 0.2;
+    const ITB_W = (typeof opts.itbValue === 'number') ? opts.itbValue : 0.08;
+    const HIT = 4;
+    const BW = (typeof opts.benchWeight === 'number') ? opts.benchWeight : FPL_RULES.BENCH_WEIGHT;
+    const TAIL_N = (typeof opts.noTxTail === 'number') ? opts.noTxTail : 2;
+    const ft0 = Math.max(1, Math.min(5, opts.freeTransfers || 1));
+    const bank0 = Math.max(0, +opts.bank || 0);
+    const sellOf = opts.sellingPrices || {};   // id -> selling price
+
+    // ── candidate pruning: squad ∪ top-N per position by horizon pts ──────
+    const sqIds = new Set(squad.map(p => p.id));
+    const hxp = (p) => {
+      let t = 0;
+      const a = p.xp_per_gw || [];
+      for (let w = 0; w < H; w++) t += Math.pow(DECAY, w) * (+a[startIdx + w] || 0);
+      return t;
+    };
+    const extrasPerPos = { 1: 4, 2: 12, 3: 14, 4: 10 };
+    const cap = (typeof opts.candidateCap === 'number') ? opts.candidateCap : 40;
+    let extras = [];
+    for (const et of [1, 2, 3, 4]) {
+      const cs = pool.filter(p => p.element_type === et && !sqIds.has(p.id))
+        .sort((a, b) => hxp(b) - hxp(a)).slice(0, extrasPerPos[et]);
+      extras = extras.concat(cs);
+    }
+    extras.sort((a, b) => hxp(b) - hxp(a));
+    extras = extras.slice(0, cap);
+    const C = squad.concat(extras);            // candidate set
+    const N = C.length;
+    const idOf = (p) => String(p.id);
+    const priceOf = (p) => +p.cost || 0;
+    const sellPx = (p) => {
+      const sp = sellOf[String(p.id)];
+      return (sp != null && sp > 0) ? +sp : priceOf(p);
+    };
+    const ptsAt = (p, w) => +((p.xp_per_gw || [])[startIdx + w] || 0);
+
+    // ── variable names ────────────────────────────────────────────────────
+    const vx = (i, w) => `x_${i}_${w}`;     // in squad
+    const vs = (i, w) => `s_${i}_${w}`;     // in XI
+    const vc = (i, w) => `c_${i}_${w}`;     // captain
+    const vin = (i, w) => `ti_${i}_${w}`;   // transferred in
+    const vout = (i, w) => `to_${i}_${w}`;  // transferred out
+    const vP = (w) => `hit_${w}`;           // penalized transfers (int)
+    const vT = (w) => `tc_${w}`;            // transfer count (int)
+    const vB = (w) => `bank_${w}`;          // bank (continuous)
+    const vF = (w) => `ft_${w}`;            // FT stock entering week w (int 1..5)
+    const vZ = (w, k) => `z_${w}_${k}`;     // ft level >= k indicator (k=2..5)
+    const vA = (w) => `ovr_${w}`;           // overspend indicator (ft floor)
+
+    const objective = { direction: glpk.GLP_MAX, name: 'obj', vars: [] };
+    const subjectTo = [];
+    const binaries = [];
+    const generals = [];
+    const bounds = [];
+    const OBJ = new Map();
+    const addObj = (name, coef) => { OBJ.set(name, (OBJ.get(name) || 0) + coef); };
+
+    for (let w = 0; w < H; w++) {
+      const D = Math.pow(DECAY, w);
+      const tail = (H - w) <= TAIL_N && H >= 4;   // tail guard (skip on tiny windows)
+
+      // per-player structure
+      const sqVars = [], posVars = { 1: [], 2: [], 3: [], 4: [] };
+      const xiVars = [], capVars = [], teamOf = {};
+      for (let i = 0; i < N; i++) {
+        const p = C[i];
+        binaries.push(vx(i, w), vs(i, w), vc(i, w), vin(i, w), vout(i, w));
+        sqVars.push({ name: vx(i, w), coef: 1 });
+        posVars[p.element_type].push({ name: vx(i, w), coef: 1 });
+        xiVars.push({ name: vs(i, w), coef: 1 });
+        capVars.push({ name: vc(i, w), coef: 1 });
+        (teamOf[p.team] = teamOf[p.team] || []).push({ name: vx(i, w), coef: 1 });
+        // s <= x ; c <= s
+        subjectTo.push({ name: `sx_${i}_${w}`, vars: [{ name: vs(i, w), coef: 1 }, { name: vx(i, w), coef: -1 }], bnds: { type: glpk.GLP_UP, ub: 0, lb: 0 } });
+        subjectTo.push({ name: `cs_${i}_${w}`, vars: [{ name: vc(i, w), coef: 1 }, { name: vs(i, w), coef: -1 }], bnds: { type: glpk.GLP_UP, ub: 0, lb: 0 } });
+        // continuity: x_{w} - x_{w-1} - tin + tout = 0  (w=0 vs initial squad)
+        const cont = [{ name: vx(i, w), coef: 1 }, { name: vin(i, w), coef: -1 }, { name: vout(i, w), coef: 1 }];
+        let rhs = 0;
+        if (w === 0) rhs = sqIds.has(p.id) ? 1 : 0;
+        else cont.push({ name: vx(i, w - 1), coef: -1 });
+        subjectTo.push({ name: `cont_${i}_${w}`, vars: cont, bnds: { type: glpk.GLP_FX, ub: rhs, lb: rhs } });
+        // tin + tout <= 1
+        subjectTo.push({ name: `tio_${i}_${w}`, vars: [{ name: vin(i, w), coef: 1 }, { name: vout(i, w), coef: 1 }], bnds: { type: glpk.GLP_UP, ub: 1, lb: 0 } });
+        // objective: lineup + captain + bench
+        const pw = ptsAt(p, w);
+        if (pw) {
+          addObj(vs(i, w), D * pw * (1 - BW));
+          addObj(vx(i, w), D * pw * BW);
+          addObj(vc(i, w), D * pw);          // captain doubles
+        }
+      }
+      subjectTo.push({ name: `sq15_${w}`, vars: sqVars, bnds: { type: glpk.GLP_FX, ub: 15, lb: 15 } });
+      subjectTo.push({ name: `gk2_${w}`, vars: posVars[1], bnds: { type: glpk.GLP_FX, ub: 2, lb: 2 } });
+      subjectTo.push({ name: `df5_${w}`, vars: posVars[2], bnds: { type: glpk.GLP_FX, ub: 5, lb: 5 } });
+      subjectTo.push({ name: `md5_${w}`, vars: posVars[3], bnds: { type: glpk.GLP_FX, ub: 5, lb: 5 } });
+      subjectTo.push({ name: `fw3_${w}`, vars: posVars[4], bnds: { type: glpk.GLP_FX, ub: 3, lb: 3 } });
+      subjectTo.push({ name: `xi11_${w}`, vars: xiVars, bnds: { type: glpk.GLP_FX, ub: 11, lb: 11 } });
+      subjectTo.push({ name: `cap1_${w}`, vars: capVars, bnds: { type: glpk.GLP_FX, ub: 1, lb: 1 } });
+      // XI formation bounds per position
+      const xiPos = (et) => C.map((p, i) => p.element_type === et ? { name: vs(i, w), coef: 1 } : null).filter(Boolean);
+      subjectTo.push({ name: `xgk_${w}`, vars: xiPos(1), bnds: { type: glpk.GLP_FX, ub: 1, lb: 1 } });
+      subjectTo.push({ name: `xdf_${w}`, vars: xiPos(2), bnds: { type: glpk.GLP_DB, ub: 5, lb: 3 } });
+      subjectTo.push({ name: `xmd_${w}`, vars: xiPos(3), bnds: { type: glpk.GLP_DB, ub: 5, lb: 2 } });
+      subjectTo.push({ name: `xfw_${w}`, vars: xiPos(4), bnds: { type: glpk.GLP_DB, ub: 3, lb: 1 } });
+      for (const t of Object.keys(teamOf)) {
+        subjectTo.push({ name: `t3_${t}_${w}`, vars: teamOf[t], bnds: { type: glpk.GLP_UP, ub: 3, lb: 0 } });
+      }
+
+      // transfer count + tail guard
+      generals.push(vT(w), vP(w));
+      const tVars = C.map((p, i) => ({ name: vin(i, w), coef: 1 }));
+      tVars.push({ name: vT(w), coef: -1 });
+      subjectTo.push({ name: `tcnt_${w}`, vars: tVars, bnds: { type: glpk.GLP_FX, ub: 0, lb: 0 } });
+      bounds.push({ name: vT(w), type: tail ? glpk.GLP_FX : glpk.GLP_DB, ub: tail ? 0 : 5, lb: 0 });
+      bounds.push({ name: vP(w), type: glpk.GLP_DB, ub: 5, lb: 0 });
+
+      // FT stock: vF(0) fixed; hits P_w >= T_w - ft_w
+      generals.push(vF(w));
+      if (w === 0) {
+        bounds.push({ name: vF(0), type: glpk.GLP_FX, ub: ft0, lb: ft0 });
+      } else {
+        bounds.push({ name: vF(w), type: glpk.GLP_DB, ub: 5, lb: 1 });
+        // ft_w <= ft_{w-1} - T_{w-1} + 1 + 6*ovr_{w-1} ; ft_w <= 1 + 4*(1-ovr_{w-1})
+        binaries.push(vA(w - 1));
+        subjectTo.push({ name: `ftu_${w}`, vars: [
+          { name: vF(w), coef: 1 }, { name: vF(w - 1), coef: -1 },
+          { name: vT(w - 1), coef: 1 }, { name: vA(w - 1), coef: -6 },
+        ], bnds: { type: glpk.GLP_UP, ub: 1, lb: 0 } });
+        subjectTo.push({ name: `ftf_${w}`, vars: [
+          { name: vF(w), coef: 1 }, { name: vA(w - 1), coef: 4 },
+        ], bnds: { type: glpk.GLP_UP, ub: 5, lb: 0 } });
+      }
+      subjectTo.push({ name: `hits_${w}`, vars: [
+        { name: vP(w), coef: 1 }, { name: vT(w), coef: -1 }, { name: vF(w), coef: 1 },
+      ], bnds: { type: glpk.GLP_LO, ub: 0, lb: 0 } });
+      addObj(vP(w), -D * HIT + D * FT_USE_PEN);       // hits cost 4; hit legs are not FT legs
+      addObj(vT(w), -D * FT_USE_PEN);                 // use pen per FT leg (T - P)
+
+      // FT level value (flows): ft_w = 1 + sum z_{w,k}; L_w = sum m_k z_{w,k}
+      for (let k = 2; k <= 5; k++) {
+        binaries.push(vZ(w, k));
+        if (k > 2) subjectTo.push({ name: `zo_${w}_${k}`, vars: [
+          { name: vZ(w, k), coef: 1 }, { name: vZ(w, k - 1), coef: -1 },
+        ], bnds: { type: glpk.GLP_UP, ub: 0, lb: 0 } });
+      }
+      subjectTo.push({ name: `zft_${w}`, vars: [
+        { name: vF(w), coef: 1 },
+        { name: vZ(w, 2), coef: -1 }, { name: vZ(w, 3), coef: -1 },
+        { name: vZ(w, 4), coef: -1 }, { name: vZ(w, 5), coef: -1 },
+      ], bnds: { type: glpk.GLP_FX, ub: 1, lb: 1 } });
+      // gw_ft_gain[w] = L_w - L_{w-1}, decayed at week w (L_{-1} constant, dropped)
+      for (let k = 2; k <= 5; k++) {
+        const m = FT_M[k] || 0;
+        addObj(vZ(w, k), D * m);
+        if (w + 1 < H) addObj(vZ(w, k), -Math.pow(DECAY, w + 1) * m);
+      }
+
+      // bank: bank_w - bank_{w-1} - sum sell*tout + sum price*tin = 0 ; itb value
+      const bVars = [{ name: vB(w), coef: 1 }];
+      for (let i = 0; i < N; i++) {
+        bVars.push({ name: vout(i, w), coef: -sellPx(C[i]) });
+        bVars.push({ name: vin(i, w), coef: priceOf(C[i]) });
+      }
+      let bRhs = 0;
+      if (w === 0) bRhs = bank0;
+      else bVars.push({ name: vB(w - 1), coef: -1 });
+      subjectTo.push({ name: `bank_${w}`, vars: bVars, bnds: { type: glpk.GLP_FX, ub: bRhs, lb: bRhs } });
+      bounds.push({ name: vB(w), type: glpk.GLP_DB, ub: 1000, lb: 0 });
+      addObj(vB(w), D * ITB_W);
+    }
+
+    objective.vars = Array.from(OBJ.entries()).map(([name, coef]) => ({ name, coef }));
+    const prob = {
+      name: 'apex_multiperiod',
+      objective,
+      subjectTo,
+      binaries: Array.from(new Set(binaries)),
+      generals: Array.from(new Set(generals)),
+      bounds,
+    };
+    const tml = Math.max(5, Math.min(600, opts.timeLimitSec || 60));
+    const res = await Promise.resolve(glpk.solve(prob, { msglev: glpk.GLP_MSG_OFF, tmlim: tml, mipgap: opts.gap || 0.01 }));
+    const st = res && res.result ? res.result.status : -1;
+    const ok = (st === glpk.GLP_OPT || st === glpk.GLP_FEAS);
+    if (!ok) return { status: 'infeasible', glpkStatus: st };
+    const V = res.result.vars || {};
+    const weeks = [];
+    for (let w = 0; w < H; w++) {
+      const inNames = [], outNames = [], xi = [], bench = [];
+      let capName = null;
+      for (let i = 0; i < N; i++) {
+        if ((V[vin(i, w)] || 0) > 0.5) inNames.push(C[i].web_name);
+        if ((V[vout(i, w)] || 0) > 0.5) outNames.push(C[i].web_name);
+        if ((V[vx(i, w)] || 0) > 0.5) {
+          if ((V[vs(i, w)] || 0) > 0.5) xi.push(C[i].web_name); else bench.push(C[i].web_name);
+          if ((V[vc(i, w)] || 0) > 0.5) capName = C[i].web_name;
+        }
+      }
+      weeks.push({
+        week: w, gwIdx: startIdx + w,
+        transfersIn: inNames, transfersOut: outNames,
+        roll: inNames.length === 0,
+        ft: Math.round(V[vF(w)] || 0), hits: Math.round(V[vP(w)] || 0),
+        bank: round2(V[vB(w)] || 0), captain: capName, xi, bench,
+      });
+    }
+    return { status: 'optimal', objective: round2(res.result.z || 0), weeks,
+             candidates: N, binariesCount: prob.binaries.length };
+  }
+
   // ── util ───────────────────────────────────────────────────────────────
   function round1(x) { return Math.round(x * 10) / 10; }
   function round2(x) { return Math.round(x * 100) / 100; }
@@ -12572,6 +12810,7 @@ html.apex-offseason #view-landing .hero-sub::after {
     livePointsNow,
     setFetchFpl,
     setGLPK,
+    solveMultiPeriod,   // APEX_MILP_v1 — experimental one-planner (flag window.APEX_MILP)
     // Background-safe cooperative yield (MessageChannel macrotask) — shared
     // with the Path Planner's chunked compute in apex_app.js (2026-06-11).
     _apexYield,
@@ -16772,7 +17011,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1787353387-GW2-a6799fe8";
+const BUILD_VERSION = "1787354947-GW2-c6f0c128";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = false;
@@ -16780,7 +17019,7 @@ window.APEX_SQUAD_ROLLBACK = false;
 let FPL_ID = null;
 let SQUAD_DATA = [];
 </script>
-<script src="/apex_pool.js?v=1787353387-GW2-a6799fe8"></script>
+<script src="/apex_pool.js?v=1787354947-GW2-c6f0c128"></script>
 <script>
 const PLAYER_NAMES = {"1": "Raya", "2": "Arrizabalaga", "3": "Meslier", "4": "Gabriel", "5": "J.Timber", "6": "Saliba", "7": "Lewis-Skelly", "8": "Calafiori", "9": "Hincapie", "10": "White", "11": "Mosquera", "12": "Saka", "13": "Rice", "14": "Eze", "15": "\u00d8degaard", "16": "Madueke", "17": "Merino", "18": "Martinelli", "19": "Zubimendi", "20": "Dowman", "22": "Nwaneri", "23": "F\u00e1bio Vieira", "24": "Nelson", "25": "Gy\u00f6keres", "26": "Havertz", "27": "G.Jesus", "31": "Konsa", "452": "Bruno G.", "557": "Tzolis", "28": "Martinez", "29": "M.Bizot", "30": "Digne", "32": "Cash", "33": "Mings", "34": "Pau", "35": "Bogarde", "36": "Maatsen", "37": "Lindel\u00f6f", "38": "A.Garc\u00eda", "39": "Nedeljkovic", "41": "Buend\u00eda", "44": "Bailey", "45": "McGinn", "46": "Barkley", "47": "Kamara", "48": "Onana", "49": "Iling Jr", "50": "Burrowes", "51": "George Hemmings", "52": "Alysson", "53": "Manzambi", "54": "Gomes", "55": "Watkins", "56": "Abraham", "160": "Garnacho", "582": "Madjo", "596": "Ruggeri", "597": "Suzuki", "57": "Petrovi\u0107", "58": "Forster", "59": "Dennis", "60": "Hill", "61": "Truffert", "62": "Diakit\u00e9", "63": "Milosavljevi\u0107", "64": "Smith", "65": "J.Araujo", "66": "Soler", "67": "Rayan", "68": "Tavernier", "69": "Scott", "70": "Kluivert", "71": "Cook", "72": "Gannon-Doak", "73": "Adams", "74": "Brooks", "75": "Christie", "76": "T\u00f3th.A", "77": "Adli", "78": "Kroupi.Jr", "79": "Evanilson", "80": "Enes \u00dcnal", "81": "Rodr\u00edguez", "566": "Silva", "573": "Sanchez", "82": "Kelleher", "83": "Valdimarsson", "84": "Collins", "85": "Van den Berg", "86": "Lewis-Potter", "87": "Ajer", "88": "Kayode", "89": "Henry", "90": "Hickey", "91": "Pinnock", "92": "Ji-soo", "93": "Schuster", "94": "Schade", "95": "O.Dango", "96": "Damsgaard", "97": "Jensen", "98": "Janelt", "99": "Milambo", "100": "Carvalho", "102": "Yarmoliuk", "103": "Dasilva", "105": "Anthony", "106": "Thiago", "107": "Furo", "108": "Wilson", "565": "M.Sangar\u00e9", "109": "Verbruggen", "111": "Steele", "113": "F.Kad\u0131o\u011flu", "114": "Boscagli", "115": "De Cuyper", "116": "Dunk", "117": "Coppola", "118": "Igor", "119": "Costinha", "120": "Svoboda", "121": "Mitoma", "122": "Minteh", "123": "Hinshelwood", "124": "Gro\u00df", "125": "Georginio", "126": "O'Riley", "127": "Gomez", "128": "Buonanotte", "129": "Ayari", "130": "Wieffer", "131": "Baleba", "132": "Howell", "133": "Watson", "134": "Oriola", "135": "Yohanna", "137": "Tzimas", "138": "Kostoulas", "139": "Ferguson", "328": "Struijk", "504": "Vuskovic", "594": "David", "600": "Osman", "40": "Rogers", "101": "Henderson", "136": "Welbeck", "140": "S\u00e1nchez", "141": "J\u00f6rgensen", "142": "James", "143": "Chalobah", "144": "Gusto", "145": "Fofana", "146": "B.Badiashile", "147": "Tosin", "148": "Hato", "149": "Colwill", "150": "M.Sarr", "151": "Acheampong", "152": "Palestra", "153": "Disasi", "154": "Palmer", "155": "Enzo", "156": "Neto", "157": "Est\u00eav\u00e3o", "158": "Gittens", "159": "Caicedo", "161": "Lavia", "163": "D.Essugo", "164": "Quenda", "165": "Jo\u00e3o Pedro", "166": "N.Jackson", "167": "Delap", "168": "Marc Guiu", "169": "Mheuka", "170": "Emegha", "200": "Lacroix", "560": "Penders", "561": "Anselmino", "568": "Barco", "578": "Mudryk", "583": "Chavarria", "104": "Onyeka", "110": "Rushworth", "171": "Dovin", "172": "Wilson", "173": "Thomas", "174": "Kitching", "175": "van Ewijk", "176": "Dasilva", "177": "Kesler-Hayden", "178": "Bidwell", "179": "Latibeaudiere", "180": "Woolfenden", "181": "Brau", "182": "Amenda", "183": "Rudoni", "184": "Grimes", "185": "Sakamoto", "186": "Mason-Clark", "187": "Eccles", "188": "Torp", "189": "Shepherd", "190": "Tchaouna", "191": "Borges Rodrigues", "192": "Andrews", "193": "Wright", "194": "Thomas-Asante", "195": "Simms", "196": "Markelo", "197": "Bassette", "492": "Awoniyi", "575": "Yirenkyi", "584": "Hamer", "599": "Cherif", "42": "Guessand", "198": "Henderson", "199": "Benitez", "201": "Mu\u00f1oz", "202": "Richards", "203": "Canvot", "204": "Mitchell", "205": "Sosa", "206": "Chadi Riad", "207": "Mingueza", "208": "Sarr", "210": "Wharton", "211": "Yeremy", "212": "Hughes", "213": "Lerma", "214": "Kamada", "215": "Devenny", "216": "Esse", "217": "M.Fran\u00e7a", "218": "Doucour\u00e9", "219": "J.Rak-Sakyi", "220": "Cardines", "221": "Drakes-Thomas", "222": "Strand Larsen", "223": "Mateta", "224": "Nketiah", "225": "Uche", "241": "McNeil", "555": "Matthews", "577": "Tomiyasu", "588": "Khalaili", "595": "Gozo", "21": "N\u00f8rgaard", "209": "Johnson", "226": "Pickford", "227": "Travers", "228": "King", "229": "Tarkowski", "230": "Branthwaite", "231": "Keane", "232": "O'Brien", "233": "Mykolenko", "234": "Patterson", "235": "Aznou", "236": "Dewsbury-Hall", "237": "Ndiaye", "239": "Garner", "240": "Iroegbunam", "242": "George", "243": "Alcaraz", "244": "Armstrong", "245": "Dibling", "246": "R\u00f6hl", "247": "Hackney", "248": "Beto", "249": "Barry", "250": "Leno", "251": "Lecomte", "252": "McNally", "253": "Andersen", "254": "Robinson", "255": "J.Cuenca", "256": "Tete", "257": "Bassey", "258": "Castagne", "261": "Iwobi", "262": "Smith Rowe", "263": "Kevin", "264": "Bobb", "265": "Berge", "266": "Cairney", "268": "King", "269": "Sessegnon", "270": "Reed", "271": "Muniz", "272": "Kusi-Asare", "569": "Gonzalo", "570": "Palacios", "580": "Charles", "273": "Phillips", "274": "Butland", "275": "Cartwright", "276": "Lo-Tutala", "277": "Egan", "278": "Hughes", "279": "Ajayi", "280": "Coyle", "281": "Drameh", "282": "Giles", "283": "Jacob", "284": "McCarthy", "285": "McNair", "286": "Belloumi", "287": "Millar", "288": "Dowell", "289": "Crooks", "290": "Slater", "291": "Matazo", "292": "\u00d6m\u00fcr", "293": "Kamara", "294": "Zambrano", "295": "McBurnie", "296": "Akintola", "297": "Gyabi", "298": "Destan", "299": "Burstow", "340": "Gelhardt", "556": "Targett", "563": "Morita", "572": "Tzolakis", "574": "Hjert\u00f8-Dahl", "576": "Stroud", "585": "Herrington", "586": "Mendy", "589": "Gourna-Douath", "259": "Diop", "267": "Luki\u0107", "300": "Walton", "301": "Palmer", "302": "Button", "303": "Kipr\u00e9", "304": "O'Shea", "305": "Davis", "306": "Greaves", "307": "Johnson", "308": "Furlong", "309": "N\u00fa\u00f1ez", "310": "Matusiwa", "311": "Burns", "312": "Taylor", "313": "Clarke", "314": "Ogbene", "315": "Fatawu", "316": "Emersonn", "317": "Hirst", "318": "Philogene", "319": "Szmodics", "320": "Akpom", "321": "Walle Egeli", "322": "Al-Hamadi", "323": "McAteer", "324": "Mehmeti", "554": "Van Oevelen", "562": "Maeda", "564": "Scherpen", "571": "Florentino", "591": "Enciso", "592": "Ouattara", "260": "Wilson", "326": "Perri", "327": "Bijol", "329": "Rodon", "330": "Bogle", "331": "Gudmundsson", "332": "Justin", "333": "Bornauw", "334": "Muharemovi\u0107", "335": "Stach", "336": "Okafor", "337": "Aaronson", "338": "Ampadu", "339": "Longstaff", "341": "Gnonto", "342": "Harrison", "343": "James", "344": "Gruev", "345": "Tanaka", "346": "Calvert-Lewin", "347": "Nmecha", "348": "Piroe", "349": "Mateo Joseph", "385": "Trafford", "598": "Elvedi", "350": "A.Becker", "351": "Mamardashvili", "352": "Woodman", "353": "Pecsi", "354": "Jaros", "355": "Davies", "356": "Virgil", "357": "Frimpong", "358": "Kerkez", "359": "Gomez", "360": "Bradley", "361": "Lucky", "362": "Jacquet", "363": "Leoni", "364": "Tsimikas", "365": "Ramsay", "366": "Wirtz", "367": "Gakpo", "368": "Szoboszlai", "369": "Ngumoha", "370": "Chiesa", "371": "Gravenberch", "372": "Mac Allister", "373": "C.Jones", "374": "Endo", "375": "Nyoni", "376": "Bajcetic", "377": "Munoz", "378": "McConnell", "379": "Isak", "380": "Ekitik\u00e9", "381": "Koumas", "382": "Danns", "383": "Elliott", "579": "Araujo", "238": "Grealish", "384": "Donnarumma", "386": "Bettinelli", "387": "O'Reilly", "388": "Gu\u00e9hi", "389": "Matheus N.", "390": "R\u00faben", "391": "Gvardiol", "392": "A\u00eft-Nouri", "393": "Khusanov", "394": "Alleyne", "395": "Lewis", "396": "Vitor Reis", "397": "Semenyo", "398": "Foden", "399": "Cherki", "400": "Doku", "401": "Marmoush", "402": "Rodrigo", "403": "Savinho", "404": "Reijnders", "405": "N.Gonzalez", "406": "Kova\u010di\u0107", "407": "Echeverri", "408": "Phillips", "409": "Mukasa", "410": "Monga", "411": "Haaland", "481": "Anderson", "587": "Rulli", "43": "Tielemans", "162": "Andrey Santos", "325": "Darlow", "412": "Lammens", "413": "Bayindir", "414": "Heaton", "415": "Dorgu", "416": "De Ligt", "417": "Dalot", "418": "Maguire", "419": "Martinez", "420": "Yoro", "421": "Heaven", "422": "Mazraoui", "423": "Shaw", "424": "Amass", "425": "Fredricson", "426": "B.Fernandes", "427": "Mbeumo", "428": "Cunha", "429": "Rashford", "430": "Mount", "431": "Amad", "432": "Mainoo", "433": "Ugarte", "434": "J.Fletcher", "435": "Lacey", "436": "Collyer", "437": "Bendito Mantato", "438": "Fletcher", "439": "\u0160e\u0161ko", "440": "Zirkzee", "441": "Obi", "442": "Pope", "443": "Gillespie", "444": "Jaouen", "445": "Thiaw", "446": "Sch\u00e4r", "447": "Botman", "448": "Burn", "449": "Hall", "450": "Livramento", "451": "A.Murphy", "453": "Barnes", "454": "Elanga", "456": "J.Ramsey", "457": "J.Murphy", "458": "Joelinton", "459": "L.Miley", "460": "Willock", "461": "Tour\u00e9", "462": "Steur", "463": "Woltemade", "464": "Wissa", "465": "Osula", "466": "Neave", "559": "Bamba", "567": "Horn\u00ed\u010dek", "593": "Dedi\u0107", "467": "Sels", "468": "John", "469": "N.Williams", "470": "Morato", "471": "Milenkovi\u0107", "472": "Murillo", "473": "Aina", "474": "Jair Cunha", "475": "Savona", "476": "O.Richards", "477": "Abbott", "478": "Netz", "479": "Bindon", "480": "Gibbs-White", "482": "Hudson-Odoi", "483": "Ndoye", "484": "Hutchinson", "485": "Bakwa", "486": "McAtee", "487": "Dominguez", "488": "I.Sangar\u00e9", "489": "Yates", "490": "Wood", "491": "Igor Jesus", "493": "Kalimuendo", "558": "Schlager", "581": "Diomande", "590": "Benda", "112": "Van Hecke", "455": "Tonali", "494": "Vicario", "495": "Austin", "496": "Kinsky", "497": "Dubravka", "498": "Senesi", "499": "Pedro Porro", "500": "Romero", "501": "Danso", "502": "Robertson", "503": "Van de Ven", "505": "Spence", "506": "Udogie", "507": "Phillips", "508": "Davies", "509": "Byfield", "510": "Rowswell", "511": "Souza", "512": "Kudus", "513": "Xavi", "514": "Tel", "515": "Maddison", "516": "Bentancur", "517": "Odobert", "518": "P.M.Sarr", "519": "Gallagher", "520": "Bergvall", "521": "Kulusevski", "522": "Gray", "523": "Moore", "524": "Olusesi", "525": "Fernandes", "526": "Solanke", "527": "Richarlison", "528": "Scarlett", "529": "Roefs", "530": "Patterson", "531": "Ellborg", "532": "Ballard", "533": "Mukiele", "534": "Hume", "535": "Alderete", "536": "Reinildo", "537": "Seelt", "538": "Hjelde", "539": "O'Nien", "540": "Masuaku", "541": "Meunier", "542": "E.Le F\u00e9e", "543": "Diarra", "544": "Xhaka", "545": "Sadiki", "546": "Adingra", "547": "Mundle", "548": "Rigg", "549": "Talbi", "550": "Jocelin.T", "551": "Angulo", "552": "Brobbey", "553": "Isidor"};
 const TRANSFER_RECS = [];
@@ -16954,7 +17193,7 @@ const FPL_CORS_PROXY = 'https://fpl-proxy.weathered-bird-16f4.workers.dev';
 // the synthetic-squad path below is dead code in production. True only when
 // built via TEST_SOLVER.bat (--test-entry) for pre-deadline feature QA.
 const APEX_TEST_ENTRY = false;
-const APEX_TEST_SQUAD = {"picks": [["Raya", "Arsenal"], ["Watkins", "Aston Villa"], ["Thiago", "Brentford"], ["Palmer", "Chelsea"], ["Sarr", "Crystal Palace"], ["Calvert-Lewin", "Leeds"], ["Virgil", "Liverpool"], ["Szoboszlai", "Liverpool"], ["O'Reilly", "Manchester City"], ["Semenyo", "Manchester City"], ["Thiaw", "Newcastle United"], ["N.Williams", "Nottingham Forest"], ["Gibbs-White", "Nottingham Forest"], ["Van Hecke", "Tottenham"], ["Kinsky", "Tottenham"]], "captain": "Palmer", "vice": "Szoboszlai"};
+const APEX_TEST_SQUAD = {"picks": [["Raya", "Arsenal"], ["Buend\u00eda", "Aston Villa"], ["Thiago", "Brentford"], ["Palmer", "Chelsea"], ["Canvot", "Crystal Palace"], ["Barry", "Everton"], ["Virgil", "Liverpool"], ["Szoboszlai", "Liverpool"], ["Isak", "Liverpool"], ["O'Reilly", "Manchester City"], ["Semenyo", "Manchester City"], ["Thiaw", "Newcastle United"], ["Gibbs-White", "Nottingham Forest"], ["Van Hecke", "Tottenham"], ["Kinsky", "Tottenham"]], "captain": "Palmer", "vice": "Isak"};
 const APEX_BLANK_ENTRY = false;
 // Owner force-in / force-out list (data/preseason/seed_locks.csv). Consumed by
 // _ppSeedLockOpts() in assets/apex_app.js and passed to EVERY pre-GW1 wildcard
@@ -21027,6 +21266,43 @@ function evaluateRollVsTransfer(thisGwIdx) {
     thisGw: thisGw,
     nextGw: nextGw,
   };
+}
+
+// ── APEX_MILP_HOOK_v1 (2026-08-22) — evaluation hook for the one-planner
+// MILP (ApexSolver.solveMultiPeriod, APEX_MILP_v1). NOT yet a decision
+// surface: run `apexMilpPlan()` (optionally apexMilpPlan(8)) in the console,
+// or set window.APEX_MILP = true before load to log the plan on boot. Prints
+// the week-by-week plan and returns it. Uses the SAME seeds as the tree
+// (live squad, FT/bank net of applied moves, selling prices). Surfaces start
+// READING this plan once its outputs are validated against the tree and
+// Solio on live weeks — the validation gate, not a deferral.
+window.apexMilpPlan = async function (horizon) {
+  try {
+    const liveSquad = [..._xiPlayers, ..._benchPlayers];
+    if (liveSquad.length !== 15) { console.warn('[milp] squad not hydrated'); return null; }
+    const _preTx = (typeof _transfersAppliedByGw !== 'undefined'
+      && _transfersAppliedByGw && _transfersAppliedByGw[activeGwIdx]) || 0;
+    const ft = Math.max(1, ((TEAM_META && TEAM_META.free_transfers) || 1) - _preTx);
+    const bank = Math.max(0, (TEAM_META && TEAM_META.bank) || 0);
+    const r = await window.ApexSolver.solveMultiPeriod(POOL_DATA, liveSquad, {
+      horizon: horizon || 6, startIdx: activeGwIdx, freeTransfers: ft, bank: bank,
+      sellingPrices: (TEAM_META && TEAM_META.selling_prices) || {},
+      timeLimitSec: 90,
+    });
+    if (r && r.weeks) {
+      console.log('[milp] status ' + r.status + ' · obj ' + r.objective + ' · ' + r.binariesCount + ' binaries');
+      for (const w of r.weeks) {
+        console.log('  GW' + TEAM_META.gw_range[w.gwIdx] + ' ft' + w.ft + ' bank£' + w.bank
+          + (w.hits ? (' hit' + w.hits) : '') + ': '
+          + (w.roll ? 'ROLL' : (w.transfersOut.join(',') + ' → ' + w.transfersIn.join(',')))
+          + ' (C: ' + w.captain + ')');
+      }
+    }
+    return r;
+  } catch (e) { console.error('[milp]', e); return null; }
+};
+if (typeof window !== 'undefined' && window.APEX_MILP === true) {
+  setTimeout(function () { window.apexMilpPlan(); }, 4000);
 }
 
 // ── APEX_ONE_VERDICT_v1 (2026-08-21) ──────────────────────────────────────────
@@ -35148,7 +35424,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW2</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1787353387-GW2-a6799fe8</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1787354947-GW2-c6f0c128</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
