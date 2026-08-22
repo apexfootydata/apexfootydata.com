@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="2" data-built-at="2026-08-22T19:49:57">
+<meta name="apex-gw" content="2" data-built-at="2026-08-22T20:24:25">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
@@ -37,7 +37,7 @@
 })();
 </script>
 <meta http-equiv="Pragma" content="no-cache">
-<meta name="apex-build" content="20260822-194957">
+<meta name="apex-build" content="20260822-202425">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — FPL Apex</title>
 <meta name="description" content="Plan FPL transfers, chips, and Free Hit squads. Live xG-based projections, a rival head-to-head simulator, and a mini-league table. Free FPL tool.">
@@ -6006,6 +6006,134 @@ body[data-apex-view="team"] #topbar .va-tabs { display: flex; }
 .va-twopane-rail::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,.22); }
 .va-twopane-rail::-webkit-scrollbar-track { background: transparent; }
 
+/* ═══ APEX_HERO_TIGHT_v1 (2026-08-22) ══════════════════════════════════════
+   Marcus: "i think this can be compressed and tightened up."
+
+   MEASURED FIRST, in a harness built from the page's own five <style> blocks
+   and the exact markup _apexOptDHtml emits, at the 563px rail a 1040px
+   .container actually gives it:
+
+       card 192px  =  row 80  +  odds 50  +  foot 29  +  card chrome 33
+
+   Nothing is deleted. Every figure and both disclosures survive; they are
+   re-laid, so the card stops spending four stacked bands on four things that
+   fit in two.
+
+   1. ONE GRID INSTEAD OF THREE STACKED BLOCKS.  `display: contents` on
+      .apex-optd and .apex-optd-hero promotes the caption, the pill, the icons
+      and the chart into a grid owned by .apex-optd-wrap, alongside the odds
+      strip and the foot — the same technique APEX_CTL_CARD_v1 uses, and it
+      MOVES NO NODES: every id, class and handler stays exactly where it is, so
+      _apexOptDDownload, _apexOptDHelp and the innerHTML writes are untouched.
+
+          ┌──────┬──────────────────────────────┬───────┐
+          │ cap  │  12,000 sims · autosubs in   │ [↓][?]│
+          ├──────┼──────────────────────────────┴───────┤
+          │ 60.8 │        ~~~~~ curve ~~~~~             │
+          ├──────┴──────────────────────────────────────┤
+          │  1 in 2      1 in 10        1 in 10         │
+          └─────────────────────────────────────────────┘
+
+      The provenance line moves into the header row, which was 300px of white
+      space, and the two icon buttons stop being a 68px VERTICAL stack that was
+      taller than the curve it stood beside — for part of the width range they,
+      not the chart, were setting the row height.
+
+   2. THE ROW COULD ALSO WRAP, which is how this reaches 210px in a narrow
+      rail: `.apex-optd` is flex-wrap:wrap with the chart at `flex: 1 1 220px`,
+      and below ~430px the pill, the icons and a 220px basis cannot share a
+      line, so the block silently becomes three stacked rows. A grid cannot
+      wrap.
+
+   3. THE CURVE'S HEIGHT IS NOW A NUMBER.  It used to be 104/470 of whatever
+      width the chart column happened to get — 80px in this rail, and taller in
+      a wider one. With the emitter's preserveAspectRatio="none" the viewBox
+      maps straight onto the box, so the drawing keeps its shape and only its
+      scale follows the cell, and vector-effect="non-scaling-stroke" holds the
+      line at 1.5 device px so widening cannot thin it.
+
+   4. THREE HAIRLINES AND THREE 8px GAPS for what needs one divider.
+
+   Scoped to `.va-twopane-rail` throughout. The phone layout keeps its own
+   @media (max-width:560px) block, untouched, and a build with the grid
+   unsupported falls back to today's flex row.
+   ───────────────────────────────────────────────────────────────────────── */
+
+/* GUARDED AT 561px. Everything below is a `.va-twopane-rail …` selector, which
+   outranks the phone block's plain `.apex-optd …` rules — unguarded it would
+   override the <=560px layout the rail div is still present in. The phone
+   block stays the phone block. */
+@media (min-width: 561px) {
+  .va-twopane-rail .apex-optd-wrap {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas:
+      "cap  foot  icons"
+      "pill chart chart"
+      "odds odds  odds"
+      "help help  help";
+    align-items: center;
+    gap: 3px 12px;
+  }
+  .va-twopane-rail .apex-optd,
+  .va-twopane-rail .apex-optd-hero { display: contents; }
+
+  .va-twopane-rail .apex-optd-cap {
+    grid-area: cap;
+    margin: 0;
+    align-self: center;
+  }
+  .va-twopane-rail .apex-optd-pill {
+    grid-area: pill;
+    font-size: 30px;
+    padding: 5px 14px;
+    border-radius: 10px;
+    justify-self: start;
+  }
+  .va-twopane-rail .apex-optd-icons {
+    grid-area: icons;
+    flex-direction: row;
+    justify-content: flex-end;
+    gap: 6px;
+  }
+  .va-twopane-rail .apex-optd-sq { width: 23px; height: 23px; font-size: 12px; }
+
+  .va-twopane-rail .apex-optd-chart {
+    grid-area: chart;
+    flex: none;        /* a grid item now, not a flex item */
+    max-width: none;   /* the grid column bounds it; nothing can wrap */
+    min-width: 0;
+    width: 100%;
+  }
+  .va-twopane-rail .apex-optd-svg { height: 46px; }
+
+  .va-twopane-rail .apex-optd-odds {
+    grid-area: odds;
+    margin: 4px 0 0;
+    padding-top: 7px;
+  }
+  .va-twopane-rail .apex-optd-odds b { font-size: 16px; }
+  .va-twopane-rail .apex-optd-odds span { font-size: 11.5px; margin-top: 1px; }
+
+  /* The provenance line, up in the header row where there was nothing. Still the
+     full sentence — the draw count AND the autosubs disclosure — just no longer
+     set apart under a rule as though it were a finding. */
+  .va-twopane-rail .apex-optd-wrap .va-range-foot {
+    grid-area: foot;
+    justify-self: end;
+    text-align: right;
+    font-size: 11px !important;
+    line-height: 1.3 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border-top: none !important;
+  }
+  .va-twopane-rail .apex-optd-help { grid-area: help; }
+
+  /* The card's 16px/18px was set when the block inside it stood 160px tall. */
+  .va-twopane-rail .va-card-hero { padding: 11px 15px !important; }
+}
+
 </style>
 <!-- Cookie consent + conditional Google Analytics 4 loader -->
 <script>
@@ -6990,6 +7118,25 @@ html.apex-offseason #view-landing .hero-sub::after {
   padding: 0 2px;
 }
 #apex-ctl-card .px-rival-unpin:hover { color: var(--coral, #D85A30); }
+
+
+/* ── APEX_RIVAL_PICK_v1 (2026-08-22) ──────────────────────────────────────
+   The compact rival control had no way to CHOOSE a rival - it only re-ran the
+   search. A select is the one picker that fits a rail row. */
+#apex-ctl-card .px-rival-sel {
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: 100%;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: .78rem;
+  font-weight: 800;
+  color: var(--accent, #1D9E75);
+  cursor: pointer;
+  padding: 0;
+}
+#apex-ctl-card .px-rival-sel option { color: var(--text, #1E1E1A); font-weight: 700; }
 
 /* ── kill switch ────────────────────────────────────────────────────── */
 html[data-apex-ctl-card="off"] #apex-ctl-card {
@@ -17137,11 +17284,26 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
   window._pxUnpin = function () { try { localStorage.removeItem(_pinKey()); } catch (e) {} _rivalRenderCard(); };
 
   var _pinChoices = null, _pinBusy = false;
+  // APEX_RIVAL_PICK_v1 (2026-08-22): _pinChoices = [] used to mean three very
+  // different things and the compact pill reported all three as a load
+  // failure. _pinWhy says which: 'error' | 'none' (no private leagues) |
+  // 'empty' (leagues exist, no rival in any of them) | 'noteam'.
+  var _pinWhy = null;
   window._pxPickRival = function () {
     if (_pinBusy) return;
-    var me = _meId();
-    if (!me) return;
+    var me = Number(_meId()) || 0;   // FPL_ID is a STRING when it came from the
+                                     // landing input; the API sends numbers.
+    if (!me) {
+      // Used to be a bare `return` - the click did nothing at all on the
+      // public build before a team is loaded. Say so instead.
+      _pinChoices = [];
+      _pinWhy = 'noteam';
+      _rivalRenderCard();
+      return;
+    }
     _pinBusy = true;
+    _pinChoices = null;   // clear a previous failure so a retry can succeed
+    _pinWhy = null;
     _rivalRenderCard('Finding your mini-leagues…');
     _fetchJson('/entry/' + me + '/').then(function (entry) {
       var priv = ((entry.leagues || {}).classic || []).filter(function (l) {
@@ -17159,11 +17321,13 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
       if (!usable.length) {
         _pinBusy = false;
         _pinChoices = null;
+        _pinWhy = null;
         if (priv.length) {
           _rivalRenderCard('Your ' + priv.length + ' mini-league' + (priv.length === 1 ? ' is' : 's are') +
             ' there — FPL publishes standings once the season starts, so rivals appear after GW1.');
         } else {
           _pinChoices = [];
+          _pinWhy = 'none';        // no private classic leagues - not a failure
           _rivalRenderCard();
         }
         return;
@@ -17171,30 +17335,38 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
       usable.sort(function (a, b) { return (a.rank_count || 1e9) - (b.rank_count || 1e9); });
       // Try leagues smallest-first until one actually contains a rival.
       var tryLeague = function (idx) {
-        if (idx >= usable.length) { _pinBusy = false; _pinChoices = []; _rivalRenderCard(); return; }
+        if (idx >= usable.length) {
+          _pinBusy = false; _pinChoices = []; _pinWhy = 'empty'; _rivalRenderCard(); return;
+        }
         var lg = usable[idx];
         return _fetchJson('/leagues-classic/' + lg.id + '/standings/').then(function (st) {
           var rows = ((st.standings || {}).results || []).slice(0, 8);
-          var choices = rows.filter(function (r) { return r.entry !== me; }).map(function (r) {
+          var choices = rows.filter(function (r) { return Number(r.entry) !== me; }).map(function (r) {
             return { id: r.entry, name: r.player_name || r.entry_name, team: r.entry_name,
                      total: r.total, rank: r.rank, league: lg.name, leagueId: lg.id };
           });
           if (!choices.length) return tryLeague(idx + 1);
           _pinChoices = choices;
+          _pinWhy = null;
           _pinBusy = false;
           _rivalRenderCard();
         });
       };
       return tryLeague(0);
-    }).catch(function () { _pinBusy = false; _pinChoices = []; _rivalRenderCard(); });
+    }).catch(function () {
+      _pinBusy = false; _pinChoices = []; _pinWhy = 'error'; _rivalRenderCard();
+    });
   };
+  // APEX_RIVAL_PICK_v1: back out of the picker without pinning anyone.
+  window._pxPinCancel = function () { _pinChoices = null; _pinWhy = null; _rivalRenderCard(); };
   window._pxPinChoice = function (i) {
-    var c = _pinChoices && _pinChoices[i];
+    var c = _pinChoices && _pinChoices[Number(i)];
     if (!c) return;
     var meTotal = _myLeagueTotal(c.leagueId);
     _pinSet({ id: c.id, name: c.name, team: c.team, league: c.league, leagueId: c.leagueId,
               rivalTotal: c.total, myTotal: meTotal, pinnedAt: new Date().toISOString().slice(0, 10) });
     _pinChoices = null;
+    _pinWhy = null;
     _rivalRenderCard();
     _pinRefreshGap();
   };
@@ -17279,12 +17451,42 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
         }
         if (_pinChoices) {
           if (!_pinChoices.length) {
+            // APEX_RIVAL_PICK_v1: only 'error' is worth a retry link. The other
+            // two are ordinary states and were being reported as breakage.
+            if (_pinWhy === 'noteam') {
+              wrap.innerHTML = shell('<span class="px-rival-mut">'
+                + 'Load your team to pin a rival</span>');
+              return;
+            }
+            if (_pinWhy === 'none') {
+              wrap.innerHTML = shell('<span class="px-rival-mut">'
+                + 'No mini-leagues on your account</span>');
+              return;
+            }
+            if (_pinWhy === 'empty') {
+              wrap.innerHTML = shell('<span class="px-rival-mut">'
+                + 'No rival in your mini-leagues yet</span>');
+              return;
+            }
             wrap.innerHTML = shell('<a href="#" onclick="_pxPickRival();return false;"'
-              + ' class="px-rival-cta">Leagues did not load - retry</a>');
+              + ' class="px-rival-cta">Leagues didn\u2019t load \u2014 retry</a>');
             return;
           }
-          wrap.innerHTML = shell('<a href="#" onclick="_pxPickRival();return false;"'
-            + ' class="px-rival-cta">Pick your rival</a>');
+          // THE FIX. This used to draw a link that called _pxPickRival() again,
+          // so the compact control could never reach a pinned state - the full
+          // banner's candidate buttons have no room in a rail row. A <select>
+          // does, and it is one tap on a phone.
+          var opts = _pinChoices.map(function (c, i) {
+            return '<option value="' + i + '">' + _esc(c.name)
+              + ' \u00b7 ' + c.total + '</option>';
+          }).join('');
+          wrap.innerHTML = shell(
+            '<select class="px-rival-sel" aria-label="Pick your rival"'
+            + ' onchange="if(this.value!==\'\')_pxPinChoice(this.value);">'
+            + '<option value="" selected disabled>Pick your rival\u2026</option>'
+            + opts + '</select>'
+            + '<a href="#" class="px-rival-unpin" title="Cancel"'
+            + ' onclick="_pxPinCancel();return false;" aria-label="Cancel">\u00d7</a>');
           return;
         }
         if (!pin) {
@@ -17661,7 +17863,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1787424597-GW2-860d7a00";
+const BUILD_VERSION = "1787426665-GW2-e403c549";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = false;
@@ -17669,7 +17871,7 @@ window.APEX_SQUAD_ROLLBACK = false;
 let FPL_ID = null;
 let SQUAD_DATA = [];
 </script>
-<script src="/apex_pool.js?v=1787424597-GW2-860d7a00"></script>
+<script src="/apex_pool.js?v=1787426665-GW2-e403c549"></script>
 <script>
 const PLAYER_NAMES = {"1": "Raya", "2": "Arrizabalaga", "3": "Meslier", "4": "Gabriel", "5": "J.Timber", "6": "Saliba", "7": "Lewis-Skelly", "8": "Calafiori", "9": "Hincapie", "10": "White", "11": "Mosquera", "12": "Saka", "13": "Rice", "14": "Eze", "15": "\u00d8degaard", "16": "Madueke", "17": "Merino", "18": "Martinelli", "19": "Zubimendi", "20": "Dowman", "22": "Nwaneri", "23": "F\u00e1bio Vieira", "24": "Nelson", "25": "Gy\u00f6keres", "26": "Havertz", "27": "G.Jesus", "31": "Konsa", "452": "Bruno G.", "557": "Tzolis", "28": "Martinez", "29": "M.Bizot", "30": "Digne", "32": "Cash", "33": "Mings", "34": "Pau", "35": "Bogarde", "36": "Maatsen", "37": "Lindel\u00f6f", "38": "A.Garc\u00eda", "39": "Nedeljkovic", "41": "Buend\u00eda", "44": "Bailey", "45": "McGinn", "46": "Barkley", "47": "Kamara", "48": "Onana", "49": "Iling Jr", "50": "Burrowes", "51": "George Hemmings", "52": "Alysson", "53": "Manzambi", "54": "Gomes", "55": "Watkins", "56": "Abraham", "160": "Garnacho", "582": "Madjo", "596": "Ruggeri", "597": "Suzuki", "57": "Petrovi\u0107", "58": "Forster", "59": "Dennis", "60": "Hill", "61": "Truffert", "62": "Diakit\u00e9", "63": "Milosavljevi\u0107", "64": "Smith", "65": "J.Araujo", "66": "Soler", "67": "Rayan", "68": "Tavernier", "69": "Scott", "70": "Kluivert", "71": "Cook", "72": "Gannon-Doak", "73": "Adams", "74": "Brooks", "75": "Christie", "76": "T\u00f3th.A", "77": "Adli", "78": "Kroupi.Jr", "79": "Evanilson", "80": "Enes \u00dcnal", "81": "Rodr\u00edguez", "566": "Silva", "573": "Sanchez", "82": "Kelleher", "83": "Valdimarsson", "84": "Collins", "85": "Van den Berg", "86": "Lewis-Potter", "87": "Ajer", "88": "Kayode", "89": "Henry", "90": "Hickey", "91": "Pinnock", "92": "Ji-soo", "93": "Schuster", "94": "Schade", "95": "O.Dango", "96": "Damsgaard", "97": "Jensen", "98": "Janelt", "99": "Milambo", "100": "Carvalho", "102": "Yarmoliuk", "103": "Dasilva", "105": "Anthony", "106": "Thiago", "107": "Furo", "108": "Wilson", "565": "M.Sangar\u00e9", "109": "Verbruggen", "111": "Steele", "113": "F.Kad\u0131o\u011flu", "114": "Boscagli", "115": "De Cuyper", "116": "Dunk", "117": "Coppola", "118": "Igor", "119": "Costinha", "120": "Svoboda", "121": "Mitoma", "122": "Minteh", "123": "Hinshelwood", "124": "Gro\u00df", "125": "Georginio", "126": "O'Riley", "127": "Gomez", "128": "Buonanotte", "129": "Ayari", "130": "Wieffer", "131": "Baleba", "132": "Howell", "133": "Watson", "134": "Oriola", "135": "Yohanna", "137": "Tzimas", "138": "Kostoulas", "139": "Ferguson", "328": "Struijk", "504": "Vuskovic", "594": "David", "600": "Osman", "40": "Rogers", "101": "Henderson", "136": "Welbeck", "140": "S\u00e1nchez", "141": "J\u00f6rgensen", "142": "James", "143": "Chalobah", "144": "Gusto", "145": "Fofana", "146": "B.Badiashile", "147": "Tosin", "148": "Hato", "149": "Colwill", "150": "M.Sarr", "151": "Acheampong", "152": "Palestra", "153": "Disasi", "154": "Palmer", "155": "Enzo", "156": "Neto", "157": "Est\u00eav\u00e3o", "158": "Gittens", "159": "Caicedo", "161": "Lavia", "163": "D.Essugo", "164": "Quenda", "165": "Jo\u00e3o Pedro", "166": "N.Jackson", "167": "Delap", "168": "Marc Guiu", "169": "Mheuka", "170": "Emegha", "200": "Lacroix", "560": "Penders", "561": "Anselmino", "568": "Barco", "578": "Mudryk", "583": "Chavarria", "104": "Onyeka", "110": "Rushworth", "171": "Dovin", "172": "Wilson", "173": "Thomas", "174": "Kitching", "175": "van Ewijk", "176": "Dasilva", "177": "Kesler-Hayden", "178": "Bidwell", "179": "Latibeaudiere", "180": "Woolfenden", "181": "Brau", "182": "Amenda", "183": "Rudoni", "184": "Grimes", "185": "Sakamoto", "186": "Mason-Clark", "187": "Eccles", "188": "Torp", "189": "Shepherd", "190": "Tchaouna", "191": "Borges Rodrigues", "192": "Andrews", "193": "Wright", "194": "Thomas-Asante", "195": "Simms", "196": "Markelo", "197": "Bassette", "492": "Awoniyi", "575": "Yirenkyi", "584": "Hamer", "599": "Cherif", "42": "Guessand", "198": "Henderson", "199": "Benitez", "201": "Mu\u00f1oz", "202": "Richards", "203": "Canvot", "204": "Mitchell", "205": "Sosa", "206": "Chadi Riad", "207": "Mingueza", "208": "Sarr", "210": "Wharton", "211": "Yeremy", "212": "Hughes", "213": "Lerma", "214": "Kamada", "215": "Devenny", "216": "Esse", "217": "M.Fran\u00e7a", "218": "Doucour\u00e9", "219": "J.Rak-Sakyi", "220": "Cardines", "221": "Drakes-Thomas", "222": "Strand Larsen", "223": "Mateta", "224": "Nketiah", "225": "Uche", "241": "McNeil", "555": "Matthews", "577": "Tomiyasu", "588": "Khalaili", "595": "Gozo", "21": "N\u00f8rgaard", "209": "Johnson", "226": "Pickford", "227": "Travers", "228": "King", "229": "Tarkowski", "230": "Branthwaite", "231": "Keane", "232": "O'Brien", "233": "Mykolenko", "234": "Patterson", "235": "Aznou", "236": "Dewsbury-Hall", "237": "Ndiaye", "239": "Garner", "240": "Iroegbunam", "242": "George", "243": "Alcaraz", "244": "Armstrong", "245": "Dibling", "246": "R\u00f6hl", "247": "Hackney", "248": "Beto", "249": "Barry", "250": "Leno", "251": "Lecomte", "252": "McNally", "253": "Andersen", "254": "Robinson", "255": "J.Cuenca", "256": "Tete", "257": "Bassey", "258": "Castagne", "261": "Iwobi", "262": "Smith Rowe", "263": "Kevin", "264": "Bobb", "265": "Berge", "266": "Cairney", "268": "King", "269": "Sessegnon", "270": "Reed", "271": "Muniz", "272": "Kusi-Asare", "569": "Gonzalo", "570": "Palacios", "580": "Charles", "273": "Phillips", "274": "Butland", "275": "Cartwright", "276": "Lo-Tutala", "277": "Egan", "278": "Hughes", "279": "Ajayi", "280": "Coyle", "281": "Drameh", "282": "Giles", "283": "Jacob", "284": "McCarthy", "285": "McNair", "286": "Belloumi", "287": "Millar", "288": "Dowell", "289": "Crooks", "290": "Slater", "291": "Matazo", "292": "\u00d6m\u00fcr", "293": "Kamara", "294": "Zambrano", "295": "McBurnie", "296": "Akintola", "297": "Gyabi", "298": "Destan", "299": "Burstow", "340": "Gelhardt", "556": "Targett", "563": "Morita", "572": "Tzolakis", "574": "Hjert\u00f8-Dahl", "576": "Stroud", "585": "Herrington", "586": "Mendy", "589": "Gourna-Douath", "259": "Diop", "267": "Luki\u0107", "300": "Walton", "301": "Palmer", "302": "Button", "303": "Kipr\u00e9", "304": "O'Shea", "305": "Davis", "306": "Greaves", "307": "Johnson", "308": "Furlong", "309": "N\u00fa\u00f1ez", "310": "Matusiwa", "311": "Burns", "312": "Taylor", "313": "Clarke", "314": "Ogbene", "315": "Fatawu", "316": "Emersonn", "317": "Hirst", "318": "Philogene", "319": "Szmodics", "320": "Akpom", "321": "Walle Egeli", "322": "Al-Hamadi", "323": "McAteer", "324": "Mehmeti", "554": "Van Oevelen", "562": "Maeda", "564": "Scherpen", "571": "Florentino", "591": "Enciso", "592": "Ouattara", "260": "Wilson", "326": "Perri", "327": "Bijol", "329": "Rodon", "330": "Bogle", "331": "Gudmundsson", "332": "Justin", "333": "Bornauw", "334": "Muharemovi\u0107", "335": "Stach", "336": "Okafor", "337": "Aaronson", "338": "Ampadu", "339": "Longstaff", "341": "Gnonto", "342": "Harrison", "343": "James", "344": "Gruev", "345": "Tanaka", "346": "Calvert-Lewin", "347": "Nmecha", "348": "Piroe", "349": "Mateo Joseph", "385": "Trafford", "598": "Elvedi", "350": "A.Becker", "351": "Mamardashvili", "352": "Woodman", "353": "Pecsi", "354": "Jaros", "355": "Davies", "356": "Virgil", "357": "Frimpong", "358": "Kerkez", "359": "Gomez", "360": "Bradley", "361": "Lucky", "362": "Jacquet", "363": "Leoni", "364": "Tsimikas", "365": "Ramsay", "366": "Wirtz", "367": "Gakpo", "368": "Szoboszlai", "369": "Ngumoha", "370": "Chiesa", "371": "Gravenberch", "372": "Mac Allister", "373": "C.Jones", "374": "Endo", "375": "Nyoni", "376": "Bajcetic", "377": "Munoz", "378": "McConnell", "379": "Isak", "380": "Ekitik\u00e9", "381": "Koumas", "382": "Danns", "383": "Elliott", "579": "Araujo", "238": "Grealish", "384": "Donnarumma", "386": "Bettinelli", "387": "O'Reilly", "388": "Gu\u00e9hi", "389": "Matheus N.", "390": "R\u00faben", "391": "Gvardiol", "392": "A\u00eft-Nouri", "393": "Khusanov", "394": "Alleyne", "395": "Lewis", "396": "Vitor Reis", "397": "Semenyo", "398": "Foden", "399": "Cherki", "400": "Doku", "401": "Marmoush", "402": "Rodrigo", "403": "Savinho", "404": "Reijnders", "405": "N.Gonzalez", "406": "Kova\u010di\u0107", "407": "Echeverri", "408": "Phillips", "409": "Mukasa", "410": "Monga", "411": "Haaland", "481": "Anderson", "587": "Rulli", "43": "Tielemans", "162": "Andrey Santos", "325": "Darlow", "412": "Lammens", "413": "Bayindir", "414": "Heaton", "415": "Dorgu", "416": "De Ligt", "417": "Dalot", "418": "Maguire", "419": "Martinez", "420": "Yoro", "421": "Heaven", "422": "Mazraoui", "423": "Shaw", "424": "Amass", "425": "Fredricson", "426": "B.Fernandes", "427": "Mbeumo", "428": "Cunha", "429": "Rashford", "430": "Mount", "431": "Amad", "432": "Mainoo", "433": "Ugarte", "434": "J.Fletcher", "435": "Lacey", "436": "Collyer", "437": "Bendito Mantato", "438": "Fletcher", "439": "\u0160e\u0161ko", "440": "Zirkzee", "441": "Obi", "442": "Pope", "443": "Gillespie", "444": "Jaouen", "445": "Thiaw", "446": "Sch\u00e4r", "447": "Botman", "448": "Burn", "449": "Hall", "450": "Livramento", "451": "A.Murphy", "453": "Barnes", "454": "Elanga", "456": "J.Ramsey", "457": "J.Murphy", "458": "Joelinton", "459": "L.Miley", "460": "Willock", "461": "Tour\u00e9", "462": "Steur", "463": "Woltemade", "464": "Wissa", "465": "Osula", "466": "Neave", "559": "Bamba", "567": "Horn\u00ed\u010dek", "593": "Dedi\u0107", "467": "Sels", "468": "John", "469": "N.Williams", "470": "Morato", "471": "Milenkovi\u0107", "472": "Murillo", "473": "Aina", "474": "Jair Cunha", "475": "Savona", "476": "O.Richards", "477": "Abbott", "478": "Netz", "479": "Bindon", "480": "Gibbs-White", "482": "Hudson-Odoi", "483": "Ndoye", "484": "Hutchinson", "485": "Bakwa", "486": "McAtee", "487": "Dominguez", "488": "I.Sangar\u00e9", "489": "Yates", "490": "Wood", "491": "Igor Jesus", "493": "Kalimuendo", "558": "Schlager", "581": "Diomande", "590": "Benda", "112": "Van Hecke", "455": "Tonali", "494": "Vicario", "495": "Austin", "496": "Kinsky", "497": "Dubravka", "498": "Senesi", "499": "Pedro Porro", "500": "Romero", "501": "Danso", "502": "Robertson", "503": "Van de Ven", "505": "Spence", "506": "Udogie", "507": "Phillips", "508": "Davies", "509": "Byfield", "510": "Rowswell", "511": "Souza", "512": "Kudus", "513": "Xavi", "514": "Tel", "515": "Maddison", "516": "Bentancur", "517": "Odobert", "518": "P.M.Sarr", "519": "Gallagher", "520": "Bergvall", "521": "Kulusevski", "522": "Gray", "523": "Moore", "524": "Olusesi", "525": "Fernandes", "526": "Solanke", "527": "Richarlison", "528": "Scarlett", "529": "Roefs", "530": "Patterson", "531": "Ellborg", "532": "Ballard", "533": "Mukiele", "534": "Hume", "535": "Alderete", "536": "Reinildo", "537": "Seelt", "538": "Hjelde", "539": "O'Nien", "540": "Masuaku", "541": "Meunier", "542": "E.Le F\u00e9e", "543": "Diarra", "544": "Xhaka", "545": "Sadiki", "546": "Adingra", "547": "Mundle", "548": "Rigg", "549": "Talbi", "550": "Jocelin.T", "551": "Angulo", "552": "Brobbey", "553": "Isidor"};
 const TRANSFER_RECS = [];
@@ -20831,7 +21033,17 @@ function _apexOptDHtml(d, gwLabel, headlineE) {
   path += ' L ' + x(hi).toFixed(1) + ' ' + y0.toFixed(1);
   // APEX_FIX_AUG07J_ODDS: mx / ry / rx placed the rotated median rule, which is gone.
   var s = '';
-  s += '<svg class="apex-optd-svg" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="xMidYMid meet"'
+  // APEX_HERO_TIGHT_v1 (2026-08-22): "xMidYMid meet" -> "none". With meet the
+  // rendered HEIGHT is 104/470 of whatever width the chart column gets - 80px
+  // in a 563px rail and taller in a wider one - so the card's tallest band was
+  // set by the page width rather than by a decision. With none the viewBox maps
+  // straight onto the box, the drawing keeps its shape, and CSS can state the
+  // height. There is no text in this SVG (AUG07J_ODDS removed the ticks and the
+  // rotated rule), so nothing can be distorted by the stretch except the
+  // stroke, which vector-effect below holds at 1.5 device px.
+  // With APEX_HERO_TIGHT=0 no height is stated, the viewBox intrinsic ratio
+  // still applies to `width:100%; height:auto`, and the box is unchanged.
+  s += '<svg class="apex-optd-svg" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none"'
      + ' xmlns="http://www.w3.org/2000/svg" role="img" aria-label="' + gwLabel
      + ' simulated score distribution. Mean ' + d.mean.toFixed(1) + ', median ' + d.median.toFixed(1)
      + ' points. ' + 'Middle 80% of weeks, ' + d.floor.toFixed(1) + ' to ' + d.ceiling.toFixed(1) + '.' + '">';
@@ -20839,7 +21051,7 @@ function _apexOptDHtml(d, gwLabel, headlineE) {
   // for back — rgba(29,158,117,.14) fill under a .42 stroke at 1.5. Same green as
   // --apexd-g5, just carried at the old weight.
   s += '<path d="' + path + ' Z" fill="#1D9E75" fill-opacity="0.14"/>';
-  s += '<path d="' + path + '" fill="none" stroke="#1D9E75" stroke-opacity="0.42" stroke-width="1.5" stroke-linejoin="round"/>';
+  s += '<path d="' + path + '" fill="none" stroke="#1D9E75" stroke-opacity="0.42" stroke-width="1.5" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>';
   // APEX_FIX_AUG07J_ODDS: baseline, axis ticks and the rotated median rule all removed.
   // The ticks and the sideways label were two of the four things that made this
   // read as the rival's block; the odds strip below now carries what they said,
@@ -36202,7 +36414,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW2</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1787424597-GW2-860d7a00</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1787426665-GW2-e403c549</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
