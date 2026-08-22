@@ -93,7 +93,7 @@
           were, on average, 3.15 points from reality. Lower is closer; a perfect projection is 0.
         </div>
         <div class="explain">
-          <b>Scored honestly:</b> on the template players (20%+ owned), using whatever they actually
+          <b>Scored honestly:</b> on widely-owned players (5%+ owned at the deadline), using whatever they actually
           got — <b>including a 0 if they blanked or sat on the bench.</b> Nothing filtered out. Every
           tool judged on the same players, matched by FPL player ID.
         </div>
@@ -105,7 +105,7 @@
           <div class="tag">NUMBERS over NARRATIVES</div>
         </div>
         <div class="rule"></div>
-        <div class="ttl" id="eval-ttl">ILLUSTRATIVE EXAMPLE · PROJECTION ACCURACY (template players)</div>
+        <div class="ttl" id="eval-ttl">ILLUSTRATIVE EXAMPLE · PROJECTION ACCURACY (widely-owned players)</div>
         <div class="sub">Average miss per pick · <b style="color:var(--ink)">lower = closer</b></div>
 
         <div class="bars">
@@ -227,7 +227,7 @@ var EVAL_DATA = null;
 
     /* APEX-EVAL-FULLFLIP-v1: the bars card, lede and caveat must flip too. */
     function setTxt(id,t){var e=document.getElementById(id);if(e)e.textContent=t;}
-    setTxt('eval-ttl','PROJECTION ACCURACY (template players) · SEASON TO DATE');
+    setTxt('eval-ttl','PROJECTION ACCURACY (widely-owned players) · SEASON TO DATE');
     setTxt('eval-readline','Measured live — season running total, updated after every scored gameweek.');
     var lede=document.getElementById('eval-lede');
     if(lede) lede.innerHTML='We score Apex against the leading paid tools every gameweek, in the open — '+
@@ -235,7 +235,7 @@ var EVAL_DATA = null;
       (EVAL_DATA.weeks===1?'':'s')+' scored so far.</b>';
     var cav=document.getElementById('eval-caveat');
     if(cav) cav.innerHTML='<b>Live.</b> The figures above are measured results from the season to date, '+
-      'scored after each gameweek on the 20%+-owned template players. Rivals shown as Tool A / Tool B. '+
+      'scored after each gameweek on players owned by '+((EVAL_DATA&&EVAL_DATA.owned_thr!=null)?EVAL_DATA.owned_thr:5)+'%+ of managers at the deadline. Rivals shown as Tool A / Tool B. '+
       'Only aggregate accuracy is ever shown — never any tool\u2019s individual projections.';
     var aTag=document.getElementById('exbar-a-tag'); if(aTag) aTag.textContent='';
     var vals=[['apex',EVAL_DATA.apex],['a',EVAL_DATA.review],['b',EVAL_DATA.bench_b]];
