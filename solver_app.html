@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="2" data-built-at="2026-08-23T13:06:51">
+<meta name="apex-gw" content="2" data-built-at="2026-08-23T16:46:09">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
@@ -37,7 +37,7 @@
 })();
 </script>
 <meta http-equiv="Pragma" content="no-cache">
-<meta name="apex-build" content="20260823-130651">
+<meta name="apex-build" content="20260823-164609">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — FPL Apex</title>
 <meta name="description" content="Plan FPL transfers, chips, and Free Hit squads. Live xG-based projections, a rival head-to-head simulator, and a mini-league table. Free FPL tool.">
@@ -13211,8 +13211,82 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
   // its plan, compare with the tree. Pool is pruned to the squad + top
   // horizon scorers per position (opts.candidateCap, default 40 extras) so
   // glpk stays tractable in the browser; opts.timeLimitSec caps the solve.
+  // ── APEX_MILP_BENCH_VICE_v1 (2026-08-23, Marcus: "fix all") ───────────
+  // The three constants the bench/vice/candidate work is calibrated on. All
+  // three carry a kill switch (see solveMultiPeriod) so any of them can be
+  // put back to what shipped on 08-22 without a rebuild.
+  //
+  // ── APEX_MILP_BENCH_PROFILE_TRUTH_v1 (2026-08-23 pm) ─────────────────
+  // MILP_BENCH_PROFILE — the coefficient that rides on a bench slot's xP.
+  //
+  // WHAT THE PROFILE HAS TO BE. This objective books BP * ptsAt(p, w), and
+  // ptsAt IS xP_b, which already contains P(b plays). So the coefficient is
+  // NOT P(slot is used) — booking that squares availability, which is worst
+  // exactly on the cheap fodder a bench is made of. It is
+  //     w_b = E[ 1{slot b's points enter the XI} * b's realised points ] / xP_b
+  // The morning's profile (0.035/0.202/0.033/0.002, kept below as
+  // MILP_BENCH_PROFILE_0823) is the shape of P(slot used), i.e. the wrong
+  // quantity, and could not be reproduced at any blank rate: see the header
+  // of scripts/patches/patch_appearance_truth_2026-08-23.py.
+  //
+  // BOOKING AGAINST CONDITIONAL POINTS IS THE SAME LINEAR MODEL, not a
+  // richer one: P(open_b) * p_any(b) * (xP_b / p_any(b)) = P(open_b) * xP_b,
+  // so p_any cancels identically. A per-slot constant on xP_b IS the honest
+  // formulation. What no constant can carry is that P(open_b) depends on the
+  // XI being chosen, which is not linear in the decision variables.
+  //
+  // MEASURED — scripts/verify/_harness/appearance_truth.js, in the tree, by
+  // name, with its sample size, because the number it replaces had no
+  // harness anywhere:
+  //   node appearance_truth.js milpsquads 24
+  //   AT_SQUADS=milp AT_IDX=0..5 AT_MODE=truth \
+  //     node appearance_truth.js bench 24 12000
+  //   24 MILP-optimal fifteens x 12000 sims x 6 gameweeks
+  //     = 1,728,000 squad-gameweek sims, under APEX_APPEARANCE_TRUTH_v1.
+  //     slot   08-23am   shipped-appearance   MEASURED
+  //     gk      0.035        0.138              0.020
+  //     sub1    0.202        0.678              0.517
+  //     sub2    0.033        0.388              0.217
+  //     sub3    0.002        0.200              0.078
+  //   Fixed point: squads rebuilt WITH this profile re-measure at
+  //   0.021/0.513/0.218/0.076 — stable to ~1.5%.
+  //
+  // NO SINGLE CONSTANT PROFILE IS A GOOD APPROXIMATION, and this comment is
+  // not going to pretend otherwise. Per-squad across the 24 optimal fifteens:
+  //   gk p10 0.001 p50 0.018 p90 0.022 | sub1 0.448 / 0.504 / 0.594
+  //   sub2 0.117 / 0.215 / 0.279       | sub3 0.016 / 0.055 / 0.116
+  // and across squad POPULATIONS it is worse — the two real squad fixtures
+  // give 0.017/0.41/0.16/0.023, wide randomised fifteens 0.041/0.594/0.324/
+  // 0.136. These constants are right for the squads THIS solver builds.
+  const MILP_BENCH_PROFILE      = { gk: 0.020, sub1: 0.517, sub2: 0.217, sub3: 0.078 };
+  // The 2026-08-23 morning profile, kept verbatim for the kill switch.
+  const MILP_BENCH_PROFILE_0823 = { gk: 0.035, sub1: 0.202, sub2: 0.033, sub3: 0.002 };
+  //
+  // MILP_VICE_WEIGHT — P(captain plays 0 minutes), which is exactly when the
+  // vice's points double, so the probability IS the objective coefficient.
+  // Measured over four seasons of real history
+  // (data/fpl/history_archive/fpl_history_by_code_gw.csv, prior-information-
+  // only captain proxy): 5.04%, n=1390, +/-1.15pp. FPL Review publishes 0.05
+  // and sits inside that interval; Solio's 0.10 is at the top of the
+  // plausible range and outside ours, so we use our own number.
+  const MILP_VICE_WEIGHT = 0.05;
+  //
+  // MILP_MAX_TX_PER_WEEK — upper bound on transfers in one gameweek. Was a
+  // bare literal 5 (on vT AND on the hits counter vP beside it). FPL itself
+  // imposes no such limit; 5 is a tractability guess, and when it bound the
+  // solver returned a truncated plan with NO signal. Solio allows 15. It is
+  // 15 here too, and a plan that reaches the cap now says so
+  // (result.txCapBinding / week.txCapHit) instead of lying by omission.
+  const MILP_MAX_TX_PER_WEEK = 15;
   async function solveMultiPeriod(pool, squad, opts) {
     opts = opts || {};
+    // APEX_MILP_BENCH_VICE_v1 (2026-08-23): the three kill switches. Each is
+    // read from `window` so it can be flipped in a live tab, and overridden
+    // per-call by opts for the suites and the measurement harness.
+    //   window.APEX_MILP_BENCH_SLOTS = false  -> flat BENCH_WEIGHT (08-22)
+    //   window.APEX_MILP_VICE        = false  -> no vice-captain term
+    //   window.APEX_MILP_CAND_RULE   = 'sum'  -> horizon-sum selection (08-22)
+    const _win = (typeof window !== 'undefined') ? window : {};
     const glpk = _needGLPK();
     const H = Math.max(2, Math.min(8, opts.horizon || 6));
     const startIdx = opts.startIdx || 0;
@@ -13222,6 +13296,82 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
     const ITB_W = (typeof opts.itbValue === 'number') ? opts.itbValue : 0.08;
     const HIT = 4;
     const BW = (typeof opts.benchWeight === 'number') ? opts.benchWeight : FPL_RULES.BENCH_WEIGHT;
+    // APEX_MILP_BENCH_VICE_v1 (2026-08-23) — bench pricing mode. `flat` is the
+    // 08-22 model exactly (one weight on all four slots, booked through the
+    // x/s decomposition); the two shaped modes spend the measured
+    // MILP_BENCH_PROFILE instead. Cost is the reason there are two:
+    //   'full'  Solio's ordered bench (dev/solver.py:425-435) — a binary per
+    //           candidate per slot per week. Slots 1-3 are restricted to
+    //           OUTFIELDERS here, which is provably equivalent (a 15-man
+    //           squad holds exactly 2 GKs and the XI starts exactly 1, so
+    //           the single benched GK is forced into slot 0 regardless) and
+    //           strictly smaller than restricting nothing.
+    //   'slot1' the bench GK priced at its own weight through the existing
+    //           x/s decomposition — FREE, no new variable, because bench
+    //           membership already IS (x - s) — plus ONE ordered binary for
+    //           the first outfield sub, which the measured profile says
+    //           carries 0.202 of the 0.237 outfield bench value (85%). The
+    //           remaining two slots take the flat residual (0.033+0.002)/2.
+    //           The booked total is 0.035+0.202+2*0.0175 = 0.272 — the sim's
+    //           sum exactly; only the ordering of the last two is dropped.
+    // See the patch header for the measured solve-time cost of each.
+    const _benchOff = (_win.APEX_MILP_BENCH_SLOTS === false);
+    const BENCH_MODE = _benchOff ? 'flat'
+      : (opts.benchMode || _win.APEX_MILP_BENCH_MODE || 'slot1');
+    // APEX_MILP_BENCH_PROFILE_TRUTH_v1 (2026-08-23 pm) — kill switch.
+    //   window.APEX_MILP_BENCH_PROFILE_TRUTH = false  -> the 08-23am profile
+    //   opts.benchProfileTruth = false                -> same, per call
+    // opts.benchProfile still overrides individual slots on top of either.
+    const _bpTruth = (typeof opts.benchProfileTruth === 'boolean')
+      ? opts.benchProfileTruth : (_win.APEX_MILP_BENCH_PROFILE_TRUTH !== false);
+    const BP = Object.assign({}, _bpTruth ? MILP_BENCH_PROFILE : MILP_BENCH_PROFILE_0823,
+                             opts.benchProfile || {});
+    // Residual weight for the two unordered tail slots in 'slot1'.
+    const BP_REST = (BP.sub2 + BP.sub3) / 2;
+    // Per-player BASE bench weight — the coefficient that rides on vx (i.e.
+    // on bench membership, x - s). 'full' books nothing here: every bench
+    // point arrives through an ordered slot variable instead.
+    const bwOf = (p) => (BENCH_MODE === 'flat') ? BW
+      : (BENCH_MODE === 'full') ? 0
+      : (p.element_type === 1 ? BP.gk : BP_REST);
+    // APEX_MILP_BENCH_VICE_v1 (2026-08-23) — vice-captain. Weight 0 (or the
+    // kill switch) removes the variables entirely, not merely their
+    // coefficient, so the OFF path is the 08-22 model byte for byte.
+    const VICE_W = (typeof opts.viceWeight === 'number') ? opts.viceWeight : MILP_VICE_WEIGHT;
+    const VICE_ON = (_win.APEX_MILP_VICE !== false) && VICE_W > 0;
+    // ── APEX_MILP_SOLVE_BUDGET_v1 (2026-08-23) ──────────────────────────
+    // The vice and bench-slot-1 selectors above were declared BINARY this
+    // morning. Neither needs to be, and the 624 integer variables they added
+    // to the real-pool horizon-6 problem (1679 -> 2303) are most of why the
+    // shaped model runs a median 1.68x / p75 2.64x slower than the 08-22 one.
+    //
+    // Why the relaxation is EXACT, not an approximation. Per week each family
+    // is a simplex with 0/1 upper bounds driven by variables that stay binary:
+    //     vice   sum_i vc_i = 1,  vc_i <= s_i,  vc_i + c_i <= 1
+    //     slot1  sum_i b_i  = 1,  b_i  <= x_i - s_i
+    // Fix s, c and x at integer values — which branch-and-bound does at every
+    // integer-feasible node, because they are still declared binary — and the
+    // reduced polytope in vc (or b) is { v >= 0, sum v = 1, v_i <= u_i } with
+    // every u_i in {0,1}. Its vertices are unit vectors, so the simplex
+    // solution IS integral and there is nothing left to branch on.
+    //
+    // MEASURED, at gap 0 where both sides are PROVEN optimal, 80 randomised
+    // realistic squads at horizon 4 (scripts/verify/_harness/milp_relax.js):
+    // objective identical to the penny 80/80, plan 80/80, fifteen 80/80,
+    // vice 80/80, bench slot 1 79/80 — the one difference an exact xP tie
+    // between two benched men, at the same objective. Solve time median 0.87x
+    // of the binary formulation at gap 0.005 (n = 48, horizon 6).
+    //
+    // The readout below reads these as an ARGMAX and publishes selectorFrac,
+    // so if a degenerate vertex ever did come back fractional the result says
+    // so out loud instead of silently naming nobody.
+    //   window.APEX_MILP_RELAX_SELECTORS = false -> binary again (08-23 am)
+    const SELECTORS_RELAXED = (typeof opts.relaxSelectors === 'boolean')
+      ? opts.relaxSelectors : (_win.APEX_MILP_RELAX_SELECTORS !== false);
+    // APEX_MILP_BENCH_VICE_v1 (2026-08-23) — see MILP_MAX_TX_PER_WEEK.
+    const TX_CAP = (typeof opts.maxTransfersPerWeek === 'number')
+      ? Math.max(1, Math.min(15, Math.floor(opts.maxTransfersPerWeek)))
+      : MILP_MAX_TX_PER_WEEK;
     const TAIL_N = (typeof opts.noTxTail === 'number') ? opts.noTxTail : 2;
     // APEX_MILP_FT_ZERO_v1 (2026-08-23) - was Math.max(1, Math.min(5,
     // opts.freeTransfers || 1)). TWO defects in one line: `|| 1` turned a
@@ -13285,17 +13435,91 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
       for (let w = 0; w < H; w++) t += Math.pow(DECAY, w) * (+a[startIdx + w] || 0);
       return t;
     };
-    const extrasPerPos = { 1: 4, 2: 12, 3: 14, 4: 10 };
-    const cap = (typeof opts.candidateCap === 'number') ? opts.candidateCap : 40;
+    // APEX_MILP_BENCH_VICE_v1 (2026-08-23) — the SELECTION RULE, which is the
+    // part of candidate pruning that was actually wrong. hxp above is the
+    // decayed horizon SUM, and it was the only score: a player with one
+    // outstanding gameweek inside the window ranked below a flat also-ran and
+    // was deleted before the model could see him. Multi-period value is
+    // exactly where per-week spikes matter, so the sum alone prunes the
+    // decision-relevant player and keeps the competitor.
+    // pkxp is his best SINGLE decayed week. 'union' keeps a player who is top-n
+    // by EITHER measure (implemented as the better of his two within-position
+    // ranks, ties to the sum) — same set size, different content. Pure 'peak'
+    // is available for measurement but is NOT the default: on its own it
+    // prefers one 8.0 week over six steady 6.0s, which is the opposite error.
+    const pkxp = (p) => {
+      let m = 0;
+      const a = p.xp_per_gw || [];
+      for (let w = 0; w < H; w++) m = Math.max(m, Math.pow(DECAY, w) * (+a[startIdx + w] || 0));
+      return m;
+    };
+    const CAND_RULE = opts.candidateRule || _win.APEX_MILP_CAND_RULE || 'union';
+    const extrasPerPos = opts.extrasPerPos || { 1: 4, 2: 12, 3: 14, 4: 10 };
+    // APEX_MILP_BENCH_VICE_v1 (2026-08-23) — candidateCap's default 40 is
+    // EXACTLY sum(extrasPerPos) = 4+12+14+10, so the global re-cut below could
+    // only ever delete union-pass ADDITIONS, and it deleted every one of them:
+    // measured `candidates` 55 (= 15 squad + 40 extras) with
+    // candidateUnionOwnCap set and unset, identical. The shared low-owned
+    // universe the routes surface documents did not exist. The fix is in the
+    // union pass (it RESERVES slots now instead of appending doomed ones), so
+    // the cap stays where it was — deliberately. MEASURED, and this is the
+    // reason: widening the set buys NOTHING on the real pool. At horizon 6,
+    // gap 0, both proven, the objective is 288.34 at N=55, N=63 and N=102
+    // (extrasPerPos x2) — identical to the penny, same fifteen, same
+    // transfers, on the pick line AND on the maxOwnIn swing line. Weekly xP in
+    // this window has a median within-player CV of 0.080 and the window holds
+    // no blanks or doubles, so there is simply nothing outside the top 40 that
+    // the model wants. Paying +14% binaries for +0.00 at a horizon that
+    // already does not close would be the wrong trade. Derived from
+    // extrasPerPos rather than hardcoded so a caller who widens the per-
+    // position caps is not silently truncated back.
+    const cap = (typeof opts.candidateCap === 'number') ? opts.candidateCap
+      : [1, 2, 3, 4].reduce((a, et) => a + (extrasPerPos[et] || 0), 0);
+    const unionPerPos = (typeof opts.unionPerPos === 'number') ? opts.unionPerPos : 2;
+    const rankScore = (arr) => {
+      // Within-position selection score. Higher is better; 'union' returns the
+      // negated better-of-two ranks so a top-n finish on EITHER list keeps you.
+      const bySum = arr.slice().sort((a, b) => hxp(b) - hxp(a));
+      const byPk = arr.slice().sort((a, b) => pkxp(b) - pkxp(a));
+      const rs = new Map(), rp = new Map();
+      bySum.forEach((p, k) => rs.set(p.id, k));
+      byPk.forEach((p, k) => rp.set(p.id, k));
+      return (p) => (CAND_RULE === 'sum') ? hxp(p)
+        : (CAND_RULE === 'peak') ? pkxp(p)
+        : -(Math.min(rs.get(p.id), rp.get(p.id)) + 1e-6 * rs.get(p.id));
+    };
     let extras = [];
     for (const et of [1, 2, 3, 4]) {
-      const byXp = pool.filter(p => p.element_type === et && !sqIds.has(p.id))
-        .sort((a, b) => hxp(b) - hxp(a));
-      let cs = byXp.slice(0, extrasPerPos[et]);
-      if (unionCap !== null) {
-        const low = byXp.filter(p => (+p.own || 0) <= unionCap).slice(0, extrasPerPos[et]);
+      const nWant = extrasPerPos[et] || 0;
+      if (nWant <= 0) continue;
+      const inPos = pool.filter(p => p.element_type === et && !sqIds.has(p.id));
+      const sc = rankScore(inPos);
+      const byXp = inPos.slice().sort((a, b) => sc(b) - sc(a));
+      let cs;
+      if (unionCap !== null && unionPerPos > 0 && nWant > unionPerPos) {
+        // APEX_MILP_BENCH_VICE_v1 (2026-08-23) — RESERVE, do not append. The
+        // old pass added up to another extrasPerPos[et] low-owned players and
+        // the global re-cut then deleted every one of them. Reserving a
+        // bounded few keeps the candidate set the SAME SIZE — which the
+        // measurement above says is the size to keep — while making the
+        // shared low-owned universe real. A handful that SURVIVES beats forty
+        // that do not.
+        cs = byXp.slice(0, nWant - unionPerPos);
         const seen = new Set(cs.map(p => p.id));
-        for (const p of low) if (!seen.has(p.id)) { cs.push(p); seen.add(p.id); }
+        for (const p of byXp) {
+          if (cs.length >= nWant) break;
+          if (seen.has(p.id) || (+p.own || 0) > unionCap) continue;
+          cs.push(p); seen.add(p.id);
+        }
+        // Not enough low-owned players in this position: refill by score, so
+        // reserving can never SHRINK the set below what it was.
+        for (const p of byXp) {
+          if (cs.length >= nWant) break;
+          if (seen.has(p.id)) continue;
+          cs.push(p); seen.add(p.id);
+        }
+      } else {
+        cs = byXp.slice(0, nWant);
       }
       extras = extras.concat(cs);
     }
@@ -13323,6 +13547,9 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
     const vF = (w) => `ft_${w}`;            // FT stock entering week w (int 1..5)
     const vZ = (w, k) => `z_${w}_${k}`;     // ft level >= k indicator (k=2..5)
     const vA = (w) => `ovr_${w}`;           // overspend indicator (ft floor)
+    // APEX_MILP_BENCH_VICE_v1 (2026-08-23)
+    const vvc = (i, w) => `vc_${i}_${w}`;      // vice-captain
+    const vb = (i, w, o) => `b_${i}_${w}_${o}`; // bench slot o (0=GK,1..3 outfield)
 
     const objective = { direction: glpk.GLP_MAX, name: 'obj', vars: [] };
     const subjectTo = [];
@@ -13368,10 +13595,17 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
                            bnds: { type: glpk.GLP_UP, ub: 0, lb: 0 } });
         }
         // objective: lineup + captain + bench
+        // APEX_MILP_BENCH_VICE_v1 (2026-08-23) — was a flat BW on both legs.
+        // The x/s split is unchanged in shape and still books bench value on
+        // (x - s): a starter gets D*pw*(1-bw) + D*pw*bw = D*pw, a benched man
+        // gets D*pw*bw. Only `bw` moved — from one number for everybody to the
+        // measured per-slot profile (0 in 'full', where ordered slot variables
+        // carry every bench point instead).
         const pw = ptsAt(p, w);
+        const _bw = bwOf(p);
         if (pw) {
-          addObj(vs(i, w), D * pw * (1 - BW));
-          addObj(vx(i, w), D * pw * BW);
+          addObj(vs(i, w), D * pw * (1 - _bw));
+          addObj(vx(i, w), D * pw * _bw);
           addObj(vc(i, w), D * pw);          // captain doubles
         }
       }
@@ -13382,6 +13616,82 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
       subjectTo.push({ name: `fw3_${w}`, vars: posVars[4], bnds: { type: glpk.GLP_FX, ub: 3, lb: 3 } });
       subjectTo.push({ name: `xi11_${w}`, vars: xiVars, bnds: { type: glpk.GLP_FX, ub: 11, lb: 11 } });
       subjectTo.push({ name: `cap1_${w}`, vars: capVars, bnds: { type: glpk.GLP_FX, ub: 1, lb: 1 } });
+      // ── APEX_MILP_BENCH_VICE_v1 (2026-08-23): vice-captain ──────────────
+      // The repo's own autosub sim already prices this — _apexAutosubTotal
+      // passes the armband to the vice when the captain records no minutes —
+      // so before today the MILP and the sim disagreed about the same fifteen
+      // by roughly 0.3-0.6 pts per horizon, in the sim's favour. vc must be a
+      // STARTER and must not be the captain. Every one of these is a ROW, not
+      // a bound: glpk.js silently ignores bounds on binary variables (it let
+      // a 25%-owned player through a maxOwnIn "ban" that way — see ownban_).
+      if (VICE_ON) {
+        const vcVars = [];
+        for (let i = 0; i < N; i++) {
+          // APEX_MILP_SOLVE_BUDGET_v1 (2026-08-23): continuous by default.
+          if (SELECTORS_RELAXED) bounds.push({ name: vvc(i, w), type: glpk.GLP_DB, ub: 1, lb: 0 });
+          else binaries.push(vvc(i, w));
+          vcVars.push({ name: vvc(i, w), coef: 1 });
+          subjectTo.push({ name: `vcs_${i}_${w}`, vars: [
+            { name: vvc(i, w), coef: 1 }, { name: vs(i, w), coef: -1 },
+          ], bnds: { type: glpk.GLP_UP, ub: 0, lb: 0 } });
+          subjectTo.push({ name: `vcc_${i}_${w}`, vars: [
+            { name: vvc(i, w), coef: 1 }, { name: vc(i, w), coef: 1 },
+          ], bnds: { type: glpk.GLP_UP, ub: 1, lb: 0 } });
+          const _pv = ptsAt(C[i], w);
+          if (_pv) addObj(vvc(i, w), D * _pv * VICE_W);
+        }
+        subjectTo.push({ name: `vc1_${w}`, vars: vcVars, bnds: { type: glpk.GLP_FX, ub: 1, lb: 1 } });
+      }
+      // ── APEX_MILP_BENCH_VICE_v1 (2026-08-23): ordered bench slots ───────
+      // 'slot1' adds ONE binary per outfield candidate per week; 'full' adds
+      // Solio's four. Both say the same thing about a slot variable: it may
+      // only sit on a squad member who is NOT starting, i.e. b <= x - s, and
+      // no player may hold two slots. Written as rows, per the note above.
+      if (BENCH_MODE === 'slot1') {
+        const b1Vars = [];
+        for (let i = 0; i < N; i++) {
+          if (C[i].element_type === 1) continue;   // GK priced via bwOf
+          // APEX_MILP_SOLVE_BUDGET_v1 (2026-08-23): continuous by default.
+          if (SELECTORS_RELAXED) bounds.push({ name: vb(i, w, 1), type: glpk.GLP_DB, ub: 1, lb: 0 });
+          else binaries.push(vb(i, w, 1));
+          b1Vars.push({ name: vb(i, w, 1), coef: 1 });
+          subjectTo.push({ name: `b1x_${i}_${w}`, vars: [
+            { name: vb(i, w, 1), coef: 1 }, { name: vs(i, w), coef: 1 }, { name: vx(i, w), coef: -1 },
+          ], bnds: { type: glpk.GLP_UP, ub: 0, lb: 0 } });
+          // The BONUS over the residual weight already booked on vx. The model
+          // maximises, and (sub1 - rest) > 0, so it lands the slot on the
+          // highest-xP benched outfielder by itself — which is the pitch's own
+          // bench order, so this is the rule the autosub sim uses, not a proxy.
+          const _pb = ptsAt(C[i], w);
+          if (_pb) addObj(vb(i, w, 1), D * _pb * (BP.sub1 - BP_REST));
+        }
+        subjectTo.push({ name: `bs1_${w}`, vars: b1Vars, bnds: { type: glpk.GLP_FX, ub: 1, lb: 1 } });
+      } else if (BENCH_MODE === 'full') {
+        const slotW = [BP.gk, BP.sub1, BP.sub2, BP.sub3];
+        for (let o = 0; o <= 3; o++) {
+          const oVars = [];
+          for (let i = 0; i < N; i++) {
+            const isGk = C[i].element_type === 1;
+            if (o === 0 ? !isGk : isGk) continue;   // slot 0 is the GK's; 1-3 outfield
+            binaries.push(vb(i, w, o));
+            oVars.push({ name: vb(i, w, o), coef: 1 });
+            subjectTo.push({ name: `bx_${i}_${w}_${o}`, vars: [
+              { name: vb(i, w, o), coef: 1 }, { name: vx(i, w), coef: -1 },
+            ], bnds: { type: glpk.GLP_UP, ub: 0, lb: 0 } });
+            const _pb = ptsAt(C[i], w);
+            if (_pb) addObj(vb(i, w, o), D * _pb * slotW[o]);
+          }
+          subjectTo.push({ name: `bs_${w}_${o}`, vars: oVars, bnds: { type: glpk.GLP_FX, ub: 1, lb: 1 } });
+        }
+        // s + sum_o b <= 1 : a starter holds no bench slot, a bench man holds one.
+        for (let i = 0; i < N; i++) {
+          const isGk = C[i].element_type === 1;
+          const rv = [{ name: vs(i, w), coef: 1 }];
+          if (isGk) rv.push({ name: vb(i, w, 0), coef: 1 });
+          else for (let o = 1; o <= 3; o++) rv.push({ name: vb(i, w, o), coef: 1 });
+          subjectTo.push({ name: `sb_${i}_${w}`, vars: rv, bnds: { type: glpk.GLP_UP, ub: 1, lb: 0 } });
+        }
+      }
       // XI formation bounds per position
       const xiPos = (et) => C.map((p, i) => p.element_type === et ? { name: vs(i, w), coef: 1 } : null).filter(Boolean);
       subjectTo.push({ name: `xgk_${w}`, vars: xiPos(1), bnds: { type: glpk.GLP_FX, ub: 1, lb: 1 } });
@@ -13398,8 +13708,14 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
       tVars.push({ name: vT(w), coef: -1 });
       subjectTo.push({ name: `tcnt_${w}`, vars: tVars, bnds: { type: glpk.GLP_FX, ub: 0, lb: 0 } });
       const _rollPinned = tail || forceRoll.has(w);
-      bounds.push({ name: vT(w), type: _rollPinned ? glpk.GLP_FX : glpk.GLP_DB, ub: _rollPinned ? 0 : 5, lb: 0 });
-      bounds.push({ name: vP(w), type: glpk.GLP_DB, ub: 5, lb: 0 });
+      // APEX_MILP_BENCH_VICE_v1 (2026-08-23) — both literals were 5. vT is the
+      // weekly transfer count and vP the hit counter beside it, so capping vP
+      // at 5 caps the PAID transfers too: raising one without the other would
+      // just move the silent truncation. vT/vP are GENERAL integers, so unlike
+      // every binary in this model a `bounds` entry does bind them — glpk.js
+      // only ignores bounds on binaries. Left as bounds for that reason.
+      bounds.push({ name: vT(w), type: _rollPinned ? glpk.GLP_FX : glpk.GLP_DB, ub: _rollPinned ? 0 : TX_CAP, lb: 0 });
+      bounds.push({ name: vP(w), type: glpk.GLP_DB, ub: TX_CAP, lb: 0 });
 
       // FT stock: vF(0) fixed; hits P_w >= T_w - ft_w
       generals.push(vF(w));
@@ -13514,9 +13830,23 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
     const V = res.result.vars || {};
     const weeks = [];
     let xpTotal = 0;
+    let txCapBinding = false;   // APEX_MILP_BENCH_VICE_v1 (2026-08-23)
+    // APEX_MILP_SOLVE_BUDGET_v1 (2026-08-23): worst distance from {0,1} over
+    // every LP-relaxed selector, across every week. The relaxation is exact
+    // (see SELECTORS_RELAXED) so this is 0 on every instance measured; it is
+    // published rather than assumed, because a formulation argument that is
+    // never checked at runtime is a formulation argument that rots.
+    let selectorFrac = 0;
     for (let w = 0; w < H; w++) {
       const inNames = [], outNames = [], inIds = [], outIds = [], xi = [], bench = [];
-      let capName = null, xiXp = 0;
+      // APEX_MILP_BENCH_VICE_v1 (2026-08-23): vice + bench-slot readout, so a
+      // caller (and suites_milp) can see WHICH bench slot the model priced,
+      // not merely that it priced one.
+      let capName = null, xiXp = 0, viceName = null;
+      // APEX_MILP_SOLVE_BUDGET_v1 (2026-08-23): running argmax for the two
+      // relaxed selectors — see the readout below.
+      let _vcTop = 0, _b1Top = 0;
+      const benchOrder = [null, null, null, null];
       for (let i = 0; i < N; i++) {
         if ((V[vin(i, w)] || 0) > 0.5) { inNames.push(C[i].web_name); inIds.push(C[i].id); }
         if ((V[vout(i, w)] || 0) > 0.5) { outNames.push(C[i].web_name); outIds.push(C[i].id); }
@@ -13525,9 +13855,37 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
           if ((V[vs(i, w)] || 0) > 0.5) { xi.push(C[i].web_name); xiXp += _pw; }
           else bench.push(C[i].web_name);
           if ((V[vc(i, w)] || 0) > 0.5) { capName = C[i].web_name; xiXp += _pw; }
+          // APEX_MILP_SOLVE_BUDGET_v1 (2026-08-23) — was a `> 0.5` test on
+          // each. These two are LP-relaxed by default, so read them as the
+          // ARGMAX over the week's simplex instead. Identical to `> 0.5`
+          // whenever the values are integral (the row sums to exactly 1, so at
+          // most one can exceed 0.5) and, unlike `> 0.5`, it still names the
+          // right man rather than nobody if one ever is not.
+          if (VICE_ON) {
+            const _vv = V[vvc(i, w)] || 0;
+            if (_vv > _vcTop) { _vcTop = _vv; viceName = C[i].web_name; }
+            const _vf = Math.min(_vv, 1 - _vv);
+            if (_vf > selectorFrac) selectorFrac = _vf;
+          }
+          if (BENCH_MODE === 'slot1') {
+            const _bv = V[vb(i, w, 1)] || 0;
+            if (_bv > _b1Top) { _b1Top = _bv; benchOrder[1] = C[i].web_name; }
+            const _bf = Math.min(_bv, 1 - _bv);
+            if (_bf > selectorFrac) selectorFrac = _bf;
+          } else if (BENCH_MODE === 'full') {
+            for (let o = 0; o <= 3; o++) if ((V[vb(i, w, o)] || 0) > 0.5) benchOrder[o] = C[i].web_name;
+          }
         }
       }
       xpTotal += xiXp;
+      // APEX_MILP_BENCH_VICE_v1 (2026-08-23): a cap that BINDS must say so.
+      // vT at its upper bound in a week that was not roll-pinned means the
+      // model wanted more transfers than it was allowed — which used to come
+      // back as an ordinary-looking plan with no infeasibility signal at all.
+      const _tcw = Math.round(V[vT(w)] || 0);
+      const _pinned = ((H - w) <= TAIL_N && H >= 4) || forceRoll.has(w);
+      const _txCapHit = !_pinned && _tcw >= TX_CAP;
+      if (_txCapHit) txCapBinding = true;
       weeks.push({
         week: w, gwIdx: startIdx + w,
         transfersIn: inNames, transfersOut: outNames,
@@ -13535,6 +13893,8 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
         roll: inNames.length === 0,
         ft: Math.round(V[vF(w)] || 0), hits: Math.round(V[vP(w)] || 0),
         bank: round2(V[vB(w)] || 0), captain: capName, xi, bench,
+        vice: viceName, benchOrder: benchOrder.slice(),
+        transferCount: _tcw, txCapHit: _txCapHit,
         xiXp: round2(xiXp),
       });
     }
@@ -13549,6 +13909,21 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
              timeLimitSec: tml, mipGap: gap,
              objective: round2(res.result.z || 0), weeks,
              xpTotal: round2(xpTotal),
+             // APEX_MILP_BENCH_VICE_v1 (2026-08-23) — what the model actually
+             // priced, so a caller never has to assume. txCapBinding true means
+             // the returned plan is capped, not optimal-and-modest.
+             benchMode: BENCH_MODE, benchProfile: (BENCH_MODE === 'flat') ? null : BP,
+             benchProfileTruth: _bpTruth,
+             viceWeight: VICE_ON ? VICE_W : 0,
+             candidateRule: CAND_RULE, maxTransfersPerWeek: TX_CAP,
+             txCapBinding: txCapBinding,
+             // APEX_MILP_SOLVE_BUDGET_v1 (2026-08-23). selectorsIntegral is
+             // the runtime proof of the relaxation argument, not a hope: it
+             // has been true on every instance measured (80/80 proven at gap
+             // 0, 48 at gap 0.005, 49 at gap 0.01).
+             selectorsRelaxed: SELECTORS_RELAXED,
+             selectorFrac: Math.round(selectorFrac * 1e9) / 1e9,
+             selectorsIntegral: selectorFrac < 1e-6,
              candidates: N, binariesCount: prob.binaries.length };
   }
 
@@ -13770,6 +14145,49 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
   function $(id) { return document.getElementById(id); }
   function gauss() { var u = 0, v = 0; while (!u) u = Math.random(); while (!v) v = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
   function curGw() { try { return (typeof LEAGUE_SIM_META !== 'undefined' && LEAGUE_SIM_META && LEAGUE_SIM_META.start_gw) || (window._leagueData && _leagueData.start_gw) || 1; } catch (e) { return 1; } }
+  // ── APEX_RIVAL_TRUTH_v1 (2026-08-23) · DEFECT 3 ───────────────────────────
+  // fetchPicks has always returned { picks, chip, gw } and NOTHING read .chip:
+  // the rival's chip was pulled from FPL on every compare and thrown away.
+  //
+  // WHAT IS ACTUALLY KNOWABLE, and it is narrower than it looks. FPL publishes
+  // another manager's active_chip only through the picks endpoint, and that
+  // endpoint 404s until the gameweek's deadline has passed - the same fact the
+  // pre-GW1 note above _privateLeagues is built on. So fetchPicks can only
+  // ever succeed for a LOCKED gameweek, and pd.chip is therefore only ever a
+  // statement about a week whose deadline is already behind us. This page
+  // cannot know a rival's current, pre-deadline chip, and the copy below is
+  // written so that it never implies otherwise.
+  //
+  // NOT a scoring change, deliberately. APEX_RIVAL_WC_AWARE_v1 is about the
+  // MANAGER's own wildcard; a wildcarding RIVAL is already handled correctly
+  // because rivalXi ignores pd.chip entirely and reads pick multipliers, so
+  // their new squad arrives through `picks` and scores like any other week
+  // (pinned by suites_rival_pick.js "the chip changes WHO they own, never how
+  // it scores"). The defect was never the arithmetic - it was that the page
+  // never said so.
+  // Kill switch: window.APEX_RIVAL_CHIP_SEEN = false.
+  var _CHIP_NAMES = { wildcard: 'Wildcard', freehit: 'Free Hit', '3xc': 'Triple Captain',
+                      bboost: 'Bench Boost', manager: 'Assistant Manager' };
+  function _chipSeenOn() {
+    try { return !(typeof window !== 'undefined' && window.APEX_RIVAL_CHIP_SEEN === false); }
+    catch (e) { return true; }
+  }
+  // Two shapes, because two different things are true. When their picks are a
+  // PAST week the status line beside this already names that week, so the chip
+  // is named against that week and nothing further needs claiming. When their
+  // picks ARE this week, this week's deadline has necessarily passed (it is
+  // the only way they loaded at all) and the clause says exactly that, so the
+  // line cannot be read as the site knowing a live chip. An unrecognised chip
+  // code is not guessed at, and a chipless week says nothing rather than
+  // announcing an absence.
+  function _rivalChipNote(pd) {
+    if (!_chipSeenOn() || !pd || !pd.chip || !pd.gw) return '';
+    var nm = _CHIP_NAMES[String(pd.chip).toLowerCase()];
+    if (!nm) return '';
+    if (pd.gw < curGw()) return 'They played their ' + nm + ' in GW' + pd.gw + '.';
+    return 'They played their ' + nm + ' this week — a rival’s chip only becomes '
+      + 'visible once the deadline has passed.';
+  }
   function normCdf(z) { var t = 1 / (1 + 0.2316419 * Math.abs(z)); var d = 0.3989423 * Math.exp(-z * z / 2); var p = d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274)))); return z > 0 ? 1 - p : p; }
   function objFromMoments(mean, sd, stance, margin) { var t = stance === 'lead' ? -margin : margin; if (!isFinite(mean)) mean = 0; if (!(sd > 0) || !isFinite(sd)) return mean > t ? 1 : 0; return 1 - normCdf((t - mean) / sd); }
 
@@ -14221,7 +14639,15 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
       var stanceEl = document.querySelector('#rival-stance .on');
       _state = { mine: mine, theirs: theirs, stance: stanceEl ? stanceEl.getAttribute('data-v') : 'lead', margin: Math.max(0, parseInt(($('rival-margin') || {}).value, 10) || 0) };
       runAndRender();
-      if (status) status.textContent = (pd && pd.gw && pd.gw < curGw()) ? ("Using their GW" + pd.gw + " team — this week's picks aren't out yet.") : '';
+      // APEX_RIVAL_TRUTH_v1 (2026-08-23) · DEFECT 3: the chip fetchPicks
+      // already had, said out loud. It goes here and nowhere else because this
+      // line is already the place the card admits WHICH gameweek of theirs it
+      // is showing you - the chip is a fact about that same gameweek.
+      var _gwNote = (pd && pd.gw && pd.gw < curGw())
+        ? ("Using their GW" + pd.gw + " team — this week's picks aren't out yet.") : '';
+      var _chipNote = _rivalChipNote(pd);
+      if (status) status.textContent = (_gwNote && _chipNote)
+        ? (_gwNote + ' ' + _chipNote) : (_gwNote || _chipNote);
     } catch (e) { if (status) status.textContent = (e && e.message) ? e.message : 'Something went wrong.'; }
     finally { _busy = false; }
   };
@@ -14671,6 +15097,53 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
   // at gap 0.005, so every one of them legitimately returns 'feasible'.
   function _txpSolved(r) { return !!(r && r.solved && r.weeks && r.weeks.length); }
 
+  // ── APEX_MILP_SOLVE_BUDGET_v1 (2026-08-23) ────────────────────────────────
+  // The mipgap every solve on this page runs at. It was the literal 0.005 in
+  // `base` below; it is 0.01 now, and it is a function so a live tab can put
+  // it back (window.APEX_ROUTES_GAP = 0.005) without a rebuild.
+  //
+  // WHY THIS IS NOT A RETREAT. APEX_ROUTES_TIED_v1 above derives its
+  // resolution from the gap it is actually handed — _txpResolution returns
+  // |r.mipGap * r.objective|, read off each solve, never a constant. Loosening
+  // the gap therefore cannot make this page print a FALSE ordering; it makes
+  // the page admit a WIDER TIE BAND, which is the honest consequence and the
+  // whole reason the tie rule was built to derive rather than hardcode.
+  //
+  // And measured, the wider band changes almost nothing about what renders.
+  // Over 43 instances on the real pool (86 route-vs-pick comparisons,
+  // scripts/verify/_harness/milp_routes.js): TIED pairs 1 at gap 0.005 and 1
+  // at gap 0.01 — the same pair, the real squad's Rank-swing line, already
+  // tied at 0.005. ZERO pairs flip from ranked to tied. The band itself
+  // doubles as it should: median 1.30 -> 2.60 objective points.
+  // On the real pool today: pick 283.72, swing 282.68, band 1.42 at 0.005 and
+  // 2.83 at 0.01 — tied under both. Patient IS the pick there (the model rolls
+  // week 0), which the rule reports as samePlanAsPick, not as a tie.
+  //
+  // WHAT IT COSTS. Against the PROVEN gap-0 optimum of the same model over 30
+  // instances: gap 0.005 gives up mean 0.096 objective (median 0.000), gap
+  // 0.01 mean 0.299 (median 0.000, p95 1.29, max 1.73). The change costs mean
+  // 0.20 objective over a SIX-WEEK horizon — about 0.03 pts/GW, zero at the
+  // median.
+  //
+  // WHAT IT BUYS. This morning's bench-slot + vice-captain terms made the pick
+  // solve a median 1.68x / p75 2.64x / p95 4.11x slower (n = 48 paired
+  // instances). Against this page's own pre-change 17.5 s at gap 0.005 that is
+  // 29 s median and 46 s at p75, over timeLimitSec 45. With the solver's
+  // selectors LP-relaxed (APEX_MILP_SOLVE_BUDGET_v1 in assets/apex_solver.js)
+  // AND this gap at 0.01, the same projection is 11.3 s median, 15.6 s p75,
+  // 24.2 s p90, 28.5 s p95 — i.e. faster than the page was BEFORE the two
+  // correctness terms were added, with both of them switched on.
+  // Neither term had to come off. The vice costs a median 1.23x on top of the
+  // bench slots and is worth ~0.3 pts/horizon; the gap change bought more time
+  // than dropping it would, for a tenth of the points.
+  function _txpRouteGap() {
+    try {
+      var g = (typeof window !== 'undefined') ? window.APEX_ROUTES_GAP : undefined;
+      if (typeof g === 'number' && isFinite(g) && g >= 0 && g < 1) return g;
+    } catch (e) {}
+    return 0.01;
+  }
+
   // ── APEX_ROUTES_TIED_v1 (2026-08-23, Marcus: "show them as TIED") ─────────
   // APEX_MILP_HONEST_STATUS_v1 detected the extreme case — a constrained line
   // finishing ABOVE the unconstrained one — warned to the console, published
@@ -14976,7 +15449,10 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
       // 0 removes it (0/42 trials) and cannot be afforded here: 32.2 s for one
       // horizon-6 solve, 59.6 s for all four, against timeLimitSec 45. So the
       // inversion is DETECTED below and published, not silently rendered.
-      candidateUnionOwnCap: TXP_EO_DIFF_MAX, gap: 0.005,
+      // APEX_MILP_SOLVE_BUDGET_v1 (2026-08-23) - was the literal 0.005. See
+      // _txpRouteGap above for the measurement and for why a wider gap widens
+      // the TIED band rather than inventing an ordering.
+      candidateUnionOwnCap: TXP_EO_DIFF_MAX, gap: _txpRouteGap(),
     };
     var S = window.ApexSolver;
     var allRoll = [0, 1, 2, 3, 4, 5];
@@ -15396,6 +15872,10 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
     // documents at its own head). riskLine is here because the wording IS the
     // deliverable — a rule that computes 'tied' and then prints an ordering
     // would pass a maths-only suite.
+    // APEX_MILP_SOLVE_BUDGET_v1 (2026-08-23): the shipped gap, exported so
+    // scripts/verify/suites_routes_tied.js can assert what this page actually
+    // asks GLPK for instead of restating a number of its own.
+    routeGap: _txpRouteGap,
     tiedOn: _txpTiedOn, tieResolution: _txpResolution, lineQ: _txpLineQ,
     tiedPair: _txpTiedPair, tieState: _txpTieState, tieText: _txpTieText,
     bestSet: _txpBestSet, qualityNote: _txpQualityNote,
@@ -17860,6 +18340,41 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
   // failure. _pinWhy says which: 'error' | 'none' (no private leagues) |
   // 'empty' (leagues exist, no rival in any of them) | 'noteam'.
   var _pinWhy = null;
+
+  // ── APEX_RIVAL_TRUTH_v1 (2026-08-23) · DEFECT 2 ──────────────────────────
+  // APEX_RIVAL_PICK_v1 wrote all four of those reasons into the `_mini` branch
+  // of _rivalRenderCard and only that branch. A build with APEX_CTL_CARD=0 has
+  // no #apex-ctl-card, renders the full banner instead, and therefore still
+  // answered ALL FOUR states with
+  //     "Couldn't load your leagues - try again in a minute."  [Retry]
+  // Three of the four are not failures, and Retry cannot help in any of them:
+  // it is the exact lie that patch was written to remove, left standing one
+  // branch away from where it was removed.
+  //
+  // So the reasons live HERE, once, and both branches read this table. The
+  // copy is deliberately not duplicated per layout - this project has been
+  // bitten more than once by the same value living in two consumers and being
+  // corrected in only one. What legitimately differs between the layouts is
+  // CHROME, not words: the compact pill is a single line in a shared row, the
+  // banner is a sentence with room for a button beside it.
+  //
+  // `retry` is a property of the STATE, not of the layout: retrying a fetch
+  // that failed can work, retrying "you have no mini-leagues" never can, so
+  // only 'error' offers it - in either layout.
+  // Kill switch: window.APEX_RIVAL_REASONS = false restores the 08-22 banner
+  // byte-for-byte. The compact branch is not gated: it was already honest and
+  // its rendered output is unchanged here, only its source moved.
+  var _PIN_REASONS = {
+    noteam: { text: 'Load your team to pin a rival',     retry: false },
+    none:   { text: 'No mini-leagues on your account',   retry: false },
+    empty:  { text: 'No rival in your mini-leagues yet', retry: false },
+    error:  { text: 'Leagues didn\u2019t load',     retry: true }
+  };
+  function _pinReason(why) { return _PIN_REASONS[why] || _PIN_REASONS.error; }
+  function _pinReasonsOn() {
+    try { return !(typeof window !== 'undefined' && window.APEX_RIVAL_REASONS === false); }
+    catch (e) { return true; }
+  }
   window._pxPickRival = function () {
     if (_pinBusy) return;
     var me = Number(_meId()) || 0;   // FPL_ID is a STRING when it came from the
@@ -17948,10 +18463,35 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
     if (!pin || !pin.leagueId) return;
     _fetchJson('/leagues-classic/' + pin.leagueId + '/standings/').then(function (st) {
       var rows = ((st.standings || {}).results || []);
-      var me = _meId(), mine = null, theirs = null;
+      // ── APEX_RIVAL_TRUTH_v1 (2026-08-23) · DEFECT 1 ──────────────────────
+      // Was:  var me = _meId(), and a bare `===` against r.entry for both
+      // halves of the row match.
+      // APEX_RIVAL_PICK_v1 coerced BOTH sides of this exact comparison in
+      // _pxPickRival, for the reason written at that site ("FPL_ID is a STRING
+      // when it came from the landing input; the API sends numbers"), and left
+      // this function - same ids, same endpoint - on a bare ===.
+      //
+      // Measured through the shipped pin flow against standings
+      // Me/210/rank1 + Nemesis/198/rank2:
+      //     FPL_ID = 11051   (number)  rivalTotal 198  myTotal 210  gap +12
+      //     FPL_ID = '11051' (string)  rivalTotal 198  myTotal null gap  -
+      // The rival half matched because both of ITS sides were numbers. Mine
+      // never matched, and pin.myTotal is written ONLY from inside that match,
+      // so it stayed null for the life of the pin and _rivalRenderCard printed
+      // the em-dash on every visit, forever.
+      //
+      // Latent today - nothing shipped assigns a string FPL_ID (PUBLIC_BOOT
+      // parseInts, TEAM_META.entry_id is baked as a Python int) - and fixed
+      // anyway, because it is one assignment away from live and because two
+      // lines of one file reading one field two different ways is the bug.
+      // pin.id is coerced with it: it is a localStorage JSON round trip, the
+      // same class of comparison, and if one side can be a string anywhere
+      // then they all can.
+      var me = Number(_meId()) || 0, pinId = Number(pin.id);
+      var mine = null, theirs = null;
       rows.forEach(function (r) {
-        if (r.entry === me) mine = r;
-        if (r.entry === pin.id) theirs = r;
+        if (Number(r.entry) === me) mine = r;
+        if (Number(r.entry) === pinId) theirs = r;
       });
       if (mine) { _myTotals[pin.leagueId] = mine.total; pin.myTotal = mine.total; pin.myRank = mine.rank; }
       if (theirs) { pin.rivalTotal = theirs.total; pin.rivalRank = theirs.rank; }
@@ -18024,23 +18564,19 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
           if (!_pinChoices.length) {
             // APEX_RIVAL_PICK_v1: only 'error' is worth a retry link. The other
             // two are ordinary states and were being reported as breakage.
-            if (_pinWhy === 'noteam') {
-              wrap.innerHTML = shell('<span class="px-rival-mut">'
-                + 'Load your team to pin a rival</span>');
-              return;
+            // APEX_RIVAL_TRUTH_v1 (2026-08-23): the four sentences moved out to
+            // _PIN_REASONS so the legacy banner below reads the same table
+            // instead of carrying a second, older, less honest copy of them.
+            // What this branch RENDERS is byte-identical to 08-22 - a non-retry
+            // reason is a muted span, 'error' is the retry link and still reads
+            // "Leagues didn't load - retry" - so only the source moved.
+            var _rz = _pinReason(_pinWhy);
+            if (_rz.retry) {
+              wrap.innerHTML = shell('<a href="#" onclick="_pxPickRival();return false;"'
+                + ' class="px-rival-cta">' + _esc(_rz.text) + ' \u2014 retry</a>');
+            } else {
+              wrap.innerHTML = shell('<span class="px-rival-mut">' + _esc(_rz.text) + '</span>');
             }
-            if (_pinWhy === 'none') {
-              wrap.innerHTML = shell('<span class="px-rival-mut">'
-                + 'No mini-leagues on your account</span>');
-              return;
-            }
-            if (_pinWhy === 'empty') {
-              wrap.innerHTML = shell('<span class="px-rival-mut">'
-                + 'No rival in your mini-leagues yet</span>');
-              return;
-            }
-            wrap.innerHTML = shell('<a href="#" onclick="_pxPickRival();return false;"'
-              + ' class="px-rival-cta">Leagues didn\u2019t load \u2014 retry</a>');
             return;
           }
           // THE FIX. This used to draw a link that called _pxPickRival() again,
@@ -18085,6 +18621,19 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
       if (statusTxt) { wrap.innerHTML = shell('<span style="color:#7a8783;font-size:.85rem;">' + _esc(statusTxt) + '</span>'); return; }
       if (_pinChoices) {
         if (!_pinChoices.length) {
+          // APEX_RIVAL_TRUTH_v1 (2026-08-23) · DEFECT 2. This branch used to
+          // answer all four empty states with "Couldn't load your leagues - try
+          // again in a minute." and a Retry button. Only one of the four is a
+          // load failure; for the other three the sentence is untrue and the
+          // button is dead. Same _PIN_REASONS table as the compact pill above -
+          // one definition, two sets of chrome - and Retry appears only on the
+          // one state where retrying can actually change the answer.
+          if (_pinReasonsOn()) {
+            var _bz = _pinReason(_pinWhy);
+            wrap.innerHTML = shell('<span style="color:#7a8783;font-size:.85rem;">' + _esc(_bz.text) + '</span>'
+              + (_bz.retry ? '<a href="#" onclick="_pxPickRival();return false;" style="color:#0F6E56;font-weight:700;font-size:.8rem;">Retry</a>' : ''));
+            return;
+          }
           wrap.innerHTML = shell('<span style="color:#7a8783;font-size:.85rem;">Couldn’t load your leagues — try again in a minute.</span>' +
             '<a href="#" onclick="_pxPickRival();return false;" style="color:#0F6E56;font-weight:700;font-size:.8rem;">Retry</a>');
           return;
@@ -18434,7 +18983,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1787486811-GW2-0f7a73f8";
+const BUILD_VERSION = "1787499969-GW2-da8eb535";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = false;
@@ -18442,7 +18991,7 @@ window.APEX_SQUAD_ROLLBACK = false;
 let FPL_ID = null;
 let SQUAD_DATA = [];
 </script>
-<script src="/apex_pool.js?v=1787486811-GW2-0f7a73f8"></script>
+<script src="/apex_pool.js?v=1787499969-GW2-da8eb535"></script>
 <script>
 const PLAYER_NAMES = {"1": "Raya", "2": "Arrizabalaga", "3": "Meslier", "4": "Gabriel", "5": "J.Timber", "6": "Saliba", "7": "Lewis-Skelly", "8": "Calafiori", "9": "Hincapie", "10": "White", "11": "Mosquera", "12": "Saka", "13": "Rice", "14": "Eze", "15": "\u00d8degaard", "16": "Madueke", "17": "Merino", "18": "Martinelli", "19": "Zubimendi", "20": "Dowman", "22": "Nwaneri", "23": "F\u00e1bio Vieira", "24": "Nelson", "25": "Gy\u00f6keres", "26": "Havertz", "27": "G.Jesus", "31": "Konsa", "452": "Bruno G.", "557": "Tzolis", "28": "Martinez", "29": "M.Bizot", "30": "Digne", "32": "Cash", "33": "Mings", "34": "Pau", "35": "Bogarde", "36": "Maatsen", "37": "Lindel\u00f6f", "38": "A.Garc\u00eda", "39": "Nedeljkovic", "41": "Buend\u00eda", "44": "Bailey", "45": "McGinn", "46": "Barkley", "47": "Kamara", "48": "Onana", "49": "Iling Jr", "50": "Burrowes", "51": "George Hemmings", "52": "Alysson", "53": "Manzambi", "54": "Gomes", "55": "Watkins", "56": "Abraham", "160": "Garnacho", "582": "Madjo", "596": "Ruggeri", "597": "Suzuki", "57": "Petrovi\u0107", "58": "Forster", "59": "Dennis", "60": "Hill", "61": "Truffert", "62": "Diakit\u00e9", "63": "Milosavljevi\u0107", "64": "Smith", "65": "J.Araujo", "66": "Soler", "67": "Rayan", "68": "Tavernier", "69": "Scott", "70": "Kluivert", "71": "Cook", "72": "Gannon-Doak", "73": "Adams", "74": "Brooks", "75": "Christie", "76": "T\u00f3th.A", "77": "Adli", "78": "Kroupi.Jr", "79": "Evanilson", "80": "Enes \u00dcnal", "81": "Rodr\u00edguez", "566": "Silva", "573": "Sanchez", "82": "Kelleher", "83": "Valdimarsson", "84": "Collins", "85": "Van den Berg", "86": "Lewis-Potter", "87": "Ajer", "88": "Kayode", "89": "Henry", "90": "Hickey", "91": "Pinnock", "92": "Ji-soo", "93": "Schuster", "94": "Schade", "95": "O.Dango", "96": "Damsgaard", "97": "Jensen", "98": "Janelt", "99": "Milambo", "100": "Carvalho", "102": "Yarmoliuk", "103": "Dasilva", "105": "Anthony", "106": "Thiago", "107": "Furo", "108": "Wilson", "565": "M.Sangar\u00e9", "109": "Verbruggen", "111": "Steele", "113": "F.Kad\u0131o\u011flu", "114": "Boscagli", "115": "De Cuyper", "116": "Dunk", "117": "Coppola", "118": "Igor", "119": "Costinha", "120": "Svoboda", "121": "Mitoma", "122": "Minteh", "123": "Hinshelwood", "124": "Gro\u00df", "125": "Georginio", "126": "O'Riley", "127": "Gomez", "128": "Buonanotte", "129": "Ayari", "130": "Wieffer", "131": "Baleba", "132": "Howell", "133": "Watson", "134": "Oriola", "135": "Yohanna", "137": "Tzimas", "138": "Kostoulas", "139": "Ferguson", "328": "Struijk", "504": "Vuskovic", "594": "David", "600": "Osman", "40": "Rogers", "101": "Henderson", "136": "Welbeck", "140": "S\u00e1nchez", "141": "J\u00f6rgensen", "142": "James", "143": "Chalobah", "144": "Gusto", "145": "Fofana", "146": "B.Badiashile", "147": "Tosin", "148": "Hato", "149": "Colwill", "150": "M.Sarr", "151": "Acheampong", "152": "Palestra", "153": "Disasi", "154": "Palmer", "155": "Enzo", "156": "Neto", "157": "Est\u00eav\u00e3o", "158": "Gittens", "159": "Caicedo", "161": "Lavia", "163": "D.Essugo", "164": "Quenda", "165": "Jo\u00e3o Pedro", "166": "N.Jackson", "167": "Delap", "168": "Marc Guiu", "169": "Mheuka", "170": "Emegha", "200": "Lacroix", "560": "Penders", "561": "Anselmino", "568": "Barco", "578": "Mudryk", "583": "Chavarria", "104": "Onyeka", "110": "Rushworth", "171": "Dovin", "172": "Wilson", "173": "Thomas", "174": "Kitching", "175": "van Ewijk", "176": "Dasilva", "177": "Kesler-Hayden", "178": "Bidwell", "179": "Latibeaudiere", "180": "Woolfenden", "181": "Brau", "182": "Amenda", "183": "Rudoni", "184": "Grimes", "185": "Sakamoto", "186": "Mason-Clark", "187": "Eccles", "188": "Torp", "189": "Shepherd", "190": "Tchaouna", "191": "Borges Rodrigues", "192": "Andrews", "193": "Wright", "194": "Thomas-Asante", "195": "Simms", "196": "Markelo", "197": "Bassette", "492": "Awoniyi", "575": "Yirenkyi", "584": "Hamer", "599": "Cherif", "42": "Guessand", "198": "Henderson", "199": "Benitez", "201": "Mu\u00f1oz", "202": "Richards", "203": "Canvot", "204": "Mitchell", "205": "Sosa", "206": "Chadi Riad", "207": "Mingueza", "208": "Sarr", "210": "Wharton", "211": "Yeremy", "212": "Hughes", "213": "Lerma", "214": "Kamada", "215": "Devenny", "216": "Esse", "217": "M.Fran\u00e7a", "218": "Doucour\u00e9", "219": "J.Rak-Sakyi", "220": "Cardines", "221": "Drakes-Thomas", "222": "Strand Larsen", "223": "Mateta", "224": "Nketiah", "225": "Uche", "241": "McNeil", "555": "Matthews", "577": "Tomiyasu", "588": "Khalaili", "595": "Gozo", "21": "N\u00f8rgaard", "209": "Johnson", "226": "Pickford", "227": "Travers", "228": "King", "229": "Tarkowski", "230": "Branthwaite", "231": "Keane", "232": "O'Brien", "233": "Mykolenko", "234": "Patterson", "235": "Aznou", "236": "Dewsbury-Hall", "237": "Ndiaye", "239": "Garner", "240": "Iroegbunam", "242": "George", "243": "Alcaraz", "244": "Armstrong", "245": "Dibling", "246": "R\u00f6hl", "247": "Hackney", "248": "Beto", "249": "Barry", "250": "Leno", "251": "Lecomte", "252": "McNally", "253": "Andersen", "254": "Robinson", "255": "J.Cuenca", "256": "Tete", "257": "Bassey", "258": "Castagne", "261": "Iwobi", "262": "Smith Rowe", "263": "Kevin", "264": "Bobb", "265": "Berge", "266": "Cairney", "268": "King", "269": "Sessegnon", "270": "Reed", "271": "Muniz", "272": "Kusi-Asare", "569": "Gonzalo", "570": "Palacios", "580": "Charles", "273": "Phillips", "274": "Butland", "275": "Cartwright", "276": "Lo-Tutala", "277": "Egan", "278": "Hughes", "279": "Ajayi", "280": "Coyle", "281": "Drameh", "282": "Giles", "283": "Jacob", "284": "McCarthy", "285": "McNair", "286": "Belloumi", "287": "Millar", "288": "Dowell", "289": "Crooks", "290": "Slater", "291": "Matazo", "292": "\u00d6m\u00fcr", "293": "Kamara", "294": "Zambrano", "295": "McBurnie", "296": "Akintola", "297": "Gyabi", "298": "Destan", "299": "Burstow", "340": "Gelhardt", "556": "Targett", "563": "Morita", "572": "Tzolakis", "574": "Hjert\u00f8-Dahl", "576": "Stroud", "585": "Herrington", "586": "Mendy", "589": "Gourna-Douath", "259": "Diop", "267": "Luki\u0107", "300": "Walton", "301": "Palmer", "302": "Button", "303": "Kipr\u00e9", "304": "O'Shea", "305": "Davis", "306": "Greaves", "307": "Johnson", "308": "Furlong", "309": "N\u00fa\u00f1ez", "310": "Matusiwa", "311": "Burns", "312": "Taylor", "313": "Clarke", "314": "Ogbene", "315": "Fatawu", "316": "Emersonn", "317": "Hirst", "318": "Philogene", "319": "Szmodics", "320": "Akpom", "321": "Walle Egeli", "322": "Al-Hamadi", "323": "McAteer", "324": "Mehmeti", "554": "Van Oevelen", "562": "Maeda", "564": "Scherpen", "571": "Florentino", "591": "Enciso", "592": "Ouattara", "602": "Humphreys", "260": "Wilson", "326": "Perri", "327": "Bijol", "329": "Rodon", "330": "Bogle", "331": "Gudmundsson", "332": "Justin", "333": "Bornauw", "334": "Muharemovi\u0107", "335": "Stach", "336": "Okafor", "337": "Aaronson", "338": "Ampadu", "339": "Longstaff", "341": "Gnonto", "342": "Harrison", "343": "James", "344": "Gruev", "345": "Tanaka", "346": "Calvert-Lewin", "347": "Nmecha", "348": "Piroe", "349": "Mateo Joseph", "385": "Trafford", "598": "Elvedi", "603": "Lienou", "604": "Cresswell", "350": "A.Becker", "351": "Mamardashvili", "352": "Woodman", "353": "Pecsi", "354": "Jaros", "355": "Davies", "356": "Virgil", "357": "Frimpong", "358": "Kerkez", "359": "Gomez", "360": "Bradley", "361": "Lucky", "362": "Jacquet", "363": "Leoni", "364": "Tsimikas", "365": "Ramsay", "366": "Wirtz", "367": "Gakpo", "368": "Szoboszlai", "369": "Ngumoha", "370": "Chiesa", "371": "Gravenberch", "372": "Mac Allister", "373": "C.Jones", "374": "Endo", "375": "Nyoni", "376": "Bajcetic", "377": "Munoz", "378": "McConnell", "379": "Isak", "380": "Ekitik\u00e9", "381": "Koumas", "382": "Danns", "383": "Elliott", "579": "Araujo", "238": "Grealish", "384": "Donnarumma", "386": "Bettinelli", "387": "O'Reilly", "388": "Gu\u00e9hi", "389": "Matheus N.", "390": "R\u00faben", "391": "Gvardiol", "392": "A\u00eft-Nouri", "393": "Khusanov", "394": "Alleyne", "395": "Lewis", "396": "Vitor Reis", "397": "Semenyo", "398": "Foden", "399": "Cherki", "400": "Doku", "401": "Marmoush", "402": "Rodrigo", "403": "Savinho", "404": "Reijnders", "405": "N.Gonzalez", "406": "Kova\u010di\u0107", "407": "Echeverri", "408": "Phillips", "409": "Mukasa", "410": "Monga", "411": "Haaland", "481": "Anderson", "587": "Rulli", "43": "Tielemans", "162": "Andrey Santos", "325": "Darlow", "412": "Lammens", "413": "Bayindir", "414": "Heaton", "415": "Dorgu", "416": "De Ligt", "417": "Dalot", "418": "Maguire", "419": "Martinez", "420": "Yoro", "421": "Heaven", "422": "Mazraoui", "423": "Shaw", "424": "Amass", "425": "Fredricson", "426": "B.Fernandes", "427": "Mbeumo", "428": "Cunha", "429": "Rashford", "430": "Mount", "431": "Amad", "432": "Mainoo", "433": "Ugarte", "434": "J.Fletcher", "435": "Lacey", "436": "Collyer", "437": "Bendito Mantato", "438": "Fletcher", "439": "\u0160e\u0161ko", "440": "Zirkzee", "441": "Obi", "442": "Pope", "443": "Gillespie", "444": "Jaouen", "445": "Thiaw", "446": "Sch\u00e4r", "447": "Botman", "448": "Burn", "449": "Hall", "450": "Livramento", "451": "A.Murphy", "453": "Barnes", "454": "Elanga", "456": "J.Ramsey", "457": "J.Murphy", "458": "Joelinton", "459": "L.Miley", "460": "Willock", "461": "Tour\u00e9", "462": "Steur", "463": "Woltemade", "464": "Wissa", "465": "Osula", "466": "Neave", "559": "Bamba", "567": "Horn\u00ed\u010dek", "593": "Dedi\u0107", "467": "Sels", "468": "John", "469": "N.Williams", "470": "Morato", "471": "Milenkovi\u0107", "472": "Murillo", "473": "Aina", "474": "Jair Cunha", "475": "Savona", "476": "O.Richards", "477": "Abbott", "478": "Netz", "479": "Bindon", "480": "Gibbs-White", "482": "Hudson-Odoi", "483": "Ndoye", "484": "Hutchinson", "485": "Bakwa", "486": "McAtee", "487": "Dominguez", "488": "I.Sangar\u00e9", "489": "Yates", "490": "Wood", "491": "Igor Jesus", "493": "Kalimuendo", "558": "Schlager", "581": "Diomande", "590": "Benda", "112": "Van Hecke", "455": "Tonali", "494": "Vicario", "495": "Austin", "496": "Kinsky", "497": "Dubravka", "498": "Senesi", "499": "Pedro Porro", "500": "Romero", "501": "Danso", "502": "Robertson", "503": "Van de Ven", "505": "Spence", "506": "Udogie", "507": "Phillips", "508": "Davies", "509": "Byfield", "510": "Rowswell", "511": "Souza", "512": "Kudus", "513": "Xavi", "514": "Tel", "515": "Maddison", "516": "Bentancur", "517": "Odobert", "518": "P.M.Sarr", "519": "Gallagher", "520": "Bergvall", "521": "Kulusevski", "522": "Gray", "523": "Moore", "524": "Olusesi", "525": "Fernandes", "526": "Solanke", "527": "Richarlison", "528": "Scarlett", "601": "Williams-Barnett", "529": "Roefs", "530": "Patterson", "531": "Ellborg", "532": "Ballard", "533": "Mukiele", "534": "Hume", "535": "Alderete", "536": "Reinildo", "537": "Seelt", "538": "Hjelde", "539": "O'Nien", "540": "Masuaku", "541": "Meunier", "542": "E.Le F\u00e9e", "543": "Diarra", "544": "Xhaka", "545": "Sadiki", "546": "Adingra", "547": "Mundle", "548": "Rigg", "549": "Talbi", "550": "Jocelin.T", "551": "Angulo", "552": "Brobbey", "553": "Isidor"};
 const TRANSFER_RECS = [];
@@ -21190,9 +21739,37 @@ function _apexCat(p, key, idx) {
 function _apexComponents(player, idx) {
   const pd = _apexPoolById(player.id) || player;
   const et = pd.element_type || player.element_type || 3;
+  // ══ APEX_APPEARANCE_TRUTH_v1 (2026-08-23) ════════════════════════════
+  // `app` is xp_app_per_gw[idx] = (p_60*2 + (p_any - p_60)) * games, then
+  // rescaled twice for display (_scale_i, _r_sc). Reading availability off
+  // it as app/2 was therefore two errors at once: the MIDPOINT of p_any and
+  // p_60 rather than p_any, and the points haircut leaking into the
+  // probability. pany/p60 below are the pool's RAW curve pair.
+  //
+  // appSc keeps the fix mean-neutral. E[app draw] = appSc*(pany+p60) = app
+  // exactly, at every display scale, so the sim's expected total still
+  // reconciles to the published xP while the EVENT comes from the curve.
+  //
+  // FALLBACK IS AN EXACT REDUCTION. No arrays (an old pool) or the kill
+  // switch off => pany = p60 = clamp(app/2) and appSc = 1, which makes the
+  // draw, the _apexLastApp flag and the variance term identical to the
+  // pre-patch code, term for term. Kill switch:
+  //   window.APEX_APPEARANCE_TRUTH = false
+  const _app  = _apexCat(pd, 'xp_app_per_gw', idx);
+  const _on   = !(typeof window !== 'undefined' && window.APEX_APPEARANCE_TRUTH === false);
+  const _paR  = _on ? _apexCat(pd, 'p_any_per_gw', idx) : 0;
+  const _p6R  = _on ? _apexCat(pd, 'p60_per_gw',   idx) : 0;
+  const _half = Math.min(1, Math.max(0, _app / 2));
+  const _use  = _paR > 0;
+  const _p60  = _use ? Math.min(1, Math.max(0, Math.min(_p6R, _paR))) : _half;
+  const _pany = _use ? Math.min(1, Math.max(_p60, _paR)) : _half;
+  const _den  = _pany + _p60;
   return {
     et: et,
-    app: _apexCat(pd, 'xp_app_per_gw', idx),
+    app: _app,
+    pany: _pany,
+    p60: _p60,
+    appSc: _use ? ((_den > 1e-9) ? _app / _den : 0) : 1,
     g:   _apexCat(pd, 'xp_g_per_gw',   idx),
     a:   _apexCat(pd, 'xp_a_per_gw',   idx),
     cs:  _apexCat(pd, 'xp_cs_per_gw',  idx),
@@ -21213,6 +21790,19 @@ function _apexBakedSd(playerId, idx) {
   const v = (Array.isArray(a) && idx < a.length) ? +a[idx] : 0;
   return (isFinite(v) && v > 0) ? v : 0;
 }
+// APEX_APPEARANCE_TRUTH_v1 (2026-08-23) — Var(appearance points) for the
+// three-way draw, in ONE place because it has two call sites (_apexPlayerMV
+// and _apexDrawPlayer's calibrated-sd stretch) that used to carry the same
+// expression twice and could drift apart.
+//   app takes appSc*2 w.p. p60, appSc*1 w.p. (pany - p60), 0 otherwise
+//   E[app]   = appSc * (pany + p60)          ( == xp_app, by appSc's defn )
+//   E[app^2] = appSc^2 * (4*p60 + (pany - p60))
+// With the fallback (pany == p60 == pplay, appSc == 1) this is exactly the
+// pre-patch pplay*(1-pplay)*4.
+function _apexAppVar(c) {
+  const _m = c.pany + c.p60;
+  return c.appSc * c.appSc * ((4 * c.p60 + (c.pany - c.p60)) - _m * _m);
+}
 // Analytic mean + variance for one player — drives the risk-preset ranking.
 function _apexPlayerMV(player, idx) {
   const c = _apexComponents(player, idx);
@@ -21220,9 +21810,8 @@ function _apexPlayerMV(player, idx) {
   const lg = Math.max(0, c.g) / pg;
   const la = Math.max(0, c.a) / 3;
   const pcs = csp > 0 ? Math.min(1, Math.max(0, c.cs / csp)) : 0;
-  const pplay = Math.min(1, Math.max(0, c.app / 2));
   const mean = c.app + c.g + c.a + c.cs + c.konst;
-  let variance = lg * pg * pg + la * 9 + pcs * (1 - pcs) * csp * csp + pplay * (1 - pplay) * 4;
+  let variance = lg * pg * pg + la * 9 + pcs * (1 - pcs) * csp * csp + _apexAppVar(c);
   const bsd = _apexBakedSd(player.id, idx);
   if (bsd > 0) variance = bsd * bsd;   // calibrated truth wins over the local approximation
   return { mean: mean, variance: variance, sd: Math.sqrt(Math.max(0, variance)) };
@@ -21254,10 +21843,16 @@ function _apexDrawPlayer(player, idx) {
   const lg = Math.max(0, c.g) / pg;
   const la = Math.max(0, c.a) / 3;
   const pcs = csp > 0 ? Math.min(1, Math.max(0, c.cs / csp)) : 0;
-  const pplay = Math.min(1, Math.max(0, c.app / 2));
   const g = _apexPois(lg), a = _apexPois(la);
   const cs = (_apexRng() < pcs) ? 1 : 0;
-  const app = (_apexRng() < pplay) ? 2 : 0;
+  // APEX_APPEARANCE_TRUTH_v1 (2026-08-23) — the appearance EVENT, three ways.
+  // The old draw was `(_apexRng() < pplay) ? 2 : 0`, which could never award
+  // 1 point: every sub-60 cameo was scored as a no-show and fired an autosub.
+  // ONE rng call, exactly as before, so the seeded common-random-numbers
+  // property of every existing sim is untouched. Mean-neutral by appSc — see
+  // _apexComponents.
+  const _u = _apexRng();
+  const app = c.appSc * ((_u < c.p60) ? 2 : ((_u < c.pany) ? 1 : 0));
   // APEX_FIX_AUG07B_AUTOSUB: record the appearance draw. The RETURN of this
   // function is deliberately unchanged — the calibrated-sd stretch below still
   // runs, so a non-appearing player's number is NOT zero and every existing
@@ -21265,7 +21860,10 @@ function _apexDrawPlayer(player, idx) {
   // byte-for-byte drift replica) sees exactly what it saw before. Only the
   // bench-aware sim path reads this flag, and it throws the number away and
   // scores the player 0, which is what FPL does.
-  _apexLastApp = (app > 0) ? 1 : 0;
+  // APEX_APPEARANCE_TRUTH_v1: read off the SAME _u, not off `app`. A cameo
+  // now scores 1 and still counts as an appearance; `app > 0` would have kept
+  // working here by accident, but only while a cameo was impossible.
+  _apexLastApp = (_u < c.pany) ? 1 : 0;
   const d = g * pg + a * 3 + cs * csp + app + c.konst;
   // Calibrated-sd alignment (2026-07-07): stretch the draw's deviation from the
   // local mean so the per-player sd matches the baked xp_sd_per_gw (full
@@ -21275,7 +21873,7 @@ function _apexDrawPlayer(player, idx) {
   const bsd = _apexBakedSd(player.id, idx);
   if (bsd > 0) {
     const lmean = c.app + c.g + c.a + c.cs + c.konst;
-    const lvar = lg * pg * pg + la * 9 + pcs * (1 - pcs) * csp * csp + pplay * (1 - pplay) * 4;
+    const lvar = lg * pg * pg + la * 9 + pcs * (1 - pcs) * csp * csp + _apexAppVar(c);
     const lsd = Math.sqrt(Math.max(0, lvar));
     if (lsd > 0.05) return lmean + (d - lmean) * (bsd / lsd);
     // Local draw is (near-)deterministic but truth says there IS swing
@@ -37356,7 +37954,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW2</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1787486811-GW2-0f7a73f8</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1787499969-GW2-da8eb535</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
