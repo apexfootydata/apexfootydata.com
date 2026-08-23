@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="2" data-built-at="2026-08-23T09:59:02">
+<meta name="apex-gw" content="2" data-built-at="2026-08-23T13:06:51">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
@@ -37,7 +37,7 @@
 })();
 </script>
 <meta http-equiv="Pragma" content="no-cache">
-<meta name="apex-build" content="20260823-095901">
+<meta name="apex-build" content="20260823-130651">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — FPL Apex</title>
 <meta name="description" content="Plan FPL transfers, chips, and Free Hit squads. Live xG-based projections, a rival head-to-head simulator, and a mini-league table. Free FPL tool.">
@@ -8457,6 +8457,23 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
       return { locked: Object.keys(_locked).length, banned: Object.keys(_banned).length };
     },
 
+    // APEX_LOCK_MEMO_v1 (2026-08-23) - counts are not an identity. Two memos
+    // (the lookahead cache and the verdict memo) keyed on counts or on nothing
+    // at all, so locking A and unlocking B in one session left the key
+    // unchanged and both served the PRE-SWAP answer -- a future priced on a
+    // plan the user had just forbidden. There was no way to ask what is
+    // locked, only how many; this is that missing accessor. EMPTY STRING when
+    // nothing is locked or banned, so a memo key that appends it is
+    // byte-identical to today in the ordinary case.
+    signature: function () {
+      _load();
+      var num = function (o) {
+        return Object.keys(o).map(Number).sort(function (a, b) { return a - b; }).join(',');
+      };
+      var l = num(_locked), b = num(_banned);
+      return (l || b) ? (l + '/' + b) : '';
+    },
+
     // Explicit wipe — the ONLY path that clears forced decisions (doctrine).
     clearAll: function () {
       _load(); _locked = {}; _banned = {}; _persist(); _fire();
@@ -13206,7 +13223,24 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
     const HIT = 4;
     const BW = (typeof opts.benchWeight === 'number') ? opts.benchWeight : FPL_RULES.BENCH_WEIGHT;
     const TAIL_N = (typeof opts.noTxTail === 'number') ? opts.noTxTail : 2;
-    const ft0 = Math.max(1, Math.min(5, opts.freeTransfers || 1));
+    // APEX_MILP_FT_ZERO_v1 (2026-08-23) - was Math.max(1, Math.min(5,
+    // opts.freeTransfers || 1)). TWO defects in one line: `|| 1` turned a
+    // legitimate 0 into 1 before the floor ran, and the floor itself made "no
+    // free transfer left" inexpressible, so a manager who had already used this
+    // week's transfer got his next move priced FREE here while the tree charged
+    // -4 (it uses Math.max(0,...)). Measured: freeTransfers 0 and 1 returned
+    // byte-identical plans. See K_LO below for why the floor existed at all.
+    // Kill switch: window.APEX_MILP_FT_ZERO = false restores the old flooring.
+    const _ftRaw = (opts.freeTransfers === null || opts.freeTransfers === undefined
+      || isNaN(+opts.freeTransfers)) ? 1 : Math.floor(+opts.freeTransfers);
+    const _ftZeroOk = !(typeof window !== 'undefined' && window.APEX_MILP_FT_ZERO === false);
+    const ft0 = Math.min(5, Math.max(_ftZeroOk ? 0 : 1, _ftRaw));
+    // The FT-value ladder encodes ft_w = (K_LO - 1) + sum z_{w,k}. It shipped
+    // with an implicit K_LO of 2, i.e. "you always hold at least one FT" -- which
+    // is why vF(0)=0 was INFEASIBLE rather than merely mispriced. K_LO drops to 1
+    // only in the zero-FT model; at ft0 >= 1 every row, coefficient and ordering
+    // below is exactly what ships today, so exact-value suites are untouched.
+    const K_LO = (ft0 === 0) ? 1 : 2;
     const bank0 = Math.max(0, +opts.bank || 0);
     const sellOf = opts.sellingPrices || {};   // id -> selling price
     // APEX_MILP_ROUTES_v1 (2026-08-22, Marcus: "keep the page and execute the
@@ -13214,8 +13248,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
     // (Patient = [0]; a full-roll baseline = all weeks); maxOwnIn caps the
     // ownership of INCOMING candidates (Rank swing = 15) by filtering the
     // extras pool — owned players are unaffected. Same objective throughout:
-    // routes generated this way cannot disagree with the optimal plan's
-    // maths, only differ by their stated constraint.
+    // routes generated this way differ only by their stated constraint.
     const forceRoll = new Set((opts.forceRollWeeks || []).map(Number));
     // maxOwnIn is a CONSTRAINT (incoming transfers banned for candidates over
     // the cap), never a candidate filter — and candidateUnionOwnCap widens the
@@ -13224,7 +13257,23 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
     // swing solve see value picks the pick's pruning missed and "outscore" the
     // unconstrained plan by +0.76 — a pruning artifact masquerading as an
     // objective violation. One universe, constraints only ⇒ the coherence
-    // guarantee (constrained ≤ unconstrained) is mathematical again.
+    // guarantee (constrained ≤ unconstrained) is a property of the MODEL.
+    // APEX_MILP_HONEST_STATUS_v1 (2026-08-23) - that sentence used to end "is
+    // mathematical again", which reads as a promise about the numbers that
+    // reach the screen. It is not one, and measurement disproved it. The
+    // guarantee is over EXACT optima; what the routes surface compares is two
+    // INCUMBENTS, each stopped early by its own mipgap, so the observable
+    // margin can invert by up to that gap. Measured in the shipped routes
+    // configuration (gap 0.005, horizon 6, timeLimitSec 45, real pool):
+    // unconstrained 284.18 vs the maxOwnIn swing 284.30 - a +0.12 violation.
+    // On randomised synthetic pools the same four-solve pattern violated in
+    // 13 of 48 trials (27%), largest +1.29. At gap 0: 0 violations in 42
+    // trials, true margin -0.27. So the mathematics is sound and the GAP is
+    // the cause - the harder unconstrained solve stops short of its own
+    // optimum while the easier constrained one lands on its. Gap 0 is not the
+    // remedy: measured 32.2 s for ONE horizon-6 solve and 59.6 s for all four,
+    // against a 45 s limit. _txpMilpRoutes in assets/apex_paths.js now DETECTS
+    // the inversion and reports it instead of rendering an impossible line.
     const maxOwnIn = (typeof opts.maxOwnIn === 'number') ? opts.maxOwnIn : null;
     const unionCap = (typeof opts.candidateUnionOwnCap === 'number') ? opts.candidateUnionOwnCap : null;
 
@@ -13374,20 +13423,25 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
       addObj(vP(w), -D * HIT + D * FT_USE_PEN);       // hits cost 4; hit legs are not FT legs
       addObj(vT(w), -D * FT_USE_PEN);                 // use pen per FT leg (T - P)
 
-      // FT level value (flows): ft_w = 1 + sum z_{w,k}; L_w = sum m_k z_{w,k}
-      for (let k = 2; k <= 5; k++) {
+      // FT level value (flows): ft_w = (K_LO-1) + sum z_{w,k}; L_w = sum m_k z
+      // APEX_MILP_FT_ZERO_v1 (2026-08-23): K_LO is 2 in the normal case, which is
+      // the model exactly as it shipped. It becomes 1 only when the manager has
+      // no free transfer left (ft0 === 0), adding the rung that makes the zero
+      // state representable. vF(w) has lb 1 for w >= 1, so z_{w,1} is pinned to 1
+      // there and contributes a constant -- only week 0 can sit on the new rung.
+      for (let k = K_LO; k <= 5; k++) {
         binaries.push(vZ(w, k));
-        if (k > 2) subjectTo.push({ name: `zo_${w}_${k}`, vars: [
+        if (k > K_LO) subjectTo.push({ name: `zo_${w}_${k}`, vars: [
           { name: vZ(w, k), coef: 1 }, { name: vZ(w, k - 1), coef: -1 },
         ], bnds: { type: glpk.GLP_UP, ub: 0, lb: 0 } });
       }
-      subjectTo.push({ name: `zft_${w}`, vars: [
-        { name: vF(w), coef: 1 },
-        { name: vZ(w, 2), coef: -1 }, { name: vZ(w, 3), coef: -1 },
-        { name: vZ(w, 4), coef: -1 }, { name: vZ(w, 5), coef: -1 },
-      ], bnds: { type: glpk.GLP_FX, ub: 1, lb: 1 } });
+      const _zftVars = [{ name: vF(w), coef: 1 }];
+      for (let k = K_LO; k <= 5; k++) _zftVars.push({ name: vZ(w, k), coef: -1 });
+      const _zftRhs = K_LO - 1;
+      subjectTo.push({ name: `zft_${w}`, vars: _zftVars,
+        bnds: { type: glpk.GLP_FX, ub: _zftRhs, lb: _zftRhs } });
       // gw_ft_gain[w] = L_w - L_{w-1}, decayed at week w (L_{-1} constant, dropped)
-      for (let k = 2; k <= 5; k++) {
+      for (let k = K_LO; k <= 5; k++) {
         const m = FT_M[k] || 0;
         addObj(vZ(w, k), D * m);
         if (w + 1 < H) addObj(vZ(w, k), -Math.pow(DECAY, w + 1) * m);
@@ -13417,10 +13471,46 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
       bounds,
     };
     const tml = Math.max(5, Math.min(600, opts.timeLimitSec || 60));
-    const res = await Promise.resolve(glpk.solve(prob, { msglev: glpk.GLP_MSG_OFF, tmlim: tml, mipgap: opts.gap || 0.01 }));
+    // APEX_MILP_HONEST_STATUS_v1 (2026-08-23) - was `mipgap: opts.gap || 0.01`.
+    // The THIRD falsy-zero of this exact shape in this file this week (see
+    // APEX_MILP_FT_ZERO_v1 above): `gap: 0` is a caller saying "prove it", and
+    // `0 || 0.01` answered by handing GLPK a gap TWICE AS LOOSE as the 0.005
+    // assets/apex_paths.js passes. Measured on the suites_milp marginal
+    // fixture: gap 0.005 -> z 260.05, gap 0 -> z 258.24 (byte-identical to gap
+    // undefined) - asking for exactness silently cost 1.82 objective. `typeof`
+    // rather than `||`, because 0 is the one value a caller most wants to say
+    // here; the same reasoning, and the same idiom, as DECAY/BW/ITB_W above.
+    const gap = (typeof opts.gap === 'number') ? opts.gap : 0.01;
+    const _t0 = Date.now();
+    const res = await Promise.resolve(glpk.solve(prob, { msglev: glpk.GLP_MSG_OFF, tmlim: tml, mipgap: gap }));
+    const elapsedSec = (Date.now() - _t0) / 1000;
     const st = res && res.result ? res.result.status : -1;
     const ok = (st === glpk.GLP_OPT || st === glpk.GLP_FEAS);
-    if (!ok) return { status: 'infeasible', glpkStatus: st };
+    if (!ok) return { status: 'infeasible', solved: false, glpkStatus: st, elapsedSec: round2(elapsedSec) };
+    // APEX_MILP_HONEST_STATUS_v1 (2026-08-23) - this function used to return the
+    // hardcoded string 'optimal' for BOTH branches accepted above and throw the
+    // raw GLPK status away. GLPK returns GLP_FEAS(2) when it stops on the mipgap
+    // AND when it hits tmlim, so a truncated incumbent reached every caller
+    // wearing the word "optimal". Measured: the identical captured problem
+    // re-solved at mipgap 0 -> GLP_OPT(5) z 280.0224, at mipgap 0.01 ->
+    // GLP_FEAS(2) z 280.0224 - same incumbent, and only one of those is proven.
+    // Every one of the eight suites_milp fixtures came back GLP_FEAS(2) while
+    // reporting 'optimal', and at horizon 8 every real solve hits the wall.
+    // HONEST_NUMBERS: a number that might be a truncated incumbent must not be
+    // presented as proven. So:
+    //   'optimal'  GLP_OPT               - proven; the bound closed.
+    //   'feasible' GLP_FEAS, off the wall - stopped on the gap; the incumbent is
+    //                                      within `gap` of the bound.
+    //   'timeout'  GLP_FEAS, at the wall  - cut off by tmlim; NO quality bound.
+    // GLPK will not tell us which of the last two happened, so we time it. A
+    // solve that genuinely finishes inside the final half-second of its budget
+    // is called 'timeout' as well: at the wall the two are indistinguishable,
+    // and the honest side of that coin-flip is the one that does not
+    // over-promise. Callers get glpkStatus/elapsedSec/timeLimitSec/mipGap and
+    // can re-derive the call themselves rather than trust this string.
+    const proven = (st === glpk.GLP_OPT);
+    const timedOut = !proven && (elapsedSec >= tml - 0.5);
+    const status = proven ? 'optimal' : (timedOut ? 'timeout' : 'feasible');
     const V = res.result.vars || {};
     const weeks = [];
     let xpTotal = 0;
@@ -13448,7 +13538,16 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
         xiXp: round2(xiXp),
       });
     }
-    return { status: 'optimal', objective: round2(res.result.z || 0), weeks,
+    // APEX_MILP_HONEST_STATUS_v1 (2026-08-23): `status` is now the classified
+    // truth (see above), never the literal 'optimal'. `solved` is the field a
+    // caller should test for "did a usable plan come back" - that is what the
+    // old `status === 'optimal'` compares actually meant, since the string was
+    // hardcoded and could not fail. `proven` is the field to test before
+    // telling a user a number is the best available.
+    return { status, solved: true, proven, timedOut,
+             glpkStatus: st, elapsedSec: round2(elapsedSec),
+             timeLimitSec: tml, mipGap: gap,
+             objective: round2(res.result.z || 0), weeks,
              xpTotal: round2(xpTotal),
              candidates: N, binariesCount: prob.binaries.length };
   }
@@ -14546,14 +14645,260 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
   //   Patient       = week-0 transfers pinned to 0
   //   Rank swing    = incoming players capped at 15% ownership
   // Because it is ONE objective, "a constrained route quietly beating the
-  // pick on the pick's own maths" is structurally impossible — the exact
-  // incoherence Marcus screenshotted on 08-22. Displayed totals stay PURE
+  // pick on the pick's own maths" is impossible AT THE EXACT OPTIMUM — the
+  // exact incoherence Marcus screenshotted on 08-22.
+  // APEX_MILP_HONEST_STATUS_v1 (2026-08-23) - it used to read "structurally
+  // impossible", full stop. It is not. These lines are solved to a 0.005
+  // mipgap and what a gap returns is an incumbent, not an optimum. Measured
+  // in this exact configuration on the real pool: unconstrained 284.18 vs
+  // Rank swing 284.30, a +0.12 violation. 13 of 48 randomised synthetic
+  // trials (27%) violated, largest +1.29; at gap 0, 0 of 42 did (true margin
+  // -0.27) - the maths is sound, the gap is the cause. Gap 0 costs 59.6 s for
+  // the four solves against a 45 s limit, so it is not the remedy either.
+  // The inversion is now DETECTED below and published on solveQuality.
+  // Displayed totals stay PURE
   // xP vs no transfers (comparable, no economics units); the BEST badge is
   // awarded on the full objective (xP + FT/bank economics), so Patient can
   // honestly show more raw xP while the pick explains what the early move
   // buys. Legacy staged heuristic (_txpComputeRoutes below) is the fail-soft
   // fallback and the kill switch: window.APEX_MILP_ROUTES = false.
   var _txpMilpCache = { key: null, routes: null, inflight: false };
+  // APEX_MILP_HONEST_STATUS_v1 (2026-08-23): the single "did a usable plan
+  // come back" predicate for every solve line below. Deliberately NOT a
+  // status-string compare any more — solveMultiPeriod now tells the truth
+  // ('optimal' only when GLPK PROVED it, 'feasible' for a gap-stop, 'timeout'
+  // for an incumbent cut off at the wall), and every solve on this page runs
+  // at gap 0.005, so every one of them legitimately returns 'feasible'.
+  function _txpSolved(r) { return !!(r && r.solved && r.weeks && r.weeks.length); }
+
+  // ── APEX_ROUTES_TIED_v1 (2026-08-23, Marcus: "show them as TIED") ─────────
+  // APEX_MILP_HONEST_STATUS_v1 detected the extreme case — a constrained line
+  // finishing ABOVE the unconstrained one — warned to the console, published
+  // solveQuality, and left the copy to a product decision. This is that
+  // decision, and it generalises the rule: "incoherent" is not a separate
+  // phenomenon, it is the far end of TIED.
+  //
+  // What GLPK actually reports about ONE line (fields added by
+  // APEX_MILP_HONEST_STATUS_v1 in assets/apex_solver.js):
+  //   proven   (GLP_OPT)      the bound closed — the number IS the optimum.
+  //   feasible (mipgap stop)  the incumbent z is within the gap of the bound,
+  //                           so the true optimum lies in [z, z + gap*|z|].
+  //   timeout  (tmlim)        cut off mid-search — NO bound was ever reported,
+  //                           so the true optimum lies in [z, +infinity).
+  // _txpResolution returns the WIDTH of that interval above the incumbent. It
+  // is read off the solve (r.proven / r.status / r.mipGap), never a constant:
+  // at objective 284.18 and gap 0.005 it is 1.42, at objective 60 it is 0.30,
+  // at gap 0 it is 0. Change base.gap below and every number this page prints
+  // about its own precision moves with it — which is the point of deriving it.
+  //
+  // Two lines are TIED when those intervals overlap, i.e. when the LOWER
+  // line's optimum could reach the higher line's incumbent:
+  //
+  //     tied(a, b)  <=>  |z_a - z_b|  <=  resolution(lower line)
+  //
+  // Measured 2026-08-23, real pool, this exact config (gap 0.005, horizon 6,
+  // timeLimitSec 45): pick 284.18, swing 284.30, patient 283.85.
+  //   |284.18 - 284.30| = 0.12  <=  0.005 * 284.18 = 1.42   -> TIED.
+  // The +0.12 is impossible at an exact optimum; it is the gap talking. On
+  // randomised synthetic pools the same four-solve pattern inverted in 13 of
+  // 48 trials (27%), largest +1.29; at gap 0, 0 of 42 (true margin -0.27).
+  // Gap 0 is not the remedy: 32.2 s for ONE horizon-6 solve, 59.6 s for all
+  // four, against a 45 s limit.
+  //
+  // An INCOHERENT pair can never escape this rule, so it needs no branch:
+  //     z_swing <= OPT_swing <= OPT_model <= z_model + resolution(model)
+  // (the middle step is the constrained-vs-unconstrained theorem, which holds
+  // over exact optima). Any inversion is therefore inside the lower line's own
+  // resolution by construction. There is deliberately no "incoherent" case
+  // below — there was never a second rule to write.
+  //
+  // Doctrine: an unknown bound resolves toward TIED, never toward an ordering.
+  // Fail toward noise, never toward silence — and never toward a claim.
+  // Kill switch: window.APEX_ROUTES_TIED = false restores the 08-22
+  // presentation byte-for-byte (pinned by scripts/verify/suites_routes_tied.js).
+  var _TXP_LINES = ['model', 'patient', 'swing'];
+  var _TXP_LABEL = { model: 'the pick', patient: 'Patient', swing: 'Rank swing' };
+  function _txpTiedOn() {
+    try { return !(typeof window !== 'undefined' && window.APEX_ROUTES_TIED === false); }
+    catch (e) { return true; }
+  }
+  function _txpResolution(r) {
+    if (!r || typeof r.objective !== 'number' || !isFinite(r.objective)) return Infinity;
+    if (r.proven === true) return 0;                 // the bound closed; nothing to allow for
+    if (r.status === 'timeout') return Infinity;     // cut off at tmlim; GLPK reported no bound
+    if (typeof r.mipGap !== 'number' || !isFinite(r.mipGap)) return Infinity;
+    return Math.abs(r.mipGap * r.objective);         // the gap the caller asked for, at this size
+  }
+  // Published summaries carry `resolution` already; recompute only for a shape
+  // that predates it, and in that case _txpResolution answers Infinity (no
+  // mipGap to read) — i.e. "cannot rank", which is the safe direction.
+  function _txpLineRes(q) {
+    return (q && typeof q.resolution === 'number') ? q.resolution : _txpResolution(q);
+  }
+  function _txpLineQ(r, samePlanAsPick) {
+    return {
+      objective: (r && typeof r.objective === 'number') ? r.objective : null,
+      status: r ? r.status : null,
+      proven: !!(r && r.proven),
+      resolution: _txpResolution(r),
+      timeLimitSec: r ? r.timeLimitSec : null,
+      samePlanAsPick: !!samePlanAsPick,
+    };
+  }
+  function _txpTiedPair(a, b) {
+    if (!a || !b || typeof a.objective !== 'number' || typeof b.objective !== 'number') return false;
+    var lo = (a.objective <= b.objective) ? a : b;
+    // 1e-9 is float noise on the subtraction, not a tolerance: when both lines
+    // are PROVEN the resolution is 0 and only an exact tie survives it.
+    return Math.abs(a.objective - b.objective) <= _txpLineRes(lo) + 1e-9;
+  }
+  // The renderer-facing question: what must this card NOT claim about its
+  // distance from the pick? null means the ordering is real and today's
+  // wording stands.
+  function _txpTieState(key, routes) {
+    if (!_txpTiedOn()) return null;
+    var sq = routes && routes.solveQuality;
+    var L = sq && sq.lines;
+    // Legacy heuristic routes (_txpComputeRoutes) publish no solveQuality:
+    // no solver, no bound, no solver-precision claim to soften.
+    if (!L) return null;
+    var pick = L.model, me = L[key];
+    if (!pick || !me) return null;
+    if (key !== 'model') {
+      // Patient IS the pick when the pick already rolls week 0 (see the
+      // `patient = model` shortcut below). That is one line shown twice, not
+      // two the solver cannot separate, and 'Costs nothing vs the pick'
+      // already says it exactly right.
+      if (me.samePlanAsPick) return null;
+      // No bound at all beats no ordering: report the stronger fact first.
+      if (me.status === 'timeout' || pick.status === 'timeout')
+        return { kind: 'unbounded', selfTimedOut: me.status === 'timeout',
+                 limitSec: (me.status === 'timeout' ? me : pick).timeLimitSec, names: [key] };
+      if (!_txpTiedPair(pick, me)) return null;
+      var lo = (pick.objective <= me.objective) ? pick : me;
+      return { kind: 'tied', diff: Math.abs(pick.objective - me.objective),
+               resolution: _txpLineRes(lo), names: [key] };
+    }
+    // The pick's own card. It may claim to lead only when the solver can rank
+    // it against every line shown beside it.
+    if (pick.status === 'timeout')
+      return { kind: 'unbounded', selfTimedOut: true, limitSec: pick.timeLimitSec, names: ['model'] };
+    var tied = [], unb = [], lim = null, minDiff = Infinity, resAtMin = Infinity;
+    for (var i = 0; i < _TXP_LINES.length; i++) {
+      var k = _TXP_LINES[i];
+      if (k === 'model' || !L[k] || L[k].samePlanAsPick) continue;
+      if (L[k].status === 'timeout') { unb.push(k); lim = L[k].timeLimitSec; continue; }
+      if (!_txpTiedPair(pick, L[k])) continue;
+      tied.push(k);
+      var dlt = Math.abs(pick.objective - L[k].objective);
+      if (dlt < minDiff) {
+        minDiff = dlt;
+        resAtMin = _txpLineRes(pick.objective <= L[k].objective ? pick : L[k]);
+      }
+    }
+    if (unb.length) return { kind: 'unbounded', selfTimedOut: false, limitSec: lim, names: unb };
+    if (!tied.length) return null;
+    return { kind: 'tied', diff: minDiff, resolution: resAtMin, names: tied };
+  }
+  // APEX_ROUTES_TIED_v1 (2026-08-23): the copy. Voice matched to the two places
+  // on this product that already admit uncertainty out loud — the Roll card's
+  // "nothing beats rolling by 0.5+" (assets/apex_app.js, _PP_DECISION_FLOOR)
+  // and the Stress test footer's "each test world nudges every player's
+  // projections by about ±10% (the model's own typical error)"
+  // (assets/apex_sensitivity.js). Both name the limit, name the number, and
+  // stay in bet-slip English; neither says "gap", "incumbent" or "MILP". The
+  // pre-GW1 card's "staged routes would be inventing a choice you do not have"
+  // is the same move as "inventing a difference" below.
+  function _txpTieText(key, t) {
+    var d = function (x) { return (Math.round(x * 10) / 10).toFixed(1); };
+    var names = (t.names || []).map(function (k) { return _TXP_LABEL[k] || k; });
+    var list = names.length > 1
+      ? names.slice(0, -1).join(', ') + ' and ' + names[names.length - 1]
+      : (names[0] || 'the other routes');
+    if (t.kind === 'unbounded') {
+      if (key !== 'model')
+        return 'Not ranked against the pick — the ' + t.limitSec + 's solve clock ran out here before the optimiser had bounded this line, so read the total as a floor, not a verdict.';
+      if (t.selfTimedOut)
+        return 'The ' + t.limitSec + 's solve clock ran out on this line before the optimiser had bounded it — read the total as a floor, not a verdict.';
+      return 'Not established as the leader on this run: ' + list + ' ran out the ' + t.limitSec
+        + 's solve clock, so there is no telling how high ' + (names.length > 1 ? 'those lines' : 'that line') + ' would have gone.';
+    }
+    if (key === 'model')
+      return 'Level with ' + list + ' on this run — the optimiser only resolves a line this size to about '
+        + d(t.resolution) + ' xPts, and they finish inside that.';
+    return 'Level with the pick, not behind it — the optimiser only resolves a line this size to about '
+      + d(t.resolution) + ' xPts, and '
+      + (t.diff < 0.05 ? 'the two totals are level' : 'the two totals are ' + d(t.diff) + ' apart')
+      + ', so ranking one above the other would be inventing a difference.';
+  }
+  // APEX_ROUTES_TIED_v1 (2026-08-23): the BEST badge was the loudest ordering
+  // claim on this surface — one green border, decided by a strict `>` on two
+  // objectives that were measured 0.12 apart with a 1.42 resolution (and the
+  // wrong way round). It now lights EVERY line the solver cannot separate from
+  // the leader. Nothing is suppressed and nothing is reordered: same three
+  // cards, same order, same totals — the highlight simply stops asserting a
+  // single winner where there is not one.
+  function _txpBestSet(routes, order) {
+    var best = order.reduce(function (a, b) {
+      return (routes.milp ? routes[b].objective > routes[a].objective
+                          : routes[b].delta > routes[a].delta) ? b : a;
+    }, 'model');
+    var set = {};
+    set[best] = true;
+    if (!routes.milp || !_txpTiedOn()) return set;
+    var L = routes.solveQuality && routes.solveQuality.lines;
+    if (!L || !L[best]) return set;
+    for (var i = 0; i < order.length; i++) {
+      var k = order[i];
+      if (k === best || !L[k] || L[k].samePlanAsPick) continue;
+      if (_txpTiedPair(L[best], L[k])) set[k] = true;
+    }
+    return set;
+  }
+  // APEX_ROUTES_TIED_v1 (2026-08-23): one clause under the cards saying what
+  // the highlight means, in the Stress-test footer's register — state the
+  // limit as a number the reader can hold, not as a solver term.
+  function _txpQualityNote(routes) {
+    if (!_txpTiedOn()) return '';
+    var sq = routes && routes.solveQuality;
+    var L = sq && sq.lines;
+    if (!L) return '';
+    var d = function (x) { return (Math.round(x * 10) / 10).toFixed(1); };
+    var trunc = [];
+    for (var i = 0; i < _TXP_LINES.length; i++) {
+      var k = _TXP_LINES[i];
+      if (L[k] && L[k].status === 'timeout') trunc.push(_TXP_LABEL[k]);
+    }
+    if (trunc.length)
+      return ' · ' + trunc.join(' and ') + ' ran out the ' + sq.timeLimitSec + 's solve clock, so '
+        + (trunc.length > 1 ? 'those totals are floors' : 'that total is a floor') + ' rather than best plans';
+    var res = _txpLineRes(L.model);
+    if (!isFinite(res) || res <= 0) return '';
+    return ' · the optimiser stops within about ' + d(res)
+      + ' xPts of its own best at this size, so lines closer together than that are shown level, not ranked';
+  }
+  // APEX_ROUTES_TIED_v1 (2026-08-23): _txpMilpAdapt returns
+  // { steps, hits, laterMoves, milp } — it has never had a `moves` array — and
+  // _txpRiskLine read `R.state.moves.length` three times. That threw a
+  // TypeError on EVERY MILP route, which the outer try/catch in
+  // _renderTransferPaths swallowed by setting body.innerHTML = '': the MILP
+  // Transfer Paths panel has been rendering BLANK since APEX_MILP_ROUTES_v1
+  // (2026-08-22). Reproduced against the unpatched file:
+  //   MILP state keys: [ 'steps', 'hits', 'laterMoves', 'milp' ]
+  //   state.moves === undefined
+  //   THROWS: TypeError: Cannot read properties of undefined (reading 'length')
+  // Wiring honest copy into a renderer that never runs would have been
+  // worthless, so the count is derived from whichever state shape arrives.
+  // laterMoves is included because a route with all its moves beyond the
+  // 3-week display window is emphatically not "no upgrade worth a move".
+  function _txpMoveCount(state) {
+    if (!state) return 0;
+    if (Array.isArray(state.moves)) return state.moves.length;   // legacy heuristic state
+    var n = +state.laterMoves || 0;
+    var steps = state.steps || [];
+    for (var i = 0; i < steps.length; i++) n += ((steps[i] && steps[i].moves) || []).length;
+    return n;
+  }
   function _txpMilpOn() {
     try {
       if (typeof window !== 'undefined' && window.APEX_MILP_ROUTES === false) return false;
@@ -14602,31 +14947,77 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
     try {
       var preTx = (typeof _transfersAppliedByGw !== 'undefined'
         && _transfersAppliedByGw && _transfersAppliedByGw[startIdx]) || 0;
-      ft = Math.max(1, ((tm.free_transfers || 1) - preTx));
+      // APEX_MILP_FT_ZERO_v1 (2026-08-23) - was Math.max(1, ...). Transfer
+      // Paths showed a move as free when preTx had already spent the FT.
+      // APEX_MILP_HONEST_STATUS_v1 (2026-08-23) - the `|| 1` INSIDE it was the
+      // same laundering one level down, and it survived that fix: a manager
+      // whose TEAM_META genuinely says free_transfers 0 had the 0 rewritten to
+      // 1 before preTx was even subtracted, so the zero state the fix above
+      // made expressible could never arrive from this call site. `typeof`
+      // rather than `||`, for exactly the reason APEX_MILP_FT_ZERO_v1 gives.
+      var _ftMeta = (typeof tm.free_transfers === 'number' && isFinite(tm.free_transfers))
+        ? tm.free_transfers : 1;
+      ft = Math.max(0, (_ftMeta - preTx));
       bank = Math.max(0, tm.bank || 0);
     } catch (e) {}
     var base = {
       horizon: 6, startIdx: startIdx, freeTransfers: ft, bank: bank,
       sellingPrices: tm.selling_prices || {}, timeLimitSec: 45,
       // One shared candidate universe for all four solves (incl. the best
-      // low-owned extras), so the coherence guarantee is mathematical and the
-      // pick gets the same value picks the swing sees. gap tightened so the
-      // displayed plans don't wobble between renders.
+      // low-owned extras), so the pick gets the same value picks the swing
+      // sees. gap tightened so the displayed plans don't wobble between
+      // renders.
+      // APEX_MILP_HONEST_STATUS_v1 (2026-08-23) - this used to say the shared
+      // universe made "the coherence guarantee mathematical". Measured false
+      // in this exact configuration: unconstrained 284.18 vs swing 284.30, a
+      // +0.12 violation, and 13/48 (27%) on randomised pools, largest +1.29.
+      // The guarantee is over exact optima, and gap 0.005 buys two incumbents
+      // rather than two optima, so the margin can invert by up to the gap. Gap
+      // 0 removes it (0/42 trials) and cannot be afforded here: 32.2 s for one
+      // horizon-6 solve, 59.6 s for all four, against timeLimitSec 45. So the
+      // inversion is DETECTED below and published, not silently rendered.
       candidateUnionOwnCap: TXP_EO_DIFF_MAX, gap: 0.005,
     };
     var S = window.ApexSolver;
     var allRoll = [0, 1, 2, 3, 4, 5];
     return (async function () {
       var model = await S.solveMultiPeriod(_txpPool(), sq, base);
-      if (!model || model.status !== 'optimal') return null;
+      // APEX_MILP_HONEST_STATUS_v1 (2026-08-23) - was `model.status !== 'optimal'`.
+      // That string was hardcoded in solveMultiPeriod and could not fail, so
+      // what this line actually tested was "did a plan come back"; it now asks
+      // that directly. Testing the string today would blank the whole routes
+      // surface, because at gap 0.005 GLPK honestly answers 'feasible'.
+      if (!_txpSolved(model)) return null;
       // Patient: if the pick already rolls week 0, it IS the patient plan.
       var patient = (model.weeks[0] && model.weeks[0].roll)
         ? model
         : await S.solveMultiPeriod(_txpPool(), sq, Object.assign({}, base, { forceRollWeeks: [0] }));
       var swing = await S.solveMultiPeriod(_txpPool(), sq, Object.assign({}, base, { maxOwnIn: TXP_EO_DIFF_MAX }));
       var baseline = await S.solveMultiPeriod(_txpPool(), sq, Object.assign({}, base, { forceRollWeeks: allRoll }));
-      if (!patient || patient.status !== 'optimal' || !swing || swing.status !== 'optimal'
-          || !baseline || baseline.status !== 'optimal') return null;
+      // APEX_MILP_HONEST_STATUS_v1 (2026-08-23) - see _txpSolved.
+      if (!_txpSolved(patient) || !_txpSolved(swing) || !_txpSolved(baseline)) return null;
+      // APEX_MILP_HONEST_STATUS_v1 (2026-08-23): gap-stop coherence detection.
+      // A constrained line CANNOT beat the unconstrained one at the exact
+      // optimum; at gap 0.005 it can, and measurably does (+0.12 on the real
+      // pool, 27% of synthetic trials - see the note on `base` above). 1e-6 is
+      // float noise; anything above it is the gap talking. We DETECT it and
+      // publish it rather than rendering an impossible line as if it were real.
+      // What the surface should then DO with an incoherent route - suppress it,
+      // caveat it, or re-solve that pair tighter - is a product decision and is
+      // deliberately not made here.
+      var _rq = [model, patient, swing, baseline];
+      var _coh = [];
+      if (swing.objective > model.objective + 1e-6)
+        _coh.push({ line: 'swing', excess: Math.round((swing.objective - model.objective) * 100) / 100 });
+      if (patient !== model && patient.objective > model.objective + 1e-6)
+        _coh.push({ line: 'patient', excess: Math.round((patient.objective - model.objective) * 100) / 100 });
+      if (_coh.length) {
+        try {
+          console.warn('[milp-routes] incoherent at gap ' + base.gap
+            + ' (constrained line exceeds the unconstrained optimum): '
+            + JSON.stringify(_coh));
+        } catch (e) {}
+      }
       var W = Math.min(TXP_WINDOW, model.weeks.length);
       return {
         startIdx: startIdx, window: W,
@@ -14635,6 +15026,38 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
         model:   { state: _txpMilpAdapt(model, startIdx, W),   delta: model.xpTotal - baseline.xpTotal,   objective: model.objective },
         patient: { state: _txpMilpAdapt(patient, startIdx, W), delta: patient.xpTotal - baseline.xpTotal, objective: patient.objective },
         swing:   { state: _txpMilpAdapt(swing, startIdx, W),   delta: swing.xpTotal - baseline.xpTotal,   objective: swing.objective },
+        // APEX_MILP_HONEST_STATUS_v1 (2026-08-23): everything a surface needs
+        // to tell the user what it is looking at. `proven` is true only when
+        // every one of the four solves closed its bound; `truncated` is true
+        // when any of them was cut off by timeLimitSec, which means its plan is
+        // an incumbent of unknown quality, not a best plan. `incoherent` lists
+        // any constrained line that came out ABOVE the unconstrained optimum -
+        // impossible at an exact optimum, possible by up to `gap` here. The
+        // renderer does not read these yet; wiring the caveat copy is a product
+        // decision, but the data is no longer hidden from it.
+        solveQuality: {
+          proven: _rq.every(function (r) { return r.proven === true; }),
+          truncated: _rq.some(function (r) { return r.status === 'timeout'; }),
+          statuses: { model: model.status, patient: patient.status,
+                      swing: swing.status, baseline: baseline.status },
+          gap: base.gap,
+          maxElapsedSec: Math.max.apply(null, _rq.map(function (r) { return +r.elapsedSec || 0; })),
+          timeLimitSec: base.timeLimitSec,
+          incoherent: _coh,
+          // APEX_ROUTES_TIED_v1 (2026-08-23): `incoherent` above lists only the
+          // extreme case. The renderer needs the general one, so publish what
+          // each line's own solve reported and let _txpResolution derive the
+          // bound from it. `samePlanAsPick` records the `patient = model`
+          // shortcut a few lines up — that is one plan shown twice, not two
+          // plans the solver could not separate, and the surface must not
+          // confuse the two.
+          lines: {
+            model:    _txpLineQ(model, false),
+            patient:  _txpLineQ(patient, patient === model),
+            swing:    _txpLineQ(swing, swing === model),
+            baseline: _txpLineQ(baseline, false),
+          },
+        },
       };
     })();
   }
@@ -14694,28 +15117,55 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
       + '<span>' + txt + '</span></div>';
   }
 
+  // APEX_ROUTES_TIED_v1 (2026-08-23): every sentence in here that names a
+  // DISTANCE from the pick is an ordering claim, and at gap 0.005 the solver
+  // often cannot make one — measured, it made the WRONG one (pick 284.18 vs
+  // swing 284.30). Where _txpTieState says the two lines sit inside the
+  // solve's own resolution, the distance sentence is REPLACED, not decorated:
+  // printing '~0.1 xPts below the pick' and then adding 'but they are tied'
+  // would leave the invented number on the page, which is the thing being
+  // fixed. A line cut off at the time limit reads differently again — it has
+  // no bound at all, which is a bigger caveat than "too close to call".
+  // The zero-move branches make no comparison at all ("Nothing clears the bar
+  // even with two FTs" is a statement about that plan), so they are left
+  // exactly as they were.
+  // R.state.moves -> _txpMoveCount(R.state): see _txpMoveCount — the MILP
+  // state shape has no `moves` array and these three reads were throwing.
   function _txpRiskLine(key, R, routes) {
     var d = function (x) { return (Math.round(x * 10) / 10).toFixed(1); };
+    var tie = _txpTieState(key, routes);
     if (key === 'model') {
+      var lead;
       if (R.state.hits > 0)
-        return 'Includes a −4 hit — already netted out of the total, and it still leads.';
-      if (R.state.moves.length === 0)
-        return 'The model sees no upgrade worth a move — bank and let the FT stack.';
-      return 'Steady route. No hits; prices are today’s — early moves lock value.';
+        // '…and it still leads' is itself an ordering claim, so it goes when
+        // the solver cannot support one. The hit and the netting are facts
+        // about this plan and stay.
+        lead = tie ? 'Includes a −4 hit — already netted out of the total.'
+                   : 'Includes a −4 hit — already netted out of the total, and it still leads.';
+      else if (_txpMoveCount(R.state) === 0)
+        lead = 'The model sees no upgrade worth a move — bank and let the FT stack.';
+      else
+        lead = 'Steady route. No hits; prices are today’s — early moves lock value.';
+      return lead + (tie ? ' ' + _txpTieText(key, tie) : '');
     }
     if (key === 'patient') {
       var giveUp = routes.model.delta - R.delta;
-      if (R.state.moves.length === 0)
+      if (_txpMoveCount(R.state) === 0)
         return 'Nothing clears the bar even with two FTs — full patience, keep stacking.';
+      if (tie)
+        return _txpTieText(key, tie) + ' Either way you see this week’s team news before committing.';
       if (giveUp > 0.05)
         return 'Gives up ~' + d(giveUp) + ' xPts vs the pick to see this week’s team news before committing a free double move.';
       return 'Costs nothing vs the pick — and you see this week’s team news before committing.';
     }
     // swing
     var below = routes.model.delta - R.delta;
-    if (R.state.moves.length === 0)
+    if (_txpMoveCount(R.state) === 0)
       return 'No low-EO player clears the quality bar right now — a differential for its own sake is just a worse team.';
     var src = _txpEoBaked() ? 'under ' + TXP_EO_DIFF_MAX + '% EO near the top of the game' : 'under ' + TXP_EO_DIFF_MAX + '% owned';
+    if (tie)
+      return _txpTieText(key, tie) + ' Every incoming player is ' + src
+        + ' — the route if you’re chasing rank, not protecting it.';
     return (below > 0.05 ? '~' + d(below) + ' xPts below the pick, but every incoming player is ' + src
       : 'Matches the pick AND every incoming player is ' + src)
       + ' — the route if you’re chasing rank, not protecting it.';
@@ -14871,14 +15321,26 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
       // the FULL objective (xP + FT/bank economics) — a constrained line can
       // show more raw xP (Patient keeps the FT's value, which is not xP) but
       // it can never out-SCORE the pick on the pick's own maths.
-      var bestKey = routes.milp
-        ? order.reduce(function (a, b) { return routes[b].objective > routes[a].objective ? b : a; }, 'model')
-        : order.reduce(function (a, b) { return routes[b].delta > routes[a].delta ? b : a; }, 'model');
+      // APEX_ROUTES_TIED_v1 (2026-08-23): was a single `bestKey` from a strict
+      // `>` on two objectives. Measured, that `>` fired on a 0.12 margin with
+      // a 1.42 resolution AND pointed at the constrained line — an ordering
+      // the solver cannot make. _txpBestSet keeps the same argmax and then
+      // adds every line tied with it, so the badge shows joint-best when the
+      // field is joint-best. Order and membership of `order` are untouched:
+      // no route is hidden and no route moves.
+      var bestSet = _txpBestSet(routes, order);
       var cards = order.map(function (k) {
-        return _txpCardHtml(k, routes[k], routes, routes.startIdx, routes.lastGw, k === bestKey);
+        return _txpCardHtml(k, routes[k], routes, routes.startIdx, routes.lastGw, !!bestSet[k]);
       }).join('');
       var subtitle = routes.milp
-        ? ('All three routes solved by the ONE planner — same objective, different constraint (pick = unconstrained · patient = bank this week · swing = incoming under ' + TXP_EO_DIFF_MAX + '% owned) · totals to GW' + routes.lastGw + ' are pure xPts vs making no transfers, hits netted · best badge decided on the full objective incl. the banked transfer\u2019s value · the plan-ahead tree decides what to apply.')
+        // APEX_ROUTES_TIED_v1 (2026-08-23): this sentence explains what the
+        // green badge means, so it has to explain the new rule too.
+        // _txpQualityNote states the solver's actual resolution in xPts —
+        // or, when a line was cut off at the limit, says that instead. Same
+        // register as the Stress test footer, which names its ±10% jitter as
+        // "the model's own typical error" rather than leaving the reader to
+        // guess how solid the number is.
+        ? ('All three routes solved by the ONE planner — same objective, different constraint (pick = unconstrained · patient = bank this week · swing = incoming under ' + TXP_EO_DIFF_MAX + '% owned) · totals to GW' + routes.lastGw + ' are pure xPts vs making no transfers, hits netted · best badge decided on the full objective incl. the banked transfer\u2019s value' + _txpQualityNote(routes) + ' · the plan-ahead tree decides what to apply.')
         : ('Staged over the next ' + routes.window + ' gameweeks · totals run to GW' + routes.lastGw + ' vs making no transfers, hits already netted · the plan-ahead tree decides what to apply — these routes show the shape of a path, re-checked every week as prices and news land.');
       body.innerHTML = head
         + '<p class="muted" style="font-size:.8rem;margin:0 0 12px;">' + subtitle + '</p>'
@@ -14928,6 +15390,16 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
     newState: _txpNewState, computeRoutes: _txpComputeRoutes, eo: _txpEo, sell: _txpSell,
     banned: _txpBanned, locked: _txpLocked, lbOn: _txpLbOn,
     milpRoutes: _txpMilpRoutes, milpAdapt: _txpMilpAdapt, milpOn: _txpMilpOn,   // APEX_MILP_ROUTES_v1
+    // APEX_ROUTES_TIED_v1 (2026-08-23): the tie rule and the copy it drives,
+    // exported so scripts/verify/suites_routes_tied.js exercises the SHIPPED
+    // file rather than a verbatim copy of it (the drift trap suites_paths.js
+    // documents at its own head). riskLine is here because the wording IS the
+    // deliverable — a rule that computes 'tied' and then prints an ordering
+    // would pass a maths-only suite.
+    tiedOn: _txpTiedOn, tieResolution: _txpResolution, lineQ: _txpLineQ,
+    tiedPair: _txpTiedPair, tieState: _txpTieState, tieText: _txpTieText,
+    bestSet: _txpBestSet, qualityNote: _txpQualityNote,
+    riskLine: _txpRiskLine, moveCount: _txpMoveCount,
   };
 })();
 
@@ -17962,7 +18434,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1787475541-GW2-935288c0";
+const BUILD_VERSION = "1787486811-GW2-0f7a73f8";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = false;
@@ -17970,7 +18442,7 @@ window.APEX_SQUAD_ROLLBACK = false;
 let FPL_ID = null;
 let SQUAD_DATA = [];
 </script>
-<script src="/apex_pool.js?v=1787475541-GW2-935288c0"></script>
+<script src="/apex_pool.js?v=1787486811-GW2-0f7a73f8"></script>
 <script>
 const PLAYER_NAMES = {"1": "Raya", "2": "Arrizabalaga", "3": "Meslier", "4": "Gabriel", "5": "J.Timber", "6": "Saliba", "7": "Lewis-Skelly", "8": "Calafiori", "9": "Hincapie", "10": "White", "11": "Mosquera", "12": "Saka", "13": "Rice", "14": "Eze", "15": "\u00d8degaard", "16": "Madueke", "17": "Merino", "18": "Martinelli", "19": "Zubimendi", "20": "Dowman", "22": "Nwaneri", "23": "F\u00e1bio Vieira", "24": "Nelson", "25": "Gy\u00f6keres", "26": "Havertz", "27": "G.Jesus", "31": "Konsa", "452": "Bruno G.", "557": "Tzolis", "28": "Martinez", "29": "M.Bizot", "30": "Digne", "32": "Cash", "33": "Mings", "34": "Pau", "35": "Bogarde", "36": "Maatsen", "37": "Lindel\u00f6f", "38": "A.Garc\u00eda", "39": "Nedeljkovic", "41": "Buend\u00eda", "44": "Bailey", "45": "McGinn", "46": "Barkley", "47": "Kamara", "48": "Onana", "49": "Iling Jr", "50": "Burrowes", "51": "George Hemmings", "52": "Alysson", "53": "Manzambi", "54": "Gomes", "55": "Watkins", "56": "Abraham", "160": "Garnacho", "582": "Madjo", "596": "Ruggeri", "597": "Suzuki", "57": "Petrovi\u0107", "58": "Forster", "59": "Dennis", "60": "Hill", "61": "Truffert", "62": "Diakit\u00e9", "63": "Milosavljevi\u0107", "64": "Smith", "65": "J.Araujo", "66": "Soler", "67": "Rayan", "68": "Tavernier", "69": "Scott", "70": "Kluivert", "71": "Cook", "72": "Gannon-Doak", "73": "Adams", "74": "Brooks", "75": "Christie", "76": "T\u00f3th.A", "77": "Adli", "78": "Kroupi.Jr", "79": "Evanilson", "80": "Enes \u00dcnal", "81": "Rodr\u00edguez", "566": "Silva", "573": "Sanchez", "82": "Kelleher", "83": "Valdimarsson", "84": "Collins", "85": "Van den Berg", "86": "Lewis-Potter", "87": "Ajer", "88": "Kayode", "89": "Henry", "90": "Hickey", "91": "Pinnock", "92": "Ji-soo", "93": "Schuster", "94": "Schade", "95": "O.Dango", "96": "Damsgaard", "97": "Jensen", "98": "Janelt", "99": "Milambo", "100": "Carvalho", "102": "Yarmoliuk", "103": "Dasilva", "105": "Anthony", "106": "Thiago", "107": "Furo", "108": "Wilson", "565": "M.Sangar\u00e9", "109": "Verbruggen", "111": "Steele", "113": "F.Kad\u0131o\u011flu", "114": "Boscagli", "115": "De Cuyper", "116": "Dunk", "117": "Coppola", "118": "Igor", "119": "Costinha", "120": "Svoboda", "121": "Mitoma", "122": "Minteh", "123": "Hinshelwood", "124": "Gro\u00df", "125": "Georginio", "126": "O'Riley", "127": "Gomez", "128": "Buonanotte", "129": "Ayari", "130": "Wieffer", "131": "Baleba", "132": "Howell", "133": "Watson", "134": "Oriola", "135": "Yohanna", "137": "Tzimas", "138": "Kostoulas", "139": "Ferguson", "328": "Struijk", "504": "Vuskovic", "594": "David", "600": "Osman", "40": "Rogers", "101": "Henderson", "136": "Welbeck", "140": "S\u00e1nchez", "141": "J\u00f6rgensen", "142": "James", "143": "Chalobah", "144": "Gusto", "145": "Fofana", "146": "B.Badiashile", "147": "Tosin", "148": "Hato", "149": "Colwill", "150": "M.Sarr", "151": "Acheampong", "152": "Palestra", "153": "Disasi", "154": "Palmer", "155": "Enzo", "156": "Neto", "157": "Est\u00eav\u00e3o", "158": "Gittens", "159": "Caicedo", "161": "Lavia", "163": "D.Essugo", "164": "Quenda", "165": "Jo\u00e3o Pedro", "166": "N.Jackson", "167": "Delap", "168": "Marc Guiu", "169": "Mheuka", "170": "Emegha", "200": "Lacroix", "560": "Penders", "561": "Anselmino", "568": "Barco", "578": "Mudryk", "583": "Chavarria", "104": "Onyeka", "110": "Rushworth", "171": "Dovin", "172": "Wilson", "173": "Thomas", "174": "Kitching", "175": "van Ewijk", "176": "Dasilva", "177": "Kesler-Hayden", "178": "Bidwell", "179": "Latibeaudiere", "180": "Woolfenden", "181": "Brau", "182": "Amenda", "183": "Rudoni", "184": "Grimes", "185": "Sakamoto", "186": "Mason-Clark", "187": "Eccles", "188": "Torp", "189": "Shepherd", "190": "Tchaouna", "191": "Borges Rodrigues", "192": "Andrews", "193": "Wright", "194": "Thomas-Asante", "195": "Simms", "196": "Markelo", "197": "Bassette", "492": "Awoniyi", "575": "Yirenkyi", "584": "Hamer", "599": "Cherif", "42": "Guessand", "198": "Henderson", "199": "Benitez", "201": "Mu\u00f1oz", "202": "Richards", "203": "Canvot", "204": "Mitchell", "205": "Sosa", "206": "Chadi Riad", "207": "Mingueza", "208": "Sarr", "210": "Wharton", "211": "Yeremy", "212": "Hughes", "213": "Lerma", "214": "Kamada", "215": "Devenny", "216": "Esse", "217": "M.Fran\u00e7a", "218": "Doucour\u00e9", "219": "J.Rak-Sakyi", "220": "Cardines", "221": "Drakes-Thomas", "222": "Strand Larsen", "223": "Mateta", "224": "Nketiah", "225": "Uche", "241": "McNeil", "555": "Matthews", "577": "Tomiyasu", "588": "Khalaili", "595": "Gozo", "21": "N\u00f8rgaard", "209": "Johnson", "226": "Pickford", "227": "Travers", "228": "King", "229": "Tarkowski", "230": "Branthwaite", "231": "Keane", "232": "O'Brien", "233": "Mykolenko", "234": "Patterson", "235": "Aznou", "236": "Dewsbury-Hall", "237": "Ndiaye", "239": "Garner", "240": "Iroegbunam", "242": "George", "243": "Alcaraz", "244": "Armstrong", "245": "Dibling", "246": "R\u00f6hl", "247": "Hackney", "248": "Beto", "249": "Barry", "250": "Leno", "251": "Lecomte", "252": "McNally", "253": "Andersen", "254": "Robinson", "255": "J.Cuenca", "256": "Tete", "257": "Bassey", "258": "Castagne", "261": "Iwobi", "262": "Smith Rowe", "263": "Kevin", "264": "Bobb", "265": "Berge", "266": "Cairney", "268": "King", "269": "Sessegnon", "270": "Reed", "271": "Muniz", "272": "Kusi-Asare", "569": "Gonzalo", "570": "Palacios", "580": "Charles", "273": "Phillips", "274": "Butland", "275": "Cartwright", "276": "Lo-Tutala", "277": "Egan", "278": "Hughes", "279": "Ajayi", "280": "Coyle", "281": "Drameh", "282": "Giles", "283": "Jacob", "284": "McCarthy", "285": "McNair", "286": "Belloumi", "287": "Millar", "288": "Dowell", "289": "Crooks", "290": "Slater", "291": "Matazo", "292": "\u00d6m\u00fcr", "293": "Kamara", "294": "Zambrano", "295": "McBurnie", "296": "Akintola", "297": "Gyabi", "298": "Destan", "299": "Burstow", "340": "Gelhardt", "556": "Targett", "563": "Morita", "572": "Tzolakis", "574": "Hjert\u00f8-Dahl", "576": "Stroud", "585": "Herrington", "586": "Mendy", "589": "Gourna-Douath", "259": "Diop", "267": "Luki\u0107", "300": "Walton", "301": "Palmer", "302": "Button", "303": "Kipr\u00e9", "304": "O'Shea", "305": "Davis", "306": "Greaves", "307": "Johnson", "308": "Furlong", "309": "N\u00fa\u00f1ez", "310": "Matusiwa", "311": "Burns", "312": "Taylor", "313": "Clarke", "314": "Ogbene", "315": "Fatawu", "316": "Emersonn", "317": "Hirst", "318": "Philogene", "319": "Szmodics", "320": "Akpom", "321": "Walle Egeli", "322": "Al-Hamadi", "323": "McAteer", "324": "Mehmeti", "554": "Van Oevelen", "562": "Maeda", "564": "Scherpen", "571": "Florentino", "591": "Enciso", "592": "Ouattara", "602": "Humphreys", "260": "Wilson", "326": "Perri", "327": "Bijol", "329": "Rodon", "330": "Bogle", "331": "Gudmundsson", "332": "Justin", "333": "Bornauw", "334": "Muharemovi\u0107", "335": "Stach", "336": "Okafor", "337": "Aaronson", "338": "Ampadu", "339": "Longstaff", "341": "Gnonto", "342": "Harrison", "343": "James", "344": "Gruev", "345": "Tanaka", "346": "Calvert-Lewin", "347": "Nmecha", "348": "Piroe", "349": "Mateo Joseph", "385": "Trafford", "598": "Elvedi", "603": "Lienou", "604": "Cresswell", "350": "A.Becker", "351": "Mamardashvili", "352": "Woodman", "353": "Pecsi", "354": "Jaros", "355": "Davies", "356": "Virgil", "357": "Frimpong", "358": "Kerkez", "359": "Gomez", "360": "Bradley", "361": "Lucky", "362": "Jacquet", "363": "Leoni", "364": "Tsimikas", "365": "Ramsay", "366": "Wirtz", "367": "Gakpo", "368": "Szoboszlai", "369": "Ngumoha", "370": "Chiesa", "371": "Gravenberch", "372": "Mac Allister", "373": "C.Jones", "374": "Endo", "375": "Nyoni", "376": "Bajcetic", "377": "Munoz", "378": "McConnell", "379": "Isak", "380": "Ekitik\u00e9", "381": "Koumas", "382": "Danns", "383": "Elliott", "579": "Araujo", "238": "Grealish", "384": "Donnarumma", "386": "Bettinelli", "387": "O'Reilly", "388": "Gu\u00e9hi", "389": "Matheus N.", "390": "R\u00faben", "391": "Gvardiol", "392": "A\u00eft-Nouri", "393": "Khusanov", "394": "Alleyne", "395": "Lewis", "396": "Vitor Reis", "397": "Semenyo", "398": "Foden", "399": "Cherki", "400": "Doku", "401": "Marmoush", "402": "Rodrigo", "403": "Savinho", "404": "Reijnders", "405": "N.Gonzalez", "406": "Kova\u010di\u0107", "407": "Echeverri", "408": "Phillips", "409": "Mukasa", "410": "Monga", "411": "Haaland", "481": "Anderson", "587": "Rulli", "43": "Tielemans", "162": "Andrey Santos", "325": "Darlow", "412": "Lammens", "413": "Bayindir", "414": "Heaton", "415": "Dorgu", "416": "De Ligt", "417": "Dalot", "418": "Maguire", "419": "Martinez", "420": "Yoro", "421": "Heaven", "422": "Mazraoui", "423": "Shaw", "424": "Amass", "425": "Fredricson", "426": "B.Fernandes", "427": "Mbeumo", "428": "Cunha", "429": "Rashford", "430": "Mount", "431": "Amad", "432": "Mainoo", "433": "Ugarte", "434": "J.Fletcher", "435": "Lacey", "436": "Collyer", "437": "Bendito Mantato", "438": "Fletcher", "439": "\u0160e\u0161ko", "440": "Zirkzee", "441": "Obi", "442": "Pope", "443": "Gillespie", "444": "Jaouen", "445": "Thiaw", "446": "Sch\u00e4r", "447": "Botman", "448": "Burn", "449": "Hall", "450": "Livramento", "451": "A.Murphy", "453": "Barnes", "454": "Elanga", "456": "J.Ramsey", "457": "J.Murphy", "458": "Joelinton", "459": "L.Miley", "460": "Willock", "461": "Tour\u00e9", "462": "Steur", "463": "Woltemade", "464": "Wissa", "465": "Osula", "466": "Neave", "559": "Bamba", "567": "Horn\u00ed\u010dek", "593": "Dedi\u0107", "467": "Sels", "468": "John", "469": "N.Williams", "470": "Morato", "471": "Milenkovi\u0107", "472": "Murillo", "473": "Aina", "474": "Jair Cunha", "475": "Savona", "476": "O.Richards", "477": "Abbott", "478": "Netz", "479": "Bindon", "480": "Gibbs-White", "482": "Hudson-Odoi", "483": "Ndoye", "484": "Hutchinson", "485": "Bakwa", "486": "McAtee", "487": "Dominguez", "488": "I.Sangar\u00e9", "489": "Yates", "490": "Wood", "491": "Igor Jesus", "493": "Kalimuendo", "558": "Schlager", "581": "Diomande", "590": "Benda", "112": "Van Hecke", "455": "Tonali", "494": "Vicario", "495": "Austin", "496": "Kinsky", "497": "Dubravka", "498": "Senesi", "499": "Pedro Porro", "500": "Romero", "501": "Danso", "502": "Robertson", "503": "Van de Ven", "505": "Spence", "506": "Udogie", "507": "Phillips", "508": "Davies", "509": "Byfield", "510": "Rowswell", "511": "Souza", "512": "Kudus", "513": "Xavi", "514": "Tel", "515": "Maddison", "516": "Bentancur", "517": "Odobert", "518": "P.M.Sarr", "519": "Gallagher", "520": "Bergvall", "521": "Kulusevski", "522": "Gray", "523": "Moore", "524": "Olusesi", "525": "Fernandes", "526": "Solanke", "527": "Richarlison", "528": "Scarlett", "601": "Williams-Barnett", "529": "Roefs", "530": "Patterson", "531": "Ellborg", "532": "Ballard", "533": "Mukiele", "534": "Hume", "535": "Alderete", "536": "Reinildo", "537": "Seelt", "538": "Hjelde", "539": "O'Nien", "540": "Masuaku", "541": "Meunier", "542": "E.Le F\u00e9e", "543": "Diarra", "544": "Xhaka", "545": "Sadiki", "546": "Adingra", "547": "Mundle", "548": "Rigg", "549": "Talbi", "550": "Jocelin.T", "551": "Angulo", "552": "Brobbey", "553": "Isidor"};
 const TRANSFER_RECS = [];
@@ -19747,7 +20219,26 @@ function getEffectiveFTs(gwIdx) {
   const _n = Math.max(0, Math.min(
     Math.floor(+gwIdx || 0),
     ((TEAM_META && TEAM_META.gw_range) || []).length));
-  let ft = (TEAM_META && TEAM_META.free_transfers) || 1;
+  // APEX_FT_ZERO_LEDGER_v1 (2026-08-23) - was `(TEAM_META &&
+  // TEAM_META.free_transfers) || 1`. The last of the `x || 1` family opened by
+  // APEX_MILP_FT_ZERO_v1 this morning, and the one that mattered most: this is
+  // the seed of the FT LEDGER, and getHitsForGw SUBTRACTS what this returns, so
+  // the laundering never stopped at a label. 0 is a legitimate answer -- this
+  // week's free transfer is already spent -- and `|| 1` handed it back as one,
+  // so a manager on 0 FT making his one transfer was charged 0 hits and 0
+  // points where FPL charges -4. Measured before the fix, in-season: 0 and 1
+  // produced an IDENTICAL ledger at every gameweek (eff/hits/penalty all
+  // equal), i.e. the zero state was simply unreachable from here.
+  // Same shape as the sibling fixed at the MILP hook further down this file
+  // (APEX_MILP_HONEST_STATUS_v1, ~2600 lines on): a number is taken at its
+  // word, and ONLY a
+  // genuinely absent or non-numeric value falls back to 1 -- so a page built
+  // without the field behaves exactly as it does today.
+  // The walk below is untouched on purpose. _apexFreeTransferChipGw still
+  // forces tx = 0 through a WC/FH week, and _ppNextFt still returns exactly 1
+  // out of the pre-GW1 unlimited window whatever this seed was.
+  const _ftMeta = (TEAM_META && TEAM_META.free_transfers);
+  let ft = (typeof _ftMeta === 'number' && isFinite(_ftMeta)) ? _ftMeta : 1;
   for (let _i = 0; _i < _n; _i++) {
     // INSERTED APEX_FIX_AUG07_F1_FTWALK -- a WC/FH week uses no transfers at
     // all, so it banks like an untouched week instead of draining the bank.
@@ -22318,7 +22809,16 @@ window.apexMilpPlan = async function (horizon) {
     if (liveSquad.length !== 15) { console.warn('[milp] squad not hydrated'); return null; }
     const _preTx = (typeof _transfersAppliedByGw !== 'undefined'
       && _transfersAppliedByGw && _transfersAppliedByGw[activeGwIdx]) || 0;
-    const ft = Math.max(1, ((TEAM_META && TEAM_META.free_transfers) || 1) - _preTx);
+    // APEX_MILP_FT_ZERO_v1 (2026-08-23) - was Math.max(1, ...); see apex_solver.js
+    // APEX_MILP_HONEST_STATUS_v1 (2026-08-23) - and the `|| 1` inside it turned a
+    // genuine free_transfers 0 back into 1 before _preTx was subtracted, the same
+    // laundering fixed in assets/apex_paths.js. NOTE: two sibling sites still
+    // carry this shape (getEffectiveFTs, and the path-planner seeds below); both
+    // feed the FT ledger and the plan-ahead tree and are deliberately NOT touched
+    // by this patch - they need their own measurement, not a drive-by.
+    const _ftMeta = (typeof (TEAM_META && TEAM_META.free_transfers) === 'number'
+      && isFinite(TEAM_META.free_transfers)) ? TEAM_META.free_transfers : 1;
+    const ft = Math.max(0, _ftMeta - _preTx);
     const bank = Math.max(0, (TEAM_META && TEAM_META.bank) || 0);
     const r = await window.ApexSolver.solveMultiPeriod(POOL_DATA, liveSquad, {
       horizon: horizon || 6, startIdx: activeGwIdx, freeTransfers: ft, bank: bank,
@@ -22326,7 +22826,16 @@ window.apexMilpPlan = async function (horizon) {
       timeLimitSec: 90,
     });
     if (r && r.weeks) {
-      console.log('[milp] status ' + r.status + ' · obj ' + r.objective + ' · ' + r.binariesCount + ' binaries');
+      // APEX_MILP_HONEST_STATUS_v1 (2026-08-23): r.status is the classified truth
+      // now, so this line stopped printing 'optimal' for every solve. Spell out
+      // what it means, because "feasible" alone reads like a downgrade when it
+      // is simply the gap-stop this hook always asked for.
+      console.log('[milp] status ' + r.status
+        + (r.proven ? ' (PROVEN optimal)'
+                    : r.status === 'timeout'
+                      ? ' (TRUNCATED at the ' + r.timeLimitSec + 's limit — quality unknown)'
+                      : ' (stopped on the ' + r.mipGap + ' gap — within that of the bound)')
+        + ' · ' + r.elapsedSec + 's · obj ' + r.objective + ' · ' + r.binariesCount + ' binaries');
       for (const w of r.weeks) {
         console.log('  GW' + TEAM_META.gw_range[w.gwIdx] + ' ft' + w.ft + ' bank£' + w.bank
           + (w.hits ? (' hit' + w.hits) : '') + ': '
@@ -22383,15 +22892,158 @@ const _apexPathEdge = {
       return o && (o.type === 'one' || o.type === 'two');
     });
   },
+  // APEX_PATH_EDGE_TAXED_v1 (2026-08-23) - the strip ranked in one currency and
+  // printed in another. Order comes from _ppRankEv (+ _ppBias), which applies
+  // the active preset's hit-aversion taxes; the differential below subtracted
+  // RAW lookaheadEv. On a taxed preset a demoted branch can hold the higher raw
+  // future, so the strip could render "Roll ... prices -0.42 over acting now" --
+  // a NEGATIVE edge for the branch it had just ranked first. Compare in the
+  // ranking currency and that is impossible by construction. _ppRankEv returns
+  // lookaheadEv byte-identical when taxes are 0 (balanced and high), so those
+  // presets do not move a digit; only low/diff change, which are the broken
+  // cases. rawDelta() keeps the true-points number available for any surface
+  // that wants to show both -- no wording was changed here, that is Marcus's
+  // call. Kill switch: window.APEX_PATH_EDGE_TAXED = false.
+  taxedOn: function () {
+    try {
+      if (typeof window !== 'undefined' && window.APEX_PATH_EDGE_TAXED === false) return false;
+      return (typeof _ppRankEv === 'function');
+    } catch (_e) { return false; }
+  },
+  ev: function (o) {
+    if (!o) return null;
+    if (_apexPathEdge.taxedOn()) {
+      try {
+        var v = _ppRankEv(o);
+        if (typeof v === 'number' && isFinite(v)) return v;
+      } catch (_e) {}
+    }
+    return (o.lookaheadEv != null) ? o.lookaheadEv : null;
+  },
+  rawEv: function (o) { return (o && o.lookaheadEv != null) ? o.lookaheadEv : null; },
+  delta: function (a, b) {
+    var x = _apexPathEdge.ev(a), y = _apexPathEdge.ev(b);
+    return (x != null && y != null) ? (x - y) : null;
+  },
+  rawDelta: function (a, b) {
+    var x = _apexPathEdge.rawEv(a), y = _apexPathEdge.rawEv(b);
+    return (x != null && y != null) ? (x - y) : null;
+  },
   vsRoll: function (opt, options) {
-    var r = _apexPathEdge.roll(options);
-    return (opt && opt.lookaheadEv != null && r && r.lookaheadEv != null)
-      ? _apexPathEdge.fmt(opt.lookaheadEv - r.lookaheadEv) : null;
+    var d = _apexPathEdge.delta(opt, _apexPathEdge.roll(options));
+    return (d != null) ? _apexPathEdge.fmt(d) : null;
   },
   rollVsBest: function (top, options) {
-    var b = _apexPathEdge.bestMove(options);
-    return (b && b.lookaheadEv != null && top && top.lookaheadEv != null)
-      ? _apexPathEdge.fmt(top.lookaheadEv - b.lookaheadEv) : null;
+    // APEX_PATH_EDGE_TAXED_v1 - same currency rule as vsRoll above.
+    var d = _apexPathEdge.delta(top, _apexPathEdge.bestMove(options));
+    return (d != null) ? _apexPathEdge.fmt(d) : null;
+  },
+  // ── APEX_VERDICT_TIED_v1 (2026-08-23, Marcus) ────────────────────────────
+  // The sibling of APEX_ROUTES_TIED_v1 (assets/apex_paths.js), same disease
+  // and the same cure. TAXED_v1 above fixed this differential's CURRENCY so
+  // its sign can no longer contradict the tree's order. What it still did not
+  // do is admit when the difference is too small to mean anything: the strip
+  // prints "prices +0.31 over acting now" for a margin the tree has ALREADY
+  // classified as noise, and on the Differential preset — exempt from the
+  // demotion below — it prints one with no caveat at all.
+  //
+  // THE RESOLUTION IS ALREADY IN THE CODEBASE. This invents no threshold.
+  // assets/apex_app.js:
+  //     const _PP_DECISION_FLOOR = 0.5;
+  //     // transfer-vs-roll margins below this are inside the measured
+  //     // depth-sensitivity band (0.45-0.59 pts across _PP_LOOKAHEAD_DEPTH
+  //     // 6..12) -- i.e. model noise, not signal.
+  // and the demotion it drives, at fan assembly:
+  //     (_ppRankEv(_nfTop) - _ppRankEv(_nfRoll)) < _PP_DECISION_FLOOR
+  //         -> Roll goes to branch 0, _withinNoise = true
+  // That constant is this surface's own stated resolution, measured and
+  // registered as a dial (units note at apex_app.js:1858). It is READ LIVE
+  // below, never copied: change it there and every sentence this object
+  // prints moves with it, exactly as the routes rule moves with base.gap.
+  //
+  // WHY ABSOLUTE, NOT PROPORTIONAL like the routes rule. A mipgap is a
+  // RELATIVE stopping criterion, so gap x objective is its true form. This
+  // floor was measured directly in points, so points is its true form.
+  // Scaling it by the branch total would invent a shape the measurement does
+  // not have — and lookaheadEv is the WHOLE future path, which
+  // APEX_VERDICT_HONEST_NUMBERS_v1 established dwarfs the decision, so a
+  // proportional band would be enormous and meaningless.
+  //
+  // WHY NOT A BETTER PER-DECISION NUMBER: the tree exposes no per-branch
+  // uncertainty. _withinNoise is this same floor on one pair at fan-assembly
+  // time, not an independent measurement; assets/apex_sensitivity.js does
+  // measure per-decision but is an on-demand Monte-Carlo over the transfer
+  // LIST, not available synchronously when the strip renders. If one ever
+  // exists, it replaces resolution() and nothing else.
+  //
+  // WHAT THIS ADDS OVER _withinNoise — it is not redundant:
+  //   1. _withinNoise flags the ordering while the surfaces STILL PRINT THE
+  //      NUMBER beside it. Decorating, not replacing; the routes defect.
+  //   2. It is not set at all on the Differential preset (APEX_DIFF_BOX
+  //      exemption), so a sub-floor margin there carries no caveat today.
+  //   3. It only ever describes top-vs-Roll; rollVsBest is that pair
+  //      sign-flipped, so |delta| generalises it in the direction it lacks.
+  //
+  // CURRENCY: delta() returns _ppRankEv(a) - _ppRankEv(b) whenever taxedOn(),
+  // the EXACT expression the demotion compares to the floor — same number,
+  // same units, so the strip and the tree cannot disagree about what "too
+  // close to call" means. The strict `<` is the demotion's own operator,
+  // kept deliberately.
+  //
+  // COPY ONLY. Branch order stays the tree's; a second opinion about it is
+  // the exact failure the 2026-08-07 ruling exists to stop.
+  // Kill switch: window.APEX_VERDICT_TIED = false.
+  tiedOn: function () {
+    try {
+      if (typeof window !== 'undefined' && window.APEX_VERDICT_TIED === false) return false;
+      // A missing floor is a statement about the BUILD, not about this
+      // decision: it means no resolution was ever stated here, so the rule
+      // goes inert rather than declaring every margin unresolvable. The
+      // routes rule fails the OTHER way on purpose — there a missing bound is
+      // the solve reporting nothing about itself, which is a fact about that
+      // decision.
+      return (typeof _PP_DECISION_FLOOR === 'number') && isFinite(_PP_DECISION_FLOOR);
+    } catch (_e) { return false; }
+  },
+  resolution: function () {
+    try {
+      if (typeof _PP_DECISION_FLOOR === 'number' && isFinite(_PP_DECISION_FLOOR)) {
+        return _PP_DECISION_FLOOR;
+      }
+    } catch (_e) {}
+    return null;
+  },
+  // { delta, tied, resolution } — or null when there is no pair to compare,
+  // in which case every surface below keeps its existing empty-clause path.
+  edgeState: function (a, b) {
+    var d = _apexPathEdge.delta(a, b);
+    if (d == null) return null;
+    if (!_apexPathEdge.tiedOn()) return { delta: d, tied: false, resolution: null };
+    var r = _apexPathEdge.resolution();
+    return { delta: d, tied: (Math.abs(d) < r), resolution: r };
+  },
+  vsRollState: function (opt, options) {
+    return _apexPathEdge.edgeState(opt, _apexPathEdge.roll(options));
+  },
+  rollVsBestState: function (top, options) {
+    return _apexPathEdge.edgeState(top, _apexPathEdge.bestMove(options));
+  },
+  // The copy, defined ONCE for all three surfaces — the discipline
+  // APEX_PATH_EDGE_ONE_SOURCE_v1 imposed on the maths, now on the wording.
+  // Voice matched to APEX_ROUTES_TIED_v1's cards so the two read as one
+  // product: name the limit, name the number, no solver jargon. "the two are
+  // X apart" and "inventing a difference" are lifted verbatim from the routes
+  // (itself an echo of the pre-GW1 card's "inventing a choice you do not
+  // have"), and "only resolves ... to about N xPts" is the shared spine.
+  tieAmt: function (st) { return Math.abs(st.delta).toFixed(2); },
+  tieRes: function (st) { return (+st.resolution).toFixed(1); },
+  tieWhy: function (st) {
+    return 'the tree only resolves a decision to about ' + _apexPathEdge.tieRes(st)
+      + ' xPts, and the two are ' + _apexPathEdge.tieAmt(st)
+      + ' apart, so ranking one above the other would be inventing a difference';
+  },
+  tieShort: function (st) {
+    return 'inside the tree’s ' + _apexPathEdge.tieRes(st) + ' xPts';
   }
 };
 
@@ -22405,7 +23057,23 @@ async function _apexTreeBranch0(gwIdx) {
     && _transfersAppliedByGw && _transfersAppliedByGw[gwIdx]) || 0;
   const _preMoves = (window._appliedRecMoves || []).filter(m => m && m.gwIdx === gwIdx);
   const _preBankDelta = _preMoves.reduce((s, m) => s + (m.bankApplied === true ? 0 : (+m.bankDelta || 0)), 0);
-  const ft   = Math.max(0, ((TEAM_META && TEAM_META.free_transfers) || 1) - _preTx);
+  // APEX_FT_ZERO_TREE_v1 (2026-08-23) - the Math.max(1, ...) half of this line
+  // went this morning as APEX_MILP_FT_ZERO_v1_hook; the `|| 1` INSIDE it
+  // survived, and it is the last one in the family. These are the plan-ahead
+  // TREE's seeds, so branch 0 -- the verdict the strip, the Model-picks preview
+  // and Quick Optimise all QUOTE (APEX_ONE_VERDICT_v1) -- was being priced off
+  // a free transfer the manager does not have.
+  // Measured over the whole (free_transfers, _preTx) grid against
+  // _ppComputeOptions' own hit price, EXACTLY ONE cell diverged from FPL:
+  // free_transfers 0 with nothing yet applied in-session seeded ft 1, and
+  // `hit1 = Math.max(0, 1 - workingFt) * 4` then charged 0 where FPL charges 4.
+  // Every other cell already agreed -- a non-zero _preTx dragged the laundered
+  // 1 back down to 0 by accident, which is exactly why this hid for so long.
+  // That one cell is the ORDINARY case: spend the FT on the FPL site, then open
+  // Apex. Absent or non-numeric still falls back to 1, as at the ledger seed.
+  const _ftMetaT = (TEAM_META && TEAM_META.free_transfers);
+  const _ftSeed  = (typeof _ftMetaT === 'number' && isFinite(_ftMetaT)) ? _ftMetaT : 1;
+  const ft   = Math.max(0, _ftSeed - _preTx);
   const bank = ((TEAM_META && TEAM_META.bank) || 0) + _preBankDelta;
   // Verdict memo — three consumers (verdict strip, Model-picks preview, Quick
   // Optimise) ask far more often than the answer changes. Key = the decision's
@@ -22416,9 +23084,14 @@ async function _apexTreeBranch0(gwIdx) {
   try {
     const _ids = liveSquad.map(p => p.id).sort((a, b) => a - b).join(',');
     const _chipsK = ['wc', 'fh', 'bb', 'tc'].map(c => (document.getElementById('sel-' + c) || {}).value || 0).join('|');
+    // APEX_LOCK_MEMO_v1 (2026-08-23) - was counts, `(locked):(banned)`. Lock A
+    // and unlock B in one session and the counts are identical, so the memo
+    // handed back the pre-swap verdict. Key on WHICH ids, not how many.
     const _lbK = (function () {
       try {
-        const c = window.apexLocks && window.apexLocks.counts && window.apexLocks.counts();
+        const L = window.apexLocks;
+        if (L && typeof L.signature === 'function') return L.signature() || '';
+        const c = L && L.counts && L.counts();
         return c ? ((c.locked || 0) + ':' + (c.banned || 0)) : '';
       } catch (_e) { return ''; }
     })();
@@ -22479,10 +23152,26 @@ async function _apexResolveTreeVerdict(gwIdx) {
       borderCol = '#D85A30';
       const bestMove = _apexPathEdge.bestMove(options);          // APEX_PATH_EDGE_ONE_SOURCE_v1
       const _bmEdge = _apexPathEdge.rollVsBest(top, options);
-      const vs = (bestMove && _bmEdge)
-        ? ` — its whole path prices <strong style="color:var(--text);">${_bmEdge}</strong> over acting now on the best move (${bestMove.out ? bestMove.out.web_name : '?'} → ${bestMove.in ? bestMove.in.web_name : '?'})`
+      // APEX_VERDICT_TIED_v1 (2026-08-23): when the margin is inside the
+      // tree's own _PP_DECISION_FLOOR the NUMBER COMES OFF the line and the
+      // sentence says so. Decorating the figure with a caveat would leave the
+      // invented ordering on the page, which is the thing being fixed — the
+      // routes rule, same wording, so the two surfaces read as one product.
+      const _bmSt = _apexPathEdge.rollVsBestState(top, options);
+      const _bmNames = bestMove
+        ? ` (${bestMove.out ? bestMove.out.web_name : '?'} → ${bestMove.in ? bestMove.in.web_name : '?'})`
         : '';
-      const noise = top._withinNoise ? ' The best move’s edge is inside model noise, so Roll wins.' : '';
+      const vs = (bestMove && _bmSt && _bmSt.tied)
+        ? ` — its whole path is level with acting now on the best move${_bmNames}: ${_apexPathEdge.tieWhy(_bmSt)}`
+        : ((bestMove && _bmEdge)
+            ? ` — its whole path prices <strong style="color:var(--text);">${_bmEdge}</strong> over acting now on the best move${_bmNames}`
+            : '');
+      // _withinNoise is the SAME floor on the SAME pair, so once the tie has
+      // been stated this clause would only say it twice. Folded to the one
+      // fact it still adds: that the tie is WHY Roll took branch 0.
+      const noise = (_bmSt && _bmSt.tied)
+        ? (top._withinNoise ? ' Roll wins on that basis.' : '')
+        : (top._withinNoise ? ' The best move’s edge is inside model noise, so Roll wins.' : '');
       inner = `
         <div style="font-weight:800;color:#D85A30;font-size:.92rem;margin-bottom:4px;">🌳 Tree verdict — Roll (bank the FT)</div>
         <div style="color:var(--muted);font-size:.8rem;">Rolling keeps the FT’s future value${vs}.${noise} Moves below beat the bar on their own 3-GW maths, but the tree ranks rolling above all of them this week.</div>`;
@@ -22491,7 +23180,14 @@ async function _apexResolveTreeVerdict(gwIdx) {
       const moveTxt = (top.type === 'two')
         ? `${top.out.web_name} → ${top.in.web_name} · ${top.out2.web_name} → ${top.in2.web_name}`
         : `${top.out.web_name} → ${top.in.web_name}`;
-      const _edgeTxt = _edge(top) ? ` · whole path <strong style="color:var(--text);">${_edge(top)}</strong> vs rolling instead` : '';
+      // APEX_VERDICT_TIED_v1 (2026-08-23): see the Roll branch above. This is
+      // the clause that justifies acting NOW instead of banking; if the tree
+      // cannot resolve the two, it justifies nothing and must not print a
+      // figure that says it does.
+      const _edgeSt = _apexPathEdge.vsRollState(top, options);
+      const _edgeTxt = (_edgeSt && _edgeSt.tied)
+        ? ` · whole path level with rolling instead — ${_apexPathEdge.tieWhy(_edgeSt)}`
+        : (_edge(top) ? ` · whole path <strong style="color:var(--text);">${_edge(top)}</strong> vs rolling instead` : '');
       inner = `
         <div style="font-weight:800;color:#0F6E56;font-size:.92rem;margin-bottom:4px;">🌳 Tree verdict — ${moveTxt}${hitNote}</div>
         <div style="color:var(--muted);font-size:.8rem;"><strong style="color:var(--text);">${_own(top)}</strong> squad gain now${_edgeTxt} — the plan-ahead tree’s first branch on your live squad. Open <strong>plan ahead →</strong> to make it.</div>`;
@@ -23161,9 +23857,18 @@ function _qoActOnVerdict(best, recs, tv, activeGw, section, status) {
   if (top && top.type === 'none') {
     const bestMove = _apexPathEdge.bestMove(tv.options);         // APEX_PATH_EDGE_ONE_SOURCE_v1
     const _qBmE = _apexPathEdge.rollVsBest(top, tv.options);
-    const vs = _qBmE ? ` — its path prices <strong style="color:var(--text);">${_qBmE}</strong> over acting now on the best move` : '';
+    // APEX_VERDICT_TIED_v1 (2026-08-23): the strip's twin — same rule, same
+    // sentence from the same helper, so the two surfaces cannot say different
+    // things about the same pair of branches.
+    const _qBmSt = _apexPathEdge.rollVsBestState(top, tv.options);
+    const vs = (_qBmSt && _qBmSt.tied)
+      ? ` — its path is level with acting now on the best move: ${_apexPathEdge.tieWhy(_qBmSt)}`
+      : (_qBmE ? ` — its path prices <strong style="color:var(--text);">${_qBmE}</strong> over acting now on the best move` : '');
+    const _qNoise = (_qBmSt && _qBmSt.tied)
+      ? (top._withinNoise ? ' Roll wins on that basis.' : '')
+      : (top._withinNoise ? ' (Best move within model noise.)' : '');
     _qoCard('#D85A30', '🌳 Tree verdict — Roll (bank the FT)',
-      `Rolling keeps the FT’s future value${vs} — nothing applied.${top._withinNoise ? ' (Best move within model noise.)' : ''}`,
+      `Rolling keeps the FT’s future value${vs} — nothing applied.${_qNoise}`,
       `<div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
          <button onclick="_rollFT()" style="background:#D85A30;color:#000;border:none;border-radius:6px;padding:6px 12px;font-size:.75rem;font-weight:700;cursor:pointer;">🚫 Roll FT</button>
          <button onclick="_applyTransferRec(${best.in_id}, ${best.out_id})" style="background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:6px 12px;font-size:.75rem;font-weight:600;cursor:pointer;">Apply ${best.out_name} → ${best.in_name} anyway</button>
@@ -23191,8 +23896,16 @@ function _qoActOnVerdict(best, recs, tv, activeGw, section, status) {
       best = _rowMatch;   // fall through to the legacy apply with the tree's row
     } else {
       _applyTransferRec(top.in.id, top.out.id);
+      // APEX_VERDICT_TIED_v1 (2026-08-23): same rule on the card that reports
+      // a move JUST APPLIED. This one matters most — it is the number the
+      // user is handed as the reason the press was worth it. Short form: the
+      // card is already dense and the long clause would bury the undo.
+      const _qoSt = _apexPathEdge.vsRollState(top, _qOpts);
+      const _qoEdgeTxt = (_qoSt && _qoSt.tied)
+        ? `, path level with rolling (${_apexPathEdge.tieShort(_qoSt)})`
+        : (_qEdge(top) ? `, path ${_qEdge(top)} vs rolling` : '');
       _qoCard('#22c55e', `✓ Optimized — ${top.out.web_name} → ${top.in.web_name}`,
-        `The plan-ahead tree’s first branch (<strong style="color:var(--text);">${_evTxt(top)}</strong> squad gain now${_qEdge(top) ? `, path ${_qEdge(top)} vs rolling` : ''}). ↺ Reset (squad view) undoes it.`);
+        `The plan-ahead tree’s first branch (<strong style="color:var(--text);">${_evTxt(top)}</strong> squad gain now${_qoEdgeTxt}). ↺ Reset (squad view) undoes it.`);
       if (status) status.textContent = `Applied the tree’s pick for GW${activeGw}: ${top.out.web_name} → ${top.in.web_name}`;
       return;
     }
@@ -23961,12 +24674,27 @@ function _renderRecoPreview() {
             col = '#D85A30';
             const _vBm = _apexPathEdge.bestMove(tv.options);      // APEX_PATH_EDGE_ONE_SOURCE_v1
             const _vBmE = _apexPathEdge.rollVsBest(top, tv.options);
+            // APEX_VERDICT_TIED_v1 (2026-08-23): the compact twin. This line
+            // is .78rem on one row, so it takes tieShort — the invented
+            // number still comes off and the limit is still named, which is
+            // the whole requirement; the long clause belongs on the roomier
+            // strip and Quick Optimise cards.
+            const _vBmSt = _apexPathEdge.rollVsBestState(top, tv.options);
+            const _vTied = !!(_vBmSt && _vBmSt.tied);
             line = '🌳 Tree verdict: <b>Roll — bank the FT</b>'
-              + (_vBmE ? ' (path ' + _vBmE + ' over acting now)' : '')
-              + (top._withinNoise ? ' — best move within noise' : '');
+              + (_vTied
+                  ? ' (level with acting now — ' + _apexPathEdge.tieShort(_vBmSt) + ')'
+                  : (_vBmE ? ' (path ' + _vBmE + ' over acting now)' : ''))
+              // '— best move within noise' is the same fact the clause above
+              // now carries, so it is dropped rather than doubled.
+              + (_vTied ? '' : (top._withinNoise ? ' — best move within noise' : ''));
           } else if (top.type === 'one') {
             const _agree = recs.length && recs[0].out_id === top.out.id && recs[0].in_id === top.in.id;
-            const _eTxt = _vEdge ? (' · path ' + _vEdge + ' vs rolling') : '';
+            // APEX_VERDICT_TIED_v1 (2026-08-23): see the Roll line above.
+            const _eSt = _apexPathEdge.vsRollState(top, tv.options);
+            const _eTxt = (_eSt && _eSt.tied)
+              ? (' · path level with rolling (' + _apexPathEdge.tieShort(_eSt) + ')')
+              : (_vEdge ? (' · path ' + _vEdge + ' vs rolling') : '');
             line = _agree
               ? '🌳 Tree agrees: <b>' + top.out.web_name + ' → ' + top.in.web_name + '</b> leads (' + _vn + ' now' + _eTxt + ')'
               : '🌳 Tree verdict: <b>' + top.out.web_name + ' → ' + top.in.web_name + '</b> (' + _vn + ' now' + _eTxt + ') — a different first step than this list’s leader';
@@ -27640,6 +28368,35 @@ async function _ppComputeOptions(workingSquad, gwIdx, bank, workingFt) {
 // produces in 95% of practical FPL cases.
 const _ppLookaheadCache = {};
 
+// APEX_LOCK_MEMO_v1 (2026-08-23) - every mutation path must write through.
+// The cache is dropped at four sites (apply, planner open, two restores) and a
+// lock/ban toggle was none of them, so a forced decision could not evict the
+// branches that contradict it. apexLocks already fires onRecompute on every
+// toggle AND on clearAll -- that is the callee, so subscribe there rather than
+// hunting for a fifth clear site to remember. The verdict memo goes with it:
+// same event, same staleness. Registration is lazy because apex_locks.js is
+// absent in the node harness; it is idempotent and unsubscribes nothing.
+function _ppEnsureLockBanEviction() {
+  try {
+    if (typeof window === 'undefined') return false;
+    if (window._ppLockEvictionWired) return true;
+    var L = window.apexLocks;
+    if (!L || typeof L.onRecompute !== 'function') return false;
+    L.onRecompute(function () {
+      try { for (const k of Object.keys(_ppLookaheadCache)) delete _ppLookaheadCache[k]; } catch (_e) {}
+      try { window._apexVerdictMemo = null; } catch (_e) {}
+    });
+    window._ppLockEvictionWired = true;
+    return true;
+  } catch (_e) { return false; }
+}
+try {
+  if (!_ppEnsureLockBanEviction() && typeof window !== 'undefined'
+      && typeof window.addEventListener === 'function') {
+    window.addEventListener('load', function () { _ppEnsureLockBanEviction(); });
+  }
+} catch (_e) {}
+
 // ── APEX_PP_LOOKAHEAD_DEPTH_CAP (2026-07-30) ─────────────────────────────────
 // The recursion used to run to the end of the DISPLAY horizon. Branching is
 // ~4 per level (top 3 + Roll) and every level runs a full POOL_DATA scan per
@@ -27694,6 +28451,22 @@ function _ppLookaheadEndIdx() {
   return Math.min(n, root + _PP_LOOKAHEAD_DEPTH);
 }
 
+// APEX_LOCK_MEMO_v1 (2026-08-23) - see _ppStateKey below. Returns '' when the
+// lock/ban feature is off OR nothing is locked/banned, so the memo key is
+// unchanged in the ordinary case and only grows a term once a forced decision
+// actually exists. Falls back to counts if the page is running an apex_locks
+// that predates signature() (the asset/rebuild gap).
+function _ppLockBanSig() {
+  try {
+    if (!_ppLockBanOn()) return '';
+    var L = (typeof window !== 'undefined') ? window.apexLocks : null;
+    if (!L) return '';
+    if (typeof L.signature === 'function') return L.signature() || '';
+    var c = (typeof L.counts === 'function') ? L.counts() : null;
+    return c && ((c.locked || 0) + (c.banned || 0)) ? ((c.locked || 0) + ':' + (c.banned || 0)) : '';
+  } catch (_e) { return ''; }
+}
+
 function _ppStateKey(squad, gwIdx, bank, ft) {
   // Squad signature: sorted player IDs joined. Bank rounded to 0.1m.
   const ids = squad.map(p => p.id).sort((a, b) => a - b).join(',');
@@ -27701,7 +28474,15 @@ function _ppStateKey(squad, gwIdx, bank, ft) {
   // active preset's hit-aversion taxes, so memo entries must not leak across
   // presets. Balanced/high are both 0|0 and keep sharing entries (as before).
   const t = _ppPresetTaxes();
-  return `${gwIdx}|${ids}|${Math.round(bank * 10)}|${ft}|${t.hit}|${t.ft}`;
+  // APEX_LOCK_MEMO_v1 (2026-08-23) - the lock/ban term. _ppComputeOptionsLocal
+  // consults _ppIsLocked/_ppIsBanned on EVERY enumeration, so a branch built
+  // under one lock set is not interchangeable with one built under another --
+  // but the key said nothing about locks, and no clear site fired on a toggle.
+  // Lock a player mid-walk and the visible options stopped offering to sell
+  // him while every cached futureEv behind them still did.
+  const _lb = _ppLockBanSig();
+  return `${gwIdx}|${ids}|${Math.round(bank * 10)}|${ft}|${t.hit}|${t.ft}`
+    + (_lb ? ('|' + _lb) : '');
 }
 
 // ASYNC (2026-06-11): yields to the event loop every ~35ms of work via
@@ -30033,6 +30814,18 @@ async function _ppTakeWildcardInWalk(gwIdx, wcSquad) {
     const wcCost = wcSquad.reduce((t, p) => t + _ppEffCost(p), 0);
     const bankRaw = budgetCap - wcCost;
     const bankAfter = Math.abs(bankRaw) < 0.15 ? 0 : Math.max(0, bankRaw);
+    // APEX_WC_FT_TRUTH_v1 (2026-08-23) - was a hardcoded 1 in BOTH places below,
+    // commented "FPL: one free transfer the week after a Wildcard". That has not
+    // been the rule since the FT bank went to 5: a chip consumes no transfer, so
+    // banked FTs carry THROUGH the chip week and accrue on top. _openPathPlanner
+    // fixed exactly this on 2026-07-28 (see its comment, ~line 3399); this
+    // surface was written the day before and never got it, so tapping WC with a
+    // non-empty trunk deleted the bank. Measured: 3 banked FTs became 1, pricing
+    // the next week's 3 transfers at -8 instead of 0 -- while the tree had
+    // already SOLD the branch on keeping them. Same helper, same arguments, same
+    // answer as in-tree; _ppNextFt returns 1 by itself in the unlimited pre-GW1
+    // week, so pre-deadline behaviour is unchanged.
+    const _wcFtAfter = _ppNextFt(gwIdx, _pathPlanner.workingFt, 0);
     _pathPlanner.selections.push({
       gwIdx,
       gw: TEAM_META.gw_range[gwIdx],
@@ -30042,11 +30835,11 @@ async function _ppTakeWildcardInWalk(gwIdx, wcSquad) {
       evGain: 0, netEv: 0, hitCost: 0,
       gwXp,
       bankAfter,
-      ftAfter: 1,          // FPL: one free transfer the week after a Wildcard
+      ftAfter: _wcFtAfter,   // APEX_WC_FT_TRUTH_v1 - was 1; chips accrue FT
     });
     _pathPlanner.workingSquad = wcSquad.slice();   // carries forward
     _pathPlanner.workingBank  = bankAfter;
-    _pathPlanner.workingFt    = 1;
+    _pathPlanner.workingFt    = _wcFtAfter;        // APEX_WC_FT_TRUTH_v1
     _pathPlanner.totalXp     += gwXp;
     _pathPlanner.currentGwIdx++;
     window._ppChipPlays = (window._ppChipPlays || []).filter(c => c && c.gwIdx !== gwIdx);
@@ -36563,7 +37356,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW2</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1787475541-GW2-935288c0</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1787486811-GW2-0f7a73f8</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
