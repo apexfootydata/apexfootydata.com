@@ -1,6 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script>
+/* APEX_ARCHIVE_RETRO_v1 (2026-08-25). This snapshot was frozen 2026-08-21,
+   one day BEFORE archive mode (APEX_ARCHIVE_MODE_v1) existed, so its baked
+   JS has none of the hooks and the freezer's immutability rule (correctly)
+   refused to re-freeze it. Repaired in place: the flag for anything that
+   reads it, a fetch fence so a RECORD makes no live calls (the baked code
+   would otherwise hydrate today's squad into a GW1 book and raise the
+   "fresh numbers on their way" banner — a promise an archive can never
+   keep), and an honest banner naming what this page is. POOL_DATA and
+   every projection byte are untouched.  Frozen: 2026-08-21T17:24:00Z */
+window.APEX_ARCHIVE={"gw":1,"deadline_utc":"2026-08-21T17:30:00Z","frozen_at_utc":"2026-08-21T17:24:00Z","retro":true};
+(function(){
+  var _f=window.fetch;
+  window.fetch=function(u,o){
+    try{var s=String(u&&u.url||u);
+      if(s.indexOf("fantasy.premierleague.com")>=0||s.indexOf("apex_build.json")>=0){
+        return Promise.reject(new Error("archive: live fetch disabled on a frozen snapshot"));
+      }
+    }catch(e){}
+    return _f.apply(this,arguments);
+  };
+  function _banner(){
+    if(document.getElementById("apex-archive-banner"))return;
+    var b=document.createElement("div");
+    b.id="apex-archive-banner";
+    b.style.cssText="background:#0c2a22;color:#eaf5f0;padding:10px 16px;font:600 14px/1.45 system-ui,sans-serif;text-align:center;";
+    b.textContent="\uD83D\uDCD8 The Record \u2014 GW1 deadline snapshot, frozen 21 Aug 2026 17:24 UTC. Every number is as it stood at the deadline; nothing here updates.";
+    if(document.body)document.body.insertBefore(b,document.body.firstChild);
+  }
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",_banner);else _banner();
+})();
+</script>
+
 <meta name="apex-gw" content="1" data-built-at="2026-08-21T18:24:00">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -6117,7 +6150,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 
 <header class="topbar" id="topbar" style="display:none;">
   <a href="#" class="logo" onclick="_logoClick(event); return false;">
-    <img src="brand_banner_sm.png?v=4" alt="FPL Apex — numbers over narratives" style="display:block;height:32px;width:auto">
+    <img src="/brand_banner_sm.png?v=4" alt="FPL Apex — numbers over narratives" style="display:block;height:32px;width:auto">
   </a>
   <!-- ONE-BAR HEADER (2026-08-01, Marcus). These four tabs used to sit in
        their own full-width row inside #view-team's container. They are the

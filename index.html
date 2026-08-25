@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="2" data-built-at="2026-08-25T10:05:09">
+<meta name="apex-gw" content="2" data-built-at="2026-08-25T10:29:22">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/x-icon" href="favicon.ico?v=4">
@@ -140,10 +140,10 @@
             <img src="brand_banner.png?v=4" alt="FPL Apex — numbers over narratives" class="brand-sm">
             <nav>
             <a href="#" onclick="var i=document.getElementById('apex-hero-fplid');if(i){i.scrollIntoView({behavior:'smooth',block:'center'});setTimeout(function(){i.focus();},350);}return false;">Solver</a>
-            <a href="#leaders">Leaders</a>
+            <a href="#leaders">Apex Insights</a>
             <a href="/evaluation.html">Model Evaluation</a>
             <!-- APEX_ARCHIVE_PAGE_v1: the frozen deadline snapshots. -->
-            <a href="/archive.html">Time Travel</a>
+            <a href="/archive.html">The Record</a>
             </nav>
         </div>
     </div>
@@ -225,15 +225,18 @@
         <div style="display:flex;align-items:center;gap:14px;">
           <img src="favicon-256.png?v=4" alt="FPL Apex" width="54" height="54" style="border-radius:50%;">
           <div>
-            <div style="font-weight:800;color:#0c0c0f;font-size:28px;line-height:1.1;">Last season's final Apex leaders</div>
-            <div style="color:#1D9E75;font-size:13px;font-weight:700;letter-spacing:1.5px;margin-top:4px;">GW1 &middot; FINAL 2025/26 SEASON &middot; OPTA DATA</div>
+            <div style="font-weight:800;color:#0c0c0f;font-size:28px;line-height:1.1;">This week's Apex leaders</div>
+            <div style="color:#1D9E75;font-size:13px;font-weight:700;letter-spacing:1.5px;margin-top:4px;">GW1 &middot; OPTA DATA &middot; UPDATED 25 AUG</div>
           </div>
         </div>
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:24px;">
-          <img src="leaders/gw_xg.png?v=4" alt="Apex leaders card: top xG" style="width:100%;border-radius:12px;display:block;box-shadow:0 4px 14px rgba(12,12,15,.10);">
-          <img src="leaders/gw_xa.png?v=4" alt="Apex leaders card: top creator (xA)" style="width:100%;border-radius:12px;display:block;box-shadow:0 4px 14px rgba(12,12,15,.10);">
-          <img src="leaders/gw_defcon.png?v=4" alt="Apex leaders card: top defensive contribution" style="width:100%;border-radius:12px;display:block;box-shadow:0 4px 14px rgba(12,12,15,.10);">
-          <img src="leaders/gw_gk.png?v=4" alt="Apex leaders card: top goalkeeper" style="width:100%;border-radius:12px;display:block;box-shadow:0 4px 14px rgba(12,12,15,.10);">
+          <img src="leaders/gw_xg.png?v=gw1-1787648541" alt="Apex leaders card: top xG" style="width:100%;border-radius:12px;display:block;box-shadow:0 4px 14px rgba(12,12,15,.10);">
+          <img src="leaders/gw_xa.png?v=gw1-1787648541" alt="Apex leaders card: top creator (xA)" style="width:100%;border-radius:12px;display:block;box-shadow:0 4px 14px rgba(12,12,15,.10);">
+          <img src="leaders/gw_defcon.png?v=gw1-1787648541" alt="Apex leaders card: top defensive contribution" style="width:100%;border-radius:12px;display:block;box-shadow:0 4px 14px rgba(12,12,15,.10);">
+          <img src="leaders/gw_gk.png?v=gw1-1787648541" alt="Apex leaders card: top goalkeeper" style="width:100%;border-radius:12px;display:block;box-shadow:0 4px 14px rgba(12,12,15,.10);">
+        </div>
+        <div style="margin-top:18px;text-align:right;">
+          <a href="/leaders.html" style="color:#0F6E56;font-weight:800;font-size:15px;text-decoration:none;">See the full top-20 tables &rarr;</a>
         </div>
       </div>
     </section>
@@ -258,8 +261,8 @@
                 <p id="apex-band-blurb">The solver is free while the public log fills up. The gameweek leader cards drop on X after every round &mdash; follow along.</p>
             </div>
             <div class="founder-cta">
-                <a id="apex-band-cta" class="btn" href="https://x.com/FPLApexHQ" target="_blank" rel="noopener" onclick="if(window.APEX_BILLING_LIVE===true&amp;&amp;window.apexBilling&amp;&amp;window.apexBilling.openModal){window.apexBilling.openModal('sub');return false;}return true;">Follow @FPLApexHQ</a>
-                <div id="apex-band-sub" class="founder-sub">Numbers over narratives, every gameweek.</div>
+                <a id="apex-band-cta" class="btn" href="#" onclick="if(window.APEX_BILLING_LIVE===true&amp;&amp;window.apexBilling&amp;&amp;window.apexBilling.openModal){window.apexBilling.openModal('sub');return false;}var i=document.getElementById('apex-hero-fplid');if(i){i.scrollIntoView({behavior:'smooth',block:'center'});setTimeout(function(){i.focus();},350);}return false;">Solve my team &rarr;</a>
+                <div id="apex-band-sub" class="founder-sub">Numbers over narratives, every gameweek. <a href="https://x.com/FPLApexHQ" target="_blank" rel="noopener" style="color:#1D9E75;font-weight:700;text-decoration:none;">Follow @FPLApexHQ</a></div>
                 <div id="apex-band-login" class="founder-sub" style="display:none;">Already a member? <a href="#" onclick="if(window.apexBilling&amp;&amp;window.apexBilling.openModal){window.apexBilling.openModal('login');}return false;" style="color:#1D9E75;font-weight:700;text-decoration:none;">Log in / restore purchase</a></div>
             </div>
         </section>
