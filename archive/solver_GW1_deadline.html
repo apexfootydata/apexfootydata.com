@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <script>
-/* APEX_ARCHIVE_RETRO_v1 (2026-08-25). This snapshot was frozen 2026-08-21,
+/* APEX_ARCHIVE_RETRO_v2 (2026-08-25). This snapshot was frozen 2026-08-21,
    one day BEFORE archive mode (APEX_ARCHIVE_MODE_v1) existed, so its baked
    JS has none of the hooks and the freezer's immutability rule (correctly)
    refused to re-freeze it. Repaired in place: the flag for anything that
@@ -16,7 +16,7 @@ window.APEX_ARCHIVE={"gw":1,"deadline_utc":"2026-08-21T17:30:00Z","frozen_at_utc
   var _f=window.fetch;
   window.fetch=function(u,o){
     try{var s=String(u&&u.url||u);
-      if(s.indexOf("fantasy.premierleague.com")>=0||s.indexOf("apex_build.json")>=0){
+      if(s.indexOf("fantasy.premierleague.com")>=0||s.indexOf("apex_build.json")>=0||s.indexOf("fpl-proxy.")>=0||s.indexOf("workers.dev")>=0||s.indexOf("/bootstrap-static/")>=0){
         return Promise.reject(new Error("archive: live fetch disabled on a frozen snapshot"));
       }
     }catch(e){}
@@ -31,6 +31,15 @@ window.APEX_ARCHIVE={"gw":1,"deadline_utc":"2026-08-21T17:30:00Z","frozen_at_utc
     if(document.body)document.body.insertBefore(b,document.body.firstChild);
   }
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",_banner);else _banner();
+  /* v2: any live-status banner that still slips through a route the fence
+     does not know is removed on sight. A frozen record has ONE banner: its own. */
+  function _sweep(){
+    ["apex-stale-banner","apex-build-banner"].forEach(function(id){
+      var e=document.getElementById(id); if(e&&e.parentNode)e.parentNode.removeChild(e);
+    });
+  }
+  setInterval(_sweep,1500);
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",_sweep);else _sweep();
 })();
 </script>
 
