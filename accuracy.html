@@ -6,7 +6,7 @@
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=4">
 <link rel="shortcut icon" type="image/x-icon" href="favicon.ico?v=4">
 <title>Accuracy &mdash; FPL Apex</title>
-<meta name="description" content="The FPL Apex accuracy record: validated benchmarks against the leading paid FPL tools, the full 2025/26 season tracker, and a live point-in-time forward test for 2026/27. Wins and losses both published.">
+<meta name="description" content="The FPL Apex accuracy record: a full 2025/26 match-level backtest and a live point-in-time forward test for 2026/27 against the leading paid FPL tools. Wins and losses both published.">
 <meta name="author" content="FPL Apex">
 <link rel="canonical" href="https://fplapex.com/accuracy.html">
 <meta name="robots" content="index, follow">
@@ -263,105 +263,28 @@
   <h1>Model accuracy, published in the open.</h1>
   <p class="lede">
     Every prediction model claims it works. This page is where FPL Apex proves it &mdash;
-    validated benchmarks against the leading paid tools, a full-season tracker, and a live
-    forward test where predictions are locked before kick-off and scored after.
+    a full-season match tracker and a live forward test against the leading paid tools,
+    where every projection is locked before the deadline and scored after.
     Wins and losses both published.
   </p>
 
-  <!-- Validated benchmarks vs leading paid tools -->
+  <!-- APEX_BENCHMARK_RETIRE_v1 (2026-08-25, Marcus): the 2025/26 player benchmark
+       cards are retired to a statement with no figures. The numbers measured the
+       June engine on stand-in minutes over six late-season gameweeks, replayed
+       against Tool A's genuine point-in-time files. compute_benchmarks() still
+       derives them from the source CSVs for internal use; the page does not
+       print them. The forward test below is the record. -->
   <section id="benchmarks">
-    <h2>How Apex compares to the leading paid tools</h2>
+    <h2>Last season, against the paid tools</h2>
     <p class="section-intro">
-      Tool A and Tool B are the two benchmark paid projection tools in the FPL community &mdash;
-      the strongest competition we know of. Here is where Apex stands against them, measured
-      on the same players, the same gameweeks, the same data. MAE is mean absolute error:
-      the average size of the miss. Lower is better.
+      In June 2026 we replayed the engine of the day over six late-season gameweeks of
+      2025/26 and scored it against Tool A&rsquo;s published projections on the same players,
+      matched by FPL player ID. The result: statistically level across all players, behind
+      on the players who actually started. That engine has been rebuilt since, so the figure
+      no longer describes what ships &mdash; which is why we no longer print it. The live
+      forward test below, where every tool&rsquo;s book is frozen before each deadline and
+      scored after, is the record that counts.
     </p>
-    <div class="bench-grid">
-
-      <div class="bench-card">
-        <div class="bench-head">
-          <div class="bench-title">Expected points</div>
-          <span class="badge badge-coral">LEVEL · BEHIND ON STARTERS</span>
-        </div>
-        <div class="bench-nums">
-          <div class="bn">
-            <span class="bn-label">Apex</span>
-            <span class="bn-val">1.872</span>
-            <span class="bn-unit">MAE, pts &middot; all 1,683</span>
-          </div>
-          <div class="bn">
-            <span class="bn-label">Tool A</span>
-            <span class="bn-val">1.837</span>
-            <span class="bn-unit">MAE, pts &middot; all 1,683</span>
-          </div>
-        </div>
-        <p class="bench-note">
-          <!-- APEX_ACCURACY_TRUTH_v1: both slices published. The all-players
-               "level" is partly carried by the blanks, where projecting ~0 is
-               easy; the starters are the truer test and there Apex trails. -->
-          All players: paired difference <strong>+0.036</strong> points, 95% CI
-          <strong>[−0.012, +0.086]</strong> &mdash; the interval spans zero, so overall the two
-          are <strong>statistically level</strong>.
-          On the <strong>1,229 who actually played</strong>, Apex <strong>2.263</strong>
-          vs Tool A <strong>2.191</strong>: Apex trailed by
-          <strong>+0.073</strong> per pick (paired CI [+0.010, +0.136]; cluster-bootstrap
-          CI [−0.005, +0.143] &mdash; at the edge of significance). The other 454 rows
-          are players who did not feature, where a near-zero projection is easy to get right
-          and flatters both tools. We do not claim to match Tool A on starters; we publish the split.
-        </p>
-      </div>
-
-      <div class="bench-card">
-        <div class="bench-head">
-          <div class="bench-title">Expected minutes</div>
-          <span class="badge badge-coral">BEING RE-MEASURED</span>
-        </div>
-        <div class="bench-nums">
-          <div class="bn">
-            <span class="bn-label">Verdict</span>
-            <span class="bn-val">Tool A led</span>
-            <span class="bn-unit">at the June 2026 benchmark</span>
-          </div>
-        </div>
-        <p class="bench-note">
-          Tool A was clearly better than Apex at predicting minutes, and we published
-          that. The minutes model has been rebuilt since, so
-          the old figure no longer describes what ships &mdash; quoting it either way
-          would mislead. A fresh, point-in-time number lands in the live forward test
-          below from GW1. Published because honest beats flattering.
-        </p>
-      </div>
-
-      <div class="bench-card">
-        <div class="bench-head">
-          <div class="bench-title">Double gameweeks</div>
-          <span class="badge badge-coral">BEHIND</span>
-        </div>
-        <div class="bench-nums">
-          <div class="bn">
-            <span class="bn-label">Verdict</span>
-            <span class="bn-val">Both paid tools closer</span>
-            <span class="bn-unit">on double-gameweek rows</span>
-          </div>
-        </div>
-        <p class="bench-note">
-          <!-- APEX_ACCURACY_TRUTH_v1: this card used to read "APEX LEADS · Best of 3".
-               It was a bias reduction presented as accuracy; both rivals had the
-               lower MAE. Corrected 2026-08-25 after an audit against the source files. -->
-          On double-gameweek rows both paid tools projected closer than Apex:
-          Tool A <strong>2.46</strong> vs Apex <strong>2.71</strong> MAE
-          (115 rows), and Tool B <strong>3.49</strong> vs Apex
-          <strong>3.77</strong> (18 rows, a small hand-transcribed sample).
-          Apex&rsquo;s second-leg dampener reduced its double-week over-projection
-          (bias <strong>+0.84</strong> &rarr; <strong>+0.02</strong> points per
-          player on that sample) but did not close the accuracy gap. An earlier version of this
-          card said the opposite; it was wrong, and we corrected it.
-        </p>
-      </div>
-
-    </div>
-    <p class="source-note">Validated 2026-06-13 · 1,683 player-gameweeks of 2025/26 (GW28, GW30, GW33, GW34, GW35, GW36), 24 rows removed from the original 1,707 for duplicate player IDs · Apex projections reconstructed walk-forward and news-blind; Tool A’s from its own published point-in-time files · both scored against actual FPL points, matched by FPL player ID · uncertainty via cluster bootstrap, 10,000 resamples by gameweek · recomputed from the source file on every build.</p>
   </section>
 
   <!-- 2025/26 season tracker — generated from outputs/accuracy_history.json -->
