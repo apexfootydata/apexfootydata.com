@@ -67,16 +67,17 @@
   <nav>
     <a href="/" class="home">&larr; FPL Apex</a>
     <a href="/solver_app.html" class="nav-solver" data-view="team">My Squad</a>
-    <a href="/solver_app.html" class="nav-solver" data-view="chip-select">Chip Planner</a>
+    <!-- APEX_NAV_STATIC_TRUTH_v1: Chip Planner link removed (recommendation
+         surface is off site-wide; the solver gates its own copy). -->
     <a href="/solver_app.html" class="nav-solver" data-view="league">Mini-League</a>
-    <a href="#" class="active">Evaluation</a>
+    <a href="#" class="active">Model Evaluation</a>
   </nav>
 
   <main>
     <div class="grid">
 
       <div class="left">
-        <span class="preview">PREVIEW · ILLUSTRATIVE</span>
+        <span class="preview">LIVE &middot; 1 GAMEWEEK</span>
         <h1>How accurate is Apex?</h1>
         <p class="lede" id="eval-lede">We score Apex against the leading paid tools every gameweek, in the open —
           same players, same metric, no cherry-picking. Live tracking begins 2026/27.</p>
@@ -89,8 +90,8 @@
 
         <div class="explain">
           <b>What "average miss" means:</b> for every player we take the gap between our projected
-          points and what they actually scored, then average it. So <b>Apex 3.15</b> would mean our picks
-          were, on average, 3.15 points from reality. Lower is closer; a perfect projection is 0.
+          points and what they actually scored, then average it. So <b>Apex 3.00</b> would mean our picks
+          were, on average, 3 points from reality. Lower is closer; a perfect projection is 0.
         </div>
         <div class="explain">
           <b>Scored honestly:</b> on widely-owned players (5%+ owned at the deadline), using whatever they actually
@@ -105,33 +106,33 @@
           <div class="tag">NUMBERS over NARRATIVES</div>
         </div>
         <div class="rule"></div>
-        <div class="ttl" id="eval-ttl">ILLUSTRATIVE EXAMPLE · PROJECTION ACCURACY (widely-owned players)</div>
+        <div class="ttl" id="eval-ttl">PROJECTION ACCURACY (widely-owned players) &middot; SEASON TO DATE</div>
         <div class="sub">Average miss per pick · <b style="color:var(--ink)">lower = closer</b></div>
 
         <div class="bars">
           <div class="barrow">
-            <div class="lab"><span style="font-weight:700;">Apex</span><span class="v" style="color:var(--teal)" id="exbar-apex-v">3.15</span></div>
-            <div class="track"><div class="fill" style="width:95%;background:#1D9E75" id="exbar-apex-f"></div></div>
+            <div class="lab"><span style="font-weight:700;">Apex</span><span class="v" style="color:var(--teal)" id="exbar-apex-v">2.63</span></div>
+            <div class="track"><div class="fill" style="width:93%;background:#1D9E75" id="exbar-apex-f"></div></div>
           </div>
           <div class="barrow">
-            <div class="lab"><span>Tool A <span style="font-size:12px;font-weight:700;color:var(--muted)" id="exbar-a-tag">&middot; example</span></span><span class="v" id="exbar-a-v">3.11</span></div>
-            <div class="track"><div class="fill" style="width:94%;background:#3f4d47" id="exbar-a-f"></div></div>
+            <div class="lab"><span>Tool A <span style="font-size:12px;font-weight:700;color:var(--muted)" id="exbar-a-tag"></span></span><span class="v" id="exbar-a-v">2.56</span></div>
+            <div class="track"><div class="fill" style="width:96%;background:#3f4d47" id="exbar-a-f"></div></div>
           </div>
           <div class="barrow">
-            <div class="lab"><span>Tool B</span><span class="v" id="exbar-b-v">3.17</span></div>
-            <div class="track"><div class="fill" style="width:96%;background:#b8c2bc" id="exbar-b-f"></div></div>
+            <div class="lab"><span>Tool B</span><span class="v" id="exbar-b-v">2.63</span></div>
+            <div class="track"><div class="fill" style="width:93%;background:#b8c2bc" id="exbar-b-f"></div></div>
           </div>
         </div>
 
-        <div class="readline" id="eval-readline">Illustrative only — no comparison has been measured yet.</div>
+        <div class="readline" id="eval-readline">Measured live &mdash; season running total, updated after every scored gameweek.</div>
 
         <div class="season">
-          <span class="exbadge" id="eval-badge">EXAMPLE LAYOUT</span>
-          <div style="font-size:12px;font-weight:800;color:var(--muted);letter-spacing:1.5px;padding-right:108px;" id="eval-heading">SEASON RUNNING TOTAL · fills in live each gameweek</div>
+          <span class="exbadge" id="eval-badge">LIVE</span>
+          <div style="font-size:12px;font-weight:800;color:var(--muted);letter-spacing:1.5px;padding-right:108px;" id="eval-heading">SEASON RUNNING TOTAL &middot; 1 gameweek &middot; 66 player-projections scored</div>
           <div class="tiles">
-            <div class="tile" style="background:#1D9E7512"><div class="n" style="color:var(--teal)" id="eval-apex">&mdash;</div><div class="t">Apex</div></div>
-            <div class="tile" style="background:rgba(63,77,71,.10)"><div class="n" style="color:#3f4d47" id="eval-toolA">&mdash;</div><div class="t" style="color:#3f4d47">Tool A</div></div>
-            <div class="tile" style="background:rgba(26,46,40,.04)"><div class="n" style="color:#8d978f" id="eval-toolB">&mdash;</div><div class="t" style="color:#8d978f">Tool B</div></div>
+            <div class="tile" style="background:#1D9E7512"><div class="n" style="color:var(--teal)" id="eval-apex">2.63</div><div class="t">Apex</div></div>
+            <div class="tile" style="background:rgba(63,77,71,.10)"><div class="n" style="color:#3f4d47" id="eval-toolA">2.56</div><div class="t" style="color:#3f4d47">Tool A</div></div>
+            <div class="tile" style="background:rgba(26,46,40,.04)"><div class="n" style="color:#8d978f" id="eval-toolB">2.63</div><div class="t" style="color:#8d978f">Tool B</div></div>
           </div>
           <div id="eval-verdict" style="display:none;font-size:14px;font-weight:700;color:var(--ink);margin-top:16px;"></div>
           <div style="display:flex;justify-content:space-between;align-items:center;margin:20px 0 6px;">
@@ -154,15 +155,12 @@
 
     </div>
 
-    <p class="caveat" id="eval-caveat"><b>Preview.</b> The figures above are <b>illustrative placeholders</b>, not measured
-      results — they show what this page will look like, not how anything has performed. Real scoring starts
-      with GW1 of 2026/27 and the running total fills in automatically from then. Rivals shown as
-      Tool A / Tool B for now. Only aggregate accuracy is ever shown — never any tool's individual projections.</p>
+    <p class="caveat" id="eval-caveat"><b>Live.</b> The figures above are measured results from the season to date, scored after each gameweek on players owned by 5%+ of managers at the deadline &mdash; every tool&rsquo;s projection frozen at that deadline, scored on the same 66 player-gameweeks. Rivals shown as Tool A / Tool B. Only aggregate accuracy is ever shown &mdash; never any tool&rsquo;s individual projections.</p>
   </main>
 
 <script>
   /* Nav deep-links: carry the user's FPL Team ID into the solver so My Squad /
-     Chip Planner / Mini-League open the right view directly — no Team ID box.
+     Mini-League open the right view directly — no Team ID box.
      ID comes from ?id= in the URL, else the persisted apex_fpl_id (set whenever
      the solver loads a team). If we have no ID, links fall back to the solver
      entry, which will ask for one. */
@@ -177,10 +175,11 @@
     }
   })();
   /* Season running total — baked by forward_log.py `eval` from the live
-     forward-test log. null until the first 26/27 GW is scored, so the page
-     shows the EXAMPLE LAYOUT mockup pre-season and flips to live by itself. */
+     forward-test log. null until the first 26/27 GW is scored. The static markup is rendered
+     server-side by _render_static() to match, so the file never claims a state
+     it is not in — with or without JS. */
   /* APEX-EVAL-DATA-START */
-var EVAL_DATA = {"weeks": 1, "owned_thr": 5.0, "n": 66, "n_all": 459, "apex": 2.63, "review": 2.56, "bench_b": 2.63, "bench_b_n": 66, "bench_b_common": true, "form": ["review"], "verdict": "Too early to separate them: 66 shared picks over 1 gameweek is not enough to call a winner, and we will not pretend otherwise.", "updated_utc": "2026-08-25T10:24:56Z"};
+var EVAL_DATA = {"weeks": 1, "owned_thr": 5.0, "n": 66, "n_all": 459, "apex": 2.63, "review": 2.56, "bench_b": 2.63, "bench_b_n": 66, "bench_b_common": true, "form": ["review"], "verdict": "Too early to separate them: 66 shared picks over 1 gameweek is not enough to call a winner, and we will not pretend otherwise.", "updated_utc": "2026-08-25T10:44:13Z"};
 /* APEX-EVAL-DATA-END */
   (function(){
     var COL={apex:'#1D9E75',review:'#3f4d47',toolA:'#3f4d47',toolB:'#b8c2bc',level:'#cfd6d2'};
@@ -189,9 +188,8 @@ var EVAL_DATA = {"weeks": 1, "owned_thr": 5.0, "n": 66, "n_all": 459, "apex": 2.
 
     var live = EVAL_DATA && EVAL_DATA.weeks > 0;
     if(!live){
-      // Preview mockup — illustrative form pattern, dimmed.
-      ['apex','apex','toolB','apex','apex','toolB','apex','apex','apex','toolB','apex','apex']
-        .forEach(function(k){bar(k,false);});
+      // APEX_NAV_STATIC_TRUTH_v1: no mock form strip. An invented run of
+      // "weeks closest" is exactly the kind of thing a reader takes as a record.
       return;
     }
 
