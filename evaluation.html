@@ -155,7 +155,7 @@
 
     </div>
 
-    <p class="caveat" id="eval-caveat"><b>Live.</b> The figures above are measured results from the season to date, scored after each gameweek on players owned by 5%+ of managers at the deadline &mdash; every tool&rsquo;s projection frozen at that deadline, scored on the same 66 player-gameweeks. Rivals shown as Tool A / Tool B. Only aggregate accuracy is ever shown &mdash; never any tool&rsquo;s individual projections.</p>
+    <p class="caveat" id="eval-caveat"><b>Live.</b> The figures above are measured results from the season to date, scored after each gameweek on players owned by 5%+ of managers at the deadline &mdash; every tool&rsquo;s projection frozen before that deadline, scored on the same 66 player-gameweeks. Rivals shown as Tool A / Tool B. Only aggregate accuracy is ever shown &mdash; never any tool&rsquo;s individual projections.</p>
   </main>
 
 <script>
@@ -179,10 +179,10 @@
      server-side by _render_static() to match, so the file never claims a state
      it is not in — with or without JS. */
   /* APEX-EVAL-DATA-START */
-var EVAL_DATA = {"weeks": 1, "owned_thr": 5.0, "n": 66, "n_all": 459, "apex": 2.63, "review": 2.56, "bench_b": 2.63, "bench_b_n": 66, "bench_b_common": true, "form": ["review"], "verdict": "Too early to separate them: 66 shared picks over 1 gameweek is not enough to call a winner, and we will not pretend otherwise.", "updated_utc": "2026-08-25T10:44:13Z"};
+var EVAL_DATA = {"weeks": 1, "owned_thr": 5.0, "n": 66, "n_all": 459, "apex": 2.63, "tool_a": 2.56, "bench_b": 2.63, "bench_b_n": 66, "bench_b_common": true, "form": ["toolA"], "verdict": "Too early to separate them: 66 shared picks over 1 gameweek is not enough to call a winner, and we will not pretend otherwise.", "updated_utc": "2026-08-25T11:10:12Z"};
 /* APEX-EVAL-DATA-END */
   (function(){
-    var COL={apex:'#1D9E75',review:'#3f4d47',toolA:'#3f4d47',toolB:'#b8c2bc',level:'#cfd6d2'};
+    var COL={apex:'#1D9E75',toolA:'#3f4d47',toolB:'#b8c2bc',level:'#cfd6d2'};
     var host=document.getElementById('form');
     function bar(kind,live){var d=document.createElement('i');d.style.background=(COL[kind]||'#cfd6d2');d.style.opacity=live?'1':'.45';host.appendChild(d);}
 
@@ -196,9 +196,11 @@ var EVAL_DATA = {"weeks": 1, "owned_thr": 5.0, "n": 66, "n_all": 459, "apex": 2.
     // ── Live: fill tiles, verdict, badge, form from the real numbers ──
     function fmt(v){return (v==null)?'—':Number(v).toFixed(2);}
     document.getElementById('eval-apex').textContent  = fmt(EVAL_DATA.apex);
-    document.getElementById('eval-toolA').textContent = fmt(EVAL_DATA.review);
+    document.getElementById('eval-toolA').textContent = fmt(EVAL_DATA.tool_a);
     var bEl=document.getElementById('eval-toolB');
-    /* APEX_EVAL_LIVE_v1: dagger only when Tool B was scored on a SAMPLE, not the
+    /* APEX_ACCURACY_TRUTH_v1: "frozen before that deadline" — the rival books are
+       captured minutes to a couple of hours ahead of it; "at" overstated it.
+       APEX_EVAL_LIVE_v1: dagger only when Tool B was scored on a SAMPLE, not the
        same players as Apex / Tool A (EVAL_DATA.bench_b_common === false). */
     bEl.innerHTML = (EVAL_DATA.bench_b==null) ? '—'
                     : (fmt(EVAL_DATA.bench_b)+(EVAL_DATA.bench_b_common===false?'<span style="font-size:14px;">&dagger;</span>':''));
@@ -236,11 +238,11 @@ var EVAL_DATA = {"weeks": 1, "owned_thr": 5.0, "n": 66, "n_all": 459, "apex": 2.
     var cav=document.getElementById('eval-caveat');
     if(cav) cav.innerHTML='<b>Live.</b> The figures above are measured results from the season to date, '+
       'scored after each gameweek on players owned by '+((EVAL_DATA&&EVAL_DATA.owned_thr!=null)?EVAL_DATA.owned_thr:5)+'%+ of managers at the deadline'+
-      ' \u2014 every tool\u2019s projection frozen at that deadline, scored on the same '+(EVAL_DATA.n!=null?EVAL_DATA.n+' ':'')+'player-gameweeks'+
+      ' \u2014 every tool\u2019s projection frozen before that deadline, scored on the same '+(EVAL_DATA.n!=null?EVAL_DATA.n+' ':'')+'player-gameweeks'+
       (EVAL_DATA.bench_b_common===false?' (\u2020 Tool B on a sample of '+EVAL_DATA.bench_b_n+')':'')+'. Rivals shown as Tool A / Tool B. '+
       'Only aggregate accuracy is ever shown — never any tool\u2019s individual projections.';
     var aTag=document.getElementById('exbar-a-tag'); if(aTag) aTag.textContent='';
-    var vals=[['apex',EVAL_DATA.apex],['a',EVAL_DATA.review],['b',EVAL_DATA.bench_b]];
+    var vals=[['apex',EVAL_DATA.apex],['a',EVAL_DATA.tool_a],['b',EVAL_DATA.bench_b]];
     var best=null;
     vals.forEach(function(p){ if(p[1]!=null&&(best==null||p[1]<best)) best=p[1]; });
     vals.forEach(function(p){

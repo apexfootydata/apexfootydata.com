@@ -130,7 +130,8 @@
     flex-direction: column;
     gap: 12px;
   }
-  .bench-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .bench-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+  .bench-head .badge { white-space: normal; text-align: right; line-height: 1.3; }
   .bench-title { font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink2); }
   .badge {
     font-family: 'JetBrains Mono', ui-monospace, monospace;
@@ -258,19 +259,8 @@
 <main>
 
   <!-- Hero -->
-  <!-- APEX_ACCURACY_NAMING_v1 (2026-08-22): was "THE RECEIPTS". That name belonged to a
-       homepage panel deleted the same day, and it collided with the live tracker on
-       /evaluation.html. Two pages answering "how accurate is Apex" needed two jobs,
-       not two names for one job: THIS page is the VALIDATED BENCHMARK (last season,
-       1,707 player-gameweeks, fixed); that one is the LIVE TRACKER (this season,
-       scored weekly). Each now says which it is and points at the other. -->
-  <div class="eyebrow">VALIDATED BENCHMARK &middot; 2025/26</div>
+  <div class="eyebrow">THE RECEIPTS</div>
   <h1>Model accuracy, published in the open.</h1>
-  <p style="margin:-6px 0 18px;font-size:14.5px;color:#6b6b7b;">
-    This is the <b>fixed benchmark</b>: 1,707 player-gameweeks of 2025/26, measured once and
-    not moved. For <b>this season, scored week by week</b>, see
-    <a href="/evaluation.html">Model Evaluation</a>.
-  </p>
   <p class="lede">
     Every prediction model claims it works. This page is where FPL Apex proves it &mdash;
     validated benchmarks against the leading paid tools, a full-season tracker, and a live
@@ -292,25 +282,33 @@
       <div class="bench-card">
         <div class="bench-head">
           <div class="bench-title">Expected points</div>
-          <span class="badge badge-level">LEVEL</span>
+          <span class="badge badge-coral">LEVEL · BEHIND ON STARTERS</span>
         </div>
         <div class="bench-nums">
           <div class="bn">
             <span class="bn-label">Apex</span>
-            <span class="bn-val">1.880</span>
-            <span class="bn-unit">MAE, pts</span>
+            <span class="bn-val">1.872</span>
+            <span class="bn-unit">MAE, pts &middot; all 1,683</span>
           </div>
           <div class="bn">
             <span class="bn-label">Tool A</span>
-            <span class="bn-val">1.842</span>
-            <span class="bn-unit">MAE, pts</span>
+            <span class="bn-val">1.837</span>
+            <span class="bn-unit">MAE, pts &middot; all 1,683</span>
           </div>
         </div>
         <p class="bench-note">
-          Paired difference <strong>+0.038</strong> points, 95% CI
-          <strong>[−0.004, +0.085]</strong>. The interval spans zero:
-          <strong>statistically indistinguishable</strong>. We do not claim to beat
-          Tool A on points &mdash; we claim to match a leading paid tool, for free.
+          <!-- APEX_ACCURACY_TRUTH_v1: both slices published. The all-players
+               "level" is partly carried by the blanks, where projecting ~0 is
+               easy; the starters are the truer test and there Apex trails. -->
+          All players: paired difference <strong>+0.036</strong> points, 95% CI
+          <strong>[−0.012, +0.086]</strong> &mdash; the interval spans zero, so overall the two
+          are <strong>statistically level</strong>.
+          On the <strong>1,229 who actually played</strong>, Apex <strong>2.263</strong>
+          vs Tool A <strong>2.191</strong>: Apex trailed by
+          <strong>+0.073</strong> per pick (paired CI [+0.010, +0.136]; cluster-bootstrap
+          CI [−0.005, +0.143] &mdash; at the edge of significance). The other 454 rows
+          are players who did not feature, where a near-zero projection is easy to get right
+          and flatters both tools. We do not claim to match Tool A on starters; we publish the split.
         </p>
       </div>
 
@@ -338,38 +336,50 @@
       <div class="bench-card">
         <div class="bench-head">
           <div class="bench-title">Double gameweeks</div>
-          <span class="badge badge-teal">APEX LEADS</span>
+          <span class="badge badge-coral">BEHIND</span>
         </div>
         <div class="bench-nums">
           <div class="bn">
             <span class="bn-label">Verdict</span>
-            <span class="bn-val">Best of 3</span>
-            <span class="bn-unit">Apex / Tool A / Tool B</span>
+            <span class="bn-val">Both paid tools closer</span>
+            <span class="bn-unit">on double-gameweek rows</span>
           </div>
         </div>
         <p class="bench-note">
-          On double-gameweek projections, Apex is the most accurate of the three tools
-          tested. Its second-leg dampener cut the bias on headline double-GW players from
-          <strong>+1.47</strong> to <strong>+0.63</strong> points per player.
+          <!-- APEX_ACCURACY_TRUTH_v1: this card used to read "APEX LEADS · Best of 3".
+               It was a bias reduction presented as accuracy; both rivals had the
+               lower MAE. Corrected 2026-08-25 after an audit against the source files. -->
+          On double-gameweek rows both paid tools projected closer than Apex:
+          Tool A <strong>2.46</strong> vs Apex <strong>2.71</strong> MAE
+          (115 rows), and Tool B <strong>3.49</strong> vs Apex
+          <strong>3.77</strong> (18 rows, a small hand-transcribed sample).
+          Apex&rsquo;s second-leg dampener reduced its double-week over-projection
+          (bias <strong>+0.84</strong> &rarr; <strong>+0.02</strong> points per
+          player on that sample) but did not close the accuracy gap. An earlier version of this
+          card said the opposite; it was wrong, and we corrected it.
         </p>
       </div>
 
     </div>
-    <p class="source-note">Validated 2026-06-10 · 1,707 player-gameweek sample (held-out benchmark workbook) · uncertainty via cluster bootstrap, 10,000 resamples by gameweek.</p>
+    <p class="source-note">Validated 2026-06-13 · 1,683 player-gameweeks of 2025/26 (GW28, GW30, GW33, GW34, GW35, GW36), 24 rows removed from the original 1,707 for duplicate player IDs · Apex projections reconstructed walk-forward and news-blind; Tool A’s from its own published point-in-time files · both scored against actual FPL points, matched by FPL player ID · uncertainty via cluster bootstrap, 10,000 resamples by gameweek · recomputed from the source file on every build.</p>
   </section>
 
   <!-- 2025/26 season tracker — generated from outputs/accuracy_history.json -->
   <section id="season-2526">
     <h2>2025/26 — match prediction accuracy</h2>
     <p class="section-intro">
-      Every matchweek of the 2025/26 Premier League season, the model's match goal
-      predictions were scored against what actually happened. The number tracked is
-      MAE &mdash; the average size of the miss, in goals per match. Lower is better.
+      A walk-forward backtest over the 2025/26 Premier League season: for every matchday
+      the model is refit on the matches played strictly before it, then its goal projection
+      for each side is scored against the actual score. The number tracked is MAE &mdash;
+      the average size of the miss, in <strong>goals per team per match</strong> (the home-side
+      and away-side misses averaged). Lower is better. This is a backtest re-run with the
+      current model, not a record of predictions published at the time; the live record is
+      the forward test below and on Model Evaluation.
     </p>
     <div class="summary-strip">
       <div class="sum-card">
         <div class="sum-val">0.882</div>
-        <div class="sum-label">Average error (goals / match)</div>
+        <div class="sum-label">Average error (goals per team, per match)</div>
       </div>
       <div class="sum-card">
         <div class="sum-val">356</div>
@@ -453,11 +463,12 @@
       </table>
     </div>
     <p class="table-foot">
-      Scored by scripts/forward_test/forward_log.py &mdash; snapshot before the deadline,
-      score after the final whistle, publish either way. Apex and Tool A are compared on
-      the shared set of players both tools project. &dagger;&nbsp;Tool B has no bulk export,
-      so it is scored on a hand-transcribed weekly sample (~30 template players) &mdash;
-      shown for reference, never decides the Closest column.
+      Scored by scripts/forward_test/forward_log.py &mdash; every tool&rsquo;s book captured
+      before the deadline, scored after the final whistle, published either way. All three
+      tools are compared on the common set of players every tool projected, matched by FPL
+      player ID, and Closest is whichever of the three had the lowest miss that week.
+      &dagger;&nbsp;marks a gameweek where Tool B could only be scored on a smaller sample;
+      in that week it does not decide the Closest column.
     </p>
   </section>
 
