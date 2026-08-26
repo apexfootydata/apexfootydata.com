@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="2" data-built-at="2026-08-26T09:45:21">
+<meta name="apex-gw" content="2" data-built-at="2026-08-26T10:48:23">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
@@ -37,7 +37,7 @@
 })();
 </script>
 <meta http-equiv="Pragma" content="no-cache">
-<meta name="apex-build" content="20260826-094520">
+<meta name="apex-build" content="20260826-104823">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — FPL Apex</title>
 <meta name="description" content="Plan FPL transfers, chips, and Free Hit squads. Live xG-based projections, a rival head-to-head simulator, and a mini-league table. Free FPL tool.">
@@ -5852,6 +5852,66 @@ body[data-apex-view="team"] #topbar .va-tabs { display: flex; }
      type size; a curve with no lettering can be any size at all. */
   flex:1 1 220px; max-width:360px; min-width:0; }
 .apex-optd-svg { display:block; width:100%; height:auto; }
+/* ═══ APEX_DIST_AXIS_v1 (2026-08-26) - the HTML axis ════════════════════════
+   Everything here exists because the SVG is preserveAspectRatio="none". Text
+   inside a stretched viewBox shears with the column width, so the ticks and the
+   sideways label are HTML laid over the same 0-100% scale x() uses. */
+.apex-optd-chart { container-type: inline-size; container-name: optdchart; }
+/* APEX_DIST_AXIS_v2 (2026-08-26): restoring the stats column put a FOURTH item in
+   this row - pill, icons, curve, column - and the curve is the only one that
+   shrinks. MEASURED at a 360px block: the curve was squeezed to nothing and the
+   ticks piled up on each other. The <=560px @media below cannot catch it,
+   because that block is 360px wide inside a 1010px WINDOW; the rail's width is
+   not the viewport's. flex-wrap lets the column drop instead of crushing the
+   curve (which keeps flex:1 1 220px), and the container query makes it span the
+   full width once it has dropped rather than sitting in a narrow stub. */
+.apex-optd { flex-wrap: wrap; container-type: inline-size; container-name: optd; }
+@container optd (max-width: 600px) {
+  .apex-optd-stats { flex:1 1 100%; min-width:0; margin-top:2px; }
+  .apex-optd-stats div { padding:2px 0; }
+}
+.apex-optd-plot { position:relative; }  /* APEX_DIST_AXIS_v2 */
+.apex-optd-ticks { position:relative; height:15px; margin-top:3px; }
+.apex-optd-ticks span {
+  position:absolute; transform:translateX(-50%);
+  font-size:11px; color:#94a3b8; font-variant-numeric:tabular-nums;
+}
+/* APEX_DIST_AXIS_v5 (2026-08-26): the END ticks are clamped INSIDE the box. Centred
+   on their own value, half of "0" hangs off the left edge and half of "150" off
+   the right - and in the two-pane rail the thing immediately to the right is the
+   stats column, so "150" printed straight through "80+ pts". MEASURED at rail
+   1050 and 640 and in single-column 940; all three collided. This is the same
+   overhang the AUG07F_SLIM note records for the old in-SVG labels, where the fix
+   was 14 units of margin; here the labels are HTML, so they can simply be
+   anchored by their inner edge instead of their centre. Only the first and last
+   move - every interior tick stays centred on its value. */
+.apex-optd-ticks span:first-child { transform:translateX(0); }
+.apex-optd-ticks span:last-child  { transform:translateX(-100%); }
+/* How many ticks fit is a property of the CHART, not the viewport - it is capped
+   at 360px in the rail and full-bleed on a phone. Default is the sparse set
+   (0/50/100/150 = children 1,6,11,16) and room adds to it; a browser without
+   container queries keeps the sparse set, which is legible at every width. */
+.apex-optd-ticks span:not(:nth-child(odd)) { display:none; }
+/* APEX_DIST_AXIS_v3 (2026-08-26): the selector has to MATCH the sparse rule's
+   specificity, not merely come after it. A container query adds NO specificity -
+   `.apex-optd-ticks span` scores (0,1,1) and loses to the `:not(:nth-child(odd))`
+   rule's (0,2,1) whatever the source order, so at a 360px chart the 25s silently
+   never appeared. Measured: only 0/50/100/150 rendered in a 360px container. */
+@container optdchart (min-width: 340px) {
+  .apex-optd-ticks span:not(:nth-child(odd)) { display:block; }
+}
+/* APEX_DIST_AXIS_v2: horizontal, sitting in the mt=12 band above the curve, and
+   flipped to the left of its own rule past 55% of the width so it can never run
+   off the right edge. It was rotated to begin with - the rival's is - but this
+   plot draws 80-100px tall and the text is ~90px, so rotated it left the card.
+   The halo is what lets it cross the fill and stay readable. */
+.apex-optd-crowd {
+  position:absolute; top:0; padding:0 4px;
+  font-size:10px; line-height:1.25; color:#4A554F; white-space:nowrap;
+  letter-spacing:.02em; pointer-events:none;
+  text-shadow:0 0 3px #fff, 0 0 3px #fff, 0 0 3px #fff, 0 0 2px #fff;
+}
+.apex-optd-crowd.l { transform:translateX(-100%); }
 .apex-optd-ax { /* APEX_FIX_AUG07F_SLIM: 12 -> 15 user units. The chart is narrower now,
      so each unit renders smaller; this keeps the tick labels at the same ~11.7px
      on screen they have today. */
@@ -5876,6 +5936,11 @@ body[data-apex-view="team"] #topbar .va-tabs { display: flex; }
 /* Left in place on purpose: .apex-optd-stats matches nothing now, costs nothing,
    and the <=560px block below still names it. Deleting live rules to tidy up is
    how the last three regressions started. */
+/* APEX_DIST_AXIS_v1 (2026-08-26): .apex-optd-stats matches something again. The
+   note above ("matches nothing now, costs nothing ... deleting live rules to
+   tidy up is how the last three regressions started") is why this restore is
+   a markup change and not a CSS rewrite - and why the <=560px block below,
+   which has kept ordering it all along, needed no edit either. */
 .apex-optd-stats { flex:0 0 auto; min-width:150px; max-width:100%; }
 .apex-optd-stats div { display:flex; justify-content:space-between; gap:16px; padding:3px 0; }
 .apex-optd-stats span { font-size:13px; color:#4A554F; }
@@ -6069,9 +6134,15 @@ body[data-apex-view="team"] #topbar .va-tabs { display: flex; }
   .va-twopane-rail .apex-optd-wrap {
     display: grid;
     grid-template-columns: auto minmax(0, 1fr) auto;
+    /* APEX_DIST_AXIS_v4 (2026-08-26): `stats` takes column 3 on the chart row.
+       .apex-optd is `display:contents` here, so every one of its children is a
+       direct grid item of THIS grid and an unnamed one lands in an implicit row
+       under the curve, in column 1, at whatever width it likes. Column 3 is
+       `auto`, so the column sizes to the five label/value rows and the curve
+       keeps minmax(0,1fr) - the same proportions the flex layout gets. */
     grid-template-areas:
       "cap  foot  icons"
-      "pill chart chart"
+      "pill chart stats"
       "odds odds  odds"
       "help help  help";
     align-items: center;
@@ -6107,7 +6178,19 @@ body[data-apex-view="team"] #topbar .va-tabs { display: flex; }
     min-width: 0;
     width: 100%;
   }
-  .va-twopane-rail .apex-optd-svg { height: 46px; }
+  /* APEX_DIST_AXIS_v4: 46px -> 88px. MEASURED on the shipped page: the rail runs
+     about 1050px, the chart column took nearly 790 of it, and at 46px tall that
+     is an aspect ratio of 17:1 - the curve rendered as a flat smear with no
+     readable shape, which is what Marcus called out. 46 was chosen when the
+     block was a bare curve with no axis, no baseline and no column beside it;
+     it now has all three. With `stats` in column 3 the curve column is ~620px,
+     so 88px is about 7:1, and the extra 42px comes out of the empty space that
+     was already sitting under this card. */
+  .va-twopane-rail .apex-optd-svg { height: 88px; }
+  .va-twopane-rail .apex-optd-stats { grid-area: stats; min-width: 0; }
+  .va-twopane-rail .apex-optd-stats div { padding: 1.5px 0; gap: 12px; }
+  .va-twopane-rail .apex-optd-stats span { font-size: 12px; }
+  .va-twopane-rail .apex-optd-stats b { font-size: 13px; }
 
   .va-twopane-rail .apex-optd-odds {
     grid-area: odds;
@@ -19327,7 +19410,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1787733920-GW2-6ccdc073";
+const BUILD_VERSION = "1787737703-GW2-c076d505";
 window.APEX_BUILD = BUILD_VERSION;
 // DEMO ROLLBACK flag — true only when force-pinned to a completed GW for a demo.
 window.APEX_SQUAD_ROLLBACK = false;
@@ -19335,7 +19418,7 @@ window.APEX_SQUAD_ROLLBACK = false;
 let FPL_ID = null;
 let SQUAD_DATA = [];
 </script>
-<script src="/apex_pool.js?v=1787733920-GW2-6ccdc073"></script>
+<script src="/apex_pool.js?v=1787737703-GW2-c076d505"></script>
 <script>
 const PLAYER_NAMES = {"1": "Raya", "2": "Arrizabalaga", "3": "Meslier", "4": "Gabriel", "5": "J.Timber", "6": "Saliba", "7": "Lewis-Skelly", "8": "Calafiori", "9": "Hincapie", "10": "White", "11": "Mosquera", "12": "Saka", "13": "Rice", "14": "Eze", "15": "\u00d8degaard", "16": "Madueke", "17": "Merino", "18": "Martinelli", "19": "Zubimendi", "20": "Dowman", "22": "Nwaneri", "23": "F\u00e1bio Vieira", "24": "Nelson", "25": "Gy\u00f6keres", "26": "Havertz", "27": "G.Jesus", "31": "Konsa", "452": "Bruno G.", "557": "Tzolis", "28": "Martinez", "29": "M.Bizot", "30": "Digne", "32": "Cash", "33": "Mings", "34": "Pau", "35": "Bogarde", "36": "Maatsen", "37": "Lindel\u00f6f", "38": "A.Garc\u00eda", "39": "Nedeljkovic", "41": "Buend\u00eda", "44": "Bailey", "45": "McGinn", "46": "Barkley", "47": "Kamara", "48": "Onana", "49": "Iling Jr", "50": "Burrowes", "51": "George Hemmings", "52": "Alysson", "53": "Manzambi", "54": "Gomes", "55": "Watkins", "56": "Abraham", "160": "Garnacho", "582": "Madjo", "596": "Ruggeri", "597": "Suzuki", "606": "Rowe", "607": "Lynch", "611": "Wan-Bissaka", "57": "Petrovi\u0107", "58": "Forster", "59": "Dennis", "60": "Hill", "61": "Truffert", "62": "Diakit\u00e9", "63": "Milosavljevi\u0107", "64": "Smith", "65": "J.Araujo", "66": "Soler", "67": "Rayan", "68": "Tavernier", "69": "Scott", "70": "Kluivert", "71": "Cook", "72": "Gannon-Doak", "73": "Adams", "74": "Brooks", "75": "Christie", "76": "T\u00f3th.A", "77": "Adli", "78": "Kroupi.Jr", "79": "Evanilson", "80": "Enes \u00dcnal", "81": "Rodr\u00edguez", "566": "Silva", "573": "Sanchez", "608": "Jebbison", "82": "Kelleher", "83": "Valdimarsson", "84": "Collins", "85": "Van den Berg", "86": "Lewis-Potter", "87": "Ajer", "88": "Kayode", "89": "Henry", "90": "Hickey", "91": "Pinnock", "92": "Ji-soo", "93": "Schuster", "94": "Schade", "95": "O.Dango", "96": "Damsgaard", "97": "Jensen", "98": "Janelt", "99": "Milambo", "100": "Carvalho", "102": "Yarmoliuk", "103": "Dasilva", "105": "Anthony", "106": "Thiago", "107": "Furo", "108": "Wilson", "565": "M.Sangar\u00e9", "109": "Verbruggen", "111": "Steele", "113": "F.Kad\u0131o\u011flu", "114": "Boscagli", "115": "De Cuyper", "116": "Dunk", "117": "Coppola", "118": "Igor", "119": "Costinha", "120": "Svoboda", "121": "Mitoma", "122": "Minteh", "123": "Hinshelwood", "124": "Gro\u00df", "125": "Georginio", "126": "O'Riley", "127": "Gomez", "128": "Buonanotte", "129": "Ayari", "130": "Wieffer", "131": "Baleba", "132": "Howell", "133": "Watson", "134": "Oriola", "135": "Yohanna", "137": "Tzimas", "138": "Kostoulas", "139": "Ferguson", "328": "Struijk", "504": "Vuskovic", "594": "David", "600": "Osman", "605": "Yalcouy\u00e9", "40": "Rogers", "101": "Henderson", "136": "Welbeck", "140": "S\u00e1nchez", "141": "J\u00f6rgensen", "142": "James", "143": "Chalobah", "144": "Gusto", "145": "Fofana", "146": "B.Badiashile", "147": "Tosin", "148": "Hato", "149": "Colwill", "150": "M.Sarr", "151": "Acheampong", "152": "Palestra", "153": "Disasi", "154": "Palmer", "155": "Enzo", "156": "Neto", "157": "Est\u00eav\u00e3o", "158": "Gittens", "159": "Caicedo", "161": "Lavia", "163": "D.Essugo", "164": "Quenda", "165": "Jo\u00e3o Pedro", "166": "N.Jackson", "167": "Delap", "168": "Marc Guiu", "169": "Mheuka", "170": "Emegha", "200": "Lacroix", "560": "Penders", "561": "Anselmino", "568": "Barco", "578": "Mudryk", "583": "Chavarria", "104": "Onyeka", "110": "Rushworth", "171": "Dovin", "172": "Wilson", "173": "Thomas", "174": "Kitching", "175": "van Ewijk", "176": "Dasilva", "177": "Kesler-Hayden", "178": "Bidwell", "179": "Latibeaudiere", "180": "Woolfenden", "181": "Brau", "182": "Amenda", "183": "Rudoni", "184": "Grimes", "185": "Sakamoto", "186": "Mason-Clark", "187": "Eccles", "188": "Torp", "189": "Shepherd", "190": "Tchaouna", "191": "Borges Rodrigues", "192": "Andrews", "193": "Wright", "194": "Thomas-Asante", "195": "Simms", "196": "Markelo", "197": "Bassette", "492": "Awoniyi", "575": "Yirenkyi", "584": "Hamer", "599": "Cherif", "42": "Guessand", "198": "Henderson", "199": "Benitez", "201": "Mu\u00f1oz", "202": "Richards", "203": "Canvot", "204": "Mitchell", "205": "Sosa", "206": "Chadi Riad", "207": "Mingueza", "208": "Sarr", "210": "Wharton", "211": "Yeremy", "212": "Hughes", "213": "Lerma", "214": "Kamada", "215": "Devenny", "216": "Esse", "217": "M.Fran\u00e7a", "218": "Doucour\u00e9", "219": "J.Rak-Sakyi", "220": "Cardines", "221": "Drakes-Thomas", "222": "Strand Larsen", "223": "Mateta", "224": "Nketiah", "225": "Uche", "241": "McNeil", "555": "Matthews", "577": "Tomiyasu", "588": "Khalaili", "595": "Gozo", "21": "N\u00f8rgaard", "209": "Johnson", "226": "Pickford", "227": "Travers", "228": "King", "229": "Tarkowski", "230": "Branthwaite", "231": "Keane", "232": "O'Brien", "233": "Mykolenko", "234": "Patterson", "235": "Aznou", "236": "Dewsbury-Hall", "237": "Ndiaye", "239": "Garner", "240": "Iroegbunam", "242": "George", "243": "Alcaraz", "244": "Armstrong", "245": "Dibling", "246": "R\u00f6hl", "247": "Hackney", "248": "Beto", "249": "Barry", "250": "Leno", "251": "Lecomte", "252": "McNally", "253": "Andersen", "254": "Robinson", "255": "J.Cuenca", "256": "Tete", "257": "Bassey", "258": "Castagne", "261": "Iwobi", "262": "Smith Rowe", "263": "Kevin", "264": "Bobb", "265": "Berge", "266": "Cairney", "268": "King", "269": "Sessegnon", "270": "Reed", "271": "Muniz", "272": "Kusi-Asare", "569": "Gonzalo", "570": "Palacios", "580": "Charles", "610": "De Fougerolles", "273": "Phillips", "274": "Butland", "275": "Cartwright", "276": "Lo-Tutala", "277": "Egan", "278": "Hughes", "279": "Ajayi", "280": "Coyle", "281": "Drameh", "282": "Giles", "283": "Jacob", "284": "McCarthy", "285": "McNair", "286": "Belloumi", "287": "Millar", "288": "Dowell", "289": "Crooks", "290": "Slater", "291": "Matazo", "292": "\u00d6m\u00fcr", "293": "Kamara", "294": "Zambrano", "295": "McBurnie", "296": "Akintola", "297": "Gyabi", "298": "Destan", "299": "Burstow", "340": "Gelhardt", "556": "Targett", "563": "Morita", "572": "Tzolakis", "574": "Hjert\u00f8-Dahl", "576": "Stroud", "585": "Herrington", "586": "Mendy", "589": "Gourna-Douath", "259": "Diop", "267": "Luki\u0107", "300": "Walton", "301": "Palmer", "302": "Button", "303": "Kipr\u00e9", "304": "O'Shea", "305": "Davis", "306": "Greaves", "307": "Johnson", "308": "Furlong", "309": "N\u00fa\u00f1ez", "310": "Matusiwa", "311": "Burns", "312": "Taylor", "313": "Clarke", "314": "Ogbene", "315": "Fatawu", "316": "Emersonn", "317": "Hirst", "318": "Philogene", "319": "Szmodics", "320": "Akpom", "321": "Walle Egeli", "322": "Al-Hamadi", "323": "McAteer", "324": "Mehmeti", "554": "Van Oevelen", "562": "Maeda", "564": "Scherpen", "571": "Florentino", "591": "Enciso", "592": "Ouattara", "602": "Humphreys", "260": "Wilson", "326": "Perri", "327": "Bijol", "329": "Rodon", "330": "Bogle", "331": "Gudmundsson", "332": "Justin", "333": "Bornauw", "334": "Muharemovi\u0107", "335": "Stach", "336": "Okafor", "337": "Aaronson", "338": "Ampadu", "339": "Longstaff", "341": "Gnonto", "342": "Harrison", "343": "James", "344": "Gruev", "345": "Tanaka", "346": "Calvert-Lewin", "347": "Nmecha", "348": "Piroe", "349": "Mateo Joseph", "385": "Trafford", "598": "Elvedi", "603": "Lienou", "604": "Cresswell", "350": "A.Becker", "351": "Mamardashvili", "352": "Woodman", "353": "Pecsi", "354": "Jaros", "355": "Davies", "356": "Virgil", "357": "Frimpong", "358": "Kerkez", "359": "Gomez", "360": "Bradley", "361": "Lucky", "362": "Jacquet", "363": "Leoni", "364": "Tsimikas", "365": "Ramsay", "366": "Wirtz", "367": "Gakpo", "368": "Szoboszlai", "369": "Ngumoha", "370": "Chiesa", "371": "Gravenberch", "372": "Mac Allister", "373": "C.Jones", "374": "Endo", "375": "Nyoni", "376": "Bajcetic", "377": "Munoz", "378": "McConnell", "379": "Isak", "380": "Ekitik\u00e9", "381": "Koumas", "382": "Danns", "383": "Elliott", "579": "Araujo", "238": "Grealish", "384": "Donnarumma", "386": "Bettinelli", "387": "O'Reilly", "388": "Gu\u00e9hi", "389": "Matheus N.", "390": "R\u00faben", "391": "Gvardiol", "392": "A\u00eft-Nouri", "393": "Khusanov", "394": "Alleyne", "395": "Lewis", "396": "Vitor Reis", "397": "Semenyo", "398": "Foden", "399": "Cherki", "400": "Doku", "401": "Marmoush", "402": "Rodrigo", "404": "Reijnders", "405": "N.Gonzalez", "406": "Kova\u010di\u0107", "407": "Echeverri", "408": "Phillips", "409": "Mukasa", "410": "Monga", "411": "Haaland", "481": "Anderson", "587": "Rulli", "43": "Tielemans", "162": "Andrey Santos", "325": "Darlow", "412": "Lammens", "413": "Bayindir", "414": "Heaton", "415": "Dorgu", "416": "De Ligt", "417": "Dalot", "418": "Maguire", "419": "Martinez", "420": "Yoro", "421": "Heaven", "422": "Mazraoui", "423": "Shaw", "424": "Amass", "425": "Fredricson", "426": "B.Fernandes", "427": "Mbeumo", "428": "Cunha", "429": "Rashford", "430": "Mount", "431": "Amad", "432": "Mainoo", "433": "Ugarte", "434": "J.Fletcher", "435": "Lacey", "436": "Collyer", "437": "Bendito Mantato", "438": "Fletcher", "439": "\u0160e\u0161ko", "440": "Zirkzee", "441": "Obi", "442": "Pope", "443": "Gillespie", "444": "Jaouen", "445": "Thiaw", "446": "Sch\u00e4r", "447": "Botman", "448": "Burn", "449": "Hall", "450": "Livramento", "451": "A.Murphy", "453": "Barnes", "454": "Elanga", "456": "J.Ramsey", "457": "J.Murphy", "458": "Joelinton", "459": "L.Miley", "460": "Willock", "461": "Tour\u00e9", "462": "Steur", "463": "Woltemade", "464": "Wissa", "465": "Osula", "466": "Neave", "559": "Bamba", "567": "Horn\u00ed\u010dek", "593": "Dedi\u0107", "609": "Shahar", "467": "Sels", "468": "John", "469": "N.Williams", "470": "Morato", "471": "Milenkovi\u0107", "472": "Murillo", "473": "Aina", "474": "Jair Cunha", "475": "Savona", "476": "O.Richards", "477": "Abbott", "478": "Netz", "479": "Bindon", "480": "Gibbs-White", "482": "Hudson-Odoi", "483": "Ndoye", "484": "Hutchinson", "485": "Bakwa", "486": "McAtee", "487": "Dominguez", "488": "I.Sangar\u00e9", "489": "Yates", "490": "Wood", "491": "Igor Jesus", "493": "Kalimuendo", "558": "Schlager", "581": "Diomande", "590": "Benda", "112": "Van Hecke", "403": "Savinho", "455": "Tonali", "494": "Vicario", "495": "Austin", "496": "Kinsky", "497": "Dubravka", "498": "Senesi", "499": "Pedro Porro", "500": "Romero", "501": "Danso", "502": "Robertson", "503": "Van de Ven", "505": "Spence", "506": "Udogie", "507": "Phillips", "508": "Davies", "509": "Byfield", "510": "Rowswell", "511": "Souza", "512": "Kudus", "513": "Xavi", "514": "Tel", "515": "Maddison", "516": "Bentancur", "517": "Odobert", "518": "P.M.Sarr", "519": "Gallagher", "520": "Bergvall", "521": "Kulusevski", "522": "Gray", "523": "Moore", "524": "Olusesi", "525": "Fernandes", "526": "Solanke", "527": "Richarlison", "528": "Scarlett", "601": "Williams-Barnett", "529": "Roefs", "530": "Patterson", "531": "Ellborg", "532": "Ballard", "533": "Mukiele", "534": "Hume", "535": "Alderete", "536": "Reinildo", "537": "Seelt", "538": "Hjelde", "539": "O'Nien", "540": "Masuaku", "541": "Meunier", "542": "E.Le F\u00e9e", "543": "Diarra", "544": "Xhaka", "545": "Sadiki", "546": "Adingra", "547": "Mundle", "548": "Rigg", "549": "Talbi", "550": "Jocelin.T", "551": "Angulo", "552": "Brobbey", "553": "Isidor", "612": "Methalie"};
 const TRANSFER_RECS = [];
@@ -19349,6 +19432,11 @@ const _APEX_FH_SQUADS_BACKUP = JSON.parse(JSON.stringify(FH_SQUADS));
 const COMPARE_WC_SQUADS = {};
 const COMPARE_FH_SQUADS = {};
 let TEAM_META = {"team_name": "", "manager": "", "overall_rank": 0, "bank": 0.0, "free_transfers": 1, "squad_value": 0.0, "budget": 100.0, "start_gw": 2, "gw_range": [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20], "gw_labels": ["GW2", "GW3", "GW4", "GW5", "GW6", "GW7", "GW8", "GW9", "GW10", "GW11", "GW12", "GW13", "GW14", "GW15", "GW16", "GW17", "GW18", "GW19", "GW20"], "dgw_teams_by_gw": {}, "bgw_teams_by_gw": {}, "deadlines_by_gw": {"1": 1787333400, "2": 1787938200, "3": 1788543000, "4": 1789216200, "5": 1789752600, "6": 1791626400, "7": 1792231200, "8": 1792776600, "9": 1793444400, "10": 1794058200, "11": 1795267800, "12": 1795872600, "13": 1796236200, "14": 1796477400, "15": 1797082200, "16": 1797687000, "17": 1798291800, "18": 1798655400, "19": 1798896600, "20": 1799260200, "21": 1800106200, "22": 1800711000, "23": 1801315800, "24": 1801920600, "25": 1802284200, "26": 1803130200, "27": 1803735000, "28": 1804098600, "29": 1804944600, "30": 1805549400, "31": 1807360200, "32": 1807965000, "33": 1808569800, "34": 1809174600, "35": 1809779400, "36": 1810384200, "37": 1811075400, "38": 1811683800}, "season": "2026/27"};
+// APEX_DIST_AXIS_v1 - FPL average over the gameweeks that have FINISHED, or null
+// before any has. Read only by the distribution block. Deliberately NOT part of
+// TEAM_META: that object has a public/private split (two json.dumps sites near
+// the end of this file) and this is public FPL data with no variant.
+const APEX_CROWD_AVG = {"score": 50.0, "label": "GW1", "n": 1};
 // ── APEX-DEADLINE-GUARD-v1 (2026-07-28, audit K1) ────────────────────────
 // The pre-GW1 "unlimited free transfers" window is opened by _ppUnlimitedGw
 // (assets/apex_app.js), which reads TEAM_META.deadlines_by_gw and, when the
@@ -22665,10 +22753,30 @@ function _apexOptDHtml(d, gwLabel, headlineE) {
   // as "11(" at 6). AUG08B_TIGHTEN removed every piece of text from this SVG,
   // so all they do now is hold the curve 3% short of each end of its own box.
   var W = 470, H = 104, ml = 0, mr = 0, mb = 4, mt = 12;
-  var lo = d.lo, hi = d.hi, rng = Math.max(1, hi - lo);
-  var step = (rng > 80) ? 20 : ((rng > 34) ? 10 : 5);
-  var XLO = Math.floor(lo / step) * step, XHI = Math.ceil(hi / step) * step;
-  if (XHI - XLO < step * 2) XHI = XLO + step * 2;
+  var lo = d.lo, hi = d.hi;
+  // APEX_DIST_AXIS_v1: the window is FIXED, not fitted to this week's own draws.
+  // Fitted, every card silently rescaled itself - a 42-mean bank week and a
+  // 78-mean triple-captain week drew the SAME width of curve - so the picture
+  // said nothing about which week was bigger, and moving between gameweeks told
+  // you nothing. 0-150 is the scale FPL scores actually live on and it does not
+  // move, so two cards are comparable by eye. The ceiling lifts ONLY when a
+  // week's own draws would otherwise fall outside it (bench boost, triple
+  // captain), because clipping the curve would be a lie rather than a rescale.
+  // lo / hi still carry the DATA range - the path below maps hist across
+  // lo..hi through x(), so a wider window squeezes the curve, it does not
+  // stretch the histogram.
+  var step = 25;
+  var XLO = 0, XHI = Math.max(150, Math.ceil(hi / 25) * 25);
+  // The crowd rule, when there is one. Guarded three ways: the const may not
+  // exist on an older baked page, it is null before any gameweek has finished,
+  // and a figure outside the window would draw a rule against the frame.
+  var _cw = null;
+  try {
+    if (typeof APEX_CROWD_AVG !== 'undefined' && APEX_CROWD_AVG
+        && +APEX_CROWD_AVG.score > XLO && +APEX_CROWD_AVG.score < XHI) {
+      _cw = APEX_CROWD_AVG;
+    }
+  } catch (_eCw) { _cw = null; }
   var x = function (v) { return ml + (v - XLO) / (XHI - XLO) * (W - ml - mr); };
   var hh = (d.hist && d.hist.length) ? d.hist : [1], NB = hh.length;
   var sm = [], i, k, j, acc, cnt2;
@@ -22710,6 +22818,9 @@ function _apexOptDHtml(d, gwLabel, headlineE) {
   // picture cannot drift from the words.
   // Brace-free on purpose: this whole function is inside an f-string.
   var _pol = (typeof window !== 'undefined' && window.APEX_POLISH === false) ? false : true;
+  // APEX_DIST_AXIS_v1: AUG07J retired pc() with the column it formatted. Back,
+  // renamed so it cannot collide with anything that took the short name since.
+  var _pcD = function (v) { return ((+v || 0) * 100).toFixed(1) + '%'; };
   var _uid = 'aog' + String(gwLabel || 'gw').replace(/[^A-Za-z0-9]/g, '')
            + Math.round((d.mean || 0) * 10);
   if (_pol) s += '<defs><linearGradient id="' + _uid + '" x1="0" y1="0" x2="0" y2="1">'
@@ -22742,7 +22853,36 @@ function _apexOptDHtml(d, gwLabel, headlineE) {
   // read as the rival's block; the odds strip below now carries what they said,
   // in words. XLO / XHI / step still drive x(), so the horizontal scale is
   // unchanged — it is only the ink that is gone.
+  // APEX_DIST_AXIS_v1: the baseline comes back, and the crowd rule with it. The
+  // axis TICKS do NOT come back into this SVG. preserveAspectRatio="none"
+  // stretches the box to whatever width the column gets, so every glyph drawn
+  // inside it shears horizontally - that is why AUG07J could only remove them
+  // and HERO_TIGHT could only go to "none" once no text was left. The ticks and
+  // the sideways crowd label are HTML instead, positioned by percentage against
+  // this same XLO..XHI scale, so they line up with the drawing without living
+  // in a stretched coordinate system.
+  s += '<line x1="0" y1="' + (H - mb) + '" x2="' + W + '" y2="' + (H - mb)
+     + '" stroke="#dbe4e0" stroke-width="1" vector-effect="non-scaling-stroke"/>';
+  if (_cw) s += '<line x1="' + x(+_cw.score).toFixed(1) + '" y1="2" x2="'
+     + x(+_cw.score).toFixed(1) + '" y2="' + (H - mb) + '" stroke="#5d6b65"'
+     + ' stroke-width="1.25" stroke-dasharray="3 2" vector-effect="non-scaling-stroke"/>';
   s += '</svg>';
+  // APEX_DIST_AXIS_v1: the HTML axis. One span per tick, positioned by percent.
+  // How many of them are VISIBLE is a CSS container query on .apex-optd-chart -
+  // the chart is capped at 360px in the rail and full-bleed on a phone, neither
+  // of which the viewport width tells you.
+  var _ax = '<div class="apex-optd-ticks">';
+  for (var _t = XLO; _t <= XHI; _t += step)
+    _ax += '<span style="left:' + ((_t - XLO) / (XHI - XLO) * 100).toFixed(3)
+        + '%">' + _t + '</span>';
+  _ax += '</div>';
+  var _cwLab = '';
+  if (_cw) {
+    var _cwPct = (+_cw.score - XLO) / (XHI - XLO) * 100;
+    _cwLab = '<div class="apex-optd-crowd' + (_cwPct > 55 ? ' l' : '')
+       + '" style="left:' + _cwPct.toFixed(3) + '%">FPL avg (' + _cw.label
+       + ') ' + (+_cw.score).toFixed(0) + '</div>';
+  }
   // APEX_FIX_AUG07J_ODDS: pc() formatted the three percentages the odds strip replaced.
   var h = '';
   h += '<div class="va-range apex-optd-wrap">';
@@ -22776,7 +22916,26 @@ function _apexOptDHtml(d, gwLabel, headlineE) {
   h +=       '<button type="button" class="apex-optd-sq" onclick="_apexOptDDownload()" title="Download this distribution as CSV" aria-label="Download this distribution as CSV">&#8595;</button>';
   h +=       '<button type="button" class="apex-optd-sq apex-optd-rd" onclick="_apexOptDHelp(this)" title="How to read this" aria-label="How to read this chart" aria-expanded="false">?</button>';
   h +=     '</div>';
-  h +=     '<div class="apex-optd-chart">' + s + '</div>';
+  // APEX_DIST_AXIS_v1: .apex-optd-plot wraps the SVG ONLY. The rotated label is
+  // anchored with top:100%, which resolves against this wrapper - if the ticks
+  // were inside it the label would sit a row too low.
+  h +=     '<div class="apex-optd-chart">'
+     +       '<div class="apex-optd-plot">' + s + _cwLab + '</div>' + _ax
+     +     '</div>';
+  // APEX_DIST_AXIS_v1: the column beside the curve, restored. AUG07J removed it
+  // and gave its three figures to the odds strip below; the strip is retired
+  // just below, so nothing is printed twice. median and the middle-80% band are
+  // in here too, which is why retiring the strip loses no figure the card used
+  // to show. p40/p60/p80 come off `d` - the same object the curve is drawn
+  // from - so the column cannot drift from the picture.
+  h +=     '<div class="apex-optd-stats">';
+  h +=       '<div><span>median</span><b>' + d.median.toFixed(1) + '</b></div>';
+  h +=       '<div><span>middle 80%</span><b>' + d.floor.toFixed(1) + '&ndash;'
+     +         d.ceiling.toFixed(1) + '</b></div>';
+  h +=       '<div><span>40+ pts</span><b>' + _pcD(d.p40) + '</b></div>';
+  h +=       '<div><span>60+ pts</span><b>' + _pcD(d.p60) + '</b></div>';
+  h +=       '<div><span>80+ pts</span><b>' + _pcD(d.p80) + '</b></div>';
+  h +=     '</div>';
   h +=   '</div>';
   // APEX_FIX_AUG07J_ODDS: the 40+ / 60+ / 80+ column is gone and the odds take its place
   // BELOW the row, not beside it. Two reasons. The wording: those three
@@ -22790,16 +22949,37 @@ function _apexOptDHtml(d, gwLabel, headlineE) {
   // THE FRACTIONS BELOW ARE HARDCODED AGAINST THOSE THREE CONSTANTS. Move a
   // percentile in _apexSimDist and these strings start lying.
   // p40 / p60 / p80 are still computed and still in the CSV download.
+  // APEX_DIST_AXIS_v1: the odds strip is OFF. Its three figures - median,
+  // ceiling, floor - are all in the stats column above now, so leaving it on
+  // would print each of them twice, which is the exact duplicate AUG08A_DEDUPE
+  // and MERGE1 both argue against. Kept in the source behind a flag rather than
+  // deleted: the wording ("1 in 10 weeks over 80.2" instead of "90th
+  // percentile") is the better of the two ways to say it and may come back as
+  // the stats column's labels. window.APEX_ODDS_STRIP = true restores it.
+  if (typeof window !== 'undefined' && window.APEX_ODDS_STRIP === true) {
   h +=   '<div class="apex-optd-odds">';
   h +=     '<div><b>1 in 2</b><span>weeks over ' + d.median.toFixed(1) + '</span></div>';
   h +=     '<div><b>1 in 10</b><span>weeks over ' + d.ceiling.toFixed(1) + '</span></div>';
   h +=     '<div><b>1 in 10</b><span>weeks under ' + d.floor.toFixed(1) + '</span></div>';
   h +=   '</div>';
+  }
   h +=   '<div class="apex-optd-help" hidden>' + (d.n || 0).toLocaleString() + ' simulated gameweeks from your fifteen, '
      +   'autosubs included — so the mean already carries the bench cover that used to be printed under the total. '
-     +   'The three lines under the curve are percentiles of those same weeks: half land above the first, '
-     +   'a tenth above the second, a tenth below the third. It is not a crowd average — '
-     +   'nobody has played ' + (gwLabel || 'this gameweek') + ' yet, so there is nothing to average.</div>';
+     +   'The column beside the curve reads off those same weeks: half land above the median, '
+     +   'the middle 80% fall inside the band, and the three thresholds are the share clearing 40, 60 and 80. '
+     // APEX_DIST_AXIS_v1: this sentence used to end "It is not a crowd average -
+     // nobody has played this gameweek yet, so there is nothing to average."
+     // That was true of the whole card and is still true of the CURVE. It is no
+     // longer true of the block, because the dashed rule IS a crowd figure - so
+     // the sentence now says which gameweeks it came from and which one it did
+     // not come from, rather than denying it exists.
+     +   (_cw
+          ? 'The dashed vertical rule is the FPL average from the gameweeks that have finished ('
+            + _cw.label + ': ' + (+_cw.score).toFixed(1) + '). It is not an average for '
+            + (gwLabel || 'this gameweek') + ' — nobody has played that yet, so there is nothing to average.'
+          : 'There is no crowd average on this chart — nobody has played '
+            + (gwLabel || 'this gameweek') + ' yet, so there is nothing to average.')
+     +   '</div>';
   h +=   '<div class="va-range-foot">' + (d.n || 0).toLocaleString() + ' simulated gameweeks · '
      +   (d.chip === 'bb' ? 'bench boost: all 15 score, autosubs off'
           : d.chip === 'tc' ? 'triple captain applied · autosubs included'
@@ -38819,7 +38999,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW2</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1787733920-GW2-6ccdc073</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1787737703-GW2-c076d505</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
