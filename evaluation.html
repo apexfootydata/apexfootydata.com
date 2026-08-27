@@ -8,7 +8,7 @@
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=4">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800&display=optional" rel="stylesheet">
 <style>
   :root{ --cream:#FAF7F1; --ink:#1a2e28; --teal:#1D9E75; --muted:#7a8783; }
   *{ box-sizing:border-box; }
@@ -179,7 +179,7 @@
      server-side by _render_static() to match, so the file never claims a state
      it is not in — with or without JS. */
   /* APEX-EVAL-DATA-START */
-var EVAL_DATA = {"weeks": 1, "owned_thr": 5.0, "n": 66, "n_all": 459, "apex": 2.63, "tool_a": 2.56, "bench_b": 2.63, "bench_b_n": 66, "bench_b_common": true, "form": ["toolA"], "verdict": "Too early to separate them: 66 shared picks over 1 gameweek is not enough to call a winner, and we will not pretend otherwise.", "updated_utc": "2026-08-27T13:54:16Z"};
+var EVAL_DATA = {"weeks": 1, "owned_thr": 5.0, "n": 66, "n_all": 459, "apex": 2.63, "tool_a": 2.56, "bench_b": 2.63, "bench_b_n": 66, "bench_b_common": true, "form": ["toolA"], "verdict": "Too early to separate them: 66 shared picks over 1 gameweek is not enough to call a winner, and we will not pretend otherwise.", "updated_utc": "2026-08-27T15:54:23Z"};
 /* APEX-EVAL-DATA-END */
   (function(){
     var COL={apex:'#1D9E75',toolA:'#3f4d47',toolB:'#b8c2bc',level:'#cfd6d2'};
@@ -255,8 +255,17 @@ var EVAL_DATA = {"weeks": 1, "owned_thr": 5.0, "n": 66, "n_all": 459, "apex": 2.
     });
   })();
 </script>
-<!-- Cloudflare Web Analytics -->
-<script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "890700f621df42909deca8500a0df182"}'></script>
+<!-- Cloudflare Web Analytics - APEX_ANALYTICS_OPTOUT_v1 -->
+<script>
+(function(){var K="apex_notrack";try{var q=window.location.search||"";
+if(q.indexOf("notrack=1")>-1){localStorage.setItem(K,"1");}
+else if(q.indexOf("notrack=0")>-1){localStorage.removeItem(K);}
+if(localStorage.getItem(K)==="1"){return;}}catch(e){}
+var s=document.createElement("script");s.defer=true;
+s.src="https://static.cloudflareinsights.com/beacon.min.js";
+s.setAttribute("data-cf-beacon",'{"token": "890700f621df42909deca8500a0df182"}');
+(document.head||document.documentElement).appendChild(s);})();
+</script>
 <!-- End Cloudflare Web Analytics -->
 </body>
 </html>

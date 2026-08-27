@@ -23,7 +23,9 @@
 <meta name="twitter:title" content="Accuracy &mdash; FPL Apex">
 <meta name="twitter:description" content="How the FPL Apex model actually performs &mdash; point-in-time, wins and losses both published.">
 <meta name="twitter:image" content="https://fplapex.com/og-image.png">
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=optional" rel="stylesheet">
 <style>
   :root {
     --cream:   #FAF7F1;
@@ -431,8 +433,17 @@
 
 </main>
 <footer>fplapex.com &middot; data-driven football analytics</footer>
-<!-- Cloudflare Web Analytics -->
-<script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "890700f621df42909deca8500a0df182"}'></script>
+<!-- Cloudflare Web Analytics - APEX_ANALYTICS_OPTOUT_v1 -->
+<script>
+(function(){var K="apex_notrack";try{var q=window.location.search||"";
+if(q.indexOf("notrack=1")>-1){localStorage.setItem(K,"1");}
+else if(q.indexOf("notrack=0")>-1){localStorage.removeItem(K);}
+if(localStorage.getItem(K)==="1"){return;}}catch(e){}
+var s=document.createElement("script");s.defer=true;
+s.src="https://static.cloudflareinsights.com/beacon.min.js";
+s.setAttribute("data-cf-beacon",'{"token": "890700f621df42909deca8500a0df182"}');
+(document.head||document.documentElement).appendChild(s);})();
+</script>
 <!-- End Cloudflare Web Analytics -->
 </body>
 </html>
