@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="3" data-built-at="2026-08-30T10:05:44">
+<meta name="apex-gw" content="3" data-built-at="2026-08-30T14:02:14">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
@@ -37,7 +37,7 @@
 })();
 </script>
 <meta http-equiv="Pragma" content="no-cache">
-<meta name="apex-build" content="20260830-100543">
+<meta name="apex-build" content="20260830-140213">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — FPL Apex</title>
 <meta name="description" content="Plan FPL transfers, chips, and Free Hit squads. Live xG-based projections, a rival head-to-head simulator, and a mini-league table. Free FPL tool.">
@@ -9628,6 +9628,59 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
   //                           squad that is JUDGED on an undecayed total.
   const _CHIP_DECAY_SPAN = CHIP_DECAY.length;      // 6 — the authored window
   function _flatDecay() { return 1; }
+
+  // ── APEX_XMINS_SEAM_TAPER_v1 (2026-08-30) ──────────────────────────────────
+  // HALF THE WILDCARD WAS BEING DECIDED ON PADDING, AT FULL WEIGHT.
+  //
+  // Marcus, 2026-08-30, after checking our rows against his two vendor books.
+  // APEX_XMINS_SOURCE=fr and FPL Review prices TEN gameweeks; the rest of the
+  // baked horizon is the Solio tail, a FLAT constant per player. On the
+  // 2026-08-30 build that was 9 of 19 gameweeks carrying 47.1% of every
+  // player's points, with a +8.2' step UP at the seam - so the unmodelled half
+  // scored BETTER per week than the modelled half.
+  //
+  // flatObjective weights every gameweek 1.0, which is honest when every
+  // gameweek is modelled and a lie when nine of them are a repeated constant.
+  // MEASURED both ways on the live pool, Max EV, scored on the MODELLED weeks
+  // only (you cannot grade a squad on padding):
+  //     padded weeks at 1.00 (shipped)  558.0 xP   -   the fifteen we ship
+  //     padded weeks at 0.15 or 0.00    557.4 xP   -   SIX of fifteen different
+  // 0.6 xP over ten gameweeks. The padding buys nothing and moves six players.
+  // That is churn on made-up numbers, which is the second kind of defect in
+  // OBJECTIVE.md: it does not cost points, it makes the build tell you
+  // something it does not know.
+  //
+  // NOT ZERO. A hard 0 makes the objective indifferent between a man who is
+  // still a starter in GW21 and one who vanishes after GW12, and the flat tail
+  // does carry that one weak fact even though it carries no week-to-week shape.
+  // 0.15 keeps the ordering without letting padding pick the squad; measured
+  // identical to 0.00 on this pool, so the choice is about robustness, not fit.
+  //
+  // REFUSES TO GUESS. The seam comes from TEAM_META.xmins_modelled_gws, stamped
+  // by the build that emitted the pool (APEX_XMINS_SEAM_STAMP_v1). No stamp
+  // means no taper and byte-identical behaviour - an older page, or a book that
+  // covers the whole horizon, must not be silently reshaped by an inference.
+  // DOCTRINE.md: never infer a gameweek something already stamps; if no stamp
+  // exists, REFUSE.
+  // Kill: window.APEX_SEAM_TAPER = false.
+  const _PAD_WEIGHT = 0.15;
+  function _apexModelledDepth(horizon) {
+    try {
+      if (typeof window === 'undefined' || !window) return null;
+      if (window.APEX_SEAM_TAPER === false) return null;
+      const _o = (typeof window.APEX_SEAM_DEPTH === 'number') ? window.APEX_SEAM_DEPTH : null;
+      const tm = window.TEAM_META;
+      const d = (_o !== null) ? _o : (tm ? +tm.xmins_modelled_gws : NaN);
+      if (!isFinite(d) || d <= 0) return null;          // absent -> refuse
+      if (d >= horizon) return null;                     // fully modelled -> nothing to taper
+      return d;
+    } catch (_e) { return null; }
+  }
+  function _flatDecayFor(horizon) {
+    const d = _apexModelledDepth(horizon);
+    if (d === null) return _flatDecay;
+    return function (g) { return (g < d) ? 1 : _PAD_WEIGHT; };
+  }
   function _chipDecayStretched(horizon) {
     const H = Math.max(1, horizon | 0);
     if (H <= _CHIP_DECAY_SPAN) return _chipDecay;
@@ -9642,7 +9695,11 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
   }
   // mode: 'flat' | 'chip' | anything falsy => the 0.85 rolling curve.
   function _decayFnFor(mode, horizon) {
-    if (mode === 'flat') return _flatDecay;
+    // APEX_XMINS_SEAM_TAPER_v1: flat over the MODELLED weeks, tapered over the
+    // padded tail. _decayFnFor also builds _evW, so the variance term rides the
+    // same weights as the mean (the solver's own FIX 8 rule) - without that, a
+    // tapered mean beside a full-weight SD hands the solve to the punt term.
+    if (mode === 'flat') return _flatDecayFor(horizon);
     if (mode) return _chipDecayStretched(horizon);
     return _rollingDecay;
   }
@@ -10736,9 +10793,35 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
         if (dropGhosts && peak < 10) continue;   // no-history ghost: not in the pool at all
         const xm = xmArr ? (+(xmArr[gi] != null ? xmArr[gi] : xmArr[0]) || 0) : 0;
         if (xm >= bar || !(d < 1) || !Array.isArray(p.xp_per_gw)) { out.push(p); continue; }
-        out.push(Object.assign({}, p, {
-          xp_per_gw: p.xp_per_gw.map(function (v) { return (+v || 0) * d; })
-        }));
+        // ── APEX_EVIDENCE_SURVIVES_SHRINK_v1 (2026-08-30) ──────────────────
+        // THE DISCOUNT USED TO BE WIPED BEFORE THE ILP EVER SAW IT.
+        //
+        // This wrote xp_per_gw only. Every solve entry point then calls
+        // _objPool, which OVERWRITES xp_per_gw with the UNDISCOUNTED
+        // xp_solve_per_gw (the vendor-consensus blend). Two transforms writing
+        // one field, second one wins, no gate. Measured on the live GW3 pool:
+        // 118 rows were discounted here and 118 of them carried
+        // xp_solve_per_gw, so the evidence policy reached the objective for
+        // ZERO of them. It has been inert since consensus shrink landed 08-27.
+        //
+        // Fixed at the POLICY, not at the call site: whichever array a later
+        // stage promotes to the objective, it is already discounted, so no
+        // ordering between these two transforms can undo it. That is the
+        // difference between fixing the caller and fixing the engine
+        // (DOCTRINE.md: only the root is eradication).
+        // Consequence measured BEFORE writing this: the wildcard fifteen moves
+        // 2/15 (Raya and Slater out), flat-19 squad EV 1126.7 -> 1138.0; the
+        // chip-decay pitch squad does not move at all.
+        const _disc = function (arr) {
+          return Array.isArray(arr) ? arr.map(function (v) { return (+v || 0) * d; }) : arr;
+        };
+        const _row = Object.assign({}, p, { xp_per_gw: _disc(p.xp_per_gw) });
+        if (Array.isArray(p.xp_solve_per_gw)) _row.xp_solve_per_gw = _disc(p.xp_solve_per_gw);
+        // `xp` is the next-GW scalar _objPool rebuilds from the blend; keep it
+        // consistent so a reader that takes the scalar cannot see a fuller
+        // number than the array it is supposed to summarise.
+        if (typeof p.xp === 'number') _row.xp = (+p.xp || 0) * d;
+        out.push(_row);
       }
       return (out.length >= FPL_RULES.SQUAD_SIZE) ? out : pool;   // never starve the ILP
     } catch (_e) { return pool; }
@@ -14269,6 +14352,15 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
     const ITB_W = (typeof opts.itbValue === 'number') ? opts.itbValue : 0.08;
     const HIT = 4;
     const BW = (typeof opts.benchWeight === 'number') ? opts.benchWeight : FPL_RULES.BENCH_WEIGHT;
+    // APEX_MILP_PRESET_TILT_v1 (2026-08-30): the risk preset, read with the SAME
+    // contract solveWildcard uses so one dial cannot mean two things. Absent
+    // opts.differential this is inert and every coefficient is byte-identical to
+    // the pre-2026-08-30 objective.
+    const DIFF_ON = (opts.differential === true)
+      && !(typeof window !== 'undefined' && window.APEX_MILP_PRESET_TILT === false);
+    const DIFF_SIGN = (opts.diffSign === -1) ? -1 : 1;
+    const DIFF_W = (typeof opts.diffWeight === 'number') ? opts.diffWeight
+                 : ((DIFF_SIGN > 0) ? 0.15 : 1.15);   // PUNT_DIFF_WEIGHT / DIFF_WEIGHT
     // APEX_MILP_BENCH_VICE_v1 (2026-08-23) — bench pricing mode. `flat` is the
     // 08-22 model exactly (one weight on all four slots, booked through the
     // x/s decomposition); the two shaped modes spend the measured
@@ -14589,8 +14681,44 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
         const pw = ptsAt(p, w);
         const _bw = bwOf(p);
         if (pw) {
-          addObj(vs(i, w), D * pw * (1 - _bw));
-          addObj(vx(i, w), D * pw * _bw);
+          // ── APEX_MILP_PRESET_TILT_v1 (2026-08-30) ───────────────────────
+          // THE PRESET WAS APPLIED AT BUILD TIME AND REVERSED HERE.
+          //
+          // Marcus, 2026-08-30: "wc was the diff preset and was still
+          // recommended ... sell him next week." solveWildcard reads
+          // opts.differential; this function contained ZERO references to it.
+          // So the Differential box built a low-owned fifteen and this engine,
+          // pure untilted EV, spent the free transfers converting it back to
+          // the template. MEASURED before the fix, fresh WC15 walked 6 GW:
+          //   Max EV        24.6% -> 23.8%  (-0.7, the control)
+          //   Differential  11.8% -> 19.2%  (+7.4, four of its own picks sold,
+          //                                  buying Joao Pedro 68.5% and
+          //                                  Szoboszlai 43.1%)
+          //   Template      28.9% -> 25.7%  (-3.2)
+          // You paid the preset's xP cost at build time and then paid transfers
+          // to throw away what it bought. Worst of both.
+          //
+          // This is the BUILD ENGINE'S OWN FORMULA, not a second scheme:
+          //   diffPenalty = diffSign * ownWeight * (own/100) * dangerEV
+          // with the same constants and the same x/s split, so a benched player
+          // is tilted at bench weight exactly as his points are. dangerEV there
+          // is "the array this objective maximises", which here is the decayed
+          // per-week points -- so the lever lands denominated in THIS engine's
+          // horizon and decay, which is what that comment asks for.
+          //
+          // NOT MIRRORED, deliberately: the variance (riskWeight/SD) term. It
+          // needs xp_sd_per_gw through a horizon this engine has never carried,
+          // and PUNT_RISK_WEIGHT is itself an open question (ships at 5.00,
+          // measured to peak at 3.7 -- 2026-08-29 handover). Adding an
+          // unmeasured variance term to the transfer objective is how you get a
+          // fix nobody can attribute. Ownership is what was drifting; ownership
+          // is what this moves.
+          // Kill: window.APEX_MILP_PRESET_TILT = false, or omit opts.differential.
+          const _dp = DIFF_ON
+            ? (DIFF_SIGN * DIFF_W * ((+p.own || 0) / 100) * D * Math.max(0, pw))
+            : 0;
+          addObj(vs(i, w), D * pw * (1 - _bw) - _dp * (1 - _bw));
+          addObj(vx(i, w), D * pw * _bw       - _dp * _bw);
           addObj(vc(i, w), D * pw);          // captain doubles
         }
       }
@@ -20070,7 +20198,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1788080743-GW3-9175d75d";
+const BUILD_VERSION = "1788094933-GW3-d5bebc2d";
 window.APEX_BUILD = BUILD_VERSION;
 // APEX_BUILD_FRESHNESS_v1 (2026-08-28): the page checks whether a NEWER build
 // is live and offers a one-tap update. GitHub Pages serves HTML max-age=600,
@@ -20115,7 +20243,7 @@ window.APEX_SQUAD_ROLLBACK = false;
 let FPL_ID = null;
 let SQUAD_DATA = [];
 </script>
-<script src="/apex_pool.js?v=1788080743-GW3-9175d75d"></script>
+<script src="/apex_pool.js?v=1788094933-GW3-d5bebc2d"></script>
 <script>
 const PLAYER_NAMES = {"1": "Raya", "2": "Arrizabalaga", "3": "Meslier", "4": "Gabriel", "5": "J.Timber", "6": "Saliba", "7": "Lewis-Skelly", "8": "Calafiori", "9": "Hincapie", "10": "White", "11": "Mosquera", "12": "Saka", "13": "Rice", "14": "Eze", "15": "\u00d8degaard", "16": "Madueke", "17": "Merino", "18": "Martinelli", "19": "Zubimendi", "20": "Dowman", "22": "Nwaneri", "23": "F\u00e1bio Vieira", "24": "Nelson", "25": "Gy\u00f6keres", "26": "Havertz", "27": "G.Jesus", "31": "Konsa", "452": "Bruno G.", "557": "Tzolis", "28": "Martinez", "29": "M.Bizot", "30": "Digne", "32": "Cash", "33": "Mings", "34": "Pau", "35": "Bogarde", "36": "Maatsen", "37": "Lindel\u00f6f", "38": "A.Garc\u00eda", "39": "Nedeljkovic", "41": "Buend\u00eda", "44": "Bailey", "45": "McGinn", "46": "Barkley", "47": "Kamara", "48": "Onana", "49": "Iling Jr", "50": "Burrowes", "51": "George Hemmings", "52": "Alysson", "53": "Manzambi", "54": "Gomes", "55": "Watkins", "56": "Abraham", "160": "Garnacho", "166": "N.Jackson", "582": "Madjo", "596": "Ruggeri", "597": "Suzuki", "606": "Rowe", "607": "Lynch", "611": "Wan-Bissaka", "618": "Goretzka", "57": "Petrovi\u0107", "58": "Forster", "59": "Dennis", "60": "Hill", "61": "Truffert", "62": "Diakit\u00e9", "63": "Milosavljevi\u0107", "64": "Smith", "65": "J.Araujo", "66": "Soler", "67": "Rayan", "68": "Tavernier", "69": "Scott", "70": "Kluivert", "71": "Cook", "72": "Gannon-Doak", "73": "Adams", "74": "Brooks", "75": "Christie", "76": "T\u00f3th.A", "77": "Adli", "78": "Kroupi.Jr", "79": "Evanilson", "80": "Enes \u00dcnal", "81": "Rodr\u00edguez", "566": "Silva", "573": "Sanchez", "608": "Jebbison", "615": "Di Gregorio", "82": "Kelleher", "83": "Valdimarsson", "84": "Collins", "85": "Van den Berg", "86": "Lewis-Potter", "87": "Ajer", "88": "Kayode", "89": "Henry", "90": "Hickey", "92": "Ji-soo", "93": "Schuster", "94": "Schade", "95": "O.Dango", "96": "Damsgaard", "97": "Jensen", "98": "Janelt", "99": "Milambo", "100": "Carvalho", "102": "Yarmoliuk", "103": "Dasilva", "105": "Anthony", "106": "Thiago", "107": "Furo", "108": "Wilson", "565": "M.Sangar\u00e9", "620": "Diouf", "109": "Verbruggen", "111": "Steele", "113": "F.Kad\u0131o\u011flu", "114": "Boscagli", "115": "De Cuyper", "116": "Dunk", "117": "Coppola", "118": "Igor", "119": "Costinha", "120": "Svoboda", "121": "Mitoma", "122": "Minteh", "123": "Hinshelwood", "124": "Gro\u00df", "125": "Georginio", "126": "O'Riley", "127": "Gomez", "128": "Buonanotte", "129": "Ayari", "130": "Wieffer", "132": "Howell", "133": "Watson", "134": "Oriola", "135": "Yohanna", "137": "Tzimas", "138": "Kostoulas", "139": "Ferguson", "328": "Struijk", "504": "Vuskovic", "594": "David", "600": "Osman", "605": "Yalcouy\u00e9", "614": "Hadjam", "40": "Rogers", "101": "Henderson", "136": "Welbeck", "140": "S\u00e1nchez", "141": "J\u00f6rgensen", "142": "James", "143": "Chalobah", "144": "Gusto", "145": "Fofana", "146": "B.Badiashile", "147": "Tosin", "148": "Hato", "149": "Colwill", "150": "M.Sarr", "151": "Acheampong", "152": "Palestra", "154": "Palmer", "155": "Enzo", "156": "Neto", "157": "Est\u00eav\u00e3o", "158": "Gittens", "159": "Caicedo", "161": "Lavia", "163": "D.Essugo", "164": "Quenda", "165": "Jo\u00e3o Pedro", "168": "Marc Guiu", "169": "Mheuka", "170": "Emegha", "200": "Lacroix", "560": "Penders", "561": "Anselmino", "568": "Barco", "578": "Mudryk", "583": "Chavarria", "91": "Pinnock", "104": "Onyeka", "110": "Rushworth", "171": "Dovin", "172": "Wilson", "173": "Thomas", "174": "Kitching", "175": "van Ewijk", "176": "Dasilva", "177": "Kesler-Hayden", "178": "Bidwell", "179": "Latibeaudiere", "180": "Woolfenden", "181": "Brau", "182": "Amenda", "183": "Rudoni", "184": "Grimes", "185": "Sakamoto", "186": "Mason-Clark", "187": "Eccles", "188": "Torp", "189": "Shepherd", "190": "Tchaouna", "191": "Borges Rodrigues", "192": "Andrews", "193": "Wright", "194": "Thomas-Asante", "195": "Simms", "196": "Markelo", "197": "Bassette", "492": "Awoniyi", "575": "Yirenkyi", "584": "Hamer", "599": "Cherif", "623": "Bentley", "42": "Guessand", "153": "Disasi", "198": "Henderson", "199": "Benitez", "201": "Mu\u00f1oz", "202": "Richards", "203": "Canvot", "204": "Mitchell", "205": "Sosa", "206": "Chadi Riad", "207": "Mingueza", "208": "Sarr", "210": "Wharton", "211": "Yeremy", "212": "Hughes", "213": "Lerma", "214": "Kamada", "215": "Devenny", "216": "Esse", "217": "M.Fran\u00e7a", "218": "Doucour\u00e9", "219": "J.Rak-Sakyi", "220": "Cardines", "221": "Drakes-Thomas", "222": "Strand Larsen", "223": "Mateta", "224": "Nketiah", "225": "Uche", "241": "McNeil", "555": "Matthews", "577": "Tomiyasu", "588": "Khalaili", "595": "Gozo", "21": "N\u00f8rgaard", "209": "Johnson", "226": "Pickford", "227": "Travers", "228": "King", "229": "Tarkowski", "230": "Branthwaite", "231": "Keane", "232": "O'Brien", "233": "Mykolenko", "234": "Patterson", "235": "Aznou", "236": "Dewsbury-Hall", "237": "Ndiaye", "239": "Garner", "240": "Iroegbunam", "242": "George", "243": "Alcaraz", "244": "Armstrong", "245": "Dibling", "246": "R\u00f6hl", "247": "Hackney", "248": "Beto", "249": "Barry", "250": "Leno", "251": "Lecomte", "252": "McNally", "253": "Andersen", "254": "Robinson", "255": "J.Cuenca", "256": "Tete", "257": "Bassey", "258": "Castagne", "261": "Iwobi", "262": "Smith Rowe", "263": "Kevin", "264": "Bobb", "265": "Berge", "266": "Cairney", "268": "King", "269": "Sessegnon", "270": "Reed", "271": "Muniz", "272": "Kusi-Asare", "569": "Gonzalo", "570": "Palacios", "580": "Charles", "610": "De Fougerolles", "273": "Phillips", "274": "Butland", "275": "Cartwright", "276": "Lo-Tutala", "277": "Egan", "278": "Hughes", "279": "Ajayi", "280": "Coyle", "281": "Drameh", "282": "Giles", "283": "Jacob", "284": "McCarthy", "285": "McNair", "286": "Belloumi", "287": "Millar", "288": "Dowell", "289": "Crooks", "290": "Slater", "291": "Matazo", "292": "\u00d6m\u00fcr", "293": "Kamara", "294": "Zambrano", "295": "McBurnie", "296": "Akintola", "297": "Gyabi", "298": "Destan", "299": "Burstow", "340": "Gelhardt", "556": "Targett", "563": "Morita", "572": "Tzolakis", "574": "Hjert\u00f8-Dahl", "576": "Stroud", "585": "Herrington", "586": "Mendy", "589": "Gourna-Douath", "617": "Cho", "259": "Diop", "267": "Luki\u0107", "300": "Walton", "301": "Palmer", "302": "Button", "303": "Kipr\u00e9", "304": "O'Shea", "305": "Davis", "306": "Greaves", "307": "Johnson", "308": "Furlong", "309": "N\u00fa\u00f1ez", "310": "Matusiwa", "311": "Burns", "312": "Taylor", "313": "Clarke", "314": "Ogbene", "315": "Fatawu", "316": "Emersonn", "317": "Hirst", "318": "Philogene", "319": "Szmodics", "320": "Akpom", "321": "Walle Egeli", "322": "Al-Hamadi", "323": "McAteer", "324": "Mehmeti", "554": "Van Oevelen", "562": "Maeda", "564": "Scherpen", "571": "Florentino", "591": "Enciso", "592": "Ouattara", "602": "Humphreys", "619": "Palacios", "260": "Wilson", "326": "Perri", "327": "Bijol", "329": "Rodon", "330": "Bogle", "331": "Gudmundsson", "332": "Justin", "333": "Bornauw", "334": "Muharemovi\u0107", "335": "Stach", "336": "Okafor", "337": "Aaronson", "338": "Ampadu", "339": "Longstaff", "341": "Gnonto", "342": "Harrison", "343": "James", "344": "Gruev", "345": "Tanaka", "346": "Calvert-Lewin", "347": "Nmecha", "348": "Piroe", "349": "Mateo Joseph", "385": "Trafford", "598": "Elvedi", "603": "Lienou", "604": "Cresswell", "350": "A.Becker", "351": "Mamardashvili", "352": "Woodman", "353": "Pecsi", "354": "Jaros", "355": "Davies", "356": "Virgil", "357": "Frimpong", "358": "Kerkez", "359": "Gomez", "360": "Bradley", "361": "Lucky", "362": "Jacquet", "363": "Leoni", "364": "Tsimikas", "365": "Ramsay", "366": "Wirtz", "367": "Gakpo", "368": "Szoboszlai", "369": "Ngumoha", "370": "Chiesa", "371": "Gravenberch", "372": "Mac Allister", "373": "C.Jones", "374": "Endo", "375": "Nyoni", "376": "Bajcetic", "377": "Munoz", "378": "McConnell", "379": "Isak", "380": "Ekitik\u00e9", "381": "Koumas", "382": "Danns", "383": "Elliott", "579": "Araujo", "238": "Grealish", "384": "Donnarumma", "386": "Bettinelli", "387": "O'Reilly", "388": "Gu\u00e9hi", "389": "Matheus N.", "390": "R\u00faben", "391": "Gvardiol", "392": "A\u00eft-Nouri", "393": "Khusanov", "394": "Alleyne", "395": "Lewis", "396": "Vitor Reis", "397": "Semenyo", "398": "Foden", "399": "Cherki", "400": "Doku", "402": "Rodrigo", "404": "Reijnders", "406": "Kova\u010di\u0107", "407": "Echeverri", "408": "Phillips", "409": "Mukasa", "410": "Monga", "411": "Haaland", "481": "Anderson", "587": "Rulli", "616": "Bouaddi", "621": "McAidoo", "622": "Braithwaite", "43": "Tielemans", "131": "Baleba", "162": "Andrey Santos", "325": "Darlow", "412": "Lammens", "413": "Bayindir", "414": "Heaton", "415": "Dorgu", "416": "De Ligt", "417": "Dalot", "418": "Maguire", "419": "Martinez", "420": "Yoro", "421": "Heaven", "422": "Mazraoui", "423": "Shaw", "424": "Amass", "425": "Fredricson", "426": "B.Fernandes", "427": "Mbeumo", "428": "Cunha", "429": "Rashford", "430": "Mount", "431": "Amad", "432": "Mainoo", "433": "Ugarte", "434": "J.Fletcher", "435": "Lacey", "436": "Collyer", "437": "Bendito Mantato", "438": "Fletcher", "439": "\u0160e\u0161ko", "440": "Zirkzee", "441": "Obi", "405": "N.Gonzalez", "442": "Pope", "443": "Gillespie", "444": "Jaouen", "445": "Thiaw", "446": "Sch\u00e4r", "447": "Botman", "448": "Burn", "449": "Hall", "450": "Livramento", "451": "A.Murphy", "453": "Barnes", "454": "Elanga", "456": "J.Ramsey", "457": "J.Murphy", "458": "Joelinton", "459": "L.Miley", "460": "Willock", "461": "Tour\u00e9", "462": "Steur", "463": "Woltemade", "464": "Wissa", "465": "Osula", "466": "Neave", "559": "Bamba", "567": "Horn\u00ed\u010dek", "593": "Dedi\u0107", "609": "Shahar", "167": "Delap", "467": "Sels", "468": "John", "469": "N.Williams", "470": "Morato", "471": "Milenkovi\u0107", "472": "Murillo", "473": "Aina", "474": "Jair Cunha", "475": "Savona", "476": "O.Richards", "477": "Abbott", "478": "Netz", "479": "Bindon", "480": "Gibbs-White", "482": "Hudson-Odoi", "483": "Ndoye", "484": "Hutchinson", "485": "Bakwa", "486": "McAtee", "487": "Dominguez", "488": "I.Sangar\u00e9", "489": "Yates", "490": "Wood", "491": "Igor Jesus", "493": "Kalimuendo", "558": "Schlager", "581": "Diomande", "590": "Benda", "112": "Van Hecke", "401": "Marmoush", "403": "S\u00e1vio", "455": "Tonali", "494": "Vicario", "495": "Austin", "496": "Kinsky", "497": "Dubravka", "498": "Senesi", "499": "Pedro Porro", "500": "Romero", "501": "Danso", "502": "Robertson", "503": "Van de Ven", "505": "Spence", "506": "Udogie", "507": "Phillips", "508": "Davies", "509": "Byfield", "510": "Rowswell", "511": "Souza", "512": "Kudus", "513": "Xavi", "514": "Tel", "515": "Maddison", "516": "Bentancur", "517": "Odobert", "518": "P.M.Sarr", "519": "Gallagher", "520": "Bergvall", "521": "Kulusevski", "522": "Gray", "523": "Moore", "524": "Olusesi", "525": "Fernandes", "526": "Solanke", "527": "Richarlison", "528": "Scarlett", "601": "Williams-Barnett", "529": "Roefs", "530": "Patterson", "531": "Ellborg", "532": "Ballard", "533": "Mukiele", "534": "Hume", "535": "Alderete", "536": "Reinildo", "537": "Seelt", "538": "Hjelde", "539": "O'Nien", "540": "Masuaku", "541": "Meunier", "542": "E.Le F\u00e9e", "543": "Diarra", "544": "Xhaka", "545": "Sadiki", "546": "Adingra", "547": "Mundle", "548": "Rigg", "549": "Talbi", "550": "Jocelin.T", "551": "Angulo", "552": "Brobbey", "553": "Isidor", "612": "Methalie", "613": "Ahoka"};
 const TRANSFER_RECS = [];
@@ -20128,7 +20256,7 @@ const _APEX_WC_SQUADS_BACKUP = JSON.parse(JSON.stringify(WC_SQUADS));
 const _APEX_FH_SQUADS_BACKUP = JSON.parse(JSON.stringify(FH_SQUADS));
 const COMPARE_WC_SQUADS = {};
 const COMPARE_FH_SQUADS = {};
-let TEAM_META = {"team_name": "", "manager": "", "overall_rank": 0, "bank": 0.0, "free_transfers": 1, "squad_value": 0.0, "budget": 100.0, "start_gw": 3, "gw_range": [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21], "gw_labels": ["GW3", "GW4", "GW5", "GW6", "GW7", "GW8", "GW9", "GW10", "GW11", "GW12", "GW13", "GW14", "GW15", "GW16", "GW17", "GW18", "GW19", "GW20", "GW21"], "dgw_teams_by_gw": {}, "bgw_teams_by_gw": {}, "anchor_by_gw": {"3": {"n": 10, "of": 10}, "4": {"n": 0, "of": 10}, "5": {"n": 0, "of": 10}, "6": {"n": 0, "of": 10}, "7": {"n": 0, "of": 10}, "8": {"n": 0, "of": 10}, "9": {"n": 0, "of": 10}, "10": {"n": 0, "of": 10}, "11": {"n": 0, "of": 10}, "12": {"n": 0, "of": 10}, "13": {"n": 0, "of": 10}, "14": {"n": 0, "of": 10}, "15": {"n": 0, "of": 10}, "16": {"n": 0, "of": 10}, "17": {"n": 0, "of": 10}, "18": {"n": 0, "of": 10}, "19": {"n": 0, "of": 10}, "20": {"n": 0, "of": 10}, "21": {"n": 0, "of": 10}}, "deadlines_by_gw": {"1": 1787333400, "2": 1787938200, "3": 1788543000, "4": 1789216200, "5": 1789752600, "6": 1791626400, "7": 1792231200, "8": 1792776600, "9": 1793444400, "10": 1794058200, "11": 1795267800, "12": 1795872600, "13": 1796236200, "14": 1796477400, "15": 1797082200, "16": 1797687000, "17": 1798291800, "18": 1798655400, "19": 1798896600, "20": 1799260200, "21": 1800106200, "22": 1800711000, "23": 1801315800, "24": 1801920600, "25": 1802284200, "26": 1803130200, "27": 1803735000, "28": 1804098600, "29": 1804944600, "30": 1805549400, "31": 1807360200, "32": 1807965000, "33": 1808569800, "34": 1809174600, "35": 1809779400, "36": 1810384200, "37": 1811075400, "38": 1811683800}, "season": "2026/27"};
+let TEAM_META = {"team_name": "", "manager": "", "overall_rank": 0, "bank": 0.0, "free_transfers": 1, "squad_value": 0.0, "budget": 100.0, "start_gw": 3, "gw_range": [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21], "gw_labels": ["GW3", "GW4", "GW5", "GW6", "GW7", "GW8", "GW9", "GW10", "GW11", "GW12", "GW13", "GW14", "GW15", "GW16", "GW17", "GW18", "GW19", "GW20", "GW21"], "dgw_teams_by_gw": {}, "bgw_teams_by_gw": {}, "anchor_by_gw": {"3": {"n": 10, "of": 10}, "4": {"n": 10, "of": 10}, "5": {"n": 0, "of": 10}, "6": {"n": 0, "of": 10}, "7": {"n": 0, "of": 10}, "8": {"n": 0, "of": 10}, "9": {"n": 0, "of": 10}, "10": {"n": 0, "of": 10}, "11": {"n": 0, "of": 10}, "12": {"n": 0, "of": 10}, "13": {"n": 0, "of": 10}, "14": {"n": 0, "of": 10}, "15": {"n": 0, "of": 10}, "16": {"n": 0, "of": 10}, "17": {"n": 0, "of": 10}, "18": {"n": 0, "of": 10}, "19": {"n": 0, "of": 10}, "20": {"n": 0, "of": 10}, "21": {"n": 0, "of": 10}}, "xmins_modelled_gws": 10, "deadlines_by_gw": {"1": 1787333400, "2": 1787938200, "3": 1788543000, "4": 1789216200, "5": 1789752600, "6": 1791626400, "7": 1792231200, "8": 1792776600, "9": 1793444400, "10": 1794058200, "11": 1795267800, "12": 1795872600, "13": 1796236200, "14": 1796477400, "15": 1797082200, "16": 1797687000, "17": 1798291800, "18": 1798655400, "19": 1798896600, "20": 1799260200, "21": 1800106200, "22": 1800711000, "23": 1801315800, "24": 1801920600, "25": 1802284200, "26": 1803130200, "27": 1803735000, "28": 1804098600, "29": 1804944600, "30": 1805549400, "31": 1807360200, "32": 1807965000, "33": 1808569800, "34": 1809174600, "35": 1809779400, "36": 1810384200, "37": 1811075400, "38": 1811683800}, "season": "2026/27"};
 // APEX_DIST_AXIS_v1 - FPL average over the gameweeks that have FINISHED, or null
 // before any has. Read only by the distribution block. Deliberately NOT part of
 // TEAM_META: that object has a public/private split (two json.dumps sites near
@@ -20276,8 +20404,8 @@ const INFLIGHT_GW = 2;
 // Pre-computed Apex/FR scale + Apex-scaled inflight xP. In public mode the
 // raw FR_*_XP_BY_ID maps above are empty; rank_milestones.js falls through
 // to these instead. Local mode bakes both for diagnostic use.
-const APEX_FR_SCALE = 1.0002163099930819;
-const INFLIGHT_XP_BY_ID = {"1": 4.171, "2": 0.05, "4": 5.031, "7": 2.0, "8": 4.071, "9": 0.75, "10": 4.121, "11": 3.121, "12": 5.681, "13": 3.981, "14": 1.03, "15": 4.191, "16": 0.8, "17": 0.8, "19": 0.86, "20": 0.52, "22": 0.51, "25": 0.98, "26": 4.621, "27": 0.37, "31": 1.76, "452": 1.39, "557": 4.461, "29": 0.04, "32": 1.48, "33": 1.19, "34": 2.01, "35": 0.87, "36": 2.1, "37": 2.16, "41": 3.321, "44": 0.54, "45": 2.881, "46": 2.2, "47": 2.671, "51": 2.14, "52": 0.73, "53": 0.33, "56": 2.1, "160": 2.471, "582": 0.27, "596": 0.76, "597": 3.051, "611": 1.34, "57": 3.741, "60": 4.261, "61": 4.241, "62": 0.84, "64": 1.61, "66": 0.08, "67": 4.101, "68": 4.491, "69": 3.881, "70": 4.261, "71": 0.83, "72": 0.75, "73": 2.25, "74": 0.34, "75": 1.36, "76": 0.58, "79": 4.021, "81": 1.54, "566": 4.281, "573": 2.511, "82": 3.561, "83": 0.04, "84": 3.961, "86": 3.151, "87": 3.681, "88": 3.101, "89": 0.48, "90": 0.7, "92": 0.18, "93": 0.41, "94": 3.681, "95": 3.821, "96": 1.37, "97": 2.841, "98": 2.441, "99": 0.13, "100": 0.26, "102": 1.27, "103": 0.42, "105": 1.2, "106": 4.091, "108": 0.83, "565": 3.531, "109": 3.041, "113": 1.97, "114": 2.07, "115": 3.111, "116": 1.6, "119": 0.38, "120": 0.06, "121": 0.35, "123": 3.181, "124": 3.561, "125": 1.93, "126": 0.13, "127": 3.251, "129": 2.951, "130": 2.641, "135": 0.82, "138": 1.3, "328": 0.67, "504": 2.26, "594": 1.7, "600": 0.91, "605": 0.49, "614": 0.16, "40": 4.101, "136": 0.58, "140": 3.601, "142": 3.361, "144": 1.12, "145": 3.051, "147": 0.18, "148": 1.77, "149": 3.481, "150": 0.06, "151": 0.45, "152": 0.28, "154": 5.381, "155": 4.311, "156": 2.411, "157": 0.67, "158": 0.19, "159": 2.15, "161": 0.94, "163": 0.18, "164": 0.72, "165": 4.481, "170": 0.08, "200": 3.341, "560": 0.05, "568": 1.41, "578": 0.16, "583": 1.12, "91": 0.61, "104": 2.731, "110": 3.921, "173": 4.391, "174": 0.18, "175": 4.181, "176": 3.871, "177": 0.21, "178": 0.13, "179": 0.17, "180": 0.13, "182": 4.241, "183": 1.59, "184": 3.541, "185": 1.55, "186": 2.521, "187": 0.29, "188": 0.81, "190": 3.941, "192": 0.09, "194": 2.12, "195": 1.97, "492": 2.951, "575": 2.441, "584": 1.31, "599": 0.76, "623": 0.05, "42": 1.45, "153": 1.56, "198": 2.861, "201": 1.47, "202": 3.011, "203": 2.871, "204": 2.371, "205": 0.24, "207": 1.03, "208": 0.14, "210": 3.421, "211": 2.19, "212": 0.72, "213": 0.55, "214": 2.431, "215": 0.32, "217": 0.31, "218": 0.2, "219": 0.07, "222": 1.49, "223": 2.831, "224": 1.74, "241": 2.26, "577": 1.11, "588": 0.91, "595": 0.17, "21": 0.89, "209": 2.11, "226": 3.431, "229": 3.911, "230": 3.641, "231": 0.2, "232": 1.14, "233": 2.771, "234": 0.29, "235": 0.13, "236": 3.821, "237": 4.321, "239": 2.931, "242": 1.79, "243": 0.46, "244": 0.88, "245": 0.59, "246": 2.751, "247": 2.691, "248": 1.34, "249": 3.021, "250": 3.581, "251": 0.04, "253": 3.331, "254": 3.421, "255": 1.14, "256": 0.79, "257": 3.471, "258": 2.921, "261": 3.611, "262": 1.32, "263": 1.86, "264": 3.171, "265": 2.621, "268": 3.051, "269": 1.15, "270": 0.21, "271": 0.91, "272": 0.11, "569": 3.911, "570": 2.591, "580": 1.4, "277": 3.361, "279": 2.09, "280": 2.04, "281": 0.96, "282": 2.761, "285": 0.52, "286": 3.461, "287": 1.55, "288": 0.33, "289": 2.471, "290": 2.651, "292": 0.58, "295": 4.151, "296": 0.47, "340": 0.07, "556": 0.65, "563": 1.11, "572": 3.221, "574": 0.84, "576": 2.401, "585": 0.63, "586": 3.591, "589": 0.66, "259": 2.25, "267": 2.981, "300": 0.09, "303": 0.3, "304": 2.741, "305": 2.05, "306": 1.42, "308": 0.56, "309": 1.66, "310": 0.17, "312": 0.13, "313": 1.19, "314": 0.1, "315": 2.591, "316": 2.641, "320": 0.71, "321": 0.57, "323": 0.57, "324": 0.75, "562": 2.521, "564": 2.891, "571": 1.63, "591": 2.901, "592": 1.46, "260": 3.841, "327": 3.871, "329": 3.381, "330": 3.481, "331": 0.96, "332": 3.381, "334": 3.861, "335": 3.951, "336": 2.561, "337": 2.04, "338": 3.401, "339": 0.7, "341": 0.18, "343": 0.7, "344": 0.06, "345": 0.71, "346": 4.311, "347": 1.07, "385": 3.521, "598": 0.44, "350": 3.931, "351": 0.05, "356": 4.771, "357": 4.531, "358": 3.851, "359": 0.21, "362": 3.671, "364": 0.77, "366": 4.921, "367": 4.931, "368": 5.501, "369": 3.091, "370": 0.52, "371": 3.521, "372": 1.68, "374": 0.27, "375": 0.24, "376": 0.07, "377": 1.71, "379": 4.981, "381": 0.54, "383": 0.25, "579": 1.89, "238": 1.01, "384": 3.911, "387": 4.391, "388": 3.191, "389": 3.671, "390": 3.091, "391": 4.011, "392": 1.12, "393": 1.73, "395": 0.91, "396": 0.16, "397": 4.431, "398": 4.671, "399": 3.901, "400": 0.2, "406": 1.51, "407": 0.11, "410": 0.08, "411": 5.891, "481": 3.431, "616": 0.35, "43": 3.461, "131": 0.37, "162": 3.011, "325": 0.05, "412": 3.971, "415": 2.18, "417": 2.571, "418": 4.471, "419": 2.24, "420": 0.68, "421": 2.23, "422": 2.541, "423": 3.891, "424": 0.08, "426": 6.891, "427": 5.551, "428": 4.571, "429": 1.97, "430": 0.77, "432": 1.08, "434": 0.1, "435": 0.21, "436": 0.07, "439": 3.541, "440": 0.66, "441": 0.11, "445": 3.591, "446": 0.55, "447": 3.681, "449": 3.291, "450": 0.22, "453": 3.371, "454": 3.061, "456": 1.76, "457": 0.99, "458": 0.14, "459": 2.361, "460": 1.74, "461": 1.49, "462": 2.21, "463": 1.71, "464": 3.991, "465": 1.27, "559": 1.41, "567": 3.221, "593": 2.911, "609": 0.07, "467": 2.971, "469": 2.481, "470": 0.26, "471": 2.701, "472": 2.831, "473": 2.06, "474": 1.24, "478": 0.3, "480": 3.081, "482": 1.15, "483": 2.461, "484": 0.91, "486": 1.55, "487": 0.64, "488": 2.921, "489": 0.19, "490": 1.75, "491": 2.931, "493": 0.18, "558": 1.87, "581": 1.19, "112": 3.831, "403": 3.261, "455": 3.471, "496": 3.381, "497": 0.05, "498": 2.681, "499": 2.04, "501": 0.29, "502": 2.431, "503": 2.06, "506": 1.34, "508": 0.08, "511": 0.07, "512": 0.36, "514": 3.881, "516": 0.99, "518": 0.12, "519": 2.961, "520": 1.08, "522": 1.43, "523": 1.08, "524": 0.07, "525": 3.971, "526": 3.161, "527": 3.141, "529": 2.971, "532": 3.501, "533": 3.781, "534": 3.161, "535": 3.811, "536": 3.071, "539": 0.32, "541": 0.6, "542": 4.441, "543": 1.19, "544": 3.431, "545": 2.821, "546": 0.09, "547": 0.18, "548": 0.41, "549": 1.35, "550": 0.27, "551": 2.24, "552": 3.801, "553": 1.07, "612": 3.671};
+const APEX_FR_SCALE = 0.9943836263217417;
+const INFLIGHT_XP_BY_ID = {"1": 4.147, "2": 0.05, "4": 5.002, "7": 1.989, "8": 4.047, "9": 0.746, "10": 4.097, "11": 3.102, "12": 5.648, "13": 3.958, "14": 1.024, "15": 4.166, "16": 0.796, "17": 0.796, "19": 0.855, "20": 0.517, "22": 0.507, "25": 0.974, "26": 4.594, "27": 0.368, "31": 1.75, "452": 1.382, "557": 4.435, "29": 0.04, "32": 1.472, "33": 1.183, "34": 1.999, "35": 0.865, "36": 2.088, "37": 2.148, "41": 3.301, "44": 0.537, "45": 2.864, "46": 2.188, "47": 2.655, "51": 2.128, "52": 0.726, "53": 0.328, "56": 2.088, "160": 2.456, "582": 0.268, "596": 0.756, "597": 3.033, "611": 1.332, "57": 3.719, "60": 4.236, "61": 4.216, "62": 0.835, "64": 1.601, "66": 0.08, "67": 4.077, "68": 4.465, "69": 3.858, "70": 4.236, "71": 0.825, "72": 0.746, "73": 2.237, "74": 0.338, "75": 1.352, "76": 0.577, "79": 3.997, "81": 1.531, "566": 4.256, "573": 2.496, "82": 3.54, "83": 0.04, "84": 3.938, "86": 3.132, "87": 3.659, "88": 3.083, "89": 0.477, "90": 0.696, "92": 0.179, "93": 0.408, "94": 3.659, "95": 3.799, "96": 1.362, "97": 2.824, "98": 2.426, "99": 0.129, "100": 0.259, "102": 1.263, "103": 0.418, "105": 1.193, "106": 4.067, "108": 0.825, "565": 3.51, "109": 3.023, "113": 1.959, "114": 2.058, "115": 3.093, "116": 1.591, "119": 0.378, "120": 0.06, "121": 0.348, "123": 3.162, "124": 3.54, "125": 1.919, "126": 0.129, "127": 3.232, "129": 2.933, "130": 2.625, "135": 0.815, "138": 1.293, "328": 0.666, "504": 2.247, "594": 1.69, "600": 0.905, "605": 0.487, "614": 0.159, "40": 4.077, "136": 0.577, "140": 3.58, "142": 3.341, "144": 1.114, "145": 3.033, "147": 0.179, "148": 1.76, "149": 3.46, "150": 0.06, "151": 0.447, "152": 0.278, "154": 5.35, "155": 4.286, "156": 2.396, "157": 0.666, "158": 0.189, "159": 2.138, "161": 0.935, "163": 0.179, "164": 0.716, "165": 4.455, "170": 0.08, "200": 3.321, "560": 0.05, "568": 1.402, "578": 0.159, "583": 1.114, "91": 0.607, "104": 2.715, "110": 3.898, "173": 4.365, "174": 0.179, "175": 4.157, "176": 3.848, "177": 0.209, "178": 0.129, "179": 0.169, "180": 0.129, "182": 4.216, "183": 1.581, "184": 3.52, "185": 1.541, "186": 2.506, "187": 0.288, "188": 0.805, "190": 3.918, "192": 0.089, "194": 2.108, "195": 1.959, "492": 2.933, "575": 2.426, "584": 1.303, "599": 0.756, "623": 0.05, "42": 1.442, "153": 1.551, "198": 2.844, "201": 1.462, "202": 2.993, "203": 2.854, "204": 2.357, "205": 0.239, "207": 1.024, "208": 0.139, "210": 3.401, "211": 2.178, "212": 0.716, "213": 0.547, "214": 2.416, "215": 0.318, "217": 0.308, "218": 0.199, "219": 0.07, "222": 1.482, "223": 2.814, "224": 1.73, "241": 2.247, "577": 1.104, "588": 0.905, "595": 0.169, "21": 0.885, "209": 2.098, "226": 3.411, "229": 3.888, "230": 3.62, "231": 0.199, "232": 1.134, "233": 2.754, "234": 0.288, "235": 0.129, "236": 3.799, "237": 4.296, "239": 2.914, "242": 1.78, "243": 0.457, "244": 0.875, "245": 0.587, "246": 2.735, "247": 2.675, "248": 1.332, "249": 3.003, "250": 3.56, "251": 0.04, "253": 3.311, "254": 3.401, "255": 1.134, "256": 0.786, "257": 3.451, "258": 2.904, "261": 3.59, "262": 1.313, "263": 1.85, "264": 3.152, "265": 2.605, "268": 3.033, "269": 1.144, "270": 0.209, "271": 0.905, "272": 0.109, "569": 3.888, "570": 2.575, "580": 1.392, "277": 3.341, "279": 2.078, "280": 2.029, "281": 0.955, "282": 2.744, "285": 0.517, "286": 3.441, "287": 1.541, "288": 0.328, "289": 2.456, "290": 2.635, "292": 0.577, "295": 4.127, "296": 0.467, "340": 0.07, "556": 0.646, "563": 1.104, "572": 3.202, "574": 0.835, "576": 2.387, "585": 0.626, "586": 3.57, "589": 0.656, "259": 2.237, "267": 2.963, "300": 0.089, "303": 0.298, "304": 2.725, "305": 2.038, "306": 1.412, "308": 0.557, "309": 1.651, "310": 0.169, "312": 0.129, "313": 1.183, "314": 0.099, "315": 2.575, "316": 2.625, "320": 0.706, "321": 0.567, "323": 0.567, "324": 0.746, "562": 2.506, "564": 2.874, "571": 1.621, "591": 2.884, "592": 1.452, "260": 3.818, "327": 3.848, "329": 3.361, "330": 3.46, "331": 0.955, "332": 3.361, "334": 3.838, "335": 3.928, "336": 2.546, "337": 2.029, "338": 3.381, "339": 0.696, "341": 0.179, "343": 0.696, "344": 0.06, "345": 0.706, "346": 4.286, "347": 1.064, "385": 3.5, "598": 0.438, "350": 3.908, "351": 0.05, "356": 4.743, "357": 4.505, "358": 3.828, "359": 0.209, "362": 3.649, "364": 0.766, "366": 4.892, "367": 4.902, "368": 5.469, "369": 3.073, "370": 0.517, "371": 3.5, "372": 1.671, "374": 0.268, "375": 0.239, "376": 0.07, "377": 1.7, "379": 4.952, "381": 0.537, "383": 0.249, "579": 1.879, "238": 1.004, "384": 3.888, "387": 4.365, "388": 3.172, "389": 3.649, "390": 3.073, "391": 3.987, "392": 1.114, "393": 1.72, "395": 0.905, "396": 0.159, "397": 4.405, "398": 4.644, "399": 3.878, "400": 0.199, "406": 1.502, "407": 0.109, "410": 0.08, "411": 5.857, "481": 3.411, "616": 0.348, "43": 3.441, "131": 0.368, "162": 2.993, "325": 0.05, "412": 3.948, "415": 2.168, "417": 2.556, "418": 4.445, "419": 2.227, "420": 0.676, "421": 2.217, "422": 2.526, "423": 3.868, "424": 0.08, "426": 6.851, "427": 5.519, "428": 4.544, "429": 1.959, "430": 0.766, "432": 1.074, "434": 0.099, "435": 0.209, "436": 0.07, "439": 3.52, "440": 0.656, "441": 0.109, "445": 3.57, "446": 0.547, "447": 3.659, "449": 3.272, "450": 0.219, "453": 3.351, "454": 3.043, "456": 1.75, "457": 0.984, "458": 0.139, "459": 2.347, "460": 1.73, "461": 1.482, "462": 2.198, "463": 1.7, "464": 3.968, "465": 1.263, "559": 1.402, "567": 3.202, "593": 2.894, "609": 0.07, "467": 2.953, "469": 2.466, "470": 0.259, "471": 2.685, "472": 2.814, "473": 2.048, "474": 1.233, "478": 0.298, "480": 3.063, "482": 1.144, "483": 2.446, "484": 0.905, "486": 1.541, "487": 0.636, "488": 2.904, "489": 0.189, "490": 1.74, "491": 2.914, "493": 0.179, "558": 1.859, "581": 1.183, "112": 3.808, "403": 3.242, "455": 3.451, "496": 3.361, "497": 0.05, "498": 2.665, "499": 2.029, "501": 0.288, "502": 2.416, "503": 2.048, "506": 1.332, "508": 0.08, "511": 0.07, "512": 0.358, "514": 3.858, "516": 0.984, "518": 0.119, "519": 2.943, "520": 1.074, "522": 1.422, "523": 1.074, "524": 0.07, "525": 3.948, "526": 3.142, "527": 3.122, "529": 2.953, "532": 3.48, "533": 3.759, "534": 3.142, "535": 3.789, "536": 3.053, "539": 0.318, "541": 0.597, "542": 4.415, "543": 1.183, "544": 3.411, "545": 2.804, "546": 0.089, "547": 0.179, "548": 0.408, "549": 1.342, "550": 0.268, "551": 2.227, "552": 3.779, "553": 1.064, "612": 3.649};
 // COMPARE_XP_LOOKUP — for the Apex↔Tool A compare toggle (?compare=1).
 // {fpl_id: [xp_gw0, xp_gw1, ...]} matching POOL_DATA[i].xp_per_gw shape.
 // When toggle = 'compare', POOL_DATA + SQUAD_DATA xP fields swap to these.
@@ -20303,7 +20431,7 @@ const FPL_CORS_PROXY = 'https://fpl-proxy.weathered-bird-16f4.workers.dev';
 // the synthetic-squad path below is dead code in production. True only when
 // built via TEST_SOLVER.bat (--test-entry) for pre-deadline feature QA.
 const APEX_TEST_ENTRY = false;
-const APEX_TEST_SQUAD = {"picks": [["Saka", "Arsenal"], ["Petrovi\u0107", "Bournemouth"], ["Gro\u00df", "Brighton"], ["Gomez", "Brighton"], ["Wieffer", "Brighton"], ["Palmer", "Chelsea"], ["Jo\u00e3o Pedro", "Chelsea"], ["Mykolenko", "Everton"], ["Leno", "Fulham"], ["Diop", "Ipswich"], ["Calvert-Lewin", "Leeds"], ["Virgil", "Liverpool"], ["Szoboszlai", "Liverpool"], ["Haaland", "Manchester City"], ["Thiaw", "Newcastle United"]], "captain": "Haaland", "vice": "Saka"};
+const APEX_TEST_SQUAD = {"picks": [["Raya", "Arsenal"], ["Petrovi\u0107", "Bournemouth"], ["Gro\u00df", "Brighton"], ["Gomez", "Brighton"], ["Wieffer", "Brighton"], ["Palmer", "Chelsea"], ["Jo\u00e3o Pedro", "Chelsea"], ["Ndiaye", "Everton"], ["Diop", "Ipswich"], ["Calvert-Lewin", "Leeds"], ["Virgil", "Liverpool"], ["Szoboszlai", "Liverpool"], ["O'Reilly", "Manchester City"], ["Haaland", "Manchester City"], ["Thiaw", "Newcastle United"]], "captain": "Haaland", "vice": "O'Reilly"};
 const APEX_BLANK_ENTRY = false;
 // Owner force-in / force-out list (data/preseason/seed_locks.csv). Consumed by
 // _ppSeedLockOpts() in assets/apex_app.js and passed to EVERY pre-GW1 wildcard
@@ -25435,11 +25563,17 @@ window.apexMilpPlan = async function (horizon) {
       && isFinite(TEAM_META.free_transfers)) ? TEAM_META.free_transfers : 1;
     const ft = Math.max(0, _ftMeta - _preTx);
     const bank = Math.max(0, (TEAM_META && TEAM_META.bank) || 0);
-    const r = await window.ApexSolver.solveMultiPeriod(POOL_DATA, liveSquad, {
+    // APEX_MILP_PRESET_TILT_v1 (2026-08-30): the risk preset now reaches the
+    // transfer engine. Before this it reached the BUILD only, so the Differential
+    // box handed you a low-owned fifteen and this solve spent the free transfers
+    // converting it back to the template (measured: ownership 11.8% -> 19.2% over
+    // six gameweeks, four of its own picks sold). Tilt keys only - the bench
+    // weight in _ppPresetSolveOpts is a build dial and deliberately stays there.
+    const r = await window.ApexSolver.solveMultiPeriod(POOL_DATA, liveSquad, Object.assign({
       horizon: horizon || 6, startIdx: activeGwIdx, freeTransfers: ft, bank: bank,
       sellingPrices: (TEAM_META && TEAM_META.selling_prices) || {},
       timeLimitSec: 90,
-    });
+    }, (typeof _ppPresetTiltOpts === 'function') ? _ppPresetTiltOpts() : {}));
     if (r && r.weeks) {
       // APEX_MILP_HONEST_STATUS_v1 (2026-08-23): r.status is the classified truth
       // now, so this line stopped printing 'optimal' for every solve. Spell out
@@ -25934,36 +26068,15 @@ function renderTransfers(recs) {
     } catch (_eT) {}
   }
   if (_planMeta && section) {
-    // APEX_PLAN_BOOK_STAMP_v1: freshness badge. Reads the blob directly (this
-    // render can beat _restorePlanState - same boot race as _planMeta above).
+    // APEX_PLAN_STALE_ONE_DEF_v1 (2026-08-30): this badge used to carry its OWN
+    // copy of the staleness test, and that copy compared a DIFFERENT thing from
+    // the one in _restorePlanState. Both read _apexPlanStale() now. Reading the
+    // helper (which reads the blob) also keeps this render safe against the
+    // boot race with _restorePlanState - same reason as _planMeta above.
     // Badge text is STATIC: nothing from the blob reaches innerHTML.
     let _staleTxt = '';
     try {
-      const _rawS = localStorage.getItem(_planKey());
-      const _plS = _rawS ? JSON.parse(_rawS) : null;
-      // APEX_PLAN_STAMP_HASH_v1 (2026-08-29): compare the POOL HASH, not the
-      // whole build string. BUILD_VERSION is "<unix_ts>-GW<n>-<pool sha1[:8]>"
-      // and only the last part describes the numbers, so comparing the whole
-      // string flagged every plan as stale after any rebuild -- the badge said
-      // "the numbers have updated since" when nothing had moved. A stamp with
-      // no hash segment compares unequal, which shows the badge: the safe way
-      // round for a plan saved before this format.
-      const _poolSig = function (s) {
-        if (typeof s !== 'string') return '';
-        const _i = s.lastIndexOf('-');
-        return _i >= 0 ? s.slice(_i + 1) : s;
-      };
-      if (_plS && typeof window.APEX_BUILD === 'string'
-          && _poolSig(_plS.bookStamp) !== _poolSig(window.APEX_BUILD)) {
-        _staleTxt = '<div style="margin:0 0 8px;padding:6px 10px;border-radius:8px;'
-          + 'background:rgba(217,119,6,.12);color:#B45309;font-size:.8rem;font-weight:600;">'
-          + '&#9888; Priced on an older projections build - the numbers have updated since. '
-          + 'Press <strong>Solve</strong> to review it as saved.</div>'
-          + '<div style="margin:0 0 8px;"><button onclick="window._apexPlanReprice()" '
-          + 'style="background:#0F6E56;color:#fff;border:0;border-radius:8px;'
-          + 'padding:8px 14px;font-weight:700;cursor:pointer;">'
-          + 'Re-price on today&#8217;s numbers</button></div>';
-      }
+      if (_apexPlanStale().stale) _staleTxt = _apexPlanStaleHtml('squad');
     } catch (_eS2) {}
     const _gwTxt = _planMeta.gwA === _planMeta.gwB ? `GW${_planMeta.gwA}` : `GW${_planMeta.gwA}–GW${_planMeta.gwB}`;
     section.innerHTML = `
@@ -26681,6 +26794,73 @@ function _planKey() {
     : (localStorage.getItem('apex_fpl_id') || '0');
   return 'apex_plan_v1:' + id;
 }
+// ── APEX_PLAN_STALE_ONE_DEF_v1 (2026-08-30) ─────────────────────────────
+// ONE DEFINITION OF "THIS PLAN WAS PRICED ON AN OLDER BOOK".
+//
+// Marcus, 2026-08-30: a GW3 wildcard fifteen that no shipped objective builds
+// (measured: lock the other 14 and every tilt returns Virgil, +15.7 xP over the
+// held pick), with the GW4 branch then spending a transfer repairing it. The
+// plan was priced on 1788034954-GW3-e703647b, the page on ...-9175d75d.
+//
+// The fact was already being COMPUTED and then dropped twice over:
+//   1. _restorePlanState set window._apexPlanBookStale and NOTHING read it --
+//      once, in the source and in the built page. Its own comment claimed it was
+//      "flagged so every render surface can say so"; exactly zero surfaces did.
+//   2. The applied-plan badge re-derived the same fact from localStorage with a
+//      SECOND, DIFFERENT comparison: pool sig here (APEX_PLAN_STAMP_HASH_v1,
+//      2026-08-29) against the WHOLE build string there. So the restore path
+//      cried stale on every rebuild while the badge stayed quiet, and the two
+//      surfaces could never have agreed. The dead flag is the only reason that
+//      divergence never reached a user.
+//
+// Both now read THIS. The pool sig is the only part of BUILD_VERSION
+// ("<unix_ts>-GW<n>-<pool sha1[:8]>") that describes the numbers; a stamp with
+// no hash segment compares unequal, which shows the warning -- the safe way
+// round for a plan saved before the format existed.
+// Gate: scripts/verify/suites_plan_stale_surfaced.js, which reads the BUILT
+// page and fails if the fact is computed and never read, if a second comparison
+// reappears, or if the tree loses its surface.
+function _apexPoolSig(s) {
+  if (typeof s !== 'string') return '';
+  const i = s.lastIndexOf('-');
+  return i >= 0 ? s.slice(i + 1) : s;
+}
+window._apexPoolSig = _apexPoolSig;
+
+function _apexPlanStale() {
+  try {
+    if (typeof window.APEX_BUILD !== 'string') return { stale: false, reason: 'no build stamp' };
+    const raw = localStorage.getItem(_planKey());
+    const plan = raw ? JSON.parse(raw) : null;
+    if (!plan || typeof plan !== 'object') return { stale: false, reason: 'no saved plan' };
+    const saved = (typeof plan.bookStamp === 'string') ? plan.bookStamp : null;
+    const stale = _apexPoolSig(saved) !== _apexPoolSig(window.APEX_BUILD);
+    return { stale, saved, current: window.APEX_BUILD,
+             savedSig: _apexPoolSig(saved), currentSig: _apexPoolSig(window.APEX_BUILD) };
+  } catch (_e) { return { stale: false, reason: 'unreadable' }; }
+}
+window._apexPlanStale = _apexPlanStale;
+
+// The warning every surface shows, authored once. Static text: nothing from the
+// blob reaches innerHTML. `where` only changes the closing sentence, because the
+// action differs by surface -- the squad view re-prices the whole plan, the tree
+// can rewind to the week you are looking at.
+function _apexPlanStaleHtml(where) {
+  const act = (where === 'tree')
+    ? 'Click the decided week you want to re-plan from, or '
+    : '';
+  return '<div style="margin:0 0 8px;padding:6px 10px;border-radius:8px;'
+    + 'background:rgba(217,119,6,.12);color:#B45309;font-size:.8rem;font-weight:600;">'
+    + '&#9888; This plan was priced on an older projections build - the numbers '
+    + 'have updated since. ' + act + 'the squad below is the one you saved, not '
+    + 'today&#8217;s pick.</div>'
+    + '<div style="margin:0 0 8px;"><button onclick="window._apexPlanReprice()" '
+    + 'style="background:#0F6E56;color:#fff;border:0;border-radius:8px;'
+    + 'padding:8px 14px;font-weight:700;cursor:pointer;font-family:inherit;">'
+    + 'Re-price on today&#8217;s numbers</button></div>';
+}
+window._apexPlanStaleHtml = _apexPlanStaleHtml;
+
 function _savePlanState() {
   // A WC/FH preview is a LOOK, not a plan (2026-08-01). While one is up the
   // pitch is showing a squad you do not own; persisting it would make "No
@@ -27021,13 +27201,18 @@ function _restorePlanState() {
     // surface can say so. A blob with no bookStamp predates the stamp itself,
     // so it is older by definition and gets the same flag.
     try {
-      if (typeof window.APEX_BUILD === 'string'
-          && plan.bookStamp !== window.APEX_BUILD) {
-        window._apexPlanBookStale = { saved: plan.bookStamp || null, current: window.APEX_BUILD };
+      // APEX_PLAN_STALE_ONE_DEF_v1 (2026-08-30): was `plan.bookStamp !==
+      // window.APEX_BUILD`, the WHOLE build string, which carries a unix
+      // timestamp -- so this fired on EVERY rebuild, including one that moved
+      // no numbers at all, while the badge (pool sig, 08-29) stayed quiet. Two
+      // tests, one fact, permanently disagreeing. One definition now.
+      const _st = _apexPlanStale();
+      if (_st.stale) {
+        window._apexPlanBookStale = { saved: _st.saved, current: _st.current };
         try { console.warn('[stale-plan] applied plan was priced on '
-          + (plan.bookStamp || 'a pre-stamp build')
-          + ' - current build is ' + window.APEX_BUILD
-          + '. Kept as saved; Reset then Solve to re-price it.'); } catch (_eW2) {}
+          + (_st.saved || 'a pre-stamp build')
+          + ' - current build is ' + _st.current
+          + '. Kept as saved; the tree and the plan card both say so.'); } catch (_eW2) {}
       }
     } catch (_eBk) {}
     const byId = (id) => (POOL_DATA.find(p => p.id === id)
@@ -28587,6 +28772,24 @@ function _ppPresetSolveOpts(_forPreset) {   // INSERTED APEX_FIX_AUG05A_PRESET_L
   } catch (_e) { return {}; }
 }
 window._ppPresetSolveOpts = _ppPresetSolveOpts;
+
+// APEX_MILP_PRESET_TILT_v1 (2026-08-30): the TILT ONLY, for the transfer engine.
+// _ppPresetSolveOpts also carries wcBenchWeight, which is a BUILD dial - passing
+// it to solveMultiPeriod would quietly re-price the bench as a side effect of a
+// fix about ownership. Two dials, two decisions; this hands over one of them.
+function _ppPresetTiltOpts() {
+  try {
+    const o = (typeof _ppPresetSolveOpts === 'function') ? _ppPresetSolveOpts() : {};
+    const t = {};
+    if (o.differential === true) {
+      t.differential = true;
+      t.diffSign = (o.diffSign === -1) ? -1 : 1;
+      if (typeof o.diffWeight === 'number') t.diffWeight = o.diffWeight;
+    }
+    return t;
+  } catch (_e) { return {}; }
+}
+window._ppPresetTiltOpts = _ppPresetTiltOpts;
 
 function _ppSeedLockOpts(gwIdx) {
   try {
@@ -30371,7 +30574,7 @@ async function apexPrimeWcSquad(gwIdx) {
   _apexWcMilp.busy = true;
   try {
     const left = Math.max(2, Math.min(6, (TEAM_META.gw_range.length - gwIdx)));
-    const r = await S.solveMultiPeriod(POOL_DATA, held, {
+    const r = await S.solveMultiPeriod(POOL_DATA, held, Object.assign({
       horizon: left,
       startIdx: gwIdx,
       wildcardWeek: 0,
@@ -30381,7 +30584,10 @@ async function apexPrimeWcSquad(gwIdx) {
       sellingPrices: TEAM_META.selling_prices || {},
       candidateCap: 60,
       timeLimitSec: 25,
-    });
+      // APEX_MILP_PRESET_TILT_v1 (2026-08-30): this is a WILDCARD rebuild, so it
+      // must honour the risk preset exactly as solveWildcard does. Without it the
+      // MILP path returned a Max-EV fifteen under the Differential box.
+    }, _ppPresetTiltOpts()));
     const ids = (r && r.solved && r.weeks && r.weeks[0]) ? r.weeks[0].squadIds : null;
     if (!Array.isArray(ids) || ids.length !== 15) { _apexWcMilp.failed[key] = 1; return null; }
     const byId = {};
@@ -33257,6 +33463,47 @@ function _renderPathTree() {
   }
   s += '</svg>';
   host.innerHTML = s;
+  // ── APEX_PLAN_STALE_TREE_v1 (2026-08-30) ─────────────────────────────────
+  // THE TREE IS WHERE THE FROZEN SQUAD IS ACTUALLY SHOWN, AND IT WAS THE ONE
+  // SURFACE THAT COULD NOT SAY SO.
+  //
+  // Marcus, 2026-08-30: "calafiori is on the bench in wc3 but the optimal is to
+  // sell him in gw4, seems like a waste of a transfer." It was not a wasted
+  // transfer and the wildcard was not short-term (measured: 10.6% of squad EV
+  // in the first two weeks against a 10.5% flat share; the vendor books put
+  // 21.9% and 20.7% in theirs). The GW3 fifteen was a plan priced 12.7 hours
+  // earlier, and GW4 was repairing it. Under every shipped tilt the ILP puts
+  // Virgil in that slot, +15.7 xP.
+  //
+  // _restorePlanState knew. It set window._apexPlanBookStale and this file
+  // contained zero references to staleness, so the tree rendered a stale
+  // fifteen as if it were today's pick. Same shape as the phantom-goal
+  // exemption in DOCTRINE.md: the fact existed, nothing acted on it.
+  //
+  // LABEL, DO NOT REPAIR — the standing WC-week-freeze rule. The squad is the
+  // user's decision and every downstream move was computed from it, so silently
+  // re-solving this week would invalidate the whole move list below it. The
+  // rewind the caption already advertises is the repair; this is the signal
+  // that you want it.
+  try {
+    const _stale = (typeof window._apexPlanStale === 'function')
+      ? window._apexPlanStale() : null;
+    let _sb = document.getElementById('pp-tree-stale');
+    if (_stale && _stale.stale && typeof window._apexPlanStaleHtml === 'function') {
+      if (!_sb) {
+        _sb = document.createElement('div');
+        _sb.id = 'pp-tree-stale';
+        _sb.style.cssText = 'margin:0 2px 10px;';
+        if (host.parentNode) host.parentNode.insertBefore(_sb, host);
+      }
+      _sb.innerHTML = window._apexPlanStaleHtml('tree');
+    } else if (_sb && _sb.parentNode) {
+      // Re-priced or reset mid-session: the strip must go, or it becomes the
+      // same lie in the other direction.
+      _sb.parentNode.removeChild(_sb);
+    }
+  } catch (_eStaleStrip) {}
+
   // 2026-07-27 (Marcus, on a phone) — the caption used to be an SVG <text> at
   // x=20 INSIDE the scroller, so it scrolled with the tree and read
   // "reyed branches stay tappable to compare." once the view was scrolled
@@ -40949,7 +41196,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW3</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1788080743-GW3-9175d75d</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1788094933-GW3-d5bebc2d</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
