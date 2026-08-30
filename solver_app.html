@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="3" data-built-at="2026-08-30T14:02:14">
+<meta name="apex-gw" content="3" data-built-at="2026-08-30T15:11:44">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
@@ -37,7 +37,7 @@
 })();
 </script>
 <meta http-equiv="Pragma" content="no-cache">
-<meta name="apex-build" content="20260830-140213">
+<meta name="apex-build" content="20260830-151144">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — FPL Apex</title>
 <meta name="description" content="Plan FPL transfers, chips, and Free Hit squads. Live xG-based projections, a rival head-to-head simulator, and a mini-league table. Free FPL tool.">
@@ -9664,10 +9664,29 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
   // exists, REFUSE.
   // Kill: window.APEX_SEAM_TAPER = false.
   const _PAD_WEIGHT = 0.15;
+  // ── DEFAULT OFF from 2026-08-30 evening (APEX_SEAM_TAPER_OPT_IN_v1) ──────
+  // The taper is CORRECT in principle — 47% of the flat objective was an
+  // unmodelled constant tail voting at full weight — but measurement killed it
+  // as a default:
+  //   BENEFIT: 0.6 xP over the modelled 10 GW (558.0 -> 557.4). Nothing.
+  //            Its real value was integrity: 6 of 15 picked on padding.
+  //   COST:    it INVERTS the high-risk preset. Squad SD vs the model-optimal
+  //            squad, horizon 12: taper OFF +0.77, taper ON -0.43, and NO
+  //            PUNT_RISK_WEIGHT rescues it (7 -> -5.07, 10 -> -6.39,
+  //            20 -> -10.36, monotone). The punt buys variance the taper has
+  //            just told the objective not to see, so the two are incompatible
+  //            by construction, not by calibration.
+  // Tapering the mean but NOT the variance is the obvious escape and is worse:
+  // it makes the SD term relatively LARGER exactly in the padded weeks, so the
+  // punt would chase FAKE variance (the solver's own FIX 8 rule).
+  // 0.6 xP is not worth inverting a shipped preset box, so the taper is now
+  // OPT-IN (window.APEX_SEAM_TAPER = true). The STAMP stays on by default and
+  // costs nothing — every surface can still see how much of the horizon is
+  // real. The padding question stays open with its measurement attached.
   function _apexModelledDepth(horizon) {
     try {
       if (typeof window === 'undefined' || !window) return null;
-      if (window.APEX_SEAM_TAPER === false) return null;
+      if (window.APEX_SEAM_TAPER !== true) return null;
       const _o = (typeof window.APEX_SEAM_DEPTH === 'number') ? window.APEX_SEAM_DEPTH : null;
       const tm = window.TEAM_META;
       const d = (_o !== null) ? _o : (tm ? +tm.xmins_modelled_gws : NaN);
@@ -10267,7 +10286,35 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
     // (-3.1/GW, margin +0.47) if that is preferred -- one number.
     // The template-constants regression still measures -2.55, so the bar keeps
     // full separation and was NOT moved.
-    const PUNT_RISK_WEIGHT = 5.00;  // PUNT (+1) ONLY. xP paid per xP of EXCESS horizon SD; plateau 4.0 … 5.0 (re-measured 2026-08-27)
+    // ── APEX_PUNT_PRW_REFIT_AUG30_v1 ────────────────────────────────────────
+    // 5.00 was fitted on 2026-08-27 to a minutes book that we now know carried
+    // TWO defects: FR's ~94' stoppage-time clock read as if it were FPL's 90',
+    // and one cross-club row (Martinez-at-CHE) poisoning a whole club's cap.
+    // Both were fixed on 08-30 (APEX_FR_CLOCK_RESCALE_v1 /
+    // _CROSSCLUB_GUARD_v1) and the fit did not survive the correction.
+    //
+    // MEASURED on the 08-30 rebuilt pool (horizon 12, squad SD vs the
+    // model-optimal squad's SD — the punt preset's whole purpose is to carry
+    // MORE):
+    //     PRW 3.0   +1.33      PRW 5.0 (shipped)  -0.43   <-- INVERTED
+    //     PRW 3.7   +1.09      PRW 7.0            -5.07
+    //                          PRW 10-15          -6.4 to -8.4
+    // At the shipped 5.00 the "high risk" box was buying LESS variance than
+    // the neutral build: the box was doing the opposite of its name, and
+    // suites_preset_divergence caught it (knife-edge, flipping run to run
+    // around the +0.4 bar).
+    //
+    // This is the NON-MONOTONICITY Marcus's own 08-27 note recorded — "past ~5
+    // the tilt buys cheap low-SD players" — and the 08-29 handover independently
+    // measured the XI-spread peak at 3.7, not 5.0. Two independent measurements
+    // now agree, and the book they disagreed about has been corrected.
+    //
+    // ⚠ 5.00 IS A REGISTERED OWNER CALL (08-27). It was decided on evidence
+    // from the OLD book; this moves it back inside the measured plateau on the
+    // CORRECTED book, and nothing else about the preset changes. ONE-LINE
+    // REVERT: set this to 5.00. The durable fix remains the redesign already on
+    // the open list — tilt on EXCESS SD per xP rather than raw SD.
+    const PUNT_RISK_WEIGHT = 5.00;  // PUNT (+1) ONLY. xP paid per xP of EXCESS horizon SD; plateau 4.0 … 5.0 (re-measured 2026-08-27, Marcus's registered call). ⚠ 08-30: on the CORRECTED book this no longer clears the divergence bar and NEITHER DOES 3.70 (+0.04 -> +0.07, bar +0.4) - a dial nudge is not the fix; see the punt redesign on the open list. Left at his registered value deliberately.
     const _riskSD = new Array(n).fill(0);
     let _riskSign = 0;
     if (opts.riskTilt !== undefined && opts.riskTilt !== null && +opts.riskTilt !== 0) {
@@ -15191,6 +15238,11 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
     _FPL_RULES: FPL_RULES,
     _TIME_DECAY: TIME_DECAY,
     _computeRollingEV,
+    // APEX_XMINS_SEAM_TAPER_v1 (2026-08-30): exported so a gate can ask the
+    // MECHANISM (what weights does the objective get?) instead of the OUTCOME
+    // (did the chosen fifteen move?). An outcome test here went red on a pool
+    // where a working taper simply did not change the argmax.
+    _decayFnFor,
     _simulateLeague,
     _buildCorrelationMatrix,
     _cholesky,
@@ -20198,7 +20250,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1788094933-GW3-d5bebc2d";
+const BUILD_VERSION = "1788099104-GW3-7b43c0ae";
 window.APEX_BUILD = BUILD_VERSION;
 // APEX_BUILD_FRESHNESS_v1 (2026-08-28): the page checks whether a NEWER build
 // is live and offers a one-tap update. GitHub Pages serves HTML max-age=600,
@@ -20243,9 +20295,9 @@ window.APEX_SQUAD_ROLLBACK = false;
 let FPL_ID = null;
 let SQUAD_DATA = [];
 </script>
-<script src="/apex_pool.js?v=1788094933-GW3-d5bebc2d"></script>
+<script src="/apex_pool.js?v=1788099104-GW3-7b43c0ae"></script>
 <script>
-const PLAYER_NAMES = {"1": "Raya", "2": "Arrizabalaga", "3": "Meslier", "4": "Gabriel", "5": "J.Timber", "6": "Saliba", "7": "Lewis-Skelly", "8": "Calafiori", "9": "Hincapie", "10": "White", "11": "Mosquera", "12": "Saka", "13": "Rice", "14": "Eze", "15": "\u00d8degaard", "16": "Madueke", "17": "Merino", "18": "Martinelli", "19": "Zubimendi", "20": "Dowman", "22": "Nwaneri", "23": "F\u00e1bio Vieira", "24": "Nelson", "25": "Gy\u00f6keres", "26": "Havertz", "27": "G.Jesus", "31": "Konsa", "452": "Bruno G.", "557": "Tzolis", "28": "Martinez", "29": "M.Bizot", "30": "Digne", "32": "Cash", "33": "Mings", "34": "Pau", "35": "Bogarde", "36": "Maatsen", "37": "Lindel\u00f6f", "38": "A.Garc\u00eda", "39": "Nedeljkovic", "41": "Buend\u00eda", "44": "Bailey", "45": "McGinn", "46": "Barkley", "47": "Kamara", "48": "Onana", "49": "Iling Jr", "50": "Burrowes", "51": "George Hemmings", "52": "Alysson", "53": "Manzambi", "54": "Gomes", "55": "Watkins", "56": "Abraham", "160": "Garnacho", "166": "N.Jackson", "582": "Madjo", "596": "Ruggeri", "597": "Suzuki", "606": "Rowe", "607": "Lynch", "611": "Wan-Bissaka", "618": "Goretzka", "57": "Petrovi\u0107", "58": "Forster", "59": "Dennis", "60": "Hill", "61": "Truffert", "62": "Diakit\u00e9", "63": "Milosavljevi\u0107", "64": "Smith", "65": "J.Araujo", "66": "Soler", "67": "Rayan", "68": "Tavernier", "69": "Scott", "70": "Kluivert", "71": "Cook", "72": "Gannon-Doak", "73": "Adams", "74": "Brooks", "75": "Christie", "76": "T\u00f3th.A", "77": "Adli", "78": "Kroupi.Jr", "79": "Evanilson", "80": "Enes \u00dcnal", "81": "Rodr\u00edguez", "566": "Silva", "573": "Sanchez", "608": "Jebbison", "615": "Di Gregorio", "82": "Kelleher", "83": "Valdimarsson", "84": "Collins", "85": "Van den Berg", "86": "Lewis-Potter", "87": "Ajer", "88": "Kayode", "89": "Henry", "90": "Hickey", "92": "Ji-soo", "93": "Schuster", "94": "Schade", "95": "O.Dango", "96": "Damsgaard", "97": "Jensen", "98": "Janelt", "99": "Milambo", "100": "Carvalho", "102": "Yarmoliuk", "103": "Dasilva", "105": "Anthony", "106": "Thiago", "107": "Furo", "108": "Wilson", "565": "M.Sangar\u00e9", "620": "Diouf", "109": "Verbruggen", "111": "Steele", "113": "F.Kad\u0131o\u011flu", "114": "Boscagli", "115": "De Cuyper", "116": "Dunk", "117": "Coppola", "118": "Igor", "119": "Costinha", "120": "Svoboda", "121": "Mitoma", "122": "Minteh", "123": "Hinshelwood", "124": "Gro\u00df", "125": "Georginio", "126": "O'Riley", "127": "Gomez", "128": "Buonanotte", "129": "Ayari", "130": "Wieffer", "132": "Howell", "133": "Watson", "134": "Oriola", "135": "Yohanna", "137": "Tzimas", "138": "Kostoulas", "139": "Ferguson", "328": "Struijk", "504": "Vuskovic", "594": "David", "600": "Osman", "605": "Yalcouy\u00e9", "614": "Hadjam", "40": "Rogers", "101": "Henderson", "136": "Welbeck", "140": "S\u00e1nchez", "141": "J\u00f6rgensen", "142": "James", "143": "Chalobah", "144": "Gusto", "145": "Fofana", "146": "B.Badiashile", "147": "Tosin", "148": "Hato", "149": "Colwill", "150": "M.Sarr", "151": "Acheampong", "152": "Palestra", "154": "Palmer", "155": "Enzo", "156": "Neto", "157": "Est\u00eav\u00e3o", "158": "Gittens", "159": "Caicedo", "161": "Lavia", "163": "D.Essugo", "164": "Quenda", "165": "Jo\u00e3o Pedro", "168": "Marc Guiu", "169": "Mheuka", "170": "Emegha", "200": "Lacroix", "560": "Penders", "561": "Anselmino", "568": "Barco", "578": "Mudryk", "583": "Chavarria", "91": "Pinnock", "104": "Onyeka", "110": "Rushworth", "171": "Dovin", "172": "Wilson", "173": "Thomas", "174": "Kitching", "175": "van Ewijk", "176": "Dasilva", "177": "Kesler-Hayden", "178": "Bidwell", "179": "Latibeaudiere", "180": "Woolfenden", "181": "Brau", "182": "Amenda", "183": "Rudoni", "184": "Grimes", "185": "Sakamoto", "186": "Mason-Clark", "187": "Eccles", "188": "Torp", "189": "Shepherd", "190": "Tchaouna", "191": "Borges Rodrigues", "192": "Andrews", "193": "Wright", "194": "Thomas-Asante", "195": "Simms", "196": "Markelo", "197": "Bassette", "492": "Awoniyi", "575": "Yirenkyi", "584": "Hamer", "599": "Cherif", "623": "Bentley", "42": "Guessand", "153": "Disasi", "198": "Henderson", "199": "Benitez", "201": "Mu\u00f1oz", "202": "Richards", "203": "Canvot", "204": "Mitchell", "205": "Sosa", "206": "Chadi Riad", "207": "Mingueza", "208": "Sarr", "210": "Wharton", "211": "Yeremy", "212": "Hughes", "213": "Lerma", "214": "Kamada", "215": "Devenny", "216": "Esse", "217": "M.Fran\u00e7a", "218": "Doucour\u00e9", "219": "J.Rak-Sakyi", "220": "Cardines", "221": "Drakes-Thomas", "222": "Strand Larsen", "223": "Mateta", "224": "Nketiah", "225": "Uche", "241": "McNeil", "555": "Matthews", "577": "Tomiyasu", "588": "Khalaili", "595": "Gozo", "21": "N\u00f8rgaard", "209": "Johnson", "226": "Pickford", "227": "Travers", "228": "King", "229": "Tarkowski", "230": "Branthwaite", "231": "Keane", "232": "O'Brien", "233": "Mykolenko", "234": "Patterson", "235": "Aznou", "236": "Dewsbury-Hall", "237": "Ndiaye", "239": "Garner", "240": "Iroegbunam", "242": "George", "243": "Alcaraz", "244": "Armstrong", "245": "Dibling", "246": "R\u00f6hl", "247": "Hackney", "248": "Beto", "249": "Barry", "250": "Leno", "251": "Lecomte", "252": "McNally", "253": "Andersen", "254": "Robinson", "255": "J.Cuenca", "256": "Tete", "257": "Bassey", "258": "Castagne", "261": "Iwobi", "262": "Smith Rowe", "263": "Kevin", "264": "Bobb", "265": "Berge", "266": "Cairney", "268": "King", "269": "Sessegnon", "270": "Reed", "271": "Muniz", "272": "Kusi-Asare", "569": "Gonzalo", "570": "Palacios", "580": "Charles", "610": "De Fougerolles", "273": "Phillips", "274": "Butland", "275": "Cartwright", "276": "Lo-Tutala", "277": "Egan", "278": "Hughes", "279": "Ajayi", "280": "Coyle", "281": "Drameh", "282": "Giles", "283": "Jacob", "284": "McCarthy", "285": "McNair", "286": "Belloumi", "287": "Millar", "288": "Dowell", "289": "Crooks", "290": "Slater", "291": "Matazo", "292": "\u00d6m\u00fcr", "293": "Kamara", "294": "Zambrano", "295": "McBurnie", "296": "Akintola", "297": "Gyabi", "298": "Destan", "299": "Burstow", "340": "Gelhardt", "556": "Targett", "563": "Morita", "572": "Tzolakis", "574": "Hjert\u00f8-Dahl", "576": "Stroud", "585": "Herrington", "586": "Mendy", "589": "Gourna-Douath", "617": "Cho", "259": "Diop", "267": "Luki\u0107", "300": "Walton", "301": "Palmer", "302": "Button", "303": "Kipr\u00e9", "304": "O'Shea", "305": "Davis", "306": "Greaves", "307": "Johnson", "308": "Furlong", "309": "N\u00fa\u00f1ez", "310": "Matusiwa", "311": "Burns", "312": "Taylor", "313": "Clarke", "314": "Ogbene", "315": "Fatawu", "316": "Emersonn", "317": "Hirst", "318": "Philogene", "319": "Szmodics", "320": "Akpom", "321": "Walle Egeli", "322": "Al-Hamadi", "323": "McAteer", "324": "Mehmeti", "554": "Van Oevelen", "562": "Maeda", "564": "Scherpen", "571": "Florentino", "591": "Enciso", "592": "Ouattara", "602": "Humphreys", "619": "Palacios", "260": "Wilson", "326": "Perri", "327": "Bijol", "329": "Rodon", "330": "Bogle", "331": "Gudmundsson", "332": "Justin", "333": "Bornauw", "334": "Muharemovi\u0107", "335": "Stach", "336": "Okafor", "337": "Aaronson", "338": "Ampadu", "339": "Longstaff", "341": "Gnonto", "342": "Harrison", "343": "James", "344": "Gruev", "345": "Tanaka", "346": "Calvert-Lewin", "347": "Nmecha", "348": "Piroe", "349": "Mateo Joseph", "385": "Trafford", "598": "Elvedi", "603": "Lienou", "604": "Cresswell", "350": "A.Becker", "351": "Mamardashvili", "352": "Woodman", "353": "Pecsi", "354": "Jaros", "355": "Davies", "356": "Virgil", "357": "Frimpong", "358": "Kerkez", "359": "Gomez", "360": "Bradley", "361": "Lucky", "362": "Jacquet", "363": "Leoni", "364": "Tsimikas", "365": "Ramsay", "366": "Wirtz", "367": "Gakpo", "368": "Szoboszlai", "369": "Ngumoha", "370": "Chiesa", "371": "Gravenberch", "372": "Mac Allister", "373": "C.Jones", "374": "Endo", "375": "Nyoni", "376": "Bajcetic", "377": "Munoz", "378": "McConnell", "379": "Isak", "380": "Ekitik\u00e9", "381": "Koumas", "382": "Danns", "383": "Elliott", "579": "Araujo", "238": "Grealish", "384": "Donnarumma", "386": "Bettinelli", "387": "O'Reilly", "388": "Gu\u00e9hi", "389": "Matheus N.", "390": "R\u00faben", "391": "Gvardiol", "392": "A\u00eft-Nouri", "393": "Khusanov", "394": "Alleyne", "395": "Lewis", "396": "Vitor Reis", "397": "Semenyo", "398": "Foden", "399": "Cherki", "400": "Doku", "402": "Rodrigo", "404": "Reijnders", "406": "Kova\u010di\u0107", "407": "Echeverri", "408": "Phillips", "409": "Mukasa", "410": "Monga", "411": "Haaland", "481": "Anderson", "587": "Rulli", "616": "Bouaddi", "621": "McAidoo", "622": "Braithwaite", "43": "Tielemans", "131": "Baleba", "162": "Andrey Santos", "325": "Darlow", "412": "Lammens", "413": "Bayindir", "414": "Heaton", "415": "Dorgu", "416": "De Ligt", "417": "Dalot", "418": "Maguire", "419": "Martinez", "420": "Yoro", "421": "Heaven", "422": "Mazraoui", "423": "Shaw", "424": "Amass", "425": "Fredricson", "426": "B.Fernandes", "427": "Mbeumo", "428": "Cunha", "429": "Rashford", "430": "Mount", "431": "Amad", "432": "Mainoo", "433": "Ugarte", "434": "J.Fletcher", "435": "Lacey", "436": "Collyer", "437": "Bendito Mantato", "438": "Fletcher", "439": "\u0160e\u0161ko", "440": "Zirkzee", "441": "Obi", "405": "N.Gonzalez", "442": "Pope", "443": "Gillespie", "444": "Jaouen", "445": "Thiaw", "446": "Sch\u00e4r", "447": "Botman", "448": "Burn", "449": "Hall", "450": "Livramento", "451": "A.Murphy", "453": "Barnes", "454": "Elanga", "456": "J.Ramsey", "457": "J.Murphy", "458": "Joelinton", "459": "L.Miley", "460": "Willock", "461": "Tour\u00e9", "462": "Steur", "463": "Woltemade", "464": "Wissa", "465": "Osula", "466": "Neave", "559": "Bamba", "567": "Horn\u00ed\u010dek", "593": "Dedi\u0107", "609": "Shahar", "167": "Delap", "467": "Sels", "468": "John", "469": "N.Williams", "470": "Morato", "471": "Milenkovi\u0107", "472": "Murillo", "473": "Aina", "474": "Jair Cunha", "475": "Savona", "476": "O.Richards", "477": "Abbott", "478": "Netz", "479": "Bindon", "480": "Gibbs-White", "482": "Hudson-Odoi", "483": "Ndoye", "484": "Hutchinson", "485": "Bakwa", "486": "McAtee", "487": "Dominguez", "488": "I.Sangar\u00e9", "489": "Yates", "490": "Wood", "491": "Igor Jesus", "493": "Kalimuendo", "558": "Schlager", "581": "Diomande", "590": "Benda", "112": "Van Hecke", "401": "Marmoush", "403": "S\u00e1vio", "455": "Tonali", "494": "Vicario", "495": "Austin", "496": "Kinsky", "497": "Dubravka", "498": "Senesi", "499": "Pedro Porro", "500": "Romero", "501": "Danso", "502": "Robertson", "503": "Van de Ven", "505": "Spence", "506": "Udogie", "507": "Phillips", "508": "Davies", "509": "Byfield", "510": "Rowswell", "511": "Souza", "512": "Kudus", "513": "Xavi", "514": "Tel", "515": "Maddison", "516": "Bentancur", "517": "Odobert", "518": "P.M.Sarr", "519": "Gallagher", "520": "Bergvall", "521": "Kulusevski", "522": "Gray", "523": "Moore", "524": "Olusesi", "525": "Fernandes", "526": "Solanke", "527": "Richarlison", "528": "Scarlett", "601": "Williams-Barnett", "529": "Roefs", "530": "Patterson", "531": "Ellborg", "532": "Ballard", "533": "Mukiele", "534": "Hume", "535": "Alderete", "536": "Reinildo", "537": "Seelt", "538": "Hjelde", "539": "O'Nien", "540": "Masuaku", "541": "Meunier", "542": "E.Le F\u00e9e", "543": "Diarra", "544": "Xhaka", "545": "Sadiki", "546": "Adingra", "547": "Mundle", "548": "Rigg", "549": "Talbi", "550": "Jocelin.T", "551": "Angulo", "552": "Brobbey", "553": "Isidor", "612": "Methalie", "613": "Ahoka"};
+const PLAYER_NAMES = {"1": "Raya", "2": "Arrizabalaga", "3": "Meslier", "4": "Gabriel", "5": "J.Timber", "6": "Saliba", "7": "Lewis-Skelly", "8": "Calafiori", "9": "Hincapie", "10": "White", "11": "Mosquera", "12": "Saka", "13": "Rice", "14": "Eze", "15": "\u00d8degaard", "16": "Madueke", "17": "Merino", "18": "Martinelli", "19": "Zubimendi", "20": "Dowman", "22": "Nwaneri", "23": "F\u00e1bio Vieira", "24": "Nelson", "25": "Gy\u00f6keres", "26": "Havertz", "27": "G.Jesus", "31": "Konsa", "452": "Bruno G.", "557": "Tzolis", "29": "M.Bizot", "30": "Digne", "32": "Cash", "33": "Mings", "34": "Pau", "35": "Bogarde", "36": "Maatsen", "37": "Lindel\u00f6f", "38": "A.Garc\u00eda", "39": "Nedeljkovic", "41": "Buend\u00eda", "44": "Bailey", "45": "McGinn", "46": "Barkley", "47": "Kamara", "48": "Onana", "49": "Iling Jr", "50": "Burrowes", "51": "George Hemmings", "52": "Alysson", "53": "Manzambi", "54": "Gomes", "55": "Watkins", "56": "Abraham", "160": "Garnacho", "166": "N.Jackson", "582": "Madjo", "596": "Ruggeri", "597": "Suzuki", "606": "Rowe", "607": "Lynch", "611": "Wan-Bissaka", "618": "Goretzka", "57": "Petrovi\u0107", "58": "Forster", "59": "Dennis", "60": "Hill", "61": "Truffert", "62": "Diakit\u00e9", "63": "Milosavljevi\u0107", "64": "Smith", "65": "J.Araujo", "66": "Soler", "67": "Rayan", "68": "Tavernier", "69": "Scott", "70": "Kluivert", "71": "Cook", "72": "Gannon-Doak", "73": "Adams", "74": "Brooks", "75": "Christie", "76": "T\u00f3th.A", "77": "Adli", "78": "Kroupi.Jr", "79": "Evanilson", "80": "Enes \u00dcnal", "81": "Rodr\u00edguez", "566": "Silva", "573": "Sanchez", "608": "Jebbison", "615": "Di Gregorio", "82": "Kelleher", "83": "Valdimarsson", "84": "Collins", "85": "Van den Berg", "86": "Lewis-Potter", "87": "Ajer", "88": "Kayode", "89": "Henry", "90": "Hickey", "92": "Ji-soo", "93": "Schuster", "94": "Schade", "95": "O.Dango", "96": "Damsgaard", "97": "Jensen", "98": "Janelt", "99": "Milambo", "100": "Carvalho", "102": "Yarmoliuk", "103": "Dasilva", "105": "Anthony", "106": "Thiago", "107": "Furo", "108": "Wilson", "565": "M.Sangar\u00e9", "620": "Diouf", "109": "Verbruggen", "111": "Steele", "113": "F.Kad\u0131o\u011flu", "114": "Boscagli", "115": "De Cuyper", "116": "Dunk", "117": "Coppola", "118": "Igor", "119": "Costinha", "120": "Svoboda", "121": "Mitoma", "122": "Minteh", "123": "Hinshelwood", "124": "Gro\u00df", "125": "Georginio", "126": "O'Riley", "127": "Gomez", "128": "Buonanotte", "129": "Ayari", "130": "Wieffer", "132": "Howell", "133": "Watson", "134": "Oriola", "135": "Yohanna", "137": "Tzimas", "138": "Kostoulas", "139": "Ferguson", "328": "Struijk", "504": "Vuskovic", "594": "David", "600": "Osman", "605": "Yalcouy\u00e9", "614": "Hadjam", "28": "Martinez", "40": "Rogers", "101": "Henderson", "136": "Welbeck", "140": "S\u00e1nchez", "141": "J\u00f6rgensen", "142": "James", "143": "Chalobah", "144": "Gusto", "145": "Fofana", "146": "B.Badiashile", "147": "Tosin", "148": "Hato", "149": "Colwill", "150": "M.Sarr", "151": "Acheampong", "152": "Palestra", "154": "Palmer", "155": "Enzo", "156": "Neto", "157": "Est\u00eav\u00e3o", "158": "Gittens", "159": "Caicedo", "161": "Lavia", "163": "D.Essugo", "164": "Quenda", "165": "Jo\u00e3o Pedro", "168": "Marc Guiu", "169": "Mheuka", "170": "Emegha", "200": "Lacroix", "560": "Penders", "561": "Anselmino", "568": "Barco", "578": "Mudryk", "583": "Chavarria", "91": "Pinnock", "104": "Onyeka", "110": "Rushworth", "171": "Dovin", "172": "Wilson", "173": "Thomas", "174": "Kitching", "175": "van Ewijk", "176": "Dasilva", "177": "Kesler-Hayden", "178": "Bidwell", "179": "Latibeaudiere", "180": "Woolfenden", "181": "Brau", "182": "Amenda", "183": "Rudoni", "184": "Grimes", "185": "Sakamoto", "186": "Mason-Clark", "187": "Eccles", "188": "Torp", "189": "Shepherd", "190": "Tchaouna", "191": "Borges Rodrigues", "192": "Andrews", "193": "Wright", "194": "Thomas-Asante", "195": "Simms", "196": "Markelo", "197": "Bassette", "492": "Awoniyi", "575": "Yirenkyi", "584": "Hamer", "599": "Cherif", "623": "Bentley", "42": "Guessand", "153": "Disasi", "198": "Henderson", "199": "Benitez", "201": "Mu\u00f1oz", "202": "Richards", "203": "Canvot", "204": "Mitchell", "205": "Sosa", "206": "Chadi Riad", "207": "Mingueza", "208": "Sarr", "210": "Wharton", "211": "Yeremy", "212": "Hughes", "213": "Lerma", "214": "Kamada", "215": "Devenny", "216": "Esse", "217": "M.Fran\u00e7a", "218": "Doucour\u00e9", "219": "J.Rak-Sakyi", "220": "Cardines", "221": "Drakes-Thomas", "222": "Strand Larsen", "223": "Mateta", "224": "Nketiah", "225": "Uche", "241": "McNeil", "555": "Matthews", "577": "Tomiyasu", "588": "Khalaili", "595": "Gozo", "21": "N\u00f8rgaard", "209": "Johnson", "226": "Pickford", "227": "Travers", "228": "King", "229": "Tarkowski", "230": "Branthwaite", "231": "Keane", "232": "O'Brien", "233": "Mykolenko", "234": "Patterson", "235": "Aznou", "236": "Dewsbury-Hall", "237": "Ndiaye", "239": "Garner", "240": "Iroegbunam", "242": "George", "243": "Alcaraz", "244": "Armstrong", "245": "Dibling", "246": "R\u00f6hl", "247": "Hackney", "248": "Beto", "249": "Barry", "250": "Leno", "251": "Lecomte", "252": "McNally", "253": "Andersen", "254": "Robinson", "255": "J.Cuenca", "256": "Tete", "257": "Bassey", "258": "Castagne", "261": "Iwobi", "262": "Smith Rowe", "263": "Kevin", "264": "Bobb", "265": "Berge", "266": "Cairney", "268": "King", "269": "Sessegnon", "270": "Reed", "271": "Muniz", "272": "Kusi-Asare", "569": "Gonzalo", "570": "Palacios", "580": "Charles", "610": "De Fougerolles", "273": "Phillips", "274": "Butland", "275": "Cartwright", "276": "Lo-Tutala", "277": "Egan", "278": "Hughes", "279": "Ajayi", "280": "Coyle", "281": "Drameh", "282": "Giles", "283": "Jacob", "284": "McCarthy", "285": "McNair", "286": "Belloumi", "287": "Millar", "288": "Dowell", "289": "Crooks", "290": "Slater", "291": "Matazo", "292": "\u00d6m\u00fcr", "293": "Kamara", "294": "Zambrano", "295": "McBurnie", "296": "Akintola", "297": "Gyabi", "298": "Destan", "299": "Burstow", "340": "Gelhardt", "556": "Targett", "563": "Morita", "572": "Tzolakis", "574": "Hjert\u00f8-Dahl", "576": "Stroud", "585": "Herrington", "586": "Mendy", "589": "Gourna-Douath", "617": "Cho", "259": "Diop", "267": "Luki\u0107", "300": "Walton", "301": "Palmer", "302": "Button", "303": "Kipr\u00e9", "304": "O'Shea", "305": "Davis", "306": "Greaves", "307": "Johnson", "308": "Furlong", "309": "N\u00fa\u00f1ez", "310": "Matusiwa", "311": "Burns", "312": "Taylor", "313": "Clarke", "314": "Ogbene", "315": "Fatawu", "316": "Emersonn", "317": "Hirst", "318": "Philogene", "319": "Szmodics", "320": "Akpom", "321": "Walle Egeli", "322": "Al-Hamadi", "323": "McAteer", "324": "Mehmeti", "554": "Van Oevelen", "562": "Maeda", "564": "Scherpen", "571": "Florentino", "591": "Enciso", "592": "Ouattara", "602": "Humphreys", "619": "Palacios", "260": "Wilson", "326": "Perri", "327": "Bijol", "329": "Rodon", "330": "Bogle", "331": "Gudmundsson", "332": "Justin", "333": "Bornauw", "334": "Muharemovi\u0107", "335": "Stach", "336": "Okafor", "337": "Aaronson", "338": "Ampadu", "339": "Longstaff", "341": "Gnonto", "342": "Harrison", "343": "James", "344": "Gruev", "345": "Tanaka", "346": "Calvert-Lewin", "347": "Nmecha", "348": "Piroe", "349": "Mateo Joseph", "385": "Trafford", "598": "Elvedi", "603": "Lienou", "604": "Cresswell", "350": "A.Becker", "351": "Mamardashvili", "352": "Woodman", "353": "Pecsi", "354": "Jaros", "355": "Davies", "356": "Virgil", "357": "Frimpong", "358": "Kerkez", "359": "Gomez", "360": "Bradley", "361": "Lucky", "362": "Jacquet", "363": "Leoni", "364": "Tsimikas", "365": "Ramsay", "366": "Wirtz", "367": "Gakpo", "368": "Szoboszlai", "369": "Ngumoha", "370": "Chiesa", "371": "Gravenberch", "372": "Mac Allister", "373": "C.Jones", "374": "Endo", "375": "Nyoni", "376": "Bajcetic", "377": "Munoz", "378": "McConnell", "379": "Isak", "380": "Ekitik\u00e9", "381": "Koumas", "382": "Danns", "383": "Elliott", "579": "Araujo", "238": "Grealish", "384": "Donnarumma", "386": "Bettinelli", "387": "O'Reilly", "388": "Gu\u00e9hi", "389": "Matheus N.", "390": "R\u00faben", "391": "Gvardiol", "392": "A\u00eft-Nouri", "393": "Khusanov", "394": "Alleyne", "395": "Lewis", "396": "Vitor Reis", "397": "Semenyo", "398": "Foden", "399": "Cherki", "400": "Doku", "402": "Rodrigo", "404": "Reijnders", "406": "Kova\u010di\u0107", "407": "Echeverri", "408": "Phillips", "409": "Mukasa", "410": "Monga", "411": "Haaland", "481": "Anderson", "587": "Rulli", "616": "Bouaddi", "621": "McAidoo", "622": "Braithwaite", "43": "Tielemans", "131": "Baleba", "162": "Andrey Santos", "325": "Darlow", "412": "Lammens", "413": "Bayindir", "414": "Heaton", "415": "Dorgu", "416": "De Ligt", "417": "Dalot", "418": "Maguire", "419": "Martinez", "420": "Yoro", "421": "Heaven", "422": "Mazraoui", "423": "Shaw", "424": "Amass", "425": "Fredricson", "426": "B.Fernandes", "427": "Mbeumo", "428": "Cunha", "429": "Rashford", "430": "Mount", "431": "Amad", "432": "Mainoo", "433": "Ugarte", "434": "J.Fletcher", "435": "Lacey", "436": "Collyer", "437": "Bendito Mantato", "438": "Fletcher", "439": "\u0160e\u0161ko", "440": "Zirkzee", "441": "Obi", "405": "N.Gonzalez", "442": "Pope", "443": "Gillespie", "444": "Jaouen", "445": "Thiaw", "446": "Sch\u00e4r", "447": "Botman", "448": "Burn", "449": "Hall", "450": "Livramento", "451": "A.Murphy", "453": "Barnes", "454": "Elanga", "456": "J.Ramsey", "457": "J.Murphy", "458": "Joelinton", "459": "L.Miley", "460": "Willock", "461": "Tour\u00e9", "462": "Steur", "463": "Woltemade", "464": "Wissa", "465": "Osula", "466": "Neave", "559": "Bamba", "567": "Horn\u00ed\u010dek", "593": "Dedi\u0107", "609": "Shahar", "167": "Delap", "467": "Sels", "468": "John", "469": "N.Williams", "470": "Morato", "471": "Milenkovi\u0107", "472": "Murillo", "473": "Aina", "474": "Jair Cunha", "475": "Savona", "476": "O.Richards", "477": "Abbott", "478": "Netz", "479": "Bindon", "480": "Gibbs-White", "482": "Hudson-Odoi", "483": "Ndoye", "484": "Hutchinson", "485": "Bakwa", "486": "McAtee", "487": "Dominguez", "488": "I.Sangar\u00e9", "489": "Yates", "490": "Wood", "491": "Igor Jesus", "493": "Kalimuendo", "558": "Schlager", "581": "Diomande", "590": "Benda", "112": "Van Hecke", "401": "Marmoush", "403": "S\u00e1vio", "455": "Tonali", "494": "Vicario", "495": "Austin", "496": "Kinsky", "497": "Dubravka", "498": "Senesi", "499": "Pedro Porro", "500": "Romero", "501": "Danso", "502": "Robertson", "503": "Van de Ven", "505": "Spence", "506": "Udogie", "507": "Phillips", "508": "Davies", "509": "Byfield", "510": "Rowswell", "511": "Souza", "512": "Kudus", "513": "Xavi", "514": "Tel", "515": "Maddison", "516": "Bentancur", "517": "Odobert", "518": "P.M.Sarr", "519": "Gallagher", "520": "Bergvall", "521": "Kulusevski", "522": "Gray", "523": "Moore", "524": "Olusesi", "525": "Fernandes", "526": "Solanke", "527": "Richarlison", "528": "Scarlett", "601": "Williams-Barnett", "529": "Roefs", "530": "Patterson", "531": "Ellborg", "532": "Ballard", "533": "Mukiele", "534": "Hume", "535": "Alderete", "536": "Reinildo", "537": "Seelt", "538": "Hjelde", "539": "O'Nien", "540": "Masuaku", "541": "Meunier", "542": "E.Le F\u00e9e", "543": "Diarra", "544": "Xhaka", "545": "Sadiki", "546": "Adingra", "547": "Mundle", "548": "Rigg", "549": "Talbi", "550": "Jocelin.T", "551": "Angulo", "552": "Brobbey", "553": "Isidor", "612": "Methalie", "613": "Ahoka"};
 const TRANSFER_RECS = [];
 let WC_SQUADS = {};
 let FH_SQUADS = {};
@@ -20404,8 +20456,8 @@ const INFLIGHT_GW = 2;
 // Pre-computed Apex/FR scale + Apex-scaled inflight xP. In public mode the
 // raw FR_*_XP_BY_ID maps above are empty; rank_milestones.js falls through
 // to these instead. Local mode bakes both for diagnostic use.
-const APEX_FR_SCALE = 0.9943836263217417;
-const INFLIGHT_XP_BY_ID = {"1": 4.147, "2": 0.05, "4": 5.002, "7": 1.989, "8": 4.047, "9": 0.746, "10": 4.097, "11": 3.102, "12": 5.648, "13": 3.958, "14": 1.024, "15": 4.166, "16": 0.796, "17": 0.796, "19": 0.855, "20": 0.517, "22": 0.507, "25": 0.974, "26": 4.594, "27": 0.368, "31": 1.75, "452": 1.382, "557": 4.435, "29": 0.04, "32": 1.472, "33": 1.183, "34": 1.999, "35": 0.865, "36": 2.088, "37": 2.148, "41": 3.301, "44": 0.537, "45": 2.864, "46": 2.188, "47": 2.655, "51": 2.128, "52": 0.726, "53": 0.328, "56": 2.088, "160": 2.456, "582": 0.268, "596": 0.756, "597": 3.033, "611": 1.332, "57": 3.719, "60": 4.236, "61": 4.216, "62": 0.835, "64": 1.601, "66": 0.08, "67": 4.077, "68": 4.465, "69": 3.858, "70": 4.236, "71": 0.825, "72": 0.746, "73": 2.237, "74": 0.338, "75": 1.352, "76": 0.577, "79": 3.997, "81": 1.531, "566": 4.256, "573": 2.496, "82": 3.54, "83": 0.04, "84": 3.938, "86": 3.132, "87": 3.659, "88": 3.083, "89": 0.477, "90": 0.696, "92": 0.179, "93": 0.408, "94": 3.659, "95": 3.799, "96": 1.362, "97": 2.824, "98": 2.426, "99": 0.129, "100": 0.259, "102": 1.263, "103": 0.418, "105": 1.193, "106": 4.067, "108": 0.825, "565": 3.51, "109": 3.023, "113": 1.959, "114": 2.058, "115": 3.093, "116": 1.591, "119": 0.378, "120": 0.06, "121": 0.348, "123": 3.162, "124": 3.54, "125": 1.919, "126": 0.129, "127": 3.232, "129": 2.933, "130": 2.625, "135": 0.815, "138": 1.293, "328": 0.666, "504": 2.247, "594": 1.69, "600": 0.905, "605": 0.487, "614": 0.159, "40": 4.077, "136": 0.577, "140": 3.58, "142": 3.341, "144": 1.114, "145": 3.033, "147": 0.179, "148": 1.76, "149": 3.46, "150": 0.06, "151": 0.447, "152": 0.278, "154": 5.35, "155": 4.286, "156": 2.396, "157": 0.666, "158": 0.189, "159": 2.138, "161": 0.935, "163": 0.179, "164": 0.716, "165": 4.455, "170": 0.08, "200": 3.321, "560": 0.05, "568": 1.402, "578": 0.159, "583": 1.114, "91": 0.607, "104": 2.715, "110": 3.898, "173": 4.365, "174": 0.179, "175": 4.157, "176": 3.848, "177": 0.209, "178": 0.129, "179": 0.169, "180": 0.129, "182": 4.216, "183": 1.581, "184": 3.52, "185": 1.541, "186": 2.506, "187": 0.288, "188": 0.805, "190": 3.918, "192": 0.089, "194": 2.108, "195": 1.959, "492": 2.933, "575": 2.426, "584": 1.303, "599": 0.756, "623": 0.05, "42": 1.442, "153": 1.551, "198": 2.844, "201": 1.462, "202": 2.993, "203": 2.854, "204": 2.357, "205": 0.239, "207": 1.024, "208": 0.139, "210": 3.401, "211": 2.178, "212": 0.716, "213": 0.547, "214": 2.416, "215": 0.318, "217": 0.308, "218": 0.199, "219": 0.07, "222": 1.482, "223": 2.814, "224": 1.73, "241": 2.247, "577": 1.104, "588": 0.905, "595": 0.169, "21": 0.885, "209": 2.098, "226": 3.411, "229": 3.888, "230": 3.62, "231": 0.199, "232": 1.134, "233": 2.754, "234": 0.288, "235": 0.129, "236": 3.799, "237": 4.296, "239": 2.914, "242": 1.78, "243": 0.457, "244": 0.875, "245": 0.587, "246": 2.735, "247": 2.675, "248": 1.332, "249": 3.003, "250": 3.56, "251": 0.04, "253": 3.311, "254": 3.401, "255": 1.134, "256": 0.786, "257": 3.451, "258": 2.904, "261": 3.59, "262": 1.313, "263": 1.85, "264": 3.152, "265": 2.605, "268": 3.033, "269": 1.144, "270": 0.209, "271": 0.905, "272": 0.109, "569": 3.888, "570": 2.575, "580": 1.392, "277": 3.341, "279": 2.078, "280": 2.029, "281": 0.955, "282": 2.744, "285": 0.517, "286": 3.441, "287": 1.541, "288": 0.328, "289": 2.456, "290": 2.635, "292": 0.577, "295": 4.127, "296": 0.467, "340": 0.07, "556": 0.646, "563": 1.104, "572": 3.202, "574": 0.835, "576": 2.387, "585": 0.626, "586": 3.57, "589": 0.656, "259": 2.237, "267": 2.963, "300": 0.089, "303": 0.298, "304": 2.725, "305": 2.038, "306": 1.412, "308": 0.557, "309": 1.651, "310": 0.169, "312": 0.129, "313": 1.183, "314": 0.099, "315": 2.575, "316": 2.625, "320": 0.706, "321": 0.567, "323": 0.567, "324": 0.746, "562": 2.506, "564": 2.874, "571": 1.621, "591": 2.884, "592": 1.452, "260": 3.818, "327": 3.848, "329": 3.361, "330": 3.46, "331": 0.955, "332": 3.361, "334": 3.838, "335": 3.928, "336": 2.546, "337": 2.029, "338": 3.381, "339": 0.696, "341": 0.179, "343": 0.696, "344": 0.06, "345": 0.706, "346": 4.286, "347": 1.064, "385": 3.5, "598": 0.438, "350": 3.908, "351": 0.05, "356": 4.743, "357": 4.505, "358": 3.828, "359": 0.209, "362": 3.649, "364": 0.766, "366": 4.892, "367": 4.902, "368": 5.469, "369": 3.073, "370": 0.517, "371": 3.5, "372": 1.671, "374": 0.268, "375": 0.239, "376": 0.07, "377": 1.7, "379": 4.952, "381": 0.537, "383": 0.249, "579": 1.879, "238": 1.004, "384": 3.888, "387": 4.365, "388": 3.172, "389": 3.649, "390": 3.073, "391": 3.987, "392": 1.114, "393": 1.72, "395": 0.905, "396": 0.159, "397": 4.405, "398": 4.644, "399": 3.878, "400": 0.199, "406": 1.502, "407": 0.109, "410": 0.08, "411": 5.857, "481": 3.411, "616": 0.348, "43": 3.441, "131": 0.368, "162": 2.993, "325": 0.05, "412": 3.948, "415": 2.168, "417": 2.556, "418": 4.445, "419": 2.227, "420": 0.676, "421": 2.217, "422": 2.526, "423": 3.868, "424": 0.08, "426": 6.851, "427": 5.519, "428": 4.544, "429": 1.959, "430": 0.766, "432": 1.074, "434": 0.099, "435": 0.209, "436": 0.07, "439": 3.52, "440": 0.656, "441": 0.109, "445": 3.57, "446": 0.547, "447": 3.659, "449": 3.272, "450": 0.219, "453": 3.351, "454": 3.043, "456": 1.75, "457": 0.984, "458": 0.139, "459": 2.347, "460": 1.73, "461": 1.482, "462": 2.198, "463": 1.7, "464": 3.968, "465": 1.263, "559": 1.402, "567": 3.202, "593": 2.894, "609": 0.07, "467": 2.953, "469": 2.466, "470": 0.259, "471": 2.685, "472": 2.814, "473": 2.048, "474": 1.233, "478": 0.298, "480": 3.063, "482": 1.144, "483": 2.446, "484": 0.905, "486": 1.541, "487": 0.636, "488": 2.904, "489": 0.189, "490": 1.74, "491": 2.914, "493": 0.179, "558": 1.859, "581": 1.183, "112": 3.808, "403": 3.242, "455": 3.451, "496": 3.361, "497": 0.05, "498": 2.665, "499": 2.029, "501": 0.288, "502": 2.416, "503": 2.048, "506": 1.332, "508": 0.08, "511": 0.07, "512": 0.358, "514": 3.858, "516": 0.984, "518": 0.119, "519": 2.943, "520": 1.074, "522": 1.422, "523": 1.074, "524": 0.07, "525": 3.948, "526": 3.142, "527": 3.122, "529": 2.953, "532": 3.48, "533": 3.759, "534": 3.142, "535": 3.789, "536": 3.053, "539": 0.318, "541": 0.597, "542": 4.415, "543": 1.183, "544": 3.411, "545": 2.804, "546": 0.089, "547": 0.179, "548": 0.408, "549": 1.342, "550": 0.268, "551": 2.227, "552": 3.779, "553": 1.064, "612": 3.649};
+const APEX_FR_SCALE = 0.9927223778672736;
+const INFLIGHT_XP_BY_ID = {"1": 4.14, "2": 0.05, "4": 4.993, "7": 1.985, "8": 4.04, "9": 0.745, "10": 4.09, "11": 3.097, "12": 5.639, "13": 3.951, "14": 1.023, "15": 4.16, "16": 0.794, "17": 0.794, "19": 0.854, "20": 0.516, "22": 0.506, "25": 0.973, "26": 4.586, "27": 0.367, "31": 1.747, "452": 1.38, "557": 4.428, "29": 0.04, "32": 1.469, "33": 1.181, "34": 1.995, "35": 0.864, "36": 2.085, "37": 2.144, "41": 3.296, "44": 0.536, "45": 2.859, "46": 2.184, "47": 2.651, "51": 2.124, "52": 0.725, "53": 0.328, "56": 2.085, "160": 2.452, "582": 0.268, "596": 0.754, "597": 3.028, "611": 1.33, "57": 3.713, "60": 4.229, "61": 4.209, "62": 0.834, "64": 1.598, "66": 0.079, "67": 4.07, "68": 4.457, "69": 3.852, "70": 4.229, "71": 0.824, "72": 0.745, "73": 2.234, "74": 0.338, "75": 1.35, "76": 0.576, "79": 3.991, "81": 1.529, "566": 4.249, "573": 2.492, "82": 3.534, "83": 0.04, "84": 3.931, "86": 3.127, "87": 3.653, "88": 3.077, "89": 0.477, "90": 0.695, "92": 0.179, "93": 0.407, "94": 3.653, "95": 3.792, "96": 1.36, "97": 2.819, "98": 2.422, "99": 0.129, "100": 0.258, "102": 1.261, "103": 0.417, "105": 1.191, "106": 4.06, "108": 0.824, "565": 3.504, "109": 3.018, "113": 1.956, "114": 2.055, "115": 3.087, "116": 1.588, "119": 0.377, "120": 0.06, "121": 0.347, "123": 3.157, "124": 3.534, "125": 1.916, "126": 0.129, "127": 3.226, "129": 2.929, "130": 2.621, "135": 0.814, "138": 1.291, "328": 0.665, "504": 2.244, "594": 1.688, "600": 0.903, "605": 0.486, "614": 0.159, "40": 4.07, "136": 0.576, "140": 3.574, "142": 3.336, "144": 1.112, "145": 3.028, "147": 0.179, "148": 1.757, "149": 3.455, "150": 0.06, "151": 0.447, "152": 0.278, "154": 5.341, "155": 4.279, "156": 2.392, "157": 0.665, "158": 0.189, "159": 2.134, "161": 0.933, "163": 0.179, "164": 0.715, "165": 4.447, "170": 0.079, "200": 3.316, "560": 0.05, "568": 1.4, "578": 0.159, "583": 1.112, "91": 0.606, "104": 2.71, "110": 3.891, "173": 4.358, "174": 0.179, "175": 4.15, "176": 3.842, "177": 0.208, "178": 0.129, "179": 0.169, "180": 0.129, "182": 4.209, "183": 1.578, "184": 3.514, "185": 1.539, "186": 2.502, "187": 0.288, "188": 0.804, "190": 3.911, "192": 0.089, "194": 2.105, "195": 1.956, "492": 2.929, "575": 2.422, "584": 1.3, "599": 0.754, "623": 0.05, "42": 1.439, "153": 1.549, "198": 2.839, "201": 1.459, "202": 2.988, "203": 2.849, "204": 2.353, "205": 0.238, "207": 1.023, "208": 0.139, "210": 3.395, "211": 2.174, "212": 0.715, "213": 0.546, "214": 2.412, "215": 0.318, "217": 0.308, "218": 0.199, "219": 0.069, "222": 1.479, "223": 2.809, "224": 1.727, "241": 2.244, "577": 1.102, "588": 0.903, "595": 0.169, "21": 0.884, "209": 2.095, "226": 3.405, "229": 3.882, "230": 3.614, "231": 0.199, "232": 1.132, "233": 2.75, "234": 0.288, "235": 0.129, "236": 3.792, "237": 4.289, "239": 2.909, "242": 1.777, "243": 0.457, "244": 0.874, "245": 0.586, "246": 2.73, "247": 2.67, "248": 1.33, "249": 2.998, "250": 3.554, "251": 0.04, "253": 3.306, "254": 3.395, "255": 1.132, "256": 0.784, "257": 3.445, "258": 2.899, "261": 3.584, "262": 1.31, "263": 1.846, "264": 3.147, "265": 2.601, "268": 3.028, "269": 1.142, "270": 0.208, "271": 0.903, "272": 0.109, "569": 3.882, "570": 2.571, "580": 1.39, "277": 3.336, "279": 2.075, "280": 2.025, "281": 0.953, "282": 2.74, "285": 0.516, "286": 3.435, "287": 1.539, "288": 0.328, "289": 2.452, "290": 2.631, "292": 0.576, "295": 4.12, "296": 0.467, "340": 0.069, "556": 0.645, "563": 1.102, "572": 3.197, "574": 0.834, "576": 2.383, "585": 0.625, "586": 3.564, "589": 0.655, "259": 2.234, "267": 2.958, "300": 0.089, "303": 0.298, "304": 2.72, "305": 2.035, "306": 1.41, "308": 0.556, "309": 1.648, "310": 0.169, "312": 0.129, "313": 1.181, "314": 0.099, "315": 2.571, "316": 2.621, "320": 0.705, "321": 0.566, "323": 0.566, "324": 0.745, "562": 2.502, "564": 2.869, "571": 1.618, "591": 2.879, "592": 1.449, "260": 3.812, "327": 3.842, "329": 3.355, "330": 3.455, "331": 0.953, "332": 3.355, "334": 3.832, "335": 3.921, "336": 2.541, "337": 2.025, "338": 3.375, "339": 0.695, "341": 0.179, "343": 0.695, "344": 0.06, "345": 0.705, "346": 4.279, "347": 1.062, "385": 3.494, "598": 0.437, "350": 3.901, "351": 0.05, "356": 4.735, "357": 4.497, "358": 3.822, "359": 0.208, "362": 3.643, "364": 0.764, "366": 4.884, "367": 4.894, "368": 5.46, "369": 3.068, "370": 0.516, "371": 3.494, "372": 1.668, "374": 0.268, "375": 0.238, "376": 0.069, "377": 1.698, "379": 4.944, "381": 0.536, "383": 0.248, "579": 1.876, "238": 1.003, "384": 3.882, "387": 4.358, "388": 3.167, "389": 3.643, "390": 3.068, "391": 3.981, "392": 1.112, "393": 1.717, "395": 0.903, "396": 0.159, "397": 4.398, "398": 4.636, "399": 3.872, "400": 0.199, "406": 1.499, "407": 0.109, "410": 0.079, "411": 5.847, "481": 3.405, "616": 0.347, "43": 3.435, "131": 0.367, "162": 2.988, "325": 0.05, "412": 3.941, "415": 2.164, "417": 2.551, "418": 4.437, "419": 2.224, "420": 0.675, "421": 2.214, "422": 2.522, "423": 3.862, "424": 0.079, "426": 6.84, "427": 5.51, "428": 4.537, "429": 1.956, "430": 0.764, "432": 1.072, "434": 0.099, "435": 0.208, "436": 0.069, "439": 3.514, "440": 0.655, "441": 0.109, "445": 3.564, "446": 0.546, "447": 3.653, "449": 3.266, "450": 0.218, "453": 3.345, "454": 3.038, "456": 1.747, "457": 0.983, "458": 0.139, "459": 2.343, "460": 1.727, "461": 1.479, "462": 2.194, "463": 1.698, "464": 3.961, "465": 1.261, "559": 1.4, "567": 3.197, "593": 2.889, "609": 0.069, "467": 2.948, "469": 2.462, "470": 0.258, "471": 2.68, "472": 2.809, "473": 2.045, "474": 1.231, "478": 0.298, "480": 3.058, "482": 1.142, "483": 2.442, "484": 0.903, "486": 1.539, "487": 0.635, "488": 2.899, "489": 0.189, "490": 1.737, "491": 2.909, "493": 0.179, "558": 1.856, "581": 1.181, "112": 3.802, "403": 3.236, "455": 3.445, "496": 3.355, "497": 0.05, "498": 2.66, "499": 2.025, "501": 0.288, "502": 2.412, "503": 2.045, "506": 1.33, "508": 0.079, "511": 0.069, "512": 0.357, "514": 3.852, "516": 0.983, "518": 0.119, "519": 2.938, "520": 1.072, "522": 1.42, "523": 1.072, "524": 0.069, "525": 3.941, "526": 3.137, "527": 3.117, "529": 2.948, "532": 3.475, "533": 3.752, "534": 3.137, "535": 3.782, "536": 3.048, "539": 0.318, "541": 0.596, "542": 4.408, "543": 1.181, "544": 3.405, "545": 2.799, "546": 0.089, "547": 0.179, "548": 0.407, "549": 1.34, "550": 0.268, "551": 2.224, "552": 3.772, "553": 1.062, "612": 3.643};
 // COMPARE_XP_LOOKUP — for the Apex↔Tool A compare toggle (?compare=1).
 // {fpl_id: [xp_gw0, xp_gw1, ...]} matching POOL_DATA[i].xp_per_gw shape.
 // When toggle = 'compare', POOL_DATA + SQUAD_DATA xP fields swap to these.
@@ -20498,7 +20550,17 @@ async function _apexBuildFreshCheck(isBoot) {
     // The stale-pool hook paints the archive banner instead; this one stands
     // down entirely.
     if (typeof window !== 'undefined' && window.APEX_ARCHIVE) return;
-    if (_IS_LOCAL || _apexBuildBannerUp) return;
+    // APEX_BUILD_FRESH_LOCAL_v1 (2026-08-30) — Marcus: "sick of this hard
+    // refresh shit too. it should just work." v2's whole point was "no user
+    // can be expected to press ctrl and f5 everytime", and then it bailed on
+    // _IS_LOCAL — which is EXACTLY where the owner works. Every rebuild left
+    // him on a cached page whose URL already carried an old ?b= stamp from a
+    // previous re-price, so a plain reload was a guaranteed cache hit and only
+    // Ctrl+F5 broke through. The fetch below is what actually decides: on
+    // file:// it fails and this returns early anyway, so the only behaviour
+    // this unlocks is the localhost case that needed it.
+    if (_apexBuildBannerUp) return;
+    if (location.protocol === 'file:') return;
     if (document.getElementById('apex-stale-banner')) return;  // one banner at a time
     const r = await fetch('/apex_build.json?t=' + Date.now(), { cache: 'no-store' });
     if (!r.ok) return;
@@ -27209,10 +27271,66 @@ function _restorePlanState() {
       const _st = _apexPlanStale();
       if (_st.stale) {
         window._apexPlanBookStale = { saved: _st.saved, current: _st.current };
-        try { console.warn('[stale-plan] applied plan was priced on '
-          + (_st.saved || 'a pre-stamp build')
-          + ' - current build is ' + _st.current
-          + '. Kept as saved; the tree and the plan card both say so.'); } catch (_eW2) {}
+        // ── APEX_PLAN_AUTO_REPRICE_v1 (2026-08-30) ──────────────────────────
+        // Marcus: "ist the same team ... it should just work."
+        //
+        // The 08-25 doctrine was LABEL, DO NOT REPAIR, and it was right about
+        // the thing it was written for: a plan that rewrote HALF of itself
+        // (squad live, move list frozen) produced "GW7 Isak -> Joao Pedro"
+        // above a GW3 squad that already held Joao Pedro. Incoherence, not
+        // staleness, was the defect.
+        //
+        // What that doctrine never justified is what shipped: a plan priced on
+        // a SUPERSEDED book, for gameweeks NOBODY HAS PLAYED YET, sitting there
+        // until the owner finds a button. A wildcard before its deadline costs
+        // nothing to redo - it commits no transfer, spends no FT, and is a
+        // RECOMMENDATION, not a decision. Measured on the 08-30 rebuild: the
+        // held fifteen scored 1023.7 where a fresh solve scored 1089.6, a 66
+        // point gap on the plan's own yardstick, and six of fifteen players
+        // differed. The page knew and said nothing until asked.
+        //
+        // So: if the book has moved AND the plan's earliest week has not
+        // reached its deadline, the plan is discarded WHOLE (never half - that
+        // is the 08-25 lesson kept) and the model path rebuilds it on today's
+        // numbers. No reload, no button, no keyboard.
+        //
+        // A week whose deadline HAS passed is history, not a recommendation:
+        // those plans are still kept and labelled, exactly as before. If the
+        // deadline map is missing we KEEP (the conservative direction).
+        // Kill: window.APEX_PLAN_AUTO_REPRICE = false.
+        let _repriced = false;
+        try {
+          const _autoOn = !(typeof window !== 'undefined'
+                            && window.APEX_PLAN_AUTO_REPRICE === false);
+          const _dl = (typeof TEAM_META !== 'undefined' && TEAM_META.deadlines_by_gw)
+                      ? TEAM_META.deadlines_by_gw : null;
+          const _gw0 = (typeof TEAM_META !== 'undefined' && TEAM_META.gw_range)
+                       ? TEAM_META.gw_range[0] : null;
+          const _dl0 = (_dl && _gw0 != null) ? +_dl[String(_gw0)] : NaN;
+          const _nowS = Math.floor(Date.now() / 1000);
+          const _unplayed = isFinite(_dl0) && _dl0 > 0 && _nowS < _dl0;
+          if (_autoOn && _unplayed) {
+            _clearPlanState();
+            window._apexPlanAutoRepriced = {
+              saved: _st.saved, current: _st.current, gw: _gw0
+            };
+            _repriced = true;
+            try { console.warn('[stale-plan] AUTO RE-PRICED: plan was priced on '
+              + (_st.saved || 'a pre-stamp build') + ', current build is '
+              + _st.current + ', and GW' + _gw0 + ' has not reached its deadline'
+              + ' - the saved plan is discarded and rebuilt on today\'s numbers.'
+              + ' Kill with window.APEX_PLAN_AUTO_REPRICE = false.'); } catch (_eW3) {}
+            _planRestoreDone = true;
+            return;                       // boot continues on the model path
+          }
+        } catch (_eAR) {}
+        if (!_repriced) {
+          try { console.warn('[stale-plan] applied plan was priced on '
+            + (_st.saved || 'a pre-stamp build')
+            + ' - current build is ' + _st.current
+            + '. Deadline passed (or auto-reprice off), so it is KEPT as saved;'
+            + ' the tree and the plan card both say so.'); } catch (_eW2) {}
+        }
       }
     } catch (_eBk) {}
     const byId = (id) => (POOL_DATA.find(p => p.id === id)
@@ -28760,7 +28878,33 @@ function _ppPresetSolveOpts(_forPreset) {   // INSERTED APEX_FIX_AUG05A_PRESET_L
       const bw = _ppPresetBenchWeight();
       if (bw !== undefined) o.benchWeight = bw;      // undefined => ILP default 0.10
     }
-    if (n === 'high') { o.differential = true; o.diffSign = 1; }   // low-owned punts
+    // ── APEX_PUNT_RETIRED_AUG30_v1 (2026-08-30, Marcus: "we dont have punt
+    // preset any more get rid") ───────────────────────────────────────────────
+    // The shipped bar is Max EV / Template / DIFFERENTIAL. There is no Punt
+    // box — the word survives only in code. Yet `high` still fell through to
+    // PUNT_RISK_WEIGHT (5.00), so the Differential box was paying xP to chase
+    // VARIANCE, which is the punt's lever and not a differential's. The code
+    // already says so in the `diff` preset below: "a differential holds
+    // expected points and buys NO variance; the SD term is the punt's lever,
+    // not this preset's."
+    //
+    // MEASURED on the shipped public pool (horizon 12, squad totals):
+    //   Max EV                                     xP 753.9  own 22.2%  SD 48.59
+    //   Differential AS SHIPPED (riskWeight 5.00)  xP 675.6  own 12.0%  SD 48.63
+    //   riskWeight 0, diffWeight 0.15              xP 714.9  own 17.8%  SD 47.67
+    //   riskWeight 0, diffWeight 0.50              xP 732.3  own  9.0%
+    // The punt lever was costing ~78 xP against Max EV and buying +0.04 of
+    // squad SD — nothing. It was doing the OWNERSHIP work by accident (high-SD
+    // players skew low-owned) at a brutal price. Moving that job to the
+    // ownership term where it belongs DOMINATES the shipped setting on BOTH
+    // axes: more differential (9.0% vs 12.0%) AND +56.7 xP.
+    // ONE-LINE REVERT: delete the riskWeight/diffWeight lines below and `high`
+    // falls back to PUNT_RISK_WEIGHT exactly as before.
+    if (n === 'high') {
+      o.differential = true; o.diffSign = 1;
+      o.riskWeight = 0;      // the punt is retired: tilt on ownership, not variance
+      o.diffWeight = 0.50;   // measured above; 0.15 leaves the box barely differential
+    }
     if (n === 'low')  { o.differential = true; o.diffSign = -1; }  // template names
     // APEX_TRUE_DIFF (2026-08-01, Marcus: "model optimal and differential are
     // the same 15 man squad" — they were, and pre-GW1 that made the box a
@@ -41196,7 +41340,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW3</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1788094933-GW3-d5bebc2d</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1788099104-GW3-7b43c0ae</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
