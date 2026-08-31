@@ -77,7 +77,7 @@
     <div class="grid">
 
       <div class="left">
-        <span class="preview">LIVE &middot; 1 GAMEWEEK</span>
+        <span class="preview">LIVE &middot; 2 GAMEWEEKS</span>
         <h1>How accurate is Apex?</h1>
         <p class="lede" id="eval-lede">We score Apex against the leading paid tools every gameweek, in the open —
           same players, same metric, no cherry-picking. Live tracking begins 2026/27.</p>
@@ -111,16 +111,16 @@
 
         <div class="bars">
           <div class="barrow">
-            <div class="lab"><span style="font-weight:700;">Apex</span><span class="v" style="color:var(--teal)" id="exbar-apex-v">2.63</span></div>
-            <div class="track"><div class="fill" style="width:93%;background:#1D9E75" id="exbar-apex-f"></div></div>
+            <div class="lab"><span style="font-weight:700;">Apex</span><span class="v" style="color:var(--teal)" id="exbar-apex-v">2.69</span></div>
+            <div class="track"><div class="fill" style="width:96%;background:#1D9E75" id="exbar-apex-f"></div></div>
           </div>
           <div class="barrow">
-            <div class="lab"><span>Tool A <span style="font-size:12px;font-weight:700;color:var(--muted)" id="exbar-a-tag"></span></span><span class="v" id="exbar-a-v">2.56</span></div>
-            <div class="track"><div class="fill" style="width:96%;background:#3f4d47" id="exbar-a-f"></div></div>
+            <div class="lab"><span>Tool A <span style="font-size:12px;font-weight:700;color:var(--muted)" id="exbar-a-tag"></span></span><span class="v" id="exbar-a-v">2.72</span></div>
+            <div class="track"><div class="fill" style="width:95%;background:#3f4d47" id="exbar-a-f"></div></div>
           </div>
           <div class="barrow">
-            <div class="lab"><span>Tool B</span><span class="v" id="exbar-b-v">2.63</span></div>
-            <div class="track"><div class="fill" style="width:93%;background:#b8c2bc" id="exbar-b-f"></div></div>
+            <div class="lab"><span>Tool B</span><span class="v" id="exbar-b-v">2.70</span></div>
+            <div class="track"><div class="fill" style="width:96%;background:#b8c2bc" id="exbar-b-f"></div></div>
           </div>
         </div>
 
@@ -128,11 +128,11 @@
 
         <div class="season">
           <span class="exbadge" id="eval-badge">LIVE</span>
-          <div style="font-size:12px;font-weight:800;color:var(--muted);letter-spacing:1.5px;padding-right:108px;" id="eval-heading">SEASON RUNNING TOTAL &middot; 1 gameweek &middot; 66 player-projections scored</div>
+          <div style="font-size:12px;font-weight:800;color:var(--muted);letter-spacing:1.5px;padding-right:108px;" id="eval-heading">SEASON RUNNING TOTAL &middot; 2 gameweeks &middot; 134 player-projections scored</div>
           <div class="tiles">
-            <div class="tile" style="background:#1D9E7512"><div class="n" style="color:var(--teal)" id="eval-apex">2.63</div><div class="t">Apex</div></div>
-            <div class="tile" style="background:rgba(63,77,71,.10)"><div class="n" style="color:#3f4d47" id="eval-toolA">2.56</div><div class="t" style="color:#3f4d47">Tool A</div></div>
-            <div class="tile" style="background:rgba(26,46,40,.04)"><div class="n" style="color:#8d978f" id="eval-toolB">2.63</div><div class="t" style="color:#8d978f">Tool B</div></div>
+            <div class="tile" style="background:#1D9E7512"><div class="n" style="color:var(--teal)" id="eval-apex">2.69</div><div class="t">Apex</div></div>
+            <div class="tile" style="background:rgba(63,77,71,.10)"><div class="n" style="color:#3f4d47" id="eval-toolA">2.72</div><div class="t" style="color:#3f4d47">Tool A</div></div>
+            <div class="tile" style="background:rgba(26,46,40,.04)"><div class="n" style="color:#8d978f" id="eval-toolB">2.70</div><div class="t" style="color:#8d978f">Tool B</div></div>
           </div>
           <div id="eval-verdict" style="display:none;font-size:14px;font-weight:700;color:var(--ink);margin-top:16px;"></div>
           <div style="display:flex;justify-content:space-between;align-items:center;margin:20px 0 6px;">
@@ -155,7 +155,7 @@
 
     </div>
 
-    <p class="caveat" id="eval-caveat"><b>Live.</b> The figures above are measured results from the season to date, scored after each gameweek on players owned by 5%+ of managers at the deadline &mdash; every tool&rsquo;s projection frozen before that deadline, scored on the same 66 player-gameweeks. Rivals shown as Tool A / Tool B. Only aggregate accuracy is ever shown &mdash; never any tool&rsquo;s individual projections.</p>
+    <p class="caveat" id="eval-caveat"><b>Live.</b> The figures above are measured results from the season to date, scored after each gameweek on players owned by 5%+ of managers at the deadline &mdash; every tool&rsquo;s projection frozen before that deadline, scored on the same 134 player-gameweeks. Rivals shown as Tool A / Tool B. Only aggregate accuracy is ever shown &mdash; never any tool&rsquo;s individual projections.</p>
   </main>
 
 <script>
@@ -179,7 +179,7 @@
      server-side by _render_static() to match, so the file never claims a state
      it is not in — with or without JS. */
   /* APEX-EVAL-DATA-START */
-var EVAL_DATA = {"weeks": 1, "owned_thr": 5.0, "n": 66, "n_all": 459, "apex": 2.63, "tool_a": 2.56, "bench_b": 2.63, "bench_b_n": 66, "bench_b_common": true, "form": ["toolA"], "verdict": "Too early to separate them: 66 shared picks over 1 gameweek is not enough to call a winner, and we will not pretend otherwise.", "updated_utc": "2026-08-31T17:17:59Z"};
+var EVAL_DATA = {"weeks": 2, "owned_thr": 5.0, "n": 134, "n_all": 916, "apex": 2.69, "tool_a": 2.72, "bench_b": 2.7, "bench_b_n": 134, "bench_b_common": true, "form": ["toolA", "apex"], "verdict": "Too early to separate them: 134 shared picks over 2 gameweeks is not enough to call a winner, and we will not pretend otherwise.", "updated_utc": "2026-08-31T21:20:38Z"};
 /* APEX-EVAL-DATA-END */
   (function(){
     var COL={apex:'#1D9E75',toolA:'#3f4d47',toolB:'#b8c2bc',level:'#cfd6d2'};
