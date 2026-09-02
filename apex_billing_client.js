@@ -100,7 +100,7 @@
       return post('/session', { token: m[1] }).then(function (d) {
         if (d && d.session) {
           lsSet(SESSION_KEY, d.session);
-          toast('Signed in ✓');
+          toast('Signed in <i class=apex-ic data-i=check></i>');
           return true;
         }
         toast((d && d.error) || 'Sign-in link invalid or expired — request a new one.');
@@ -156,7 +156,7 @@
       };
     }
 
-    // ── minimal UI (brand: teal #1D9E75, cream, Plus Jakarta Sans) ──────────
+    // ── minimal UI (brand: teal #0F6E56, cream, Plus Jakarta Sans) ──────────
     var _mount = null;
 
     function toast(msg) {
@@ -168,7 +168,7 @@
           el.id = 'apex-billing-toast';
           el.style.cssText = 'position:fixed;bottom:18px;left:50%;transform:translateX(-50%);' +
             'background:#12221d;color:#fff;padding:10px 18px;border-radius:10px;font-size:.85rem;' +
-            'z-index:99999;box-shadow:0 4px 14px rgba(0,0,0,.25);transition:opacity .3s;max-width:90vw;';
+            'z-index:99999;box-shadow:none;transition:opacity .3s;max-width:90vw;';
           window.document.body.appendChild(el);
         }
         el.textContent = msg;
@@ -181,16 +181,16 @@
     function btnCss(primary) {
       return 'cursor:pointer;border-radius:9px;font-weight:700;font-size:.8rem;' +
         'padding:7px 14px;font-family:inherit;' +
-        (primary ? 'background:#1D9E75;color:#fff;border:1px solid #1D9E75;'
-                 : 'background:transparent;color:#1D9E75;border:1px solid #1D9E75;');
+        (primary ? 'background:#0F6E56;color:#fff;border:1px solid #0F6E56;'
+                 : 'background:transparent;color:#0F6E56;border:1px solid #0F6E56;');
     }
 
     function renderMount() {
       if (!live() || !_mount) return;
       var s = status();
       var tierBadge = s.ready && s.tier === 'season'
-        ? '<span style="background:#1D9E75;color:#fff;border-radius:7px;padding:3px 9px;font-size:.72rem;font-weight:800;">APEX MEMBER</span>'
-        : '<span style="background:rgba(29,158,117,.12);color:#1D9E75;border-radius:7px;padding:3px 9px;font-size:.72rem;font-weight:800;">FREE</span>';
+        ? '<span style="background:#0F6E56;color:#fff;border-radius:7px;padding:3px 9px;font-size:.72rem;font-weight:800;">APEX MEMBER</span>'
+        : '<span style="background:rgba(15,110,86,.12);color:#0F6E56;border-radius:7px;padding:3px 9px;font-size:.72rem;font-weight:800;">FREE</span>';
       if (s.loggedIn) {
         _mount.innerHTML =
           '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">' + tierBadge +
@@ -231,7 +231,7 @@
         var hint = escapeHtml(lsGet(HINT_KEY) || '');
         var inner =
           '<div style="background:#fdfcf8;border-radius:16px;max-width:400px;width:100%;padding:24px;' +
-          'font-family:inherit;box-shadow:0 10px 40px rgba(0,0,0,.3);">' +
+          'font-family:inherit;box-shadow:none;">' +
           '<div style="font-weight:800;font-size:1.05rem;color:#12221d;margin-bottom:4px;">' +
           (mode === 'login' ? 'Log in / Restore purchase' : 'Get FPL Apex') + '</div>' +
           '<div style="font-size:.8rem;color:#7a8783;margin-bottom:14px;">' +
@@ -249,7 +249,7 @@
               '<button id="apex-bill-p-monthly" style="' + btnCss(false) + '">Monthly — £3.50</button>' +
               '<button id="apex-bill-p-founder" style="' + btnCss(false) + '">Founder — £15 (limited)</button></div>' +
               '<div style="font-size:.72rem;color:#7a8783;margin-top:10px;">Already subscribed? ' +
-              '<a href="#" id="apex-bill-switch" style="color:#1D9E75;">Log in instead</a></div>') +
+              '<a href="#" id="apex-bill-switch" style="color:#0F6E56;">Log in instead</a></div>') +
           '<div style="text-align:right;margin-top:12px;">' +
           '<a href="#" id="apex-bill-close" style="font-size:.78rem;color:#7a8783;">Close</a></div></div>';
         wrap.innerHTML = inner;
@@ -299,7 +299,7 @@
         box.id = 'apex-billing-chip';
         box.style.cssText = 'position:fixed;top:10px;right:12px;z-index:99990;' +
           'background:rgba(253,252,248,.96);border:1px solid #e3dfd2;border-radius:12px;' +
-          'padding:8px 12px;box-shadow:0 2px 10px rgba(0,0,0,.08);font-family:inherit;';
+          'padding:8px 12px;box-shadow:none;font-family:inherit;';
         d.body.appendChild(box);
         mountUI(box);
       } catch (e) {}
@@ -332,7 +332,7 @@
         .then(function () { whenDomReady(autoMount); });
       try {
         if (/[?&]apex_sub=success/.test(String(window.location.search))) {
-          toast('Payment received ✓ — now enter your email under “Log in” to unlock this device.');
+          toast('Payment received <i class=apex-ic data-i=check></i> — now enter your email under “Log in” to unlock this device.');
         }
       } catch (e) {}
     }

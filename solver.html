@@ -762,6 +762,46 @@ a[href*="rank_milestones"] {
 <!-- APEX_PATCH_E4_2026-08-03: truncated orphan apex_mobile.js copy removed (its unclosed script tag swallowed the appended APEX_MOBILE_FIX block) -->
 <!-- ## APEX_MOBILE_FIX:START ## -->
 <style>
+:root{
+  --ic-tree:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 4v11a3 3 0 0 0 3 3h4M6 4a2 2 0 1 0 0-.01M13 18a2 2 0 1 0 0 .01M18 8a2 2 0 1 0 0-.01M6 9h8a4 4 0 0 0 4-1'/%3E%3C/svg%3E");
+  --ic-bolt:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M13 2 4 14h6l-1 8 9-12h-6z'/%3E%3C/svg%3E");
+  --ic-ban:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18M6 6l12 12'/%3E%3C/svg%3E");
+  --ic-lock:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 11h14v10H5zM8 11V7a4 4 0 0 1 8 0v4'/%3E%3C/svg%3E");
+  --ic-road:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 3 4 21M18 3l2 18M12 4v3M12 11v3M12 18v3'/%3E%3C/svg%3E");
+  --ic-shield:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z'/%3E%3C/svg%3E");
+  --ic-gem:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 9h18l-9 12zM3 9l3-5h12l3 5M9 9l3 12 3-12M6 4l3 5M18 4l-3 5'/%3E%3C/svg%3E");
+  --ic-sync:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 11a8 8 0 0 0-14-5M4 13a8 8 0 0 0 14 5M20 5v6h-6M4 19v-6h6'/%3E%3C/svg%3E");
+  --ic-board:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M8 4h8v3H8zM6 5H5v16h14V5h-1M9 12h6M9 16h4'/%3E%3C/svg%3E");
+  --ic-flame:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3c3 4 5 6 5 9a5 5 0 0 1-10 0c0-2 1-3 2-5 1 2 2 2 3 1 0-2 0-3 0-5z'/%3E%3C/svg%3E");
+  --ic-warn:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 4 2 20h20zM12 10v5M12 18v.5'/%3E%3C/svg%3E");
+  --ic-flag:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 21V4M6 5h11l-2 4 2 4H6'/%3E%3C/svg%3E");
+  --ic-cards:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 7l6-2 4 11-6 2zM12 4h6v14h-6'/%3E%3C/svg%3E");
+  --ic-hold:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 11V5.5a1.5 1.5 0 0 1 3 0V11m0-.5V4.5a1.5 1.5 0 0 1 3 0V11m0-1V6.5a1.5 1.5 0 0 1 3 0V14a6 6 0 0 1-6 6h-1a5 5 0 0 1-4-2l-3-4a1.5 1.5 0 0 1 2.2-2z'/%3E%3C/svg%3E");
+  --ic-timer:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 21a8 8 0 1 0 0-16 8 8 0 0 0 0 16M12 9v4l3 2M9 2h6'/%3E%3C/svg%3E");
+  --ic-hourglass:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 3h10M7 21h10M8 3v4l4 5-4 5v4M16 3v4l-4 5 4 5v4'/%3E%3C/svg%3E");
+  --ic-pin:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 17v5M9 3h6l-1 6 3 3v2H7v-2l3-3z'/%3E%3C/svg%3E");
+  --ic-ban:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18M6 6l12 12'/%3E%3C/svg%3E");
+  --ic-check:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 12.5l5 5L20 6.5'/%3E%3C/svg%3E");
+  --ic-check:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 12.5l5 5L20 6.5'/%3E%3C/svg%3E");
+  --ic-close:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 6l12 12M18 6L6 18'/%3E%3C/svg%3E");
+  --ic-close:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 6l12 12M18 6L6 18'/%3E%3C/svg%3E");
+  --ic-star:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3.5l2.6 5.6 6 .8-4.4 4.2 1.1 6-5.3-3-5.3 3 1.1-6L3.4 9.9l6-.8z'/%3E%3C/svg%3E");
+  --ic-star:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3.5l2.6 5.6 6 .8-4.4 4.2 1.1 6-5.3-3-5.3 3 1.1-6L3.4 9.9l6-.8z'/%3E%3C/svg%3E");
+  --ic-list:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 5h16v14H4zM4 10h16M4 14.5h16M9 5v14'/%3E%3C/svg%3E");
+  --ic-caret:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9.5l6 6 6-6'/%3E%3C/svg%3E");
+  --ic-diamond:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3l7 9-7 9-7-9z'/%3E%3C/svg%3E");
+  --ic-pause:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 5v14M15 5v14'/%3E%3C/svg%3E");
+  --ic-edit:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 20h4L20 8l-4-4L4 16z'/%3E%3C/svg%3E");
+  --ic-edit:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 20h4L20 8l-4-4L4 16z'/%3E%3C/svg%3E");
+  --ic-play:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 4l12 8-12 8z'/%3E%3C/svg%3E");
+}
+
+/* APEX_BRAND_V2_MATCHDAY_v1 - emoji replaced by masked icons. They inherit the
+   surrounding text colour, so an icon can never be a second palette. */
+.apex-ic{display:inline-block;width:1em;height:1em;vertical-align:-.125em;
+  background:currentColor;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
+  -webkit-mask-position:center;mask-position:center;
+  -webkit-mask-size:contain;mask-size:contain;flex:none}
 /* ============================================================================
  * apex_mobile.css — universal mobile fixes for fplapex.com
  *
@@ -787,8 +827,8 @@ a[href*="rank_milestones"] {
     max-width: 100%;
     /* fade-out hint that there's more horizontal content */
     background:
-        linear-gradient(to right, transparent 0, transparent 30px),
-        linear-gradient(to left,  transparent 0, transparent 30px);
+        transparent,
+        transparent;
 }
 .apex-table-scroll > table {
     min-width: max-content;
@@ -819,8 +859,8 @@ a[href*="rank_milestones"] {
         scrollbar-width: thin;
         justify-content: flex-start !important;
         /* visual cue that there's more to the right */
-        mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent);
-        -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent);
+        mask-image: #000;
+        -webkit-mask-image: #000;
     }
     .tab-nav::-webkit-scrollbar { height: 3px; }
     .tab-nav::-webkit-scrollbar-thumb { background: #2a2a35; border-radius: 2px; }
@@ -839,8 +879,8 @@ a[href*="rank_milestones"] {
         padding-left: 8px;
         padding-right: 8px;
         /* gradient affordance: subtle right-edge fade */
-        -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 18px), rgba(0,0,0,.5));
-                mask-image: linear-gradient(to right, #000 calc(100% - 18px), rgba(0,0,0,.5));
+        -webkit-mask-image: #000;
+                mask-image: #000;
     }
     /* When user has scrolled to the end, drop the fade */
     .apex-table-scroll.is-scrolled-end,
@@ -903,10 +943,10 @@ a[href*="rank_milestones"] {
 @media (max-width: 480px) {
     /* 2026-06-06: top padding clears the absolute cost badge so it no longer
        overlaps the GK; was 22px. */
-    /* 2026-06-10: side padding 8→14px — the absolute ⊗/⏱ controls hang
+    /* 2026-06-10: side padding 8→14px — the absolute ⊗/<i class=apex-ic data-i=timer></i> controls hang
        outside the kits and were clipping at both screen edges on 5-man rows. */
     .pitch { padding: 94px 16px 14px !important; }
-    /* 2026-06-19: the ⏱ clock button is pinned right:-6px so it pokes past
+    /* 2026-06-19: the <i class=apex-ic data-i=timer></i> clock button is pinned right:-6px so it pokes past
        every shirt; on the outermost players (5-man row) that clips at the
        screen edge. Tuck both edge controls inside the shirt on phones. */
     .pitch .pp-xmins-btn.pp-xmins-btn, .bench-row .pp-xmins-btn.pp-xmins-btn { right: 1px !important; }
@@ -916,7 +956,7 @@ a[href*="rank_milestones"] {
     /* doubled-class selectors out-rank the desktop XL rules
        (.pitch .shirt 140px !important + min-width) on phones */
     /* 2026-06-19: size shirts to the viewport so 5-per-row + the absolute
-       ⊗/⏱ controls ALWAYS fit — fixed 66px overflowed ~375px phones (SE/mini).
+       ⊗/<i class=apex-ic data-i=timer></i> controls ALWAYS fit — fixed 66px overflowed ~375px phones (SE/mini).
        (100vw − 60px)/5 reserves 60px for pitch padding + control overhang.
        Capped 72px so big phones don't balloon. */
     .pitch .shirt.shirt, .bench-row .shirt.shirt, .shirt {
@@ -1029,15 +1069,15 @@ a[href*="rank_milestones"] {
         justify-content: flex-start;
         scrollbar-width: thin;
         /* fade cue that there's more to the right */
-        -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent);
-                mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent);
+        -webkit-mask-image: #000;
+                mask-image: #000;
     }
     header.topbar .nav .nav-link {
         white-space: nowrap;                     /* stops "My / Squad" wrapping to two lines */
         flex: 0 0 auto;
     }
     header.topbar .nav::-webkit-scrollbar { height: 3px; }
-    header.topbar .nav::-webkit-scrollbar-thumb { background: #C9C7BB; border-radius: 2px; }
+    header.topbar .nav::-webkit-scrollbar-thumb { background: #EFF2EF; border-radius: 2px; }
 }
 
 /* ============================================================================
@@ -1076,9 +1116,9 @@ a[href*="rank_milestones"] {
  * column on mobile.
  * ========================================================================== */
 .apex-footer {
-    border-top: 1px solid #D9D7CC;
-    background: #F1EFE8;
-    color: #5F5E5A;
+    border-top: 1px solid #E4E8E4;
+    background: #F4F5F3;
+    color: #6B7671;
     font-family: 'Plus Jakarta Sans', sans-serif;
     font-size: 0.82rem;
     padding: 22px 28px 24px;
@@ -1099,29 +1139,29 @@ a[href*="rank_milestones"] {
     gap: 4px;
 }
 .apex-footer-wordmark { font-weight: 600; font-size: 0.95rem; line-height: 1; }
-.apex-footer-apex { color: #1D9E75; font-weight: 500; }
-.apex-footer-rest { color: #1E1E1A; font-weight: 700; }
+.apex-footer-apex { color: #0F6E56; font-weight: 500; }
+.apex-footer-rest { color: #16211D; font-weight: 700; }
 .apex-footer-tagline {
-    color: #5F5E5A;   /* 2026-07-25: #8a8a95 was 2.97:1 on the cream footer */
+    color: #6B7671;   /* 2026-07-25: #8a8a95 was 2.97:1 on the cream footer */
     font-size: 0.74rem;
     font-family: 'JetBrains Mono', ui-monospace, monospace;
 }
 .apex-footer-tagline .ftr-stat {
-    color: #1D9E75;
+    color: #0F6E56;
     font-weight: 600;
 }
 .apex-footer-links { display: flex; gap: 18px; align-items: center; }
 .apex-footer-links a {
-    color: #5F5E5A;   /* 2026-07-25: 2.97:1 -> 7.0:1 */
+    color: #6B7671;   /* 2026-07-25: 2.97:1 -> 7.0:1 */
     text-decoration: none;
     font-weight: 500;
     transition: color 0.15s;
 }
-.apex-footer-links a:hover { color: #1D9E75; }
+.apex-footer-links a:hover { color: #0F6E56; }
 .apex-footer-copy { color: #4a4a55; font-size: 0.72rem; }
 .apex-footer-legal { display: flex; gap: 12px; }
 .apex-footer-legal a {
-    color: #6b6b7b;
+    color: #6B7671;
     text-decoration: none;
     font-size: 0.72rem;
 }
