@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="3" data-built-at="2026-09-02T23:40:39">
+<meta name="apex-gw" content="3" data-built-at="2026-09-03T00:12:57">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
@@ -37,7 +37,7 @@
 })();
 </script>
 <meta http-equiv="Pragma" content="no-cache">
-<meta name="apex-build" content="20260902-234039">
+<meta name="apex-build" content="20260903-001256">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — FPL Apex</title>
 <meta name="description" content="Plan FPL transfers, chips, and Free Hit squads. Live xG-based projections, a rival head-to-head simulator, and a mini-league table. Free FPL tool.">
@@ -5950,12 +5950,12 @@ body[data-apex-view="team"] #topbar .va-tabs { display: flex; }
 }
 
 /* APEX_FIX_AUG07B_OPTD (2026-08-07) — option-D hero distribution block.
-   Sequential green ramp derived from the product accent #1D9E75; the rival's
+   Sequential green ramp derived from the product accent #0F6E56; the rival's
    orange stays in REFERENCE_optionD.html. Scoped to .apex-optd so nothing
    else can inherit these names. */
 .apex-optd {
   --apexd-g1:#E8F5EF; --apexd-g2:#BEE3D3; --apexd-g3:#8ECDB4; --apexd-g4:#57B393;
-  --apexd-g5:#1D9E75; --apexd-g6:#14795A; --apexd-g7:#0E5942;
+  --apexd-g5:#0F6E56; --apexd-g6:#14795A; --apexd-g7:#0E5942;
   /* APEX_FIX_AUG07G_LEFT: centring was AUG07F_SLIM's answer to slack the capped chart
      stopped absorbing. The real slack was the empty .va-hero-text beside us
      (collapsed below); with that gone, centring would sit the pill ~80px to
@@ -6102,7 +6102,7 @@ body[data-apex-view="team"] #topbar .va-tabs { display: flex; }
 .apex-optd-ticks { position:relative; height:15px; margin-top:3px; }
 .apex-optd-ticks span {
   position:absolute; transform:translateX(-50%);
-  font-size:11px; color:#94a3b8; font-variant-numeric:tabular-nums;
+  font-size:11px; color:#9AA39E; font-variant-numeric:tabular-nums;
 }
 /* APEX_DIST_AXIS_v5 (2026-08-26): the END ticks are clamped INSIDE the box. Centred
    on their own value, half of "0" hangs off the left edge and half of "150" off
@@ -6137,13 +6137,13 @@ body[data-apex-view="team"] #topbar .va-tabs { display: flex; }
   position:absolute; top:0; padding:0 4px;
   font-size:10px; line-height:1.25; color:#4A554F; white-space:nowrap;
   letter-spacing:.02em; pointer-events:none;
-  text-shadow:0 0 3px #fff, 0 0 3px #fff, 0 0 3px #fff, 0 0 2px #fff;
+  text-shadow:none;
 }
 .apex-optd-crowd.l { transform:translateX(-100%); }
 .apex-optd-ax { /* APEX_FIX_AUG07F_SLIM: 12 -> 15 user units. The chart is narrower now,
      so each unit renders smaller; this keeps the tick labels at the same ~11.7px
      on screen they have today. */
-  font-size:15px; fill:#94a3b8; font-variant-numeric:tabular-nums; }
+  font-size:15px; fill:#9AA39E; font-variant-numeric:tabular-nums; }
 .apex-optd-rule { /* APEX_FIX_AUG07F_SLIM: 11 -> 14 user units, same reason as -ax. */
   font-size:14px; fill:#4A554F; font-variant-numeric:tabular-nums; }
 /* APEX_FIX_AUG07J_ODDS: the odds strip that replaced the 40+/60+/80+ column. It is a
@@ -6157,7 +6157,7 @@ body[data-apex-view="team"] #topbar .va-tabs { display: flex; }
 }
 .apex-optd-odds > div { flex:1 1 0; min-width:0; }
 .apex-optd-odds b {
-  display:block; font-size:17px; font-weight:700; color:#0f172a; line-height:1.2;
+  display:block; font-size:17px; font-weight:700; color:#16211D; line-height:1.2;
   font-family:'JetBrains Mono', ui-monospace, monospace; font-variant-numeric:tabular-nums;
 }
 .apex-optd-odds span { display:block; font-size:12px; color:#8A938D; margin-top:2px; }
@@ -6173,7 +6173,7 @@ body[data-apex-view="team"] #topbar .va-tabs { display: flex; }
 .apex-optd-stats div { display:flex; justify-content:space-between; gap:16px; padding:3px 0; }
 .apex-optd-stats span { font-size:13px; color:#4A554F; }
 .apex-optd-stats b {
-  font-size:14px; font-weight:650; color:#0f172a;
+  font-size:14px; font-weight:650; color:#16211D;
   font-variant-numeric:tabular-nums; font-family:'JetBrains Mono', ui-monospace, monospace;
 }
 /* APEX_FIX_AUG07B_MERGE1_ — the lead-row rule is gone with the mean it used
@@ -6185,7 +6185,7 @@ body[data-apex-view="team"] #topbar .va-tabs { display: flex; }
   color:#8A938D; font-weight:650; margin:0 0 5px; white-space:nowrap;
 }
 .apex-optd-pill {
-  display:inline-block; background:var(--accent,#1D9E75); color:#fff;
+  display:inline-block; background:var(--accent,#0F6E56); color:#fff;
   /* APEX_FIX_AUG08B_TIGHTEN: 40 -> 36, padding 8/18 -> 7/16. Still by some distance the
      biggest thing on the block — 36px against the odds strip's 17 — which is the
      only property of it that matters. Hero column 82 -> 74. */
@@ -6209,9 +6209,9 @@ body[data-apex-view="team"] #topbar .va-tabs { display: flex; }
 .apex-optd-help .apex-optd-help-note { color:#8A938D; font-size:11.5px; }
 .apex-optd-help .apex-optd-help-note b { color:#8A938D; }
 /* APEX_DIST_RELATIVE_v1: the CSV link lives in here now. */
-.apex-optd-help a { color:var(--accent,#1D9E75); text-decoration:underline; }
+.apex-optd-help a { color:var(--accent,#0F6E56); text-decoration:underline; }
 .apex-optd-sq.apex-optd-toggle[aria-pressed="true"] {
-  background:var(--accent,#1D9E75); border-color:var(--accent,#1D9E75); color:#fff;
+  background:var(--accent,#0F6E56); border-color:var(--accent,#0F6E56); color:#fff;
 }
 /* The retheme hides .va-range-foot inside the rail wholesale
    (`.va-twopane-rail .va-range-foot { display:none !important }`) — that was
@@ -6223,7 +6223,7 @@ body[data-apex-view="team"] #topbar .va-tabs { display: flex; }
 .va-twopane-rail .apex-optd-wrap .va-range-foot {
   display:block !important; font-size:12.5px !important; padding-top:8px !important; margin-top:8px !important;
 }
-.apex-optd-wrap .va-range-foot { font-size:12.5px; color:#94a3b8; margin-top:8px; }
+.apex-optd-wrap .va-range-foot { font-size:12.5px; color:#9AA39E; margin-top:8px; }
 /* Phones: curve full width on top, stats as a 2-up grid, buttons as a row
    underneath. Everything min-width:0 so nothing can push past the viewport. */
 /* APEX_FIX_AUG07B_MERGE1_ — phones. Breakpoint moved 440 -> 560 (merge.html's).
@@ -6283,7 +6283,27 @@ body[data-apex-view="team"] #topbar .va-tabs { display: flex; }
    !important on both sides is decided by source order, and this block only
    wins because it happens to be emitted after that sheet. Repeating the class
    makes it (1,3,0): it now wins on the cascade, not on luck, and stays won if
-   anyone reorders the <link>/<style> emission. Do not "simplify" the doubled
+   anyone reorders the <link>/<style>
+
+/* APEX_BRAND_V2_MATCHDAY_v1 - emoji replaced by masked icons. They inherit the
+   surrounding text colour, so an icon can never be a second palette. */
+.apex-ic{display:inline-block;width:1em;height:1em;vertical-align:-.125em;
+  background:currentColor;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
+  -webkit-mask-position:center;mask-position:center;
+  -webkit-mask-size:contain;mask-size:contain;flex:none}
+.apex-ic[data-i=tree]{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 4v11a3 3 0 0 0 3 3h4M6 4a2 2 0 1 0 0-.01M13 18a2 2 0 1 0 0 .01M18 8a2 2 0 1 0 0-.01M6 9h8a4 4 0 0 0 4-1'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 4v11a3 3 0 0 0 3 3h4M6 4a2 2 0 1 0 0-.01M13 18a2 2 0 1 0 0 .01M18 8a2 2 0 1 0 0-.01M6 9h8a4 4 0 0 0 4-1'/%3E%3C/svg%3E")}
+.apex-ic[data-i=bolt]{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M13 2 4 14h6l-1 8 9-12h-6z'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M13 2 4 14h6l-1 8 9-12h-6z'/%3E%3C/svg%3E")}
+.apex-ic[data-i=ban]{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18M6 6l12 12'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18M6 6l12 12'/%3E%3C/svg%3E")}
+.apex-ic[data-i=lock]{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 11h14v10H5zM8 11V7a4 4 0 0 1 8 0v4'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 11h14v10H5zM8 11V7a4 4 0 0 1 8 0v4'/%3E%3C/svg%3E")}
+.apex-ic[data-i=road]{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 3 4 21M18 3l2 18M12 4v3M12 11v3M12 18v3'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 3 4 21M18 3l2 18M12 4v3M12 11v3M12 18v3'/%3E%3C/svg%3E")}
+.apex-ic[data-i=shield]{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z'/%3E%3C/svg%3E")}
+.apex-ic[data-i=gem]{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 9h18l-9 12zM3 9l3-5h12l3 5M9 9l3 12 3-12M6 4l3 5M18 4l-3 5'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 9h18l-9 12zM3 9l3-5h12l3 5M9 9l3 12 3-12M6 4l3 5M18 4l-3 5'/%3E%3C/svg%3E")}
+.apex-ic[data-i=sync]{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 11a8 8 0 0 0-14-5M4 13a8 8 0 0 0 14 5M20 5v6h-6M4 19v-6h6'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 11a8 8 0 0 0-14-5M4 13a8 8 0 0 0 14 5M20 5v6h-6M4 19v-6h6'/%3E%3C/svg%3E")}
+.apex-ic[data-i=board]{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M8 4h8v3H8zM6 5H5v16h14V5h-1M9 12h6M9 16h4'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M8 4h8v3H8zM6 5H5v16h14V5h-1M9 12h6M9 16h4'/%3E%3C/svg%3E")}
+.apex-ic[data-i=flame]{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3c3 4 5 6 5 9a5 5 0 0 1-10 0c0-2 1-3 2-5 1 2 2 2 3 1 0-2 0-3 0-5z'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3c3 4 5 6 5 9a5 5 0 0 1-10 0c0-2 1-3 2-5 1 2 2 2 3 1 0-2 0-3 0-5z'/%3E%3C/svg%3E")}
+.apex-ic[data-i=warn]{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 4 2 20h20zM12 10v5M12 18v.5'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 4 2 20h20zM12 10v5M12 18v.5'/%3E%3C/svg%3E")}
+.apex-ic[data-i=flag]{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 21V4M6 5h11l-2 4 2 4H6'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 21V4M6 5h11l-2 4 2 4H6'/%3E%3C/svg%3E")}
+ emission. Do not "simplify" the doubled
    class away -- that is the whole fix. */
 #view-team .va-twopane > .va-twopane-rail.va-twopane-rail { gap: 1px !important; }
 .va-twopane-rail { gap: 2px !important; }
@@ -6659,7 +6679,7 @@ body[data-apex-view="team"] #topbar .va-tabs { display: flex; }
    and the grid both have to be named to get past them. */
 .va-twopane-rail #apex-ctl-card .va-chip-grid .va-chip-card {
   background: #fff !important;
-  border: 1px solid var(--border, #D9D7CC) !important;
+  border: 1px solid var(--border, #E4E8E4) !important;
   border-radius: 9px !important;
   padding: 9px 12px !important;
   display: flex !important;
@@ -6732,12 +6752,12 @@ body[data-apex-view="team"] #topbar .va-tabs { display: flex; }
 
   function showBanner() {
     var style = 'position:fixed;left:16px;right:16px;bottom:16px;z-index:99998;'
-              + 'background:#FFFFFF;border:1px solid #D9D7CC;border-radius:12px;'
-              + 'padding:14px 18px;color:#1E1E1A;font-family:Plus Jakarta Sans,sans-serif;'
+              + 'background:#FFFFFF;border:1px solid #E4E8E4;border-radius:12px;'
+              + 'padding:14px 18px;color:#16211D;font-family:Plus Jakarta Sans,sans-serif;'
               + 'font-size:.92rem;display:flex;align-items:center;gap:14px;'
-              + 'flex-wrap:wrap;box-shadow:0 8px 24px rgba(0,0,0,.12);max-width:760px;'
+              + 'flex-wrap:wrap;box-shadow:none;max-width:760px;'
               + 'margin:0 auto;';
-    var btnA = 'background:#1D9E75;color:#fff;border:none;padding:8px 16px;'
+    var btnA = 'background:#0F6E56;color:#fff;border:none;padding:8px 16px;'
              + 'border-radius:6px;font-weight:700;cursor:pointer;font-family:inherit;'
              + 'font-size:.85rem;letter-spacing:.3px;';
     var btnD = 'background:transparent;color:#9ca3af;border:1px solid #2a2a35;'
@@ -6791,17 +6811,17 @@ body[data-apex-view="team"] #topbar .va-tabs { display: flex; }
 -->
 <style>
 #offseason-banner { position: sticky; top: 0; z-index: 9999;
-  background: linear-gradient(135deg, #1a1d24 0%, #2a2f3a 100%);
-  border-bottom: 1px solid var(--accent, #1D9E75);
+  background: #1a1d24;
+  border-bottom: 1px solid var(--accent, #0F6E56);
   color: #f4f4f5; padding: 12px 20px; text-align: center;
   font-family: 'Plus Jakarta Sans', sans-serif;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+  box-shadow:none; }
 .offseason-banner-inner { max-width: 1100px; margin: 0 auto;
   display: flex; align-items: center; justify-content: center;
   gap: 14px; flex-wrap: wrap; font-size: 14px; line-height: 1.4; }
 .offseason-banner-pause { font-size: 18px; opacity: 0.7; }
-.offseason-banner-text strong { color: var(--accent, #1D9E75); font-weight: 600; }
-.offseason-banner-link { color: var(--accent, #1D9E75); text-decoration: underline;
+.offseason-banner-text strong { color: var(--accent, #0F6E56); font-weight: 600; }
+.offseason-banner-link { color: var(--accent, #0F6E56); text-decoration: underline;
   font-weight: 600; white-space: nowrap; }
 .offseason-banner-link:hover { opacity: 0.85; }
 html.apex-offseason #view-landing .landing-cta-row { opacity: 0.55; pointer-events: none; }
@@ -6869,7 +6889,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 
 <div id="view-landing" class="view-container" style="display:none;">
   <section class="hero hero-landing">
-    <h1 class="hero-headline"><span style="color:#1E1E1A;">FPL </span><span style="color:var(--accent);">APEX</span></h1>
+    <h1 class="hero-headline"><span style="color:#16211D;">FPL </span><span style="color:var(--accent);">APEX</span></h1>
     <p class="hero-sub">Enter your FPL Team ID to get started.</p>
 
     <div class="landing-id-wrap">
@@ -6880,14 +6900,14 @@ html.apex-offseason #view-landing .hero-sub::after {
 
     <div class="landing-cta-row">
       <button id="landing-cta-chips" class="landing-cta landing-cta-primary" onclick="_landingGo('chip-select')">
-        <span class="cta-icon">⚡</span>
+        <span class="cta-icon"><i class=apex-ic data-i=bolt></i></span>
         <span class="cta-body">
           <span class="cta-title">Optimise My Chips</span>
           <span class="cta-desc">Find the best WC, FH, BB, TC sequence for your squad</span>
         </span>
       </button>
       <button class="landing-cta landing-cta-secondary" onclick="_landingGo('team')">
-        <span class="cta-icon">📋</span>
+        <span class="cta-icon"><i class=apex-ic data-i=board></i></span>
         <span class="cta-body">
           <span class="cta-title">View My Squad</span>
           <span class="cta-desc">GW projections, transfers, and weekly xPts</span>
@@ -7144,8 +7164,8 @@ html.apex-offseason #view-landing .hero-sub::after {
          toast, NOT in-flow — the in-flow version added rail height and broke
          the one-page fit (Marcus). Zero layout impact; dismissed forever on
          first solve or via the ×. localStorage-flagged. -->
-    <div id="apex-firstrun-hint" style="display:none;position:fixed;bottom:22px;left:50%;transform:translateX(-50%);z-index:9000;background:#fff;border:1px solid var(--accent,#1D9E75);border-radius:12px;padding:10px 16px;font-size:.82rem;color:var(--text,#16201C);box-shadow:0 6px 24px rgba(0,0,0,.14);max-width:92vw;text-align:center;">
-      New here? Tap <b style="color:var(--accent,#1D9E75);">🛣 Solve</b> — it maps your best path, gameweek by gameweek. Everything else can wait.
+    <div id="apex-firstrun-hint" style="display:none;position:fixed;bottom:22px;left:50%;transform:translateX(-50%);z-index:9000;background:#fff;border:1px solid var(--accent,#0F6E56);border-radius:12px;padding:10px 16px;font-size:.82rem;color:var(--text,#16201C);box-shadow:none;max-width:92vw;text-align:center;">
+      New here? Tap <b style="color:var(--accent,#0F6E56);"><i class=apex-ic data-i=road></i> Solve</b> — it maps your best path, gameweek by gameweek. Everything else can wait.
       <a href="#" onclick="try{localStorage.setItem('apex_firstrun_done','1');}catch(e){}document.getElementById('apex-firstrun-hint').style.display='none';return false;" style="color:var(--muted);text-decoration:none;margin-left:8px;font-weight:700;" title="Dismiss">✕</a>
     </div>
     <script>
@@ -7361,8 +7381,8 @@ html.apex-offseason #view-landing .hero-sub::after {
     <div id="va-solve-actions" style="display:flex;gap:10px;margin:0 0 20px;align-items:center;justify-content:center;flex-wrap:wrap;">
       <button class="btn solve-btn" onclick="_apexPrimarySolve()" id="solve-btn"
         title="Solve your path - open the planner and pick it gameweek by gameweek"
-        style="background:var(--accent,#1D9E75);color:#000;border:none;padding:11px 28px;border-radius:8px;font-weight:700;font-size:.95rem;cursor:pointer;display:flex;align-items:center;gap:8px;">
-        🛣 Solve
+        style="background:var(--accent,#0F6E56);color:#000;border:none;padding:11px 28px;border-radius:8px;font-weight:700;font-size:.95rem;cursor:pointer;display:flex;align-items:center;gap:8px;">
+        <i class=apex-ic data-i=road></i> Solve
       </button>
       <button class="btn reset-btn" onclick="resetSolver()" id="reset-btn"
         title="Revert all transfers + chip selections, restore original squad"
@@ -7399,12 +7419,12 @@ html.apex-offseason #view-landing .hero-sub::after {
            HORIZON picker that _apexBuildHorizonPicker appends to this same
            row, so the two solver controls read as one family instead of two
            accidents. -->
-      <span class="apex-chip-wrap" style="display:inline-flex;align-items:center;align-self:center;gap:6px;line-height:1;padding:10px 14px;border:1px solid var(--border,#D9D7CC);border-radius:9px;background:var(--bg2,#fff);">
+      <span class="apex-chip-wrap" style="display:inline-flex;align-items:center;align-self:center;gap:6px;line-height:1;padding:10px 14px;border:1px solid var(--border,#E4E8E4);border-radius:9px;background:var(--bg2,#fff);">
         <span aria-hidden="true" style="font-size:.72rem;color:var(--muted);">&#9670;</span>
         <label for="apex-view-chip" style="font-size:.72rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);cursor:pointer;">Play chip</label>
         <select id="apex-view-chip" onchange="apexSetViewChip(this.value)"
                 title="Show this gameweek with a chip applied. Does not change your saved plan."
-                style="border:none;background:transparent;font-family:inherit;font-size:.78rem;font-weight:800;color:var(--text,#1E1E1A);cursor:pointer;outline:none;">
+                style="border:none;background:transparent;font-family:inherit;font-size:.78rem;font-weight:800;color:var(--text,#16211D);cursor:pointer;outline:none;">
           <option value="">No chip</option>
           <option value="bb">Bench Boost</option>
           <option value="tc">Triple Captain</option>
@@ -7456,11 +7476,11 @@ html.apex-offseason #view-landing .hero-sub::after {
       }
     </script>
 
-    <div id="solve-banner" style="display:none;margin-bottom:12px;padding:10px 14px;border-radius:8px;background:rgba(29,158,117,.12);border:1px solid rgba(29,158,117,.3);font-size:.85rem;color:var(--accent,#1D9E75);font-weight:600;"></div>
+    <div id="solve-banner" style="display:none;margin-bottom:12px;padding:10px 14px;border-radius:8px;background:rgba(15,110,86,.12);border:1px solid rgba(15,110,86,.3);font-size:.85rem;color:var(--accent,#0F6E56);font-weight:600;"></div>
     <!-- Engine picks live in their OWN card (2026-06-09): solve-banner gets
          display:none'd by runSolve/reset/pill flows, which kept vanishing the
          preview. Nothing else touches this div. -->
-    <div id="engine-picks" style="display:none;margin-bottom:12px;padding:14px 18px;border-radius:12px;background:#FFFFFF;box-shadow:0 1px 4px rgba(0,0,0,.06);"></div>
+    <div id="engine-picks" style="display:none;margin-bottom:12px;padding:14px 18px;border-radius:12px;background:#FFFFFF;box-shadow:none;"></div>
     <!-- Scenario Planner strip RETIRED 2026-06-09 (Marcus): the decision tree
          in the Path Planner ("plan ahead") does its job better. The freed rail
          space goes to the range hero + Recommended transfer cards (see
@@ -7490,8 +7510,8 @@ html.apex-offseason #view-landing .hero-sub::after {
          with the transfers view exactly like the paths block. -->
     <section id="sensitivity-section" style="margin:8px 0;">
       <button id="sensitivity-btn" type="button"
-        style="background:var(--bg2,#faf8f3);border:1px solid var(--accent,#1D9E75);
-               color:var(--accent,#1D9E75);font-weight:700;font-size:.78rem;
+        style="background:var(--bg2,#faf8f3);border:1px solid var(--accent,#0F6E56);
+               color:var(--accent,#0F6E56);font-weight:700;font-size:.78rem;
                padding:6px 12px;border-radius:8px;cursor:pointer;">
         Stress-test this pick
       </button>
@@ -7504,7 +7524,7 @@ html.apex-offseason #view-landing .hero-sub::after {
          the one-page rule) into its own sub-tab, per Marcus. -->
     <section id="brief-section">
       <div style="max-width:720px;margin:0 auto;padding:6px 16px 40px;">
-        <div id="squad-brief" style="display:none;margin-top:12px;padding:18px 22px;border-radius:12px;background:#FFFFFF;box-shadow:0 1px 4px rgba(0,0,0,.06);"></div>
+        <div id="squad-brief" style="display:none;margin-top:12px;padding:18px 22px;border-radius:12px;background:#FFFFFF;box-shadow:none;"></div>
         <!-- Premium Four (2026-07-03): template-risk dial, under the Brief. -->
         <div id="px-dial-wrap"></div>
       </div>
@@ -7516,7 +7536,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 
     <section id="pool-section" style="margin-top:24px;">
       <h2 style="font-size:1.1rem;font-weight:700;margin-bottom:4px;">Expected Points</h2>
-      <p class="muted" style="font-size:.78rem;margin-bottom:12px;">Tap <strong style="color:var(--accent,#1D9E75);">✕</strong> on any player above to remove them, then pick a replacement below.</p>
+      <p class="muted" style="font-size:.78rem;margin-bottom:12px;">Tap <strong style="color:var(--accent,#0F6E56);">✕</strong> on any player above to remove them, then pick a replacement below.</p>
       <!-- Custom Projections panel REMOVED 2026-07-25 (Marcus: "get rid of csv
            upload"). It let a user replace the model's projections with their own
            CSV — the opposite of what the product sells, and a niche one: the
@@ -7531,7 +7551,7 @@ html.apex-offseason #view-landing .hero-sub::after {
            div back. Reset's custom-projection cleanup (~L5167) is deliberately
            left in place so any override saved before today is still cleared. -->
 
-      <div class="pool-filters" style="background:var(--bg2);border:1px solid var(--border-light);border-radius:var(--card-radius);padding:18px;margin-bottom:16px;box-shadow:var(--card-shadow);">
+      <div class="pool-filters" style="background:var(--bg2);border:1px solid var(--border-light);border-radius:var(--card-radius);padding:18px;margin-bottom:16px;box-shadow:none;">
         <div style="display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end;">
           <div style="flex:1;min-width:200px;">
             <label style="display:block;font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px;">Search</label>
@@ -7574,7 +7594,7 @@ html.apex-offseason #view-landing .hero-sub::after {
           </div>
           <div style="display:flex;align-items:center;gap:8px;padding-bottom:2px;">
             <label style="display:flex;align-items:center;gap:6px;font-size:.8rem;color:var(--muted);cursor:pointer;">
-              <input type="checkbox" id="pool-affordable" onchange="renderPoolTable()" style="accent-color:var(--accent,#1D9E75);">
+              <input type="checkbox" id="pool-affordable" onchange="renderPoolTable()" style="accent-color:var(--accent,#0F6E56);">
               Affordable only
             </label>
           </div>
@@ -7582,7 +7602,7 @@ html.apex-offseason #view-landing .hero-sub::after {
         <div id="pool-count" style="margin-top:10px;font-size:.78rem;color:var(--muted);"></div>
       </div>
 
-      <div style="background:var(--bg2);border:1px solid var(--border-light);border-radius:var(--card-radius);overflow:hidden;box-shadow:var(--card-shadow);">
+      <div style="background:var(--bg2);border:1px solid var(--border-light);border-radius:var(--card-radius);overflow:hidden;box-shadow:none;">
         <div style="overflow-x:auto;">
           <table class="pool-table" id="pool-table"
             style="width:100%;border-collapse:collapse;font-size:.85rem;min-width:900px;">
@@ -7594,7 +7614,7 @@ html.apex-offseason #view-landing .hero-sub::after {
                 <th data-key="xp_minutes" onclick="setPoolSort('xp_minutes')" style="padding:10px 12px;cursor:pointer;font-weight:700;text-transform:uppercase;letter-spacing:.04em;font-size:.7rem;color:var(--muted);text-align:right;" title="How many minutes we expect them to play this gameweek">Exp. mins</th>
                 <th data-key="cost"       onclick="setPoolSort('cost')"       style="padding:10px 12px;cursor:pointer;font-weight:700;text-transform:uppercase;letter-spacing:.04em;font-size:.7rem;color:var(--muted);text-align:right;">£</th>
                 <!-- GW columns injected by JS -->
-                <th data-key="total_xp" onclick="setPoolSort('total_xp')" style="padding:10px 12px;cursor:pointer;font-weight:700;text-transform:uppercase;letter-spacing:.04em;font-size:.7rem;color:var(--accent,#1D9E75);text-align:right;">Total</th>
+                <th data-key="total_xp" onclick="setPoolSort('total_xp')" style="padding:10px 12px;cursor:pointer;font-weight:700;text-transform:uppercase;letter-spacing:.04em;font-size:.7rem;color:var(--accent,#0F6E56);text-align:right;">Total</th>
                 <th style="padding:10px 16px 10px 12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;font-size:.7rem;color:var(--muted);min-width:80px;"></th>
               </tr>
             </thead>
@@ -7651,10 +7671,10 @@ html.apex-offseason #view-landing .hero-sub::after {
   align-items: stretch;
   gap: 10px;
   background: var(--bg2, #fff);
-  border: 1px solid var(--border, #D9D7CC);
+  border: 1px solid var(--border, #E4E8E4);
   border-radius: 14px;
   padding: 14px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, .07), 0 4px 16px rgba(0, 0, 0, .05);
+  box-shadow:none;
 }
 
 /* The two inner containers stop being boxes and hand their children up. */
@@ -7693,11 +7713,11 @@ html.apex-offseason #view-landing .hero-sub::after {
   padding: 8px 10px !important;
   font-size: .82rem !important;
   font-weight: 700 !important;
-  border-color: var(--border-light, #C9C7BB) !important;
+  border-color: var(--border-light, #EFF2EF) !important;
   overflow: hidden;
 }
 #apex-ctl-card #reset-btn,
-#apex-ctl-card #apex-drafts-btn { color: var(--muted, #5F5E5A) !important; }
+#apex-ctl-card #apex-drafts-btn { color: var(--muted, #6B7671) !important; }
 /* THE PILL IS .apex-hz-wrap, THE SELECT IS #apex-hz-pick. _apexBuildHorizonPicker
    puts the id on the <select> and the class on the span around it. Styling the
    id as though it were the pill matched nothing: the pill got no order, fell to
@@ -7725,12 +7745,12 @@ html.apex-offseason #view-landing .hero-sub::after {
   justify-content: center !important;
   gap: 6px !important;
   padding: 8px 10px !important;
-  border: 1px solid var(--border-light, #C9C7BB) !important;
+  border: 1px solid var(--border-light, #EFF2EF) !important;
   border-radius: 8px !important;
-  background: var(--bg, #FAF7F1) !important;
+  background: var(--bg, #FBFBFA) !important;
   min-width: 0 !important;
   width: auto !important;
-  box-shadow: none !important;
+  box-shadow:none;
   white-space: nowrap !important;
 }
 
@@ -7748,7 +7768,7 @@ html.apex-offseason #view-landing .hero-sub::after {
   font-size: .72rem !important;
   font-weight: 800 !important;
   letter-spacing: .03em !important;
-  color: var(--muted, #5F5E5A) !important;
+  color: var(--muted, #6B7671) !important;
 }
 #apex-ctl-card .va-chip-grid .va-chip-wc .va-chip-card-tag::after { content: "WC"; }
 #apex-ctl-card .va-chip-grid .va-chip-bb .va-chip-card-tag::after { content: "BB"; }
@@ -7764,7 +7784,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 #apex-ctl-card .va-chip-panel {
   background: transparent !important;
   border: none !important;
-  box-shadow: none !important;
+  box-shadow:none;
   padding: 0 !important;
   margin: 0 !important;
 }
@@ -7789,7 +7809,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 .va-twopane-rail #apex-ctl-card {
   padding: 6px 10px;
   gap: 6px;
-  box-shadow: none;
+  box-shadow:none;
 }
 .va-twopane-rail #apex-ctl-card #reset-btn,
 .va-twopane-rail #apex-ctl-card #apex-drafts-btn,
@@ -7822,7 +7842,7 @@ html.apex-offseason #view-landing .hero-sub::after {
   display: flex;
   align-items: center;
   padding: 8px 10px;
-  border: 1px solid var(--border-light, #C9C7BB);
+  border: 1px solid var(--border-light, #EFF2EF);
   border-radius: 8px;
   background: var(--bg2, #fff);
 }
@@ -7839,11 +7859,11 @@ html.apex-offseason #view-landing .hero-sub::after {
 /* full-width in the rail, so centre it like every other row */
 .va-twopane-rail #apex-ctl-card .px-rival-open { flex: 0 1 auto; }
 #apex-ctl-card .px-rival-pin { flex: 0 0 auto; width: 13px; height: 13px;
-  color: var(--muted, #5F5E5A); }
-#apex-ctl-card .px-rival-mut { color: var(--muted, #5F5E5A); font-size: .78rem; }
+  color: var(--muted, #6B7671); }
+#apex-ctl-card .px-rival-mut { color: var(--muted, #6B7671); font-size: .78rem; }
 
 #apex-ctl-card .px-rival-cta {
-  color: var(--accent, #1D9E75);
+  color: var(--accent, #0F6E56);
   font-weight: 800;
   font-size: .8rem;
   text-decoration: none;
@@ -7865,7 +7885,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 #apex-ctl-card .px-rival-name {
   font-weight: 800;
   font-size: .8rem;
-  color: var(--text, #1E1E1A);
+  color: var(--text, #16211D);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -7876,7 +7896,7 @@ html.apex-offseason #view-landing .hero-sub::after {
   font-weight: 700;
   letter-spacing: .03em;
   text-transform: uppercase;
-  color: var(--muted, #5F5E5A);
+  color: var(--muted, #6B7671);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -7892,13 +7912,13 @@ html.apex-offseason #view-landing .hero-sub::after {
 }
 #apex-ctl-card .px-rival-unpin {
   flex: 0 0 auto;
-  color: var(--muted, #5F5E5A);
+  color: var(--muted, #6B7671);
   font-size: .9rem;
   line-height: 1;
   text-decoration: none;
   padding: 0 2px;
 }
-#apex-ctl-card .px-rival-unpin:hover { color: var(--coral, #D85A30); }
+#apex-ctl-card .px-rival-unpin:hover { color: var(--coral, #B4453A); }
 
 
 /* ── APEX_RIVAL_PICK_v1 (2026-08-22) ──────────────────────────────────────
@@ -7913,11 +7933,11 @@ html.apex-offseason #view-landing .hero-sub::after {
   font-family: inherit;
   font-size: .78rem;
   font-weight: 800;
-  color: var(--accent, #1D9E75);
+  color: var(--accent, #0F6E56);
   cursor: pointer;
   padding: 0;
 }
-#apex-ctl-card .px-rival-sel option { color: var(--text, #1E1E1A); font-weight: 700; }
+#apex-ctl-card .px-rival-sel option { color: var(--text, #16211D); font-weight: 700; }
 
 /* ── kill switch ────────────────────────────────────────────────────── */
 html[data-apex-ctl-card="off"] #apex-ctl-card {
@@ -7925,7 +7945,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
   background: none;
   border: none;
   padding: 0;
-  box-shadow: none;
+  box-shadow:none;
 }
 
 /* ── the rail folds row 3 into row 4 ─────────────────────────────────────
@@ -7942,22 +7962,22 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
 }
 .pool-pos-pill:hover { background:rgba(0,0,0,.04);color:var(--text); }
 .pool-pos-pill.active {
-  background:var(--accent,#1D9E75);border-color:var(--accent,#1D9E75);color:#fff;
-  box-shadow:0 2px 8px rgba(29,158,117,.25);
+  background:var(--accent,#0F6E56);border-color:var(--accent,#0F6E56);color:#fff;
+  box-shadow:none;
 }
 .pool-row { border-top:1px solid rgba(0,0,0,.06);transition:background .15s; }
-.pool-row:hover { background:rgba(29,158,117,.04); }
+.pool-row:hover { background:rgba(15,110,86,.04); }
 .pool-row td { padding:11px 14px;vertical-align:middle; }
 .pool-row .pool-xp { text-align:right;font-variant-numeric:tabular-nums; }
 .pool-row .pool-xp-total { font-weight:800;color:#15803d; }
 .pool-add-btn {
-  background:var(--accent,#1D9E75);color:#000;border:none;border-radius:7px;
+  background:var(--accent,#0F6E56);color:#000;border:none;border-radius:7px;
   padding:6px 14px;font-size:.72rem;font-weight:700;cursor:pointer;transition:all .15s;
   white-space:nowrap;
 }
-.pool-add-btn:hover { background:#D85A30; }
+.pool-add-btn:hover { background:#B4453A; }
 .pool-add-btn.in-squad {
-  background:rgba(34,197,94,.15);color:#22c55e;border:1px solid #22c55e44;cursor:default;
+  background:rgba(29,158,117,.15);color:#1D9E75;border:1px solid #22c55e44;cursor:default;
   white-space:nowrap;
 }
 
@@ -7988,18 +8008,18 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
 .confidence-title::before {
   content: '';
   width: 8px; height: 8px;
-  background: var(--accent,#1D9E75);
+  background: var(--accent,#0F6E56);
   border-radius: 50%;
   display: inline-block;
 }
 .confidence-title .cf-gw {
-  color: var(--accent,#1D9E75);
+  color: var(--accent,#0F6E56);
   font-family: var(--mono,'JetBrains Mono',monospace);
   font-size: .9rem;
   letter-spacing: .04em;
 }
 .confidence-desc {
-  color: var(--muted,#8a8a8a);
+  color: var(--muted,#6B7671);
   font-size: .76rem;
   font-family: var(--mono,'JetBrains Mono',monospace);
   max-width: 58%;
@@ -8007,7 +8027,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
   line-height: 1.55;
 }
 .confidence-meta {
-  color: var(--muted,#8a8a8a);
+  color: var(--muted,#6B7671);
   font-size: .7rem;
   font-family: var(--mono,'JetBrains Mono',monospace);
   margin-top: 4px;
@@ -8025,16 +8045,16 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
   gap: 7px;
   font-family: var(--mono,'JetBrains Mono',monospace);
   font-size: .74rem;
-  color: var(--muted,#8a8a8a);
+  color: var(--muted,#6B7671);
   letter-spacing: .03em;
 }
 .tier-dot {
   width: 10px; height: 10px;
   border-radius: 50%;
 }
-.dot-locked { background: #22c55e; }
+.dot-locked { background: #1D9E75; }
 .dot-swing  { background: #f59e0b; }
-.dot-fringe { background: #64748b; }
+.dot-fringe { background: #6B7671; }
 .confidence-pos-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -8052,7 +8072,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
 .pos-label {
   font-family: var(--mono,'JetBrains Mono',monospace);
   font-size: .7rem;
-  color: var(--accent,#1D9E75);
+  color: var(--accent,#0F6E56);
   letter-spacing: 1.4px;
   margin-bottom: 10px;
   display: flex;
@@ -8060,7 +8080,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
   align-items: baseline;
 }
 .pos-label .pos-label-right {
-  color: var(--muted,#8a8a8a);
+  color: var(--muted,#6B7671);
   letter-spacing: .02em;
   font-size: .68rem;
   font-weight: 500;
@@ -8076,7 +8096,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
 }
 .confidence-row:last-child { border-bottom: none; }
 .confidence-row.in-optimal {
-  background: linear-gradient(90deg, rgba(29,158,117,.07) 0%, transparent 60%);
+  background: rgba(15,110,86,.07);
   margin: 0 -8px;
   padding: 7px 8px;
   border-radius: 4px;
@@ -8086,9 +8106,9 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
   height: 22px;
   border-radius: 2px;
 }
-.tier-bar.locked { background: #22c55e; }
+.tier-bar.locked { background: #1D9E75; }
 .tier-bar.swing  { background: #f59e0b; }
-.tier-bar.fringe { background: #64748b; }
+.tier-bar.fringe { background: #6B7671; }
 .cf-name {
   font-weight: 500;
   overflow: hidden;
@@ -8099,13 +8119,13 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
   gap: 6px;
 }
 .cf-name .cf-star {
-  color: var(--accent,#1D9E75);
+  color: var(--accent,#0F6E56);
   font-size: .7rem;
 }
 .cf-team {
   font-family: var(--mono,'JetBrains Mono',monospace);
   font-size: .66rem;
-  color: var(--muted,#8a8a8a);
+  color: var(--muted,#6B7671);
   text-transform: uppercase;
   letter-spacing: .06em;
   text-align: right;
@@ -8116,13 +8136,13 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
   text-align: right;
   font-size: .88rem;
 }
-.cf-pct.locked { color: #22c55e; }
+.cf-pct.locked { color: #1D9E75; }
 .cf-pct.swing  { color: #f59e0b; }
-.cf-pct.fringe { color: #64748b; }
+.cf-pct.fringe { color: #6B7671; }
 .cf-xp {
   font-family: var(--mono,'JetBrains Mono',monospace);
   font-size: .7rem;
-  color: var(--muted,#8a8a8a);
+  color: var(--muted,#6B7671);
   text-align: right;
 }
 .confidence-footnote {
@@ -8131,11 +8151,11 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
   border-top: 1px solid var(--border,#2a2a2a);
   font-size: .72rem;
   font-family: var(--mono,'JetBrains Mono',monospace);
-  color: var(--muted,#8a8a8a);
+  color: var(--muted,#6B7671);
   line-height: 1.6;
 }
 .confidence-empty {
-  color: var(--muted,#8a8a8a);
+  color: var(--muted,#6B7671);
   font-size: .85rem;
   padding: 10px 4px;
   font-style: italic;
@@ -8150,7 +8170,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
 .aps-title {
   font-family: 'Plus Jakarta Sans', sans-serif;
   font-size: 20px; font-weight: 800; letter-spacing: -0.01em;
-  color: #0f172a; margin: 0;
+  color: #16211D; margin: 0;
 }
 .aps-beta {
   font-family: 'JetBrains Mono', monospace;
@@ -8160,36 +8180,36 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
 }
 .aps-sub {
   font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: 13px; font-weight: 500; color: #64748b; margin: 0 0 16px;
+  font-size: 13px; font-weight: 500; color: #6B7671; margin: 0 0 16px;
 }
-.aps-sub .aps-sub-default { color: #16a34a; font-weight: 600; }
+.aps-sub .aps-sub-default { color: #1D9E75; font-weight: 600; }
 .aps-grid {
   /* APEX_DIFF_BOX: 4 presets since 2026-08-01; <=720px falls to 2x2, <=480px stacks. */
   display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;
 }
 .aps-card {
-  background: #ffffff; border: 1px solid #e5e7eb; border-radius: 14px;
+  background: #ffffff; border: 1px solid #E4E8E4; border-radius: 14px;
   padding: 18px 20px; display: flex; gap: 14px; align-items: flex-start;
   cursor: pointer; transition: border-color .12s ease, background .12s ease, box-shadow .12s ease;
   text-align: left; font-family: 'Plus Jakarta Sans', sans-serif;
 }
-.aps-card:hover { box-shadow: 0 2px 10px rgba(15,23,42,.06); }
+.aps-card:hover { box-shadow:none; }
 .aps-card.aps-active {
-  border: 2px solid #1D9E75; background: #F0FAF6;  /* 2026-06-11: was peach #fff6ef — orange-era fossil */
+  border: 2px solid #0F6E56; background: #F0FAF6;  /* 2026-06-11: was peach #fff6ef — orange-era fossil */
   padding: 17px 19px;  /* compensate +1px border so layout doesn't jump */
 }
 .aps-icon {
   flex-shrink: 0; width: 38px; height: 38px; border-radius: 50%;
-  background: #f1f5f9; color: #94a3b8;
+  background: #f1f5f9; color: #9AA39E;
   display: flex; align-items: center; justify-content: center;
 }
 .aps-icon svg { width: 19px; height: 19px; display: block; }
-.aps-card.aps-active .aps-icon { background: #1D9E75; color: #ffffff; }
+.aps-card.aps-active .aps-icon { background: #0F6E56; color: #ffffff; }
 .aps-body { min-width: 0; display: flex; flex-direction: column; gap: 3px; }
 .aps-card-title {
-  font-size: 15px; font-weight: 700; color: #0f172a; line-height: 1.2;
+  font-size: 15px; font-weight: 700; color: #16211D; line-height: 1.2;
 }
-.aps-card.aps-active .aps-card-title { color: #1D9E75; }
+.aps-card.aps-active .aps-card-title { color: #0F6E56; }
 /* APEX_AUDIT_38A_PRESET_DESCRIPTIONS (2026-07-29) — the preset descriptions.
    The `.aps-card-desc` rule that stood here is gone: no element has carried
    that class since the preset bars were rebuilt, so it styled nothing.
@@ -8208,7 +8228,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
    can suppress it, and the rule that governs it lives here. The stale rail rule
    is now dead too, but deleting it is a solver_style.css job — reported. */
 .aps-card-sub {
-  font-size: 12.5px; font-weight: 500; color: #64748b; line-height: 1.35;
+  font-size: 12.5px; font-weight: 500; color: #6B7671; line-height: 1.35;
 }
 /* Squad rail: that bar is a row of centred pills (solver_style.css sets
    justify-content:center, text-align:center and gap:0 !important on .aps-body),
@@ -8218,20 +8238,20 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
    .aps-card-title rule beside it already has to out-rank the same way. */
 .va-twopane-rail #aps-grid-team .aps-card-sub {
   font-size: 12px !important; font-weight: 500; line-height: 1.3;
-  margin-top: 4px; color: #64748b;
+  margin-top: 4px; color: #6B7671;
 }
 .aps-card.aps-active .aps-card-sub { color: #47605a; }
 .aps-card-soon {
   display: inline-block; margin-top: 5px;
   font-family: 'JetBrains Mono', monospace; font-size: 9.5px; font-weight: 700;
   letter-spacing: 0.6px; text-transform: uppercase;
-  color: #94a3b8; background: #f1f5f9; border-radius: 999px; padding: 1px 7px;
+  color: #9AA39E; background: #f1f5f9; border-radius: 999px; padding: 1px 7px;
 }
 .aps-card-disabled { cursor: not-allowed; opacity: 0.62; }
-.aps-card-disabled:hover { box-shadow: none; }
+.aps-card-disabled:hover { box-shadow:none; }
 .aps-custom-dials {
   margin-top: 14px; padding: 16px 18px; background: #ffffff;
-  border: 1px solid #e5e7eb; border-radius: 14px;
+  border: 1px solid #E4E8E4; border-radius: 14px;
   font-family: 'Plus Jakarta Sans', sans-serif;
 }
 .aps-dial-row {
@@ -8239,13 +8259,13 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
   gap: 14px; padding: 8px 0;
 }
 .aps-dial-row + .aps-dial-row { border-top: 1px solid #f1f5f9; }
-.aps-dial-label { font-size: 13px; font-weight: 600; color: #0f172a; }
-.aps-dial-hint { font-size: 11.5px; font-weight: 500; color: #94a3b8; margin-top: 1px; }
+.aps-dial-label { font-size: 13px; font-weight: 600; color: #16211D; }
+.aps-dial-hint { font-size: 11.5px; font-weight: 500; color: #9AA39E; margin-top: 1px; }
 .aps-dial-ctl { display: flex; align-items: center; gap: 10px; }
-.aps-dial-ctl input[type=range] { width: 130px; accent-color: #1D9E75; }
+.aps-dial-ctl input[type=range] { width: 130px; accent-color: #0F6E56; }
 .aps-dial-val {
   font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700;
-  color: #1D9E75; min-width: 34px; text-align: right;
+  color: #0F6E56; min-width: 34px; text-align: right;
 }
 @media (max-width: 720px) {
   .aps-grid { grid-template-columns: 1fr 1fr; }
@@ -8297,8 +8317,8 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
     <div style="margin:6px 0 4px;">
       <button class="btn" onclick="_apexRunChipTiming()" id="apex-chiptiming-btn"
         title="Rank every chip sequence and apply the best in one tap"
-        style="background:var(--accent,#1D9E75);color:#000;border:none;padding:9px 18px;border-radius:8px;font-weight:700;font-size:.85rem;cursor:pointer;">
-        ⚡ Best chip timing
+        style="background:var(--accent,#0F6E56);color:#000;border:none;padding:9px 18px;border-radius:8px;font-weight:700;font-size:.85rem;cursor:pointer;">
+        <i class=apex-ic data-i=bolt></i> Best chip timing
       </button>
     </div>
     <div id="apex-chiptiming-panel" style="margin:0 0 14px;"></div>
@@ -8413,7 +8433,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
 
       <div class="cs-cta-row">
         <button onclick="applyChipSelection()" class="cs-cta-btn">
-          ⚡ Calculate optimal strategy
+          <i class=apex-ic data-i=bolt></i> Calculate optimal strategy
         </button>
       </div>
     </div>
@@ -8570,7 +8590,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
            options-list link wraps under the path card instead of clipping
            off-screen at <=376px -->
       <div style="display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px;margin:10px 0;">
-        <div id="pp-path-card" style="background:#FFFFFF;border-radius:12px;padding:12px 18px;min-width:220px;box-shadow:0 1px 4px rgba(0,0,0,.06);"></div>
+        <div id="pp-path-card" style="background:#FFFFFF;border-radius:12px;padding:12px 18px;min-width:220px;box-shadow:none;"></div>
         <a href="#" id="pp-list-toggle" onclick="_ppToggleList(); return false;"
            style="font-size:.82rem;color:var(--muted);text-decoration:underline;cursor:pointer;white-space:nowrap;">Show full options list</a>
       </div>
@@ -8613,7 +8633,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
 
     <!-- Rival Mode (Phase 2, BETA) — head-to-head vs one mini-league rival -->
     <div id="rival-mode-card" style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:22px 26px;margin-bottom:22px;">
-      <div style="font-size:1.15rem;font-weight:800;margin-bottom:4px;">Beat a rival this week <span style="font-size:.68rem;font-weight:700;color:#fff;background:var(--accent,#1D9E75);border-radius:5px;padding:2px 7px;vertical-align:middle;">NEW</span></div>
+      <div style="font-size:1.15rem;font-weight:800;margin-bottom:4px;">Beat a rival this week <span style="font-size:.68rem;font-weight:700;color:#fff;background:var(--accent,#0F6E56);border-radius:5px;padding:2px 7px;vertical-align:middle;">NEW</span></div>
       <div style="color:var(--muted);font-size:.9rem;margin-bottom:14px;">Head-to-head vs one rival for the upcoming gameweek. Shared players cancel out; only your differentials and captain move the gap.</div>
       <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">
         <div style="flex:1;min-width:220px;">
@@ -8632,16 +8652,16 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
       <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:14px;">
         <span style="font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;">You are</span>
         <div id="rival-stance" style="display:inline-flex;border:1px solid var(--border);border-radius:8px;overflow:hidden;">
-          <button type="button" class="on" data-v="lead" onclick="rivalStance(this)" style="background:var(--accent,#1D9E75);color:#000;border:none;font-family:inherit;font-weight:700;font-size:.85rem;padding:9px 14px;cursor:pointer;">Leading</button>
+          <button type="button" class="on" data-v="lead" onclick="rivalStance(this)" style="background:var(--accent,#0F6E56);color:#000;border:none;font-family:inherit;font-weight:700;font-size:.85rem;padding:9px 14px;cursor:pointer;">Leading</button>
           <button type="button" data-v="chase" onclick="rivalStance(this)" style="background:var(--bg3);color:var(--fg);border:none;border-left:1px solid var(--border);font-family:inherit;font-weight:700;font-size:.85rem;padding:9px 14px;cursor:pointer;">Chasing</button>
         </div>
         <span id="rival-margin-lab" style="font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;">Lead (pts)</span>
         <input id="rival-margin" type="number" value="10" min="0" max="120" style="width:70px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--fg);padding:9px 11px;font-size:.9rem;font-family:inherit;">
-        <button onclick="rivalCompare()" style="background:var(--accent,#1D9E75);color:#000;border:none;border-radius:8px;padding:11px 22px;font-size:.95rem;font-weight:700;cursor:pointer;margin-left:auto;">Compare</button>
+        <button onclick="rivalCompare()" style="background:var(--accent,#0F6E56);color:#000;border:none;border-radius:8px;padding:11px 22px;font-size:.95rem;font-weight:700;cursor:pointer;margin-left:auto;">Compare</button>
       </div>
       <div id="rival-status" style="margin-top:12px;font-size:.85rem;color:var(--muted);"></div>
       <div id="rival-results" style="display:none;margin-top:16px;">
-        <div id="rival-verdict" style="border:2px solid var(--accent,#1D9E75);border-radius:10px;padding:12px 15px;margin-bottom:14px;line-height:1.4;"></div>
+        <div id="rival-verdict" style="border:2px solid var(--accent,#0F6E56);border-radius:10px;padding:12px 15px;margin-bottom:14px;line-height:1.4;"></div>
         <div style="display:grid;grid-template-columns:1.3fr 1fr;gap:16px;align-items:start;">
           <div><canvas id="rival-canvas" width="520" height="210" style="width:100%;height:210px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;"></canvas>
             <div style="font-size:.72rem;color:var(--muted);text-align:center;margin-top:6px;">Green = you finish level or ahead. Red = they overtake you.</div></div>
@@ -8666,7 +8686,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
           </select>
         </div>
         <button id="league-run-btn" onclick="runLeagueSim()" disabled
-          style="background:var(--accent,#1D9E75);color:#000;border:none;border-radius:8px;padding:14px 28px;font-size:1rem;font-weight:700;cursor:pointer;opacity:.5;letter-spacing:-.01em;">
+          style="background:var(--accent,#0F6E56);color:#000;border:none;border-radius:8px;padding:14px 28px;font-size:1rem;font-weight:700;cursor:pointer;opacity:.5;letter-spacing:-.01em;">
           Run Simulation
         </button>
       </div>
@@ -8690,14 +8710,14 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
       </div>
       <div id="league-hero-name" style="font-size:1.7rem;font-weight:800;color:var(--fg);margin-bottom:6px;"></div>
       <div id="league-hero-team" style="font-size:.95rem;color:var(--muted);margin-bottom:16px;"></div>
-      <div id="league-hero-pct" style="font-size:4.5rem;font-weight:800;color:var(--accent,#1D9E75);line-height:1;letter-spacing:-.03em;"></div>
+      <div id="league-hero-pct" style="font-size:4.5rem;font-weight:800;color:var(--accent,#0F6E56);line-height:1;letter-spacing:-.03em;"></div>
       <div style="font-size:.95rem;color:var(--muted);margin-top:6px;">chance to win</div>
       <!-- Dev-only A/B comparison: Apex (correlation-aware) vs Independent (Copilot-style).
            Hidden by default. Shown when ?compareSim=1 + apex_dev=1 in localStorage. -->
       <div id="league-hero-altcompare" style="display:none;margin-top:18px;padding-top:14px;border-top:1px solid rgba(0,0,0,.06);font-size:.8rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;">
         <div style="display:flex;justify-content:center;gap:28px;align-items:baseline;">
           <div style="text-align:center;">
-            <div id="league-hero-pct-apex" style="font-size:1.6rem;font-weight:700;color:var(--accent,#1D9E75);letter-spacing:-.01em;text-transform:none;"></div>
+            <div id="league-hero-pct-apex" style="font-size:1.6rem;font-weight:700;color:var(--accent,#0F6E56);letter-spacing:-.01em;text-transform:none;"></div>
             <div style="font-size:.7rem;margin-top:2px;">Apex (correlated)</div>
           </div>
           <div style="text-align:center;">
@@ -8716,7 +8736,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
           <button class="lg-toggle lg-toggle-active" id="lg-toggle-current" onclick="toggleLeagueView('current')">Current</button>
           <button class="lg-toggle" id="lg-toggle-projected" onclick="toggleLeagueView('projected')">Projected</button>
           <span id="league-live-badge" style="display:none;margin-left:14px;align-items:center;gap:8px;font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;">
-            <span style="width:8px;height:8px;background:#ef4444;border-radius:50%;display:inline-block;box-shadow:0 0 0 0 rgba(239,68,68,.6);animation:lgLivePulse 1.6s infinite;"></span>
+            <span style="width:8px;height:8px;background:#ef4444;border-radius:50%;display:inline-block;box-shadow:none;animation:lgLivePulse 1.6s infinite;"></span>
             <span style="color:#ef4444;">LIVE</span>
             <span id="league-live-updated" style="color:var(--muted);font-weight:500;letter-spacing:0;text-transform:none;margin-left:4px;"></span>
           </span>
@@ -8738,7 +8758,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
               <th class="lg-th">MANAGER</th>
               <th class="lg-th lg-th-r">PTS</th>
               <th class="lg-th lg-th-r lg-proj-th">PROJECTED</th>
-              <th class="lg-th lg-th-r" style="color:var(--accent,#1D9E75);">WIN %</th>
+              <th class="lg-th lg-th-r" style="color:var(--accent,#0F6E56);">WIN %</th>
               <th class="lg-th">CHIPS</th>
             </tr>
           </thead>
@@ -8775,33 +8795,33 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
   cursor:pointer;font-family:inherit;transition:all .15s;
 }
 .lg-toggle-active {
-  background:var(--accent,#1D9E75);color:#fff;border-color:var(--accent,#1D9E75);
+  background:var(--accent,#0F6E56);color:#fff;border-color:var(--accent,#0F6E56);
 }
 @keyframes lgLivePulse {
-  0%   { box-shadow: 0 0 0 0 rgba(239,68,68,.6); }
-  70%  { box-shadow: 0 0 0 6px rgba(239,68,68,0); }
-  100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); }
+  0%   { box-shadow:none; }
+  70%  { box-shadow:none; }
+  100% { box-shadow:none; }
 }
 @keyframes lgCellFlash {
-  0%   { background: rgba(29,158,117,.18); }
+  0%   { background: rgba(15,110,86,.18); }
   100% { background: transparent; }
 }
 .lg-flash { animation: lgCellFlash 1.2s ease-out; }
 .lg-row { border-top:1px solid rgba(0,0,0,.06);transition:background .12s; }
-.lg-row:hover { background:rgba(29,158,117,.04); }
+.lg-row:hover { background:rgba(15,110,86,.04); }
 .lg-row td { padding:18px 18px;vertical-align:middle; }
-.lg-row-you { background:rgba(29,158,117,.06);border-left:3px solid var(--accent,#1D9E75); }
-.lg-row-you:hover { background:rgba(29,158,117,.1); }
+.lg-row-you { background:rgba(15,110,86,.06);border-left:3px solid var(--accent,#0F6E56); }
+.lg-row-you:hover { background:rgba(15,110,86,.1); }
 .lg-name { font-weight:700;font-size:1.05rem;color:var(--fg); }
 .lg-team { font-size:.88rem;color:var(--muted);margin-top:2px; }
 .lg-overall-rank {
   display:inline-block;font-family:'JetBrains Mono',ui-monospace,monospace;
-  font-size:.72rem;font-weight:700;color:var(--muted,#5F5E5A);
-  background:#F1EFE8;border:1px solid var(--border,#D9D7CC);
+  font-size:.72rem;font-weight:700;color:var(--muted,#6B7671);
+  background:#F4F5F3;border:1px solid var(--border,#E4E8E4);
   border-radius:4px;padding:1px 6px;margin-left:6px;letter-spacing:0;vertical-align:1px;
 }
 .lg-you-tag {
-  display:inline-block;background:var(--accent,#1D9E75);color:#fff;
+  display:inline-block;background:var(--accent,#0F6E56);color:#fff;
   border-radius:4px;padding:2px 7px;font-size:.72rem;font-weight:800;
   margin-left:7px;letter-spacing:.04em;vertical-align:middle;
 }
@@ -8827,13 +8847,13 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
 }
 .lg-chip-wc { background:rgba(168,85,247,.15);color:#6d28d9;border:1px solid rgba(168,85,247,.3); }
 .lg-chip-fh { background:rgba(59,130,246,.12);color:#1d4ed8;border:1px solid rgba(59,130,246,.3); }
-.lg-chip-bb { background:rgba(34,197,94,.12);color:#0F6E56;border:1px solid rgba(34,197,94,.3); }
-.lg-chip-tc { background:rgba(29,158,117,.12);color:#D85A30;border:1px solid rgba(29,158,117,.3); }
+.lg-chip-bb { background:rgba(29,158,117,.12);color:#0F6E56;border:1px solid rgba(29,158,117,.3); }
+.lg-chip-tc { background:rgba(15,110,86,.12);color:#B4453A;border:1px solid rgba(15,110,86,.3); }
 .lg-chip-none { color:var(--muted);font-size:.85rem; }
 .lg-rank { font-weight:700;color:var(--muted);font-size:1rem; }
 .lg-rank-1 { color:#a16207; }   /* 2026-07-25: #facc15 was 1.53:1 on the white row — the leader's rank was blank */
 .lg-loading-bar, .apex-slide-bar {
-  height:100%;width:40%;background:var(--accent,#1D9E75);border-radius:2px;
+  height:100%;width:40%;background:var(--accent,#0F6E56);border-radius:2px;
   animation:apex-slide 1.6s ease-in-out infinite;
 }
 .apex-slide-track {
@@ -20283,7 +20303,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1788388839-GW3-abe021a5";
+const BUILD_VERSION = "1788390776-GW3-b9de9d71";
 window.APEX_BUILD = BUILD_VERSION;
 // APEX_BUILD_FRESHNESS_v1 (2026-08-28): the page checks whether a NEWER build
 // is live and offers a one-tap update. GitHub Pages serves HTML max-age=600,
@@ -20340,7 +20360,7 @@ window.APEX_SQUAD_ROLLBACK = false;
 let FPL_ID = null;
 let SQUAD_DATA = [];
 </script>
-<script src="/apex_pool.js?v=1788388839-GW3-abe021a5"></script>
+<script src="/apex_pool.js?v=1788390776-GW3-b9de9d71"></script>
 <script>
 const PLAYER_NAMES = {"1": "Raya", "2": "Arrizabalaga", "3": "Meslier", "4": "Gabriel", "5": "J.Timber", "6": "Saliba", "7": "Lewis-Skelly", "8": "Calafiori", "9": "Hincapie", "10": "White", "11": "Mosquera", "12": "Saka", "13": "Rice", "14": "Eze", "15": "\u00d8degaard", "16": "Madueke", "17": "Merino", "18": "Martinelli", "19": "Zubimendi", "20": "Dowman", "22": "Nwaneri", "23": "F\u00e1bio Vieira", "24": "Nelson", "25": "Gy\u00f6keres", "26": "Havertz", "27": "G.Jesus", "31": "Konsa", "452": "Bruno G.", "557": "Tzolis", "29": "M.Bizot", "30": "Digne", "32": "Cash", "33": "Mings", "34": "Pau", "35": "Bogarde", "36": "Maatsen", "37": "Lindel\u00f6f", "38": "A.Garc\u00eda", "39": "Nedeljkovic", "41": "Buend\u00eda", "44": "Bailey", "45": "McGinn", "46": "Barkley", "47": "Kamara", "48": "Onana", "49": "Iling Jr", "50": "Burrowes", "51": "George Hemmings", "52": "Alysson", "53": "Manzambi", "54": "Gomes", "55": "Watkins", "56": "Abraham", "160": "Garnacho", "166": "N.Jackson", "582": "Madjo", "596": "Ruggeri", "597": "Suzuki", "606": "Rowe", "607": "Lynch", "611": "Wan-Bissaka", "618": "Goretzka", "630": "Harwood-Bellis", "631": "Mbaye", "57": "Petrovi\u0107", "58": "Forster", "59": "Dennis", "60": "Hill", "61": "Truffert", "62": "Diakit\u00e9", "63": "Milosavljevi\u0107", "64": "Smith", "65": "J.Araujo", "66": "Soler", "67": "Rayan", "68": "Tavernier", "69": "Scott", "70": "Kluivert", "71": "Cook", "72": "Gannon-Doak", "73": "Adams", "74": "Brooks", "75": "Christie", "76": "T\u00f3th.A", "77": "Adli", "78": "Kroupi.Jr", "79": "Evanilson", "80": "Enes \u00dcnal", "81": "Rodr\u00edguez", "566": "Silva", "573": "Sanchez", "608": "Jebbison", "615": "Di Gregorio", "82": "Kelleher", "83": "Valdimarsson", "84": "Collins", "85": "Van den Berg", "86": "Lewis-Potter", "87": "Ajer", "88": "Kayode", "89": "Henry", "90": "Hickey", "92": "Ji-soo", "93": "Schuster", "94": "Schade", "95": "O.Dango", "96": "Damsgaard", "97": "Jensen", "98": "Janelt", "99": "Milambo", "100": "Carvalho", "102": "Yarmoliuk", "103": "Dasilva", "105": "Anthony", "106": "Thiago", "107": "Furo", "108": "Wilson", "565": "M.Sangar\u00e9", "620": "Diouf", "109": "Verbruggen", "111": "Steele", "113": "F.Kad\u0131o\u011flu", "114": "Boscagli", "115": "De Cuyper", "116": "Dunk", "117": "Coppola", "118": "Igor", "119": "Costinha", "120": "Svoboda", "121": "Mitoma", "122": "Minteh", "123": "Hinshelwood", "124": "Gro\u00df", "125": "Georginio", "126": "O'Riley", "127": "Gomez", "128": "Buonanotte", "129": "Ayari", "130": "Wieffer", "132": "Howell", "133": "Watson", "134": "Oriola", "135": "Yohanna", "137": "Tzimas", "138": "Kostoulas", "139": "Ferguson", "328": "Struijk", "504": "Vuskovic", "594": "David", "600": "Osman", "605": "Yalcouy\u00e9", "614": "Hadjam", "624": "Cozier-Duberry", "639": "Andr\u00e9s", "28": "Martinez", "40": "Rogers", "101": "Henderson", "136": "Welbeck", "140": "S\u00e1nchez", "141": "J\u00f6rgensen", "142": "James", "143": "Chalobah", "144": "Gusto", "145": "Fofana", "146": "B.Badiashile", "148": "Hato", "149": "Colwill", "150": "M.Sarr", "151": "Acheampong", "152": "Palestra", "154": "Palmer", "156": "Neto", "157": "Est\u00eav\u00e3o", "158": "Gittens", "159": "Caicedo", "161": "Lavia", "163": "D.Essugo", "164": "Quenda", "165": "Jo\u00e3o Pedro", "168": "Marc Guiu", "169": "Mheuka", "170": "Emegha", "200": "Lacroix", "560": "Penders", "561": "Anselmino", "568": "Barco", "583": "Chavarria", "91": "Pinnock", "104": "Onyeka", "110": "Rushworth", "171": "Dovin", "172": "Wilson", "173": "Thomas", "174": "Kitching", "175": "van Ewijk", "176": "Dasilva", "177": "Kesler-Hayden", "178": "Bidwell", "179": "Latibeaudiere", "180": "Woolfenden", "181": "Brau", "182": "Amenda", "183": "Rudoni", "184": "Grimes", "185": "Sakamoto", "186": "Mason-Clark", "187": "Eccles", "188": "Torp", "189": "Shepherd", "190": "Tchaouna", "191": "Borges Rodrigues", "192": "Andrews", "193": "Wright", "194": "Thomas-Asante", "195": "Simms", "196": "Markelo", "197": "Bassette", "492": "Awoniyi", "575": "Yirenkyi", "584": "Hamer", "599": "Cherif", "623": "Bentley", "42": "Guessand", "153": "Disasi", "198": "Henderson", "199": "Benitez", "202": "Richards", "203": "Canvot", "204": "Mitchell", "205": "Sosa", "206": "Chadi Riad", "207": "Mingueza", "208": "Sarr", "210": "Wharton", "211": "Yeremy", "212": "Hughes", "213": "Lerma", "214": "Kamada", "215": "Devenny", "216": "Esse", "217": "M.Fran\u00e7a", "218": "Doucour\u00e9", "219": "J.Rak-Sakyi", "220": "Cardines", "221": "Drakes-Thomas", "222": "Strand Larsen", "223": "Mateta", "224": "Nketiah", "225": "Uche", "241": "McNeil", "555": "Matthews", "577": "Tomiyasu", "588": "Khalaili", "595": "Gozo", "633": "Ahanor", "643": "Chilwell", "644": "Timber", "647": "Osorio", "21": "N\u00f8rgaard", "209": "Johnson", "226": "Pickford", "227": "Travers", "228": "King", "229": "Tarkowski", "230": "Branthwaite", "231": "Keane", "232": "O'Brien", "233": "Mykolenko", "234": "Patterson", "235": "Aznou", "236": "Dewsbury-Hall", "238": "Grealish", "239": "Garner", "242": "George", "243": "Alcaraz", "244": "Armstrong", "245": "Dibling", "246": "R\u00f6hl", "247": "Hackney", "248": "Beto", "249": "Barry", "649": "Maitland-Niles", "250": "Leno", "251": "Lecomte", "252": "McNally", "253": "Andersen", "254": "Robinson", "255": "J.Cuenca", "256": "Tete", "257": "Bassey", "258": "Castagne", "261": "Iwobi", "262": "Smith Rowe", "263": "Kevin", "264": "Bobb", "265": "Berge", "266": "Cairney", "268": "King", "269": "Sessegnon", "270": "Reed", "271": "Muniz", "272": "Kusi-Asare", "569": "Gonzalo", "570": "Palacios", "580": "Charles", "610": "De Fougerolles", "626": "Zepa", "635": "Larsson", "636": "\u00c1ngel", "650": "Affengruber", "240": "Iroegbunam", "273": "Phillips", "274": "Butland", "275": "Cartwright", "276": "Lo-Tutala", "277": "Egan", "278": "Hughes", "279": "Ajayi", "280": "Coyle", "281": "Drameh", "282": "Giles", "283": "Jacob", "284": "McCarthy", "285": "McNair", "286": "Belloumi", "287": "Millar", "288": "Dowell", "289": "Crooks", "290": "Slater", "291": "Matazo", "292": "\u00d6m\u00fcr", "293": "Kamara", "294": "Zambrano", "295": "McBurnie", "296": "Akintola", "297": "Gyabi", "298": "Destan", "299": "Burstow", "340": "Gelhardt", "556": "Targett", "563": "Morita", "572": "Tzolakis", "574": "Hjert\u00f8-Dahl", "576": "Stroud", "585": "Herrington", "586": "Mendy", "589": "Gourna-Douath", "617": "Cho", "632": "Ansah", "637": "Vaz", "638": "Norton-Cuffy", "642": "Thomas", "645": "Mouzakitis", "259": "Diop", "267": "Luki\u0107", "300": "Walton", "301": "Palmer", "302": "Button", "303": "Kipr\u00e9", "304": "O'Shea", "305": "Davis", "306": "Greaves", "307": "Johnson", "308": "Furlong", "309": "N\u00fa\u00f1ez", "310": "Matusiwa", "311": "Burns", "312": "Taylor", "313": "Clarke", "314": "Ogbene", "315": "Fatawu", "316": "Emersonn", "317": "Hirst", "318": "Philogene", "319": "Szmodics", "320": "Akpom", "321": "Walle Egeli", "322": "Al-Hamadi", "323": "McAteer", "324": "Mehmeti", "554": "Van Oevelen", "562": "Maeda", "564": "Scherpen", "571": "Florentino", "591": "Enciso", "592": "Ouattara", "602": "Humphreys", "619": "Palacios", "640": "Flemming", "260": "Wilson", "326": "Perri", "327": "Bijol", "329": "Rodon", "330": "Bogle", "331": "Gudmundsson", "332": "Justin", "333": "Bornauw", "334": "Muharemovi\u0107", "335": "Stach", "336": "Okafor", "337": "Aaronson", "338": "Ampadu", "339": "Longstaff", "341": "Gnonto", "342": "Harrison", "343": "James", "344": "Gruev", "345": "Tanaka", "346": "Calvert-Lewin", "347": "Nmecha", "348": "Piroe", "349": "Mateo Joseph", "385": "Trafford", "598": "Elvedi", "603": "Lienou", "604": "Cresswell", "625": "Cairns", "629": "Zetterer", "641": "Bard", "648": "Bahoya", "350": "A.Becker", "351": "Mamardashvili", "352": "Woodman", "353": "Pecsi", "354": "Jaros", "355": "Davies", "356": "Virgil", "357": "Frimpong", "358": "Kerkez", "359": "Gomez", "360": "Bradley", "361": "Lucky", "362": "Jacquet", "363": "Leoni", "364": "Tsimikas", "365": "Ramsay", "366": "Wirtz", "367": "Gakpo", "368": "Szoboszlai", "369": "Ngumoha", "370": "Chiesa", "371": "Gravenberch", "372": "Mac Allister", "373": "C.Jones", "374": "Endo", "375": "Nyoni", "376": "Bajcetic", "377": "Munoz", "378": "McConnell", "379": "Isak", "380": "Ekitik\u00e9", "381": "Koumas", "382": "Danns", "383": "Elliott", "579": "Araujo", "627": "Barcola", "155": "Enzo", "237": "Ndiaye", "384": "Donnarumma", "386": "Bettinelli", "387": "O'Reilly", "388": "Gu\u00e9hi", "389": "Matheus N.", "390": "R\u00faben", "391": "Gvardiol", "392": "A\u00eft-Nouri", "393": "Khusanov", "394": "Alleyne", "395": "Lewis", "396": "Vitor Reis", "397": "Semenyo", "398": "Foden", "399": "Cherki", "400": "Doku", "402": "Rodrigo", "404": "Reijnders", "406": "Kova\u010di\u0107", "407": "Echeverri", "408": "Phillips", "409": "Mukasa", "410": "Monga", "411": "Haaland", "481": "Anderson", "587": "Rulli", "616": "Bouaddi", "621": "McAidoo", "622": "Braithwaite", "628": "Allan", "43": "Tielemans", "131": "Baleba", "162": "Andrey Santos", "325": "Darlow", "412": "Lammens", "413": "Bayindir", "414": "Heaton", "415": "Dorgu", "416": "De Ligt", "417": "Dalot", "418": "Maguire", "419": "Martinez", "420": "Yoro", "421": "Heaven", "422": "Mazraoui", "423": "Shaw", "424": "Amass", "425": "Fredricson", "426": "B.Fernandes", "427": "Mbeumo", "428": "Cunha", "429": "Rashford", "430": "Mount", "431": "Amad", "432": "Mainoo", "433": "Ugarte", "434": "J.Fletcher", "435": "Lacey", "436": "Collyer", "437": "Bendito Mantato", "438": "Fletcher", "439": "\u0160e\u0161ko", "440": "Zirkzee", "441": "Obi", "405": "N.Gonzalez", "442": "Pope", "443": "Gillespie", "444": "Jaouen", "445": "Thiaw", "446": "Sch\u00e4r", "447": "Botman", "448": "Burn", "449": "Hall", "450": "Livramento", "451": "A.Murphy", "453": "Barnes", "454": "Elanga", "456": "J.Ramsey", "457": "J.Murphy", "458": "Joelinton", "459": "L.Miley", "460": "Willock", "461": "Tour\u00e9", "462": "Steur", "463": "Woltemade", "464": "Wissa", "465": "Osula", "466": "Neave", "559": "Bamba", "567": "Horn\u00ed\u010dek", "593": "Dedi\u0107", "609": "Shahar", "634": "Fernandez-Pardo", "167": "Delap", "201": "Mu\u00f1oz", "467": "Sels", "468": "John", "469": "N.Williams", "470": "Morato", "471": "Milenkovi\u0107", "472": "Murillo", "473": "Aina", "474": "Jair Cunha", "475": "Savona", "476": "O.Richards", "477": "Abbott", "478": "Netz", "479": "Bindon", "480": "Gibbs-White", "482": "Hudson-Odoi", "483": "Ndoye", "484": "Hutchinson", "485": "Bakwa", "486": "McAtee", "487": "Dominguez", "488": "I.Sangar\u00e9", "489": "Yates", "490": "Wood", "491": "Igor Jesus", "493": "Kalimuendo", "558": "Schlager", "581": "Diomande", "590": "Benda", "112": "Van Hecke", "147": "Tosin", "401": "Marmoush", "403": "S\u00e1vio", "455": "Tonali", "494": "Vicario", "495": "Austin", "496": "Kinsky", "497": "Dubravka", "498": "Senesi", "499": "Pedro Porro", "500": "Romero", "502": "Robertson", "503": "Van de Ven", "505": "Spence", "506": "Udogie", "507": "Phillips", "508": "Davies", "509": "Byfield", "510": "Rowswell", "511": "Souza", "512": "Kudus", "513": "Xavi", "514": "Tel", "515": "Maddison", "516": "Bentancur", "517": "Odobert", "518": "P.M.Sarr", "519": "Gallagher", "520": "Bergvall", "521": "Kulusevski", "522": "Gray", "523": "Moore", "524": "Olusesi", "525": "Fernandes", "526": "Solanke", "527": "Richarlison", "528": "Scarlett", "578": "Mudryk", "601": "Williams-Barnett", "501": "Danso", "529": "Roefs", "530": "Patterson", "531": "Ellborg", "532": "Ballard", "533": "Mukiele", "534": "Hume", "535": "Alderete", "536": "Reinildo", "537": "Seelt", "538": "Hjelde", "539": "O'Nien", "540": "Masuaku", "541": "Meunier", "542": "E.Le F\u00e9e", "543": "Diarra", "544": "Xhaka", "545": "Sadiki", "546": "Adingra", "547": "Mundle", "548": "Rigg", "549": "Talbi", "550": "Jocelin.T", "551": "N.Angulo", "552": "Brobbey", "553": "Isidor", "612": "Methalie", "613": "Ahoka", "646": "Fofana", "651": "J.Angulo"};
 const TRANSFER_RECS = [];
@@ -20647,7 +20667,7 @@ async function _apexBuildFreshCheck(isBoot) {
     banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999;' +
       'background:#0E6B4F;color:#fff;padding:11px 18px;text-align:center;' +
       'font-family:inherit;font-size:0.95rem;font-weight:600;' +
-      'box-shadow:0 2px 10px rgba(0,0,0,.4);';
+      'box-shadow:none;';
     banner.innerHTML = 'Fresh numbers just landed — this tab is on an older build. ' +
       '<button onclick="_apexBuildGo(' + liveTs + ')" style="margin-left:12px;background:#fff;color:#0E6B4F;' +
       'border:none;padding:6px 14px;border-radius:6px;font-weight:700;cursor:pointer;">Refresh</button>';
@@ -20716,7 +20736,7 @@ async function _apexStalePoolCheck() {
         _b.id = 'apex-archive-banner';
         _b.style.cssText = 'background:#0c2a22;color:#eaf5f0;padding:10px 16px;'
           + 'font:600 14px/1.45 system-ui,sans-serif;text-align:center;'
-          + 'border-bottom:2px solid #1D9E75;';
+          + 'border-bottom:2px solid #0F6E56;';
         _b.textContent = 'ARCHIVE — this is the GW' + (_A.gw || '?')
           + ' page exactly as it stood '
           + (_A.hours_before_deadline != null
@@ -20791,7 +20811,7 @@ async function _apexStalePoolCheck() {
       banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999;' +
         'background:#b91c1c;color:#fff;padding:11px 18px;text-align:center;' +
         'font-family:inherit;font-size:0.95rem;font-weight:600;' +
-        'box-shadow:0 2px 10px rgba(0,0,0,.4);';
+        'box-shadow:none;';
       // INSERTED APEX_FIX_AUG04K_STALE_BANNER_COPY (2026-08-04, Marcus): calm,
       // launch-appropriate copy — the mechanism, GW numbers and the reload
       // affordance stay; the alarm framing (and alarm red) goes. Fires between
@@ -21003,9 +21023,9 @@ function initLeagueDataView() {
       const dr = Math.max(0, 100 - hw - aw);
       return `<tr>` + td(`<b>${f.home}</b>`, 'right') +
         td(`<div style="display:flex;height:12px;border-radius:6px;overflow:hidden;min-width:150px;">` +
-           `<div style="width:${hw}%;background:var(--accent,#1D9E75);"></div>` +
+           `<div style="width:${hw}%;background:var(--accent,#0F6E56);"></div>` +
            `<div style="width:${dr}%;background:#C9C6BA;"></div>` +
-           `<div style="width:${aw}%;background:#D85A30;"></div></div>` +
+           `<div style="width:${aw}%;background:#B4453A;"></div></div>` +
            `<div style="display:flex;justify-content:space-between;font-size:.68rem;color:var(--muted);margin-top:2px;"><span>${hw}%</span><span>draw ${dr}%</span><span>${aw}%</span></div>`, 'center') +
         td(`<b>${f.away}</b>`) + `</tr>`;
     }).join('');
@@ -21016,7 +21036,7 @@ function initLeagueDataView() {
   if (ratings.length) {
     const rows = ratings.map(r => `<tr>` + td(r.rank, 'right') + td(`<b>${r.team}</b>`) +
       td((+r.attack).toFixed(2), 'right') + td((+r.defence).toFixed(2), 'right') +
-      td(`<b>${(r.overall >= 0 ? '+' : '') + (+r.overall).toFixed(2)}</b>`, 'right', r.overall >= 0 ? 'color:var(--accent,#1D9E75);' : 'color:#D85A30;') + `</tr>`).join('');
+      td(`<b>${(r.overall >= 0 ? '+' : '') + (+r.overall).toFixed(2)}</b>`, 'right', r.overall >= 0 ? 'color:var(--accent,#0F6E56);' : 'color:#B4453A;') + `</tr>`).join('');
     html += card('Team strength ratings', 'Apex attack / defence ratings \u2014 goals expected for and against vs an average side. Higher attack good, lower defence good.',
       `<table style="width:100%;border-collapse:collapse;"><thead><tr>${th('#', 'right')}${th('Team')}${th('Attack', 'right')}${th('Defence', 'right')}${th('Overall', 'right')}</tr></thead><tbody>${rows}</tbody></table>`);
   }
@@ -21356,10 +21376,10 @@ function toggleLeagueView(mode) {
 }
 
 function _winColor(pct) {
-  if (pct >= 50) return '#22c55e';
+  if (pct >= 50) return '#1D9E75';
   if (pct >= 25) return '#84cc16';
-  if (pct >= 10) return '#1D9E75';
-  return '#64748b';
+  if (pct >= 10) return '#0F6E56';
+  return '#6B7671';
 }
 
 function _chipClass(c) {
@@ -21497,7 +21517,7 @@ function renderLeagueTable(data) {
   if (you && Object.keys(yourCA).length > 0) {
     let items = Object.entries(yourCA).map(([chip, info]) => {
       const gwStr = info.gw ? `GW${info.gw}` : 'any';
-      return `<span class="lg-chip ${_chipClass(chip)}">${chip}</span> ${gwStr} <span style="color:var(--accent,#1D9E75);">+${info.value}</span>`;
+      return `<span class="lg-chip ${_chipClass(chip)}">${chip}</span> ${gwStr} <span style="color:var(--accent,#0F6E56);">+${info.value}</span>`;
     }).join(' &nbsp;&middot;&nbsp; ');
     chipBody.innerHTML = `<div style="font-size:.85rem;line-height:2;">${items}</div>`;
     document.getElementById('league-chip-detail').style.display = 'block';
@@ -21561,7 +21581,7 @@ async function runLeagueSim() {
     if (!_osNote) {
       _osNote = document.createElement('div');
       _osNote.id = 'league-offseason-note';
-      _osNote.style.cssText = 'background:rgba(29,158,117,0.08);border:1px solid rgba(29,158,117,0.35);border-radius:10px;padding:10px 14px;margin:10px 0;font-size:.85rem;';
+      _osNote.style.cssText = 'background:rgba(15,110,86,0.08);border:1px solid rgba(15,110,86,0.35);border-radius:10px;padding:10px 14px;margin:10px 0;font-size:.85rem;';
       errDiv.parentNode.insertBefore(_osNote, errDiv);
     }
     _osNote.textContent = 'Off-season demo — simulated on final 2025/26 squads. Live projections return for 2026/27 GW1.';
@@ -21917,8 +21937,8 @@ function _apexOwnTag(p) {
     const own = (typeof pd.own === 'number') ? pd.own : parseFloat(pd.own);
     if (!isFinite(own)) return '';
     let tag = '', color = 'var(--muted)', ttl = 'How many FPL managers own this player';
-    if (own <= _APEX_DIFF_OWN_MAX)          { tag = ' 💎'; color = '#16a34a'; ttl = 'Differential — few rivals own him: same points, bigger rank swing'; }
-    else if (own >= _APEX_TEMPLATE_OWN_MIN) { tag = ' 🛡'; color = '#2563eb'; ttl = 'Template — most rivals own him: safe, protects your rank'; }
+    if (own <= _APEX_DIFF_OWN_MAX)          { tag = ' <i class=apex-ic data-i=gem></i>'; color = '#1D9E75'; ttl = 'Differential — few rivals own him: same points, bigger rank swing'; }
+    else if (own >= _APEX_TEMPLATE_OWN_MIN) { tag = ' <i class=apex-ic data-i=shield></i>'; color = '#3A6B8F'; ttl = 'Template — most rivals own him: safe, protects your rank'; }
     // UX pass 2026-07-07: say what the % IS — a bare "13.7%" was the second-most
     // hit mystery number in the child-test walkthrough. v2 same day: compact +
     // nowrap + smaller font — the longer "owned by" phrasing wrapped every
@@ -23657,7 +23677,7 @@ function _apexConviction(t, idx) {
   } catch (_e) { return null; }
 }
 function _apexDecisionCardHtml(t, c) {
-  const COL = { teal: ['#E1F5EE', '#04342C', '#1D9E75'],
+  const COL = { teal: ['#E1F5EE', '#04342C', '#0F6E56'],
                 amber: ['#FAEEDA', '#412402', '#EF9F27'],
                 purple: ['#EEEDFE', '#26215C', '#AFA9EC'] };
   const cc = COL[c.color] || COL.teal;
@@ -23735,7 +23755,7 @@ function _apexSimCached(xi, capId, idx, n, bench, vcId) {
 // left, four stats stacked and right-aligned, a vertical rule standing in the
 // curve, ticks along the bottom, download / help buttons down the left edge.
 // Three deliberate departures from that mock:
-//   1. the product's own green ramp (#1D9E75), never the rival's orange —
+//   1. the product's own green ramp (#0F6E56), never the rival's orange —
 //      that was only in the mock so the two could be compared like for like;
 //   2. the rule is the MEDIAN and says so. The rival's rule is a crowd
 //      average. Nobody has played GW1, so we do not have one and will not
@@ -23844,7 +23864,7 @@ function _apexOptDHtml(d, gwLabel, headlineE) {
      + ' simulated score distribution. Mean ' + d.mean.toFixed(1) + ', median ' + d.median.toFixed(1)
      + ' points. ' + 'Middle 80% of weeks, ' + d.floor.toFixed(1) + ' to ' + d.ceiling.toFixed(1) + '.' + '">';
   // APEX_FIX_AUG07J_ODDS: the pre-option-D hump's own paint, which is what Marcus asked
-  // for back — rgba(29,158,117,.14) fill under a .42 stroke at 1.5. Same green as
+  // for back — rgba(15,110,86,.14) fill under a .42 stroke at 1.5. Same green as
   // --apexd-g5, just carried at the old weight.
   // ═══ APEX_POLISH_v1 (2026-08-22) ═════════════════════════════════════════
   // The strip below this chart prints three figures - the median, the 90th and
@@ -23859,10 +23879,10 @@ function _apexOptDHtml(d, gwLabel, headlineE) {
   var _uid = 'aog' + String(gwLabel || 'gw').replace(/[^A-Za-z0-9]/g, '')
            + Math.round((d.mean || 0) * 10);
   if (_pol) s += '<defs><linearGradient id="' + _uid + '" x1="0" y1="0" x2="0" y2="1">'
-     + '<stop offset="0" stop-color="#1D9E75" stop-opacity="0.26"/>'
-     + '<stop offset="1" stop-color="#1D9E75" stop-opacity="0.05"/>'
+     + '<stop offset="0" stop-color="#0F6E56" stop-opacity="0.26"/>'
+     + '<stop offset="1" stop-color="#0F6E56" stop-opacity="0.05"/>'
      + '</linearGradient><clipPath id="' + _uid + 'c"><path d="' + path + ' Z"/></clipPath></defs>';
-  s += '<path d="' + path + ' Z" fill="' + (_pol ? 'url(#' + _uid + ')' : '#1D9E75') + '"'
+  s += '<path d="' + path + ' Z" fill="' + (_pol ? 'url(#' + _uid + ')' : '#0F6E56') + '"'
      + (_pol ? '' : ' fill-opacity="0.14"') + '/>';
   // the two 1-in-10 tails, CLIPPED to the area under the curve so they read as
   // part of the shape rather than as two rectangles laid over it
@@ -23875,18 +23895,18 @@ function _apexOptDHtml(d, gwLabel, headlineE) {
      // tail detached from the curve and floated in open space around -30.
      + '<rect x="' + ml.toFixed(1) + '" y="0" width="'
      + Math.max(0, x(d.floor) - ml).toFixed(1) + '" height="' + H
-     + '" fill="#1D9E75" fill-opacity="0.07"/>'
+     + '" fill="#0F6E56" fill-opacity="0.07"/>'
      + '<rect x="' + x(d.ceiling).toFixed(1) + '" y="0" width="'
      + Math.max(0, (W - mr) - x(d.ceiling)).toFixed(1) + '" height="' + H
-     + '" fill="#1D9E75" fill-opacity="0.07"/></g>';
+     + '" fill="#0F6E56" fill-opacity="0.07"/></g>';
   // the mean - the number in the pill - drawn from the curve down to the base
   var _mi = Math.max(0, Math.min(NB - 1,
               Math.round((d.mean - lo) / Math.max(1e-9, hi - lo) * NB - 0.5)));
   if (_pol) s += '<line x1="' + x(d.mean).toFixed(1) + '" y1="' + y(sm[_mi]).toFixed(1)
      + '" x2="' + x(d.mean).toFixed(1) + '" y2="' + (H - mb)
-     + '" stroke="#1D9E75" stroke-width="1.5" stroke-opacity="0.5"'
+     + '" stroke="#0F6E56" stroke-width="1.5" stroke-opacity="0.5"'
      + ' stroke-dasharray="3 3" vector-effect="non-scaling-stroke"/>';
-  s += '<path d="' + path + '" fill="none" stroke="#1D9E75" stroke-opacity="'
+  s += '<path d="' + path + '" fill="none" stroke="#0F6E56" stroke-opacity="'
      + (_pol ? '0.62' : '0.42') + '" stroke-width="1.5" stroke-linejoin="round"'
      + ' vector-effect="non-scaling-stroke"/>';
   // APEX_FIX_AUG07J_ODDS: baseline, axis ticks and the rotated median rule all removed.
@@ -24263,8 +24283,8 @@ function _renderHeroSparkline() {
     html +=   '<div class="va-range-head"><span class="va-range-title">' + gwLabel + ' range · ' + floor.toFixed(1) + '–' + ceiling.toFixed(1) + '</span><span class="va-range-pill">Live</span></div>';
     html +=   '<div class="va-range-plot">';
     html +=     '<svg class="va-range-svg" viewBox="0 0 360 80" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">';
-    html +=       '<path d="' + hump + ' L360,74 L0,74 Z" fill="#1D9E75" fill-opacity="0.14"/>';
-    html +=       '<path d="' + hump + '" fill="none" stroke="#1D9E75" stroke-opacity="0.42" stroke-width="1.5"/>';
+    html +=       '<path d="' + hump + ' L360,74 L0,74 Z" fill="#0F6E56" fill-opacity="0.14"/>';
+    html +=       '<path d="' + hump + '" fill="none" stroke="#0F6E56" stroke-opacity="0.42" stroke-width="1.5"/>';
     html +=     '</svg>';
     html +=     '<div class="va-range-track"><span class="va-range-dot" style="left:' + dotPct + '%"></span></div>';
     html +=   '</div>';
@@ -24764,7 +24784,7 @@ function _apexScrollDebug() {
     box.style.cssText = 'position:fixed;left:8px;bottom:8px;z-index:2147483647;'
       + 'background:#111;color:#0f0;font:12px/1.45 ui-monospace,Consolas,monospace;'
       + 'padding:10px 12px;border-radius:8px;max-width:min(900px,94vw);'
-      + 'white-space:pre-wrap;box-shadow:0 4px 20px rgba(0,0,0,.45);';
+      + 'white-space:pre-wrap;box-shadow:none;';
     box.textContent = out.join(LF);
     if (!box.parentNode) document.body.appendChild(box);
   } catch (_eSd) {}
@@ -24935,13 +24955,13 @@ function _apexBuildHorizonPicker() {
     wrap.style.cssText = 'display:inline-flex;align-items:center;align-self:center;'
       + 'gap:6px;line-height:1;'
       + (inNav ? 'margin-left:auto;padding:5px 10px;' : 'padding:10px 14px;')
-      + 'border:1px solid var(--border,#D9D7CC);border-radius:9px;'
+      + 'border:1px solid var(--border,#E4E8E4);border-radius:9px;'
       + 'background:var(--bg2,#fff);';
     const sel = document.createElement('select');
     sel.id = 'apex-hz-pick';
     sel.setAttribute('aria-label', 'Planning horizon in gameweeks');
     sel.style.cssText = 'border:none;background:transparent;font-family:inherit;'
-      + 'font-size:.78rem;font-weight:800;color:var(--text,#1E1E1A);cursor:pointer;outline:none;';
+      + 'font-size:.78rem;font-weight:800;color:var(--text,#16211D);cursor:pointer;outline:none;';
     for (let n = 1; n <= allowed; n++) {
       const o = document.createElement('option');
       o.value = String(n);
@@ -26082,7 +26102,7 @@ async function _apexResolveTreeVerdict(gwIdx) {
   if (!box) return;
   if (typeof _ppComputeOptions !== 'function' || typeof _ppInjectChipOptions !== 'function') return;
   try {
-    box.innerHTML = `<div style="margin:0 0 12px 0;padding:10px 14px;border-radius:12px;background:var(--bg2);border:1px dashed var(--border);font-size:.78rem;color:var(--muted);">🌳 Asking the plan-ahead tree…</div>`;
+    box.innerHTML = `<div style="margin:0 0 12px 0;padding:10px 14px;border-radius:12px;background:var(--bg2);border:1px dashed var(--border);font-size:.78rem;color:var(--muted);"><i class=apex-ic data-i=tree></i> Asking the plan-ahead tree…</div>`;
     const _tv = await _apexTreeBranch0(gwIdx);
     if (seq !== _apexVerdictSeq) return;   // a newer render owns the box
     if (!_tv) { box.innerHTML = ''; return; }
@@ -26099,9 +26119,9 @@ async function _apexResolveTreeVerdict(gwIdx) {
     const _rollOpt = _apexPathEdge.roll(options);
     const _edge = (o) => _apexPathEdge.vsRoll(o, options);
     let inner = '';
-    let borderCol = '#1D9E75';
+    let borderCol = '#0F6E56';
     if (top.type === 'none') {
-      borderCol = '#D85A30';
+      borderCol = '#B4453A';
       const bestMove = _apexPathEdge.bestMove(options);          // APEX_PATH_EDGE_ONE_SOURCE_v1
       const _bmEdge = _apexPathEdge.rollVsBest(top, options);
       // APEX_VERDICT_TIED_v1 (2026-08-23): when the margin is inside the
@@ -26129,7 +26149,7 @@ async function _apexResolveTreeVerdict(gwIdx) {
         ? _apexPathEdge.tieSay(top._withinNoise ? ' Roll wins on that basis.' : '')
         : (top._withinNoise ? ' The best move’s edge is inside model noise, so Roll wins.' : '');
       inner = `
-        <div style="font-weight:800;color:#D85A30;font-size:.92rem;margin-bottom:4px;">🌳 Tree verdict — Roll (bank the FT)</div>
+        <div style="font-weight:800;color:#B4453A;font-size:.92rem;margin-bottom:4px;"><i class=apex-ic data-i=tree></i> Tree verdict — Roll (bank the FT)</div>
         <div style="color:var(--muted);font-size:.8rem;">Rolling keeps the FT’s future value${vs}.${noise} Moves below beat the bar on their own 3-GW maths, but the tree ranks rolling above all of them this week.</div>`;
     } else if (top.type === 'one' || top.type === 'two') {
       const hitNote = (top.hitCost > 0) ? ` <span style="color:#ef4444;">(−${top.hitCost} hit priced in)</span>` : '';
@@ -26149,16 +26169,16 @@ async function _apexResolveTreeVerdict(gwIdx) {
         ? _apexPathEdge.tieSay(` · whole path level with rolling instead — ${_apexPathEdge.tieWhy(_edgeSt)}`)
         : (_edge(top) ? ` · whole path <strong style="color:var(--text);">${_edge(top)}</strong> vs rolling instead` : '');
       inner = `
-        <div style="font-weight:800;color:#0F6E56;font-size:.92rem;margin-bottom:4px;">🌳 Tree verdict — ${moveTxt}${hitNote}</div>
+        <div style="font-weight:800;color:#0F6E56;font-size:.92rem;margin-bottom:4px;"><i class=apex-ic data-i=tree></i> Tree verdict — ${moveTxt}${hitNote}</div>
         <div style="color:var(--muted);font-size:.8rem;"><strong style="color:var(--text);">${_own(top)}</strong> squad gain now${_edgeTxt} — the tree’s first branch on your live squad. Press <strong>Solve</strong> to make it.</div>`;
     } else if (top.type === 'chip') {
       const _cn = { WC: 'Wildcard', FH: 'Free Hit', BB: 'Bench Boost', TC: 'Triple Captain' };
       inner = `
-        <div style="font-weight:800;color:#0F6E56;font-size:.92rem;margin-bottom:4px;">🌳 Tree verdict — play the ${_cn[top.chipType] || top.chipType} this week</div>
+        <div style="font-weight:800;color:#0F6E56;font-size:.92rem;margin-bottom:4px;"><i class=apex-ic data-i=tree></i> Tree verdict — play the ${_cn[top.chipType] || top.chipType} this week</div>
         <div style="color:var(--muted);font-size:.8rem;">Worth <strong style="color:var(--text);">${_own(top)}</strong> on your live squad this week — the tree’s first branch. Press <strong>Solve</strong> to play it (nothing is applied automatically).</div>`;
     } else if (top.type === 'build') {
       inner = `
-        <div style="font-weight:800;color:#0F6E56;font-size:.92rem;margin-bottom:4px;">🌳 Tree verdict — build the optimal 15</div>
+        <div style="font-weight:800;color:#0F6E56;font-size:.92rem;margin-bottom:4px;"><i class=apex-ic data-i=tree></i> Tree verdict — build the optimal 15</div>
         <div style="color:var(--muted);font-size:.8rem;">Unlimited free changes until the GW1 deadline — nothing to bank, nothing to pay.</div>`;
     } else {
       box.innerHTML = '';
@@ -26174,8 +26194,8 @@ async function _apexResolveTreeVerdict(gwIdx) {
           if (meta && !meta.querySelector('.apex-tree-badge')) {
             const b = document.createElement('span');
             b.className = 'apex-tree-badge';
-            b.style.cssText = 'background:#1D9E75;color:#000;font-size:.62rem;font-weight:700;padding:2px 6px;border-radius:4px;letter-spacing:0.4px;';
-            b.textContent = '🌳 TREE PICK';
+            b.style.cssText = 'background:#0F6E56;color:#000;font-size:.62rem;font-weight:700;padding:2px 6px;border-radius:4px;letter-spacing:0.4px;';
+            b.textContent = 'TREE PICK';
             meta.insertBefore(b, meta.firstChild);
           }
         } catch (_eBg) {}
@@ -26253,8 +26273,8 @@ function renderTransfers(recs) {
     } catch (_eS2) {}
     const _gwTxt = _planMeta.gwA === _planMeta.gwB ? `GW${_planMeta.gwA}` : `GW${_planMeta.gwA}–GW${_planMeta.gwB}`;
     section.innerHTML = `
-      <div class="section-title" style="margin-top:2rem;">⚡ Recommended Transfers</div>
-      <div style="background:var(--bg2);border:1px solid #1D9E75;border-radius:12px;padding:22px 24px;">
+      <div class="section-title" style="margin-top:2rem;"><i class=apex-ic data-i=bolt></i> Recommended Transfers</div>
+      <div style="background:var(--bg2);border:1px solid #0F6E56;border-radius:12px;padding:22px 24px;">
         <div style="font-weight:800;color:#0F6E56;font-size:1rem;margin-bottom:6px;">✓ Plan applied · ${_gwTxt}</div>${_staleTxt}
         <p style="color:var(--muted);font-size:.88rem;margin:0 0 4px;">
           ${_planMeta.transfers || 0} transfer${(_planMeta.transfers || 0) === 1 ? '' : 's'} committed${_planMeta.hits ? ` · ${_planMeta.hits} hit${_planMeta.hits > 1 ? 's' : ''}` : ''} · ${(_planMeta.totalPts || 0).toFixed ? _planMeta.totalPts.toFixed(1) : _planMeta.totalPts} pts.
@@ -26276,24 +26296,24 @@ function renderTransfers(recs) {
     const _emptyRolled  = !!_rollFTByGw[activeGwIdx];
     const _emptyPlanState = `
       <div style="margin:0 0 12px 0;padding:12px 14px;border-radius:12px;
-                  background:${_emptyRolled ? 'linear-gradient(135deg, rgba(216,90,48,0.10) 0%, var(--bg2) 100%)' : 'var(--bg2)'};
-                  border:1px solid ${_emptyRolled ? '#D85A30' : 'var(--border)'};
+                  background:${_emptyRolled ? 'rgba(216,90,48,0.10)' : 'var(--bg2)'};
+                  border:1px solid ${_emptyRolled ? '#B4453A' : 'var(--border)'};
                   display:flex;flex-wrap:wrap;align-items:center;gap:12px;font-size:.78rem;">
         <span style="font-weight:700;color:var(--text);">Transfer Plan:</span>
         <span style="color:var(--muted);">FTs available <strong style="color:var(--text);">${_ftLabel(activeGwIdx, _emptyFTs)}</strong></span>
         <span style="color:var(--muted);">Applied <strong style="color:var(--text);">${_emptyApplied}</strong></span>
         ${_emptyRolled
-          ? `<span style="color:#D85A30;font-weight:700;">🚫 FT Rolled — banks for GW${TEAM_META.gw_range[activeGwIdx + 1] || '?'}</span>`
+          ? `<span style="color:#B4453A;font-weight:700;"><i class=apex-ic data-i=ban></i> FT Rolled — banks for GW${TEAM_META.gw_range[activeGwIdx + 1] || '?'}</span>`
           : `<span style="color:var(--muted);">No transfers yet</span>`}
         <span style="flex:1;"></span>
         ${!_emptyRolled
-          ? `<button onclick="_rollFT()" style="background:#D85A30;color:#000;border:none;border-radius:6px;padding:6px 12px;font-size:.75rem;font-weight:700;cursor:pointer;">🚫 No Transfer (Roll FT)</button>`
+          ? `<button onclick="_rollFT()" style="background:#B4453A;color:#000;border:none;border-radius:6px;padding:6px 12px;font-size:.75rem;font-weight:700;cursor:pointer;"><i class=apex-ic data-i=ban></i> No Transfer (Roll FT)</button>`
           : `<button onclick="_resetTransferPlan()" style="background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:6px 12px;font-size:.75rem;font-weight:600;cursor:pointer;">↺ Reset Plan</button>`
         }
       </div>
     `;
     section.innerHTML = `
-      <div class="section-title" style="margin-top:2rem;">⚡ Recommended Transfers</div>
+      <div class="section-title" style="margin-top:2rem;"><i class=apex-ic data-i=bolt></i> Recommended Transfers</div>
       <div id="apex-tree-verdict"></div>
       ${_emptyPlanState}
       <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:24px;text-align:center;">
@@ -26307,7 +26327,7 @@ function renderTransfers(recs) {
               if ((_lbC.locked || 0) + (_lbC.banned || 0) > 0) {
                 return 'No moves available within your locks/exclusions (' +
                   (_lbC.locked || 0) + ' locked, ' + (_lbC.banned || 0) + ' excluded) — ' +
-                  'try freeing one up via the 🔒/🚫 buttons in the player pool.';
+                  'try freeing one up via the <i class=apex-ic data-i=lock></i>/<i class=apex-ic data-i=ban></i> buttons in the player pool.';
               }
             }
           } catch (_eLb) {}
@@ -26333,11 +26353,11 @@ function renderTransfers(recs) {
   const _hitPts       = _hitsCount * 4;   // positive number for display
   const _isRolled     = !!_rollFTByGw[activeGwIdx];
   const _planStateBg  = _isRolled
-        ? 'linear-gradient(135deg, rgba(216,90,48,0.10) 0%, var(--bg2) 100%)'
+        ? 'rgba(216,90,48,0.10)'
         : (_hitsCount > 0
-            ? 'linear-gradient(135deg, rgba(239,68,68,0.10) 0%, var(--bg2) 100%)'
-            : 'linear-gradient(135deg, rgba(34,197,94,0.06) 0%, var(--bg2) 100%)');
-  const _planStateBorder = _isRolled ? '#D85A30'
+            ? 'rgba(239,68,68,0.10)'
+            : 'rgba(29,158,117,0.06)');
+  const _planStateBorder = _isRolled ? '#B4453A'
                           : (_hitsCount > 0 ? '#ef4444' : 'var(--border)');
   const planStateCard = `
     <div style="margin:0 0 12px 0;padding:12px 14px;border-radius:12px;
@@ -26347,16 +26367,16 @@ function renderTransfers(recs) {
       <span style="color:var(--muted);">FTs available <strong style="color:var(--text);">${_ftLabel(activeGwIdx, _effFTs)}</strong></span>
       <span style="color:var(--muted);">Applied <strong style="color:var(--text);">${_appliedCount}</strong></span>
       ${_isRolled
-        ? `<span style="color:#D85A30;font-weight:700;">🚫 FT Rolled — banks for GW${TEAM_META.gw_range[activeGwIdx + 1] || '?'}</span>`
+        ? `<span style="color:#B4453A;font-weight:700;"><i class=apex-ic data-i=ban></i> FT Rolled — banks for GW${TEAM_META.gw_range[activeGwIdx + 1] || '?'}</span>`
         : (_hitsCount > 0
             ? `<span style="color:#ef4444;font-weight:700;">−${_hitPts} hit (${_hitsCount} excess)</span>`
             : (_appliedCount > 0
-                ? `<span style="color:#22c55e;font-weight:700;">No hit (free)</span>`
+                ? `<span style="color:#1D9E75;font-weight:700;">No hit (free)</span>`
                 : `<span style="color:var(--muted);">No transfers yet</span>`))
       }
       <span style="flex:1;"></span>
       ${!_isRolled && _appliedCount === 0
-        ? `<button onclick="_rollFT()" style="background:#D85A30;color:#000;border:none;border-radius:6px;padding:6px 12px;font-size:.75rem;font-weight:700;cursor:pointer;">🚫 No Transfer (Roll FT)</button>`
+        ? `<button onclick="_rollFT()" style="background:#B4453A;color:#000;border:none;border-radius:6px;padding:6px 12px;font-size:.75rem;font-weight:700;cursor:pointer;"><i class=apex-ic data-i=ban></i> No Transfer (Roll FT)</button>`
         : ''
       }
       ${(_isRolled || _appliedCount > 0)
@@ -26373,7 +26393,7 @@ function renderTransfers(recs) {
   // panel + Roll FT button + pill nav already give the user everything
   // needed to make the decision.
 
-  let html = `<div class="section-title" style="margin-top:2rem;">⚡ Recommended Transfers</div>`
+  let html = `<div class="section-title" style="margin-top:2rem;"><i class=apex-ic data-i=bolt></i> Recommended Transfers</div>`
     + `<div id="apex-tree-verdict"></div>`
     + planStateCard
     + `
@@ -26393,7 +26413,7 @@ function renderTransfers(recs) {
     const hitCost    = '';
     const badgeLabel = 'Free';
     const badgeCls   = 'badge';
-    const badgeStyle = 'background:#22c55e;color:#000;';
+    const badgeStyle = 'background:#1D9E75;color:#000;';
 
     const outImg = svgShirt(t.out_team, t.out_pos === 'GKP', 32);
     const inImg  = svgShirt(t.in_team,  t.in_pos  === 'GKP', 32);
@@ -26425,7 +26445,7 @@ function renderTransfers(recs) {
             <div class="swap-in">
               ${inImg}
               <div>
-                <div class="name" style="color:#22c55e;">${t.in_name}</div>
+                <div class="name" style="color:#1D9E75;">${t.in_name}</div>
                 <div style="display:flex;gap:6px;align-items:center;">
                   <span class="pos">${t.in_pos}</span>
                   <span class="team">${t.in_team}</span>
@@ -26439,11 +26459,11 @@ function renderTransfers(recs) {
         </div>
         <div class="transfer-meta">
           ${t.is_dgw_priority
-            ? `<span class="gain" style="color:#D85A30;">+${t.gw0_gain.toFixed(2)} GW${TEAM_META.gw_range[activeGwIdx]}</span>`
+            ? `<span class="gain" style="color:#B4453A;">+${t.gw0_gain.toFixed(2)} GW${TEAM_META.gw_range[activeGwIdx]}</span>`
             : `<span class="gain" title="Best-XI squad impact over the next 3 gameweeks, time-decayed — the same pricing every transfer surface uses">+${t.gain.toFixed(2)} xPts next 3 GWs (decayed)</span>`
           }
           ${t.is_dgw_priority
-            ? `<span style="background:#D85A30;color:#000;font-size:.62rem;font-weight:700;padding:2px 6px;border-radius:4px;letter-spacing:0.4px;">🔥 DGW SPIKE</span>`
+            ? `<span style="background:#B4453A;color:#000;font-size:.62rem;font-weight:700;padding:2px 6px;border-radius:4px;letter-spacing:0.4px;"><i class=apex-ic data-i=flame></i> DGW SPIKE</span>`
             : ''
           }
           ${hitCost}
@@ -26844,10 +26864,10 @@ function _qoActOnVerdict(best, recs, tv, activeGw, section, status) {
     const _qNoise = (_qBmSt && _qBmSt.tied)
       ? _apexPathEdge.tieSay(top._withinNoise ? ' Roll wins on that basis.' : '')
       : (top._withinNoise ? ' (Best move within model noise.)' : '');
-    _qoCard('#D85A30', '🌳 Tree verdict — Roll (bank the FT)',
+    _qoCard('#B4453A', '<i class=apex-ic data-i=tree></i> Tree verdict — Roll (bank the FT)',
       `Rolling keeps the FT’s future value${vs} — nothing applied.${_qNoise}`,
       `<div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
-         <button onclick="_rollFT()" style="background:#D85A30;color:#000;border:none;border-radius:6px;padding:6px 12px;font-size:.75rem;font-weight:700;cursor:pointer;">🚫 Roll FT</button>
+         <button onclick="_rollFT()" style="background:#B4453A;color:#000;border:none;border-radius:6px;padding:6px 12px;font-size:.75rem;font-weight:700;cursor:pointer;"><i class=apex-ic data-i=ban></i> Roll FT</button>
          <button onclick="_applyTransferRec(${best.in_id}, ${best.out_id})" style="background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:6px 12px;font-size:.75rem;font-weight:600;cursor:pointer;">Apply ${best.out_name} → ${best.in_name} anyway</button>
        </div>`);
     if (status) status.textContent = `Roll — the plan-ahead tree ranks banking the FT above every move for GW${activeGw}`;
@@ -26855,13 +26875,13 @@ function _qoActOnVerdict(best, recs, tv, activeGw, section, status) {
   }
   if (top && top.type === 'chip') {
     const _cnQ = { WC: 'Wildcard', FH: 'Free Hit', BB: 'Bench Boost', TC: 'Triple Captain' };
-    _qoCard('#1D9E75', `🌳 Tree verdict — play the ${_cnQ[top.chipType] || top.chipType} this week`,
+    _qoCard('#0F6E56', `<i class=apex-ic data-i=tree></i> Tree verdict — play the ${_cnQ[top.chipType] || top.chipType} this week`,
       `Worth <strong style="color:var(--text);">${_evTxt(top)}</strong> on your live squad — nothing applied. Press <strong>Solve</strong> to play it.`);
     if (status) status.textContent = `The tree ranks the ${_cnQ[top.chipType] || top.chipType} first for GW${activeGw} — press Solve to play it`;
     return;
   }
   if (top && top.type === 'two') {
-    _qoCard('#1D9E75', '🌳 Tree verdict — a 2-transfer plan',
+    _qoCard('#0F6E56', '<i class=apex-ic data-i=tree></i> Tree verdict — a 2-transfer plan',
       `${top.out.web_name} → ${top.in.web_name} · ${top.out2.web_name} → ${top.in2.web_name} (<strong style="color:var(--text);">${_evTxt(top)}</strong>${top.hitCost > 0 ? `, −${top.hitCost} hit priced in` : ''}) — a one-press button doesn’t commit two moves. Press <strong>Solve</strong> to make them.`);
     if (status) status.textContent = `The tree’s first branch is a 2-transfer plan for GW${activeGw} — press Solve to make it`;
     return;
@@ -26885,7 +26905,7 @@ function _qoActOnVerdict(best, recs, tv, activeGw, section, status) {
       const _qoEdgeTxt = (_qoSt && _qoSt.tied)
         ? _apexPathEdge.tieSay(`, path level with rolling (${_apexPathEdge.tieShort(_qoSt)})`)
         : (_qEdge(top) ? `, path ${_qEdge(top)} vs rolling` : '');
-      _qoCard('#22c55e', `✓ Optimized — ${top.out.web_name} → ${top.in.web_name}`,
+      _qoCard('#1D9E75', `✓ Optimized — ${top.out.web_name} → ${top.in.web_name}`,
         `The plan-ahead tree’s first branch (<strong style="color:var(--text);">${_evTxt(top)}</strong> squad gain now${_qoEdgeTxt}). ↺ Reset (squad view) undoes it.`);
       if (status) status.textContent = `Applied the tree’s pick for GW${activeGw}: ${top.out.web_name} → ${top.in.web_name}`;
       return;
@@ -26904,11 +26924,11 @@ function _qoActOnVerdict(best, recs, tv, activeGw, section, status) {
   if (section) {
     const resultCard = `
       <div id="optimize-result" style="margin:0 0 14px 0;padding:12px 16px;border-radius:12px;
-            background:linear-gradient(135deg, rgba(34,197,94,0.12) 0%, var(--bg2) 100%);
-            border:1px solid #22c55e;display:flex;flex-wrap:wrap;align-items:center;gap:12px;font-size:.85rem;">
-        <span style="font-weight:800;color:#22c55e;">✓ Optimized</span>
+            background:rgba(29,158,117,0.12);
+            border:1px solid #1D9E75;display:flex;flex-wrap:wrap;align-items:center;gap:12px;font-size:.85rem;">
+        <span style="font-weight:800;color:#1D9E75;">✓ Optimized</span>
         <span style="color:var(--text);">
-          <strong>${best.out_name}</strong> → <strong style="color:#22c55e;">${best.in_name}</strong>
+          <strong>${best.out_name}</strong> → <strong style="color:#1D9E75;">${best.in_name}</strong>
         </span>
         <span style="color:var(--muted);font-weight:700;">${_gainTxt}</span>
         <span style="flex:1;"></span>
@@ -27553,7 +27573,7 @@ function _renderRecoPreview() {
     // Blank canvas — picks are for a squad you have; you do not have one yet.
     if (typeof _apexBlankCanvasOn === 'function' && _apexBlankCanvasOn()) {
       _reco.innerHTML = '<div style="padding:12px 14px;font-size:.82rem;color:var(--muted);">'
-        + 'Press <b style="color:var(--accent,#1D9E75);">⚡ Optimise</b> to build your opening 15. '
+        + 'Press <b style="color:var(--accent,#0F6E56);"><i class=apex-ic data-i=bolt></i> Optimise</b> to build your opening 15. '
         + 'Before the GW1 deadline every change is free.</div>';
       _reco.style.display = 'block';
       return;
@@ -27564,7 +27584,7 @@ function _renderRecoPreview() {
     // withholds from Solve/Optimise/Transfers during the final hour.
     if (_apexDeadlineLockActive()) {
       _reco.innerHTML = '<div style="padding:10px 12px;font-size:.8rem;color:var(--muted);">' +
-        '🔒 Model picks return after the deadline — Apex members plan right up to kickoff.</div>';
+        '<i class=apex-ic data-i=lock></i> Model picks return after the deadline — Apex members plan right up to kickoff.</div>';
       return;
     }
     // Applied-plan boot gate (2026-06-11): the preview's load ladder (900ms)
@@ -27642,7 +27662,7 @@ function _renderRecoPreview() {
         if (!_vars || !_vars.length) {
           _reco.innerHTML = _g1head
             + '<div style="font-size:.8rem;color:var(--muted);">'
-            + '⚡ <a href="#" onclick="runSolve(); return false;" style="color:#1D9E75;font-weight:700;text-decoration:underline;">Build your opening 15 →</a>'
+            + '<i class=apex-ic data-i=bolt></i> <a href="#" onclick="runSolve(); return false;" style="color:#0F6E56;font-weight:700;text-decoration:underline;">Build your opening 15 →</a>'
             + ' · transfer picks return at GW2</div>';
           return;
         }
@@ -27801,7 +27821,7 @@ function _renderRecoPreview() {
           _h += '<div class="va-reco-row" style="display:flex;flex-wrap:wrap;row-gap:6px;align-items:center;'
               + (_isBest ? '' : 'opacity:.85;') + '">'
             + '<span class="va-reco-move"><b>' + v.label + '</b>'
-            + (_isBest ? ' <span style="font-size:.7em;color:#1D9E75;font-weight:800;">TOP xPTS</span>' : '')
+            + (_isBest ? ' <span style="font-size:.7em;color:#0F6E56;font-weight:800;">TOP xPTS</span>' : '')
             + '<span style="font-size:.78em;color:var(--muted);"> · £' + v.cost.toFixed(1) + 'm</span></span>'
             // APEX_FIX_AUG12B_ROWS_COVERFREE (2026-08-12): print the SAME
             // quantity the TOP xPTS badge ranks on (_rk = cover-free sum).
@@ -27816,7 +27836,7 @@ function _renderRecoPreview() {
             + '<span class="va-reco-gain">' + _rk(v).toFixed(1) + ' xPts to GW' + _lastGw + _apexChipNoteHtml(v) + '</span>'
             + '<button onclick="_apexUseGw1Squad(' + i + ')" '
             + 'style="margin-left:10px;flex:0 0 auto;max-width:100%;border:none;border-radius:6px;padding:6px 12px;font-size:.75rem;font-weight:800;cursor:pointer;'  /* INSERTED APEX_FIX_AUG04F_USE15_CLIP_BTN */
-            + (_isBest ? 'background:#1D9E75;color:#fff;' : 'background:transparent;color:var(--text);border:1px solid var(--border);')
+            + (_isBest ? 'background:#0F6E56;color:#fff;' : 'background:transparent;color:var(--text);border:1px solid var(--border);')
             + '">Use this 15</button>'
             + '</div>';
         });
@@ -27834,7 +27854,7 @@ function _renderRecoPreview() {
              + 'All three builds solved to the same 15 — the ownership split is too flat this early to separate them.</div>';
         }
         _h += '<div style="font-size:.8rem;color:var(--muted);margin-top:6px;">'
-           + '⚡ <a href="#" onclick="runSolve(); return false;" style="color:#1D9E75;font-weight:700;text-decoration:underline;">Open the tree to edit any of them →</a>'
+           + '<i class=apex-ic data-i=bolt></i> <a href="#" onclick="runSolve(); return false;" style="color:#0F6E56;font-weight:700;text-decoration:underline;">Open the tree to edit any of them →</a>'
            + ' · transfer picks return at GW2</div>';
         _reco.innerHTML = _h;
       })();
@@ -27897,9 +27917,9 @@ function _renderRecoPreview() {
           const _vn = _vf((top.netEv != null) ? top.netEv : (top.evGain || 0));
           const _vRoll = _apexPathEdge.roll(tv.options);
           const _vEdge = _apexPathEdge.vsRoll(top, tv.options);
-          let line = null, col = '#1D9E75';
+          let line = null, col = '#0F6E56';
           if (top.type === 'none') {
-            col = '#D85A30';
+            col = '#B4453A';
             const _vBm = _apexPathEdge.bestMove(tv.options);      // APEX_PATH_EDGE_ONE_SOURCE_v1
             const _vBmE = _apexPathEdge.rollVsBest(top, tv.options);
             // APEX_VERDICT_TIED_v1 (2026-08-23): the compact twin. This line
@@ -27913,7 +27933,7 @@ function _renderRecoPreview() {
             // the row is exactly "🌳 Tree verdict: Roll — bank the FT".
             const _vBmSt = _apexPathEdge.rollVsBestState(top, tv.options);
             const _vTied = !!(_vBmSt && _vBmSt.tied);
-            line = '🌳 Tree verdict: <b>Roll — bank the FT</b>'
+            line = '<i class=apex-ic data-i=tree></i> Tree verdict: <b>Roll — bank the FT</b>'
               + (_vTied
                   ? _apexPathEdge.tieSay(' (level with acting now — ' + _apexPathEdge.tieShort(_vBmSt) + ')')
                   : (_vBmE ? ' (path ' + _vBmE + ' over acting now)' : ''))
@@ -27929,14 +27949,14 @@ function _renderRecoPreview() {
               ? _apexPathEdge.tieSay(' · path level with rolling (' + _apexPathEdge.tieShort(_eSt) + ')')
               : (_vEdge ? (' · path ' + _vEdge + ' vs rolling') : '');
             line = _agree
-              ? '🌳 Tree agrees: <b>' + top.out.web_name + ' → ' + top.in.web_name + '</b> leads (' + _vn + ' now' + _eTxt + ')'
-              : '🌳 Tree verdict: <b>' + top.out.web_name + ' → ' + top.in.web_name + '</b> (' + _vn + ' now' + _eTxt + ') — a different first step than this list’s leader';
+              ? '<i class=apex-ic data-i=tree></i> Tree agrees: <b>' + top.out.web_name + ' → ' + top.in.web_name + '</b> leads (' + _vn + ' now' + _eTxt + ')'
+              : '<i class=apex-ic data-i=tree></i> Tree verdict: <b>' + top.out.web_name + ' → ' + top.in.web_name + '</b> (' + _vn + ' now' + _eTxt + ') — a different first step than this list’s leader';
           } else if (top.type === 'two') {
-            line = '🌳 Tree verdict: <b>' + top.out.web_name + ' → ' + top.in.web_name + ' · '
+            line = '<i class=apex-ic data-i=tree></i> Tree verdict: <b>' + top.out.web_name + ' → ' + top.in.web_name + ' · '
               + top.out2.web_name + ' → ' + top.in2.web_name + '</b> (' + _vn + ') — press Solve to make both';
           } else if (top.type === 'chip') {
             const _cnP = { WC: 'Wildcard', FH: 'Free Hit', BB: 'Bench Boost', TC: 'Triple Captain' };
-            line = '🌳 Tree verdict: <b>play the ' + (_cnP[top.chipType] || top.chipType) + '</b> this week (' + _vn + ')';
+            line = '<i class=apex-ic data-i=tree></i> Tree verdict: <b>play the ' + (_cnP[top.chipType] || top.chipType) + '</b> this week (' + _vn + ')';
           }
           if (!line) return;
           const _vd = document.createElement('div');
@@ -28171,7 +28191,7 @@ function _showChipSquadPanel(chipType, gw, squad, gwIdx, alreadyApplied, targetI
   const totalXp  = (xiXp + capXp).toFixed(1);
   const label    = chipType === 'WC'
     ? `🃏 WC GW${gw} — balanced squad for next ${TEAM_META.gw_range.length} GWs · Proj. ${totalXp} xPts this week`
-    : `🔄 FH GW${gw} — max XI for this week only · Proj. ${totalXp} xPts`;
+    : `<i class=apex-ic data-i=sync></i> FH GW${gw} — max XI for this week only · Proj. ${totalXp} xPts`;
   banner.textContent = label;
   banner.style.display = 'block';
 
@@ -28205,9 +28225,9 @@ function _showChipSquadPanel(chipType, gw, squad, gwIdx, alreadyApplied, targetI
       <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid var(--border);">
         <div style="font-weight:700;font-size:.95rem;">${chipType} Recommended Squad — GW${gw}</div>
         ${inReviewView ? '' : (alreadyApplied
-          ? `<span style="background:rgba(34,197,94,.15);color:#22c55e;border:1px solid #22c55e55;border-radius:7px;padding:8px 18px;font-weight:700;font-size:.85rem;">✓ Squad Applied</span>`
+          ? `<span style="background:rgba(29,158,117,.15);color:#1D9E75;border:1px solid #22c55e55;border-radius:7px;padding:8px 18px;font-weight:700;font-size:.85rem;">✓ Squad Applied</span>`
           : `<button onclick="_applyFullSquad(window._lastChipSquad, window._lastChipGwIdx)"
-              style="background:#22c55e;color:#000;border:none;border-radius:7px;padding:8px 18px;font-weight:700;font-size:.85rem;cursor:pointer;">
+              style="background:#1D9E75;color:#000;border:none;border-radius:7px;padding:8px 18px;font-weight:700;font-size:.85rem;cursor:pointer;">
               ✓ Apply Squad to Plan
              </button>`)
         }
@@ -28226,7 +28246,7 @@ function _showChipSquadPanel(chipType, gw, squad, gwIdx, alreadyApplied, targetI
     const isCap = result.cap && p.id === result.cap.id;
     const inMySquad = [..._xiPlayers, ..._benchPlayers].some(sq => sq.id === p.id);
     const btnCls = inMySquad
-      ? 'style="background:rgba(34,197,94,.15);color:#22c55e;border:1px solid #22c55e44;border-radius:5px;padding:3px 10px;font-size:.75rem;font-weight:600;cursor:default;"'
+      ? 'style="background:rgba(29,158,117,.15);color:#1D9E75;border:1px solid #22c55e44;border-radius:5px;padding:3px 10px;font-size:.75rem;font-weight:600;cursor:default;"'
       : `style="background:var(--accent);color:#000;border:none;border-radius:5px;padding:3px 10px;font-size:.75rem;font-weight:700;cursor:pointer;" onclick="_applyOneTransfer(${p.id}, window._lastChipSquad, window._lastChipGwIdx)"`;
     const btnLabel = inMySquad ? '✓ In squad' : 'Apply';
     html += `
@@ -28234,7 +28254,7 @@ function _showChipSquadPanel(chipType, gw, squad, gwIdx, alreadyApplied, targetI
         ${img}
         <div style="flex:1;">
           <span style="font-weight:600;">${p.web_name}</span>
-          ${isCap ? '<span style="background:#fbbf24;color:#000;font-size:.65rem;font-weight:700;padding:1px 5px;border-radius:3px;margin-left:4px;">C</span>' : ''}
+          ${isCap ? '<span style="background:#B07D2A;color:#000;font-size:.65rem;font-weight:700;padding:1px 5px;border-radius:3px;margin-left:4px;">C</span>' : ''}
           <span style="font-size:.72rem;color:var(--muted);margin-left:4px;">${p.team} · £${p.cost.toFixed(1)}m</span>
         </div>
         <span style="color:#15803d;font-weight:700;font-size:.85rem;min-width:38px;text-align:right;">${xp} xPts</span>
@@ -28251,8 +28271,8 @@ function _showChipSquadPanel(chipType, gw, squad, gwIdx, alreadyApplied, targetI
     const img = `<span style="opacity:.65;display:inline-flex;">${svgShirt(p.team, p.element_type === 1, 28)}</span>`;
     const inMySquad = [..._xiPlayers, ..._benchPlayers].some(sq => sq.id === p.id);
     const btnCls = inMySquad
-      ? 'style="background:rgba(34,197,94,.15);color:#22c55e;border:1px solid #22c55e44;border-radius:5px;padding:3px 10px;font-size:.75rem;font-weight:600;cursor:default;"'
-      : `style="background:#F1EFE8;color:var(--muted);border:1px solid var(--border);border-radius:5px;padding:3px 10px;font-size:.75rem;font-weight:600;cursor:pointer;" onclick="_applyOneTransfer(${p.id}, window._lastChipSquad, window._lastChipGwIdx)"`;
+      ? 'style="background:rgba(29,158,117,.15);color:#1D9E75;border:1px solid #22c55e44;border-radius:5px;padding:3px 10px;font-size:.75rem;font-weight:600;cursor:default;"'
+      : `style="background:#F4F5F3;color:var(--muted);border:1px solid var(--border);border-radius:5px;padding:3px 10px;font-size:.75rem;font-weight:600;cursor:pointer;" onclick="_applyOneTransfer(${p.id}, window._lastChipSquad, window._lastChipGwIdx)"`;
     const btnLabel = inMySquad ? '✓ In squad' : 'Apply';
     html += `
       <div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid rgba(0,0,0,.06);opacity:.75;">
@@ -35818,7 +35838,7 @@ function _apexChipPendingNote(label, plannerLoaded) {
         // APEX_CHIP_PENDING_PLACEMENT_v1: without the pitch nav the note used
         // to land at the page BOTTOM - honest but invisible. Pin it on top.
         n.style.cssText += 'position:fixed;top:8px;left:50%;transform:translateX(-50%);'
-          + 'z-index:9998;box-shadow:0 2px 10px rgba(0,0,0,.25);';
+          + 'z-index:9998;box-shadow:none;';
         document.body.appendChild(n);
       }
     }
@@ -35865,7 +35885,7 @@ function _apexPillResolve() {
           && typeof _apexBlankCanvasOn === 'function' && !_apexBlankCanvasOn()) {
         const _st = document.getElementById('solve-status');
         if (_st) _st.textContent = 'Chip plan changed — your squad is untouched. '
-          + 'Press 🛣 Solve to rebuild the 15 for it.';
+          + 'Press <i class=apex-ic data-i=road></i> Solve to rebuild the 15 for it.';
       }
     } catch (_e6) {}
   }, 350);
@@ -36637,15 +36657,15 @@ function _showOverrideModal(outId, apexInId, apexInXp, outXp, apexGain) {
       const rxp = _rolling(p);
       const isApex = p.id === apexInId;
       const isSel  = p.id === selectedId;
-      const apexTag = isApex ? `<span style="color:#1D9E75;font-size:.65rem;margin-left:4px;">APEX</span>` : '';
-      const bg = isSel ? 'background:rgba(29,158,117,0.12);' : '';
+      const apexTag = isApex ? `<span style="color:#0F6E56;font-size:.65rem;margin-left:4px;">APEX</span>` : '';
+      const bg = isSel ? 'background:rgba(15,110,86,0.12);' : '';
       return `
         <div onclick="window._setOverridePick(${p.id})"
              style="${bg}padding:8px 10px;cursor:pointer;border-radius:6px;display:flex;justify-content:space-between;align-items:center;font-size:.82rem;">
           <span><strong style="color:#e8e8f0;">${p.web_name}</strong>${apexTag}
-            <span style="color:#6b6b7b;font-size:.7rem;margin-left:6px;">£${(p.cost||0).toFixed(1)}m</span></span>
+            <span style="color:#6B7671;font-size:.7rem;margin-left:6px;">£${(p.cost||0).toFixed(1)}m</span></span>
           <span style="color:#9ca3af;font-variant-numeric:tabular-nums;font-size:.78rem;">
-            <span style="color:#6b6b7b;">GW${TEAM_META.gw_range[activeGwIdx]}: ${xp.toFixed(1)}</span>
+            <span style="color:#6B7671;">GW${TEAM_META.gw_range[activeGwIdx]}: ${xp.toFixed(1)}</span>
             &nbsp;·&nbsp;
             <strong style="color:#e8e8f0;">${_hzLbl}: ${rxp.toFixed(1)}</strong>
           </span>
@@ -36661,18 +36681,18 @@ function _showOverrideModal(outId, apexInId, apexInXp, outXp, apexGain) {
       </div>
       <input id="ovr-search" type="text" placeholder="Search a replacement…" autocomplete="off"
         oninput="window._renderOverrideModal()" autofocus
-        style="width:100%;background:#0c0c0f;border:1px solid #2a2a35;border-radius:6px;padding:8px 10px;color:#e8e8f0;font-family:inherit;font-size:.85rem;margin:14px 0 8px;outline:none;" />
+        style="width:100%;background:#16211D;border:1px solid #2a2a35;border-radius:6px;padding:8px 10px;color:#e8e8f0;font-family:inherit;font-size:.85rem;margin:14px 0 8px;outline:none;" />
       <div style="max-height:240px;overflow-y:auto;border:1px solid rgba(255,255,255,0.05);border-radius:6px;padding:4px;margin-bottom:14px;">
-        ${listHtml || '<div style="padding:14px;color:#6b6b7b;font-size:.8rem;text-align:center;">No matching players.</div>'}
+        ${listHtml || '<div style="padding:14px;color:#6B7671;font-size:.8rem;text-align:center;">No matching players.</div>'}
       </div>
       <div class="why-row"><span class="why-row-label">Apex pick</span><span class="why-row-val">${(apexP?.web_name || '?')} · ${_hzLbl} ${apexRolling > 0.05 ? apexRolling.toFixed(1) + ' xP' : '— (BGW)'}</span></div>
       <div class="why-row"><span class="why-row-label">Your pick</span><span class="why-row-val">${(sel?.web_name || '?')} · ${_hzLbl} ${selRolling > 0.05 ? selRolling.toFixed(1) + ' xP' : '— (BGW)'}</span></div>
-      <div class="why-row"><span class="why-row-label">${_hzLbl} EV delta</span><span class="why-row-val" style="color:${delta >= 0 ? '#22c55e' : '#f87171'};">${sign}${delta.toFixed(2)} xP</span></div>
+      <div class="why-row"><span class="why-row-label">${_hzLbl} EV delta</span><span class="why-row-val" style="color:${delta >= 0 ? '#1D9E75' : '#f87171'};">${sign}${delta.toFixed(2)} xP</span></div>
       <div class="why-foot">Apex optimises across the ${_hzLbl} horizon (GW${TEAM_META.gw_range[activeGwIdx || 0]}–${TEAM_META.gw_range[(activeGwIdx || 0) + _hzN - 1]}), not just one GW, and later weeks count for slightly less because they are less certain. A player with a great single GW but weak follow-ups can lose to a steadier ${_hzLbl} total. Saving locks your call. After the GWs finish you'll see who was right.</div>
       <div style="display:flex;gap:8px;margin-top:14px;">
         <button onclick="window._cancelOverride()" style="flex:1;background:transparent;color:#9ca3af;border:1px solid #2a2a35;border-radius:8px;padding:10px;font-family:inherit;font-size:.8rem;font-weight:600;cursor:pointer;text-transform:uppercase;letter-spacing:0.4px;">Cancel</button>
         ${(selectedId === apexInId || candidates.length === 0)
-          ? `<button disabled title="Pick a different player to save your call" style="flex:1;background:#2a2a35;color:#6b6b7b;border:none;border-radius:8px;padding:10px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.8rem;font-weight:700;cursor:not-allowed;text-transform:uppercase;letter-spacing:0.4px;opacity:0.6;">${candidates.length === 0 ? 'No options' : 'Same as Apex'}</button>`
+          ? `<button disabled title="Pick a different player to save your call" style="flex:1;background:#2a2a35;color:#6B7671;border:none;border-radius:8px;padding:10px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.8rem;font-weight:700;cursor:not-allowed;text-transform:uppercase;letter-spacing:0.4px;opacity:0.6;">${candidates.length === 0 ? 'No options' : 'Same as Apex'}</button>`
           : `<button onclick="window._commitOverride(${outId}, ${apexInId}, ${apexInXp}, ${outXp}, ${apexGain})" class="why-modal-close" style="flex:1;margin:0;">Save my call</button>`
         }
       </div>
@@ -36747,7 +36767,7 @@ function _showOverrideModal(outId, apexInId, apexInXp, outXp, apexGain) {
     note.textContent = _swapped
       ? `Swapped: ${outP.web_name} → ${sel.web_name}. Tap My Calls bottom-left to revert.`
       : `Saved your call: ${sel.web_name} instead of ${_apexName}.`;
-    note.style.cssText = 'position:fixed;top:24px;left:50%;transform:translateX(-50%);background:#131318;color:#e8e8f0;border:1px solid #2a2a35;padding:10px 16px;border-radius:8px;font-family:JetBrains Mono,monospace;font-size:.8rem;z-index:99999;box-shadow:0 12px 32px rgba(0,0,0,.4);max-width:90vw;text-align:center;';
+    note.style.cssText = 'position:fixed;top:24px;left:50%;transform:translateX(-50%);background:#131318;color:#e8e8f0;border:1px solid #2a2a35;padding:10px 16px;border-radius:8px;font-family:JetBrains Mono,monospace;font-size:.8rem;z-index:99999;box-shadow:none;max-width:90vw;text-align:center;';
     document.body.appendChild(note);
     setTimeout(() => note.remove(), 4500);
   };
@@ -36781,16 +36801,16 @@ function _renderOverrideBadge() {
     badge = document.createElement('div');
     badge.id = 'override-scoreboard-badge';
     badge.style.cssText = 'position:fixed;bottom:22px;left:22px;z-index:9000;'
-      + 'background:linear-gradient(135deg,#131318 0%,#1a1a22 100%);'
+      + 'background:#131318;'
       + 'border:1px solid #2a2a35;border-radius:14px;padding:14px 20px;'
       + "font-family:'Plus Jakarta Sans',sans-serif;color:#c8c8d0;"
-      + 'cursor:pointer;box-shadow:0 12px 32px rgba(0,0,0,.5);user-select:none;'
+      + 'cursor:pointer;box-shadow:none;user-select:none;'
       + 'min-width:220px;transition:transform 0.18s ease, box-shadow 0.18s ease;';
     badge.title = 'Click to view your full scoreboard';
     badge.onclick = window._showOverrideScoreboard;
     badge.onmouseenter = () => {
       badge.style.transform = 'translateY(-2px)';
-      badge.style.boxShadow = '0 16px 40px rgba(29,158,117,.18), 0 12px 32px rgba(0,0,0,.5)';
+      badge.style.boxShadow = '0 16px 40px rgba(15,110,86,.18), 0 12px 32px rgba(0,0,0,.5)';
     };
     badge.onmouseleave = () => {
       badge.style.transform = 'translateY(0)';
@@ -36804,26 +36824,26 @@ function _renderOverrideBadge() {
   }
   badge.style.display = 'block';
   const sign = totalDelta >= 0 ? '+' : '';
-  const colour = totalDelta >= 0 ? '#22c55e' : '#f87171';
+  const colour = totalDelta >= 0 ? '#1D9E75' : '#f87171';
   const pending = overrides.length - settled.length;
   // Headline depends on what's available. Pre-settle: show count + pending.
   // Post-settle: lead with W-L plus the running points delta.
   if (settled.length === 0) {
     badge.innerHTML = `
-      <div style="font-size:.7rem;color:#6b6b7b;text-transform:uppercase;letter-spacing:.12em;font-weight:600;margin-bottom:6px;">My Calls vs Apex</div>
+      <div style="font-size:.7rem;color:#6B7671;text-transform:uppercase;letter-spacing:.12em;font-weight:600;margin-bottom:6px;">My Calls vs Apex</div>
       <div style="display:flex;align-items:baseline;gap:10px;">
-        <span style="font-size:1.9rem;font-weight:700;color:#1D9E75;line-height:1;font-family:'JetBrains Mono',monospace;">${overrides.length}</span>
+        <span style="font-size:1.9rem;font-weight:700;color:#0F6E56;line-height:1;font-family:'JetBrains Mono',monospace;">${overrides.length}</span>
         <span style="font-size:.78rem;color:#9ca3af;">override${overrides.length === 1 ? '' : 's'} · ${pending} pending</span>
       </div>
-      <div style="font-size:.7rem;color:#6b6b7b;margin-top:6px;">Click for scoreboard →</div>`;
+      <div style="font-size:.7rem;color:#6B7671;margin-top:6px;">Click for scoreboard →</div>`;
   } else {
     badge.innerHTML = `
-      <div style="font-size:.7rem;color:#6b6b7b;text-transform:uppercase;letter-spacing:.12em;font-weight:600;margin-bottom:6px;">My Calls vs Apex</div>
+      <div style="font-size:.7rem;color:#6B7671;text-transform:uppercase;letter-spacing:.12em;font-weight:600;margin-bottom:6px;">My Calls vs Apex</div>
       <div style="display:flex;align-items:baseline;gap:10px;">
-        <span style="font-size:1.9rem;font-weight:700;color:#e8e8f0;line-height:1;font-family:'JetBrains Mono',monospace;">${wins}<span style="color:#6b6b7b;">-</span>${losses}</span>
+        <span style="font-size:1.9rem;font-weight:700;color:#e8e8f0;line-height:1;font-family:'JetBrains Mono',monospace;">${wins}<span style="color:#6B7671;">-</span>${losses}</span>
         <span style="font-size:1.05rem;font-weight:600;color:${colour};font-family:'JetBrains Mono',monospace;">${sign}${totalDelta.toFixed(1)}</span>
       </div>
-      <div style="font-size:.7rem;color:#6b6b7b;margin-top:6px;">${settled.length} settled${pending ? ' · ' + pending + ' pending' : ''} · click for detail →</div>`;
+      <div style="font-size:.7rem;color:#6B7671;margin-top:6px;">${settled.length} settled${pending ? ' · ' + pending + ' pending' : ''} · click for detail →</div>`;
   }
 }
 window._renderOverrideBadge = _renderOverrideBadge;
@@ -36837,9 +36857,9 @@ function _showOverrideScoreboard() {
   backdrop.className = 'why-modal-backdrop';
 
   const rowsHtml = overrides.length === 0
-    ? '<div style="padding:24px;text-align:center;color:#6b6b7b;font-size:.85rem;">No overrides yet. Click "I disagree" on any transfer recommendation to start tracking your gut vs Apex.</div>'
+    ? '<div style="padding:24px;text-align:center;color:#6B7671;font-size:.85rem;">No overrides yet. Click "I disagree" on any transfer recommendation to start tracking your gut vs Apex.</div>'
     : overrides.slice().reverse().map(o => {
-        const colour = o.settled ? ((o.actual_delta || 0) >= 0 ? '#22c55e' : '#f87171') : '#9ca3af';
+        const colour = o.settled ? ((o.actual_delta || 0) >= 0 ? '#1D9E75' : '#f87171') : '#9ca3af';
         const status = o.retracted
           ? 'retracted · doesn\'t count'
           : (o.settled
@@ -36848,13 +36868,13 @@ function _showOverrideScoreboard() {
         const lockTag = o.retracted
           ? `<span style="background:rgba(107,114,126,0.18);color:#9ca3af;font-size:.6rem;font-weight:700;padding:2px 6px;border-radius:4px;letter-spacing:.05em;margin-left:6px;">↶ RETRACTED</span>`
           : (o.locked
-              ? `<span style="background:rgba(29,158,117,0.18);color:#1D9E75;font-size:.6rem;font-weight:700;padding:2px 6px;border-radius:4px;letter-spacing:.05em;margin-left:6px;">🔒 LOCKED</span>`
-              : `<span style="color:#D85A30;font-size:.62rem;margin-left:6px;">editable</span>`);
+              ? `<span style="background:rgba(15,110,86,0.18);color:#0F6E56;font-size:.6rem;font-weight:700;padding:2px 6px;border-radius:4px;letter-spacing:.05em;margin-left:6px;"><i class=apex-ic data-i=lock></i> LOCKED</span>`
+              : `<span style="color:#B4453A;font-size:.62rem;margin-left:6px;">editable</span>`);
         // Revert button shown only for unlocked, non-retracted, swapped
         // records — i.e. cases where there's an actual squad mutation to undo.
         const revertBtnHtml = (!o.locked && !o.retracted && o.swapped)
           ? `<button onclick="window._revertOverride(${o.ts})"
-              style="flex:1;background:transparent;color:#fbbf24;border:1px solid rgba(251,191,36,0.4);border-radius:5px;padding:5px 10px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.7rem;font-weight:600;cursor:pointer;text-transform:uppercase;letter-spacing:0.05em;">
+              style="flex:1;background:transparent;color:#B07D2A;border:1px solid rgba(176,125,42,0.4);border-radius:5px;padding:5px 10px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.7rem;font-weight:600;cursor:pointer;text-transform:uppercase;letter-spacing:0.05em;">
               ↶ Revert
             </button>`
           : '';
@@ -36875,11 +36895,11 @@ function _showOverrideScoreboard() {
         // override), the modal saved Apex's "pick" as keep-this-player. Show
         // friendlier copy in that case.
         const _apexLine = (o.apex_in_id === o.out_id)
-          ? `Apex says: <strong style="color:#1D9E75;">keep ${o.out_name}</strong>`
-          : `Apex picked <strong style="color:#1D9E75;">${o.apex_in_name}</strong> (+${(o.apex_gain||0).toFixed(1)})`;
+          ? `Apex says: <strong style="color:#0F6E56;">keep ${o.out_name}</strong>`
+          : `Apex picked <strong style="color:#0F6E56;">${o.apex_in_name}</strong> (+${(o.apex_gain||0).toFixed(1)})`;
         return `
           <div style="padding:10px 12px;border-top:1px solid rgba(255,255,255,0.05);font-size:.8rem;${(o.locked || o.retracted) ? '' : 'opacity:0.85;'}${o.retracted ? 'opacity:0.5;' : ''}">
-            <div style="display:flex;justify-content:space-between;color:#6b6b7b;font-size:.7rem;margin-bottom:4px;">
+            <div style="display:flex;justify-content:space-between;color:#6B7671;font-size:.7rem;margin-bottom:4px;">
               <span>GW${o.gw}${lockTag}</span><span style="color:${colour};font-weight:600;">${status}</span>
             </div>
             <div style="color:#e8e8f0;">
@@ -36891,7 +36911,7 @@ function _showOverrideScoreboard() {
             <div style="color:#9ca3af;">
               You picked <strong style="color:#e8e8f0;">${o.user_in_name}</strong> (+${(o.user_gain||0).toFixed(1)})
             </div>
-            <div style="color:#6b6b7b;margin-top:4px;font-size:.7rem;">EV delta at save: ${(o.ev_delta||0) >= 0 ? '+' : ''}${(o.ev_delta||0).toFixed(2)} xP</div>
+            <div style="color:#6B7671;margin-top:4px;font-size:.7rem;">EV delta at save: ${(o.ev_delta||0) >= 0 ? '+' : ''}${(o.ev_delta||0).toFixed(2)} xP</div>
             ${actionsHtml}
           </div>`;
       }).join('');
@@ -37022,15 +37042,15 @@ window._showProfilePanel = function (pid) {
       ['13+', 1 - F(12.5)]
     ].map(([lab, pr]) => [lab, Math.max(0, Math.round(pr * 100))]);
     const mx = Math.max(...buckets.map(b => b[1]), 1);
-    const badgeCol = prof.cls === 'expl' ? ['#FBF0DA', '#B87A0E', '#E8A020'] : (prof.cls === 'steady' ? ['#E7F3EE', '#1D9E75', '#1D9E75'] : ['#F1EFE8', '#4A4840', '#D9D7CC']);
-    const glyph = prof.cls === 'expl' ? '⚡ EXPLOSIVE' : (prof.cls === 'steady' ? '🛡 STEADY' : '= BALANCED');
+    const badgeCol = prof.cls === 'expl' ? ['#FBF0DA', '#B87A0E', '#E8A020'] : (prof.cls === 'steady' ? ['#E7F3EE', '#0F6E56', '#0F6E56'] : ['#F4F5F3', '#4A4840', '#E4E8E4']);
+    const glyph = prof.cls === 'expl' ? '<i class=apex-ic data-i=bolt></i> EXPLOSIVE' : (prof.cls === 'steady' ? '<i class=apex-ic data-i=shield></i> STEADY' : '= BALANCED');
     const gwNo = TEAM_META.gw_range[activeGwIdx];
     const rows = buckets.map(([lab, pct]) => {
       const hot = (lab === '10–12' || lab === '13+');
       return `<div style="display:flex;align-items:center;gap:9px;margin:5px 0;">` +
         `<div style="width:52px;font-size:.7rem;color:#7A776C;font-weight:700;text-align:right;">${lab}</div>` +
-        `<div style="flex:1;background:#F1EFE8;border-radius:5px;height:14px;overflow:hidden;">` +
-        `<div style="height:100%;width:${Math.round(pct / mx * 100)}%;background:${hot ? '#E8A020' : '#1D9E75'};border-radius:5px;"></div></div>` +
+        `<div style="flex:1;background:#F4F5F3;border-radius:5px;height:14px;overflow:hidden;">` +
+        `<div style="height:100%;width:${Math.round(pct / mx * 100)}%;background:${hot ? '#E8A020' : '#0F6E56'};border-radius:5px;"></div></div>` +
         `<div style="width:38px;font-size:.72rem;color:#7A776C;font-variant-numeric:tabular-nums;">${pct}%</div></div>`;
     }).join('');
     const old = document.getElementById('apex-profile-overlay');
@@ -37039,7 +37059,7 @@ window._showProfilePanel = function (pid) {
     ov.id = 'apex-profile-overlay';
     ov.style.cssText = 'position:fixed;inset:0;background:rgba(20,20,18,0.45);z-index:99998;display:flex;align-items:center;justify-content:center;padding:18px;';
     ov.onclick = (e) => { if (e.target === ov) ov.remove(); };
-    ov.innerHTML = `<div style="background:#FFFFFF;border:1px solid #E5E2D8;border-radius:14px;padding:20px 22px;max-width:360px;width:100%;box-shadow:0 12px 34px rgba(0,0,0,0.25);font-family:'Plus Jakarta Sans',sans-serif;color:#1E1E1A;position:relative;">` +
+    ov.innerHTML = `<div style="background:#FFFFFF;border:1px solid #E5E2D8;border-radius:14px;padding:20px 22px;max-width:360px;width:100%;box-shadow:none;font-family:'Plus Jakarta Sans',sans-serif;color:#16211D;position:relative;">` +
       `<button onclick="document.getElementById('apex-profile-overlay').remove()" style="position:absolute;top:10px;right:12px;background:none;border:none;font-size:1.05rem;color:#7A776C;cursor:pointer;font-weight:700;">✕</button>` +
       `<div style="font-weight:800;font-size:1.08rem;">${p.web_name}</div>` +
       `<div style="color:#7A776C;font-size:.78rem;margin-top:1px;">${p.team || ''} · GW${gwNo} · ${prof.xp.toFixed(1)} xPts</div>` +
@@ -37059,7 +37079,7 @@ window._showProfilePanel = function (pid) {
       `<div style="flex:1;background:#FAF9F4;border:1px solid #E5E2D8;border-radius:10px;padding:9px 12px;"><div style="font-size:.62rem;color:#7A776C;text-transform:uppercase;letter-spacing:.05em;font-weight:700;">Haul chance (10+)</div><div style="font-size:1.2rem;font-weight:800;color:#B87A0E;">${prof.haul}%</div></div>` +
       `</div>` +
       `<div style="margin-top:12px;font-size:.7rem;color:#7A776C;line-height:1.5;">From the model's own per-player variance — how spread out this player's scores tend to be, not just the average.</div>` +
-      `<button onclick="window._showWhyPanel(${pid}); if (document.getElementById('why-modal-backdrop')) document.getElementById('apex-profile-overlay')?.remove();" style="margin-top:12px;width:100%;background:#FFFFFF;color:#1D9E75;border:1.5px solid #1D9E75;border-radius:9px;padding:9px;font-family:inherit;font-weight:800;font-size:.82rem;cursor:pointer;">Why this number? — see the model's working →</button>` +
+      `<button onclick="window._showWhyPanel(${pid}); if (document.getElementById('why-modal-backdrop')) document.getElementById('apex-profile-overlay')?.remove();" style="margin-top:12px;width:100%;background:#FFFFFF;color:#0F6E56;border:1.5px solid #0F6E56;border-radius:9px;padding:9px;font-family:inherit;font-weight:800;font-size:.82rem;cursor:pointer;">Why this number? — see the model's working →</button>` +
       `</div>`;
     document.body.appendChild(ov);
   } catch (_e) {}
@@ -37127,7 +37147,7 @@ function _renderSquadBrief() {
         .sort((a, b) => b.prof.haul - a.prof.haul)[0] || null;
     } catch (_e) {}
     const pill = (txt, kind) => {
-      const c = kind === 'warn' ? ['#FBF0DA', '#B87A0E', '#E8A020'] : (kind === 'bad' ? ['#FBE3DC', '#A33B1B', '#D85A30'] : ['#E7F3EE', '#1D9E75', '#1D9E75']);
+      const c = kind === 'warn' ? ['#FBF0DA', '#B87A0E', '#E8A020'] : (kind === 'bad' ? ['#FBE3DC', '#A33B1B', '#B4453A'] : ['#E7F3EE', '#0F6E56', '#0F6E56']);
       return `<span style="font-size:.66rem;font-weight:800;border-radius:6px;padding:3px 9px;white-space:nowrap;background:${c[0]};color:${c[1]};border:1px solid ${c[2]};">${txt}</span>`;
     };
     const row = (k, sub, pillHtml) => `<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--border);">` +
@@ -37151,7 +37171,7 @@ function _renderSquadBrief() {
     } else {
       read = `<b>Balanced setup.</b> Enough template to bank the obvious points, ${diffs.length ? 'with ' + diffs.length + ' differential' + (diffs.length > 1 ? 's' : '') + ' to move you when they hit' : 'but no differentials to move you up'}.`;
     }
-    html += `<div style="margin-top:11px;border:2px solid var(--accent,#1D9E75);border-radius:10px;padding:11px 14px;font-size:.84rem;line-height:1.5;">${read}</div>`;
+    html += `<div style="margin-top:11px;border:2px solid var(--accent,#0F6E56);border-radius:10px;padding:11px 14px;font-size:.84rem;line-height:1.5;">${read}</div>`;
     host.innerHTML = html;
     host.style.display = 'block';
   } catch (_e) { host.style.display = 'none'; }
@@ -37200,7 +37220,7 @@ function _shirtHtml(p, isXi) {
   const _prof = _apexProfile(p, activeGwIdx);
   if (_prof) {
     const _pg = _prof.cls === 'expl'
-      ? '<svg viewBox="0 0 24 24" width="11" height="11" fill="#1E1E1A"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z"/></svg>'
+      ? '<svg viewBox="0 0 24 24" width="11" height="11" fill="#16211D"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z"/></svg>'
       : (_prof.cls === 'steady'
         ? '<svg viewBox="0 0 24 24" width="11" height="11" fill="#0E6B4F"><path d="M12 2l8 3v6c0 5-3.5 9.2-8 11-4.5-1.8-8-6-8-11V5l8-3z"/></svg>'
         : '=');
@@ -37314,7 +37334,7 @@ function _renderBlankPitch(wrap) {
   try {
     const _sb = document.getElementById('solve-btn');
     if (_sb) {
-      _sb.innerHTML = '⚡ Optimise — build my 15';
+      _sb.innerHTML = '<i class=apex-ic data-i=bolt></i> Optimise — build my 15';
       _sb.title = 'Build the model’s opening 15 from scratch';
     }
   } catch (_eB) {}
@@ -37389,7 +37409,7 @@ function _renderPitchFromState() {
   try {
     const _sb0 = document.getElementById('solve-btn');
     if (_sb0 && /build my 15/.test(_sb0.innerHTML || '')) {
-      _sb0.innerHTML = '🛣 Solve';
+      _sb0.innerHTML = '<i class=apex-ic data-i=road></i> Solve';
       _sb0.title = 'Solve your path - open the planner and pick it gameweek by gameweek';
     }
   } catch (_eB0) {}
@@ -37782,12 +37802,12 @@ function _openShirtPanel(pid) {
     const BTN = 'font-family:inherit;font-weight:800;font-size:.78rem;cursor:pointer;'
               + 'border-radius:9px;padding:9px 10px;flex:1;min-width:74px;';
     const OFF = 'background:#FFFFFF;color:#4A4A44;border:1.5px solid #E5E2D8;';
-    const ON  = 'background:#1D9E75;color:#FFFFFF;border:1.5px solid #1D9E75;';
+    const ON  = 'background:#0F6E56;color:#FFFFFF;border:1.5px solid #0F6E56;';
     const RED = 'background:#FFFFFF;color:#D93A2B;border:1.5px solid #E9BEB8;';
     const REDON = 'background:#D93A2B;color:#FFFFFF;border:1.5px solid #D93A2B;';
     const WIDE = 'font-family:inherit;font-weight:800;font-size:.8rem;cursor:pointer;'
                + 'border-radius:9px;padding:10px;width:100%;margin-top:8px;'
-               + 'background:#FFFFFF;color:#1D9E75;border:1.5px solid #1D9E75;';
+               + 'background:#FFFFFF;color:#0F6E56;border:1.5px solid #0F6E56;';
 
     _apexShirtPanelClose();
     const ov = document.createElement('div');
@@ -37801,7 +37821,7 @@ function _openShirtPanel(pid) {
 
     let h = '<div style="background:#FFFFFF;border:1px solid #E5E2D8;border-radius:14px;'
           + 'padding:18px 20px;max-width:380px;width:100%;position:relative;'
-          + 'box-shadow:0 20px 60px rgba(0,0,0,.3);max-height:88vh;overflow:auto;">';
+          + 'box-shadow:none;max-height:88vh;overflow:auto;">';
     h += '<button onclick="window._apexShirtPanelClose()" aria-label="Close" '
        + 'style="position:absolute;top:10px;right:12px;background:none;border:none;'
        + 'font-size:1.05rem;color:#7A776C;cursor:pointer;font-weight:700;">✕</button>';
@@ -37818,7 +37838,7 @@ function _openShirtPanel(pid) {
     h += '<div style="flex:1;background:#FAF9F4;border:1px solid #E5E2D8;border-radius:10px;padding:9px 12px;">'
        + '<div style="font-size:.62rem;color:#7A776C;font-weight:800;letter-spacing:.05em;">EXPECTED MINUTES</div>'
        + '<div style="font-size:1.15rem;font-weight:800;color:#14140F;">' + mins
-       + (_ov != null ? '<span style="font-size:.6rem;color:#1D9E75;font-weight:800;"> YOUR EDIT</span>' : '')
+       + (_ov != null ? '<span style="font-size:.6rem;color:#0F6E56;font-weight:800;"> YOUR EDIT</span>' : '')
        + '</div></div>';
     h += '</div>';
     h += '<div style="margin-top:8px;font-size:.74rem;color:#7A776C;">Fixture · ' + fixL + '</div>';
@@ -37898,7 +37918,7 @@ function _openShirtPanel(pid) {
           + 'text-overflow:ellipsis;white-space:nowrap;">' + _f5 + '</span>'
           + '<span style="width:48px;text-align:right;color:#4A4A44;font-size:.73rem;'
           + 'font-variant-numeric:tabular-nums;">' + Math.round(_m5) + '′'
-          + ((_ovH5 != null) ? '<span style="color:#1D9E75;font-weight:800;">*</span>' : '')
+          + ((_ovH5 != null) ? '<span style="color:#0F6E56;font-weight:800;">*</span>' : '')
           + '</span>'
           + '<span style="width:40px;text-align:right;color:#14140F;font-size:.78rem;'
           + 'font-weight:800;font-variant-numeric:tabular-nums;">' + _p5.toFixed(1) + '</span>'
@@ -39282,14 +39302,14 @@ function renderBaselineStrip() {
       const _lbStale = Math.max(0, (_lbCC.locked || 0) - _lbLive);
       if (_lbLive > 0) {
         // locks BIND the WC/FH ILP (lockInIds constraint) -- confirmation note.
-        radarHtml += `<div style="margin-top:9px;font-size:.8rem;color:var(--muted);">🔒 ${_lbLive} locked player${_lbLive > 1 ? 's are' : ' is'} held in Wildcard / Free Hit squads too. Exclusions (🚫) respected.</div>`;
+        radarHtml += `<div style="margin-top:9px;font-size:.8rem;color:var(--muted);"><i class=apex-ic data-i=lock></i> ${_lbLive} locked player${_lbLive > 1 ? 's are' : ' is'} held in Wildcard / Free Hit squads too. Exclusions (<i class=apex-ic data-i=ban></i>) respected.</div>`;
       }
       if (_lbStale > 0) {
-        radarHtml += `<div style="margin-top:9px;font-size:.8rem;color:#f0b03a;font-weight:600;">🔒 ${_lbStale} locked player${_lbStale > 1 ? 's are' : ' is'} no longer in the player pool, so ${_lbStale > 1 ? 'those locks were' : 'that lock was'} NOT applied to the Wildcard / Free Hit squads — clear and re-set ${_lbStale > 1 ? 'them' : 'it'}.</div>`;
+        radarHtml += `<div style="margin-top:9px;font-size:.8rem;color:#f0b03a;font-weight:600;"><i class=apex-ic data-i=lock></i> ${_lbStale} locked player${_lbStale > 1 ? 's are' : ' is'} no longer in the player pool, so ${_lbStale > 1 ? 'those locks were' : 'that lock was'} NOT applied to the Wildcard / Free Hit squads — clear and re-set ${_lbStale > 1 ? 'them' : 'it'}.</div>`;
       }
     }
     if (window._apexBansDiscarded === true) {
-      radarHtml += `<div style="margin-top:5px;font-size:.8rem;color:#f0b03a;font-weight:600;">⚠ Too many exclusions to build a legal 15 — some were ignored for this solve. Free a few up (🚫 in the player pool) to make them all count.</div>`;
+      radarHtml += `<div style="margin-top:5px;font-size:.8rem;color:#f0b03a;font-weight:600;"><i class=apex-ic data-i=warn></i> Too many exclusions to build a legal 15 — some were ignored for this solve. Free a few up (<i class=apex-ic data-i=ban></i> in the player pool) to make them all count.</div>`;
     }
   } catch (_eLbN) {}
   const _rad = CHIP_PLANNER.radar || null;
@@ -39301,7 +39321,7 @@ function renderBaselineStrip() {
       radarHtml += `<div style="margin-top:9px;font-size:.8rem;color:var(--muted);">✓ Season radar: no double gameweeks after GW${_rad.window_end} — using chips inside this plan is safe.</div>`;
     }
     if (_rad.later_blanks && _rad.later_blanks.length) {
-      radarHtml += `<div style="margin-top:5px;font-size:.8rem;color:#f0b03a;">⚠ Blank gameweek at GW${_rad.later_blanks[0].gw} (${_rad.later_blanks[0].teams.length}+ teams without a fixture) — a Free Hit candidate beyond this window.</div>`;
+      radarHtml += `<div style="margin-top:5px;font-size:.8rem;color:#f0b03a;"><i class=apex-ic data-i=warn></i> Blank gameweek at GW${_rad.later_blanks[0].gw} (${_rad.later_blanks[0].teams.length}+ teams without a fixture) — a Free Hit candidate beyond this window.</div>`;
     }
     if (_rad.second_half_unlock) {
       radarHtml += `<div style="margin-top:5px;font-size:.8rem;color:var(--muted);">ℹ GW20 unlocks the second set of chips — chips used in the first half become available again.</div>`;
@@ -39341,7 +39361,7 @@ function renderBaselineStrip() {
       const bestBbGw = Object.keys(CHIP_PLANNER.bb_ev).sort((a, b) => CHIP_PLANNER.bb_ev[b] - CHIP_PLANNER.bb_ev[a])[0];
       const nPlay = bestBbGw != null ? (bp[String(bestBbGw)] ?? 4) : 4;
       if (bestBbGw != null && nPlay < 4) {
-        radarHtml += `<div style="margin-top:5px;font-size:.8rem;color:#f87171;font-weight:600;">⚠ Bench Boost check: only ${nPlay} of your 4 bench players project real minutes in GW${bestBbGw} — strengthen the bench before boosting.</div>`;
+        radarHtml += `<div style="margin-top:5px;font-size:.8rem;color:#f87171;font-weight:600;"><i class=apex-ic data-i=warn></i> Bench Boost check: only ${nPlay} of your 4 bench players project real minutes in GW${bestBbGw} — strengthen the bench before boosting.</div>`;
       }
     }
   } catch (_e) {}
@@ -39474,12 +39494,12 @@ function _applyStrategy(breakdown) {
     if (_plannerBanner) {
       const _label = chipType === 'WC'
         ? `🃏 Chip plan set — WC GW${chipGw} squad ready below. Your pitch is unchanged until you apply it.`
-        : `🔄 Chip plan set — FH GW${chipGw} squad ready below. Your pitch is unchanged until you apply it.`;
+        : `<i class=apex-ic data-i=sync></i> Chip plan set — FH GW${chipGw} squad ready below. Your pitch is unchanged until you apply it.`;
       _plannerBanner.textContent = _label;
       _plannerBanner.style.display = 'block';
-      _plannerBanner.style.background = 'rgba(29,158,117,.12)';
-      _plannerBanner.style.border = '1px solid rgba(29,158,117,.3)';
-      _plannerBanner.style.color = 'var(--accent,#1D9E75)';
+      _plannerBanner.style.background = 'rgba(15,110,86,.12)';
+      _plannerBanner.style.border = '1px solid rgba(15,110,86,.3)';
+      _plannerBanner.style.color = 'var(--accent,#0F6E56)';
     }
 
     // If strategy has FH on a different GW from WC, pre-save that squad too
@@ -39554,13 +39574,13 @@ function renderTopRecommendation() {
     : '';
   const html = `
     <div class="optimal-top">
-      <div class="optimal-top-label">⚡ Your chip plan</div>
+      <div class="optimal-top-label"><i class=apex-ic data-i=bolt></i> Your chip plan</div>
       ${tl}
       ${_moveNote}
       <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:10px;">
         ${_D.plan ? `<div class="optimal-top-ev">${_D.plan.total_xp} xPts</div>` : ''}
         <button onclick='_applyStrategy(${JSON.stringify(_bd)})'
-          style="background:var(--accent,#1D9E75);color:#fff;border:none;border-radius:8px;padding:11px 22px;font-weight:700;font-size:.92rem;cursor:pointer;white-space:nowrap;">
+          style="background:var(--accent,#0F6E56);color:#fff;border:none;border-radius:8px;padding:11px 22px;font-weight:700;font-size:.92rem;cursor:pointer;white-space:nowrap;">
           Plan transfers →
         </button>
       </div>
@@ -39579,7 +39599,7 @@ function renderRotationRisk() {
     });
   });
   if (flags.length === 0) { wrap.innerHTML = ''; return; }
-  let html = '<div class="rotation-risk-panel"><div class="rotation-risk-title">⚑ Check before committing</div><div class="rotation-risk-subtitle">The model can\'t predict these — use your judgement.</div><div class="rotation-risk-list">';
+  let html = '<div class="rotation-risk-panel"><div class="rotation-risk-title"><i class=apex-ic data-i=flag></i> Check before committing</div><div class="rotation-risk-subtitle">The model can\'t predict these — use your judgement.</div><div class="rotation-risk-list">';
   flags.forEach(flag => {
     html += `<div class="rotation-risk-item"><span class="rotation-risk-team">${flag.team}</span><span class="rotation-risk-context">${flag.context}</span></div>`;
   });
@@ -39817,7 +39837,7 @@ function renderSequencesTable() {
     const m = s && s.marginals;
     if (!m || m[item.chip] == null) return '';
     const v = +m[item.chip];
-    const c = (v >= 2) ? 'var(--accent,#1D9E75)' : (v >= 0.5 ? '#b58900' : '#c0392b');
+    const c = (v >= 2) ? 'var(--accent,#0F6E56)' : (v >= 0.5 ? '#b58900' : '#c0392b');
     return `<span style="color:${c};font-weight:700;font-size:.68rem;margin-left:2px;">${v >= 0 ? '+' : ''}${v.toFixed(1)}</span>`;
   };
   filtered.forEach((s, i) => {
@@ -39845,7 +39865,7 @@ function renderSequencesTable() {
         <td class="opt-ev ev-positive">+${s.gain.toFixed(1)}</td>
         <td class="opt-breakdown">${breakdownHtml}</td>
         <td><button onclick="_applyStrategy(JSON.parse(this.dataset.bd))" data-bd='${bdAttr}'
-          style="background:${i===0?'#22c55e':'var(--bg3,var(--bg3))'};color:${i===0?'#000':'var(--muted)'};border:1px solid ${i===0?'#22c55e':'var(--border)'};border-radius:6px;padding:4px 12px;font-size:.75rem;font-weight:700;cursor:pointer;white-space:nowrap;">
+          style="background:${i===0?'#1D9E75':'var(--bg3,var(--bg3))'};color:${i===0?'#000':'var(--muted)'};border:1px solid ${i===0?'#1D9E75':'var(--border)'};border-radius:6px;padding:4px 12px;font-size:.75rem;font-weight:700;cursor:pointer;white-space:nowrap;">
           ${i===0?'▶ Select':'Select'}
         </button></td>
       </tr>
@@ -39894,7 +39914,7 @@ function renderChipEvTable() {
   if (_activeChips.fh) headerHtml += '<th>FH EV</th>';
   if (_activeChips.bb) headerHtml += '<th>BB EV</th>';
   if (_activeChips.tc) headerHtml += '<th>TC EV</th>';
-  headerHtml += '<th style="color:#1D9E75">⚑ Check</th></tr>';
+  headerHtml += '<th style="color:#0F6E56"><i class=apex-ic data-i=flag></i> Check</th></tr>';
   thead.innerHTML = headerHtml;
 
   tbody.innerHTML = '';
@@ -40451,17 +40471,17 @@ function _showPoolBanner(msg, type) {
   b.textContent = msg;
   b.style.display = 'block';
   if (type === 'success') {
-    b.style.background = 'rgba(34,197,94,.12)';
-    b.style.border = '1px solid rgba(34,197,94,.3)';
+    b.style.background = 'rgba(29,158,117,.12)';
+    b.style.border = '1px solid rgba(29,158,117,.3)';
     b.style.color = '#4ade80';
   } else if (type === 'error') {
     b.style.background = 'rgba(239,68,68,.12)';
     b.style.border = '1px solid rgba(239,68,68,.3)';
     b.style.color = '#ef4444';
   } else {
-    b.style.background = 'rgba(29,158,117,.12)';
-    b.style.border = '1px solid rgba(29,158,117,.3)';
-    b.style.color = 'var(--accent,#1D9E75)';
+    b.style.background = 'rgba(15,110,86,.12)';
+    b.style.border = '1px solid rgba(15,110,86,.3)';
+    b.style.color = 'var(--accent,#0F6E56)';
   }
 }
 
@@ -40608,8 +40628,8 @@ function _apexRenderLocksNote() {
     const banned = POOL_DATA.filter(function (p) { try { return L.isBanned(p.id); } catch (_e) { return false; } });
     if (!locked.length && !banned.length) { el.style.display = 'none'; return; }
     let h = '';
-    if (locked.length) h += '🔒 Pinned into every solve: <b>' + locked.map(function (p) { return p.web_name; }).join(', ') + '</b>';
-    if (banned.length) h += (h ? ' · ' : '') + '🚫 Excluded from every solve: <b>' + banned.map(function (p) { return p.web_name; }).join(', ') + '</b>';
+    if (locked.length) h += '<i class=apex-ic data-i=lock></i> Pinned into every solve: <b>' + locked.map(function (p) { return p.web_name; }).join(', ') + '</b>';
+    if (banned.length) h += (h ? ' · ' : '') + '<i class=apex-ic data-i=ban></i> Excluded from every solve: <b>' + banned.map(function (p) { return p.web_name; }).join(', ') + '</b>';
     el.innerHTML = h + ' — tap the player’s card to change';
     el.style.display = 'block';
   } catch (_e) {}
@@ -40664,7 +40684,7 @@ function renderPoolTable() {
     // Forced-decision state (only meaningful when the UI is on).
     const _locked = _lbUi ? (window.apexLocks.isLocked(p.id)) : false;
     const _banned = _lbUi ? (window.apexLocks.isBanned(p.id)) : false;
-    if (_locked) tr.style.borderLeft = '3px solid #1D9E75';   // subtle teal edge
+    if (_locked) tr.style.borderLeft = '3px solid #0F6E56';   // subtle teal edge
     if (_banned) tr.style.opacity = '0.45';                    // greyed out
     const shirtImg = `<span style="display:inline-flex;align-items:center;vertical-align:middle;margin-right:8px;">${svgShirt(p.team, p.element_type === 1, 26)}</span>`;
     const gwCells = (p.xp_per_gw || []).slice(0, TEAM_META.gw_range.length).map(x =>
@@ -40690,7 +40710,7 @@ function renderPoolTable() {
               : ''}</span></td>
       <td style="color:var(--muted);">${p.team}</td>
       <td style="color:var(--muted);font-size:.72rem;font-weight:700;">${POOL_POS_LABELS[p.element_type] || '?'}</td>
-      <td class="pool-xp" style="color:${(p.xmins != null ? p.xmins : (p.xp_minutes || 0)) >= 75 ? '#16a34a' : (p.xmins != null ? p.xmins : (p.xp_minutes || 0)) >= 60 ? 'var(--fg)' : (p.xmins != null ? p.xmins : (p.xp_minutes || 0)) >= 45 ? '#f59e0b' : '#ef4444'};font-variant-numeric:tabular-nums;">
+      <td class="pool-xp" style="color:${(p.xmins != null ? p.xmins : (p.xp_minutes || 0)) >= 75 ? '#1D9E75' : (p.xmins != null ? p.xmins : (p.xp_minutes || 0)) >= 60 ? 'var(--fg)' : (p.xmins != null ? p.xmins : (p.xp_minutes || 0)) >= 45 ? '#f59e0b' : '#ef4444'};font-variant-numeric:tabular-nums;">
         <span onclick="event.stopPropagation(); window._openXminsEditor(${p.id})" title="Edit this player's expected minutes"
           style="cursor:pointer;text-decoration:underline dotted;text-underline-offset:3px;">${Math.round(p.xmins != null ? p.xmins : (p.xp_minutes || 0))} ⏱</span></td>
       <td class="pool-xp">£${p.cost.toFixed(1)}</td>
@@ -40699,9 +40719,9 @@ function renderPoolTable() {
       <td style="text-align:right;padding-right:16px;white-space:nowrap;">
         ${_lbUi ? `<button title="${_locked ? 'Locked — never suggested to sell. Click to unlock.' : 'Lock: never suggest selling this player'}"
               onclick="event.stopPropagation(); window._apexToggleLock(${p.id})"
-              style="background:${_locked ? '#1D9E75' : 'transparent'};border:1px solid ${_locked ? '#1D9E75' : 'var(--border)'};border-radius:6px;padding:3px 7px;margin-right:4px;cursor:pointer;font-size:.8rem;line-height:1;">🔒</button>` : ''}${_lbUi ? `<button title="${_banned ? 'Excluded — never suggested to buy. Click to allow.' : 'Exclude: never suggest buying this player'}"
+              style="background:${_locked ? '#0F6E56' : 'transparent'};border:1px solid ${_locked ? '#0F6E56' : 'var(--border)'};border-radius:6px;padding:3px 7px;margin-right:4px;cursor:pointer;font-size:.8rem;line-height:1;"><i class=apex-ic data-i=lock></i></button>` : ''}${_lbUi ? `<button title="${_banned ? 'Excluded — never suggested to buy. Click to allow.' : 'Exclude: never suggest buying this player'}"
               onclick="event.stopPropagation(); window._apexToggleBan(${p.id})"
-              style="background:${_banned ? '#D93A2B' : 'transparent'};border:1px solid ${_banned ? '#D93A2B' : 'var(--border)'};border-radius:6px;padding:3px 7px;margin-right:8px;cursor:pointer;font-size:.8rem;line-height:1;">🚫</button>` : ''}${_poolRemovedPlayer
+              style="background:${_banned ? '#D93A2B' : 'transparent'};border:1px solid ${_banned ? '#D93A2B' : 'var(--border)'};border-radius:6px;padding:3px 7px;margin-right:8px;cursor:pointer;font-size:.8rem;line-height:1;"><i class=apex-ic data-i=ban></i></button>` : ''}${_poolRemovedPlayer
           ? (inSquad
             ? `<button class="pool-add-btn in-squad" disabled>✓ Squad</button>`
             : (p.element_type === _poolRemovedPlayer.element_type
@@ -40736,7 +40756,7 @@ function renderPoolTable() {
     pager.innerHTML = `
       <span>${total - shown} more hidden</span>
       <button onclick="_poolRowLimit += POOL_PAGE_STEP; renderPoolTable();"
-        style="background:var(--accent,#1D9E75);color:#000;border:none;border-radius:6px;padding:6px 14px;font-size:.78rem;font-weight:700;cursor:pointer;">
+        style="background:var(--accent,#0F6E56);color:#000;border:none;border-radius:6px;padding:6px 14px;font-size:.78rem;font-weight:700;cursor:pointer;">
         Show ${Math.min(POOL_PAGE_STEP, total - shown)} more
       </button>
     `;
@@ -40905,8 +40925,8 @@ function _poolAddPlayer(playerId) {
   if (banner) {
     banner.textContent = `✓ Added ${inPlayer.web_name} — dropped ${out.web_name}. £${newCost.toFixed(1)}m / £${budgetCap.toFixed(1)}m used.`;
     banner.style.display = 'block';
-    banner.style.background = 'rgba(34,197,94,.12)';
-    banner.style.border = '1px solid rgba(34,197,94,.3)';
+    banner.style.background = 'rgba(29,158,117,.12)';
+    banner.style.border = '1px solid rgba(29,158,117,.3)';
     banner.style.color = '#4ade80';
   }
 }
@@ -41404,7 +41424,7 @@ function _openXminsEditor(pid) {
         + ((typeof window.apexLockedHtml === 'function')
             ? window.apexLockedHtml('Editable projections', 'Disagree with the model on a player\'s minutes? Set your own — every projection, transfer rec and plan updates instantly.')
             : '')
-        + '<div style="text-align:right;margin-top:6px;"><button onclick="document.getElementById(\'apex-xmins-modal\').remove()" style="background:none;border:none;color:#64748b;cursor:pointer;font-weight:700;">Close</button></div></div>';
+        + '<div style="text-align:right;margin-top:6px;"><button onclick="document.getElementById(\'apex-xmins-modal\').remove()" style="background:none;border:none;color:#6B7671;cursor:pointer;font-weight:700;">Close</button></div></div>';
       ov.addEventListener('click', (e) => { if (e.target === ov) ov.remove(); });
       document.body.appendChild(ov);
       return;
@@ -41428,41 +41448,41 @@ function _openXminsEditor(pid) {
   overlay.id = 'apex-xmins-modal';
   overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:10000;display:flex;align-items:center;justify-content:center;font-family:"Plus Jakarta Sans",sans-serif;';
   overlay.innerHTML = `
-    <div style="background:#ffffff;border-radius:14px;padding:28px;max-width:380px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+    <div style="background:#ffffff;border-radius:14px;padding:28px;max-width:380px;width:90%;box-shadow:none;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
-        <h3 style="margin:0;color:#0f172a;font-size:20px;font-weight:800;letter-spacing:-0.02em;">Edit xMins</h3>
-        <button id="xmins-close" style="background:none;border:none;font-size:24px;color:#94a3b8;cursor:pointer;line-height:1;padding:0;">×</button>
+        <h3 style="margin:0;color:#16211D;font-size:20px;font-weight:800;letter-spacing:-0.02em;">Edit xMins</h3>
+        <button id="xmins-close" style="background:none;border:none;font-size:24px;color:#9AA39E;cursor:pointer;line-height:1;padding:0;">×</button>
       </div>
       <div style="margin-bottom:18px;">
-        <div style="font-size:16px;font-weight:800;color:#0f172a;">${sq.web_name}</div>
-        <div style="font-size:13px;color:#64748b;font-weight:600;margin-top:2px;">${sq.team || ''}</div>
+        <div style="font-size:16px;font-weight:800;color:#16211D;">${sq.web_name}</div>
+        <div style="font-size:13px;color:#6B7671;font-weight:600;margin-top:2px;">${sq.team || ''}</div>
       </div>
       <div style="margin-bottom:8px;">
-        <label style="font-size:12px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:#64748b;">Predicted minutes</label>
+        <label style="font-size:12px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:#6B7671;">Predicted minutes</label>
       </div>
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;">
         <input id="xmins-input" type="number" min="0" max="90" step="1" value="${Math.round(cur)}"
-          style="font-family:'Plus Jakarta Sans',sans-serif;font-size:28px;font-weight:800;color:#0f172a;border:2px solid #e5e7eb;border-radius:10px;padding:10px 14px;width:100px;text-align:center;outline:none;" />
-        <span style="font-size:18px;color:#64748b;font-weight:600;">/ 90 min</span>
+          style="font-family:'Plus Jakarta Sans',sans-serif;font-size:28px;font-weight:800;color:#16211D;border:2px solid #E4E8E4;border-radius:10px;padding:10px 14px;width:100px;text-align:center;outline:none;" />
+        <span style="font-size:18px;color:#6B7671;font-weight:600;">/ 90 min</span>
       </div>
       <input id="xmins-slider" type="range" min="0" max="90" step="1" value="${Math.round(cur)}"
-        style="width:100%;accent-color:#1D9E75;margin-bottom:10px;" />
-      <div style="display:flex;justify-content:space-between;font-size:11px;color:#94a3b8;font-weight:600;margin-bottom:18px;">
+        style="width:100%;accent-color:#0F6E56;margin-bottom:10px;" />
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:#9AA39E;font-weight:600;margin-bottom:18px;">
         <span>0 (out)</span><span>45 (cameo)</span><span>90 (full)</span>
       </div>
       <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:#f8fafc;border-radius:10px;margin-bottom:18px;font-size:13px;">
-        <span style="color:#64748b;font-weight:600;">Model says</span>
-        <span style="color:#0f172a;font-weight:800;font-variant-numeric:tabular-nums;">${Math.round(base || 0)} min</span>
+        <span style="color:#6B7671;font-weight:600;">Model says</span>
+        <span style="color:#16211D;font-weight:800;font-variant-numeric:tabular-nums;">${Math.round(base || 0)} min</span>
       </div>
       <div style="display:flex;gap:10px;">
-        <button id="xmins-reset" style="flex:1;background:#ffffff;color:#475569;border:1px solid #e5e7eb;border-radius:10px;padding:12px;font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:700;cursor:pointer;${isOverridden ? '' : 'opacity:0.5;pointer-events:none;'}">↺ Reset</button>
-        <button id="xmins-save" style="flex:2;background:#1D9E75;color:#ffffff;border:none;border-radius:10px;padding:12px;font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:800;cursor:pointer;letter-spacing:0.02em;">✓ Save & recompute</button>
+        <button id="xmins-reset" style="flex:1;background:#ffffff;color:#475569;border:1px solid #E4E8E4;border-radius:10px;padding:12px;font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:700;cursor:pointer;${isOverridden ? '' : 'opacity:0.5;pointer-events:none;'}">↺ Reset</button>
+        <button id="xmins-save" style="flex:2;background:#0F6E56;color:#ffffff;border:none;border-radius:10px;padding:12px;font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:800;cursor:pointer;letter-spacing:0.02em;">✓ Save & recompute</button>
       </div>
       ${(Object.keys(_xminsOverrides || {}).length > 1)
           ? ('<div style="text-align:center;margin-top:14px;">'
              + '<button id="xmins-clear-all" style="background:none;border:none;'
              + 'font-family:inherit;font-size:12px;font-weight:700;'
-             + 'color:#94a3b8;cursor:pointer;text-decoration:underline;">'
+             + 'color:#9AA39E;cursor:pointer;text-decoration:underline;">'
              + 'Clear all my edits (' + Object.keys(_xminsOverrides).length + ')</button></div>')
           : ''}
     </div>
@@ -41552,7 +41572,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW3</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1788388839-GW3-abe021a5</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1788390776-GW3-b9de9d71</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
@@ -41715,13 +41735,13 @@ s.setAttribute("data-cf-beacon",'{"token": "890700f621df42909deca8500a0df182"}')
   document.addEventListener('DOMContentLoaded', function () {
     var overlay = document.createElement('div');
     overlay.id = 'apex-public-boot';
-    overlay.style.cssText = 'position:fixed;inset:0;background:#FAF7F1;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:Plus Jakarta Sans,sans-serif;color:#1E1E1A;padding:20px;';
+    overlay.style.cssText = 'position:fixed;inset:0;background:#FBFBFA;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:Plus Jakarta Sans,sans-serif;color:#16211D;padding:20px;';
     overlay.innerHTML =
       '<div style="font-size:1.5rem;font-weight:700;margin-bottom:20px;letter-spacing:-.01em;">' +
-      '<span style="font-weight:800;">FPL </span><span style="font-weight:800;color:#1D9E75;">APEX</span></div>' +
-      '<div id="apex-status" style="color:#1D9E75;font-size:.95rem;margin-bottom:16px;font-weight:600;opacity:0;transition:opacity .25s ease;">Loading your team&hellip;</div>' +
-      '<div id="apex-bar-wrap" style="width:300px;max-width:90vw;background:#F1EFE8;border:1px solid #D9D7CC;border-radius:10px;overflow:hidden;height:10px;opacity:0;transition:opacity .25s ease;">' +
-      '<div id="apex-bar" style="height:100%;width:8%;background:#1D9E75;transition:width .4s ease;"></div></div>';
+      '<span style="font-weight:800;">FPL </span><span style="font-weight:800;color:#0F6E56;">APEX</span></div>' +
+      '<div id="apex-status" style="color:#0F6E56;font-size:.95rem;margin-bottom:16px;font-weight:600;opacity:0;transition:opacity .25s ease;">Loading your team&hellip;</div>' +
+      '<div id="apex-bar-wrap" style="width:300px;max-width:90vw;background:#F4F5F3;border:1px solid #E4E8E4;border-radius:10px;overflow:hidden;height:10px;opacity:0;transition:opacity .25s ease;">' +
+      '<div id="apex-bar" style="height:100%;width:8%;background:#0F6E56;transition:width .4s ease;"></div></div>';
     document.body.appendChild(overlay);
 
     // 2026-07-10: status text + progress bar stay invisible for 400ms. Fast
@@ -41754,7 +41774,7 @@ s.setAttribute("data-cf-beacon",'{"token": "890700f621df42909deca8500a0df182"}')
         // the landing page to show the entry form instead.
         back.href = '/solver.html?change=1';
         back.textContent = '\u2190 Back to solver';
-        back.style.cssText = 'margin-top:24px;color:#1D9E75;text-decoration:none;font-size:.9rem;';
+        back.style.cssText = 'margin-top:24px;color:#0F6E56;text-decoration:none;font-size:.9rem;';
         ov.appendChild(back);
       }
     }
