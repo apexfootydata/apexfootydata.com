@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="3" data-built-at="2026-09-03T00:30:04">
+<meta name="apex-gw" content="3" data-built-at="2026-09-03T09:25:56">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
@@ -37,7 +37,7 @@
 })();
 </script>
 <meta http-equiv="Pragma" content="no-cache">
-<meta name="apex-build" content="20260903-003003">
+<meta name="apex-build" content="20260903-092556">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — FPL Apex</title>
 <meta name="description" content="Plan FPL transfers, chips, and Free Hit squads. Live xG-based projections, a rival head-to-head simulator, and a mini-league table. Free FPL tool.">
@@ -2143,7 +2143,7 @@ body {
    the UI control (X) moves to top-left so the two never collide. */
 .pp-remove-btn {
   position: absolute;
-  /* top: 2px (was -4px) — sit the <i class=apex-ic data-i=close></i> on the shirt shoulder instead of poking
+  /* top: 2px (was -4px) — sit the on the shirt shoulder instead of poking
      above it, so it stops clipping the fixture label of the row above. The
      cap/vice badge is bottom-left, so no new collision. 2026-06-26. */
   top: 2px;
@@ -2820,7 +2820,7 @@ body.compare-alt .va-card-hero::before {
   transition: background 0.15s, border-color 0.15s;
   box-sizing: border-box;
 }
-.cs-card-active::after { content: '';-webkit-mask-image:var(--ic-check);mask-image:var(--ic-check);background:currentColor;-webkit-mask-size:contain;mask-size:contain;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat; background: #0F6E56; border-color: #0F6E56; }
+.cs-card-active::after { content: ''; background: #0F6E56; border-color: #0F6E56; }
 .cs-card input[type="checkbox"] {
   position: absolute; top: 0; left: 0; opacity: 0;
   pointer-events: none;
@@ -3798,7 +3798,7 @@ button.secondary, .btn-secondary, .va-btn-secondary {
 .prof-badge {
   position: absolute;
   /* card-relative since 07-02 (was shirt-wrap-relative): column top, exactly
-     above the <i class=apex-ic data-i=timer></i> and <i class=apex-ic data-i=close></i> hover circles. UNIFORM SPEC: every circle in the column
+     above the and hover circles. UNIFORM SPEC: every circle in the column
      is 22px border-box with a 1.5px white ring — equal size, equal 5px gaps. */
   top: -5px;
   right: -6px;
@@ -3835,7 +3835,7 @@ button.secondary, .btn-secondary, .va-btn-secondary {
 .pitch .prof-badge.prof-bal    { background: #E9E7DD !important; }
 
 /* ── Hover-reveal utilities (2026-07-02, from the pitch-redesign mock) ──
-   <i class=apex-ic data-i=close></i> / <i class=apex-ic data-i=timer></i> / ? are rare-use controls: hidden at rest, revealed on card hover.
+   / / ? are rare-use controls: hidden at rest, revealed on card hover.
    Frees the corners so the profile badge + armband read clean.
    Touch devices have no hover — keep the buttons always visible there. */
 /* !important throughout: .pp-xmins-btn carries its own `opacity: 0.7 !important`
@@ -3865,8 +3865,8 @@ button.secondary, .btn-secondary, .va-btn-secondary {
   }
 }
 /* Utility COLUMN beside the shirt (2026-07-02, per Marcus's sketch): one
-   vertical line of IDENTICAL circles down the right side — <i class=apex-ic data-i=bolt></i> profile badge
-   on top (always visible), then <i class=apex-ic data-i=timer></i>, then <i class=apex-ic data-i=close></i> (hover-revealed).
+   vertical line of IDENTICAL circles down the right side — profile badge
+   on top (always visible), then , then (hover-revealed).
    UNIFORM SPEC (all three): 22px border-box, 1.5px white ring, same shadow,
    right -6px, tops -5 / 22 / 49 = equal 5px gaps. Doubled classes so this
    outranks each button's own !important base rules. */
@@ -4103,7 +4103,7 @@ button.secondary, .btn-secondary, .va-btn-secondary {
   transform: scale(1.18) !important;
   background: #0F6E56 !important;
 }
-/* Reveal the <i class=apex-ic data-i=timer></i> button when the user hovers anywhere on the shirt cell. */
+/* Reveal the button when the user hovers anywhere on the shirt cell. */
 .pitch .shirt:hover .pp-xmins-btn,
 .bench-row .shirt:hover .pp-xmins-btn,
 .pitch-bench .shirt:hover .pp-xmins-btn {
@@ -4453,7 +4453,7 @@ button.secondary, .btn-secondary, .va-btn-secondary {
   .va-twopane-pitch .bench-row, .va-twopane-pitch .pitch-bench { padding: 2px 2px 8px !important; margin-top: 2px !important; }
   /* Shrink the on-shirt controls so they stop covering the kit (Marcus 2026-06-26).
      Fixed-size badges dominate the width-constrained pitch kits; trim them ~20%.
-     <i class=apex-ic data-i=close></i> keeps its top offset so it doesn't clip the row above. */
+     keeps its top offset so it doesn't clip the row above. */
   .va-twopane-pitch .pp-remove-btn { width:15px !important; height:15px !important; line-height:15px !important; font-size:0.48rem !important; }
   .va-twopane-pitch .pp-xmins-btn { width:15px !important; height:15px !important; line-height:15px !important; font-size:0.5rem !important; }
   .va-twopane-pitch .shirt-badge { width:19px !important; height:19px !important; font-size:0.56rem !important; left:-2px !important; }
@@ -5565,8 +5565,8 @@ body, html {
 
 
 /* ── Chip-select polish (2026-06-13): flatten the cards (no float/lift),
-   drop the redundant "IN PLAY/SPENT" line (the teal <i class=apex-ic data-i=check></i>-ring + greyed 'used' card
-   already say it) and the strike-through. Keeps the existing <i class=apex-ic data-i=check></i> toggle. ── */
+   drop the redundant "IN PLAY/SPENT" line (the teal -ring + greyed 'used' card
+   already say it) and the strike-through. Keeps the existing toggle. ── */
 #view-chip-select .cs-card { box-shadow:none; }
 #view-chip-select .cs-card:hover { transform: none !important; box-shadow:none; background: #ffffff !important; }
 #view-chip-select .cs-card-state { display: none !important; }
@@ -6283,46 +6283,7 @@ body[data-apex-view="team"] #topbar .va-tabs { display: flex; }
    !important on both sides is decided by source order, and this block only
    wins because it happens to be emitted after that sheet. Repeating the class
    makes it (1,3,0): it now wins on the cascade, not on luck, and stays won if
-   anyone reorders the <link>/<style>
-
-/* APEX_BRAND_V2_MATCHDAY_v1 - emoji replaced by masked icons. They inherit the
-   surrounding text colour, so an icon can never be a second palette. */
-.apex-ic{display:inline-block;width:1em;height:1em;vertical-align:-.125em;
-  background:currentColor;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
-  -webkit-mask-position:center;mask-position:center;
-  -webkit-mask-size:contain;mask-size:contain;flex:none}
-.apex-ic[data-i=tree]{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 4v11a3 3 0 0 0 3 3h4M6 4a2 2 0 1 0 0-.01M13 18a2 2 0 1 0 0 .01M18 8a2 2 0 1 0 0-.01M6 9h8a4 4 0 0 0 4-1'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 4v11a3 3 0 0 0 3 3h4M6 4a2 2 0 1 0 0-.01M13 18a2 2 0 1 0 0 .01M18 8a2 2 0 1 0 0-.01M6 9h8a4 4 0 0 0 4-1'/%3E%3C/svg%3E")}
-.apex-ic[data-i=bolt]{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M13 2 4 14h6l-1 8 9-12h-6z'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M13 2 4 14h6l-1 8 9-12h-6z'/%3E%3C/svg%3E")}
-.apex-ic[data-i=ban]{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18M6 6l12 12'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18M6 6l12 12'/%3E%3C/svg%3E")}
-.apex-ic[data-i=lock]{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 11h14v10H5zM8 11V7a4 4 0 0 1 8 0v4'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 11h14v10H5zM8 11V7a4 4 0 0 1 8 0v4'/%3E%3C/svg%3E")}
-.apex-ic[data-i=road]{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 3 4 21M18 3l2 18M12 4v3M12 11v3M12 18v3'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 3 4 21M18 3l2 18M12 4v3M12 11v3M12 18v3'/%3E%3C/svg%3E")}
-.apex-ic[data-i=shield]{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z'/%3E%3C/svg%3E")}
-.apex-ic[data-i=gem]{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 9h18l-9 12zM3 9l3-5h12l3 5M9 9l3 12 3-12M6 4l3 5M18 4l-3 5'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 9h18l-9 12zM3 9l3-5h12l3 5M9 9l3 12 3-12M6 4l3 5M18 4l-3 5'/%3E%3C/svg%3E")}
-.apex-ic[data-i=sync]{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 11a8 8 0 0 0-14-5M4 13a8 8 0 0 0 14 5M20 5v6h-6M4 19v-6h6'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 11a8 8 0 0 0-14-5M4 13a8 8 0 0 0 14 5M20 5v6h-6M4 19v-6h6'/%3E%3C/svg%3E")}
-.apex-ic[data-i=board]{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M8 4h8v3H8zM6 5H5v16h14V5h-1M9 12h6M9 16h4'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M8 4h8v3H8zM6 5H5v16h14V5h-1M9 12h6M9 16h4'/%3E%3C/svg%3E")}
-.apex-ic[data-i=flame]{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3c3 4 5 6 5 9a5 5 0 0 1-10 0c0-2 1-3 2-5 1 2 2 2 3 1 0-2 0-3 0-5z'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3c3 4 5 6 5 9a5 5 0 0 1-10 0c0-2 1-3 2-5 1 2 2 2 3 1 0-2 0-3 0-5z'/%3E%3C/svg%3E")}
-.apex-ic[data-i=warn]{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 4 2 20h20zM12 10v5M12 18v.5'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 4 2 20h20zM12 10v5M12 18v.5'/%3E%3C/svg%3E")}
-.apex-ic[data-i=flag]{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 21V4M6 5h11l-2 4 2 4H6'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 21V4M6 5h11l-2 4 2 4H6'/%3E%3C/svg%3E")}
-.apex-ic[data-i=cards]{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 7l6-2 4 11-6 2zM12 4h6v14h-6'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 7l6-2 4 11-6 2zM12 4h6v14h-6'/%3E%3C/svg%3E")}
-.apex-ic[data-i=hold]{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 11V5.5a1.5 1.5 0 0 1 3 0V11m0-.5V4.5a1.5 1.5 0 0 1 3 0V11m0-1V6.5a1.5 1.5 0 0 1 3 0V14a6 6 0 0 1-6 6h-1a5 5 0 0 1-4-2l-3-4a1.5 1.5 0 0 1 2.2-2z'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 11V5.5a1.5 1.5 0 0 1 3 0V11m0-.5V4.5a1.5 1.5 0 0 1 3 0V11m0-1V6.5a1.5 1.5 0 0 1 3 0V14a6 6 0 0 1-6 6h-1a5 5 0 0 1-4-2l-3-4a1.5 1.5 0 0 1 2.2-2z'/%3E%3C/svg%3E")}
-.apex-ic[data-i=timer]{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 21a8 8 0 1 0 0-16 8 8 0 0 0 0 16M12 9v4l3 2M9 2h6'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 21a8 8 0 1 0 0-16 8 8 0 0 0 0 16M12 9v4l3 2M9 2h6'/%3E%3C/svg%3E")}
-.apex-ic[data-i=hourglass]{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 3h10M7 21h10M8 3v4l4 5-4 5v4M16 3v4l-4 5 4 5v4'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 3h10M7 21h10M8 3v4l4 5-4 5v4M16 3v4l-4 5 4 5v4'/%3E%3C/svg%3E")}
-.apex-ic[data-i=pin]{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 17v5M9 3h6l-1 6 3 3v2H7v-2l3-3z'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 17v5M9 3h6l-1 6 3 3v2H7v-2l3-3z'/%3E%3C/svg%3E")}
-.apex-ic[data-i=ban]{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18M6 6l12 12'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18M6 6l12 12'/%3E%3C/svg%3E")}
-.apex-ic[data-i=check]{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 12.5l5 5L20 6.5'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 12.5l5 5L20 6.5'/%3E%3C/svg%3E")}
-.apex-ic[data-i=check]{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 12.5l5 5L20 6.5'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 12.5l5 5L20 6.5'/%3E%3C/svg%3E")}
-.apex-ic[data-i=close]{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 6l12 12M18 6L6 18'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 6l12 12M18 6L6 18'/%3E%3C/svg%3E")}
-.apex-ic[data-i=close]{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 6l12 12M18 6L6 18'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 6l12 12M18 6L6 18'/%3E%3C/svg%3E")}
-.apex-ic[data-i=star]{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3.5l2.6 5.6 6 .8-4.4 4.2 1.1 6-5.3-3-5.3 3 1.1-6L3.4 9.9l6-.8z'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3.5l2.6 5.6 6 .8-4.4 4.2 1.1 6-5.3-3-5.3 3 1.1-6L3.4 9.9l6-.8z'/%3E%3C/svg%3E")}
-.apex-ic[data-i=star]{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3.5l2.6 5.6 6 .8-4.4 4.2 1.1 6-5.3-3-5.3 3 1.1-6L3.4 9.9l6-.8z'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3.5l2.6 5.6 6 .8-4.4 4.2 1.1 6-5.3-3-5.3 3 1.1-6L3.4 9.9l6-.8z'/%3E%3C/svg%3E")}
-.apex-ic[data-i=list]{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 5h16v14H4zM4 10h16M4 14.5h16M9 5v14'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 5h16v14H4zM4 10h16M4 14.5h16M9 5v14'/%3E%3C/svg%3E")}
-.apex-ic[data-i=caret]{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9.5l6 6 6-6'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9.5l6 6 6-6'/%3E%3C/svg%3E")}
-.apex-ic[data-i=diamond]{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3l7 9-7 9-7-9z'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3l7 9-7 9-7-9z'/%3E%3C/svg%3E")}
-.apex-ic[data-i=pause]{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 5v14M15 5v14'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 5v14M15 5v14'/%3E%3C/svg%3E")}
-.apex-ic[data-i=edit]{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 20h4L20 8l-4-4L4 16z'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 20h4L20 8l-4-4L4 16z'/%3E%3C/svg%3E")}
-.apex-ic[data-i=edit]{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 20h4L20 8l-4-4L4 16z'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 20h4L20 8l-4-4L4 16z'/%3E%3C/svg%3E")}
-.apex-ic[data-i=play]{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 4l12 8-12 8z'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 4l12 8-12 8z'/%3E%3C/svg%3E")}
- emission. Do not "simplify" the doubled
+   anyone reorders the <link>/<style> emission. Do not "simplify" the doubled
    class away -- that is the whole fix. */
 #view-team .va-twopane > .va-twopane-rail.va-twopane-rail { gap: 1px !important; }
 .va-twopane-rail { gap: 2px !important; }
@@ -6849,7 +6810,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 </style>
 <div id="offseason-banner" style="display:none;">
   <div class="offseason-banner-inner">
-    <span class="offseason-banner-pause"><i class=apex-ic data-i=pause></i></span>
+    <span class="offseason-banner-pause"></span>
     <span class="offseason-banner-text">
       <strong>Season ended.</strong> 2025/26 Premier League is complete &mdash;
       solver returns when 2026/27 fixtures are released (mid&#8209;August&nbsp;2026).
@@ -6919,14 +6880,14 @@ html.apex-offseason #view-landing .hero-sub::after {
 
     <div class="landing-cta-row">
       <button id="landing-cta-chips" class="landing-cta landing-cta-primary" onclick="_landingGo('chip-select')">
-        <span class="cta-icon"><i class=apex-ic data-i=bolt></i></span>
+        <span class="cta-icon"></span>
         <span class="cta-body">
           <span class="cta-title">Optimise My Chips</span>
           <span class="cta-desc">Find the best WC, FH, BB, TC sequence for your squad</span>
         </span>
       </button>
       <button class="landing-cta landing-cta-secondary" onclick="_landingGo('team')">
-        <span class="cta-icon"><i class=apex-ic data-i=board></i></span>
+        <span class="cta-icon"></span>
         <span class="cta-body">
           <span class="cta-title">View My Squad</span>
           <span class="cta-desc">GW projections, transfers, and weekly xPts</span>
@@ -7074,28 +7035,28 @@ html.apex-offseason #view-landing .hero-sub::after {
           <select name="wc_gw" id="sel-wc" onchange="_onChipGwChanged(this)">
             <option value="0">—</option>
           </select>
-          <span class="va-chip-card-chev" aria-hidden="true"><i class=apex-ic data-i=caret></i></span>
+          <span class="va-chip-card-chev" aria-hidden="true"></span>
         </label>
         <label class="va-chip-card va-chip-bb">
           <span class="va-chip-card-tag">BENCH BOOST</span>
           <select name="bb_gw" id="sel-bb" onchange="_onChipGwChanged(this)">
             <option value="0">—</option>
           </select>
-          <span class="va-chip-card-chev" aria-hidden="true"><i class=apex-ic data-i=caret></i></span>
+          <span class="va-chip-card-chev" aria-hidden="true"></span>
         </label>
         <label class="va-chip-card va-chip-tc">
           <span class="va-chip-card-tag">TRIPLE CAPTAIN</span>
           <select name="tc_gw" id="sel-tc" onchange="_onChipGwChanged(this)">
             <option value="0">—</option>
           </select>
-          <span class="va-chip-card-chev" aria-hidden="true"><i class=apex-ic data-i=caret></i></span>
+          <span class="va-chip-card-chev" aria-hidden="true"></span>
         </label>
         <label class="va-chip-card va-chip-fh">
           <span class="va-chip-card-tag">FREE HIT</span>
           <select name="fh_gw" id="sel-fh" onchange="_onChipGwChanged(this)">
             <option value="0">—</option>
           </select>
-          <span class="va-chip-card-chev" aria-hidden="true"><i class=apex-ic data-i=caret></i></span>
+          <span class="va-chip-card-chev" aria-hidden="true"></span>
         </label>
       </div>
       <!-- APEX_FIX_AUG13_CHIP_SUGGEST — the button now lives in the label row
@@ -7184,8 +7145,8 @@ html.apex-offseason #view-landing .hero-sub::after {
          the one-page fit (Marcus). Zero layout impact; dismissed forever on
          first solve or via the ×. localStorage-flagged. -->
     <div id="apex-firstrun-hint" style="display:none;position:fixed;bottom:22px;left:50%;transform:translateX(-50%);z-index:9000;background:#fff;border:1px solid var(--accent,#0F6E56);border-radius:12px;padding:10px 16px;font-size:.82rem;color:var(--text,#16201C);box-shadow:none;max-width:92vw;text-align:center;">
-      New here? Tap <b style="color:var(--accent,#0F6E56);"><i class=apex-ic data-i=road></i> Solve</b> — it maps your best path, gameweek by gameweek. Everything else can wait.
-      <a href="#" onclick="try{localStorage.setItem('apex_firstrun_done','1');}catch(e){}document.getElementById('apex-firstrun-hint').style.display='none';return false;" style="color:var(--muted);text-decoration:none;margin-left:8px;font-weight:700;" title="Dismiss"><i class=apex-ic data-i=close></i></a>
+      New here? Tap <b style="color:var(--accent,#0F6E56);">Solve</b> — it maps your best path, gameweek by gameweek. Everything else can wait.
+      <a href="#" onclick="try{localStorage.setItem('apex_firstrun_done','1');}catch(e){}document.getElementById('apex-firstrun-hint').style.display='none';return false;" style="color:var(--muted);text-decoration:none;margin-left:8px;font-weight:700;" title="Dismiss"></a>
     </div>
     <script>
       try {
@@ -7401,7 +7362,7 @@ html.apex-offseason #view-landing .hero-sub::after {
       <button class="btn solve-btn" onclick="_apexPrimarySolve()" id="solve-btn"
         title="Solve your path - open the planner and pick it gameweek by gameweek"
         style="background:var(--accent,#0F6E56);color:#000;border:none;padding:11px 28px;border-radius:8px;font-weight:700;font-size:.95rem;cursor:pointer;display:flex;align-items:center;gap:8px;">
-        <i class=apex-ic data-i=road></i> Solve
+        Solve
       </button>
       <button class="btn reset-btn" onclick="resetSolver()" id="reset-btn"
         title="Revert all transfers + chip selections, restore original squad"
@@ -7429,7 +7390,7 @@ html.apex-offseason #view-landing .hero-sub::after {
       <button class="btn" onclick="_apexToggleDrafts()" id="apex-drafts-btn"
         title="Save named plans and compare them side by side"
         style="background:transparent;color:var(--text);border:1px solid var(--border);padding:11px 18px;border-radius:8px;font-weight:600;font-size:.85rem;cursor:pointer;display:flex;align-items:center;gap:6px;">
-        <i class=apex-ic data-i=list></i> Saved plans
+        Saved plans
       </button>
       <!-- PLAY CHIP (moved here 2026-08-01, Marcus). Still VIEW-ONLY: it
            answers "what does this gameweek look like with this chip?" and
@@ -7555,7 +7516,7 @@ html.apex-offseason #view-landing .hero-sub::after {
 
     <section id="pool-section" style="margin-top:24px;">
       <h2 style="font-size:1.1rem;font-weight:700;margin-bottom:4px;">Expected Points</h2>
-      <p class="muted" style="font-size:.78rem;margin-bottom:12px;">Tap <strong style="color:var(--accent,#0F6E56);"><i class=apex-ic data-i=close></i></strong> on any player above to remove them, then pick a replacement below.</p>
+      <p class="muted" style="font-size:.78rem;margin-bottom:12px;">Tap <strong style="color:var(--accent,#0F6E56);"></strong> on any player above to remove them, then pick a replacement below.</p>
       <!-- Custom Projections panel REMOVED 2026-07-25 (Marcus: "get rid of csv
            upload"). It let a user replace the model's projections with their own
            CSV — the opposite of what the product sells, and a niche one: the
@@ -8337,7 +8298,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
       <button class="btn" onclick="_apexRunChipTiming()" id="apex-chiptiming-btn"
         title="Rank every chip sequence and apply the best in one tap"
         style="background:var(--accent,#0F6E56);color:#000;border:none;padding:9px 18px;border-radius:8px;font-weight:700;font-size:.85rem;cursor:pointer;">
-        <i class=apex-ic data-i=bolt></i> Best chip timing
+        Best chip timing
       </button>
     </div>
     <div id="apex-chiptiming-panel" style="margin:0 0 14px;"></div>
@@ -8452,7 +8413,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
 
       <div class="cs-cta-row">
         <button onclick="applyChipSelection()" class="cs-cta-btn">
-          <i class=apex-ic data-i=bolt></i> Calculate optimal strategy
+          Calculate optimal strategy
         </button>
       </div>
     </div>
@@ -8537,7 +8498,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
       <span class="cr-bank-label">Bank</span>
       <span class="cr-bank" id="cr-bank-left">£0.0m</span>
     </div>
-    <button class="cr-apply-btn" type="button" onclick="confirmChipReview()"><i class=apex-ic data-i=check></i> Apply Squad to Plan</button>
+    <button class="cr-apply-btn" type="button" onclick="confirmChipReview()">Apply Squad to Plan</button>
   </div>
   <main class="container">
     <div class="cr-hero-card">
@@ -8583,7 +8544,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
          locked trunk card to re-decide that week. See _ppUndo / _ppRewindTo. -->
     <button class="cr-back-btn" type="button" id="pp-undo-btn" onclick="_ppUndo()" style="display:none;">↶ Undo</button>
     <button class="cr-back-btn" type="button" id="pp-startover-btn" onclick="_ppStartOver()" style="display:none;">↺ Start over</button>
-    <button class="cr-apply-btn" type="button" id="pp-apply-btn" onclick="confirmPathPlan()" style="display:none;"><i class=apex-ic data-i=check></i> Apply Plan to Squad</button>
+    <button class="cr-apply-btn" type="button" id="pp-apply-btn" onclick="confirmPathPlan()" style="display:none;">Apply Plan to Squad</button>
   </div>
   <main class="container">
     <div class="pp-intro" id="pp-intro">
@@ -9018,7 +8979,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
   window.apexLockedHtml = function (title, blurb) {
     return '<div class="apex-locked-card" style="background:var(--bg2,#faf8f3);border:1px dashed var(--accent,#0F6E56);' +
       'border-radius:12px;padding:18px 20px;margin:10px 0;">' +
-      '<div style="font-weight:800;font-size:.95rem;"><i class=apex-ic data-i=lock></i> ' + title + ' — Apex feature</div>' +
+      '<div style="font-weight:800;font-size:.95rem;">' + title + ' — Apex feature</div>' +
       '<div style="font-size:.82rem;color:var(--muted,#7a8783);margin-top:4px;">' +
       (blurb || 'Part of the Apex season pass. Free tells you who’s good — Apex tells you how to beat your league.') +
       '</div></div>';
@@ -10353,7 +10314,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
     // CORRECTED book, and nothing else about the preset changes. ONE-LINE
     // REVERT: set this to 5.00. The durable fix remains the redesign already on
     // the open list — tilt on EXCESS SD per xP rather than raw SD.
-    const PUNT_RISK_WEIGHT = 5.00;  // PUNT (+1) ONLY. xP paid per xP of EXCESS horizon SD; plateau 4.0 … 5.0 (re-measured 2026-08-27, Marcus's registered call). <i class=apex-ic data-i=warn></i> 08-30: on the CORRECTED book this no longer clears the divergence bar and NEITHER DOES 3.70 (+0.04 -> +0.07, bar +0.4) - a dial nudge is not the fix; see the punt redesign on the open list. Left at his registered value deliberately.
+    const PUNT_RISK_WEIGHT = 5.00;  // PUNT (+1) ONLY. xP paid per xP of EXCESS horizon SD; plateau 4.0 … 5.0 (re-measured 2026-08-27, Marcus's registered call). 08-30: on the CORRECTED book this no longer clears the divergence bar and NEITHER DOES 3.70 (+0.04 -> +0.07, bar +0.4) - a dial nudge is not the fix; see the punt redesign on the open list. Left at his registered value deliberately.
     const _riskSD = new Array(n).fill(0);
     let _riskSign = 0;
     if (opts.riskTilt !== undefined && opts.riskTilt !== null && +opts.riskTilt !== 0) {
@@ -16994,7 +16955,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
     var tags = {
       model:   { txt: 'MODEL’S PICK', style: 'background:#0F6E56;color:#fff;' },
       patient: { txt: 'PATIENT',          style: 'background:#F4F5F3;color:var(--text);border:1px solid var(--border);' },
-      swing:   { txt: '<i class=apex-ic data-i=bolt></i> RANK SWING', style: 'background:#FBF0DA;color:#B87A0E;border:1px solid #E8B54A;' },
+      swing:   { txt: 'RANK SWING', style: 'background:#FBF0DA;color:#B87A0E;border:1px solid #E8B54A;' },
     };
     var tag = tags[key];
     var stepsHtml = R.state.steps.map(function (s) { return _txpStepHtml(s, key === 'swing'); }).join('');
@@ -17079,13 +17040,13 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
       var startIdx = _txpGwIdx();
       var W = Math.min(TXP_WINDOW, tm.gw_range.length - startIdx);
       var chip = _txpChipInWindow(startIdx, W);
-      var head = '<div class="section-title" style="margin-top:2rem;"><i class=apex-ic data-i=road></i> Transfer paths — three routes, not three moves</div>';
+      var head = '<div class="section-title" style="margin-top:2rem;">Transfer paths — three routes, not three moves</div>';
       // Pre-GW1 collapse — one card, not three. Takes precedence over the chip
       // branch: a Wildcard flagged in GW1 is meaningless when every change is
       // already free.
       if (_txpPreGw1(startIdx)) {
         body.innerHTML =
-            '<div class="section-title" style="margin-top:2rem;"><i class=apex-ic data-i=road></i> Your GW1 squad</div>'
+            '<div class="section-title" style="margin-top:2rem;">Your GW1 squad</div>'
           + '<div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:18px 20px;font-size:.85rem;color:var(--muted);">'
           + 'Before the GW1 deadline you can change all 15 players as often as you like, for free — there is no transfer to bank and no hit to weigh, so staged routes would be inventing a choice you do not have. '
           + '<a href="#" class="txp-tree-link" style="color:#0F6E56;font-weight:700;">Open the plan-ahead tree →</a> — it builds your opening 15, then stages transfers from GW2 where free transfers start to matter.</div>';
@@ -17313,7 +17274,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
   function _lockedHtml(title, blurb) {
     try { if (typeof window.apexLockedHtml === 'function') return window.apexLockedHtml(title, blurb); }
     catch (e) {}
-    return '<div style="padding:14px;border:1px dashed #0F6E56;border-radius:12px;"><i class=apex-ic data-i=lock></i> ' +
+    return '<div style="padding:14px;border:1px dashed #0F6E56;border-radius:12px;">' +
            (title || 'Apex feature') + '</div>';
   }
 
@@ -17568,7 +17529,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
       var pct = Math.round(m.pct * 100);
       return '<tr' + (isPick ? ' style="background:rgba(15,110,86,.07);"' : '') + '>' +
         '<td style="padding:6px 10px;">' + _esc(m.out_name) + ' → ' + _esc(m.in_name) +
-        (isPick ? ' <span title="the move the model actually recommends" style="color:#0F6E56;font-weight:800;"><i class=apex-ic data-i=diamond></i></span>' : '') +
+        (isPick ? ' <span title="the move the model actually recommends" style="color:#0F6E56;font-weight:800;"></span>' : '') +
         '</td>' +
         '<td style="padding:6px 10px;text-align:right;font-variant-numeric:tabular-nums;">' +
         m.survived + '/' + m.total + '</td>' +
@@ -17611,7 +17572,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
       '</tr></thead><tbody>' + rows + '</tbody></table>' +
       challenger +
       '<div style="padding:8px 14px;font-size:.72rem;color:var(--muted,#7a8783);">' +
-      '<i class=apex-ic data-i=diamond></i> = the model’s actual pick, which the verdict is about · each test world nudges every player’s projections by about ±' +
+      '= the model’s actual pick, which the verdict is about · each test world nudges every player’s projections by about ±' +
       Math.round(SIGMA * 100) + '% (the model’s own typical error) · ' + pick.total + ' worlds tested</div>' +
       '</div>';
   }
@@ -17739,7 +17700,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
   function _lockedHtml(title, blurb) {
     try { if (typeof window.apexLockedHtml === 'function') return window.apexLockedHtml(title, blurb); }
     catch (e) {}
-    return '<div style="padding:14px;border:1px dashed #0F6E56;border-radius:12px;"><i class=apex-ic data-i=lock></i> ' +
+    return '<div style="padding:14px;border:1px dashed #0F6E56;border-radius:12px;">' +
            (title || 'Apex feature') + '</div>';
   }
   function _fire() {
@@ -18316,7 +18277,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
       var cap = _cap();
       var used = Object.keys(drafts).length;
       if (used >= cap) {
-        return { ok: false, error: 'Plan limit reached (' + cap + '). Tap the <i class=apex-ic data-i=close></i> next to a saved plan below to free a slot.', capped: true };
+        return { ok: false, error: 'Plan limit reached (' + cap + '). Tap the next to a saved plan below to free a slot.', capped: true };
       }
     }
     drafts[name] = { blob: blob, savedAt: Date.now() };
@@ -18819,7 +18780,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
           title: 'This plan is from a different gameweek',
           message: '“' + name + '” was saved for GW' + (blob.gw0 != null ? blob.gw0 : '?') +
                    '. The weeks no longer line up with GW' + nowGw0 + ', so it can’t be loaded. ' +
-                   'You can delete it with <i class=apex-ic data-i=close></i>.',
+                   'You can delete it with .',
           okLabel: 'Got it', hideCancel: true,
         });
         return;
@@ -18925,7 +18886,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
       var actions = isCurrent ? '' :
         '<div style="display:inline-flex;gap:6px;margin-left:8px;">' +
         '<button onclick="_apexDraftLoad(\'' + _esc(row.name) + '\')" title="Load this plan (replaces your current plan)" style="background:#0F6E56;color:#fff;border:none;border-radius:6px;padding:3px 9px;font-size:.66rem;font-weight:800;cursor:pointer;font-family:inherit;">Load</button>' +
-        '<button onclick="_apexDraftDelete(\'' + _esc(row.name) + '\')" title="Delete this plan" style="background:#fff;color:#c0392b;border:1px solid #e0d9cc;border-radius:6px;padding:3px 8px;font-size:.66rem;font-weight:800;cursor:pointer;font-family:inherit;"><i class=apex-ic data-i=close></i></button>' +
+        '<button onclick="_apexDraftDelete(\'' + _esc(row.name) + '\')" title="Delete this plan" style="background:#fff;color:#c0392b;border:1px solid #e0d9cc;border-radius:6px;padding:3px 8px;font-size:.66rem;font-weight:800;cursor:pointer;font-family:inherit;"></button>' +
         '</div>';
       var staleTag = row.stale
         ? ' <span style="font-size:.62rem;color:#a8a294;font-weight:700;">(saved for GW' + (row.savedForGw != null ? row.savedForGw : '?') + ' — outdated)</span>'
@@ -18933,7 +18894,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
       var totalTxt = _fmt(row.total) + (row.incomplete && !row.stale ? '<span style="color:#a8a294;">*</span>' : '');
       return '<tr style="border-top:1px solid #E4E8E4;' + bg + dim + '">' +
         '<td style="padding:8px 10px;font-weight:' + (isBest ? '800' : '600') + ';position:sticky;left:0;' + (bg || 'background:#fff;') + '">' +
-          (isBest ? '<i class=apex-ic data-i=star></i> ' : '') + _escText(row.name) + staleTag + actions + '</td>' +
+          (isBest ? '' : '') + _escText(row.name) + staleTag + actions + '</td>' +
         cellsHtml +
         '<td title="Sum of the scored weeks in this row" style="padding:8px 10px;text-align:right;font-family:\'JetBrains Mono\',monospace;font-weight:800;' + (isBest ? 'color:#0F6E56;' : '') + '">' + totalTxt + '</td>' +
         '</tr>';
@@ -18948,7 +18909,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
     }
 
     var rankedNote = (data.comparableGws && data.comparableGws < data.gwRange.length)
-      ? '<div style="font-size:.66rem;color:#7a8783;margin:4px 0 0;"><i class=apex-ic data-i=star></i> ranked on the ' + data.comparableGws + ' week(s) every plan has scored — rows with * have unscored weeks.</div>'
+      ? '<div style="font-size:.66rem;color:#7a8783;margin:4px 0 0;">ranked on the ' + data.comparableGws + ' week(s) every plan has scored — rows with * have unscored weeks.</div>'
       : '';
 
     el.innerHTML =
@@ -18958,7 +18919,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
       '<button onclick="_apexDraftSaveFromPrompt()" style="background:#0F6E56;color:#fff;border:none;border-radius:8px;padding:6px 12px;font-size:.72rem;font-weight:800;cursor:pointer;font-family:inherit;">＋ Save current plan</button>' +
       '<span style="flex:1;"></span>' +
       '</div>' +
-      '<div style="font-size:.66rem;color:#7a8783;margin:0 0 6px;">Projected points (xPts) per gameweek, hits deducted · <i class=apex-ic data-i=star></i> = best plan · ~ = can’t score that week · FH? = Free Hit week not planned yet</div>' +
+      '<div style="font-size:.66rem;color:#7a8783;margin:0 0 6px;">Projected points (xPts) per gameweek, hits deducted · = best plan · ~ = can’t score that week · FH? = Free Hit week not planned yet</div>' +
       '<div style="overflow-x:auto;"><table style="border-collapse:collapse;font-size:.82rem;min-width:520px;background:#fff;border:1px solid #E4E8E4;border-radius:12px;overflow:hidden;">' +
       '<thead>' + head + '</thead><tbody>' + body + '</tbody></table></div>' +
       rankedNote +
@@ -19362,7 +19323,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
       var best = (i === 0) && !_tiedMany;
       var tiedHere = _tiedMany && s && s.tied_with_best;
       var _lead = tiedHere ? '<span style="color:#7a8783;font-weight:700;">= </span>'
-                           : (best ? '<i class=apex-ic data-i=star></i> ' : '');
+                           : (best ? '' : '');
       rows +=
         '<tr style="border-top:1px solid #E4E8E4;' + (best ? 'background:rgba(15,110,86,.08);' : (tiedHere ? 'background:rgba(15,110,86,.035);' : '')) + '">' +
         '<td style="padding:9px 10px;font-weight:' + (best ? '800' : '600') + ';">' +
@@ -19412,11 +19373,11 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
         var bits = [];
         if (Array.isArray(rad.later_dgws) && rad.later_dgws.length) {
           var picks = rad.later_dgws.slice(0, 2).map(function (d) { return 'GW' + d.gw; });
-          bits.push('<i class=apex-ic data-i=hourglass></i> Double gameweek' + (rad.later_dgws.length > 1 ? 's' : '') + ' at ' + picks.join(' and ') +
+          bits.push('Double gameweek' + (rad.later_dgws.length > 1 ? 's' : '') + ' at ' + picks.join(' and ') +
                     ' — beyond this window. Holding TC/BB for a double often beats playing them now.');
         }
         if (Array.isArray(rad.later_blanks) && rad.later_blanks.length) {
-          bits.push('<i class=apex-ic data-i=warn></i> Blank gameweek at GW' + rad.later_blanks[0].gw + ' ahead — a Free Hit there may beat these options.');
+          bits.push('Blank gameweek at GW' + rad.later_blanks[0].gw + ' ahead — a Free Hit there may beat these options.');
         }
         if (rad.second_half_unlock) {
           bits.push('A second set of chips unlocks at GW20 — not modelled in this window.');
@@ -19597,15 +19558,15 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
       if (_dlDeadline) {
         var ms = _dlDeadline.t - Date.now();
         var d = Math.floor(ms / 86400000), h = Math.floor(ms % 86400000 / 3600000), m = Math.floor(ms % 3600000 / 60000);
-        bits.push('<i class=apex-ic data-i=hourglass></i> GW' + _dlDeadline.gw + ' · ' + (d > 0 ? (d + 'd ' + h + 'h') : (h + 'h ' + String(m).padStart(2, '0') + 'm')));
+        bits.push('GW' + _dlDeadline.gw + ' · ' + (d > 0 ? (d + 'd ' + h + 'h') : (h + 'h ' + String(m).padStart(2, '0') + 'm')));
         if (!_dlTimer) _dlTimer = setInterval(_dlRender, 30000);
       }
       var act = null;
       if (n.loss >= 0.5) {
-        bits.push('<i class=apex-ic data-i=warn></i> ' + n.loss.toFixed(1) + ' xPts on bench');
+        bits.push('' + n.loss.toFixed(1) + ' xPts on bench');
         act = 'squad';
       } else if (n.fixes > 0) {
-        bits.push('<i class=apex-ic data-i=bolt></i> ' + n.fixes + ' idea' + (n.fixes > 1 ? 's' : '') + ' →');
+        bits.push('' + n.fixes + ' idea' + (n.fixes > 1 ? 's' : '') + ' →');
         act = 'transfers';
       }
       // 2026-08-01 (Marcus: "is it necessary, trying to simplify the solver").
@@ -19986,7 +19947,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
       }
       if (!pin) {
         wrap.innerHTML = shell(
-          '<span style="font-size:1rem;"><i class=apex-ic data-i=pin></i></span>' +
+          '<span style="font-size:1rem;"></span>' +
           '<div style="flex:1;min-width:200px;"><div style="font-weight:800;font-size:.88rem;">Pin your rival</div>' +
           '<div style="font-size:.76rem;color:#7a8783;">Pick the one person you most want to beat — the gap shows here every week.</div></div>' +
           '<button onclick="_pxPickRival()" style="background:#0F6E56;color:#fff;border:none;border-radius:9px;padding:9px 16px;font-family:inherit;font-weight:800;font-size:.8rem;cursor:pointer;">Choose →</button>');
@@ -20322,7 +20283,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1788391803-GW3-2063077b";
+const BUILD_VERSION = "1788423956-GW3-e45bc1e6";
 window.APEX_BUILD = BUILD_VERSION;
 // APEX_BUILD_FRESHNESS_v1 (2026-08-28): the page checks whether a NEWER build
 // is live and offers a one-tap update. GitHub Pages serves HTML max-age=600,
@@ -20379,7 +20340,7 @@ window.APEX_SQUAD_ROLLBACK = false;
 let FPL_ID = null;
 let SQUAD_DATA = [];
 </script>
-<script src="/apex_pool.js?v=1788391803-GW3-2063077b"></script>
+<script src="/apex_pool.js?v=1788423956-GW3-e45bc1e6"></script>
 <script>
 const PLAYER_NAMES = {"1": "Raya", "2": "Arrizabalaga", "3": "Meslier", "4": "Gabriel", "5": "J.Timber", "6": "Saliba", "7": "Lewis-Skelly", "8": "Calafiori", "9": "Hincapie", "10": "White", "11": "Mosquera", "12": "Saka", "13": "Rice", "14": "Eze", "15": "\u00d8degaard", "16": "Madueke", "17": "Merino", "18": "Martinelli", "19": "Zubimendi", "20": "Dowman", "22": "Nwaneri", "23": "F\u00e1bio Vieira", "24": "Nelson", "25": "Gy\u00f6keres", "26": "Havertz", "27": "G.Jesus", "31": "Konsa", "452": "Bruno G.", "557": "Tzolis", "29": "M.Bizot", "30": "Digne", "32": "Cash", "33": "Mings", "34": "Pau", "35": "Bogarde", "36": "Maatsen", "37": "Lindel\u00f6f", "38": "A.Garc\u00eda", "39": "Nedeljkovic", "41": "Buend\u00eda", "44": "Bailey", "45": "McGinn", "46": "Barkley", "47": "Kamara", "48": "Onana", "49": "Iling Jr", "50": "Burrowes", "51": "George Hemmings", "52": "Alysson", "53": "Manzambi", "54": "Gomes", "55": "Watkins", "56": "Abraham", "160": "Garnacho", "166": "N.Jackson", "582": "Madjo", "596": "Ruggeri", "597": "Suzuki", "606": "Rowe", "607": "Lynch", "611": "Wan-Bissaka", "618": "Goretzka", "630": "Harwood-Bellis", "631": "Mbaye", "57": "Petrovi\u0107", "58": "Forster", "59": "Dennis", "60": "Hill", "61": "Truffert", "62": "Diakit\u00e9", "63": "Milosavljevi\u0107", "64": "Smith", "65": "J.Araujo", "66": "Soler", "67": "Rayan", "68": "Tavernier", "69": "Scott", "70": "Kluivert", "71": "Cook", "72": "Gannon-Doak", "73": "Adams", "74": "Brooks", "75": "Christie", "76": "T\u00f3th.A", "77": "Adli", "78": "Kroupi.Jr", "79": "Evanilson", "80": "Enes \u00dcnal", "81": "Rodr\u00edguez", "566": "Silva", "573": "Sanchez", "608": "Jebbison", "615": "Di Gregorio", "82": "Kelleher", "83": "Valdimarsson", "84": "Collins", "85": "Van den Berg", "86": "Lewis-Potter", "87": "Ajer", "88": "Kayode", "89": "Henry", "90": "Hickey", "92": "Ji-soo", "93": "Schuster", "94": "Schade", "95": "O.Dango", "96": "Damsgaard", "97": "Jensen", "98": "Janelt", "99": "Milambo", "100": "Carvalho", "102": "Yarmoliuk", "103": "Dasilva", "105": "Anthony", "106": "Thiago", "107": "Furo", "108": "Wilson", "565": "M.Sangar\u00e9", "620": "Diouf", "109": "Verbruggen", "111": "Steele", "113": "F.Kad\u0131o\u011flu", "114": "Boscagli", "115": "De Cuyper", "116": "Dunk", "117": "Coppola", "118": "Igor", "119": "Costinha", "120": "Svoboda", "121": "Mitoma", "122": "Minteh", "123": "Hinshelwood", "124": "Gro\u00df", "125": "Georginio", "126": "O'Riley", "127": "Gomez", "128": "Buonanotte", "129": "Ayari", "130": "Wieffer", "132": "Howell", "133": "Watson", "134": "Oriola", "135": "Yohanna", "137": "Tzimas", "138": "Kostoulas", "139": "Ferguson", "328": "Struijk", "504": "Vuskovic", "594": "David", "600": "Osman", "605": "Yalcouy\u00e9", "614": "Hadjam", "624": "Cozier-Duberry", "639": "Andr\u00e9s", "28": "Martinez", "40": "Rogers", "101": "Henderson", "136": "Welbeck", "140": "S\u00e1nchez", "141": "J\u00f6rgensen", "142": "James", "143": "Chalobah", "144": "Gusto", "145": "Fofana", "146": "B.Badiashile", "148": "Hato", "149": "Colwill", "150": "M.Sarr", "151": "Acheampong", "152": "Palestra", "154": "Palmer", "156": "Neto", "157": "Est\u00eav\u00e3o", "158": "Gittens", "159": "Caicedo", "161": "Lavia", "163": "D.Essugo", "164": "Quenda", "165": "Jo\u00e3o Pedro", "168": "Marc Guiu", "169": "Mheuka", "170": "Emegha", "200": "Lacroix", "560": "Penders", "561": "Anselmino", "568": "Barco", "583": "Chavarria", "91": "Pinnock", "104": "Onyeka", "110": "Rushworth", "171": "Dovin", "172": "Wilson", "173": "Thomas", "174": "Kitching", "175": "van Ewijk", "176": "Dasilva", "177": "Kesler-Hayden", "178": "Bidwell", "179": "Latibeaudiere", "180": "Woolfenden", "181": "Brau", "182": "Amenda", "183": "Rudoni", "184": "Grimes", "185": "Sakamoto", "186": "Mason-Clark", "187": "Eccles", "188": "Torp", "189": "Shepherd", "190": "Tchaouna", "191": "Borges Rodrigues", "192": "Andrews", "193": "Wright", "194": "Thomas-Asante", "195": "Simms", "196": "Markelo", "197": "Bassette", "492": "Awoniyi", "575": "Yirenkyi", "584": "Hamer", "599": "Cherif", "623": "Bentley", "42": "Guessand", "153": "Disasi", "198": "Henderson", "199": "Benitez", "202": "Richards", "203": "Canvot", "204": "Mitchell", "205": "Sosa", "206": "Chadi Riad", "207": "Mingueza", "208": "Sarr", "210": "Wharton", "211": "Yeremy", "212": "Hughes", "213": "Lerma", "214": "Kamada", "215": "Devenny", "216": "Esse", "217": "M.Fran\u00e7a", "218": "Doucour\u00e9", "219": "J.Rak-Sakyi", "220": "Cardines", "221": "Drakes-Thomas", "222": "Strand Larsen", "223": "Mateta", "224": "Nketiah", "225": "Uche", "241": "McNeil", "555": "Matthews", "577": "Tomiyasu", "588": "Khalaili", "595": "Gozo", "633": "Ahanor", "643": "Chilwell", "644": "Timber", "647": "Osorio", "21": "N\u00f8rgaard", "209": "Johnson", "226": "Pickford", "227": "Travers", "228": "King", "229": "Tarkowski", "230": "Branthwaite", "231": "Keane", "232": "O'Brien", "233": "Mykolenko", "234": "Patterson", "235": "Aznou", "236": "Dewsbury-Hall", "238": "Grealish", "239": "Garner", "242": "George", "243": "Alcaraz", "244": "Armstrong", "245": "Dibling", "246": "R\u00f6hl", "247": "Hackney", "248": "Beto", "249": "Barry", "649": "Maitland-Niles", "250": "Leno", "251": "Lecomte", "252": "McNally", "253": "Andersen", "254": "Robinson", "255": "J.Cuenca", "256": "Tete", "257": "Bassey", "258": "Castagne", "261": "Iwobi", "262": "Smith Rowe", "263": "Kevin", "264": "Bobb", "265": "Berge", "266": "Cairney", "268": "King", "269": "Sessegnon", "270": "Reed", "271": "Muniz", "272": "Kusi-Asare", "569": "Gonzalo", "570": "Palacios", "580": "Charles", "610": "De Fougerolles", "626": "Zepa", "635": "Larsson", "636": "\u00c1ngel", "650": "Affengruber", "240": "Iroegbunam", "273": "Phillips", "274": "Butland", "275": "Cartwright", "276": "Lo-Tutala", "277": "Egan", "278": "Hughes", "279": "Ajayi", "280": "Coyle", "281": "Drameh", "282": "Giles", "283": "Jacob", "284": "McCarthy", "285": "McNair", "286": "Belloumi", "287": "Millar", "288": "Dowell", "289": "Crooks", "290": "Slater", "291": "Matazo", "292": "\u00d6m\u00fcr", "293": "Kamara", "294": "Zambrano", "295": "McBurnie", "296": "Akintola", "297": "Gyabi", "298": "Destan", "299": "Burstow", "340": "Gelhardt", "556": "Targett", "563": "Morita", "572": "Tzolakis", "574": "Hjert\u00f8-Dahl", "576": "Stroud", "585": "Herrington", "586": "Mendy", "589": "Gourna-Douath", "617": "Cho", "632": "Ansah", "637": "Vaz", "638": "Norton-Cuffy", "642": "Thomas", "645": "Mouzakitis", "259": "Diop", "267": "Luki\u0107", "300": "Walton", "301": "Palmer", "302": "Button", "303": "Kipr\u00e9", "304": "O'Shea", "305": "Davis", "306": "Greaves", "307": "Johnson", "308": "Furlong", "309": "N\u00fa\u00f1ez", "310": "Matusiwa", "311": "Burns", "312": "Taylor", "313": "Clarke", "314": "Ogbene", "315": "Fatawu", "316": "Emersonn", "317": "Hirst", "318": "Philogene", "319": "Szmodics", "320": "Akpom", "321": "Walle Egeli", "322": "Al-Hamadi", "323": "McAteer", "324": "Mehmeti", "554": "Van Oevelen", "562": "Maeda", "564": "Scherpen", "571": "Florentino", "591": "Enciso", "592": "Ouattara", "602": "Humphreys", "619": "Palacios", "640": "Flemming", "260": "Wilson", "326": "Perri", "327": "Bijol", "329": "Rodon", "330": "Bogle", "331": "Gudmundsson", "332": "Justin", "333": "Bornauw", "334": "Muharemovi\u0107", "335": "Stach", "336": "Okafor", "337": "Aaronson", "338": "Ampadu", "339": "Longstaff", "341": "Gnonto", "342": "Harrison", "343": "James", "344": "Gruev", "345": "Tanaka", "346": "Calvert-Lewin", "347": "Nmecha", "348": "Piroe", "349": "Mateo Joseph", "385": "Trafford", "598": "Elvedi", "603": "Lienou", "604": "Cresswell", "625": "Cairns", "629": "Zetterer", "641": "Bard", "648": "Bahoya", "350": "A.Becker", "351": "Mamardashvili", "352": "Woodman", "353": "Pecsi", "354": "Jaros", "355": "Davies", "356": "Virgil", "357": "Frimpong", "358": "Kerkez", "359": "Gomez", "360": "Bradley", "361": "Lucky", "362": "Jacquet", "363": "Leoni", "364": "Tsimikas", "365": "Ramsay", "366": "Wirtz", "367": "Gakpo", "368": "Szoboszlai", "369": "Ngumoha", "370": "Chiesa", "371": "Gravenberch", "372": "Mac Allister", "373": "C.Jones", "374": "Endo", "375": "Nyoni", "376": "Bajcetic", "377": "Munoz", "378": "McConnell", "379": "Isak", "380": "Ekitik\u00e9", "381": "Koumas", "382": "Danns", "383": "Elliott", "579": "Araujo", "627": "Barcola", "155": "Enzo", "237": "Ndiaye", "384": "Donnarumma", "386": "Bettinelli", "387": "O'Reilly", "388": "Gu\u00e9hi", "389": "Matheus N.", "390": "R\u00faben", "391": "Gvardiol", "392": "A\u00eft-Nouri", "393": "Khusanov", "394": "Alleyne", "395": "Lewis", "396": "Vitor Reis", "397": "Semenyo", "398": "Foden", "399": "Cherki", "400": "Doku", "402": "Rodrigo", "404": "Reijnders", "406": "Kova\u010di\u0107", "407": "Echeverri", "408": "Phillips", "409": "Mukasa", "410": "Monga", "411": "Haaland", "481": "Anderson", "587": "Rulli", "616": "Bouaddi", "621": "McAidoo", "622": "Braithwaite", "628": "Allan", "43": "Tielemans", "131": "Baleba", "162": "Andrey Santos", "325": "Darlow", "412": "Lammens", "413": "Bayindir", "414": "Heaton", "415": "Dorgu", "416": "De Ligt", "417": "Dalot", "418": "Maguire", "419": "Martinez", "420": "Yoro", "421": "Heaven", "422": "Mazraoui", "423": "Shaw", "424": "Amass", "425": "Fredricson", "426": "B.Fernandes", "427": "Mbeumo", "428": "Cunha", "429": "Rashford", "430": "Mount", "431": "Amad", "432": "Mainoo", "433": "Ugarte", "434": "J.Fletcher", "435": "Lacey", "436": "Collyer", "437": "Bendito Mantato", "438": "Fletcher", "439": "\u0160e\u0161ko", "440": "Zirkzee", "441": "Obi", "405": "N.Gonzalez", "442": "Pope", "443": "Gillespie", "444": "Jaouen", "445": "Thiaw", "446": "Sch\u00e4r", "447": "Botman", "448": "Burn", "449": "Hall", "450": "Livramento", "451": "A.Murphy", "453": "Barnes", "454": "Elanga", "456": "J.Ramsey", "457": "J.Murphy", "458": "Joelinton", "459": "L.Miley", "460": "Willock", "461": "Tour\u00e9", "462": "Steur", "463": "Woltemade", "464": "Wissa", "465": "Osula", "466": "Neave", "559": "Bamba", "567": "Horn\u00ed\u010dek", "593": "Dedi\u0107", "609": "Shahar", "634": "Fernandez-Pardo", "167": "Delap", "201": "Mu\u00f1oz", "467": "Sels", "468": "John", "469": "N.Williams", "470": "Morato", "471": "Milenkovi\u0107", "472": "Murillo", "473": "Aina", "474": "Jair Cunha", "475": "Savona", "476": "O.Richards", "477": "Abbott", "478": "Netz", "479": "Bindon", "480": "Gibbs-White", "482": "Hudson-Odoi", "483": "Ndoye", "484": "Hutchinson", "485": "Bakwa", "486": "McAtee", "487": "Dominguez", "488": "I.Sangar\u00e9", "489": "Yates", "490": "Wood", "491": "Igor Jesus", "493": "Kalimuendo", "558": "Schlager", "581": "Diomande", "590": "Benda", "112": "Van Hecke", "147": "Tosin", "401": "Marmoush", "403": "S\u00e1vio", "455": "Tonali", "494": "Vicario", "495": "Austin", "496": "Kinsky", "497": "Dubravka", "498": "Senesi", "499": "Pedro Porro", "500": "Romero", "502": "Robertson", "503": "Van de Ven", "505": "Spence", "506": "Udogie", "507": "Phillips", "508": "Davies", "509": "Byfield", "510": "Rowswell", "511": "Souza", "512": "Kudus", "513": "Xavi", "514": "Tel", "515": "Maddison", "516": "Bentancur", "517": "Odobert", "518": "P.M.Sarr", "519": "Gallagher", "520": "Bergvall", "521": "Kulusevski", "522": "Gray", "523": "Moore", "524": "Olusesi", "525": "Fernandes", "526": "Solanke", "527": "Richarlison", "528": "Scarlett", "578": "Mudryk", "601": "Williams-Barnett", "501": "Danso", "529": "Roefs", "530": "Patterson", "531": "Ellborg", "532": "Ballard", "533": "Mukiele", "534": "Hume", "535": "Alderete", "536": "Reinildo", "537": "Seelt", "538": "Hjelde", "539": "O'Nien", "540": "Masuaku", "541": "Meunier", "542": "E.Le F\u00e9e", "543": "Diarra", "544": "Xhaka", "545": "Sadiki", "546": "Adingra", "547": "Mundle", "548": "Rigg", "549": "Talbi", "550": "Jocelin.T", "551": "N.Angulo", "552": "Brobbey", "553": "Isidor", "612": "Methalie", "613": "Ahoka", "646": "Fofana", "651": "J.Angulo"};
 const TRANSFER_RECS = [];
@@ -20540,7 +20501,7 @@ const INFLIGHT_GW = 0;
 // Pre-computed Apex/FR scale + Apex-scaled inflight xP. In public mode the
 // raw FR_*_XP_BY_ID maps above are empty; rank_milestones.js falls through
 // to these instead. Local mode bakes both for diagnostic use.
-const APEX_FR_SCALE = 0.9828192899962118;
+const APEX_FR_SCALE = 0.9832204220800922;
 const INFLIGHT_XP_BY_ID = {};
 // COMPARE_XP_LOOKUP — for the Apex↔Tool A compare toggle (?compare=1).
 // {fpl_id: [xp_gw0, xp_gw1, ...]} matching POOL_DATA[i].xp_per_gw shape.
@@ -21956,8 +21917,8 @@ function _apexOwnTag(p) {
     const own = (typeof pd.own === 'number') ? pd.own : parseFloat(pd.own);
     if (!isFinite(own)) return '';
     let tag = '', color = 'var(--muted)', ttl = 'How many FPL managers own this player';
-    if (own <= _APEX_DIFF_OWN_MAX)          { tag = ' <i class=apex-ic data-i=gem></i>'; color = '#1D9E75'; ttl = 'Differential — few rivals own him: same points, bigger rank swing'; }
-    else if (own >= _APEX_TEMPLATE_OWN_MIN) { tag = ' <i class=apex-ic data-i=shield></i>'; color = '#3A6B8F'; ttl = 'Template — most rivals own him: safe, protects your rank'; }
+    if (own <= _APEX_DIFF_OWN_MAX)          { tag = ' '; color = '#1D9E75'; ttl = 'Differential — few rivals own him: same points, bigger rank swing'; }
+    else if (own >= _APEX_TEMPLATE_OWN_MIN) { tag = ' '; color = '#3A6B8F'; ttl = 'Template — most rivals own him: safe, protects your rank'; }
     // UX pass 2026-07-07: say what the % IS — a bare "13.7%" was the second-most
     // hit mystery number in the child-test walkthrough. v2 same day: compact +
     // nowrap + smaller font — the longer "owned by" phrasing wrapped every
@@ -26121,7 +26082,7 @@ async function _apexResolveTreeVerdict(gwIdx) {
   if (!box) return;
   if (typeof _ppComputeOptions !== 'function' || typeof _ppInjectChipOptions !== 'function') return;
   try {
-    box.innerHTML = `<div style="margin:0 0 12px 0;padding:10px 14px;border-radius:12px;background:var(--bg2);border:1px dashed var(--border);font-size:.78rem;color:var(--muted);"><i class=apex-ic data-i=tree></i> Asking the plan-ahead tree…</div>`;
+    box.innerHTML = `<div style="margin:0 0 12px 0;padding:10px 14px;border-radius:12px;background:var(--bg2);border:1px dashed var(--border);font-size:.78rem;color:var(--muted);">Asking the plan-ahead tree…</div>`;
     const _tv = await _apexTreeBranch0(gwIdx);
     if (seq !== _apexVerdictSeq) return;   // a newer render owns the box
     if (!_tv) { box.innerHTML = ''; return; }
@@ -26168,7 +26129,7 @@ async function _apexResolveTreeVerdict(gwIdx) {
         ? _apexPathEdge.tieSay(top._withinNoise ? ' Roll wins on that basis.' : '')
         : (top._withinNoise ? ' The best move’s edge is inside model noise, so Roll wins.' : '');
       inner = `
-        <div style="font-weight:800;color:#B4453A;font-size:.92rem;margin-bottom:4px;"><i class=apex-ic data-i=tree></i> Tree verdict — Roll (bank the FT)</div>
+        <div style="font-weight:800;color:#B4453A;font-size:.92rem;margin-bottom:4px;">Tree verdict — Roll (bank the FT)</div>
         <div style="color:var(--muted);font-size:.8rem;">Rolling keeps the FT’s future value${vs}.${noise} Moves below beat the bar on their own 3-GW maths, but the tree ranks rolling above all of them this week.</div>`;
     } else if (top.type === 'one' || top.type === 'two') {
       const hitNote = (top.hitCost > 0) ? ` <span style="color:#ef4444;">(−${top.hitCost} hit priced in)</span>` : '';
@@ -26188,16 +26149,16 @@ async function _apexResolveTreeVerdict(gwIdx) {
         ? _apexPathEdge.tieSay(` · whole path level with rolling instead — ${_apexPathEdge.tieWhy(_edgeSt)}`)
         : (_edge(top) ? ` · whole path <strong style="color:var(--text);">${_edge(top)}</strong> vs rolling instead` : '');
       inner = `
-        <div style="font-weight:800;color:#0F6E56;font-size:.92rem;margin-bottom:4px;"><i class=apex-ic data-i=tree></i> Tree verdict — ${moveTxt}${hitNote}</div>
+        <div style="font-weight:800;color:#0F6E56;font-size:.92rem;margin-bottom:4px;">Tree verdict — ${moveTxt}${hitNote}</div>
         <div style="color:var(--muted);font-size:.8rem;"><strong style="color:var(--text);">${_own(top)}</strong> squad gain now${_edgeTxt} — the tree’s first branch on your live squad. Press <strong>Solve</strong> to make it.</div>`;
     } else if (top.type === 'chip') {
       const _cn = { WC: 'Wildcard', FH: 'Free Hit', BB: 'Bench Boost', TC: 'Triple Captain' };
       inner = `
-        <div style="font-weight:800;color:#0F6E56;font-size:.92rem;margin-bottom:4px;"><i class=apex-ic data-i=tree></i> Tree verdict — play the ${_cn[top.chipType] || top.chipType} this week</div>
+        <div style="font-weight:800;color:#0F6E56;font-size:.92rem;margin-bottom:4px;">Tree verdict — play the ${_cn[top.chipType] || top.chipType} this week</div>
         <div style="color:var(--muted);font-size:.8rem;">Worth <strong style="color:var(--text);">${_own(top)}</strong> on your live squad this week — the tree’s first branch. Press <strong>Solve</strong> to play it (nothing is applied automatically).</div>`;
     } else if (top.type === 'build') {
       inner = `
-        <div style="font-weight:800;color:#0F6E56;font-size:.92rem;margin-bottom:4px;"><i class=apex-ic data-i=tree></i> Tree verdict — build the optimal 15</div>
+        <div style="font-weight:800;color:#0F6E56;font-size:.92rem;margin-bottom:4px;">Tree verdict — build the optimal 15</div>
         <div style="color:var(--muted);font-size:.8rem;">Unlimited free changes until the GW1 deadline — nothing to bank, nothing to pay.</div>`;
     } else {
       box.innerHTML = '';
@@ -26292,9 +26253,9 @@ function renderTransfers(recs) {
     } catch (_eS2) {}
     const _gwTxt = _planMeta.gwA === _planMeta.gwB ? `GW${_planMeta.gwA}` : `GW${_planMeta.gwA}–GW${_planMeta.gwB}`;
     section.innerHTML = `
-      <div class="section-title" style="margin-top:2rem;"><i class=apex-ic data-i=bolt></i> Recommended Transfers</div>
+      <div class="section-title" style="margin-top:2rem;">Recommended Transfers</div>
       <div style="background:var(--bg2);border:1px solid #0F6E56;border-radius:12px;padding:22px 24px;">
-        <div style="font-weight:800;color:#0F6E56;font-size:1rem;margin-bottom:6px;"><i class=apex-ic data-i=check></i> Plan applied · ${_gwTxt}</div>${_staleTxt}
+        <div style="font-weight:800;color:#0F6E56;font-size:1rem;margin-bottom:6px;">Plan applied · ${_gwTxt}</div>${_staleTxt}
         <p style="color:var(--muted);font-size:.88rem;margin:0 0 4px;">
           ${_planMeta.transfers || 0} transfer${(_planMeta.transfers || 0) === 1 ? '' : 's'} committed${_planMeta.hits ? ` · ${_planMeta.hits} hit${_planMeta.hits > 1 ? 's' : ''}` : ''} · ${(_planMeta.totalPts || 0).toFixed ? _planMeta.totalPts.toFixed(1) : _planMeta.totalPts} pts.
           Week-by-week recommendations are inside your plan — press <strong>Solve</strong> to review or edit it.
@@ -26322,17 +26283,17 @@ function renderTransfers(recs) {
         <span style="color:var(--muted);">FTs available <strong style="color:var(--text);">${_ftLabel(activeGwIdx, _emptyFTs)}</strong></span>
         <span style="color:var(--muted);">Applied <strong style="color:var(--text);">${_emptyApplied}</strong></span>
         ${_emptyRolled
-          ? `<span style="color:#B4453A;font-weight:700;"><i class=apex-ic data-i=ban></i> FT Rolled — banks for GW${TEAM_META.gw_range[activeGwIdx + 1] || '?'}</span>`
+          ? `<span style="color:#B4453A;font-weight:700;">FT Rolled — banks for GW${TEAM_META.gw_range[activeGwIdx + 1] || '?'}</span>`
           : `<span style="color:var(--muted);">No transfers yet</span>`}
         <span style="flex:1;"></span>
         ${!_emptyRolled
-          ? `<button onclick="_rollFT()" style="background:#B4453A;color:#000;border:none;border-radius:6px;padding:6px 12px;font-size:.75rem;font-weight:700;cursor:pointer;"><i class=apex-ic data-i=ban></i> No Transfer (Roll FT)</button>`
+          ? `<button onclick="_rollFT()" style="background:#B4453A;color:#000;border:none;border-radius:6px;padding:6px 12px;font-size:.75rem;font-weight:700;cursor:pointer;">No Transfer (Roll FT)</button>`
           : `<button onclick="_resetTransferPlan()" style="background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:6px 12px;font-size:.75rem;font-weight:600;cursor:pointer;">↺ Reset Plan</button>`
         }
       </div>
     `;
     section.innerHTML = `
-      <div class="section-title" style="margin-top:2rem;"><i class=apex-ic data-i=bolt></i> Recommended Transfers</div>
+      <div class="section-title" style="margin-top:2rem;">Recommended Transfers</div>
       <div id="apex-tree-verdict"></div>
       ${_emptyPlanState}
       <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:24px;text-align:center;">
@@ -26346,7 +26307,7 @@ function renderTransfers(recs) {
               if ((_lbC.locked || 0) + (_lbC.banned || 0) > 0) {
                 return 'No moves available within your locks/exclusions (' +
                   (_lbC.locked || 0) + ' locked, ' + (_lbC.banned || 0) + ' excluded) — ' +
-                  'try freeing one up via the <i class=apex-ic data-i=lock></i>/<i class=apex-ic data-i=ban></i> buttons in the player pool.';
+                  'try freeing one up via the /buttons in the player pool.';
               }
             }
           } catch (_eLb) {}
@@ -26386,7 +26347,7 @@ function renderTransfers(recs) {
       <span style="color:var(--muted);">FTs available <strong style="color:var(--text);">${_ftLabel(activeGwIdx, _effFTs)}</strong></span>
       <span style="color:var(--muted);">Applied <strong style="color:var(--text);">${_appliedCount}</strong></span>
       ${_isRolled
-        ? `<span style="color:#B4453A;font-weight:700;"><i class=apex-ic data-i=ban></i> FT Rolled — banks for GW${TEAM_META.gw_range[activeGwIdx + 1] || '?'}</span>`
+        ? `<span style="color:#B4453A;font-weight:700;">FT Rolled — banks for GW${TEAM_META.gw_range[activeGwIdx + 1] || '?'}</span>`
         : (_hitsCount > 0
             ? `<span style="color:#ef4444;font-weight:700;">−${_hitPts} hit (${_hitsCount} excess)</span>`
             : (_appliedCount > 0
@@ -26395,7 +26356,7 @@ function renderTransfers(recs) {
       }
       <span style="flex:1;"></span>
       ${!_isRolled && _appliedCount === 0
-        ? `<button onclick="_rollFT()" style="background:#B4453A;color:#000;border:none;border-radius:6px;padding:6px 12px;font-size:.75rem;font-weight:700;cursor:pointer;"><i class=apex-ic data-i=ban></i> No Transfer (Roll FT)</button>`
+        ? `<button onclick="_rollFT()" style="background:#B4453A;color:#000;border:none;border-radius:6px;padding:6px 12px;font-size:.75rem;font-weight:700;cursor:pointer;">No Transfer (Roll FT)</button>`
         : ''
       }
       ${(_isRolled || _appliedCount > 0)
@@ -26412,7 +26373,7 @@ function renderTransfers(recs) {
   // panel + Roll FT button + pill nav already give the user everything
   // needed to make the decision.
 
-  let html = `<div class="section-title" style="margin-top:2rem;"><i class=apex-ic data-i=bolt></i> Recommended Transfers</div>`
+  let html = `<div class="section-title" style="margin-top:2rem;">Recommended Transfers</div>`
     + `<div id="apex-tree-verdict"></div>`
     + planStateCard
     + `
@@ -26482,7 +26443,7 @@ function renderTransfers(recs) {
             : `<span class="gain" title="Best-XI squad impact over the next 3 gameweeks, time-decayed — the same pricing every transfer surface uses">+${t.gain.toFixed(2)} xPts next 3 GWs (decayed)</span>`
           }
           ${t.is_dgw_priority
-            ? `<span style="background:#B4453A;color:#000;font-size:.62rem;font-weight:700;padding:2px 6px;border-radius:4px;letter-spacing:0.4px;"><i class=apex-ic data-i=flame></i> DGW SPIKE</span>`
+            ? `<span style="background:#B4453A;color:#000;font-size:.62rem;font-weight:700;padding:2px 6px;border-radius:4px;letter-spacing:0.4px;">DGW SPIKE</span>`
             : ''
           }
           ${hitCost}
@@ -26883,10 +26844,10 @@ function _qoActOnVerdict(best, recs, tv, activeGw, section, status) {
     const _qNoise = (_qBmSt && _qBmSt.tied)
       ? _apexPathEdge.tieSay(top._withinNoise ? ' Roll wins on that basis.' : '')
       : (top._withinNoise ? ' (Best move within model noise.)' : '');
-    _qoCard('#B4453A', '<i class=apex-ic data-i=tree></i> Tree verdict — Roll (bank the FT)',
+    _qoCard('#B4453A', 'Tree verdict — Roll (bank the FT)',
       `Rolling keeps the FT’s future value${vs} — nothing applied.${_qNoise}`,
       `<div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
-         <button onclick="_rollFT()" style="background:#B4453A;color:#000;border:none;border-radius:6px;padding:6px 12px;font-size:.75rem;font-weight:700;cursor:pointer;"><i class=apex-ic data-i=ban></i> Roll FT</button>
+         <button onclick="_rollFT()" style="background:#B4453A;color:#000;border:none;border-radius:6px;padding:6px 12px;font-size:.75rem;font-weight:700;cursor:pointer;">Roll FT</button>
          <button onclick="_applyTransferRec(${best.in_id}, ${best.out_id})" style="background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:6px 12px;font-size:.75rem;font-weight:600;cursor:pointer;">Apply ${best.out_name} → ${best.in_name} anyway</button>
        </div>`);
     if (status) status.textContent = `Roll — the plan-ahead tree ranks banking the FT above every move for GW${activeGw}`;
@@ -26894,13 +26855,13 @@ function _qoActOnVerdict(best, recs, tv, activeGw, section, status) {
   }
   if (top && top.type === 'chip') {
     const _cnQ = { WC: 'Wildcard', FH: 'Free Hit', BB: 'Bench Boost', TC: 'Triple Captain' };
-    _qoCard('#0F6E56', `<i class=apex-ic data-i=tree></i> Tree verdict — play the ${_cnQ[top.chipType] || top.chipType} this week`,
+    _qoCard('#0F6E56', `Tree verdict — play the ${_cnQ[top.chipType] || top.chipType} this week`,
       `Worth <strong style="color:var(--text);">${_evTxt(top)}</strong> on your live squad — nothing applied. Press <strong>Solve</strong> to play it.`);
     if (status) status.textContent = `The tree ranks the ${_cnQ[top.chipType] || top.chipType} first for GW${activeGw} — press Solve to play it`;
     return;
   }
   if (top && top.type === 'two') {
-    _qoCard('#0F6E56', '<i class=apex-ic data-i=tree></i> Tree verdict — a 2-transfer plan',
+    _qoCard('#0F6E56', 'Tree verdict — a 2-transfer plan',
       `${top.out.web_name} → ${top.in.web_name} · ${top.out2.web_name} → ${top.in2.web_name} (<strong style="color:var(--text);">${_evTxt(top)}</strong>${top.hitCost > 0 ? `, −${top.hitCost} hit priced in` : ''}) — a one-press button doesn’t commit two moves. Press <strong>Solve</strong> to make them.`);
     if (status) status.textContent = `The tree’s first branch is a 2-transfer plan for GW${activeGw} — press Solve to make it`;
     return;
@@ -26924,7 +26885,7 @@ function _qoActOnVerdict(best, recs, tv, activeGw, section, status) {
       const _qoEdgeTxt = (_qoSt && _qoSt.tied)
         ? _apexPathEdge.tieSay(`, path level with rolling (${_apexPathEdge.tieShort(_qoSt)})`)
         : (_qEdge(top) ? `, path ${_qEdge(top)} vs rolling` : '');
-      _qoCard('#1D9E75', `<i class=apex-ic data-i=check></i> Optimized — ${top.out.web_name} → ${top.in.web_name}`,
+      _qoCard('#1D9E75', `Optimized — ${top.out.web_name} → ${top.in.web_name}`,
         `The plan-ahead tree’s first branch (<strong style="color:var(--text);">${_evTxt(top)}</strong> squad gain now${_qoEdgeTxt}). ↺ Reset (squad view) undoes it.`);
       if (status) status.textContent = `Applied the tree’s pick for GW${activeGw}: ${top.out.web_name} → ${top.in.web_name}`;
       return;
@@ -26945,7 +26906,7 @@ function _qoActOnVerdict(best, recs, tv, activeGw, section, status) {
       <div id="optimize-result" style="margin:0 0 14px 0;padding:12px 16px;border-radius:12px;
             background:rgba(29,158,117,0.12);
             border:1px solid #1D9E75;display:flex;flex-wrap:wrap;align-items:center;gap:12px;font-size:.85rem;">
-        <span style="font-weight:800;color:#1D9E75;"><i class=apex-ic data-i=check></i> Optimized</span>
+        <span style="font-weight:800;color:#1D9E75;">Optimized</span>
         <span style="color:var(--text);">
           <strong>${best.out_name}</strong> → <strong style="color:#1D9E75;">${best.in_name}</strong>
         </span>
@@ -26980,7 +26941,7 @@ function _qoActOnVerdict(best, recs, tv, activeGw, section, status) {
       // differently or users read a 7-GW sum as a weekly gain.
       const _gl = (i === 0 ? 'xPts this GW' : 'next 3 GWs');   // APEX_VERDICT_HONEST_NUMBERS_v1: t.gain IS the 3-GW decayed swap gain
       _recoHtml += `<div class="va-reco-row" style="${i > 0 ? 'opacity:.78;' : ''}">`
-        + `<span class="va-reco-move">${i === 0 ? '<i class=apex-ic data-i=check></i> ' : ''}${t.out_name} <span class="va-reco-arr">→</span> ${t.in_name}`
+        + `<span class="va-reco-move">${i === 0 ? '' : ''}${t.out_name} <span class="va-reco-arr">→</span> ${t.in_name}`
         + `<span style="font-size:.78em;">${(typeof _apexOwnTag === 'function') ? _apexOwnTag({ id: t.in_id }) : ''}</span></span>`
         + `<span class="va-reco-gain">+${(+_g).toFixed(2)} ${_gl}</span></div>`;
     });
@@ -27517,7 +27478,7 @@ function _restorePlanState() {
         const _rq = document.getElementById('engine-picks');
         if (_rq) {
           _rq.dataset.applied = '1';
-          _rq.innerHTML = `<div class="va-reco-title"><i class=apex-ic data-i=check></i> ${_qoN} move${_qoN > 1 ? 's' : ''} applied · GW${TEAM_META.gw_range[activeGwIdx || 0]}</div>`
+          _rq.innerHTML = `<div class="va-reco-title">${_qoN} move${_qoN > 1 ? 's' : ''} applied · GW${TEAM_META.gw_range[activeGwIdx || 0]}</div>`
             + `<div style="font-size:.8rem;color:var(--muted);margin-top:6px;">↺ Reset to discard, or press Solve to keep building</div>`;
           _rq.style.display = 'block';
         }
@@ -27592,7 +27553,7 @@ function _renderRecoPreview() {
     // Blank canvas — picks are for a squad you have; you do not have one yet.
     if (typeof _apexBlankCanvasOn === 'function' && _apexBlankCanvasOn()) {
       _reco.innerHTML = '<div style="padding:12px 14px;font-size:.82rem;color:var(--muted);">'
-        + 'Press <b style="color:var(--accent,#0F6E56);"><i class=apex-ic data-i=bolt></i> Optimise</b> to build your opening 15. '
+        + 'Press <b style="color:var(--accent,#0F6E56);">Optimise</b> to build your opening 15. '
         + 'Before the GW1 deadline every change is free.</div>';
       _reco.style.display = 'block';
       return;
@@ -27603,7 +27564,7 @@ function _renderRecoPreview() {
     // withholds from Solve/Optimise/Transfers during the final hour.
     if (_apexDeadlineLockActive()) {
       _reco.innerHTML = '<div style="padding:10px 12px;font-size:.8rem;color:var(--muted);">' +
-        '<i class=apex-ic data-i=lock></i> Model picks return after the deadline — Apex members plan right up to kickoff.</div>';
+        'Model picks return after the deadline — Apex members plan right up to kickoff.</div>';
       return;
     }
     // Applied-plan boot gate (2026-06-11): the preview's load ladder (900ms)
@@ -27681,7 +27642,7 @@ function _renderRecoPreview() {
         if (!_vars || !_vars.length) {
           _reco.innerHTML = _g1head
             + '<div style="font-size:.8rem;color:var(--muted);">'
-            + '<i class=apex-ic data-i=bolt></i> <a href="#" onclick="runSolve(); return false;" style="color:#0F6E56;font-weight:700;text-decoration:underline;">Build your opening 15 →</a>'
+            + '<a href="#" onclick="runSolve(); return false;" style="color:#0F6E56;font-weight:700;text-decoration:underline;">Build your opening 15 →</a>'
             + ' · transfer picks return at GW2</div>';
           return;
         }
@@ -27873,7 +27834,7 @@ function _renderRecoPreview() {
              + 'All three builds solved to the same 15 — the ownership split is too flat this early to separate them.</div>';
         }
         _h += '<div style="font-size:.8rem;color:var(--muted);margin-top:6px;">'
-           + '<i class=apex-ic data-i=bolt></i> <a href="#" onclick="runSolve(); return false;" style="color:#0F6E56;font-weight:700;text-decoration:underline;">Open the tree to edit any of them →</a>'
+           + '<a href="#" onclick="runSolve(); return false;" style="color:#0F6E56;font-weight:700;text-decoration:underline;">Open the tree to edit any of them →</a>'
            + ' · transfer picks return at GW2</div>';
         _reco.innerHTML = _h;
       })();
@@ -27952,7 +27913,7 @@ function _renderRecoPreview() {
             // the row is exactly "🌳 Tree verdict: Roll — bank the FT".
             const _vBmSt = _apexPathEdge.rollVsBestState(top, tv.options);
             const _vTied = !!(_vBmSt && _vBmSt.tied);
-            line = '<i class=apex-ic data-i=tree></i> Tree verdict: <b>Roll — bank the FT</b>'
+            line = 'Tree verdict: <b>Roll — bank the FT</b>'
               + (_vTied
                   ? _apexPathEdge.tieSay(' (level with acting now — ' + _apexPathEdge.tieShort(_vBmSt) + ')')
                   : (_vBmE ? ' (path ' + _vBmE + ' over acting now)' : ''))
@@ -27968,14 +27929,14 @@ function _renderRecoPreview() {
               ? _apexPathEdge.tieSay(' · path level with rolling (' + _apexPathEdge.tieShort(_eSt) + ')')
               : (_vEdge ? (' · path ' + _vEdge + ' vs rolling') : '');
             line = _agree
-              ? '<i class=apex-ic data-i=tree></i> Tree agrees: <b>' + top.out.web_name + ' → ' + top.in.web_name + '</b> leads (' + _vn + ' now' + _eTxt + ')'
-              : '<i class=apex-ic data-i=tree></i> Tree verdict: <b>' + top.out.web_name + ' → ' + top.in.web_name + '</b> (' + _vn + ' now' + _eTxt + ') — a different first step than this list’s leader';
+              ? 'Tree agrees: <b>' + top.out.web_name + ' → ' + top.in.web_name + '</b> leads (' + _vn + ' now' + _eTxt + ')'
+              : 'Tree verdict: <b>' + top.out.web_name + ' → ' + top.in.web_name + '</b> (' + _vn + ' now' + _eTxt + ') — a different first step than this list’s leader';
           } else if (top.type === 'two') {
-            line = '<i class=apex-ic data-i=tree></i> Tree verdict: <b>' + top.out.web_name + ' → ' + top.in.web_name + ' · '
+            line = 'Tree verdict: <b>' + top.out.web_name + ' → ' + top.in.web_name + ' · '
               + top.out2.web_name + ' → ' + top.in2.web_name + '</b> (' + _vn + ') — press Solve to make both';
           } else if (top.type === 'chip') {
             const _cnP = { WC: 'Wildcard', FH: 'Free Hit', BB: 'Bench Boost', TC: 'Triple Captain' };
-            line = '<i class=apex-ic data-i=tree></i> Tree verdict: <b>play the ' + (_cnP[top.chipType] || top.chipType) + '</b> this week (' + _vn + ')';
+            line = 'Tree verdict: <b>play the ' + (_cnP[top.chipType] || top.chipType) + '</b> this week (' + _vn + ')';
           }
           if (!line) return;
           const _vd = document.createElement('div');
@@ -28003,7 +27964,7 @@ window._apexUseGw1Squad = function (i) {
     Promise.resolve(_ppAdoptGw1Squad(activeGwIdx || 0, v.squad)).then(function (ok) {
       if (!st) return;
       st.textContent = ok
-        ? `<i class=apex-ic data-i=check></i> ${v.label} squad loaded — every change is still free until the GW1 deadline`
+        ? `${v.label} squad loaded — every change is still free until the GW1 deadline`
         : 'Could not load that squad — try again, or edit the pitch directly.';
       // Curtain is down and the squad changed: rebuild the rail so the card
       // re-ranks around the squad you now own.
@@ -28210,7 +28171,7 @@ function _showChipSquadPanel(chipType, gw, squad, gwIdx, alreadyApplied, targetI
   const totalXp  = (xiXp + capXp).toFixed(1);
   const label    = chipType === 'WC'
     ? `🃏 WC GW${gw} — balanced squad for next ${TEAM_META.gw_range.length} GWs · Proj. ${totalXp} xPts this week`
-    : `<i class=apex-ic data-i=sync></i> FH GW${gw} — max XI for this week only · Proj. ${totalXp} xPts`;
+    : `FH GW${gw} — max XI for this week only · Proj. ${totalXp} xPts`;
   banner.textContent = label;
   banner.style.display = 'block';
 
@@ -28244,10 +28205,10 @@ function _showChipSquadPanel(chipType, gw, squad, gwIdx, alreadyApplied, targetI
       <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid var(--border);">
         <div style="font-weight:700;font-size:.95rem;">${chipType} Recommended Squad — GW${gw}</div>
         ${inReviewView ? '' : (alreadyApplied
-          ? `<span style="background:rgba(29,158,117,.15);color:#1D9E75;border:1px solid #22c55e55;border-radius:7px;padding:8px 18px;font-weight:700;font-size:.85rem;"><i class=apex-ic data-i=check></i> Squad Applied</span>`
+          ? `<span style="background:rgba(29,158,117,.15);color:#1D9E75;border:1px solid #22c55e55;border-radius:7px;padding:8px 18px;font-weight:700;font-size:.85rem;">Squad Applied</span>`
           : `<button onclick="_applyFullSquad(window._lastChipSquad, window._lastChipGwIdx)"
               style="background:#1D9E75;color:#000;border:none;border-radius:7px;padding:8px 18px;font-weight:700;font-size:.85rem;cursor:pointer;">
-              <i class=apex-ic data-i=check></i> Apply Squad to Plan
+              Apply Squad to Plan
              </button>`)
         }
       </div>
@@ -28267,7 +28228,7 @@ function _showChipSquadPanel(chipType, gw, squad, gwIdx, alreadyApplied, targetI
     const btnCls = inMySquad
       ? 'style="background:rgba(29,158,117,.15);color:#1D9E75;border:1px solid #22c55e44;border-radius:5px;padding:3px 10px;font-size:.75rem;font-weight:600;cursor:default;"'
       : `style="background:var(--accent);color:#000;border:none;border-radius:5px;padding:3px 10px;font-size:.75rem;font-weight:700;cursor:pointer;" onclick="_applyOneTransfer(${p.id}, window._lastChipSquad, window._lastChipGwIdx)"`;
-    const btnLabel = inMySquad ? '<i class=apex-ic data-i=check></i> In squad' : 'Apply';
+    const btnLabel = inMySquad ? 'In squad' : 'Apply';
     html += `
       <div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid rgba(0,0,0,.06);">
         ${img}
@@ -28292,7 +28253,7 @@ function _showChipSquadPanel(chipType, gw, squad, gwIdx, alreadyApplied, targetI
     const btnCls = inMySquad
       ? 'style="background:rgba(29,158,117,.15);color:#1D9E75;border:1px solid #22c55e44;border-radius:5px;padding:3px 10px;font-size:.75rem;font-weight:600;cursor:default;"'
       : `style="background:#F4F5F3;color:var(--muted);border:1px solid var(--border);border-radius:5px;padding:3px 10px;font-size:.75rem;font-weight:600;cursor:pointer;" onclick="_applyOneTransfer(${p.id}, window._lastChipSquad, window._lastChipGwIdx)"`;
-    const btnLabel = inMySquad ? '<i class=apex-ic data-i=check></i> In squad' : 'Apply';
+    const btnLabel = inMySquad ? 'In squad' : 'Apply';
     html += `
       <div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid rgba(0,0,0,.06);opacity:.75;">
         ${img}
@@ -33420,7 +33381,7 @@ function _renderPathTree() {
     return esc(n.length > 10 ? n.slice(0, 9) + '…' : n);
   };
   const selLabel = (sel) => sel.type === 'chip'
-      ? ((sel.chipType === 'BB' || sel.chipType === 'TC') ? `<i class=apex-ic data-i=cards></i> ${sel.chipType} played` : `${sel.chipType} squad`)
+      ? ((sel.chipType === 'BB' || sel.chipType === 'TC') ? `${sel.chipType} played` : `${sel.chipType} squad`)
     : sel.type === 'none' ? '↻ Roll FT'
     : sel.type === 'two' ? `2 tx${(sel.hitCost > 0) ? ` · −${sel.hitCost}` : ''}: ${short(sel.out)}»${short(sel.in)}…`
     : `${short(sel.out)}»${short(sel.in)}`;
@@ -33491,7 +33452,7 @@ function _renderPathTree() {
     }
     const isTc = sel.type === 'chip' && sel.chipType === 'TC';
     const isBb = sel.type === 'chip' && sel.chipType === 'BB';
-    const chipTag = sel.type === 'chip' ? ` · <i class=apex-ic data-i=cards></i>${sel.chipType}` : (sel.type === 'two' ? ' · 2 tx' : (sel.type === 'one' ? ' · 1 tx' : ' · roll'));
+    const chipTag = sel.type === 'chip' ? ` · ${sel.chipType}` : (sel.type === 'two' ? ' · 2 tx' : (sel.type === 'one' ? ' · 1 tx' : ' · roll'));
     if (sq && Array.isArray(sq.xi) && sq.xi.length === 11) {
       const inIds = new Set([sel.in && sel.in.id, sel.in2 && sel.in2.id].filter(Boolean));
       // Who LEFT this week. Rendered under the squad as a struck-through line
@@ -33517,7 +33478,7 @@ function _renderPathTree() {
         + `<rect x="${x}" y="${TOP}" width="${TW}" height="${CH}" rx="12" fill="#ffffff" stroke="${_hdBd}" stroke-width="${_isTxWk ? 2 : 1.6}"/>`
         + `<rect x="${x}" y="${TOP}" width="${TW}" height="${_hdH}" rx="12" fill="${_hdBg}"/>`
         + `<rect x="${x}" y="${TOP + _hdH - 12}" width="${TW}" height="12" fill="${_hdBg}"/>`
-        + `<text x="${x + 11}" y="${TOP + 20}" font-size="15.5" font-weight="800" fill="${_hdT}">GW${sel.gw} <i class=apex-ic data-i=check></i>${esc(chipTag)}</text>`
+        + `<text x="${x + 11}" y="${TOP + 20}" font-size="15.5" font-weight="800" fill="${_hdT}">GW${sel.gw} ${esc(chipTag)}</text>`
         + `<text x="${x + TW - 10}" y="${TOP + 20}" text-anchor="end" font-size="13" font-weight="800" fill="${_hdS}" opacity="0.75">↶</text>`
         + `<text x="${x + 11}" y="${TOP + 37}" font-size="11.5" font-weight="700" fill="${_hdS}">${(sel.gwXp || 0).toFixed(1)} pts${sel.hitCost > 0 ? ` · −${sel.hitCost} hit` : ''}</text>`
         + (_isTxWk
@@ -33579,7 +33540,7 @@ function _renderPathTree() {
       s += g;
     } else {
       // Fallback (no snapshot): legacy compact node, label kept short.
-      s += node(x, spineY - NH / 2, `GW${sel.gw} <i class=apex-ic data-i=check></i>`,
+      s += node(x, spineY - NH / 2, `GW${sel.gw} `,
         `${selLabel(sel).slice(0, 18)} · ${(sel.gwXp || 0).toFixed(1)} pts`,
         TEAL, TEAL_BG, TEAL_T, TEAL_S);
     }
@@ -33633,7 +33594,7 @@ function _renderPathTree() {
       if (o.type === 'build') {
         // Pre-GW1 only. The 15 is solved in the background (_ppPrefetchBuild);
         // until it lands we show the plain label, then repaint with the names.
-        l1 = '<i class=apex-ic data-i=bolt></i> Build the optimal 15';
+        l1 = 'Build the optimal 15';
         if (o.builtSquad) {
           const _c = o.builtSquad.reduce((t, p) => t + (+p.cost || 0), 0);
           const _x = _ppSquadHorizonXpts(o.builtSquad, cur);
@@ -33647,7 +33608,7 @@ function _renderPathTree() {
         // is how the user LEAVES GW1: every other pre-GW1 branch edits in
         // place, this one locks the squad and grows the tree.
         if (_ppUnlimitedGw(cur)) {
-          l1 = '<i class=apex-ic data-i=check></i> Done — lock this squad';
+          l1 = 'Done — lock this squad';
           l2 = `continue to GW${gwR[cur + 1] || (gwR[cur] + 1)} with these 15 · +${ev.toFixed(1)} EV`;
         } else {
           l1 = '↻ Roll the transfer';
@@ -33675,7 +33636,7 @@ function _renderPathTree() {
         // line says exactly what happens — held chips re-offer at the
         // planner's best remaining week (no silent one-shot).
         const _cn = { BB: 'Bench Boost', TC: 'Triple Captain', FH: 'Free Hit', WC: 'Wildcard' };
-        l1 = `<i class=apex-ic data-i=cards></i> ${_cn[o.chipType] || o.chipType} now`;
+        l1 = `${_cn[o.chipType] || o.chipType} now`;
         l1b = o.holdWeek ? `hold → comes back GW${o.holdWeek.gw} (${_ppSignedEv(o.holdWeek.ev)})` : null;
         // APEX_AUDIT_44A_WC_PRICED_ON_HELD_SQUAD — name the zero. A Wildcard or
         // Free Hit whose optimal 15 is the 15 you already hold changes nothing
@@ -33690,13 +33651,13 @@ function _renderPathTree() {
       } else if (o.type === 'two') {
         l1  = `${short(o.out)} » ${short(o.in)}`;
         l1b = `+ ${short(o.out2)} » ${short(o.in2)}`;
-        l2 = `${kind} · 2 transfers · +${ev.toFixed(1)} EV${HIT_TSPAN(o.hitCost)}${o.holdChip ? ` · <i class=apex-ic data-i=hold></i> holds ${o.holdChip.chipType}` : ''}`;
+        l2 = `${kind} · 2 transfers · +${ev.toFixed(1)} EV${HIT_TSPAN(o.hitCost)}${o.holdChip ? ` · holds ${o.holdChip.chipType}` : ''}`;
       } else {
         const pd = (typeof _apexPoolById === 'function' ? _apexPoolById(o.in.id) : null) || o.in;
         const own = (typeof pd.own === 'number') ? pd.own : (parseFloat(pd.own) || 0);
-        const tag = o.riskPick === 'differential' ? ' <i class=apex-ic data-i=gem></i>' : (o.riskPick === 'template' ? ' <i class=apex-ic data-i=shield></i>' : '');
+        const tag = o.riskPick === 'differential' ? ' ' : (o.riskPick === 'template' ? ' ' : '');
         l1 = `${short(o.out)} » ${short(o.in)}`;
-        l2 = `${kind} · +${ev.toFixed(1)} EV · ${own.toFixed(1)}%${tag}${HIT_TSPAN(o.hitCost)}${o.holdChip ? ` · <i class=apex-ic data-i=hold></i> holds ${o.holdChip.chipType}` : ''}`;
+        l2 = `${kind} · +${ev.toFixed(1)} EV · ${own.toFixed(1)}%${tag}${HIT_TSPAN(o.hitCost)}${o.holdChip ? ` · holds ${o.holdChip.chipType}` : ''}`;
       }
       s += line(px + pxw, spineY, x, y + BH/2, col, bi !== 0);
       // Label-overflow guard (2026-06-11, Marcus: "writing comes out of the
@@ -33765,7 +33726,7 @@ function _renderPathTree() {
       // on the ghost nodes — the accepted sequence is the DEFAULT trunk.
       const chip1 = _ppPlannedChipAt(cur + 1);
       const g1sub = chip1
-        ? `<i class=apex-ic data-i=cards></i> ${chip1}${dgwN > 0 ? ` · DGW ×${dgwN}` : ''}`
+        ? `${chip1}${dgwN > 0 ? ` · DGW ×${dgwN}` : ''}`
         : (dgwN > 0 ? `DGW ×${dgwN}` : 'next up');
       const g1stroke = chip1 ? TEAL : GREY;
       s += line(x + BW, _bestY, g1x, _bestY, TEAL);
@@ -33775,7 +33736,7 @@ function _renderPathTree() {
       if (futN > 1) {
         const g2x = g1x + 112 + 26, gw2 = gwR[cur + 2];
         const chip2 = _ppPlannedChipAt(cur + 2);
-        const g2sub = chip2 ? `<i class=apex-ic data-i=cards></i> ${chip2}` : (futN > 2 ? '+' + (futN - 1) + ' more' : 'last GW');
+        const g2sub = chip2 ? `${chip2}` : (futN > 2 ? '+' + (futN - 1) + ' more' : 'last GW');
         s += line(g1x + 112, _bestY, g2x, _bestY, GREY, true);
         s += `<g opacity="0.55"><rect x="${g2x}" y="${_bestY - 30}" width="88" height="60" rx="11" fill="none" stroke="${chip2 ? TEAL : GREY}" stroke-width="1.4"/>`
           + `<text x="${g2x + 44}" y="${_bestY - 4}" text-anchor="middle" font-size="15" font-weight="700" fill="${GREY_S}">GW${gw2}</text>`
@@ -34054,18 +34015,18 @@ function _buildLockedCard(sel) {
     const _chipAct = (sel.chipType === 'BB' || sel.chipType === 'TC')
       ? 'played — scoring boosted' : 'squad selected';
     body = `<div class="pp-locked-choice">
-      <span class="pp-check"><i class=apex-ic data-i=check></i></span>
+      <span class="pp-check"></span>
       <span class="pp-locked-text"><strong>${sel.chipType}</strong> ${_chipAct} · ${sel.gwXp.toFixed(1)} xPts this week</span>
     </div>`;
   } else if (sel.type === 'none') {
     body = `<div class="pp-locked-choice">
-      <span class="pp-check"><i class=apex-ic data-i=check></i></span>
+      <span class="pp-check"></span>
       <span class="pp-locked-text"><em>No Transfer</em> · ${sel.gwXp.toFixed(1)} xPts</span>
     </div>`;
   } else if (sel.type === 'two') {
     const hitTxt = sel.hitCost > 0 ? ` · -${sel.hitCost} hit` : '';
     body = `<div class="pp-locked-choice">
-      <span class="pp-check"><i class=apex-ic data-i=check></i></span>
+      <span class="pp-check"></span>
       <span class="pp-locked-text">
         <span class="pp-out-name">${sel.out.web_name}</span>
         <span class="pp-arrow">»»</span>
@@ -34079,7 +34040,7 @@ function _buildLockedCard(sel) {
     </div>`;
   } else {
     body = `<div class="pp-locked-choice">
-      <span class="pp-check"><i class=apex-ic data-i=check></i></span>
+      <span class="pp-check"></span>
       <span class="pp-locked-text">
         <span class="pp-out-name">${sel.out.web_name}</span>
         <span class="pp-arrow">»»</span>
@@ -34140,7 +34101,7 @@ async function _buildActiveCard(gwIdx) {
       // out.team and would throw and blank the whole planner view.
       bodyHtml = `
         <div class="pp-no-transfer-block">
-          <div class="pp-no-transfer-icon"><i class=apex-ic data-i=bolt></i></div>
+          <div class="pp-no-transfer-icon"></div>
           <div class="pp-no-transfer-text">
             <div class="pp-no-transfer-title">Build the optimal 15</div>
             <div class="pp-no-transfer-sub">unlimited free changes before the GW1 deadline · nothing to pay</div>
@@ -34158,7 +34119,7 @@ async function _buildActiveCard(gwIdx) {
         ? ` · hold it and it comes back GW${opt.holdWeek.gw} (${_ppSignedEv(opt.holdWeek.ev)})` : '';
       bodyHtml = `
         <div class="pp-no-transfer-block">
-          <div class="pp-no-transfer-icon"><i class=apex-ic data-i=cards></i></div>
+          <div class="pp-no-transfer-icon"></div>
           <div class="pp-no-transfer-text">
             <div class="pp-no-transfer-title">${_chipNames[opt.chipType] || opt.chipType} now</div>
             <div class="pp-no-transfer-sub">${_chipSub}${_holdHint}</div>
@@ -34182,7 +34143,7 @@ async function _buildActiveCard(gwIdx) {
         let disagreeBtn = '';
         if (allowDisagree && _whyPanelEnabled()) {
           if (_isSwapLocked(out.id, _gwAbsRow)) {
-            disagreeBtn = `<button disabled style="background:transparent;color:#6B7671;border:1px solid #2a2a35;border-radius:4px;padding:3px 8px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.65rem;font-weight:600;cursor:not-allowed;margin-left:8px;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;opacity:0.6;"><i class=apex-ic data-i=lock></i> Locked</button>`;
+            disagreeBtn = `<button disabled style="background:transparent;color:#6B7671;border:1px solid #2a2a35;border-radius:4px;padding:3px 8px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.65rem;font-weight:600;cursor:not-allowed;margin-left:8px;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;opacity:0.6;">Locked</button>`;
           } else {
             disagreeBtn = `<button class="pp-swap-disagree" onclick="event.stopPropagation(); _showOverrideModal(${out.id}, ${inP.id}, ${_inXpRow.toFixed(2)}, ${_outXpRow.toFixed(2)}, ${_gainRow.toFixed(2)})"
                 style="background:transparent;color:#9ca3af;border:1px solid #2a2a35;border-radius:4px;padding:3px 8px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.65rem;font-weight:600;cursor:pointer;margin-left:8px;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;">I disagree</button>`;
@@ -34275,7 +34236,7 @@ async function _buildActiveCard(gwIdx) {
       // 2026-05-07 audit fix H2 — disable the disagree button if THIS swap
       // already has a locked override. Was previously dead code.
       if (_isSwapLocked(opt.out.id, _gwAbs)) {
-        ovrBtn = `<button disabled style="background:transparent;color:#6B7671;border:1px solid #2a2a35;border-radius:5px;padding:5px 10px;font-size:.7rem;font-weight:600;cursor:not-allowed;margin-top:6px;opacity:0.6;"><i class=apex-ic data-i=lock></i> Locked</button>`;
+        ovrBtn = `<button disabled style="background:transparent;color:#6B7671;border:1px solid #2a2a35;border-radius:5px;padding:5px 10px;font-size:.7rem;font-weight:600;cursor:not-allowed;margin-top:6px;opacity:0.6;">Locked</button>`;
       } else {
         ovrBtn = `<button class="pp-option-disagree" onclick="event.stopPropagation(); _showOverrideModal(${opt.out.id}, ${opt.in.id}, ${_inXp.toFixed(2)}, ${_outXp.toFixed(2)}, ${_gain.toFixed(2)})"
                     style="background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:5px;padding:5px 10px;font-size:.7rem;font-weight:600;cursor:pointer;margin-top:6px;">I disagree</button>`;
@@ -34284,15 +34245,15 @@ async function _buildActiveCard(gwIdx) {
     // Risk-pick badge (2026-06-09): flags options that embody the active risk
     // profile — injected guaranteed picks AND naturally-qualifying ones.
     const _riskBadge = opt.riskPick === 'differential'
-      ? `<div style="font-size:.68rem;font-weight:800;color:#1D9E75;letter-spacing:.4px;margin-bottom:4px;"><i class=apex-ic data-i=gem></i> HIGH-RISK PICK · low-owned punt</div>`
+      ? `<div style="font-size:.68rem;font-weight:800;color:#1D9E75;letter-spacing:.4px;margin-bottom:4px;">HIGH-RISK PICK · low-owned punt</div>`
       : (opt.riskPick === 'template'
-      ? `<div style="font-size:.68rem;font-weight:800;color:#3A6B8F;letter-spacing:.4px;margin-bottom:4px;"><i class=apex-ic data-i=shield></i> LOW-RISK PICK · field cover</div>`
+      ? `<div style="font-size:.68rem;font-weight:800;color:#3A6B8F;letter-spacing:.4px;margin-bottom:4px;">LOW-RISK PICK · field cover</div>`
       : '');
     // Hold-the-chip badge (2026-06-11): at a chip-marked GW, the best
     // transfer option doubles as "hold the chip" — show the planner's
     // next-best week so the trade-off is explicit.
     const _holdBadge = opt.holdChip
-      ? `<div style="font-size:.68rem;font-weight:800;color:#b45309;letter-spacing:.4px;margin-bottom:4px;"><i class=apex-ic data-i=hold></i> HOLD ${opt.holdChip.chipType}${opt.holdChip.week ? ` — it comes back at GW${opt.holdChip.week.gw} (+${opt.holdChip.week.ev.toFixed(1)})` : ''}</div>`
+      ? `<div style="font-size:.68rem;font-weight:800;color:#b45309;letter-spacing:.4px;margin-bottom:4px;">HOLD ${opt.holdChip.chipType}${opt.holdChip.week ? ` — it comes back at GW${opt.holdChip.week.gw} (+${opt.holdChip.week.ev.toFixed(1)})` : ''}</div>`
       : '';
     optsHtml += `
       <div class="pp-option ${opt.type === 'none' ? 'pp-option-no-transfer' : ''} ${isTop}">
@@ -34344,7 +34305,7 @@ function _buildSummaryCard() {
   }
   div.innerHTML = `
     <div class="pp-card-header">
-      <div class="pp-card-title">Plan Complete <i class=apex-ic data-i=check></i></div>
+      <div class="pp-card-title">Plan Complete </div>
       <span class="pp-locked-badge">${totalTransfers} transfer${totalTransfers === 1 ? '' : 's'}</span>
     </div>
     <div style="font-size:0.92rem;line-height:1.5;color:var(--muted);margin-bottom:14px;">
@@ -34355,7 +34316,7 @@ function _buildSummaryCard() {
     <div class="pp-summary-stat"><span class="pp-stat-label">Bank end-of-horizon</span><span class="pp-stat-value">£${_pathPlanner.workingBank.toFixed(1)}m</span></div>
     ${transferList}
     <div style="margin-top:18px;font-size:0.84rem;color:var(--muted);">
-      Click <strong><i class=apex-ic data-i=check></i> Apply Plan to Squad</strong> in the top bar to commit this plan to your live squad. Or click <strong>← Back</strong> to discard.
+      Click <strong>Apply Plan to Squad</strong> in the top bar to commit this plan to your live squad. Or click <strong>← Back</strong> to discard.
     </div>
   `;
   return div;
@@ -35044,7 +35005,7 @@ function _apexRenderAppliedPicksCard(meta) {
   // classes kept for every selector that targets them. flex-wrap so a narrow
   // rail wraps instead of clipping.
   let _h = `<div class="va-reco-title" style="display:flex;align-items:baseline;justify-content:space-between;gap:6px 12px;flex-wrap:wrap;">`
-    + `<span><i class=apex-ic data-i=check></i> Plan applied · ${_rng}<span style="font-weight:600;font-size:.68em;color:var(--muted);"> · ${_nTx} transfer${_nTx === 1 ? '' : 's'} committed${_hits > 0 ? ` · ${_hits} hit${_hits > 1 ? 's' : ''}` : ''}</span></span>`
+    + `<span>Plan applied · ${_rng}<span style="font-weight:600;font-size:.68em;color:var(--muted);"> · ${_nTx} transfer${_nTx === 1 ? '' : 's'} committed${_hits > 0 ? ` · ${_hits} hit${_hits > 1 ? 's' : ''}` : ''}</span></span>`
     + `<span class="va-reco-gain" style="font-size:.72em;">${(+meta.totalPts || 0).toFixed(1)} pts</span></div>`;
   // 2026-07-25: was `.slice(0, 3)` — the card claimed N transfers and showed
   // three of them. Show every move, and make the direction readable at a
@@ -35121,7 +35082,7 @@ function _apexRenderAppliedPicksCard(meta) {
       const _mm = String(m).match(/^(GW\d+(?:–GW\d+)?)\s·\s(.*)$/);
       const _gwN = _mm ? _mm[1] : null;
       const _body = _mm ? _mm[2] : String(m);
-      const _isChip = _body.indexOf('<i class=apex-ic data-i=cards></i>') !== -1;
+      const _isChip = _body.indexOf('') !== -1;
       // Only label the gameweek once per group, so a double week reads as one
       // decision with two moves rather than two unrelated rows.
       const _gwCell = (_gwN && _gwN !== _lastGw)
@@ -35218,7 +35179,7 @@ function _apexAppliedChipRows(selections) {
   const out = [];
   for (const s of (selections || [])) {
     if (!s || s.type !== 'chip' || !s.chipType) continue;
-    out.push({ gw: +s.gw || 0, t: 'GW' + s.gw + ' · <i class=apex-ic data-i=cards></i> ' + s.chipType + ' played' });
+    out.push({ gw: +s.gw || 0, t: 'GW' + s.gw + ' · ' + s.chipType + ' played' });
   }
   return out;
 }
@@ -35904,7 +35865,7 @@ function _apexPillResolve() {
           && typeof _apexBlankCanvasOn === 'function' && !_apexBlankCanvasOn()) {
         const _st = document.getElementById('solve-status');
         if (_st) _st.textContent = 'Chip plan changed — your squad is untouched. '
-          + 'Press <i class=apex-ic data-i=road></i> Solve to rebuild the 15 for it.';
+          + 'Press Solve to rebuild the 15 for it.';
       }
     } catch (_e6) {}
   }, 350);
@@ -36887,7 +36848,7 @@ function _showOverrideScoreboard() {
         const lockTag = o.retracted
           ? `<span style="background:rgba(107,114,126,0.18);color:#9ca3af;font-size:.6rem;font-weight:700;padding:2px 6px;border-radius:4px;letter-spacing:.05em;margin-left:6px;">↶ RETRACTED</span>`
           : (o.locked
-              ? `<span style="background:rgba(15,110,86,0.18);color:#0F6E56;font-size:.6rem;font-weight:700;padding:2px 6px;border-radius:4px;letter-spacing:.05em;margin-left:6px;"><i class=apex-ic data-i=lock></i> LOCKED</span>`
+              ? `<span style="background:rgba(15,110,86,0.18);color:#0F6E56;font-size:.6rem;font-weight:700;padding:2px 6px;border-radius:4px;letter-spacing:.05em;margin-left:6px;">LOCKED</span>`
               : `<span style="color:#B4453A;font-size:.62rem;margin-left:6px;">editable</span>`);
         // Revert button shown only for unlocked, non-retracted, swapped
         // records — i.e. cases where there's an actual squad mutation to undo.
@@ -37062,7 +37023,7 @@ window._showProfilePanel = function (pid) {
     ].map(([lab, pr]) => [lab, Math.max(0, Math.round(pr * 100))]);
     const mx = Math.max(...buckets.map(b => b[1]), 1);
     const badgeCol = prof.cls === 'expl' ? ['#FBF0DA', '#B87A0E', '#E8A020'] : (prof.cls === 'steady' ? ['#E7F3EE', '#0F6E56', '#0F6E56'] : ['#F4F5F3', '#4A4840', '#E4E8E4']);
-    const glyph = prof.cls === 'expl' ? '<i class=apex-ic data-i=bolt></i> EXPLOSIVE' : (prof.cls === 'steady' ? '<i class=apex-ic data-i=shield></i> STEADY' : '= BALANCED');
+    const glyph = prof.cls === 'expl' ? 'EXPLOSIVE' : (prof.cls === 'steady' ? 'STEADY' : '= BALANCED');
     const gwNo = TEAM_META.gw_range[activeGwIdx];
     const rows = buckets.map(([lab, pct]) => {
       const hot = (lab === '10–12' || lab === '13+');
@@ -37079,7 +37040,7 @@ window._showProfilePanel = function (pid) {
     ov.style.cssText = 'position:fixed;inset:0;background:rgba(20,20,18,0.45);z-index:99998;display:flex;align-items:center;justify-content:center;padding:18px;';
     ov.onclick = (e) => { if (e.target === ov) ov.remove(); };
     ov.innerHTML = `<div style="background:#FFFFFF;border:1px solid #E5E2D8;border-radius:14px;padding:20px 22px;max-width:360px;width:100%;box-shadow:none;font-family:'Plus Jakarta Sans',sans-serif;color:#16211D;position:relative;">` +
-      `<button onclick="document.getElementById('apex-profile-overlay').remove()" style="position:absolute;top:10px;right:12px;background:none;border:none;font-size:1.05rem;color:#7A776C;cursor:pointer;font-weight:700;"><i class=apex-ic data-i=close></i></button>` +
+      `<button onclick="document.getElementById('apex-profile-overlay').remove()" style="position:absolute;top:10px;right:12px;background:none;border:none;font-size:1.05rem;color:#7A776C;cursor:pointer;font-weight:700;"></button>` +
       `<div style="font-weight:800;font-size:1.08rem;">${p.web_name}</div>` +
       `<div style="color:#7A776C;font-size:.78rem;margin-top:1px;">${p.team || ''} · GW${gwNo} · ${prof.xp.toFixed(1)} xPts</div>` +
       // APEX_FIX_AUG11_SYNTH_NOTE: provenance, shown only where it applies.
@@ -37249,7 +37210,7 @@ function _shirtHtml(p, isXi) {
   // to a benched player during a swap, we don't pulse — bench can't be triple-captained.
   const _tcGlow = (_tcOnThisGw && isXi && (isCap || isVc)) ? ' tc-active' : '';
   const cls = ['shirt', isCap ? 'cap' : '', !isXi ? 'bench-shirt' : ''].filter(Boolean).join(' ');
-  const removeBtn = `<button class="pp-remove-btn" onclick="event.stopPropagation(); _poolRemovePlayer(${p.id})" title="Remove ${p.web_name}"><i class=apex-ic data-i=close></i></button>`;
+  const removeBtn = `<button class="pp-remove-btn" onclick="event.stopPropagation(); _poolRemovePlayer(${p.id})" title="Remove ${p.web_name}"></button>`;
   // Dev-only WHY button — only renders when ?devUI=1 + apex_dev=1. Click
   // opens a modal showing the model's reasoning for this player's xP.
   const whyBtn = _whyPanelEnabled()
@@ -37259,7 +37220,7 @@ function _shirtHtml(p, isXi) {
   // beats users having to discover the xP number is clickable).
   const xmEditBtn = `<button class="pp-xmins-btn"
       onclick="event.stopPropagation(); event.preventDefault(); window._openXminsEditor(${p.id})"
-      title="Edit predicted minutes (xMins)"><i class=apex-ic data-i=timer></i></button>`;
+      title="Edit predicted minutes (xMins)"></button>`;
   // 2026-06-02 — derive xMins tier (high/mid/low/out) so CSS can paint a
   // signature data-driven ring around each shirt. No one else has this.
   // Per-GW xMins: show the minutes for the GW on screen (xmins_per_gw aligned to
@@ -37353,7 +37314,7 @@ function _renderBlankPitch(wrap) {
   try {
     const _sb = document.getElementById('solve-btn');
     if (_sb) {
-      _sb.innerHTML = '<i class=apex-ic data-i=bolt></i> Optimise — build my 15';
+      _sb.innerHTML = 'Optimise — build my 15';
       _sb.title = 'Build the model’s opening 15 from scratch';
     }
   } catch (_eB) {}
@@ -37428,7 +37389,7 @@ function _renderPitchFromState() {
   try {
     const _sb0 = document.getElementById('solve-btn');
     if (_sb0 && /build my 15/.test(_sb0.innerHTML || '')) {
-      _sb0.innerHTML = '<i class=apex-ic data-i=road></i> Solve';
+      _sb0.innerHTML = 'Solve';
       _sb0.title = 'Solve your path - open the planner and pick it gameweek by gameweek';
     }
   } catch (_eB0) {}
@@ -37843,7 +37804,7 @@ function _openShirtPanel(pid) {
           + 'box-shadow:none;max-height:88vh;overflow:auto;">';
     h += '<button onclick="window._apexShirtPanelClose()" aria-label="Close" '
        + 'style="position:absolute;top:10px;right:12px;background:none;border:none;'
-       + 'font-size:1.05rem;color:#7A776C;cursor:pointer;font-weight:700;"><i class=apex-ic data-i=close></i></button>';
+       + 'font-size:1.05rem;color:#7A776C;cursor:pointer;font-weight:700;"></button>';
     h += '<div style="font-weight:800;font-size:1.12rem;color:#14140F;">' + (p.web_name || '') + '</div>';
     h += '<div style="color:#7A776C;font-size:.78rem;margin-top:2px;">'
        + (p.team || '') + ' · ' + posName + ' · £' + (+p.cost || 0).toFixed(1) + 'm'
@@ -37983,13 +37944,13 @@ function _openShirtPanel(pid) {
       h += '</div>';
     }
 
-    h += '<button onclick="window._apexShirtDo(function(){ _openXminsEditor(' + pid + '); })" style="' + WIDE + '"><i class=apex-ic data-i=timer></i> Edit expected minutes</button>';
+    h += '<button onclick="window._apexShirtDo(function(){ _openXminsEditor(' + pid + '); })" style="' + WIDE + '">Edit expected minutes</button>';
     h += '<button onclick="window._apexShirtDo(function(){ window._showWhyPanel(' + pid + '); })" style="' + WIDE + '">Why this number? — see the workings →</button>';
     if (typeof window._showProfilePanel === 'function') {
       h += '<button onclick="window._apexShirtDo(function(){ window._showProfilePanel(' + pid + '); })" style="' + WIDE + '">Scoring profile</button>';
     }
     h += '<button onclick="window._apexShirtDo(function(){ _poolRemovePlayer(' + pid + '); })" style="' + WIDE
-       + 'color:#D93A2B;border-color:#E9BEB8;"><i class=apex-ic data-i=close></i> Replace this player</button>';
+       + 'color:#D93A2B;border-color:#E9BEB8;">Replace this player</button>';
     // APEX_MULTI_REMOVE_v1 — sits BESIDE Replace/Exclude, never instead of.
     h += '<button onclick="window._apexShirtDo(function(){ _poolDropPlayer(' + pid + '); })" style="' + WIDE
        + 'color:#D93A2B;border-color:#E9BEB8;">− Remove (bank the cash, leave the slot open)</button>';
@@ -39204,7 +39165,7 @@ function renderChipStatus() {
     html += `<span class="chip-badge ${cls}">${c}</span>`;
   });
   // Add "Change chips" link
-  html += `<span style="margin-left:auto;font-size:.78rem;color:var(--muted);cursor:pointer;" onclick="switchView('chip-select')"><i class=apex-ic data-i=edit></i>️ Change chips</span>`;
+  html += `<span style="margin-left:auto;font-size:.78rem;color:var(--muted);cursor:pointer;" onclick="switchView('chip-select')">️ Change chips</span>`;
   row.innerHTML = html;
 }
 
@@ -39321,26 +39282,26 @@ function renderBaselineStrip() {
       const _lbStale = Math.max(0, (_lbCC.locked || 0) - _lbLive);
       if (_lbLive > 0) {
         // locks BIND the WC/FH ILP (lockInIds constraint) -- confirmation note.
-        radarHtml += `<div style="margin-top:9px;font-size:.8rem;color:var(--muted);"><i class=apex-ic data-i=lock></i> ${_lbLive} locked player${_lbLive > 1 ? 's are' : ' is'} held in Wildcard / Free Hit squads too. Exclusions (<i class=apex-ic data-i=ban></i>) respected.</div>`;
+        radarHtml += `<div style="margin-top:9px;font-size:.8rem;color:var(--muted);">${_lbLive} locked player${_lbLive > 1 ? 's are' : ' is'} held in Wildcard / Free Hit squads too. Exclusions () respected.</div>`;
       }
       if (_lbStale > 0) {
-        radarHtml += `<div style="margin-top:9px;font-size:.8rem;color:#f0b03a;font-weight:600;"><i class=apex-ic data-i=lock></i> ${_lbStale} locked player${_lbStale > 1 ? 's are' : ' is'} no longer in the player pool, so ${_lbStale > 1 ? 'those locks were' : 'that lock was'} NOT applied to the Wildcard / Free Hit squads — clear and re-set ${_lbStale > 1 ? 'them' : 'it'}.</div>`;
+        radarHtml += `<div style="margin-top:9px;font-size:.8rem;color:#f0b03a;font-weight:600;">${_lbStale} locked player${_lbStale > 1 ? 's are' : ' is'} no longer in the player pool, so ${_lbStale > 1 ? 'those locks were' : 'that lock was'} NOT applied to the Wildcard / Free Hit squads — clear and re-set ${_lbStale > 1 ? 'them' : 'it'}.</div>`;
       }
     }
     if (window._apexBansDiscarded === true) {
-      radarHtml += `<div style="margin-top:5px;font-size:.8rem;color:#f0b03a;font-weight:600;"><i class=apex-ic data-i=warn></i> Too many exclusions to build a legal 15 — some were ignored for this solve. Free a few up (<i class=apex-ic data-i=ban></i> in the player pool) to make them all count.</div>`;
+      radarHtml += `<div style="margin-top:5px;font-size:.8rem;color:#f0b03a;font-weight:600;">Too many exclusions to build a legal 15 — some were ignored for this solve. Free a few up (in the player pool) to make them all count.</div>`;
     }
   } catch (_eLbN) {}
   const _rad = CHIP_PLANNER.radar || null;
   if (_rad) {
     if (_rad.later_dgws && _rad.later_dgws.length) {
       const picks = _rad.later_dgws.slice(0, 2).map(d => 'GW' + d.gw + ' (' + d.teams.slice(0, 3).join(', ') + (d.teams.length > 3 ? ' +' + (d.teams.length - 3) + ' more' : '') + ')');
-      radarHtml += `<div style="margin-top:9px;font-size:.8rem;color:#f0b03a;font-weight:600;"><i class=apex-ic data-i=hourglass></i> Season radar: double gameweek${_rad.later_dgws.length > 1 ? 's' : ''} at ${picks.join(' and ')} — beyond this plan's window. Holding TC/BB for a double often beats using them now.</div>`;
+      radarHtml += `<div style="margin-top:9px;font-size:.8rem;color:#f0b03a;font-weight:600;">Season radar: double gameweek${_rad.later_dgws.length > 1 ? 's' : ''} at ${picks.join(' and ')} — beyond this plan's window. Holding TC/BB for a double often beats using them now.</div>`;
     } else {
-      radarHtml += `<div style="margin-top:9px;font-size:.8rem;color:var(--muted);"><i class=apex-ic data-i=check></i> Season radar: no double gameweeks after GW${_rad.window_end} — using chips inside this plan is safe.</div>`;
+      radarHtml += `<div style="margin-top:9px;font-size:.8rem;color:var(--muted);">Season radar: no double gameweeks after GW${_rad.window_end} — using chips inside this plan is safe.</div>`;
     }
     if (_rad.later_blanks && _rad.later_blanks.length) {
-      radarHtml += `<div style="margin-top:5px;font-size:.8rem;color:#f0b03a;"><i class=apex-ic data-i=warn></i> Blank gameweek at GW${_rad.later_blanks[0].gw} (${_rad.later_blanks[0].teams.length}+ teams without a fixture) — a Free Hit candidate beyond this window.</div>`;
+      radarHtml += `<div style="margin-top:5px;font-size:.8rem;color:#f0b03a;">Blank gameweek at GW${_rad.later_blanks[0].gw} (${_rad.later_blanks[0].teams.length}+ teams without a fixture) — a Free Hit candidate beyond this window.</div>`;
     }
     if (_rad.second_half_unlock) {
       radarHtml += `<div style="margin-top:5px;font-size:.8rem;color:var(--muted);">ℹ GW20 unlocks the second set of chips — chips used in the first half become available again.</div>`;
@@ -39380,7 +39341,7 @@ function renderBaselineStrip() {
       const bestBbGw = Object.keys(CHIP_PLANNER.bb_ev).sort((a, b) => CHIP_PLANNER.bb_ev[b] - CHIP_PLANNER.bb_ev[a])[0];
       const nPlay = bestBbGw != null ? (bp[String(bestBbGw)] ?? 4) : 4;
       if (bestBbGw != null && nPlay < 4) {
-        radarHtml += `<div style="margin-top:5px;font-size:.8rem;color:#f87171;font-weight:600;"><i class=apex-ic data-i=warn></i> Bench Boost check: only ${nPlay} of your 4 bench players project real minutes in GW${bestBbGw} — strengthen the bench before boosting.</div>`;
+        radarHtml += `<div style="margin-top:5px;font-size:.8rem;color:#f87171;font-weight:600;">Bench Boost check: only ${nPlay} of your 4 bench players project real minutes in GW${bestBbGw} — strengthen the bench before boosting.</div>`;
       }
     }
   } catch (_e) {}
@@ -39513,7 +39474,7 @@ function _applyStrategy(breakdown) {
     if (_plannerBanner) {
       const _label = chipType === 'WC'
         ? `🃏 Chip plan set — WC GW${chipGw} squad ready below. Your pitch is unchanged until you apply it.`
-        : `<i class=apex-ic data-i=sync></i> Chip plan set — FH GW${chipGw} squad ready below. Your pitch is unchanged until you apply it.`;
+        : `Chip plan set — FH GW${chipGw} squad ready below. Your pitch is unchanged until you apply it.`;
       _plannerBanner.textContent = _label;
       _plannerBanner.style.display = 'block';
       _plannerBanner.style.background = 'rgba(15,110,86,.12)';
@@ -39593,7 +39554,7 @@ function renderTopRecommendation() {
     : '';
   const html = `
     <div class="optimal-top">
-      <div class="optimal-top-label"><i class=apex-ic data-i=bolt></i> Your chip plan</div>
+      <div class="optimal-top-label">Your chip plan</div>
       ${tl}
       ${_moveNote}
       <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:10px;">
@@ -39618,7 +39579,7 @@ function renderRotationRisk() {
     });
   });
   if (flags.length === 0) { wrap.innerHTML = ''; return; }
-  let html = '<div class="rotation-risk-panel"><div class="rotation-risk-title"><i class=apex-ic data-i=flag></i> Check before committing</div><div class="rotation-risk-subtitle">The model can\'t predict these — use your judgement.</div><div class="rotation-risk-list">';
+  let html = '<div class="rotation-risk-panel"><div class="rotation-risk-title">Check before committing</div><div class="rotation-risk-subtitle">The model can\'t predict these — use your judgement.</div><div class="rotation-risk-list">';
   flags.forEach(flag => {
     html += `<div class="rotation-risk-item"><span class="rotation-risk-team">${flag.team}</span><span class="rotation-risk-context">${flag.context}</span></div>`;
   });
@@ -39760,7 +39721,7 @@ function renderModelConfidence(data, wrapId) {
   html += '<div class="tier-chip"><div class="tier-dot dot-locked"></div>LOCKED — ≥80%</div>';
   html += '<div class="tier-chip"><div class="tier-dot dot-swing"></div>SWING — 30–80%</div>';
   html += '<div class="tier-chip"><div class="tier-dot dot-fringe"></div>FRINGE — &lt;30%</div>';
-  html += '<div class="tier-chip" style="margin-left:auto;"><span class="cf-star"><i class=apex-ic data-i=star></i></span>&nbsp;in optimal squad</div>';
+  html += '<div class="tier-chip" style="margin-left:auto;"><span class="cf-star"></span>&nbsp;in optimal squad</div>';
   html += '</div>';
 
   // For FH we care about XI selection rate, not total squad rate.
@@ -39793,7 +39754,7 @@ function renderModelConfidence(data, wrapId) {
         const xiPct = e.xi_pct || 0;
         const tier  = _xiTier(xiPct);
         const inOpt = e.in_optimal ? 'in-optimal' : '';
-        const star  = e.in_optimal ? '<span class="cf-star"><i class=apex-ic data-i=star></i></span>' : '';
+        const star  = e.in_optimal ? '<span class="cf-star"></span>' : '';
         if (tier === 'locked') lockedCount++;
         if (tier === 'swing') swingByPos[pos].push({...e, xi_pct: xiPct});
         // APEX-TEAMABBR-MCI-v1 (2026-08-03): a blind 4-letter slice turned
@@ -39885,7 +39846,7 @@ function renderSequencesTable() {
         <td class="opt-breakdown">${breakdownHtml}</td>
         <td><button onclick="_applyStrategy(JSON.parse(this.dataset.bd))" data-bd='${bdAttr}'
           style="background:${i===0?'#1D9E75':'var(--bg3,var(--bg3))'};color:${i===0?'#000':'var(--muted)'};border:1px solid ${i===0?'#1D9E75':'var(--border)'};border-radius:6px;padding:4px 12px;font-size:.75rem;font-weight:700;cursor:pointer;white-space:nowrap;">
-          ${i===0?'<i class=apex-ic data-i=play></i> Select':'Select'}
+          ${i===0?'Select':'Select'}
         </button></td>
       </tr>
     `;
@@ -39933,7 +39894,7 @@ function renderChipEvTable() {
   if (_activeChips.fh) headerHtml += '<th>FH EV</th>';
   if (_activeChips.bb) headerHtml += '<th>BB EV</th>';
   if (_activeChips.tc) headerHtml += '<th>TC EV</th>';
-  headerHtml += '<th style="color:#0F6E56"><i class=apex-ic data-i=flag></i> Check</th></tr>';
+  headerHtml += '<th style="color:#0F6E56">Check</th></tr>';
   thead.innerHTML = headerHtml;
 
   tbody.innerHTML = '';
@@ -40647,8 +40608,8 @@ function _apexRenderLocksNote() {
     const banned = POOL_DATA.filter(function (p) { try { return L.isBanned(p.id); } catch (_e) { return false; } });
     if (!locked.length && !banned.length) { el.style.display = 'none'; return; }
     let h = '';
-    if (locked.length) h += '<i class=apex-ic data-i=lock></i> Pinned into every solve: <b>' + locked.map(function (p) { return p.web_name; }).join(', ') + '</b>';
-    if (banned.length) h += (h ? ' · ' : '') + '<i class=apex-ic data-i=ban></i> Excluded from every solve: <b>' + banned.map(function (p) { return p.web_name; }).join(', ') + '</b>';
+    if (locked.length) h += 'Pinned into every solve: <b>' + locked.map(function (p) { return p.web_name; }).join(', ') + '</b>';
+    if (banned.length) h += (h ? ' · ' : '') + 'Excluded from every solve: <b>' + banned.map(function (p) { return p.web_name; }).join(', ') + '</b>';
     el.innerHTML = h + ' — tap the player’s card to change';
     el.style.display = 'block';
   } catch (_e) {}
@@ -40731,24 +40692,24 @@ function renderPoolTable() {
       <td style="color:var(--muted);font-size:.72rem;font-weight:700;">${POOL_POS_LABELS[p.element_type] || '?'}</td>
       <td class="pool-xp" style="color:${(p.xmins != null ? p.xmins : (p.xp_minutes || 0)) >= 75 ? '#1D9E75' : (p.xmins != null ? p.xmins : (p.xp_minutes || 0)) >= 60 ? 'var(--fg)' : (p.xmins != null ? p.xmins : (p.xp_minutes || 0)) >= 45 ? '#f59e0b' : '#ef4444'};font-variant-numeric:tabular-nums;">
         <span onclick="event.stopPropagation(); window._openXminsEditor(${p.id})" title="Edit this player's expected minutes"
-          style="cursor:pointer;text-decoration:underline dotted;text-underline-offset:3px;">${Math.round(p.xmins != null ? p.xmins : (p.xp_minutes || 0))} <i class=apex-ic data-i=timer></i></span></td>
+          style="cursor:pointer;text-decoration:underline dotted;text-underline-offset:3px;">${Math.round(p.xmins != null ? p.xmins : (p.xp_minutes || 0))} </span></td>
       <td class="pool-xp">£${p.cost.toFixed(1)}</td>
       ${gwCells}
       <td class="pool-xp pool-xp-total">${p.total_xp.toFixed(1)}</td>
       <td style="text-align:right;padding-right:16px;white-space:nowrap;">
         ${_lbUi ? `<button title="${_locked ? 'Locked — never suggested to sell. Click to unlock.' : 'Lock: never suggest selling this player'}"
               onclick="event.stopPropagation(); window._apexToggleLock(${p.id})"
-              style="background:${_locked ? '#0F6E56' : 'transparent'};border:1px solid ${_locked ? '#0F6E56' : 'var(--border)'};border-radius:6px;padding:3px 7px;margin-right:4px;cursor:pointer;font-size:.8rem;line-height:1;"><i class=apex-ic data-i=lock></i></button>` : ''}${_lbUi ? `<button title="${_banned ? 'Excluded — never suggested to buy. Click to allow.' : 'Exclude: never suggest buying this player'}"
+              style="background:${_locked ? '#0F6E56' : 'transparent'};border:1px solid ${_locked ? '#0F6E56' : 'var(--border)'};border-radius:6px;padding:3px 7px;margin-right:4px;cursor:pointer;font-size:.8rem;line-height:1;"></button>` : ''}${_lbUi ? `<button title="${_banned ? 'Excluded — never suggested to buy. Click to allow.' : 'Exclude: never suggest buying this player'}"
               onclick="event.stopPropagation(); window._apexToggleBan(${p.id})"
-              style="background:${_banned ? '#D93A2B' : 'transparent'};border:1px solid ${_banned ? '#D93A2B' : 'var(--border)'};border-radius:6px;padding:3px 7px;margin-right:8px;cursor:pointer;font-size:.8rem;line-height:1;"><i class=apex-ic data-i=ban></i></button>` : ''}${_poolRemovedPlayer
+              style="background:${_banned ? '#D93A2B' : 'transparent'};border:1px solid ${_banned ? '#D93A2B' : 'var(--border)'};border-radius:6px;padding:3px 7px;margin-right:8px;cursor:pointer;font-size:.8rem;line-height:1;"></button>` : ''}${_poolRemovedPlayer
           ? (inSquad
-            ? `<button class="pool-add-btn in-squad" disabled><i class=apex-ic data-i=check></i> Squad</button>`
+            ? `<button class="pool-add-btn in-squad" disabled>Squad</button>`
             : (p.element_type === _poolRemovedPlayer.element_type
               ? `<button class="pool-add-btn pp-fill-btn" onclick="_poolFillSlot(${p.id})">+ Pick</button>`
               : `<button class="pool-add-btn" disabled style="opacity:.3;">Wrong pos</button>`))
           : (_poolDropped.length
             ? (inSquad
-              ? `<button class="pool-add-btn in-squad" disabled><i class=apex-ic data-i=check></i> Squad</button>`
+              ? `<button class="pool-add-btn in-squad" disabled>Squad</button>`
               : (!_poolDropped.some(d => d.player.element_type === p.element_type)
                 ? `<button class="pool-add-btn" disabled style="opacity:.3;" title="No open slot in this position">Wrong pos</button>`
                 : ((p.cost || 0) > _poolAvailableCash() + 0.01
@@ -40759,7 +40720,7 @@ function renderPoolTable() {
                   : `<button class="pool-add-btn pp-fill-btn" onclick="_poolAddPlayer(${p.id})">+ Add</button>`)))
             : `<button class="pool-add-btn ${inSquad ? 'in-squad' : ''}"
               onclick="_poolAddPlayer(${p.id})"
-              ${inSquad ? 'disabled' : ''}>${inSquad ? '<i class=apex-ic data-i=check></i> Squad' : '+ Add'}</button>`)
+              ${inSquad ? 'disabled' : ''}>${inSquad ? 'Squad' : '+ Add'}</button>`)
         }
       </td>
     `;
@@ -41495,7 +41456,7 @@ function _openXminsEditor(pid) {
       </div>
       <div style="display:flex;gap:10px;">
         <button id="xmins-reset" style="flex:1;background:#ffffff;color:#475569;border:1px solid #E4E8E4;border-radius:10px;padding:12px;font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:700;cursor:pointer;${isOverridden ? '' : 'opacity:0.5;pointer-events:none;'}">↺ Reset</button>
-        <button id="xmins-save" style="flex:2;background:#0F6E56;color:#ffffff;border:none;border-radius:10px;padding:12px;font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:800;cursor:pointer;letter-spacing:0.02em;"><i class=apex-ic data-i=check></i> Save & recompute</button>
+        <button id="xmins-save" style="flex:2;background:#0F6E56;color:#ffffff;border:none;border-radius:10px;padding:12px;font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:800;cursor:pointer;letter-spacing:0.02em;">Save & recompute</button>
       </div>
       ${(Object.keys(_xminsOverrides || {}).length > 1)
           ? ('<div style="text-align:center;margin-top:14px;">'
@@ -41563,7 +41524,7 @@ setTimeout(() => {
   css.textContent = `
     .pitch .shirt-xp { cursor: pointer; transition: transform 0.15s, color 0.15s; }
     .pitch .shirt-xp:hover { transform: scale(1.08); }
-    .pitch .shirt-xp:hover::after { content: '';-webkit-mask-image:var(--ic-edit);mask-image:var(--ic-edit);background:currentColor;-webkit-mask-size:contain;mask-size:contain;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat; font-size: 0.65em; opacity: 0.7; }
+    .pitch .shirt-xp:hover::after { content: ' '; font-size: 0.65em; opacity: 0.7; }
   `;
   document.head.appendChild(css);
 })();
@@ -41591,7 +41552,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW3</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1788391803-GW3-2063077b</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1788423956-GW3-e45bc1e6</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
@@ -42702,46 +42663,6 @@ s.setAttribute("data-cf-beacon",'{"token": "890700f621df42909deca8500a0df182"}')
 
 <!-- ## APEX_MOBILE_FIX:START ## -->
 <style>
-:root{
-  --ic-tree:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 4v11a3 3 0 0 0 3 3h4M6 4a2 2 0 1 0 0-.01M13 18a2 2 0 1 0 0 .01M18 8a2 2 0 1 0 0-.01M6 9h8a4 4 0 0 0 4-1'/%3E%3C/svg%3E");
-  --ic-bolt:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M13 2 4 14h6l-1 8 9-12h-6z'/%3E%3C/svg%3E");
-  --ic-ban:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18M6 6l12 12'/%3E%3C/svg%3E");
-  --ic-lock:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 11h14v10H5zM8 11V7a4 4 0 0 1 8 0v4'/%3E%3C/svg%3E");
-  --ic-road:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 3 4 21M18 3l2 18M12 4v3M12 11v3M12 18v3'/%3E%3C/svg%3E");
-  --ic-shield:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z'/%3E%3C/svg%3E");
-  --ic-gem:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 9h18l-9 12zM3 9l3-5h12l3 5M9 9l3 12 3-12M6 4l3 5M18 4l-3 5'/%3E%3C/svg%3E");
-  --ic-sync:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 11a8 8 0 0 0-14-5M4 13a8 8 0 0 0 14 5M20 5v6h-6M4 19v-6h6'/%3E%3C/svg%3E");
-  --ic-board:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M8 4h8v3H8zM6 5H5v16h14V5h-1M9 12h6M9 16h4'/%3E%3C/svg%3E");
-  --ic-flame:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3c3 4 5 6 5 9a5 5 0 0 1-10 0c0-2 1-3 2-5 1 2 2 2 3 1 0-2 0-3 0-5z'/%3E%3C/svg%3E");
-  --ic-warn:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 4 2 20h20zM12 10v5M12 18v.5'/%3E%3C/svg%3E");
-  --ic-flag:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 21V4M6 5h11l-2 4 2 4H6'/%3E%3C/svg%3E");
-  --ic-cards:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 7l6-2 4 11-6 2zM12 4h6v14h-6'/%3E%3C/svg%3E");
-  --ic-hold:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 11V5.5a1.5 1.5 0 0 1 3 0V11m0-.5V4.5a1.5 1.5 0 0 1 3 0V11m0-1V6.5a1.5 1.5 0 0 1 3 0V14a6 6 0 0 1-6 6h-1a5 5 0 0 1-4-2l-3-4a1.5 1.5 0 0 1 2.2-2z'/%3E%3C/svg%3E");
-  --ic-timer:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 21a8 8 0 1 0 0-16 8 8 0 0 0 0 16M12 9v4l3 2M9 2h6'/%3E%3C/svg%3E");
-  --ic-hourglass:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 3h10M7 21h10M8 3v4l4 5-4 5v4M16 3v4l-4 5 4 5v4'/%3E%3C/svg%3E");
-  --ic-pin:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 17v5M9 3h6l-1 6 3 3v2H7v-2l3-3z'/%3E%3C/svg%3E");
-  --ic-ban:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18M6 6l12 12'/%3E%3C/svg%3E");
-  --ic-check:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 12.5l5 5L20 6.5'/%3E%3C/svg%3E");
-  --ic-check:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 12.5l5 5L20 6.5'/%3E%3C/svg%3E");
-  --ic-close:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 6l12 12M18 6L6 18'/%3E%3C/svg%3E");
-  --ic-close:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 6l12 12M18 6L6 18'/%3E%3C/svg%3E");
-  --ic-star:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3.5l2.6 5.6 6 .8-4.4 4.2 1.1 6-5.3-3-5.3 3 1.1-6L3.4 9.9l6-.8z'/%3E%3C/svg%3E");
-  --ic-star:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3.5l2.6 5.6 6 .8-4.4 4.2 1.1 6-5.3-3-5.3 3 1.1-6L3.4 9.9l6-.8z'/%3E%3C/svg%3E");
-  --ic-list:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 5h16v14H4zM4 10h16M4 14.5h16M9 5v14'/%3E%3C/svg%3E");
-  --ic-caret:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9.5l6 6 6-6'/%3E%3C/svg%3E");
-  --ic-diamond:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3l7 9-7 9-7-9z'/%3E%3C/svg%3E");
-  --ic-pause:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 5v14M15 5v14'/%3E%3C/svg%3E");
-  --ic-edit:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 20h4L20 8l-4-4L4 16z'/%3E%3C/svg%3E");
-  --ic-edit:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 20h4L20 8l-4-4L4 16z'/%3E%3C/svg%3E");
-  --ic-play:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 4l12 8-12 8z'/%3E%3C/svg%3E");
-}
-
-/* APEX_BRAND_V2_MATCHDAY_v1 - emoji replaced by masked icons. They inherit the
-   surrounding text colour, so an icon can never be a second palette. */
-.apex-ic{display:inline-block;width:1em;height:1em;vertical-align:-.125em;
-  background:currentColor;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
-  -webkit-mask-position:center;mask-position:center;
-  -webkit-mask-size:contain;mask-size:contain;flex:none}
 /* ============================================================================
  * apex_mobile.css — universal mobile fixes for fplapex.com
  *
@@ -42883,10 +42804,10 @@ s.setAttribute("data-cf-beacon",'{"token": "890700f621df42909deca8500a0df182"}')
 @media (max-width: 480px) {
     /* 2026-06-06: top padding clears the absolute cost badge so it no longer
        overlaps the GK; was 22px. */
-    /* 2026-06-10: side padding 8→14px — the absolute ⊗/<i class=apex-ic data-i=timer></i> controls hang
+    /* 2026-06-10: side padding 8→14px — the absolute ⊗/controls hang
        outside the kits and were clipping at both screen edges on 5-man rows. */
     .pitch { padding: 94px 16px 14px !important; }
-    /* 2026-06-19: the <i class=apex-ic data-i=timer></i> clock button is pinned right:-6px so it pokes past
+    /* 2026-06-19: the clock button is pinned right:-6px so it pokes past
        every shirt; on the outermost players (5-man row) that clips at the
        screen edge. Tuck both edge controls inside the shirt on phones. */
     .pitch .pp-xmins-btn.pp-xmins-btn, .bench-row .pp-xmins-btn.pp-xmins-btn { right: 1px !important; }
@@ -42896,7 +42817,7 @@ s.setAttribute("data-cf-beacon",'{"token": "890700f621df42909deca8500a0df182"}')
     /* doubled-class selectors out-rank the desktop XL rules
        (.pitch .shirt 140px !important + min-width) on phones */
     /* 2026-06-19: size shirts to the viewport so 5-per-row + the absolute
-       ⊗/<i class=apex-ic data-i=timer></i> controls ALWAYS fit — fixed 66px overflowed ~375px phones (SE/mini).
+       ⊗/controls ALWAYS fit — fixed 66px overflowed ~375px phones (SE/mini).
        (100vw − 60px)/5 reserves 60px for pitch padding + control overhang.
        Capped 72px so big phones don't balloon. */
     .pitch .shirt.shirt, .bench-row .shirt.shirt, .shirt {

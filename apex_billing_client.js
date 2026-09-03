@@ -100,7 +100,7 @@
       return post('/session', { token: m[1] }).then(function (d) {
         if (d && d.session) {
           lsSet(SESSION_KEY, d.session);
-          toast('Signed in <i class=apex-ic data-i=check></i>');
+          toast('Signed in ');
           return true;
         }
         toast((d && d.error) || 'Sign-in link invalid or expired — request a new one.');
@@ -332,7 +332,7 @@
         .then(function () { whenDomReady(autoMount); });
       try {
         if (/[?&]apex_sub=success/.test(String(window.location.search))) {
-          toast('Payment received <i class=apex-ic data-i=check></i> — now enter your email under “Log in” to unlock this device.');
+          toast('Payment received — now enter your email under “Log in” to unlock this device.');
         }
       } catch (e) {}
     }
