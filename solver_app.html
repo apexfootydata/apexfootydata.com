@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="3" data-built-at="2026-09-04T14:34:02">
+<meta name="apex-gw" content="3" data-built-at="2026-09-04T14:43:31">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
@@ -37,7 +37,7 @@
 })();
 </script>
 <meta http-equiv="Pragma" content="no-cache">
-<meta name="apex-build" content="20260904-143402">
+<meta name="apex-build" content="20260904-144330">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — FPL Apex</title>
 <meta name="description" content="Plan FPL transfers, chips, and Free Hit squads. Live xG-based projections, a rival head-to-head simulator, and a mini-league table. Free FPL tool.">
@@ -20603,7 +20603,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1788528842-GW3-646ff6af";
+const BUILD_VERSION = "1788529410-GW3-1e119fb5";
 window.APEX_BUILD = BUILD_VERSION;
 // APEX_BUILD_FRESHNESS_v1 (2026-08-28): the page checks whether a NEWER build
 // is live and offers a one-tap update. GitHub Pages serves HTML max-age=600,
@@ -20660,7 +20660,7 @@ window.APEX_SQUAD_ROLLBACK = false;
 let FPL_ID = null;
 let SQUAD_DATA = [];
 </script>
-<script src="/apex_pool.js?v=1788528842-GW3-646ff6af"></script>
+<script src="/apex_pool.js?v=1788529410-GW3-1e119fb5"></script>
 <script>
 const PLAYER_NAMES = {"1": "Raya", "2": "Arrizabalaga", "3": "Meslier", "4": "Gabriel", "5": "J.Timber", "6": "Saliba", "7": "Lewis-Skelly", "8": "Calafiori", "9": "Hincapie", "10": "White", "11": "Mosquera", "12": "Saka", "13": "Rice", "14": "Eze", "15": "\u00d8degaard", "16": "Madueke", "17": "Merino", "18": "Martinelli", "19": "Zubimendi", "20": "Dowman", "22": "Nwaneri", "23": "F\u00e1bio Vieira", "24": "Nelson", "25": "Gy\u00f6keres", "26": "Havertz", "27": "G.Jesus", "31": "Konsa", "452": "Bruno G.", "557": "Tzolis", "29": "M.Bizot", "30": "Digne", "32": "Cash", "33": "Mings", "34": "Pau", "35": "Bogarde", "36": "Maatsen", "37": "Lindel\u00f6f", "38": "A.Garc\u00eda", "39": "Nedeljkovic", "41": "Buend\u00eda", "44": "Bailey", "45": "McGinn", "46": "Barkley", "47": "Kamara", "48": "Onana", "49": "Iling Jr", "50": "Burrowes", "51": "George Hemmings", "52": "Alysson", "53": "Manzambi", "54": "Gomes", "55": "Watkins", "56": "Abraham", "160": "Garnacho", "166": "N.Jackson", "582": "Madjo", "596": "Ruggeri", "597": "Suzuki", "606": "Rowe", "607": "Lynch", "611": "Wan-Bissaka", "618": "Goretzka", "630": "Harwood-Bellis", "631": "Mbaye", "57": "Petrovi\u0107", "58": "Forster", "59": "Dennis", "60": "Hill", "61": "Truffert", "62": "Diakit\u00e9", "63": "Milosavljevi\u0107", "64": "Smith", "65": "J.Araujo", "66": "Soler", "67": "Rayan", "68": "Tavernier", "69": "Scott", "70": "Kluivert", "71": "Cook", "72": "Gannon-Doak", "73": "Adams", "74": "Brooks", "75": "Christie", "76": "T\u00f3th.A", "77": "Adli", "78": "Kroupi.Jr", "79": "Evanilson", "80": "Enes \u00dcnal", "81": "Rodr\u00edguez", "566": "Silva", "573": "Sanchez", "608": "Jebbison", "615": "Di Gregorio", "82": "Kelleher", "83": "Valdimarsson", "84": "Collins", "85": "Van den Berg", "86": "Lewis-Potter", "87": "Ajer", "88": "Kayode", "89": "Henry", "90": "Hickey", "92": "Ji-soo", "93": "Schuster", "94": "Schade", "95": "O.Dango", "96": "Damsgaard", "97": "Jensen", "98": "Janelt", "99": "Milambo", "100": "Carvalho", "102": "Yarmoliuk", "103": "Dasilva", "105": "Anthony", "106": "Thiago", "107": "Furo", "108": "Wilson", "565": "M.Sangar\u00e9", "620": "Diouf", "109": "Verbruggen", "111": "Steele", "113": "F.Kad\u0131o\u011flu", "114": "Boscagli", "115": "De Cuyper", "116": "Dunk", "117": "Coppola", "118": "Igor", "119": "Costinha", "120": "Svoboda", "121": "Mitoma", "122": "Minteh", "123": "Hinshelwood", "124": "Gro\u00df", "125": "Georginio", "126": "O'Riley", "127": "Gomez", "128": "Buonanotte", "129": "Ayari", "130": "Wieffer", "132": "Howell", "133": "Watson", "134": "Oriola", "135": "Yohanna", "137": "Tzimas", "138": "Kostoulas", "139": "Ferguson", "328": "Struijk", "504": "Vuskovic", "594": "David", "600": "Osman", "605": "Yalcouy\u00e9", "614": "Hadjam", "624": "Cozier-Duberry", "639": "Andr\u00e9s", "652": "Azeez", "28": "Martinez", "40": "Rogers", "101": "Henderson", "136": "Welbeck", "140": "S\u00e1nchez", "141": "J\u00f6rgensen", "142": "James", "143": "Chalobah", "144": "Gusto", "145": "Fofana", "146": "B.Badiashile", "148": "Hato", "149": "Colwill", "150": "M.Sarr", "151": "Acheampong", "152": "Palestra", "154": "Palmer", "156": "Neto", "157": "Est\u00eav\u00e3o", "158": "Gittens", "159": "Caicedo", "161": "Lavia", "163": "D.Essugo", "164": "Quenda", "165": "Jo\u00e3o Pedro", "168": "Marc Guiu", "169": "Mheuka", "170": "Emegha", "200": "Lacroix", "560": "Penders", "561": "Anselmino", "568": "Barco", "583": "Chavarria", "91": "Pinnock", "104": "Onyeka", "110": "Rushworth", "171": "Dovin", "172": "Wilson", "173": "Thomas", "174": "Kitching", "175": "van Ewijk", "176": "Dasilva", "177": "Kesler-Hayden", "178": "Bidwell", "179": "Latibeaudiere", "180": "Woolfenden", "181": "Brau", "182": "Amenda", "183": "Rudoni", "184": "Grimes", "185": "Sakamoto", "186": "Mason-Clark", "187": "Eccles", "188": "Torp", "189": "Shepherd", "190": "Tchaouna", "191": "Borges Rodrigues", "192": "Andrews", "193": "Wright", "194": "Thomas-Asante", "195": "Simms", "196": "Markelo", "197": "Bassette", "492": "Awoniyi", "575": "Yirenkyi", "584": "Hamer", "599": "Cherif", "623": "Bentley", "42": "Guessand", "153": "Disasi", "198": "Henderson", "199": "Benitez", "202": "Richards", "203": "Canvot", "204": "Mitchell", "205": "Sosa", "206": "Chadi Riad", "207": "Mingueza", "208": "Sarr", "210": "Wharton", "211": "Yeremy", "212": "Hughes", "213": "Lerma", "214": "Kamada", "215": "Devenny", "216": "Esse", "217": "M.Fran\u00e7a", "218": "Doucour\u00e9", "219": "J.Rak-Sakyi", "220": "Cardines", "221": "Drakes-Thomas", "222": "Strand Larsen", "223": "Mateta", "224": "Nketiah", "225": "Uche", "241": "McNeil", "555": "Matthews", "577": "Tomiyasu", "588": "Khalaili", "595": "Gozo", "633": "Ahanor", "643": "Chilwell", "644": "Timber", "647": "Osorio", "21": "N\u00f8rgaard", "209": "Johnson", "226": "Pickford", "227": "Travers", "228": "King", "229": "Tarkowski", "230": "Branthwaite", "231": "Keane", "232": "O'Brien", "233": "Mykolenko", "234": "Patterson", "235": "Aznou", "236": "Dewsbury-Hall", "238": "Grealish", "239": "Garner", "242": "George", "243": "Alcaraz", "244": "Armstrong", "245": "Dibling", "246": "R\u00f6hl", "247": "Hackney", "248": "Beto", "249": "Barry", "649": "Maitland-Niles", "250": "Leno", "251": "Lecomte", "252": "McNally", "253": "Andersen", "254": "Robinson", "255": "J.Cuenca", "256": "Tete", "257": "Bassey", "258": "Castagne", "261": "Iwobi", "262": "Smith Rowe", "263": "Kevin", "264": "Bobb", "265": "Berge", "266": "Cairney", "268": "King", "269": "Sessegnon", "270": "Reed", "271": "Muniz", "272": "Kusi-Asare", "569": "Gonzalo", "570": "Palacios", "580": "Charles", "610": "De Fougerolles", "626": "Zepa", "635": "Larsson", "636": "\u00c1ngel", "650": "Affengruber", "240": "Iroegbunam", "273": "Phillips", "274": "Butland", "275": "Cartwright", "276": "Lo-Tutala", "277": "Egan", "278": "Hughes", "279": "Ajayi", "280": "Coyle", "281": "Drameh", "282": "Giles", "283": "Jacob", "284": "McCarthy", "285": "McNair", "286": "Belloumi", "287": "Millar", "288": "Dowell", "289": "Crooks", "290": "Slater", "291": "Matazo", "292": "\u00d6m\u00fcr", "293": "Kamara", "294": "Zambrano", "295": "McBurnie", "296": "Akintola", "297": "Gyabi", "298": "Destan", "299": "Burstow", "340": "Gelhardt", "556": "Targett", "563": "Morita", "572": "Tzolakis", "574": "Hjert\u00f8-Dahl", "576": "Stroud", "585": "Herrington", "586": "Mendy", "589": "Gourna-Douath", "617": "Cho", "632": "Ansah", "637": "Vaz", "638": "Norton-Cuffy", "642": "Thomas", "645": "Mouzakitis", "259": "Diop", "267": "Luki\u0107", "300": "Walton", "301": "Palmer", "302": "Button", "303": "Kipr\u00e9", "304": "O'Shea", "305": "Davis", "306": "Greaves", "307": "Johnson", "308": "Furlong", "309": "N\u00fa\u00f1ez", "310": "Matusiwa", "311": "Burns", "312": "Taylor", "313": "Clarke", "314": "Ogbene", "315": "Fatawu", "316": "Emersonn", "317": "Hirst", "318": "Philogene", "319": "Szmodics", "320": "Akpom", "321": "Walle Egeli", "322": "Al-Hamadi", "323": "McAteer", "324": "Mehmeti", "554": "Van Oevelen", "562": "Maeda", "564": "Scherpen", "571": "Florentino", "591": "Enciso", "592": "Ouattara", "602": "Humphreys", "619": "Palacios", "640": "Flemming", "260": "Wilson", "326": "Perri", "327": "Bijol", "329": "Rodon", "330": "Bogle", "331": "Gudmundsson", "332": "Justin", "333": "Bornauw", "334": "Muharemovi\u0107", "335": "Stach", "336": "Okafor", "337": "Aaronson", "338": "Ampadu", "339": "Longstaff", "341": "Gnonto", "342": "Harrison", "343": "James", "344": "Gruev", "345": "Tanaka", "346": "Calvert-Lewin", "347": "Nmecha", "348": "Piroe", "349": "Mateo Joseph", "385": "Trafford", "598": "Elvedi", "603": "Lienou", "604": "Cresswell", "625": "Cairns", "629": "Zetterer", "641": "Bard", "648": "Bahoya", "350": "A.Becker", "351": "Mamardashvili", "352": "Woodman", "353": "Pecsi", "354": "Jaros", "355": "Davies", "356": "Virgil", "357": "Frimpong", "358": "Kerkez", "359": "Gomez", "360": "Bradley", "361": "Lucky", "362": "Jacquet", "363": "Leoni", "364": "Tsimikas", "365": "Ramsay", "366": "Wirtz", "367": "Gakpo", "368": "Szoboszlai", "369": "Ngumoha", "370": "Chiesa", "371": "Gravenberch", "372": "Mac Allister", "373": "C.Jones", "374": "Endo", "375": "Nyoni", "376": "Bajcetic", "377": "Munoz", "378": "McConnell", "379": "Isak", "380": "Ekitik\u00e9", "381": "Koumas", "382": "Danns", "383": "Elliott", "579": "Araujo", "627": "Barcola", "155": "Enzo", "237": "Ndiaye", "384": "Donnarumma", "386": "Bettinelli", "387": "O'Reilly", "388": "Gu\u00e9hi", "389": "Matheus N.", "390": "R\u00faben", "391": "Gvardiol", "392": "A\u00eft-Nouri", "393": "Khusanov", "394": "Alleyne", "395": "Lewis", "396": "Vitor Reis", "397": "Semenyo", "398": "Foden", "399": "Cherki", "400": "Doku", "402": "Rodrigo", "404": "Reijnders", "406": "Kova\u010di\u0107", "407": "Echeverri", "408": "Phillips", "409": "Mukasa", "410": "Monga", "411": "Haaland", "481": "Anderson", "587": "Rulli", "616": "Bouaddi", "621": "McAidoo", "622": "Braithwaite", "628": "Allan", "43": "Tielemans", "131": "Baleba", "162": "Andrey Santos", "325": "Darlow", "412": "Lammens", "413": "Bayindir", "414": "Heaton", "415": "Dorgu", "416": "De Ligt", "417": "Dalot", "418": "Maguire", "419": "Martinez", "420": "Yoro", "421": "Heaven", "422": "Mazraoui", "423": "Shaw", "424": "Amass", "425": "Fredricson", "426": "B.Fernandes", "427": "Mbeumo", "428": "Cunha", "429": "Rashford", "430": "Mount", "431": "Amad", "432": "Mainoo", "433": "Ugarte", "434": "J.Fletcher", "435": "Lacey", "436": "Collyer", "437": "Bendito Mantato", "438": "Fletcher", "439": "\u0160e\u0161ko", "440": "Zirkzee", "441": "Obi", "405": "N.Gonzalez", "442": "Pope", "443": "Gillespie", "444": "Jaouen", "445": "Thiaw", "446": "Sch\u00e4r", "447": "Botman", "448": "Burn", "449": "Hall", "450": "Livramento", "451": "A.Murphy", "453": "Barnes", "454": "Elanga", "456": "J.Ramsey", "457": "J.Murphy", "458": "Joelinton", "459": "L.Miley", "460": "Willock", "461": "Tour\u00e9", "462": "Steur", "463": "Woltemade", "464": "Wissa", "465": "Osula", "466": "Neave", "559": "Bamba", "567": "Horn\u00ed\u010dek", "593": "Dedi\u0107", "609": "Shahar", "634": "Fernandez-Pardo", "167": "Delap", "201": "Mu\u00f1oz", "467": "Sels", "468": "John", "469": "N.Williams", "470": "Morato", "471": "Milenkovi\u0107", "472": "Murillo", "473": "Aina", "474": "Jair Cunha", "475": "Savona", "476": "O.Richards", "477": "Abbott", "478": "Netz", "479": "Bindon", "480": "Gibbs-White", "482": "Hudson-Odoi", "483": "Ndoye", "484": "Hutchinson", "485": "Bakwa", "486": "McAtee", "487": "Dominguez", "488": "I.Sangar\u00e9", "489": "Yates", "490": "Wood", "491": "Igor Jesus", "493": "Kalimuendo", "558": "Schlager", "581": "Diomande", "590": "Benda", "112": "Van Hecke", "147": "Tosin", "401": "Marmoush", "403": "S\u00e1vio", "455": "Tonali", "494": "Vicario", "495": "Austin", "496": "Kinsky", "497": "Dubravka", "498": "Senesi", "499": "Pedro Porro", "500": "Romero", "502": "Robertson", "503": "Van de Ven", "505": "Spence", "506": "Udogie", "507": "Phillips", "508": "Davies", "509": "Byfield", "510": "Rowswell", "511": "Souza", "512": "Kudus", "513": "Xavi", "514": "Tel", "515": "Maddison", "516": "Bentancur", "517": "Odobert", "518": "P.M.Sarr", "519": "Gallagher", "520": "Bergvall", "521": "Kulusevski", "522": "Gray", "523": "Moore", "524": "Olusesi", "525": "Fernandes", "526": "Solanke", "527": "Richarlison", "528": "Scarlett", "578": "Mudryk", "601": "Williams-Barnett", "501": "Danso", "529": "Roefs", "530": "Patterson", "531": "Ellborg", "532": "Ballard", "533": "Mukiele", "534": "Hume", "535": "Alderete", "536": "Reinildo", "537": "Seelt", "538": "Hjelde", "539": "O'Nien", "540": "Masuaku", "541": "Meunier", "542": "E.Le F\u00e9e", "543": "Diarra", "544": "Xhaka", "545": "Sadiki", "546": "Adingra", "547": "Mundle", "548": "Rigg", "549": "Talbi", "550": "Jocelin.T", "551": "N.Angulo", "552": "Brobbey", "553": "Isidor", "612": "Methalie", "613": "Ahoka", "646": "Fofana", "651": "J.Angulo"};
 const TRANSFER_RECS = [];
@@ -23839,6 +23839,65 @@ function _apexSimDist(xi, capId, idx, nSims, bench, vcId, chip) {
     }
   }
   const totals = new Array(N);
+  // ── APEX_FIELD_IS_RANDOM_v1 (2026-09-04, Marcus: "does eo come into this?") ──
+  // THE FIELD IS NOT A CONSTANT, AND HOW MUCH OF IT YOU OWN IS THE WHOLE POINT.
+  //
+  // pBeat was counted as P(my draw >= APEX_CROWD_AVG.score) — the field held at
+  // ONE number with zero variance and zero correlation with my squad. That makes
+  // the headline "about N weeks in 100 a squad like yours finishes ahead"
+  // structurally blind to the thing it is being read for: a template squad and a
+  // pure-differential squad with the SAME expected points got the SAME answer.
+  // They should not. Rank is about my score MINUS the field's, and
+  //   Var(me - field) = Var(me) + Var(field) - 2*Cov(me, field)
+  // so owning what the field owns SHRINKS the spread (a small edge becomes near
+  // certain) and owning none of it WIDENS the spread (a small edge is a coin
+  // toss). The old maths set the last two terms to zero.
+  //
+  // MEASURED on the 2026-09-04 12:44 book: the field's own sd is ~7.8 points on
+  // an independent reading (real is higher — same-club and shared-captain
+  // correlation), against a typical XI sd of ~13. Treating 7.8 as 0 is not a
+  // rounding choice. And FPL's own average_entry_score was 50 in GW1 and 81 in
+  // GW2 — the field is the most volatile object on the card.
+  //
+  // HOW. The field's MEAN stays exactly APEX_CROWD_AVG.score, so the two lines on
+  // the card cannot disagree. Only its DEVIATION is simulated:
+  //     field_s = crowdAvg
+  //             + SUM over MY 15 of  eo_i * (my draw_i - his mean)   <- correlation
+  //             + Normal(0, restSd)                                  <- everyone else
+  // eo_i is effective ownership (XI share + captain share) published by
+  // APEX_EO_DANGER_v1 — a captained player counts twice because that is exactly
+  // how he takes rank off you. restSd is the independent sd of the field's
+  // holdings OUTSIDE my squad. Falls back to the old constant-field count when
+  // the pool carries no `eo` (an older bake) so nothing changes there.
+  // Gate: scripts/tests/test_field_is_random.py. Kill: window.APEX_FIELD_RANDOM = false.
+  let _fEo = null, _fRestSd = 0, _fOn = false;
+  try {
+    if (!(typeof window !== 'undefined' && window.APEX_FIELD_RANDOM === false)
+        && typeof POOL_DATA !== 'undefined' && Array.isArray(POOL_DATA)
+        && POOL_DATA.length && POOL_DATA[0] && POOL_DATA[0].eo !== undefined) {
+      const _mine = new Set();
+      for (const p of xi) if (p && p.id != null) _mine.add(p.id);
+      if (_bn) for (const p of _bn) if (p && p.id != null) _mine.add(p.id);
+      _fEo = new Map();
+      let _rv = 0;
+      for (const p of POOL_DATA) {
+        const e = (+p.eo || 0) / 100;
+        if (e <= 0) continue;
+        if (_mine.has(p.id)) { _fEo.set(p.id, e); continue; }
+        const _sdA = p.xp_sd_per_gw;
+        const _sd = (Array.isArray(_sdA) && _sdA[idx] != null) ? +_sdA[idx] : (+p.xp_sd || 0);
+        if (_sd > 0) _rv += (e * _sd) * (e * _sd);
+      }
+      _fRestSd = Math.sqrt(Math.max(0, _rv));
+      _fOn = _fEo.size > 0 || _fRestSd > 0;
+    }
+  } catch (_eF) { _fEo = null; _fOn = false; }
+  const _fMean = new Map();
+  if (_fOn && _fEo) {
+    for (const p of xi) if (p && _fEo.has(p.id)) _fMean.set(p.id, _xpAt(p, idx));
+    if (_bn) for (const p of _bn) if (p && _fEo.has(p.id)) _fMean.set(p.id, _xpAt(p, idx));
+  }
+  const _fDraws = _fOn ? new Array(N) : null;
   const _xv = _bn ? new Array(xi.length) : null, _xa = _bn ? new Array(xi.length) : null;
   const _bv = _bn ? new Array(_bn.length) : null, _ba = _bn ? new Array(_bn.length) : null;
   // APEX_SIMDIST_CHIPS_v1 (2026-08-19): BB = all 15 score and there are no
@@ -23871,6 +23930,27 @@ function _apexSimDist(xi, capId, idx, nSims, bench, vcId, chip) {
     }
     if (_chipTc) t += _capApp ? _capD : (_vcApp ? _vcD : 0);
     totals[s] = t;
+    // APEX_FIELD_IS_RANDOM_v1: the field's deviation this draw. Shared players
+    // move BOTH scores (that is the correlation); the rest is an independent
+    // gaussian on the same seeded RNG.
+    if (_fOn) {
+      let _fd = 0;
+      if (_bn) {
+        for (let i = 0; i < xi.length; i++) {
+          const e = _fEo.get(xi[i].id);
+          if (e) _fd += e * ((_xa[i] ? _xv[i] : 0) - (_fMean.get(xi[i].id) || 0));
+        }
+        for (let i = 0; i < _bn.length; i++) {
+          const e = _fEo.get(_bn[i].id);
+          if (e) _fd += e * ((_ba[i] ? _bv[i] : 0) - (_fMean.get(_bn[i].id) || 0));
+        }
+      }
+      if (_fRestSd > 0) {
+        const u1 = Math.max(1e-12, _apexRng()), u2 = _apexRng();
+        _fd += _fRestSd * Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+      }
+      _fDraws[s] = _fd;
+    }
   }
   totals.sort((x, y) => x - y);
   const pct = (q) => totals[Math.min(N - 1, Math.max(0, Math.floor(q * N)))];
@@ -23889,8 +23969,19 @@ function _apexSimDist(xi, capId, idx, nSims, bench, vcId, chip) {
         && +APEX_CROWD_AVG.score > 0) _cA = +APEX_CROWD_AVG.score;
   } catch (_eCa) { _cA = null; }
   let geC = 0, geC10 = 0, leC10 = 0;
+  // APEX_FIELD_IS_RANDOM_v1: the crowd counts are PAIRED — draw s of my squad
+  // against draw s of the field — so they must be taken before `totals` is
+  // sorted. ge40/ge60/ge80 are counts against fixed thresholds and do not care.
+  let _fPaired = false;
+  if (_cA !== null && _fOn && _fDraws) {
+    for (let i = 0; i < N; i++) {
+      const v = totals[i], f = _cA + _fDraws[i];
+      if (v >= f) geC++; if (v >= f + 10) geC10++; if (v <= f - 10) leC10++;
+    }
+    _fPaired = true;
+  }
   for (let i = 0; i < N; i++) { const v = totals[i]; if (v >= 40) ge40++; if (v >= 60) ge60++; if (v >= 80) ge80++;
-    if (_cA !== null) { if (v >= _cA) geC++; if (v >= _cA + 10) geC10++; if (v <= _cA - 10) leC10++; } }
+    if (_cA !== null && !_fPaired) { if (v >= _cA) geC++; if (v >= _cA + 10) geC10++; if (v <= _cA - 10) leC10++; } }
   // APEX_FIX_AUG07B_OPTD: the option-D curve is the distribution this loop
   // just paid for. Binned here (0.5th–99.5th percentile, so one freak draw
   // cannot stretch the axis) rather than re-simulated by the renderer.
@@ -23910,7 +24001,13 @@ function _apexSimDist(xi, capId, idx, nSims, bench, vcId, chip) {
            autosubs: !!_bn && chip !== 'bb', chip: chip || null,
            // APEX_DIST_RELATIVE_v1: null when no gameweek has finished, so the
            // renderer can tell "no crowd figure exists" from "you beat it 0%".
-           cAvg: _cA, pBeat: (_cA === null ? null : geC / N),
+           cAvg: _cA,
+           // APEX_FIELD_IS_RANDOM_v1: exposed so the gate and the card can tell a
+           // paired answer from the old constant-field one, and so the field's
+           // simulated spread is inspectable rather than assumed.
+           fieldRandom: _fPaired, fieldRestSd: Math.round(_fRestSd * 100) / 100,
+           fieldSd: (_fDraws ? Math.round(Math.sqrt(_fDraws.reduce((a, x) => a + x * x, 0) / N) * 100) / 100 : 0),
+           pBeat: (_cA === null ? null : geC / N),
            pBeat10: (_cA === null ? null : geC10 / N),
            pLose10: (_cA === null ? null : leC10 / N) };
 }
@@ -42075,7 +42172,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW3</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1788528842-GW3-646ff6af</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1788529410-GW3-1e119fb5</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
