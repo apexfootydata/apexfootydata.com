@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="4" data-built-at="2026-09-05T17:53:21">
+<meta name="apex-gw" content="4" data-built-at="2026-09-05T19:01:32">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
@@ -37,7 +37,7 @@
 })();
 </script>
 <meta http-equiv="Pragma" content="no-cache">
-<meta name="apex-build" content="20260905-175320">
+<meta name="apex-build" content="20260905-190132">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — FPL Apex</title>
 <meta name="description" content="Plan FPL transfers, chips, and Free Hit squads. Live xG-based projections, a rival head-to-head simulator, and a mini-league table. Free FPL tool.">
@@ -20660,7 +20660,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1788627200-GW4-0d60fcff";
+const BUILD_VERSION = "1788631292-GW4-2423ee26";
 window.APEX_BUILD = BUILD_VERSION;
 // APEX_BUILD_FRESHNESS_v1 (2026-08-28): the page checks whether a NEWER build
 // is live and offers a one-tap update. GitHub Pages serves HTML max-age=600,
@@ -20717,7 +20717,7 @@ window.APEX_SQUAD_ROLLBACK = false;
 let FPL_ID = null;
 let SQUAD_DATA = [];
 </script>
-<script src="/apex_pool.js?v=1788627200-GW4-0d60fcff"></script>
+<script src="/apex_pool.js?v=1788631292-GW4-2423ee26"></script>
 <script>
 const PLAYER_NAMES = {"1": "Raya", "2": "Arrizabalaga", "3": "Meslier", "4": "Gabriel", "5": "J.Timber", "6": "Saliba", "7": "Lewis-Skelly", "8": "Calafiori", "9": "Hincapie", "10": "White", "11": "Mosquera", "12": "Saka", "13": "Rice", "14": "Eze", "15": "\u00d8degaard", "16": "Madueke", "17": "Merino", "18": "Martinelli", "19": "Zubimendi", "20": "Dowman", "22": "Nwaneri", "23": "F\u00e1bio Vieira", "24": "Nelson", "25": "Gy\u00f6keres", "26": "Havertz", "27": "G.Jesus", "31": "Konsa", "452": "Bruno G.", "557": "Tzolis", "29": "M.Bizot", "30": "Digne", "32": "Cash", "33": "Mings", "34": "Pau", "35": "Bogarde", "36": "Maatsen", "37": "Lindel\u00f6f", "38": "A.Garc\u00eda", "39": "Nedeljkovic", "41": "Buend\u00eda", "44": "Bailey", "45": "McGinn", "46": "Barkley", "47": "Kamara", "48": "Onana", "49": "Iling Jr", "50": "Burrowes", "51": "George Hemmings", "52": "Alysson", "53": "Manzambi", "54": "Gomes", "55": "Watkins", "56": "Abraham", "160": "Garnacho", "166": "N.Jackson", "582": "Madjo", "596": "Ruggeri", "597": "Suzuki", "606": "Rowe", "607": "Lynch", "611": "Wan-Bissaka", "618": "Goretzka", "630": "Harwood-Bellis", "631": "Mbaye", "57": "Petrovi\u0107", "58": "Forster", "59": "Dennis", "60": "Hill", "61": "Truffert", "62": "Diakit\u00e9", "63": "Milosavljevi\u0107", "64": "Smith", "65": "J.Araujo", "66": "Soler", "67": "Rayan", "68": "Tavernier", "69": "Scott", "70": "Kluivert", "71": "Cook", "72": "Gannon-Doak", "73": "Adams", "74": "Brooks", "75": "Christie", "76": "T\u00f3th.A", "77": "Adli", "78": "Kroupi.Jr", "79": "Evanilson", "80": "Enes \u00dcnal", "81": "Rodr\u00edguez", "566": "Silva", "573": "Sanchez", "608": "Jebbison", "615": "Di Gregorio", "82": "Kelleher", "83": "Valdimarsson", "84": "Collins", "85": "Van den Berg", "86": "Lewis-Potter", "87": "Ajer", "88": "Kayode", "89": "Henry", "90": "Hickey", "92": "Ji-soo", "93": "Schuster", "94": "Schade", "95": "O.Dango", "96": "Damsgaard", "97": "Jensen", "98": "Janelt", "99": "Milambo", "100": "Carvalho", "102": "Yarmoliuk", "103": "Dasilva", "105": "Anthony", "106": "Thiago", "107": "Furo", "108": "Wilson", "565": "M.Sangar\u00e9", "620": "Diouf", "109": "Verbruggen", "111": "Steele", "113": "F.Kad\u0131o\u011flu", "114": "Boscagli", "115": "De Cuyper", "116": "Dunk", "117": "Coppola", "118": "Igor", "119": "Costinha", "120": "Svoboda", "121": "Mitoma", "122": "Minteh", "123": "Hinshelwood", "124": "Gro\u00df", "125": "Georginio", "126": "O'Riley", "127": "Gomez", "128": "Buonanotte", "129": "Ayari", "130": "Wieffer", "132": "Howell", "133": "Watson", "134": "Oriola", "135": "Yohanna", "137": "Tzimas", "138": "Kostoulas", "139": "Ferguson", "328": "Struijk", "504": "Vuskovic", "594": "David", "600": "Osman", "605": "Yalcouy\u00e9", "614": "Hadjam", "624": "Cozier-Duberry", "639": "Andr\u00e9s", "652": "Azeez", "28": "Martinez", "40": "Rogers", "101": "Henderson", "136": "Welbeck", "140": "S\u00e1nchez", "141": "J\u00f6rgensen", "142": "James", "143": "Chalobah", "144": "Gusto", "145": "Fofana", "146": "B.Badiashile", "148": "Hato", "149": "Colwill", "150": "M.Sarr", "151": "Acheampong", "152": "Palestra", "154": "Palmer", "156": "Neto", "157": "Est\u00eav\u00e3o", "158": "Gittens", "159": "Caicedo", "161": "Lavia", "163": "D.Essugo", "164": "Quenda", "165": "Jo\u00e3o Pedro", "168": "Marc Guiu", "169": "Mheuka", "170": "Emegha", "200": "Lacroix", "560": "Penders", "561": "Anselmino", "568": "Barco", "583": "Chavarria", "91": "Pinnock", "104": "Onyeka", "110": "Rushworth", "171": "Dovin", "172": "Wilson", "173": "Thomas", "174": "Kitching", "175": "van Ewijk", "176": "Dasilva", "177": "Kesler-Hayden", "178": "Bidwell", "179": "Latibeaudiere", "180": "Woolfenden", "181": "Brau", "182": "Amenda", "183": "Rudoni", "184": "Grimes", "185": "Sakamoto", "186": "Mason-Clark", "187": "Eccles", "188": "Torp", "189": "Shepherd", "190": "Tchaouna", "191": "Borges Rodrigues", "192": "Andrews", "193": "Wright", "194": "Thomas-Asante", "195": "Simms", "196": "Markelo", "197": "Bassette", "492": "Awoniyi", "575": "Yirenkyi", "584": "Hamer", "599": "Cherif", "623": "Bentley", "42": "Guessand", "153": "Disasi", "198": "Henderson", "199": "Benitez", "202": "Richards", "203": "Canvot", "204": "Mitchell", "205": "Sosa", "206": "Chadi Riad", "207": "Mingueza", "208": "Sarr", "210": "Wharton", "211": "Yeremy", "212": "Hughes", "213": "Lerma", "214": "Kamada", "215": "Devenny", "216": "Esse", "217": "M.Fran\u00e7a", "218": "Doucour\u00e9", "219": "J.Rak-Sakyi", "220": "Cardines", "221": "Drakes-Thomas", "222": "Strand Larsen", "223": "Mateta", "224": "Nketiah", "225": "Uche", "241": "McNeil", "555": "Matthews", "577": "Tomiyasu", "588": "Khalaili", "595": "Gozo", "633": "Ahanor", "643": "Chilwell", "644": "Timber", "647": "Osorio", "21": "N\u00f8rgaard", "209": "Johnson", "226": "Pickford", "227": "Travers", "228": "King", "229": "Tarkowski", "230": "Branthwaite", "231": "Keane", "232": "O'Brien", "233": "Mykolenko", "234": "Patterson", "235": "Aznou", "236": "Dewsbury-Hall", "238": "Grealish", "239": "Garner", "242": "George", "243": "Alcaraz", "244": "Armstrong", "245": "Dibling", "246": "R\u00f6hl", "247": "Hackney", "248": "Beto", "249": "Barry", "649": "Maitland-Niles", "250": "Leno", "251": "Lecomte", "252": "McNally", "253": "Andersen", "254": "Robinson", "255": "J.Cuenca", "256": "Tete", "257": "Bassey", "258": "Castagne", "261": "Iwobi", "262": "Smith Rowe", "263": "Kevin", "264": "Bobb", "265": "Berge", "266": "Cairney", "268": "King", "269": "Sessegnon", "270": "Reed", "271": "Muniz", "272": "Kusi-Asare", "569": "Gonzalo", "570": "Palacios", "580": "Charles", "610": "De Fougerolles", "626": "Zepa", "635": "Larsson", "636": "\u00c1ngel", "650": "Affengruber", "240": "Iroegbunam", "273": "Phillips", "274": "Butland", "275": "Cartwright", "276": "Lo-Tutala", "277": "Egan", "278": "Hughes", "279": "Ajayi", "280": "Coyle", "281": "Drameh", "282": "Giles", "283": "Jacob", "284": "McCarthy", "285": "McNair", "286": "Belloumi", "287": "Millar", "288": "Dowell", "289": "Crooks", "290": "Slater", "291": "Matazo", "292": "\u00d6m\u00fcr", "293": "Kamara", "294": "Zambrano", "295": "McBurnie", "296": "Akintola", "297": "Gyabi", "298": "Destan", "299": "Burstow", "340": "Gelhardt", "556": "Targett", "563": "Morita", "572": "Tzolakis", "574": "Hjert\u00f8-Dahl", "576": "Stroud", "585": "Herrington", "586": "Mendy", "589": "Gourna-Douath", "617": "Cho", "632": "Ansah", "637": "Vaz", "638": "Norton-Cuffy", "642": "Thomas", "645": "Mouzakitis", "259": "Diop", "267": "Luki\u0107", "300": "Walton", "301": "Palmer", "302": "Button", "303": "Kipr\u00e9", "304": "O'Shea", "305": "Davis", "306": "Greaves", "307": "Johnson", "308": "Furlong", "309": "N\u00fa\u00f1ez", "310": "Matusiwa", "311": "Burns", "312": "Taylor", "313": "Clarke", "314": "Ogbene", "315": "Fatawu", "316": "Emersonn", "317": "Hirst", "318": "Philogene", "319": "Szmodics", "320": "Akpom", "321": "Walle Egeli", "322": "Al-Hamadi", "323": "McAteer", "324": "Mehmeti", "554": "Van Oevelen", "562": "Maeda", "564": "Scherpen", "571": "Florentino", "591": "Enciso", "592": "Ouattara", "602": "Humphreys", "619": "Palacios", "640": "Flemming", "260": "Wilson", "326": "Perri", "327": "Bijol", "329": "Rodon", "330": "Bogle", "331": "Gudmundsson", "332": "Justin", "333": "Bornauw", "334": "Muharemovi\u0107", "335": "Stach", "336": "Okafor", "337": "Aaronson", "338": "Ampadu", "339": "Longstaff", "341": "Gnonto", "342": "Harrison", "343": "James", "344": "Gruev", "345": "Tanaka", "346": "Calvert-Lewin", "347": "Nmecha", "348": "Piroe", "349": "Mateo Joseph", "385": "Trafford", "598": "Elvedi", "603": "Lienou", "604": "Cresswell", "625": "Cairns", "629": "Zetterer", "641": "Bard", "648": "Bahoya", "350": "A.Becker", "351": "Mamardashvili", "352": "Woodman", "353": "Pecsi", "354": "Jaros", "355": "Davies", "356": "Virgil", "357": "Frimpong", "358": "Kerkez", "359": "Gomez", "360": "Bradley", "361": "Lucky", "362": "Jacquet", "363": "Leoni", "364": "Tsimikas", "365": "Ramsay", "366": "Wirtz", "367": "Gakpo", "368": "Szoboszlai", "369": "Ngumoha", "370": "Chiesa", "371": "Gravenberch", "372": "Mac Allister", "373": "C.Jones", "374": "Endo", "375": "Nyoni", "376": "Bajcetic", "377": "Munoz", "378": "McConnell", "379": "Isak", "380": "Ekitik\u00e9", "381": "Koumas", "382": "Danns", "383": "Elliott", "579": "Araujo", "627": "Barcola", "155": "Enzo", "237": "Ndiaye", "384": "Donnarumma", "386": "Bettinelli", "387": "O'Reilly", "388": "Gu\u00e9hi", "389": "Matheus N.", "390": "R\u00faben", "391": "Gvardiol", "392": "A\u00eft-Nouri", "393": "Khusanov", "394": "Alleyne", "395": "Lewis", "396": "Vitor Reis", "397": "Semenyo", "398": "Foden", "399": "Cherki", "400": "Doku", "402": "Rodrigo", "404": "Reijnders", "406": "Kova\u010di\u0107", "407": "Echeverri", "408": "Phillips", "409": "Mukasa", "410": "Monga", "411": "Haaland", "481": "Anderson", "587": "Rulli", "616": "Bouaddi", "621": "McAidoo", "622": "Braithwaite", "628": "Allan", "43": "Tielemans", "131": "Baleba", "162": "Andrey Santos", "325": "Darlow", "412": "Lammens", "413": "Bayindir", "414": "Heaton", "415": "Dorgu", "416": "De Ligt", "417": "Dalot", "418": "Maguire", "419": "Martinez", "420": "Yoro", "421": "Heaven", "422": "Mazraoui", "423": "Shaw", "424": "Amass", "425": "Fredricson", "426": "B.Fernandes", "427": "Mbeumo", "428": "Cunha", "429": "Rashford", "430": "Mount", "431": "Amad", "432": "Mainoo", "433": "Ugarte", "434": "J.Fletcher", "435": "Lacey", "436": "Collyer", "437": "Bendito Mantato", "438": "Fletcher", "439": "\u0160e\u0161ko", "440": "Zirkzee", "441": "Obi", "405": "N.Gonzalez", "442": "Pope", "443": "Gillespie", "444": "Jaouen", "445": "Thiaw", "446": "Sch\u00e4r", "447": "Botman", "448": "Burn", "449": "Hall", "450": "Livramento", "451": "A.Murphy", "453": "Barnes", "454": "Elanga", "456": "J.Ramsey", "457": "J.Murphy", "458": "Joelinton", "459": "L.Miley", "460": "Willock", "461": "Tour\u00e9", "462": "Steur", "463": "Woltemade", "464": "Wissa", "465": "Osula", "466": "Neave", "559": "Bamba", "567": "Horn\u00ed\u010dek", "593": "Dedi\u0107", "609": "Shahar", "634": "Fernandez-Pardo", "167": "Delap", "201": "Mu\u00f1oz", "467": "Sels", "468": "John", "469": "N.Williams", "470": "Morato", "471": "Milenkovi\u0107", "472": "Murillo", "473": "Aina", "474": "Jair Cunha", "475": "Savona", "476": "O.Richards", "477": "Abbott", "478": "Netz", "479": "Bindon", "480": "Gibbs-White", "482": "Hudson-Odoi", "483": "Ndoye", "484": "Hutchinson", "485": "Bakwa", "486": "McAtee", "487": "Dominguez", "488": "I.Sangar\u00e9", "489": "Yates", "490": "Wood", "491": "Igor Jesus", "493": "Kalimuendo", "558": "Schlager", "581": "Diomande", "590": "Benda", "112": "Van Hecke", "147": "Tosin", "401": "Marmoush", "403": "S\u00e1vio", "455": "Tonali", "494": "Vicario", "495": "Austin", "496": "Kinsky", "497": "Dubravka", "498": "Senesi", "499": "Pedro Porro", "500": "Romero", "502": "Robertson", "503": "Van de Ven", "505": "Spence", "506": "Udogie", "507": "Phillips", "508": "Davies", "509": "Byfield", "510": "Rowswell", "511": "Souza", "512": "Kudus", "513": "Xavi", "514": "Tel", "515": "Maddison", "516": "Bentancur", "517": "Odobert", "518": "P.M.Sarr", "519": "Gallagher", "520": "Bergvall", "521": "Kulusevski", "522": "Gray", "523": "Moore", "524": "Olusesi", "525": "Fernandes", "526": "Solanke", "527": "Richarlison", "528": "Scarlett", "578": "Mudryk", "601": "Williams-Barnett", "501": "Danso", "529": "Roefs", "530": "Patterson", "531": "Ellborg", "532": "Ballard", "533": "Mukiele", "534": "Hume", "535": "Alderete", "536": "Reinildo", "537": "Seelt", "538": "Hjelde", "539": "O'Nien", "540": "Masuaku", "541": "Meunier", "542": "E.Le F\u00e9e", "543": "Diarra", "544": "Xhaka", "545": "Sadiki", "546": "Adingra", "547": "Mundle", "548": "Rigg", "549": "Talbi", "550": "Jocelin.T", "551": "N.Angulo", "552": "Brobbey", "553": "Isidor", "612": "Methalie", "613": "Ahoka", "646": "Fofana", "651": "J.Angulo"};
 const TRANSFER_RECS = [];
@@ -20884,8 +20884,8 @@ const INFLIGHT_GW = 3;
 // Pre-computed Apex/FR scale + Apex-scaled inflight xP. In public mode the
 // raw FR_*_XP_BY_ID maps above are empty; rank_milestones.js falls through
 // to these instead. Local mode bakes both for diagnostic use.
-const APEX_FR_SCALE = 0.9861422074514609;
-const INFLIGHT_XP_BY_ID = {"1": 3.846, "4": 4.329, "5": 0.158, "7": 1.923, "8": 3.688, "9": 0.68, "10": 3.491, "11": 1.233, "12": 5.473, "13": 3.777, "14": 2.85, "15": 3.905, "16": 0.937, "17": 1.006, "19": 0.69, "20": 0.631, "25": 1.045, "26": 4.398, "31": 3.018, "452": 1.706, "557": 2.505, "32": 3.156, "33": 0.473, "34": 3.895, "35": 0.533, "36": 3.659, "37": 3.284, "41": 4.29, "45": 3.698, "46": 2.288, "47": 3.146, "51": 1.795, "52": 0.414, "56": 0.976, "160": 2.16, "166": 4.428, "596": 0.976, "597": 3.945, "611": 1.341, "618": 1.657, "630": 0.897, "631": 2.623, "57": 3.294, "60": 3.343, "61": 3.126, "62": 0.513, "64": 2.1, "66": 0.049, "67": 3.659, "68": 4.102, "69": 3.728, "70": 3.737, "71": 1.341, "72": 0.611, "73": 1.716, "74": 0.878, "75": 0.789, "76": 0.394, "79": 3.737, "81": 1.193, "566": 3.402, "573": 0.72, "608": 0.345, "615": 0.059, "82": 4.014, "83": 0.049, "84": 4.684, "86": 2.584, "87": 4.398, "88": 4.162, "89": 0.444, "90": 0.7, "93": 0.316, "94": 4.714, "95": 3.659, "96": 3.471, "98": 3.106, "100": 0.325, "102": 1.834, "105": 2.258, "106": 4.911, "108": 1.174, "565": 4.063, "620": 1.953, "109": 3.521, "113": 3.609, "114": 3.53, "115": 4.733, "116": 2.623, "119": 1.657, "124": 4.231, "125": 2.16, "126": 0.947, "127": 4.023, "129": 1.893, "135": 1.183, "138": 2.416, "328": 0.513, "504": 4.24, "594": 2.623, "600": 1.085, "605": 2.002, "614": 0.385, "639": 1.095, "28": 3.067, "40": 3.343, "136": 0.592, "142": 2.16, "144": 1.44, "145": 2.426, "148": 1.686, "149": 2.574, "151": 0.434, "152": 0.207, "154": 3.895, "156": 1.745, "157": 0.582, "158": 0.138, "159": 1.745, "161": 2.219, "164": 0.582, "165": 3.491, "170": 0.089, "200": 2.909, "561": 0.089, "568": 0.818, "583": 0.858, "91": 0.493, "104": 1.578, "110": 2.771, "173": 1.943, "175": 1.538, "176": 1.252, "178": 0.059, "179": 0.138, "182": 1.745, "183": 2.022, "184": 2.682, "185": 1.243, "186": 2.1, "187": 0.148, "188": 0.651, "190": 2.1, "194": 1.095, "195": 0.651, "492": 2.811, "575": 1.854, "584": 0.907, "599": 0.148, "42": 2.002, "153": 2.298, "198": 3.205, "202": 3.56, "203": 3.412, "204": 2.968, "207": 0.927, "210": 3.392, "211": 3.156, "212": 0.394, "213": 0.355, "214": 2.672, "217": 0.286, "218": 0.079, "222": 4.014, "224": 2.071, "241": 1.716, "577": 1.371, "588": 2.82, "595": 0.335, "633": 0.227, "643": 0.187, "644": 0.818, "647": 0.424, "21": 0.118, "209": 2.396, "226": 3.225, "229": 3.599, "230": 3.304, "231": 0.247, "232": 0.69, "233": 2.525, "236": 3.905, "238": 2.455, "239": 3.471, "242": 2.633, "243": 0.661, "244": 1.745, "245": 0.562, "246": 2.84, "247": 2.15, "249": 4.181, "649": 1.045, "250": 3.649, "253": 3.915, "254": 3.55, "255": 0.444, "256": 0.661, "257": 3.461, "258": 3.146, "261": 3.629, "262": 1.282, "263": 2.051, "264": 3.432, "265": 2.554, "268": 3.343, "269": 1.233, "270": 0.148, "271": 0.651, "272": 0.108, "569": 4.615, "570": 1.982, "580": 1.972, "626": 0.069, "635": 0.661, "636": 0.118, "650": 0.148, "240": 0.917, "277": 3.027, "279": 2.86, "280": 0.927, "282": 2.672, "285": 0.197, "286": 3.244, "288": 0.168, "289": 0.759, "290": 2.633, "292": 0.355, "295": 3.807, "296": 0.079, "340": 0.355, "556": 0.533, "563": 1.213, "572": 3.156, "574": 0.582, "576": 2.82, "585": 0.582, "586": 3.284, "589": 0.651, "617": 1.016, "632": 0.473, "637": 0.187, "638": 2.13, "642": 0.473, "645": 0.306, "259": 2.209, "267": 2.82, "300": 0.039, "303": 0.207, "304": 2.485, "305": 2.022, "306": 1.933, "308": 0.187, "309": 1.282, "313": 1.055, "315": 2.899, "316": 1.617, "320": 0.749, "321": 0.582, "323": 0.582, "324": 0.404, "562": 2.751, "564": 2.909, "571": 0.444, "591": 3.53, "592": 0.74, "619": 2.219, "640": 2.012, "260": 3.027, "327": 3.304, "330": 2.791, "331": 0.276, "332": 2.83, "334": 3.432, "335": 3.451, "336": 2.554, "337": 1.558, "338": 2.949, "339": 0.562, "343": 0.641, "345": 0.671, "346": 3.807, "347": 0.996, "385": 3.175, "598": 3.077, "629": 0.049, "641": 0.917, "648": 0.641, "350": 3.659, "356": 4.546, "357": 2.702, "358": 3.491, "362": 3.925, "364": 0.838, "366": 5.246, "367": 4.28, "368": 5.591, "369": 1.667, "371": 3.096, "372": 2.939, "374": 0.365, "375": 0.296, "377": 3.639, "379": 5.591, "381": 0.207, "579": 1.124, "627": 2.071, "155": 2.298, "237": 3.136, "384": 4.152, "387": 5.019, "388": 3.964, "389": 2.248, "390": 3.639, "391": 4.852, "392": 0.769, "393": 3.264, "395": 0.513, "396": 0.079, "397": 5.404, "398": 5.246, "399": 5.71, "406": 0.759, "411": 7.81, "481": 4.635, "616": 1.006, "621": 0.138, "628": 0.385, "43": 3.106, "162": 1.489, "412": 3.481, "415": 1.272, "417": 3.126, "418": 3.866, "419": 3.639, "420": 0.355, "421": 0.345, "422": 1.262, "423": 2.791, "424": 0.069, "426": 5.808, "427": 4.743, "428": 4.29, "429": 3.412, "430": 0.671, "432": 2.771, "435": 0.316, "439": 1.548, "440": 0.454, "441": 0.089, "405": 3.156, "444": 0.039, "445": 3.856, "446": 0.651, "447": 3.895, "449": 3.836, "450": 0.187, "453": 3.954, "454": 3.639, "456": 1.292, "457": 0.779, "459": 2.998, "460": 2.337, "461": 1.045, "462": 1.39, "464": 5.207, "559": 0.404, "567": 3.422, "593": 3.402, "609": 0.079, "634": 1.893, "167": 2.396, "201": 0.937, "467": 3.422, "468": 0.049, "469": 3.905, "471": 3.816, "472": 4.053, "473": 2.87, "474": 2.278, "478": 0.454, "480": 4.832, "482": 0.7, "483": 2.929, "486": 3.037, "487": 0.434, "488": 2.495, "489": 0.335, "490": 0.7, "491": 3.106, "493": 0.099, "558": 1.765, "581": 1.331, "112": 3.777, "147": 0.138, "401": 3.905, "403": 2.623, "455": 3.077, "496": 3.363, "497": 0.059, "498": 0.621, "499": 3.649, "502": 1.627, "503": 3.235, "506": 1.686, "508": 0.118, "512": 2.288, "514": 2.219, "516": 2.15, "519": 1.341, "520": 0.72, "522": 0.523, "525": 3.422, "526": 2.544, "578": 0.513, "501": 0.651, "529": 3.195, "532": 2.83, "533": 2.919, "534": 2.406, "535": 1.785, "536": 2.288, "539": 0.256, "541": 1.381, "542": 3.787, "544": 3.235, "545": 2.751, "547": 0.128, "548": 0.493, "549": 0.651, "550": 0.286, "551": 2.426, "552": 3.077, "553": 1.321, "612": 0.493, "613": 0.108, "646": 1.164, "651": 0.118};
+const APEX_FR_SCALE = 0.9866319748119646;
+const INFLIGHT_XP_BY_ID = {"1": 3.848, "4": 4.331, "5": 0.158, "7": 1.924, "8": 3.69, "9": 0.681, "10": 3.493, "11": 1.233, "12": 5.476, "13": 3.779, "14": 2.851, "15": 3.907, "16": 0.937, "17": 1.006, "19": 0.691, "20": 0.631, "25": 1.046, "26": 4.4, "31": 3.019, "452": 1.707, "557": 2.506, "32": 3.157, "33": 0.474, "34": 3.897, "35": 0.533, "36": 3.66, "37": 3.285, "41": 4.292, "45": 3.7, "46": 2.289, "47": 3.147, "51": 1.796, "52": 0.414, "56": 0.977, "160": 2.161, "166": 4.43, "596": 0.977, "597": 3.947, "611": 1.342, "618": 1.658, "630": 0.898, "631": 2.624, "57": 3.295, "60": 3.345, "61": 3.128, "62": 0.513, "64": 2.102, "66": 0.049, "67": 3.66, "68": 4.104, "69": 3.729, "70": 3.739, "71": 1.342, "72": 0.612, "73": 1.717, "74": 0.878, "75": 0.789, "76": 0.395, "79": 3.739, "81": 1.194, "566": 3.404, "573": 0.72, "608": 0.345, "615": 0.059, "82": 4.016, "83": 0.049, "84": 4.687, "86": 2.585, "87": 4.4, "88": 4.164, "89": 0.444, "90": 0.701, "93": 0.316, "94": 4.716, "95": 3.66, "96": 3.473, "98": 3.108, "100": 0.326, "102": 1.835, "105": 2.259, "106": 4.913, "108": 1.174, "565": 4.065, "620": 1.954, "109": 3.522, "113": 3.611, "114": 3.532, "115": 4.736, "116": 2.624, "119": 1.658, "124": 4.233, "125": 2.161, "126": 0.947, "127": 4.025, "129": 1.894, "135": 1.184, "138": 2.417, "328": 0.513, "504": 4.243, "594": 2.624, "600": 1.085, "605": 2.003, "614": 0.385, "639": 1.095, "28": 3.068, "40": 3.345, "136": 0.592, "142": 2.161, "144": 1.44, "145": 2.427, "148": 1.687, "149": 2.575, "151": 0.434, "152": 0.207, "154": 3.897, "156": 1.746, "157": 0.582, "158": 0.138, "159": 1.746, "161": 2.22, "164": 0.582, "165": 3.493, "170": 0.089, "200": 2.911, "561": 0.089, "568": 0.819, "583": 0.858, "91": 0.493, "104": 1.579, "110": 2.772, "173": 1.944, "175": 1.539, "176": 1.253, "178": 0.059, "179": 0.138, "182": 1.746, "183": 2.023, "184": 2.684, "185": 1.243, "186": 2.102, "187": 0.148, "188": 0.651, "190": 2.102, "194": 1.095, "195": 0.651, "492": 2.812, "575": 1.855, "584": 0.908, "599": 0.148, "42": 2.003, "153": 2.299, "198": 3.207, "202": 3.562, "203": 3.414, "204": 2.97, "207": 0.927, "210": 3.394, "211": 3.157, "212": 0.395, "213": 0.355, "214": 2.674, "217": 0.286, "218": 0.079, "222": 4.016, "224": 2.072, "241": 1.717, "577": 1.371, "588": 2.822, "595": 0.335, "633": 0.227, "643": 0.187, "644": 0.819, "647": 0.424, "21": 0.118, "209": 2.398, "226": 3.226, "229": 3.601, "230": 3.305, "231": 0.247, "232": 0.691, "233": 2.526, "236": 3.907, "238": 2.457, "239": 3.473, "242": 2.634, "243": 0.661, "244": 1.746, "245": 0.562, "246": 2.842, "247": 2.151, "249": 4.183, "649": 1.046, "250": 3.651, "253": 3.917, "254": 3.552, "255": 0.444, "256": 0.661, "257": 3.463, "258": 3.147, "261": 3.631, "262": 1.283, "263": 2.052, "264": 3.433, "265": 2.555, "268": 3.345, "269": 1.233, "270": 0.148, "271": 0.651, "272": 0.109, "569": 4.617, "570": 1.983, "580": 1.973, "626": 0.069, "635": 0.661, "636": 0.118, "650": 0.148, "240": 0.918, "277": 3.029, "279": 2.861, "280": 0.927, "282": 2.674, "285": 0.197, "286": 3.246, "288": 0.168, "289": 0.76, "290": 2.634, "292": 0.355, "295": 3.808, "296": 0.079, "340": 0.355, "556": 0.533, "563": 1.214, "572": 3.157, "574": 0.582, "576": 2.822, "585": 0.582, "586": 3.285, "589": 0.651, "617": 1.016, "632": 0.474, "637": 0.187, "638": 2.131, "642": 0.474, "645": 0.306, "259": 2.21, "267": 2.822, "300": 0.039, "303": 0.207, "304": 2.486, "305": 2.023, "306": 1.934, "308": 0.187, "309": 1.283, "313": 1.056, "315": 2.901, "316": 1.618, "320": 0.75, "321": 0.582, "323": 0.582, "324": 0.405, "562": 2.753, "564": 2.911, "571": 0.444, "591": 3.532, "592": 0.74, "619": 2.22, "640": 2.013, "260": 3.029, "327": 3.305, "330": 2.792, "331": 0.276, "332": 2.832, "334": 3.433, "335": 3.453, "336": 2.555, "337": 1.559, "338": 2.95, "339": 0.562, "343": 0.641, "345": 0.671, "346": 3.808, "347": 0.996, "385": 3.177, "598": 3.078, "629": 0.049, "641": 0.918, "648": 0.641, "350": 3.66, "356": 4.548, "357": 2.703, "358": 3.493, "362": 3.927, "364": 0.839, "366": 5.249, "367": 4.282, "368": 5.594, "369": 1.667, "371": 3.098, "372": 2.94, "374": 0.365, "375": 0.296, "377": 3.641, "379": 5.594, "381": 0.207, "579": 1.125, "627": 2.072, "155": 2.299, "237": 3.137, "384": 4.154, "387": 5.022, "388": 3.966, "389": 2.25, "390": 3.641, "391": 4.854, "392": 0.77, "393": 3.266, "395": 0.513, "396": 0.079, "397": 5.407, "398": 5.249, "399": 5.713, "406": 0.76, "411": 7.814, "481": 4.637, "616": 1.006, "621": 0.138, "628": 0.385, "43": 3.108, "162": 1.49, "412": 3.483, "415": 1.273, "417": 3.128, "418": 3.868, "419": 3.641, "420": 0.355, "421": 0.345, "422": 1.263, "423": 2.792, "424": 0.069, "426": 5.811, "427": 4.746, "428": 4.292, "429": 3.414, "430": 0.671, "432": 2.772, "435": 0.316, "439": 1.549, "440": 0.454, "441": 0.089, "405": 3.157, "444": 0.039, "445": 3.858, "446": 0.651, "447": 3.897, "449": 3.838, "450": 0.187, "453": 3.956, "454": 3.641, "456": 1.292, "457": 0.779, "459": 2.999, "460": 2.338, "461": 1.046, "462": 1.391, "464": 5.209, "559": 0.405, "567": 3.424, "593": 3.404, "609": 0.079, "634": 1.894, "167": 2.398, "201": 0.937, "467": 3.424, "468": 0.049, "469": 3.907, "471": 3.818, "472": 4.055, "473": 2.871, "474": 2.279, "478": 0.454, "480": 4.834, "482": 0.701, "483": 2.93, "486": 3.039, "487": 0.434, "488": 2.496, "489": 0.335, "490": 0.701, "491": 3.108, "493": 0.099, "558": 1.766, "581": 1.332, "112": 3.779, "147": 0.138, "401": 3.907, "403": 2.624, "455": 3.078, "496": 3.364, "497": 0.059, "498": 0.622, "499": 3.651, "502": 1.628, "503": 3.236, "506": 1.687, "508": 0.118, "512": 2.289, "514": 2.22, "516": 2.151, "519": 1.342, "520": 0.72, "522": 0.523, "525": 3.424, "526": 2.546, "578": 0.513, "501": 0.651, "529": 3.197, "532": 2.832, "533": 2.92, "534": 2.407, "535": 1.786, "536": 2.289, "539": 0.257, "541": 1.381, "542": 3.789, "544": 3.236, "545": 2.753, "547": 0.128, "548": 0.493, "549": 0.651, "550": 0.286, "551": 2.427, "552": 3.078, "553": 1.322, "612": 0.493, "613": 0.109, "646": 1.164, "651": 0.118};
 // COMPARE_XP_LOOKUP — for the Apex↔Tool A compare toggle (?compare=1).
 // {fpl_id: [xp_gw0, xp_gw1, ...]} matching POOL_DATA[i].xp_per_gw shape.
 // When toggle = 'compare', POOL_DATA + SQUAD_DATA xP fields swap to these.
@@ -27166,6 +27166,46 @@ function renderTransfers(recs) {
 }
 
 // Apply a specific transfer rec: swap outId for inId
+// APEX_ONE_LEDGER_v1 (2026-09-05, Marcus: "your free transfers still say two
+// and your bank is unchanged... fix"). Read off his live page after a
+// tree-applied Cherki -> Rogers: FT 2 (should be 1), bank 0.2 (should be 0.4:
+// Cherki sells at 7.7, Rogers costs 7.5), _transfersAppliedByGw {},
+// _appliedRecMoves []. Quick Optimise wrote all four of those inline inside
+// _applyTransferRec; the tree's confirmPathPlan saved squads and wrote NONE,
+// so every surface that reads the ledger - the FT badge, the hit maths,
+// _apexTreeBranch0's seeds, the next Solve - priced a free transfer he had
+// already spent and a bank he did not have. Two apply paths, one ledger, one
+// writer from now on. The bank is debited only for the gameweek on screen
+// (bankApplied:true), exactly as Quick Optimise did; a move the plan places
+// in a LATER week is recorded with bankApplied:false so the planner's seed
+// compensates for it when that week is opened, which is the contract
+// _apexTreeBranch0 already implements.
+function _apexLedgerMove(gwIdx, outP, inP) {
+  try {
+    const _g = Math.max(0, Math.floor(+gwIdx || 0));
+    _transfersAppliedByGw[_g] = (_transfersAppliedByGw[_g] || 0) + 1;
+    _rollFTByGw[_g] = false;   // can't be rolling if we just made a transfer
+    const _sellP = outP ? _apexSellPrice(outP) : 0;
+    const _d = _sellP - (+(inP && inP.cost) || 0);
+    const _live = (_g === (activeGwIdx || 0)) && !!outP && typeof TEAM_META === 'object' && !!TEAM_META;
+    window._appliedRecMoves = window._appliedRecMoves || [];
+    window._appliedRecMoves.push({
+      gwIdx: _g, inId: inP ? inP.id : null, outId: outP ? outP.id : null,
+      bankDelta: _d,
+      bankApplied: _live,
+    });
+    if (_live) {
+      _apexBankSnap();   // lazy pre-mutation snapshot so Reset can refund
+      TEAM_META.bank = Math.round(((+TEAM_META.bank || 0) + _d) * 100) / 100;
+      if (typeof TEAM_META.squad_value === 'number') {
+        TEAM_META.squad_value = Math.round((TEAM_META.squad_value - _d) * 100) / 100;
+      }
+      if (typeof _syncTeamHeaderFromMeta === 'function') _syncTeamHeaderFromMeta();
+    }
+    if (typeof _updateFTDisplay === 'function') _updateFTDisplay();
+  } catch (_eLedger) {}
+}
+window._apexLedgerMove = _apexLedgerMove;
 function _applyTransferRec(inId, outId) {
   // Find inPlayer from POOL_DATA
   const inPlayer = POOL_DATA.find(p => p.id === inId);
@@ -27250,54 +27290,10 @@ function _applyTransferRec(inId, outId) {
   _capDelta[activeGwIdx] = newCapXp - (GW_CAP_XP[activeGwIdx]  || 0);
   _jsBaseCapXp = newCapXp;
 
-  // ──── Transfer plan tracking (added 2026-04-28) ────
-  // Increment transfer count for this GW. Hit penalty (-4 per excess
-  // transfer beyond FT) is computed in getHitPenaltyForGw and applied
-  // automatically by getTotal → updateChipTotal below.
-  _transfersAppliedByGw[activeGwIdx] = (_transfersAppliedByGw[activeGwIdx] || 0) + 1;
-  _rollFTByGw[activeGwIdx] = false;   // can't be rolling if we just made a transfer
-  // 2026-06-11 (Marcus live find): record WHICH move was applied, with its
-  // bank delta (sell out at SP, buy in at cost). The Path Planner debits these
-  // on open — without it, "plan ahead" after Quick Optimise priced a 2-transfer
-  // branch at −4 when the FT was already spent (really −8) and read a stale bank.
-  try {
-    window._appliedRecMoves = window._appliedRecMoves || [];
-    // _sellP was `(typeof _effCost === 'function') ? _effCost(...) : cost` —
-    // a guard that can never be true (every _effCost here is a block-scoped
-    // const in another function), so the planner was fed now_cost. Now the one
-    // shared rule, and the SAME number the bank is debited by just below.
-    const _sellP = _outPlayerRec ? _apexSellPrice(_outPlayerRec) : 0;
-    // APEX_FIX_AUG13_BANK_ONCE (2026-08-13): stamp whether the LIVE bank already
-    // contains this delta. Same condition as the debit immediately below, read
-    // from the same variable, so the two cannot drift apart. The planner used
-    // to add every recorded delta on top of the live bank unconditionally,
-    // which double-counted every move made in this session.
-    const _bankWillDebit = !!(_outPlayerRec && typeof TEAM_META === 'object' && TEAM_META);
-    window._appliedRecMoves.push({
-      gwIdx: activeGwIdx, inId: inId, outId: outId,
-      bankDelta: _sellP - (+inPlayer.cost || 0),
-      bankApplied: _bankWillDebit,
-    });
-  } catch (_eRec) {}
-
-  // ── DEBIT THE BANK (2026-07-28, audit K3) ──────────────────────────────
-  // A transfer moves money. This function recorded a bankDelta for the path
-  // planner and then left TEAM_META.bank exactly as it found it, so the top
-  // strip, the pitch badge and — worst — the affordability screen in
-  // computeTransfers all kept reading the pre-transfer figure. Measured:
-  // apply a move that spends the whole £2.0m bank and the next recommendation
-  // list is still priced against £2.0m.
-  try {
-    if (_outPlayerRec && typeof TEAM_META === 'object' && TEAM_META) {
-      _apexBankSnap();   // lazy pre-mutation snapshot so Reset can refund
-      const _d = _apexSellPrice(_outPlayerRec) - (+inPlayer.cost || 0);
-      TEAM_META.bank = Math.round(((+TEAM_META.bank || 0) + _d) * 100) / 100;
-      if (typeof TEAM_META.squad_value === 'number') {
-        TEAM_META.squad_value = Math.round((TEAM_META.squad_value - _d) * 100) / 100;
-      }
-      if (typeof _syncTeamHeaderFromMeta === 'function') _syncTeamHeaderFromMeta();
-    }
-  } catch (_eBankDebit) {}
+  // APEX_ONE_LEDGER_v1 (2026-09-05): the count / roll / recMove / bank debit
+  // used to live inline here, so the TREE apply (confirmPathPlan) never wrote
+  // any of it. One owner now - see _apexLedgerMove above.
+  if (typeof _apexLedgerMove === 'function') _apexLedgerMove(activeGwIdx, _outPlayerRec, inPlayer);
 
   // 2026-06-19 (Marcus bug): a transfer is a PERMANENT squad change — the
   // bought player must stay in for THIS GW and every later GW (until sold),
@@ -35884,7 +35880,20 @@ function _apexRenderAppliedPicksCard(meta) {
     if (_nClaim > 0 && typeof _savedGwSquads === 'object' && _savedGwSquads) {
       const _keys = Object.keys(_savedGwSquads).map(Number).sort((a, b) => a - b);
       if (_keys.length) {
+        // APEX_APPLIED_CARD_FIRST_WEEK_v1 (2026-09-05, Marcus: "ive just
+        // applied rogers and applied to squad and doesnt show on the card").
+        // Read off his live page: SQUAD_DATA (the squad before the plan) held
+        // Cherki; saved squad 0 and every squad after it held Rogers. One
+        // transfer, made in the FIRST week of the plan. This guard compared
+        // each saved squad only to the saved squad BEFORE it, so a first-week
+        // move - the commonest move there is - had no baseline to be counted
+        // against, _seen stayed 0, and the guard deleted a truthful card as a
+        // liar. The pre-plan squad is the baseline for week one.
         let _seen = 0, _prev = null;
+        try {
+          if (typeof SQUAD_DATA !== 'undefined' && Array.isArray(SQUAD_DATA)
+              && SQUAD_DATA.length === 15) _prev = SQUAD_DATA;
+        } catch (_eB) { _prev = null; }
         for (const _k of _keys) {
           const _sq = _savedGwSquads[_k];
           if (!_sq || !Array.isArray(_sq.xi)) continue;
@@ -36229,6 +36238,21 @@ function confirmPathPlan() {
   try {
     const _txSels = _pathPlanner.selections.filter(s => s.type === 'one' || s.type === 'two');
     const _nTx = _txSels.reduce((n, s) => n + (s.type === 'two' ? 2 : 1), 0);
+    // APEX_ONE_LEDGER_v1 (2026-09-05): applying a plan spends transfers and
+    // moves money, and until tonight this path recorded neither - it saved
+    // the squads and left the FT badge, the hit maths and the next Solve's
+    // seeds believing the transfer was still in hand. Same writer as Quick
+    // Optimise now, one call per leg, at the gameweek the plan placed it.
+    try {
+      if (typeof _apexLedgerMove === 'function') {
+        for (const s of _txSels) {
+          const _gi = TEAM_META.gw_range.indexOf(+s.gw);
+          if (_gi < 0) continue;
+          if (s.out && s.in) _apexLedgerMove(_gi, s.out, s.in);
+          if (s.type === 'two' && s.out2 && s.in2) _apexLedgerMove(_gi, s.out2, s.in2);
+        }
+      }
+    } catch (_eLg) {}
     // Trivia D: range = the GWs actually locked in the walk, not the whole
     // horizon (selections includes the chip starter card when present).
     const _lockedGws = _pathPlanner.selections.map(s => +s.gw).filter(g => isFinite(g));
@@ -42613,7 +42637,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW4</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1788627200-GW4-0d60fcff</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1788631292-GW4-2423ee26</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
