@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="4" data-built-at="2026-09-05T12:58:00">
+<meta name="apex-gw" content="4" data-built-at="2026-09-05T14:28:10">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
@@ -37,7 +37,7 @@
 })();
 </script>
 <meta http-equiv="Pragma" content="no-cache">
-<meta name="apex-build" content="20260905-125759">
+<meta name="apex-build" content="20260905-142810">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — FPL Apex</title>
 <meta name="description" content="Plan FPL transfers, chips, and Free Hit squads. Live xG-based projections, a rival head-to-head simulator, and a mini-league table. Free FPL tool.">
@@ -20660,7 +20660,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1788609479-GW4-9755cc8e";
+const BUILD_VERSION = "1788614890-GW4-59912bad";
 window.APEX_BUILD = BUILD_VERSION;
 // APEX_BUILD_FRESHNESS_v1 (2026-08-28): the page checks whether a NEWER build
 // is live and offers a one-tap update. GitHub Pages serves HTML max-age=600,
@@ -20717,7 +20717,7 @@ window.APEX_SQUAD_ROLLBACK = false;
 let FPL_ID = null;
 let SQUAD_DATA = [];
 </script>
-<script src="/apex_pool.js?v=1788609479-GW4-9755cc8e"></script>
+<script src="/apex_pool.js?v=1788614890-GW4-59912bad"></script>
 <script>
 const PLAYER_NAMES = {"1": "Raya", "2": "Arrizabalaga", "3": "Meslier", "4": "Gabriel", "5": "J.Timber", "6": "Saliba", "7": "Lewis-Skelly", "8": "Calafiori", "9": "Hincapie", "10": "White", "11": "Mosquera", "12": "Saka", "13": "Rice", "14": "Eze", "15": "\u00d8degaard", "16": "Madueke", "17": "Merino", "18": "Martinelli", "19": "Zubimendi", "20": "Dowman", "22": "Nwaneri", "23": "F\u00e1bio Vieira", "24": "Nelson", "25": "Gy\u00f6keres", "26": "Havertz", "27": "G.Jesus", "31": "Konsa", "452": "Bruno G.", "557": "Tzolis", "29": "M.Bizot", "30": "Digne", "32": "Cash", "33": "Mings", "34": "Pau", "35": "Bogarde", "36": "Maatsen", "37": "Lindel\u00f6f", "38": "A.Garc\u00eda", "39": "Nedeljkovic", "41": "Buend\u00eda", "44": "Bailey", "45": "McGinn", "46": "Barkley", "47": "Kamara", "48": "Onana", "49": "Iling Jr", "50": "Burrowes", "51": "George Hemmings", "52": "Alysson", "53": "Manzambi", "54": "Gomes", "55": "Watkins", "56": "Abraham", "160": "Garnacho", "166": "N.Jackson", "582": "Madjo", "596": "Ruggeri", "597": "Suzuki", "606": "Rowe", "607": "Lynch", "611": "Wan-Bissaka", "618": "Goretzka", "630": "Harwood-Bellis", "631": "Mbaye", "57": "Petrovi\u0107", "58": "Forster", "59": "Dennis", "60": "Hill", "61": "Truffert", "62": "Diakit\u00e9", "63": "Milosavljevi\u0107", "64": "Smith", "65": "J.Araujo", "66": "Soler", "67": "Rayan", "68": "Tavernier", "69": "Scott", "70": "Kluivert", "71": "Cook", "72": "Gannon-Doak", "73": "Adams", "74": "Brooks", "75": "Christie", "76": "T\u00f3th.A", "77": "Adli", "78": "Kroupi.Jr", "79": "Evanilson", "80": "Enes \u00dcnal", "81": "Rodr\u00edguez", "566": "Silva", "573": "Sanchez", "608": "Jebbison", "615": "Di Gregorio", "82": "Kelleher", "83": "Valdimarsson", "84": "Collins", "85": "Van den Berg", "86": "Lewis-Potter", "87": "Ajer", "88": "Kayode", "89": "Henry", "90": "Hickey", "92": "Ji-soo", "93": "Schuster", "94": "Schade", "95": "O.Dango", "96": "Damsgaard", "97": "Jensen", "98": "Janelt", "99": "Milambo", "100": "Carvalho", "102": "Yarmoliuk", "103": "Dasilva", "105": "Anthony", "106": "Thiago", "107": "Furo", "108": "Wilson", "565": "M.Sangar\u00e9", "620": "Diouf", "109": "Verbruggen", "111": "Steele", "113": "F.Kad\u0131o\u011flu", "114": "Boscagli", "115": "De Cuyper", "116": "Dunk", "117": "Coppola", "118": "Igor", "119": "Costinha", "120": "Svoboda", "121": "Mitoma", "122": "Minteh", "123": "Hinshelwood", "124": "Gro\u00df", "125": "Georginio", "126": "O'Riley", "127": "Gomez", "128": "Buonanotte", "129": "Ayari", "130": "Wieffer", "132": "Howell", "133": "Watson", "134": "Oriola", "135": "Yohanna", "137": "Tzimas", "138": "Kostoulas", "139": "Ferguson", "328": "Struijk", "504": "Vuskovic", "594": "David", "600": "Osman", "605": "Yalcouy\u00e9", "614": "Hadjam", "624": "Cozier-Duberry", "639": "Andr\u00e9s", "652": "Azeez", "28": "Martinez", "40": "Rogers", "101": "Henderson", "136": "Welbeck", "140": "S\u00e1nchez", "141": "J\u00f6rgensen", "142": "James", "143": "Chalobah", "144": "Gusto", "145": "Fofana", "146": "B.Badiashile", "148": "Hato", "149": "Colwill", "150": "M.Sarr", "151": "Acheampong", "152": "Palestra", "154": "Palmer", "156": "Neto", "157": "Est\u00eav\u00e3o", "158": "Gittens", "159": "Caicedo", "161": "Lavia", "163": "D.Essugo", "164": "Quenda", "165": "Jo\u00e3o Pedro", "168": "Marc Guiu", "169": "Mheuka", "170": "Emegha", "200": "Lacroix", "560": "Penders", "561": "Anselmino", "568": "Barco", "583": "Chavarria", "91": "Pinnock", "104": "Onyeka", "110": "Rushworth", "171": "Dovin", "172": "Wilson", "173": "Thomas", "174": "Kitching", "175": "van Ewijk", "176": "Dasilva", "177": "Kesler-Hayden", "178": "Bidwell", "179": "Latibeaudiere", "180": "Woolfenden", "181": "Brau", "182": "Amenda", "183": "Rudoni", "184": "Grimes", "185": "Sakamoto", "186": "Mason-Clark", "187": "Eccles", "188": "Torp", "189": "Shepherd", "190": "Tchaouna", "191": "Borges Rodrigues", "192": "Andrews", "193": "Wright", "194": "Thomas-Asante", "195": "Simms", "196": "Markelo", "197": "Bassette", "492": "Awoniyi", "575": "Yirenkyi", "584": "Hamer", "599": "Cherif", "623": "Bentley", "42": "Guessand", "153": "Disasi", "198": "Henderson", "199": "Benitez", "202": "Richards", "203": "Canvot", "204": "Mitchell", "205": "Sosa", "206": "Chadi Riad", "207": "Mingueza", "208": "Sarr", "210": "Wharton", "211": "Yeremy", "212": "Hughes", "213": "Lerma", "214": "Kamada", "215": "Devenny", "216": "Esse", "217": "M.Fran\u00e7a", "218": "Doucour\u00e9", "219": "J.Rak-Sakyi", "220": "Cardines", "221": "Drakes-Thomas", "222": "Strand Larsen", "223": "Mateta", "224": "Nketiah", "225": "Uche", "241": "McNeil", "555": "Matthews", "577": "Tomiyasu", "588": "Khalaili", "595": "Gozo", "633": "Ahanor", "643": "Chilwell", "644": "Timber", "647": "Osorio", "21": "N\u00f8rgaard", "209": "Johnson", "226": "Pickford", "227": "Travers", "228": "King", "229": "Tarkowski", "230": "Branthwaite", "231": "Keane", "232": "O'Brien", "233": "Mykolenko", "234": "Patterson", "235": "Aznou", "236": "Dewsbury-Hall", "238": "Grealish", "239": "Garner", "242": "George", "243": "Alcaraz", "244": "Armstrong", "245": "Dibling", "246": "R\u00f6hl", "247": "Hackney", "248": "Beto", "249": "Barry", "649": "Maitland-Niles", "250": "Leno", "251": "Lecomte", "252": "McNally", "253": "Andersen", "254": "Robinson", "255": "J.Cuenca", "256": "Tete", "257": "Bassey", "258": "Castagne", "261": "Iwobi", "262": "Smith Rowe", "263": "Kevin", "264": "Bobb", "265": "Berge", "266": "Cairney", "268": "King", "269": "Sessegnon", "270": "Reed", "271": "Muniz", "272": "Kusi-Asare", "569": "Gonzalo", "570": "Palacios", "580": "Charles", "610": "De Fougerolles", "626": "Zepa", "635": "Larsson", "636": "\u00c1ngel", "650": "Affengruber", "240": "Iroegbunam", "273": "Phillips", "274": "Butland", "275": "Cartwright", "276": "Lo-Tutala", "277": "Egan", "278": "Hughes", "279": "Ajayi", "280": "Coyle", "281": "Drameh", "282": "Giles", "283": "Jacob", "284": "McCarthy", "285": "McNair", "286": "Belloumi", "287": "Millar", "288": "Dowell", "289": "Crooks", "290": "Slater", "291": "Matazo", "292": "\u00d6m\u00fcr", "293": "Kamara", "294": "Zambrano", "295": "McBurnie", "296": "Akintola", "297": "Gyabi", "298": "Destan", "299": "Burstow", "340": "Gelhardt", "556": "Targett", "563": "Morita", "572": "Tzolakis", "574": "Hjert\u00f8-Dahl", "576": "Stroud", "585": "Herrington", "586": "Mendy", "589": "Gourna-Douath", "617": "Cho", "632": "Ansah", "637": "Vaz", "638": "Norton-Cuffy", "642": "Thomas", "645": "Mouzakitis", "259": "Diop", "267": "Luki\u0107", "300": "Walton", "301": "Palmer", "302": "Button", "303": "Kipr\u00e9", "304": "O'Shea", "305": "Davis", "306": "Greaves", "307": "Johnson", "308": "Furlong", "309": "N\u00fa\u00f1ez", "310": "Matusiwa", "311": "Burns", "312": "Taylor", "313": "Clarke", "314": "Ogbene", "315": "Fatawu", "316": "Emersonn", "317": "Hirst", "318": "Philogene", "319": "Szmodics", "320": "Akpom", "321": "Walle Egeli", "322": "Al-Hamadi", "323": "McAteer", "324": "Mehmeti", "554": "Van Oevelen", "562": "Maeda", "564": "Scherpen", "571": "Florentino", "591": "Enciso", "592": "Ouattara", "602": "Humphreys", "619": "Palacios", "640": "Flemming", "260": "Wilson", "326": "Perri", "327": "Bijol", "329": "Rodon", "330": "Bogle", "331": "Gudmundsson", "332": "Justin", "333": "Bornauw", "334": "Muharemovi\u0107", "335": "Stach", "336": "Okafor", "337": "Aaronson", "338": "Ampadu", "339": "Longstaff", "341": "Gnonto", "342": "Harrison", "343": "James", "344": "Gruev", "345": "Tanaka", "346": "Calvert-Lewin", "347": "Nmecha", "348": "Piroe", "349": "Mateo Joseph", "385": "Trafford", "598": "Elvedi", "603": "Lienou", "604": "Cresswell", "625": "Cairns", "629": "Zetterer", "641": "Bard", "648": "Bahoya", "350": "A.Becker", "351": "Mamardashvili", "352": "Woodman", "353": "Pecsi", "354": "Jaros", "355": "Davies", "356": "Virgil", "357": "Frimpong", "358": "Kerkez", "359": "Gomez", "360": "Bradley", "361": "Lucky", "362": "Jacquet", "363": "Leoni", "364": "Tsimikas", "365": "Ramsay", "366": "Wirtz", "367": "Gakpo", "368": "Szoboszlai", "369": "Ngumoha", "370": "Chiesa", "371": "Gravenberch", "372": "Mac Allister", "373": "C.Jones", "374": "Endo", "375": "Nyoni", "376": "Bajcetic", "377": "Munoz", "378": "McConnell", "379": "Isak", "380": "Ekitik\u00e9", "381": "Koumas", "382": "Danns", "383": "Elliott", "579": "Araujo", "627": "Barcola", "155": "Enzo", "237": "Ndiaye", "384": "Donnarumma", "386": "Bettinelli", "387": "O'Reilly", "388": "Gu\u00e9hi", "389": "Matheus N.", "390": "R\u00faben", "391": "Gvardiol", "392": "A\u00eft-Nouri", "393": "Khusanov", "394": "Alleyne", "395": "Lewis", "396": "Vitor Reis", "397": "Semenyo", "398": "Foden", "399": "Cherki", "400": "Doku", "402": "Rodrigo", "404": "Reijnders", "406": "Kova\u010di\u0107", "407": "Echeverri", "408": "Phillips", "409": "Mukasa", "410": "Monga", "411": "Haaland", "481": "Anderson", "587": "Rulli", "616": "Bouaddi", "621": "McAidoo", "622": "Braithwaite", "628": "Allan", "43": "Tielemans", "131": "Baleba", "162": "Andrey Santos", "325": "Darlow", "412": "Lammens", "413": "Bayindir", "414": "Heaton", "415": "Dorgu", "416": "De Ligt", "417": "Dalot", "418": "Maguire", "419": "Martinez", "420": "Yoro", "421": "Heaven", "422": "Mazraoui", "423": "Shaw", "424": "Amass", "425": "Fredricson", "426": "B.Fernandes", "427": "Mbeumo", "428": "Cunha", "429": "Rashford", "430": "Mount", "431": "Amad", "432": "Mainoo", "433": "Ugarte", "434": "J.Fletcher", "435": "Lacey", "436": "Collyer", "437": "Bendito Mantato", "438": "Fletcher", "439": "\u0160e\u0161ko", "440": "Zirkzee", "441": "Obi", "405": "N.Gonzalez", "442": "Pope", "443": "Gillespie", "444": "Jaouen", "445": "Thiaw", "446": "Sch\u00e4r", "447": "Botman", "448": "Burn", "449": "Hall", "450": "Livramento", "451": "A.Murphy", "453": "Barnes", "454": "Elanga", "456": "J.Ramsey", "457": "J.Murphy", "458": "Joelinton", "459": "L.Miley", "460": "Willock", "461": "Tour\u00e9", "462": "Steur", "463": "Woltemade", "464": "Wissa", "465": "Osula", "466": "Neave", "559": "Bamba", "567": "Horn\u00ed\u010dek", "593": "Dedi\u0107", "609": "Shahar", "634": "Fernandez-Pardo", "167": "Delap", "201": "Mu\u00f1oz", "467": "Sels", "468": "John", "469": "N.Williams", "470": "Morato", "471": "Milenkovi\u0107", "472": "Murillo", "473": "Aina", "474": "Jair Cunha", "475": "Savona", "476": "O.Richards", "477": "Abbott", "478": "Netz", "479": "Bindon", "480": "Gibbs-White", "482": "Hudson-Odoi", "483": "Ndoye", "484": "Hutchinson", "485": "Bakwa", "486": "McAtee", "487": "Dominguez", "488": "I.Sangar\u00e9", "489": "Yates", "490": "Wood", "491": "Igor Jesus", "493": "Kalimuendo", "558": "Schlager", "581": "Diomande", "590": "Benda", "112": "Van Hecke", "147": "Tosin", "401": "Marmoush", "403": "S\u00e1vio", "455": "Tonali", "494": "Vicario", "495": "Austin", "496": "Kinsky", "497": "Dubravka", "498": "Senesi", "499": "Pedro Porro", "500": "Romero", "502": "Robertson", "503": "Van de Ven", "505": "Spence", "506": "Udogie", "507": "Phillips", "508": "Davies", "509": "Byfield", "510": "Rowswell", "511": "Souza", "512": "Kudus", "513": "Xavi", "514": "Tel", "515": "Maddison", "516": "Bentancur", "517": "Odobert", "518": "P.M.Sarr", "519": "Gallagher", "520": "Bergvall", "521": "Kulusevski", "522": "Gray", "523": "Moore", "524": "Olusesi", "525": "Fernandes", "526": "Solanke", "527": "Richarlison", "528": "Scarlett", "578": "Mudryk", "601": "Williams-Barnett", "501": "Danso", "529": "Roefs", "530": "Patterson", "531": "Ellborg", "532": "Ballard", "533": "Mukiele", "534": "Hume", "535": "Alderete", "536": "Reinildo", "537": "Seelt", "538": "Hjelde", "539": "O'Nien", "540": "Masuaku", "541": "Meunier", "542": "E.Le F\u00e9e", "543": "Diarra", "544": "Xhaka", "545": "Sadiki", "546": "Adingra", "547": "Mundle", "548": "Rigg", "549": "Talbi", "550": "Jocelin.T", "551": "N.Angulo", "552": "Brobbey", "553": "Isidor", "612": "Methalie", "613": "Ahoka", "646": "Fofana", "651": "J.Angulo"};
 const TRANSFER_RECS = [];
@@ -20884,8 +20884,8 @@ const INFLIGHT_GW = 3;
 // Pre-computed Apex/FR scale + Apex-scaled inflight xP. In public mode the
 // raw FR_*_XP_BY_ID maps above are empty; rank_milestones.js falls through
 // to these instead. Local mode bakes both for diagnostic use.
-const APEX_FR_SCALE = 0.9846586933706483;
-const INFLIGHT_XP_BY_ID = {"1": 3.84, "4": 4.323, "5": 0.158, "7": 1.92, "8": 3.683, "9": 0.679, "10": 3.486, "11": 1.231, "12": 5.465, "13": 3.771, "14": 2.846, "15": 3.899, "16": 0.935, "17": 1.004, "19": 0.689, "20": 0.63, "25": 1.044, "26": 4.392, "31": 3.013, "452": 1.703, "557": 2.501, "32": 3.151, "33": 0.473, "34": 3.889, "35": 0.532, "36": 3.653, "37": 3.279, "41": 4.283, "45": 3.692, "46": 2.284, "47": 3.141, "51": 1.792, "52": 0.414, "56": 0.975, "160": 2.156, "166": 4.421, "596": 0.975, "597": 3.939, "611": 1.339, "618": 1.654, "630": 0.896, "631": 2.619, "57": 3.289, "60": 3.338, "61": 3.121, "62": 0.512, "64": 2.097, "66": 0.049, "67": 3.653, "68": 4.096, "69": 3.722, "70": 3.732, "71": 1.339, "72": 0.61, "73": 1.713, "74": 0.876, "75": 0.788, "76": 0.394, "79": 3.732, "81": 1.191, "566": 3.397, "573": 0.719, "608": 0.345, "615": 0.059, "82": 4.008, "83": 0.049, "84": 4.677, "86": 2.58, "87": 4.392, "88": 4.155, "89": 0.443, "90": 0.699, "93": 0.315, "94": 4.707, "95": 3.653, "96": 3.466, "98": 3.102, "100": 0.325, "102": 1.831, "105": 2.255, "106": 4.904, "108": 1.172, "565": 4.057, "620": 1.95, "109": 3.515, "113": 3.604, "114": 3.525, "115": 4.726, "116": 2.619, "119": 1.654, "124": 4.224, "125": 2.156, "126": 0.945, "127": 4.017, "129": 1.891, "135": 1.182, "138": 2.412, "328": 0.512, "504": 4.234, "594": 2.619, "600": 1.083, "605": 1.999, "614": 0.384, "639": 1.093, "28": 3.062, "40": 3.338, "136": 0.591, "142": 2.156, "144": 1.438, "145": 2.422, "148": 1.684, "149": 2.57, "151": 0.433, "152": 0.207, "154": 3.889, "156": 1.743, "157": 0.581, "158": 0.138, "159": 1.743, "161": 2.215, "164": 0.581, "165": 3.486, "170": 0.089, "200": 2.905, "561": 0.089, "568": 0.817, "583": 0.857, "91": 0.492, "104": 1.575, "110": 2.767, "173": 1.94, "175": 1.536, "176": 1.251, "178": 0.059, "179": 0.138, "182": 1.743, "183": 2.019, "184": 2.678, "185": 1.241, "186": 2.097, "187": 0.148, "188": 0.65, "190": 2.097, "194": 1.093, "195": 0.65, "492": 2.806, "575": 1.851, "584": 0.906, "599": 0.148, "42": 1.999, "153": 2.294, "198": 3.2, "202": 3.555, "203": 3.407, "204": 2.964, "207": 0.926, "210": 3.387, "211": 3.151, "212": 0.394, "213": 0.354, "214": 2.668, "217": 0.286, "218": 0.079, "222": 4.008, "224": 2.068, "241": 1.713, "577": 1.369, "588": 2.816, "595": 0.335, "633": 0.226, "643": 0.187, "644": 0.817, "647": 0.423, "21": 0.118, "209": 2.393, "226": 3.22, "229": 3.594, "230": 3.299, "231": 0.246, "232": 0.689, "233": 2.521, "236": 3.899, "238": 2.452, "239": 3.466, "242": 2.629, "243": 0.66, "244": 1.743, "245": 0.561, "246": 2.836, "247": 2.147, "249": 4.175, "649": 1.044, "250": 3.643, "253": 3.909, "254": 3.545, "255": 0.443, "256": 0.66, "257": 3.456, "258": 3.141, "261": 3.624, "262": 1.28, "263": 2.048, "264": 3.427, "265": 2.55, "268": 3.338, "269": 1.231, "270": 0.148, "271": 0.65, "272": 0.108, "569": 4.608, "570": 1.979, "580": 1.969, "626": 0.069, "635": 0.66, "636": 0.118, "650": 0.148, "240": 0.916, "277": 3.023, "279": 2.856, "280": 0.926, "282": 2.668, "285": 0.197, "286": 3.24, "288": 0.167, "289": 0.758, "290": 2.629, "292": 0.354, "295": 3.801, "296": 0.079, "340": 0.354, "556": 0.532, "563": 1.211, "572": 3.151, "574": 0.581, "576": 2.816, "585": 0.581, "586": 3.279, "589": 0.65, "617": 1.014, "632": 0.473, "637": 0.187, "638": 2.127, "642": 0.473, "645": 0.305, "259": 2.206, "267": 2.816, "300": 0.039, "303": 0.207, "304": 2.481, "305": 2.019, "306": 1.93, "308": 0.187, "309": 1.28, "313": 1.054, "315": 2.895, "316": 1.615, "320": 0.748, "321": 0.581, "323": 0.581, "324": 0.404, "562": 2.747, "564": 2.905, "571": 0.443, "591": 3.525, "592": 0.738, "619": 2.215, "640": 2.009, "260": 3.023, "327": 3.299, "330": 2.787, "331": 0.276, "332": 2.826, "334": 3.427, "335": 3.446, "336": 2.55, "337": 1.556, "338": 2.944, "339": 0.561, "343": 0.64, "345": 0.67, "346": 3.801, "347": 0.995, "385": 3.171, "598": 3.072, "629": 0.049, "641": 0.916, "648": 0.64, "350": 3.653, "356": 4.539, "357": 2.698, "358": 3.486, "362": 3.919, "364": 0.837, "366": 5.238, "367": 4.273, "368": 5.583, "369": 1.664, "371": 3.092, "372": 2.934, "374": 0.364, "375": 0.295, "377": 3.633, "379": 5.583, "381": 0.207, "579": 1.123, "627": 2.068, "155": 2.294, "237": 3.131, "384": 4.145, "387": 5.012, "388": 3.958, "389": 2.245, "390": 3.633, "391": 4.845, "392": 0.768, "393": 3.259, "395": 0.512, "396": 0.079, "397": 5.396, "398": 5.238, "399": 5.701, "406": 0.758, "411": 7.798, "481": 4.628, "616": 1.004, "621": 0.138, "628": 0.384, "43": 3.102, "162": 1.487, "412": 3.476, "415": 1.27, "417": 3.121, "418": 3.86, "419": 3.633, "420": 0.354, "421": 0.345, "422": 1.26, "423": 2.787, "424": 0.069, "426": 5.8, "427": 4.736, "428": 4.283, "429": 3.407, "430": 0.67, "432": 2.767, "435": 0.315, "439": 1.546, "440": 0.453, "441": 0.089, "405": 3.151, "444": 0.039, "445": 3.85, "446": 0.65, "447": 3.889, "449": 3.83, "450": 0.187, "453": 3.948, "454": 3.633, "456": 1.29, "457": 0.778, "459": 2.993, "460": 2.334, "461": 1.044, "462": 1.388, "464": 5.199, "559": 0.404, "567": 3.417, "593": 3.397, "609": 0.079, "634": 1.891, "167": 2.393, "201": 0.935, "467": 3.417, "468": 0.049, "469": 3.899, "471": 3.811, "472": 4.047, "473": 2.865, "474": 2.275, "478": 0.453, "480": 4.825, "482": 0.699, "483": 2.924, "486": 3.033, "487": 0.433, "488": 2.491, "489": 0.335, "490": 0.699, "491": 3.102, "493": 0.098, "558": 1.763, "581": 1.329, "112": 3.771, "147": 0.138, "401": 3.899, "403": 2.619, "455": 3.072, "496": 3.358, "497": 0.059, "498": 0.62, "499": 3.643, "502": 1.625, "503": 3.23, "506": 1.684, "508": 0.118, "512": 2.284, "514": 2.215, "516": 2.147, "519": 1.339, "520": 0.719, "522": 0.522, "525": 3.417, "526": 2.54, "578": 0.512, "501": 0.65, "529": 3.19, "532": 2.826, "533": 2.915, "534": 2.403, "535": 1.782, "536": 2.284, "539": 0.256, "541": 1.379, "542": 3.781, "544": 3.23, "545": 2.747, "547": 0.128, "548": 0.492, "549": 0.65, "550": 0.286, "551": 2.422, "552": 3.072, "553": 1.319, "612": 0.492, "613": 0.108, "646": 1.162, "651": 0.118};
+const APEX_FR_SCALE = 0.9870255378695124;
+const INFLIGHT_XP_BY_ID = {"1": 3.849, "4": 4.333, "5": 0.158, "7": 1.925, "8": 3.691, "9": 0.681, "10": 3.494, "11": 1.234, "12": 5.478, "13": 3.78, "14": 2.853, "15": 3.909, "16": 0.938, "17": 1.007, "19": 0.691, "20": 0.632, "25": 1.046, "26": 4.402, "31": 3.02, "452": 1.708, "557": 2.507, "32": 3.158, "33": 0.474, "34": 3.899, "35": 0.533, "36": 3.662, "37": 3.287, "41": 4.294, "45": 3.701, "46": 2.29, "47": 3.149, "51": 1.796, "52": 0.415, "56": 0.977, "160": 2.162, "166": 4.432, "596": 0.977, "597": 3.948, "611": 1.342, "618": 1.658, "630": 0.898, "631": 2.625, "57": 3.297, "60": 3.346, "61": 3.129, "62": 0.513, "64": 2.102, "66": 0.049, "67": 3.662, "68": 4.106, "69": 3.731, "70": 3.741, "71": 1.342, "72": 0.612, "73": 1.717, "74": 0.878, "75": 0.79, "76": 0.395, "79": 3.741, "81": 1.194, "566": 3.405, "573": 0.721, "608": 0.345, "615": 0.059, "82": 4.017, "83": 0.049, "84": 4.688, "86": 2.586, "87": 4.402, "88": 4.165, "89": 0.444, "90": 0.701, "93": 0.316, "94": 4.718, "95": 3.662, "96": 3.474, "98": 3.109, "100": 0.326, "102": 1.836, "105": 2.26, "106": 4.915, "108": 1.175, "565": 4.067, "620": 1.954, "109": 3.524, "113": 3.613, "114": 3.534, "115": 4.738, "116": 2.625, "119": 1.658, "124": 4.234, "125": 2.162, "126": 0.948, "127": 4.027, "129": 1.895, "135": 1.184, "138": 2.418, "328": 0.513, "504": 4.244, "594": 2.625, "600": 1.086, "605": 2.004, "614": 0.385, "639": 1.096, "28": 3.07, "40": 3.346, "136": 0.592, "142": 2.162, "144": 1.441, "145": 2.428, "148": 1.688, "149": 2.576, "151": 0.434, "152": 0.207, "154": 3.899, "156": 1.747, "157": 0.582, "158": 0.138, "159": 1.747, "161": 2.221, "164": 0.582, "165": 3.494, "170": 0.089, "200": 2.912, "561": 0.089, "568": 0.819, "583": 0.859, "91": 0.494, "104": 1.579, "110": 2.774, "173": 1.944, "175": 1.54, "176": 1.254, "178": 0.059, "179": 0.138, "182": 1.747, "183": 2.023, "184": 2.685, "185": 1.244, "186": 2.102, "187": 0.148, "188": 0.651, "190": 2.102, "194": 1.096, "195": 0.651, "492": 2.813, "575": 1.856, "584": 0.908, "599": 0.148, "42": 2.004, "153": 2.3, "198": 3.208, "202": 3.563, "203": 3.415, "204": 2.971, "207": 0.928, "210": 3.395, "211": 3.158, "212": 0.395, "213": 0.355, "214": 2.675, "217": 0.286, "218": 0.079, "222": 4.017, "224": 2.073, "241": 1.717, "577": 1.372, "588": 2.823, "595": 0.336, "633": 0.227, "643": 0.188, "644": 0.819, "647": 0.424, "21": 0.118, "209": 2.398, "226": 3.228, "229": 3.603, "230": 3.307, "231": 0.247, "232": 0.691, "233": 2.527, "236": 3.909, "238": 2.458, "239": 3.474, "242": 2.635, "243": 0.661, "244": 1.747, "245": 0.563, "246": 2.843, "247": 2.152, "249": 4.185, "649": 1.046, "250": 3.652, "253": 3.918, "254": 3.553, "255": 0.444, "256": 0.661, "257": 3.464, "258": 3.149, "261": 3.632, "262": 1.283, "263": 2.053, "264": 3.435, "265": 2.556, "268": 3.346, "269": 1.234, "270": 0.148, "271": 0.651, "272": 0.109, "569": 4.619, "570": 1.984, "580": 1.974, "626": 0.069, "635": 0.661, "636": 0.118, "650": 0.148, "240": 0.918, "277": 3.03, "279": 2.862, "280": 0.928, "282": 2.675, "285": 0.197, "286": 3.247, "288": 0.168, "289": 0.76, "290": 2.635, "292": 0.355, "295": 3.81, "296": 0.079, "340": 0.355, "556": 0.533, "563": 1.214, "572": 3.158, "574": 0.582, "576": 2.823, "585": 0.582, "586": 3.287, "589": 0.651, "617": 1.017, "632": 0.474, "637": 0.188, "638": 2.132, "642": 0.474, "645": 0.306, "259": 2.211, "267": 2.823, "300": 0.039, "303": 0.207, "304": 2.487, "305": 2.023, "306": 1.935, "308": 0.188, "309": 1.283, "313": 1.056, "315": 2.902, "316": 1.619, "320": 0.75, "321": 0.582, "323": 0.582, "324": 0.405, "562": 2.754, "564": 2.912, "571": 0.444, "591": 3.534, "592": 0.74, "619": 2.221, "640": 2.014, "260": 3.03, "327": 3.307, "330": 2.793, "331": 0.276, "332": 2.833, "334": 3.435, "335": 3.455, "336": 2.556, "337": 1.56, "338": 2.951, "339": 0.563, "343": 0.642, "345": 0.671, "346": 3.81, "347": 0.997, "385": 3.178, "598": 3.08, "629": 0.049, "641": 0.918, "648": 0.642, "350": 3.662, "356": 4.55, "357": 2.704, "358": 3.494, "362": 3.928, "364": 0.839, "366": 5.251, "367": 4.284, "368": 5.596, "369": 1.668, "371": 3.099, "372": 2.941, "374": 0.365, "375": 0.296, "377": 3.642, "379": 5.596, "381": 0.207, "579": 1.125, "627": 2.073, "155": 2.3, "237": 3.139, "384": 4.155, "387": 5.024, "388": 3.968, "389": 2.25, "390": 3.642, "391": 4.856, "392": 0.77, "393": 3.267, "395": 0.513, "396": 0.079, "397": 5.409, "398": 5.251, "399": 5.715, "406": 0.76, "411": 7.817, "481": 4.639, "616": 1.007, "621": 0.138, "628": 0.385, "43": 3.109, "162": 1.49, "412": 3.484, "415": 1.273, "417": 3.129, "418": 3.869, "419": 3.642, "420": 0.355, "421": 0.345, "422": 1.263, "423": 2.793, "424": 0.069, "426": 5.814, "427": 4.748, "428": 4.294, "429": 3.415, "430": 0.671, "432": 2.774, "435": 0.316, "439": 1.55, "440": 0.454, "441": 0.089, "405": 3.158, "444": 0.039, "445": 3.859, "446": 0.651, "447": 3.899, "449": 3.84, "450": 0.188, "453": 3.958, "454": 3.642, "456": 1.293, "457": 0.78, "459": 3.001, "460": 2.339, "461": 1.046, "462": 1.392, "464": 5.211, "559": 0.405, "567": 3.425, "593": 3.405, "609": 0.079, "634": 1.895, "167": 2.398, "201": 0.938, "467": 3.425, "468": 0.049, "469": 3.909, "471": 3.82, "472": 4.057, "473": 2.872, "474": 2.28, "478": 0.454, "480": 4.836, "482": 0.701, "483": 2.931, "486": 3.04, "487": 0.434, "488": 2.497, "489": 0.336, "490": 0.701, "491": 3.109, "493": 0.099, "558": 1.767, "581": 1.332, "112": 3.78, "147": 0.138, "401": 3.909, "403": 2.625, "455": 3.08, "496": 3.366, "497": 0.059, "498": 0.622, "499": 3.652, "502": 1.629, "503": 3.237, "506": 1.688, "508": 0.118, "512": 2.29, "514": 2.221, "516": 2.152, "519": 1.342, "520": 0.721, "522": 0.523, "525": 3.425, "526": 2.547, "578": 0.513, "501": 0.651, "529": 3.198, "532": 2.833, "533": 2.922, "534": 2.408, "535": 1.787, "536": 2.29, "539": 0.257, "541": 1.382, "542": 3.79, "544": 3.237, "545": 2.754, "547": 0.128, "548": 0.494, "549": 0.651, "550": 0.286, "551": 2.428, "552": 3.08, "553": 1.323, "612": 0.494, "613": 0.109, "646": 1.165, "651": 0.118};
 // COMPARE_XP_LOOKUP — for the Apex↔Tool A compare toggle (?compare=1).
 // {fpl_id: [xp_gw0, xp_gw1, ...]} matching POOL_DATA[i].xp_per_gw shape.
 // When toggle = 'compare', POOL_DATA + SQUAD_DATA xP fields swap to these.
@@ -20911,7 +20911,7 @@ const FPL_CORS_PROXY = 'https://fpl-proxy.weathered-bird-16f4.workers.dev';
 // the synthetic-squad path below is dead code in production. True only when
 // built via TEST_SOLVER.bat (--test-entry) for pre-deadline feature QA.
 const APEX_TEST_ENTRY = false;
-const APEX_TEST_SQUAD = {"picks": [["Raya", "Arsenal"], ["Gabriel", "Arsenal"], ["Saka", "Arsenal"], ["Petrovi\u0107", "Bournemouth"], ["Gro\u00df", "Brighton"], ["Palmer", "Chelsea"], ["Jo\u00e3o Pedro", "Chelsea"], ["Lacroix", "Chelsea"], ["Awoniyi", "Coventry"], ["Canvot", "Crystal Palace"], ["Calvert-Lewin", "Leeds"], ["Szoboszlai", "Liverpool"], ["O'Reilly", "Manchester City"], ["Mbeumo", "Manchester United"], ["Thiaw", "Newcastle United"]], "captain": "Palmer", "vice": "Jo\u00e3o Pedro"};
+const APEX_TEST_SQUAD = {"picks": [["Raya", "Arsenal"], ["Gabriel", "Arsenal"], ["Saka", "Arsenal"], ["Petrovi\u0107", "Bournemouth"], ["Hill", "Bournemouth"], ["Gro\u00df", "Brighton"], ["Palmer", "Chelsea"], ["Jo\u00e3o Pedro", "Chelsea"], ["Lacroix", "Chelsea"], ["Awoniyi", "Coventry"], ["Canvot", "Crystal Palace"], ["Barry", "Everton"], ["Szoboszlai", "Liverpool"], ["O'Reilly", "Manchester City"], ["Mbeumo", "Manchester United"]], "captain": "Palmer", "vice": "Jo\u00e3o Pedro"};
 const APEX_BLANK_ENTRY = false;
 // Owner force-in / force-out list (data/preseason/seed_locks.csv). Consumed by
 // _ppSeedLockOpts() in assets/apex_app.js and passed to EVERY pre-GW1 wildcard
@@ -26700,7 +26700,44 @@ async function _apexTreeBranch0(gwIdx) {
     const _vc = window._apexVerdictMemo;
     if (_vc && _vc.key === _vKey) return _vc.val;
   } catch (_eVk) { _vKey = null; }
-  const rawOpts = await _ppComputeOptions(liveSquad, gwIdx, bank, ft);
+  // APEX_ONE_FLIGHT_v1 (2026-09-05, Marcus: "stuck here" / "solve say roll.
+  // clown show"). The Model-picks card sat on "Working out whether to move or
+  // hold" forever. The memo above only helps AFTER an answer exists; while one
+  // is being computed it is cold, so every caller that asked in the meantime
+  // started its OWN full lookahead. _renderRecoPreview alone fires on a
+  // 900/2200/4000ms ladder and from eight other sites (tab switch, rail
+  // repaint, apply, GW nav), and on a 12-GW horizon one branch-0 walk is
+  // seconds of main thread. They queued behind each other, each new paint
+  // cancelled the previous answer, and the card never got one. Same decision
+  // state = same answer, so callers now SHARE the walk in flight instead of
+  // racing it. The flight is cleared on settle, including on throw, so a
+  // failed walk can never wedge the key.
+  let _flDone = null;
+  if (_vKey) {
+    try {
+      const _fl = window._apexBranch0Flight;
+      if (_fl && _fl.key === _vKey && _fl.p) return await _fl.p;
+      let _res = null;
+      const _p = new Promise(function (r) { _res = r; });
+      window._apexBranch0Flight = { key: _vKey, p: _p };
+      _flDone = function (v) {
+        try { if (_res) _res(v); } catch (_e1) {}
+        try {
+          if (window._apexBranch0Flight && window._apexBranch0Flight.key === _vKey) {
+            window._apexBranch0Flight = null;
+          }
+        } catch (_e2) {}
+        return v;
+      };
+    } catch (_eFl) { _flDone = null; }
+  }
+  let rawOpts;
+  try {
+    rawOpts = await _ppComputeOptions(liveSquad, gwIdx, bank, ft);
+  } catch (_eCo) {
+    if (_flDone) _flDone(null);
+    return null;
+  }
   // _ppInjectChipOptions prices a marked chip against _pathPlanner.working*
   // (stale when the planner is closed) — swap in the live seeds for the
   // SYNCHRONOUS injection only, restore in the same tick.
@@ -26717,9 +26754,13 @@ async function _apexTreeBranch0(gwIdx) {
   } else {
     options = _ppInjectChipOptions(rawOpts, gwIdx);
   }
-  if (!options || !options.length) return null;
+  if (!options || !options.length) {
+    if (_flDone) _flDone(null);
+    return null;
+  }
   const _vVal = { options: options, top: options[0] };
   if (_vKey) { try { window._apexVerdictMemo = { key: _vKey, val: _vVal }; } catch (_eVm) {} }
+  if (_flDone) _flDone(_vVal);
   return _vVal;
 }
 
@@ -28193,6 +28234,42 @@ window.addEventListener('load', function () { [1100, 2600, 4400].forEach(functio
 // any button is pressed — auto-computed on load, re-ranked live when the
 // risk profile changes. Quick Optimise still applies #1 (and takes over the
 // card via dataset.applied so the preview stops repainting it).
+// APEX_PICKS_AFTER_SOLVE_v1 (2026-09-05, Marcus: "i think the card should show
+// no transfers until solve has been run"). Until today this card computed and
+// published three transfers on page load, before the user asked it anything,
+// and the hold-or-move verdict that qualifies them arrived seconds later or
+// (on a 12-GW horizon) not at all. So the card's loudest state was three moves
+// with no answer attached, which reads as "make one" and was the opposite of
+// the advice on every occasion he screenshotted. Picks are now the OUTPUT of
+// pressing Solve, not the wallpaper of the page.
+//
+// "Solve has been run" means: run for THIS gameweek and THIS 15. The signature
+// below is the decision itself, so changing the squad or the gameweek retires
+// the picks automatically - no writer has to remember to clear anything (the
+// same self-invalidating shape as APEX_PICKS_FOLLOW_THE_SQUAD_v1 above). It is
+// deliberately NOT persisted: a fresh page is a fresh question.
+window._apexSolvedSig = window._apexSolvedSig || null;
+function _apexDecisionSig(gwIdx) {
+  try {
+    const _f = [...(typeof _xiPlayers !== 'undefined' ? _xiPlayers : []),
+                ...(typeof _benchPlayers !== 'undefined' ? _benchPlayers : [])];
+    if (_f.length !== 15) return '';
+    return (gwIdx || 0) + '|' + _f.map(function (p) { return p && p.id; })
+                                 .sort(function (a, b) { return a - b; }).join(',');
+  } catch (_e) { return ''; }
+}
+function _apexMarkSolved(gwIdx) {
+  try {
+    window._apexSolvedSig = _apexDecisionSig(gwIdx);
+    if (typeof _renderRecoPreview === 'function') setTimeout(_renderRecoPreview, 0);
+  } catch (_e) {}
+}
+function _apexSolvedNow(gwIdx) {
+  try {
+    const _s = _apexDecisionSig(gwIdx);
+    return !!_s && window._apexSolvedSig === _s;
+  } catch (_e) { return false; }
+}
 function _renderRecoPreview() {
   try {
     const _reco = document.getElementById('engine-picks');
@@ -28516,6 +28593,18 @@ function _renderRecoPreview() {
     // stale GW1 card stays clickable at GW2+ and adopts a squad into the wrong
     // gameweek while its own copy still says "until the GW1 deadline".
     delete _reco.dataset.gw1Built;
+    // APEX_PICKS_AFTER_SOLVE_v1: nothing to sell, nothing to buy, until asked.
+    // This sits BEFORE computeTransfers on purpose - the un-asked-for card was
+    // also running a full transfer enumeration on every load and every rail
+    // repaint, for output nobody had requested.
+    // It paints NOTHING, not a prompt. The rail already has one pre-Solve
+    // message - APEX_RAIL_EMPTY_v3's "Your plan appears here · Press Solve for
+    // the transfer path..." - and that block is bound to this card being
+    // EMPTY, so a prompt here would both suppress it and repeat it. Marcus on
+    // exactly that duplication in August: "why solve button twice?" One empty
+    // card, one message, in the place he already signed off. Same shape as the
+    // no-recs bail below; _apexRailEmptySync does the hiding.
+    if (!_apexSolvedNow(activeGwIdx || 0)) { _reco.innerHTML = ''; return; }
     const recs = computeTransfers(activeGwIdx || 0) || [];
     if (!recs.length) { _reco.innerHTML = ''; return; }
     let h = `<div class="va-reco-title">Model picks · GW${TEAM_META.gw_range[activeGwIdx || 0]}</div>`;
@@ -28579,9 +28668,27 @@ function _renderRecoPreview() {
     try {
       window._apexRecoVerdictSeq = (window._apexRecoVerdictSeq || 0) + 1;
       const _vSeq = window._apexRecoVerdictSeq;
+      // APEX_ONE_FLIGHT_v1: the old guard threw the answer away if ANY later
+      // paint had happened while it computed - and on this card a later paint
+      // always had. What actually makes a verdict stale is the DECISION
+      // changing, i.e. a different gameweek or a different 15, so that is what
+      // is checked now. A slow answer for the squad still on screen is not
+      // stale, it is late, and the card wants it.
+      const _vSig = function () { return _apexDecisionSig(activeGwIdx || 0); };
+      const _vSig0 = _vSig();
+      // And it never sits on "working out..." in silence: if the walk has not
+      // landed in 20s, say where the answer is instead of pretending to think.
+      setTimeout(function () {
+        try {
+          const _ph = _reco.querySelector('.apex-tree-verdict');
+          if (_ph && /Working out/.test(_ph.textContent || '')) {
+            _ph.innerHTML = 'Still pricing hold versus move. Press <b>Solve</b> for this week’s verdict.';
+          }
+        } catch (_eTo) {}
+      }, 20000);
       if (typeof _apexTreeBranch0 === 'function') {
         _apexTreeBranch0(activeGwIdx || 0).then(function (tv) {
-          if (_vSeq !== window._apexRecoVerdictSeq) return;
+          if (_vSig() !== _vSig0) return;
           if (!tv || !tv.top || !_reco || _reco.dataset.applied === '1') return;
           const top = tv.top;
           // APEX_ONE_HEADLINE_v1 (2026-09-05, Marcus: "tree says roll board
@@ -28806,6 +28913,11 @@ function runSolve() {
 
   banner.style.display = 'none';
   section.style.display = 'none';
+  // APEX_PICKS_AFTER_SOLVE_v1: mark HERE, past the deadline lock and before the
+  // dispatch splits into planner / chip-review / inline-recs. Every one of
+  // those branches is Solve having been run; marking in one place means a new
+  // branch cannot be added that forgets to.
+  if (typeof _apexMarkSolved === 'function') _apexMarkSolved(activeGwIdx || 0);
   // Clear confidence wrap by default; repopulate only when FH is picked below
   if (confSquadWrap) confSquadWrap.innerHTML = '';
 
@@ -42417,7 +42529,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW4</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1788609479-GW4-9755cc8e</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1788614890-GW4-59912bad</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
