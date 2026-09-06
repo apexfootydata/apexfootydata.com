@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="4" data-built-at="2026-09-06T18:47:31">
+<meta name="apex-gw" content="4" data-built-at="2026-09-06T19:22:27">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
@@ -37,7 +37,7 @@
 })();
 </script>
 <meta http-equiv="Pragma" content="no-cache">
-<meta name="apex-build" content="20260906-184730">
+<meta name="apex-build" content="20260906-192226">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — FPL Apex</title>
 <meta name="description" content="Plan FPL transfers, chips, and Free Hit squads. Live xG-based projections, a rival head-to-head simulator, and a mini-league table. Free FPL tool.">
@@ -20700,7 +20700,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
 // Class 1 — build version baked in at HTML generation time. Exposed on
 // window.APEX_BUILD so it's visible in console and can be compared against
 // live FPL state to detect stale deployments. Format: "<unix_ts>-GW<n>-<hash8>".
-const BUILD_VERSION = "1788716850-GW4-7f4d9259";
+const BUILD_VERSION = "1788718946-GW4-0b3ee03c";
 window.APEX_BUILD = BUILD_VERSION;
 // APEX_BUILD_FRESHNESS_v1 (2026-08-28): the page checks whether a NEWER build
 // is live and offers a one-tap update. GitHub Pages serves HTML max-age=600,
@@ -20757,9 +20757,9 @@ window.APEX_SQUAD_ROLLBACK = false;
 let FPL_ID = null;
 let SQUAD_DATA = [];
 </script>
-<script src="/apex_pool.js?v=1788716850-GW4-7f4d9259"></script>
+<script src="/apex_pool.js?v=1788718946-GW4-0b3ee03c"></script>
 <script>
-const PLAYER_NAMES = {"1": "Raya", "2": "Arrizabalaga", "3": "Meslier", "4": "Gabriel", "5": "J.Timber", "6": "Saliba", "7": "Lewis-Skelly", "8": "Calafiori", "9": "Hincapie", "10": "White", "11": "Mosquera", "12": "Saka", "13": "Rice", "14": "Eze", "15": "\u00d8degaard", "16": "Madueke", "17": "Merino", "18": "Martinelli", "19": "Zubimendi", "20": "Dowman", "22": "Nwaneri", "23": "F\u00e1bio Vieira", "24": "Nelson", "25": "Gy\u00f6keres", "26": "Havertz", "27": "G.Jesus", "31": "Konsa", "452": "Bruno G.", "557": "Tzolis", "29": "M.Bizot", "30": "Digne", "32": "Cash", "33": "Mings", "34": "Pau", "35": "Bogarde", "36": "Maatsen", "37": "Lindel\u00f6f", "38": "A.Garc\u00eda", "39": "Nedeljkovic", "41": "Buend\u00eda", "44": "Bailey", "45": "McGinn", "46": "Barkley", "47": "Kamara", "48": "Onana", "49": "Iling Jr", "50": "Burrowes", "51": "George Hemmings", "52": "Alysson", "53": "Manzambi", "54": "Gomes", "55": "Watkins", "56": "Abraham", "160": "Garnacho", "166": "N.Jackson", "582": "Madjo", "596": "Ruggeri", "597": "Suzuki", "606": "Rowe", "607": "Lynch", "611": "Wan-Bissaka", "618": "Goretzka", "630": "Harwood-Bellis", "631": "Mbaye", "57": "Petrovi\u0107", "58": "Forster", "59": "Dennis", "60": "Hill", "61": "Truffert", "62": "Diakit\u00e9", "63": "Milosavljevi\u0107", "64": "Smith", "65": "J.Araujo", "66": "Soler", "67": "Rayan", "68": "Tavernier", "69": "Scott", "70": "Kluivert", "71": "Cook", "72": "Gannon-Doak", "73": "Adams", "74": "Brooks", "75": "Christie", "76": "T\u00f3th.A", "77": "Adli", "78": "Kroupi.Jr", "79": "Evanilson", "80": "Enes \u00dcnal", "81": "Rodr\u00edguez", "566": "Silva", "573": "Sanchez", "608": "Jebbison", "615": "Di Gregorio", "82": "Kelleher", "83": "Valdimarsson", "84": "Collins", "85": "Van den Berg", "86": "Lewis-Potter", "87": "Ajer", "88": "Kayode", "89": "Henry", "90": "Hickey", "92": "Ji-soo", "93": "Schuster", "94": "Schade", "95": "O.Dango", "96": "Damsgaard", "97": "Jensen", "98": "Janelt", "99": "Milambo", "100": "Carvalho", "102": "Yarmoliuk", "103": "Dasilva", "105": "Anthony", "106": "Thiago", "107": "Furo", "108": "Wilson", "565": "M.Sangar\u00e9", "620": "Diouf", "109": "Verbruggen", "111": "Steele", "113": "F.Kad\u0131o\u011flu", "114": "Boscagli", "115": "De Cuyper", "116": "Dunk", "117": "Coppola", "118": "Igor", "119": "Costinha", "120": "Svoboda", "121": "Mitoma", "122": "Minteh", "123": "Hinshelwood", "124": "Gro\u00df", "125": "Georginio", "126": "O'Riley", "127": "Gomez", "128": "Buonanotte", "129": "Ayari", "130": "Wieffer", "132": "Howell", "133": "Watson", "134": "Oriola", "135": "Yohanna", "137": "Tzimas", "138": "Kostoulas", "139": "Ferguson", "328": "Struijk", "504": "Vuskovic", "594": "David", "600": "Osman", "605": "Yalcouy\u00e9", "614": "Hadjam", "624": "Cozier-Duberry", "639": "Andr\u00e9s", "652": "Azeez", "28": "Martinez", "40": "Rogers", "101": "Henderson", "136": "Welbeck", "140": "S\u00e1nchez", "141": "J\u00f6rgensen", "142": "James", "143": "Chalobah", "144": "Gusto", "145": "Fofana", "146": "B.Badiashile", "148": "Hato", "149": "Colwill", "150": "M.Sarr", "151": "Acheampong", "152": "Palestra", "154": "Palmer", "156": "Neto", "157": "Est\u00eav\u00e3o", "158": "Gittens", "159": "Caicedo", "161": "Lavia", "163": "D.Essugo", "164": "Quenda", "165": "Jo\u00e3o Pedro", "168": "Marc Guiu", "169": "Mheuka", "170": "Emegha", "200": "Lacroix", "560": "Penders", "561": "Anselmino", "568": "Barco", "583": "Chavarria", "91": "Pinnock", "104": "Onyeka", "110": "Rushworth", "171": "Dovin", "172": "Wilson", "173": "Thomas", "174": "Kitching", "175": "van Ewijk", "176": "Dasilva", "177": "Kesler-Hayden", "178": "Bidwell", "179": "Latibeaudiere", "180": "Woolfenden", "181": "Brau", "182": "Amenda", "183": "Rudoni", "184": "Grimes", "185": "Sakamoto", "186": "Mason-Clark", "187": "Eccles", "188": "Torp", "189": "Shepherd", "190": "Tchaouna", "191": "Borges Rodrigues", "192": "Andrews", "193": "Wright", "194": "Thomas-Asante", "195": "Simms", "196": "Markelo", "197": "Bassette", "492": "Awoniyi", "575": "Yirenkyi", "584": "Hamer", "599": "Cherif", "623": "Bentley", "42": "Guessand", "153": "Disasi", "198": "Henderson", "199": "Benitez", "202": "Richards", "203": "Canvot", "204": "Mitchell", "205": "Sosa", "206": "Chadi Riad", "207": "Mingueza", "208": "Sarr", "210": "Wharton", "211": "Yeremy", "212": "Hughes", "213": "Lerma", "214": "Kamada", "215": "Devenny", "216": "Esse", "217": "M.Fran\u00e7a", "218": "Doucour\u00e9", "219": "J.Rak-Sakyi", "220": "Cardines", "221": "Drakes-Thomas", "222": "Strand Larsen", "223": "Mateta", "224": "Nketiah", "225": "Uche", "241": "McNeil", "555": "Matthews", "577": "Tomiyasu", "588": "Khalaili", "595": "Gozo", "633": "Ahanor", "643": "Chilwell", "644": "Timber", "647": "Osorio", "21": "N\u00f8rgaard", "209": "Johnson", "226": "Pickford", "227": "Travers", "228": "King", "229": "Tarkowski", "230": "Branthwaite", "231": "Keane", "232": "O'Brien", "233": "Mykolenko", "234": "Patterson", "235": "Aznou", "236": "Dewsbury-Hall", "238": "Grealish", "239": "Garner", "242": "George", "243": "Alcaraz", "244": "Armstrong", "245": "Dibling", "246": "R\u00f6hl", "247": "Hackney", "248": "Beto", "249": "Barry", "649": "Maitland-Niles", "250": "Leno", "251": "Lecomte", "252": "McNally", "253": "Andersen", "254": "Robinson", "255": "J.Cuenca", "256": "Tete", "257": "Bassey", "258": "Castagne", "261": "Iwobi", "262": "Smith Rowe", "263": "Kevin", "264": "Bobb", "265": "Berge", "266": "Cairney", "268": "King", "269": "Sessegnon", "270": "Reed", "271": "Muniz", "272": "Kusi-Asare", "569": "Gonzalo", "570": "Palacios", "580": "Charles", "610": "De Fougerolles", "626": "Zepa", "635": "Larsson", "636": "\u00c1ngel", "650": "Affengruber", "240": "Iroegbunam", "273": "Phillips", "274": "Butland", "275": "Cartwright", "276": "Lo-Tutala", "277": "Egan", "278": "Hughes", "279": "Ajayi", "280": "Coyle", "281": "Drameh", "282": "Giles", "283": "Jacob", "284": "McCarthy", "285": "McNair", "286": "Belloumi", "287": "Millar", "288": "Dowell", "289": "Crooks", "290": "Slater", "291": "Matazo", "292": "\u00d6m\u00fcr", "293": "Kamara", "294": "Zambrano", "295": "McBurnie", "296": "Akintola", "297": "Gyabi", "298": "Destan", "299": "Burstow", "340": "Gelhardt", "556": "Targett", "563": "Morita", "572": "Tzolakis", "574": "Hjert\u00f8-Dahl", "576": "Stroud", "585": "Herrington", "586": "Mendy", "589": "Gourna-Douath", "617": "Cho", "632": "Ansah", "637": "Vaz", "638": "Norton-Cuffy", "642": "Thomas", "645": "Mouzakitis", "259": "Diop", "267": "Luki\u0107", "300": "Walton", "301": "Palmer", "302": "Button", "303": "Kipr\u00e9", "304": "O'Shea", "305": "Davis", "306": "Greaves", "307": "Johnson", "308": "Furlong", "309": "N\u00fa\u00f1ez", "310": "Matusiwa", "311": "Burns", "312": "Taylor", "313": "Clarke", "314": "Ogbene", "315": "Fatawu", "316": "Emersonn", "317": "Hirst", "318": "Philogene", "319": "Szmodics", "320": "Akpom", "321": "Walle Egeli", "322": "Al-Hamadi", "323": "McAteer", "324": "Mehmeti", "554": "Van Oevelen", "562": "Maeda", "564": "Scherpen", "571": "Florentino", "591": "Enciso", "592": "Ouattara", "602": "Humphreys", "619": "Palacios", "640": "Flemming", "260": "Wilson", "326": "Perri", "327": "Bijol", "329": "Rodon", "330": "Bogle", "331": "Gudmundsson", "332": "Justin", "333": "Bornauw", "334": "Muharemovi\u0107", "335": "Stach", "336": "Okafor", "337": "Aaronson", "338": "Ampadu", "339": "Longstaff", "341": "Gnonto", "342": "Harrison", "343": "James", "344": "Gruev", "345": "Tanaka", "346": "Calvert-Lewin", "347": "Nmecha", "348": "Piroe", "349": "Mateo Joseph", "385": "Trafford", "598": "Elvedi", "603": "Lienou", "604": "Cresswell", "625": "Cairns", "629": "Zetterer", "641": "Bard", "648": "Bahoya", "350": "A.Becker", "351": "Mamardashvili", "352": "Woodman", "353": "Pecsi", "354": "Jaros", "355": "Davies", "356": "Virgil", "357": "Frimpong", "358": "Kerkez", "359": "Gomez", "360": "Bradley", "361": "Lucky", "362": "Jacquet", "363": "Leoni", "364": "Tsimikas", "365": "Ramsay", "366": "Wirtz", "367": "Gakpo", "368": "Szoboszlai", "369": "Ngumoha", "370": "Chiesa", "371": "Gravenberch", "372": "Mac Allister", "373": "C.Jones", "374": "Endo", "375": "Nyoni", "376": "Bajcetic", "377": "Munoz", "378": "McConnell", "379": "Isak", "380": "Ekitik\u00e9", "381": "Koumas", "382": "Danns", "383": "Elliott", "579": "Araujo", "627": "Barcola", "155": "Enzo", "237": "Ndiaye", "384": "Donnarumma", "386": "Bettinelli", "387": "O'Reilly", "388": "Gu\u00e9hi", "389": "Matheus N.", "390": "R\u00faben", "391": "Gvardiol", "392": "A\u00eft-Nouri", "393": "Khusanov", "394": "Alleyne", "395": "Lewis", "396": "Vitor Reis", "397": "Semenyo", "398": "Foden", "399": "Cherki", "400": "Doku", "402": "Rodrigo", "404": "Reijnders", "406": "Kova\u010di\u0107", "407": "Echeverri", "408": "Phillips", "409": "Mukasa", "410": "Monga", "411": "Haaland", "481": "Anderson", "587": "Rulli", "616": "Bouaddi", "621": "McAidoo", "622": "Braithwaite", "628": "Allan", "653": "Samba", "43": "Tielemans", "131": "Baleba", "162": "Andrey Santos", "325": "Darlow", "412": "Lammens", "413": "Bayindir", "414": "Heaton", "415": "Dorgu", "416": "De Ligt", "417": "Dalot", "418": "Maguire", "419": "Martinez", "420": "Yoro", "421": "Heaven", "422": "Mazraoui", "423": "Shaw", "424": "Amass", "425": "Fredricson", "426": "B.Fernandes", "427": "Mbeumo", "428": "Cunha", "429": "Rashford", "430": "Mount", "431": "Amad", "432": "Mainoo", "433": "Ugarte", "434": "J.Fletcher", "435": "Lacey", "436": "Collyer", "437": "Bendito Mantato", "438": "Fletcher", "439": "\u0160e\u0161ko", "440": "Zirkzee", "441": "Obi", "405": "N.Gonzalez", "442": "Pope", "443": "Gillespie", "444": "Jaouen", "445": "Thiaw", "446": "Sch\u00e4r", "447": "Botman", "448": "Burn", "449": "Hall", "450": "Livramento", "451": "A.Murphy", "453": "Barnes", "454": "Elanga", "456": "J.Ramsey", "457": "J.Murphy", "458": "Joelinton", "459": "L.Miley", "460": "Willock", "461": "Tour\u00e9", "462": "Steur", "463": "Woltemade", "464": "Wissa", "465": "Osula", "466": "Neave", "559": "Bamba", "567": "Horn\u00ed\u010dek", "593": "Dedi\u0107", "609": "Shahar", "634": "Fernandez-Pardo", "167": "Delap", "201": "Mu\u00f1oz", "467": "Sels", "468": "John", "469": "N.Williams", "470": "Morato", "471": "Milenkovi\u0107", "472": "Murillo", "473": "Aina", "474": "Jair Cunha", "475": "Savona", "476": "O.Richards", "477": "Abbott", "478": "Netz", "479": "Bindon", "480": "Gibbs-White", "482": "Hudson-Odoi", "483": "Ndoye", "484": "Hutchinson", "485": "Bakwa", "486": "McAtee", "487": "Dominguez", "488": "I.Sangar\u00e9", "489": "Yates", "490": "Wood", "491": "Igor Jesus", "493": "Kalimuendo", "558": "Schlager", "581": "Diomande", "590": "Benda", "112": "Van Hecke", "147": "Tosin", "401": "Marmoush", "403": "S\u00e1vio", "455": "Tonali", "494": "Vicario", "495": "Austin", "496": "Kinsky", "497": "Dubravka", "498": "Senesi", "499": "Pedro Porro", "500": "Romero", "502": "Robertson", "503": "Van de Ven", "505": "Spence", "506": "Udogie", "507": "Phillips", "508": "Davies", "509": "Byfield", "510": "Rowswell", "511": "Souza", "512": "Kudus", "513": "Xavi", "514": "Tel", "515": "Maddison", "516": "Bentancur", "517": "Odobert", "518": "P.M.Sarr", "519": "Gallagher", "520": "Bergvall", "521": "Kulusevski", "522": "Gray", "523": "Moore", "524": "Olusesi", "525": "Fernandes", "526": "Solanke", "527": "Richarlison", "528": "Scarlett", "578": "Mudryk", "601": "Williams-Barnett", "501": "Danso", "529": "Roefs", "530": "Patterson", "531": "Ellborg", "532": "Ballard", "533": "Mukiele", "534": "Hume", "535": "Alderete", "536": "Reinildo", "537": "Seelt", "538": "Hjelde", "539": "O'Nien", "540": "Masuaku", "541": "Meunier", "542": "E.Le F\u00e9e", "543": "Diarra", "544": "Xhaka", "545": "Sadiki", "546": "Adingra", "547": "Mundle", "548": "Rigg", "549": "Talbi", "550": "Jocelin.T", "551": "N.Angulo", "552": "Brobbey", "553": "Isidor", "612": "Methalie", "613": "Ahoka", "646": "Fofana", "651": "J.Angulo"};
+const PLAYER_NAMES = {"1": "Raya", "2": "Arrizabalaga", "3": "Meslier", "4": "Gabriel", "5": "J.Timber", "6": "Saliba", "7": "Lewis-Skelly", "8": "Calafiori", "9": "Hincapie", "10": "White", "11": "Mosquera", "12": "Saka", "13": "Rice", "14": "Eze", "15": "\u00d8degaard", "16": "Madueke", "17": "Merino", "18": "Martinelli", "19": "Zubimendi", "20": "Dowman", "22": "Nwaneri", "23": "F\u00e1bio Vieira", "24": "Nelson", "25": "Gy\u00f6keres", "26": "Havertz", "27": "G.Jesus", "31": "Konsa", "452": "Bruno G.", "557": "Tzolis", "29": "M.Bizot", "30": "Digne", "32": "Cash", "33": "Mings", "34": "Pau", "35": "Bogarde", "36": "Maatsen", "37": "Lindel\u00f6f", "38": "A.Garc\u00eda", "39": "Nedeljkovic", "41": "Buend\u00eda", "44": "Bailey", "45": "McGinn", "46": "Barkley", "47": "Kamara", "48": "Onana", "49": "Iling Jr", "50": "Burrowes", "51": "George Hemmings", "52": "Alysson", "53": "Manzambi", "54": "Gomes", "55": "Watkins", "56": "Abraham", "160": "Garnacho", "166": "N.Jackson", "582": "Madjo", "596": "Ruggeri", "597": "Suzuki", "606": "Rowe", "607": "Lynch", "611": "Wan-Bissaka", "618": "Goretzka", "630": "Harwood-Bellis", "631": "Mbaye", "57": "Petrovi\u0107", "58": "Forster", "59": "Dennis", "60": "Hill", "61": "Truffert", "62": "Diakit\u00e9", "63": "Milosavljevi\u0107", "64": "Smith", "65": "J.Araujo", "66": "Soler", "67": "Rayan", "68": "Tavernier", "69": "Scott", "70": "Kluivert", "71": "Cook", "72": "Gannon-Doak", "73": "Adams", "74": "Brooks", "75": "Christie", "76": "T\u00f3th.A", "77": "Adli", "78": "Kroupi.Jr", "79": "Evanilson", "80": "Enes \u00dcnal", "81": "Rodr\u00edguez", "566": "Silva", "573": "Sanchez", "608": "Jebbison", "615": "Di Gregorio", "82": "Kelleher", "83": "Valdimarsson", "84": "Collins", "85": "Van den Berg", "86": "Lewis-Potter", "87": "Ajer", "88": "Kayode", "89": "Henry", "90": "Hickey", "92": "Ji-soo", "93": "Schuster", "94": "Schade", "95": "O.Dango", "96": "Damsgaard", "97": "Jensen", "98": "Janelt", "99": "Milambo", "100": "Carvalho", "102": "Yarmoliuk", "103": "Dasilva", "105": "Anthony", "106": "Thiago", "107": "Furo", "108": "Wilson", "565": "M.Sangar\u00e9", "620": "Diouf", "109": "Verbruggen", "111": "Steele", "113": "F.Kad\u0131o\u011flu", "114": "Boscagli", "115": "De Cuyper", "116": "Dunk", "117": "Coppola", "118": "Igor", "119": "Costinha", "120": "Svoboda", "121": "Mitoma", "122": "Minteh", "123": "Hinshelwood", "124": "Gro\u00df", "125": "Georginio", "126": "O'Riley", "127": "Gomez", "128": "Buonanotte", "129": "Ayari", "130": "Wieffer", "132": "Howell", "133": "Watson", "134": "Oriola", "135": "Yohanna", "137": "Tzimas", "138": "Kostoulas", "139": "Ferguson", "328": "Struijk", "504": "Vuskovic", "594": "David", "600": "Osman", "605": "Yalcouy\u00e9", "614": "Hadjam", "624": "Cozier-Duberry", "639": "Andr\u00e9s", "652": "Azeez", "28": "Martinez", "40": "Rogers", "101": "Henderson", "136": "Welbeck", "140": "S\u00e1nchez", "141": "J\u00f6rgensen", "142": "James", "143": "Chalobah", "144": "Gusto", "145": "Fofana", "146": "B.Badiashile", "148": "Hato", "149": "Colwill", "150": "M.Sarr", "151": "Acheampong", "152": "Palestra", "154": "Palmer", "156": "Neto", "157": "Est\u00eav\u00e3o", "158": "Gittens", "159": "Caicedo", "161": "Lavia", "163": "D.Essugo", "164": "Quenda", "165": "Jo\u00e3o Pedro", "168": "Marc Guiu", "169": "Mheuka", "170": "Emegha", "200": "Lacroix", "560": "Penders", "561": "Anselmino", "568": "Barco", "583": "Chavarria", "91": "Pinnock", "104": "Onyeka", "110": "Rushworth", "171": "Dovin", "172": "Wilson", "173": "Thomas", "174": "Kitching", "175": "van Ewijk", "176": "Dasilva", "177": "Kesler-Hayden", "178": "Bidwell", "179": "Latibeaudiere", "180": "Woolfenden", "181": "Brau", "182": "Amenda", "183": "Rudoni", "184": "Grimes", "185": "Sakamoto", "186": "Mason-Clark", "187": "Eccles", "188": "Torp", "189": "Shepherd", "190": "Tchaouna", "191": "Borges Rodrigues", "192": "Andrews", "193": "Wright", "194": "Thomas-Asante", "195": "Simms", "196": "Markelo", "197": "Bassette", "492": "Awoniyi", "575": "Yirenkyi", "584": "Hamer", "599": "Cherif", "623": "Bentley", "42": "Guessand", "153": "Disasi", "198": "Henderson", "199": "Benitez", "202": "Richards", "203": "Canvot", "204": "Mitchell", "205": "Sosa", "206": "Chadi Riad", "207": "Mingueza", "208": "Sarr", "210": "Wharton", "211": "Yeremy", "212": "Hughes", "213": "Lerma", "214": "Kamada", "215": "Devenny", "216": "Esse", "217": "M.Fran\u00e7a", "218": "Doucour\u00e9", "219": "J.Rak-Sakyi", "220": "Cardines", "221": "Drakes-Thomas", "222": "Strand Larsen", "223": "Mateta", "224": "Nketiah", "225": "Uche", "241": "McNeil", "555": "Matthews", "577": "Tomiyasu", "588": "Khalaili", "595": "Gozo", "633": "Ahanor", "643": "Chilwell", "644": "Timber", "647": "Osorio", "21": "N\u00f8rgaard", "209": "Johnson", "226": "Pickford", "227": "Travers", "228": "King", "229": "Tarkowski", "230": "Branthwaite", "231": "Keane", "232": "O'Brien", "233": "Mykolenko", "234": "Patterson", "235": "Aznou", "236": "Dewsbury-Hall", "238": "Grealish", "239": "Garner", "242": "George", "243": "Alcaraz", "244": "Armstrong", "245": "Dibling", "246": "R\u00f6hl", "247": "Hackney", "248": "Beto", "249": "Barry", "649": "Maitland-Niles", "654": "Graham", "250": "Leno", "251": "Lecomte", "252": "McNally", "253": "Andersen", "254": "Robinson", "255": "J.Cuenca", "256": "Tete", "257": "Bassey", "258": "Castagne", "261": "Iwobi", "262": "Smith Rowe", "263": "Kevin", "264": "Bobb", "265": "Berge", "266": "Cairney", "268": "King", "269": "Sessegnon", "270": "Reed", "271": "Muniz", "272": "Kusi-Asare", "569": "Gonzalo", "570": "Palacios", "580": "Charles", "610": "De Fougerolles", "626": "Zepa", "635": "Larsson", "636": "\u00c1ngel", "650": "Affengruber", "240": "Iroegbunam", "273": "Phillips", "274": "Butland", "275": "Cartwright", "276": "Lo-Tutala", "277": "Egan", "278": "Hughes", "279": "Ajayi", "280": "Coyle", "281": "Drameh", "282": "Giles", "283": "Jacob", "284": "McCarthy", "285": "McNair", "286": "Belloumi", "287": "Millar", "288": "Dowell", "289": "Crooks", "290": "Slater", "291": "Matazo", "292": "\u00d6m\u00fcr", "293": "Kamara", "294": "Zambrano", "295": "McBurnie", "296": "Akintola", "297": "Gyabi", "298": "Destan", "299": "Burstow", "340": "Gelhardt", "556": "Targett", "563": "Morita", "572": "Tzolakis", "574": "Hjert\u00f8-Dahl", "576": "Stroud", "585": "Herrington", "586": "Mendy", "589": "Gourna-Douath", "617": "Cho", "632": "Ansah", "637": "Vaz", "638": "Norton-Cuffy", "642": "Thomas", "645": "Mouzakitis", "259": "Diop", "267": "Luki\u0107", "300": "Walton", "301": "Palmer", "302": "Button", "303": "Kipr\u00e9", "304": "O'Shea", "305": "Davis", "306": "Greaves", "307": "Johnson", "308": "Furlong", "309": "N\u00fa\u00f1ez", "310": "Matusiwa", "311": "Burns", "312": "Taylor", "313": "Clarke", "314": "Ogbene", "315": "Fatawu", "316": "Emersonn", "317": "Hirst", "318": "Philogene", "319": "Szmodics", "320": "Akpom", "321": "Walle Egeli", "322": "Al-Hamadi", "323": "McAteer", "324": "Mehmeti", "554": "Van Oevelen", "562": "Maeda", "564": "Scherpen", "571": "Florentino", "591": "Enciso", "592": "Ouattara", "602": "Humphreys", "619": "Palacios", "640": "Flemming", "260": "Wilson", "326": "Perri", "327": "Bijol", "329": "Rodon", "330": "Bogle", "331": "Gudmundsson", "332": "Justin", "333": "Bornauw", "334": "Muharemovi\u0107", "335": "Stach", "336": "Okafor", "337": "Aaronson", "338": "Ampadu", "339": "Longstaff", "341": "Gnonto", "342": "Harrison", "343": "James", "344": "Gruev", "345": "Tanaka", "346": "Calvert-Lewin", "347": "Nmecha", "348": "Piroe", "349": "Mateo Joseph", "385": "Trafford", "598": "Elvedi", "603": "Lienou", "604": "Cresswell", "625": "Cairns", "629": "Zetterer", "641": "Bard", "648": "Bahoya", "350": "A.Becker", "351": "Mamardashvili", "352": "Woodman", "353": "Pecsi", "354": "Jaros", "355": "Davies", "356": "Virgil", "357": "Frimpong", "358": "Kerkez", "359": "Gomez", "360": "Bradley", "361": "Lucky", "362": "Jacquet", "363": "Leoni", "364": "Tsimikas", "365": "Ramsay", "366": "Wirtz", "367": "Gakpo", "368": "Szoboszlai", "369": "Ngumoha", "370": "Chiesa", "371": "Gravenberch", "372": "Mac Allister", "373": "C.Jones", "374": "Endo", "375": "Nyoni", "376": "Bajcetic", "377": "Munoz", "378": "McConnell", "379": "Isak", "380": "Ekitik\u00e9", "381": "Koumas", "382": "Danns", "383": "Elliott", "579": "Araujo", "627": "Barcola", "155": "Enzo", "237": "Ndiaye", "384": "Donnarumma", "386": "Bettinelli", "387": "O'Reilly", "388": "Gu\u00e9hi", "389": "Matheus N.", "390": "R\u00faben", "391": "Gvardiol", "392": "A\u00eft-Nouri", "393": "Khusanov", "394": "Alleyne", "395": "Lewis", "396": "Vitor Reis", "397": "Semenyo", "398": "Foden", "399": "Cherki", "400": "Doku", "402": "Rodrigo", "404": "Reijnders", "406": "Kova\u010di\u0107", "407": "Echeverri", "408": "Phillips", "409": "Mukasa", "410": "Monga", "411": "Haaland", "481": "Anderson", "587": "Rulli", "616": "Bouaddi", "621": "McAidoo", "622": "Braithwaite", "628": "Allan", "653": "Samba", "43": "Tielemans", "131": "Baleba", "162": "Andrey Santos", "325": "Darlow", "412": "Lammens", "413": "Bayindir", "414": "Heaton", "415": "Dorgu", "416": "De Ligt", "417": "Dalot", "418": "Maguire", "419": "Martinez", "420": "Yoro", "421": "Heaven", "422": "Mazraoui", "423": "Shaw", "424": "Amass", "425": "Fredricson", "426": "B.Fernandes", "427": "Mbeumo", "428": "Cunha", "429": "Rashford", "430": "Mount", "431": "Amad", "432": "Mainoo", "433": "Ugarte", "434": "J.Fletcher", "435": "Lacey", "436": "Collyer", "437": "Bendito Mantato", "438": "Fletcher", "439": "\u0160e\u0161ko", "440": "Zirkzee", "441": "Obi", "405": "N.Gonzalez", "442": "Pope", "443": "Gillespie", "444": "Jaouen", "445": "Thiaw", "446": "Sch\u00e4r", "447": "Botman", "448": "Burn", "449": "Hall", "450": "Livramento", "451": "A.Murphy", "453": "Barnes", "454": "Elanga", "456": "J.Ramsey", "457": "J.Murphy", "458": "Joelinton", "459": "L.Miley", "460": "Willock", "461": "Tour\u00e9", "462": "Steur", "463": "Woltemade", "464": "Wissa", "465": "Osula", "466": "Neave", "559": "Bamba", "567": "Horn\u00ed\u010dek", "593": "Dedi\u0107", "609": "Shahar", "634": "Fernandez-Pardo", "167": "Delap", "201": "Mu\u00f1oz", "467": "Sels", "468": "John", "469": "N.Williams", "470": "Morato", "471": "Milenkovi\u0107", "472": "Murillo", "473": "Aina", "474": "Jair Cunha", "475": "Savona", "476": "O.Richards", "477": "Abbott", "478": "Netz", "479": "Bindon", "480": "Gibbs-White", "482": "Hudson-Odoi", "483": "Ndoye", "484": "Hutchinson", "485": "Bakwa", "486": "McAtee", "487": "Dominguez", "488": "I.Sangar\u00e9", "489": "Yates", "490": "Wood", "491": "Igor Jesus", "493": "Kalimuendo", "558": "Schlager", "581": "Diomande", "590": "Benda", "112": "Van Hecke", "147": "Tosin", "401": "Marmoush", "403": "S\u00e1vio", "455": "Tonali", "494": "Vicario", "495": "Austin", "496": "Kinsky", "497": "Dubravka", "498": "Senesi", "499": "Pedro Porro", "500": "Romero", "502": "Robertson", "503": "Van de Ven", "505": "Spence", "506": "Udogie", "507": "Phillips", "508": "Davies", "509": "Byfield", "510": "Rowswell", "511": "Souza", "512": "Kudus", "513": "Xavi", "514": "Tel", "515": "Maddison", "516": "Bentancur", "517": "Odobert", "518": "P.M.Sarr", "519": "Gallagher", "520": "Bergvall", "521": "Kulusevski", "522": "Gray", "523": "Moore", "524": "Olusesi", "525": "Fernandes", "526": "Solanke", "527": "Richarlison", "528": "Scarlett", "578": "Mudryk", "601": "Williams-Barnett", "501": "Danso", "529": "Roefs", "530": "Patterson", "531": "Ellborg", "532": "Ballard", "533": "Mukiele", "534": "Hume", "535": "Alderete", "536": "Reinildo", "537": "Seelt", "538": "Hjelde", "539": "O'Nien", "540": "Masuaku", "541": "Meunier", "542": "E.Le F\u00e9e", "543": "Diarra", "544": "Xhaka", "545": "Sadiki", "546": "Adingra", "547": "Mundle", "548": "Rigg", "549": "Talbi", "550": "Jocelin.T", "551": "N.Angulo", "552": "Brobbey", "553": "Isidor", "612": "Methalie", "613": "Ahoka", "646": "Fofana", "651": "J.Angulo"};
 const TRANSFER_RECS = [];
 let WC_SQUADS = {};
 let FH_SQUADS = {};
@@ -29813,6 +29813,25 @@ function _ppNextFt(gwIdx, ft, txUsed) {
 // Returns '' - print nothing - wherever a used/available pair would be a lie:
 // a Wildcard or Free Hit week (transfers are free, the header's chip tag says
 // so), the unlimited week, and any restored plan whose cards predate ftAfter.
+// APEX_PLANCARD_B_v1 (2026-09-06): one plain line saying what this week IS.
+// A roll week used to be identifiable only by the absence of a swap in the
+// header - you had to notice something missing. Now it says so.
+function _ppWeekLine(sel, isTc, isBb) {
+  if (!sel) return '';
+  if (sel.type === 'chip') {
+    if (sel.chipType === 'WC') return 'Wildcard \u00b7 new squad';
+    if (sel.chipType === 'FH') return 'Free Hit \u00b7 one week only';
+    if (sel.chipType === 'BB') return 'Bench Boost \u00b7 all 15 score';
+    if (sel.chipType === 'TC') return 'Triple Captain';
+    return String(sel.chipType || 'Chip');
+  }
+  if (isBb) return 'Bench Boost \u00b7 all 15 score';
+  if (isTc) return 'Triple Captain';
+  if (sel.type === 'none') return 'Roll the transfer \u00b7 banks it';
+  return '';
+}
+
+
 function _ppFtBudget(sels, i, rootFt) {
   const sel = sels && sels[i];
   if (!sel) return '';
@@ -34361,7 +34380,24 @@ function _renderPathTree() {
   // 2026-06-11 Marcus (75% zoom): bigger type → wider/taller cards.
   // 2026-07-25: CH 300 -> 336. Transfer weeks now print an OUT line per
   // departure under the bench; at 300 those rows fell outside the card.
-  const TW = 178, TGAP = 34, CH = 352;
+  // ── APEX_PLANCARD_B_v1 (2026-09-06) ──────────────────────────────────
+  // Marcus picked mock B. Its written justification was WRONG and the numbers
+  // say so: "half the height so five or six weeks fit" — but this tree runs
+  // LEFT TO RIGHT, so what limits how many weeks he sees is card WIDTH, not
+  // height. Measured at his 1536px viewport: today 5 locked weeks need 1620px;
+  // mock B's two-column card at 250 wide needs 1980px, and 2832px at eight
+  // weeks. Two columns would cost him a whole week of visibility to buy back
+  // vertical space he was never short of.
+  //
+  // So B SHIPS AT THE SAME WIDTH. Everything that made it better survives —
+  // the points as the number you read first, a line saying what happens this
+  // week, a gold captain disc instead of a bracketed (C), the bench on its own
+  // recessed shelf as ONE line instead of four rows, and a transfer spelled out
+  // in its own row. The eleven stay in one column. Height still falls 352 -> 268.
+  // Height check (2026-09-06), baselines relative to the card top:
+  //   header 50 | week line 19 | first name 84 | 11 names x 15 -> 249
+  //   bench shelf 242..272 | 8px bottom padding -> 280.
+  const TW = 178, TGAP = 34, CH = 280;
   const nLocked = sels.length;
   const branchX = 20 + NW + TGAP + nLocked * (TW + TGAP);
   const futN = done ? 0 : Math.max(0, horizonEnd - cur - 1);
@@ -34496,11 +34532,16 @@ function _renderPathTree() {
       // a single name. Transfer weeks get a warmer header + the swap spelled
       // out; roll weeks keep the calm teal.
       const _isTxWk = (sel.type === 'one' || sel.type === 'two');
+      // The swap row needs BOTH halves of a move to draw an arrow. If a
+      // branch ever carries an out with no in, fall back to the struck-through
+      // name on its own rather than printing an empty row -- the departures
+      // block that used to cover that case is gone.
+      const _txPairs = [[sel.out, sel.in], [sel.out2, sel.in2]].filter(pr => pr[0] && pr[1]);
       const _hdBg = _isTxWk ? '#FDF3E3' : TEAL_BG;
       const _hdBd = _isTxWk ? '#B4770F' : TEAL;
       const _hdT  = _isTxWk ? '#7A4E06' : TEAL_T;
       const _hdS  = _isTxWk ? '#96650C' : TEAL_S;
-      const _hdH  = _isTxWk ? 58 : 44;
+      const _hdH  = 50;   // APEX_PLANCARD_B_v1: one header height, points inside it
       // The whole card is a rewind target: click a decided week to take back
       // it and everything after it, then choose again from that point.
       let g = `<g style="cursor:pointer" onclick="_ppRewindTo(${i})">`
@@ -34508,20 +34549,36 @@ function _renderPathTree() {
         + `<rect x="${x}" y="${TOP}" width="${TW}" height="${CH}" rx="12" fill="#ffffff" stroke="${_hdBd}" stroke-width="${_isTxWk ? 2 : 1.6}"/>`
         + `<rect x="${x}" y="${TOP}" width="${TW}" height="${_hdH}" rx="12" fill="${_hdBg}"/>`
         + `<rect x="${x}" y="${TOP + _hdH - 12}" width="${TW}" height="12" fill="${_hdBg}"/>`
-        + `<text x="${x + 11}" y="${TOP + 20}" font-size="15.5" font-weight="800" fill="${_hdT}">GW${sel.gw} ${esc(chipTag)}</text>`
-        + `<text x="${x + TW - 10}" y="${TOP + 20}" text-anchor="end" font-size="13" font-weight="800" fill="${_hdS}" opacity="0.75">↶</text>`
-        + `<text x="${x + 11}" y="${TOP + 37}" font-size="11.5" font-weight="700" fill="${_hdS}">${(sel.gwXp || 0).toFixed(1)} pts${sel.hitCost > 0 ? ` · −${sel.hitCost} hit` : ''}</text>`
+        // APEX_PLANCARD_B_v1: the gameweek and its state, then the POINTS as the
+        // thing you read first. It used to be an 11.5px caption under the title,
+        // the same size as a player's name, while it is the number every branch
+        // is chosen on.
+        + `<text x="${x + 11}" y="${TOP + 17}" font-size="12.5" font-weight="800" fill="${_hdT}">GW${sel.gw} ${esc(chipTag)}</text>`
+        + `<text x="${x + TW - 10}" y="${TOP + 17}" text-anchor="end" font-size="12" font-weight="800" fill="${_hdS}" opacity="0.75">↶</text>`
+        + `<text x="${x + 11}" y="${TOP + 40}" font-size="20" font-weight="800" fill="${_hdT}" letter-spacing="-0.5">${(sel.gwXp || 0).toFixed(1)}`
+        + `<tspan dx="4" font-size="9.5" font-weight="700" fill="${_hdS}">PTS</tspan>`
+        + (sel.hitCost > 0 ? `<tspan dx="6" font-size="10" font-weight="800" fill="#B4770F">−${sel.hitCost} hit</tspan>` : '')
+        + `</text>`
         // APEX_PLAN_FT_BUDGET_v1: the week's transfer budget, right-aligned
         // under the rewind arrow. Empty string when it cannot be known.
-        + ((_b => _b ? `<text x="${x + TW - 10}" y="${TOP + 37}" text-anchor="end" font-size="10.5" font-weight="700" fill="${_hdS}" opacity="0.85">${_b}</text>` : '')(_ppFtBudget(sels, i, _ppRootFtNow)))
+        + ((_b => _b ? `<text x="${x + TW - 10}" y="${TOP + 40}" text-anchor="end" font-size="10.5" font-weight="700" fill="${_hdS}" opacity="0.85">${_b}</text>` : '')(_ppFtBudget(sels, i, _ppRootFtNow)))
+        // APEX_PLANCARD_B_v1: one line saying what actually happens this week.
+        // A transfer gets its own row with the outgoing struck through, instead
+        // of two names crushed into the header at 10.5px.
         + (_isTxWk
-            ? `<text x="${x + 11}" y="${TOP + 52}" font-size="10.5" font-weight="800" fill="${_hdT}">`
-              + `${[[sel.out, sel.in], [sel.out2, sel.in2]]
-                    .filter(pr => pr[0] && pr[1])
-                    .map(pr => `${nm(pr[0], 9)}\u2192${nm(pr[1], 9)}`)
-                    .join('  ·  ')}</text>`
-            : '');
-      let ry = TOP + (_isTxWk ? 74 : 60);
+            ? `<rect x="${x}" y="${TOP + _hdH}" width="${TW}" height="19" fill="#FFFFFF"/>`
+              + `<line x1="${x}" y1="${TOP + _hdH + 19}" x2="${x + TW}" y2="${TOP + _hdH + 19}" stroke="#EBD3A6" stroke-width="1"/>`
+              + `<text x="${x + 11}" y="${TOP + _hdH + 13.5}" font-size="10.5" font-weight="700" fill="${GREY_S}">`
+              + `${(_txPairs.length
+                    ? _txPairs.map(pr => `<tspan text-decoration="line-through">${nm(pr[0], 8)}</tspan>`
+                             + `<tspan dx="4" font-weight="800" fill="#B4770F">\u2192</tspan>`
+                             + `<tspan dx="4" font-weight="800" fill="#0F1F1A">${nm(pr[1], 8)}</tspan>`)
+                        .join('<tspan dx="6">·</tspan>')
+                    : outNames.map(_on => `<tspan text-decoration="line-through">${esc(_on.length > 13 ? _on.slice(0, 12) + '\u2026' : _on)}</tspan>`)
+                        .join('<tspan dx="6">·</tspan>'))}</text>`
+            : `<text x="${x + 11}" y="${TOP + _hdH + 13.5}" font-size="10.5" font-weight="600" fill="${GREY_S}">`
+              + `${esc(_ppWeekLine(sel, isTc, isBb))}</text>`);
+      let ry = TOP + _hdH + 34;
       // APEX_PLANCARD_ARMBAND_v1 (2026-08-22, Marcus: "who ever has the highest points
       // should be made capatain and whoever has 2nd highest points should be vice
       // captain. simple."). The plan cards carried `sq.capId` from whatever wrote
@@ -34536,39 +34593,45 @@ function _renderPathTree() {
         const _cs = [...sq.xi].sort((a, b) => _xpAt(b, sel.gwIdx) - _xpAt(a, sel.gwIdx));
         if (_cs.length >= 2) { _cardCap = _cs[0].id; _cardVc = _cs[1].id; }
       } catch (_eCa) { /* an armband must never break the plan trunk */ }
-      const row = (p, isBench) => {
+      // APEX_PLANCARD_B_v1: the armband is a disc, not "(C)". A bracketed letter
+      // at the end of a name is the same weight and colour as the name, so the
+      // one player whose points double was the hardest thing on the card to
+      // find. A gold disc is found without reading.
+      const row = (p) => {
         const isCap = _cardCap === p.id, isVc = _cardVc === p.id;
-        const mark = isCap ? (isTc ? ' (C×3)' : ' (C)') : (isVc ? ' (V)' : '');
-        const fill = isBench ? (isBb ? TEAL_S : GREY_S) : TEAL_T;
         const isIn = inIds.has(p.id);
-        const w = isCap ? '800' : (isIn ? '800' : '500');
-        // An incoming player gets the accent colour, a bolder weight and a
-        // filled marker — not a 500-weight chevron you have to hunt for.
-        const nameFill = isIn ? '#0F6E56' : fill;
-        const r = `<text x="${x + 11}" y="${ry}" font-size="12" font-weight="${w}" fill="${nameFill}">`
+        const w = (isCap || isIn) ? '800' : '500';
+        const nameFill = isIn ? '#0F6E56' : TEAL_T;
+        let r = `<text x="${x + 11}" y="${ry}" font-size="11.5" font-weight="${w}" fill="${nameFill}">`
           + `<tspan fill="${isIn ? '#0F6E56' : GREY_S}" font-weight="700">${posL[p.element_type] || ''}</tspan>`
-          + `<tspan dx="6">${isIn ? '\u25b8 ' : ''}${nm(p, 13)}${mark}</tspan>`
-          + (isIn ? `<tspan dx="5" font-size="9.5" font-weight="800" fill="#0F6E56">IN</tspan>` : '')
+          + `<tspan dx="6">${nm(p, 13)}</tspan>`
+          + (isIn ? `<tspan dx="5" font-size="9" font-weight="800" fill="#0F6E56">IN</tspan>` : '')
           + `</text>`;
-        ry += 16;
+        if (isCap || isVc) {
+          const cx = x + TW - 15, cy = ry - 4;
+          r += `<circle cx="${cx}" cy="${cy}" r="6.5" fill="${isCap ? '#E8B93C' : '#FFFFFF'}"`
+             + ` stroke="${isCap ? '#E8B93C' : GREY}" stroke-width="1.2"/>`
+             + `<text x="${cx}" y="${cy + 3.2}" text-anchor="middle" font-size="8"`
+             + ` font-weight="800" fill="${isCap ? '#3A2E08' : GREY_S}">${isCap ? (isTc ? '3' : 'C') : 'V'}</text>`;
+        }
+        ry += 15;
         return r;
       };
-      for (const p of xiRows) g += row(p, false);
-      ry += 3;
-      g += `<line x1="${x + 9}" y1="${ry - 11}" x2="${x + TW - 9}" y2="${ry - 11}" stroke="${GREY}" stroke-width="0.8" opacity="0.5"/>`;
-      for (const p of (sq.bench || [])) g += row(p, true);
-      // Departures, so the card is self-contained.
-      if (outNames.length) {
-        ry += 6;
-        g += `<line x1="${x + 9}" y1="${ry - 11}" x2="${x + TW - 9}" y2="${ry - 11}" stroke="${GREY}" stroke-width="0.8" opacity="0.5"/>`;
-        for (const _on of outNames) {
-          g += `<text x="${x + 11}" y="${ry}" font-size="11.5" font-weight="600" fill="${GREY_S}">`
-            + `<tspan font-size="9.5" font-weight="800">OUT</tspan>`
-            + `<tspan dx="6" text-decoration="line-through">${esc(_on.length > 13 ? _on.slice(0, 12) + '\u2026' : _on)}</tspan>`
-            + `</text>`;
-          ry += 15;
-        }
-      }
+      for (const p of xiRows) g += row(p);
+      // APEX_PLANCARD_B_v1: the bench is four rows of information you almost
+      // never act on, sitting in the same type as the eleven. One recessed line.
+      const _bn = (sq.bench || []).map(p => nm(p, 8)).join(' \u00b7 ');
+      ry += 4;
+      g += `<rect x="${x + 1}" y="${ry - 11}" width="${TW - 2}" height="30" fill="${isBb ? '#EAF6F1' : '#F7FAF8'}"/>`
+         + `<line x1="${x + 1}" y1="${ry - 11}" x2="${x + TW - 1}" y2="${ry - 11}" stroke="${GREY}" stroke-width="0.8" opacity="0.55"/>`
+         + `<text x="${x + 11}" y="${ry}" font-size="8" font-weight="800" letter-spacing="1" fill="${GREY_S}">`
+         + `${isBb ? 'BENCH \u00b7 SCORING' : 'BENCH'}</text>`
+         + `<text x="${x + 11}" y="${ry + 13}" font-size="10" font-weight="600" fill="${isBb ? TEAL_S : GREY_S}">${_bn}</text>`;
+      ry += 30;
+      // APEX_PLANCARD_B_v1: NO separate departures block. The header row
+      // already prints every out->in pair with the outgoing name struck
+      // through, so a second OUT list at the foot said the same thing
+      // twice and was what pushed the card past its own height.
       g += '</g>';
       s += g;
     } else {
@@ -42800,7 +42863,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW4</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1788716850-GW4-7f4d9259</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1788718946-GW4-0b3ee03c</span>
 </footer>
 
 <!-- Cloudflare Web Analytics -->
