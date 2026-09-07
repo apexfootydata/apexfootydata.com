@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="4" data-built-at="2026-09-07T10:41:15">
+<meta name="apex-gw" content="4" data-built-at="2026-09-07T11:03:19">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/x-icon" href="favicon.ico?v=4">
@@ -157,11 +157,21 @@
             <p class="sub">The solver that turns the betting market's prices into FPL points &mdash; transfers, captain and chips, every pick scored in public.</p>
             <div style="display:flex;gap:10px;justify-content:center;align-items:stretch;flex-wrap:wrap;margin-bottom:10px;">
                 <input id="apex-hero-fplid" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" maxlength="10"
+                       list="apex-recent-list"
                        placeholder="Enter your FPL Team ID"
                        style="font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;color:#16201C;background:#fff;border:1px solid #C9D2CC;border-radius:10px;padding:13px 16px;width:230px;outline:none;">
                 <button id="apex-hero-go" onclick="apexHeroSolve()" style="font-family:'Plus Jakarta Sans',sans-serif;background:#1D9E75;color:#fff;font-weight:700;font-size:15px;padding:0 24px;border:none;border-radius:10px;letter-spacing:0.01em;cursor:pointer;">Solve my team &rarr;</button>
             </div>
             <div id="apex-hero-err" style="color:#C0532F;font-size:13px;font-weight:600;min-height:18px;margin-bottom:6px;"></div>
+            <!-- APEX_RECENT_IDS_v1 (2026-09-07): the teams this browser has
+                 actually opened, newest first. Written ONLY by the solver
+                 after the entry fetch succeeds, so a typo can never get in
+                 here; this page just reads it. Hidden entirely when empty,
+                 so a first-time visitor sees exactly what they saw before. -->
+            <div id="apex-recent-wrap" style="display:none;margin:0 auto 16px;max-width:520px;">
+                <div style="font-size:12px;color:#6B756F;font-weight:600;letter-spacing:.02em;margin-bottom:6px;">RECENT TEAMS</div>
+                <div id="apex-recent-chips" style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;"></div>
+            </div>
             <div style="font-size:13px;color:#6B756F;margin-bottom:20px;">No signup &mdash; just your Team ID. &nbsp;·&nbsp; <a href="#" onclick="var h=document.getElementById('apex-id-help');h.style.display=(h.style.display==='none'?'block':'none');return false;" style="color:#1D9E75;font-weight:600;text-decoration:none;">Don't know your ID?</a> &nbsp;·&nbsp; Free all season.</div>
             <!-- UX pass 2026-07-07: inline ID help (was a dead-end navigation to solver.html —
                  every first-timer's first stuck moment per the child-test walkthrough). -->
@@ -187,6 +197,104 @@
                 if (!el) return;
                 el.addEventListener('keydown', function (e) { if (e.key === 'Enter') apexHeroSolve(); });
                 el.addEventListener('input', function () { var er = document.getElementById('apex-hero-err'); if (er) er.textContent = ''; });
+            })();
+            // APEX_RECENT_IDS_v1 — reader. The list lives at
+            // localStorage 'apex_recent_ids_v1' as
+            //   [{ id: <number>, name: <string>, t: <unix seconds> }, ...]
+            // newest first, de-duplicated, capped at 8. The SOLVER is the only
+            // writer (it writes after the entry fetch proves the id good), so
+            // nothing here validates or repairs — a row that does not read as
+            // a plain positive integer id is simply skipped, and a store this
+            // page cannot read at all just means no chips.
+            (function () {
+                var KEY = 'apex_recent_ids_v1';
+                var wrap = document.getElementById('apex-recent-wrap');
+                var host = document.getElementById('apex-recent-chips');
+                var input = document.getElementById('apex-hero-fplid');
+                if (!wrap || !host) return;
+
+                function read() {
+                    try {
+                        var raw = JSON.parse(localStorage.getItem(KEY) || '[]');
+                        if (!Array.isArray(raw)) return [];
+                        return raw.filter(function (r) {
+                            return r && typeof r === 'object'
+                                && /^[0-9]+$/.test(String(r.id))
+                                && +r.id >= 1 && +r.id <= 20000000;
+                        });
+                    } catch (e) { return []; }
+                }
+                function write(rows) {
+                    try { localStorage.setItem(KEY, JSON.stringify(rows)); } catch (e) {}
+                }
+                function forget(id) {
+                    write(read().filter(function (r) { return +r.id !== +id; }));
+                    render();
+                }
+                window.apexForgetRecentId = forget;
+
+                function render() {
+                    var rows = read();
+                    if (!rows.length) { wrap.style.display = 'none'; host.innerHTML = ''; return; }
+                    wrap.style.display = 'block';
+                    host.innerHTML = '';
+                    // A datalist as well as the chips: the chips are for the
+                    // mouse, the datalist for anyone who starts typing.
+                    var dl = document.getElementById('apex-recent-list');
+                    if (!dl) {
+                        dl = document.createElement('datalist');
+                        dl.id = 'apex-recent-list';
+                        document.body.appendChild(dl);
+                    }
+                    dl.innerHTML = '';
+                    rows.forEach(function (r) {
+                        var id = String(+r.id);
+                        var nm = String(r.name == null ? '' : r.name).slice(0, 40);
+
+                        var opt = document.createElement('option');
+                        opt.value = id;
+                        opt.label = nm || ('Team ' + id);
+                        dl.appendChild(opt);
+
+                        var chip = document.createElement('span');
+                        chip.style.cssText = 'display:inline-flex;align-items:center;gap:8px;'
+                            + 'background:#fff;border:1px solid #C9D2CC;border-radius:999px;'
+                            + 'padding:7px 8px 7px 14px;font-size:13.5px;color:#16201C;'
+                            + 'font-family:inherit;';
+
+                        var go = document.createElement('button');
+                        go.type = 'button';
+                        // textContent, never innerHTML: the team name comes
+                        // from FPL and is somebody else's text.
+                        go.textContent = nm ? (nm + '  ·  ' + id) : ('Team ' + id);
+                        go.title = 'Solve team ' + id;
+                        go.style.cssText = 'background:none;border:none;padding:0;margin:0;'
+                            + 'font:inherit;color:#16201C;font-weight:600;cursor:pointer;';
+                        go.addEventListener('click', function () {
+                            window.location.href = 'solver_app.html?id=' + (+r.id);
+                        });
+
+                        var x = document.createElement('button');
+                        x.type = 'button';
+                        x.textContent = '\u00d7';
+                        x.title = 'Forget this team';
+                        x.setAttribute('aria-label', 'Forget team ' + id);
+                        x.style.cssText = 'background:none;border:none;padding:0 4px;margin:0;'
+                            + 'font:inherit;font-size:16px;line-height:1;color:#8A938E;cursor:pointer;';
+                        x.addEventListener('click', function (e) {
+                            e.stopPropagation();
+                            forget(+r.id);
+                        });
+
+                        chip.appendChild(go);
+                        chip.appendChild(x);
+                        host.appendChild(chip);
+                    });
+                    // Prefill the box with the most recent team so the common
+                    // case is one press of the green button.
+                    if (input && !input.value) { input.value = String(+rows[0].id); }
+                }
+                render();
             })();
             </script>
         </section>
