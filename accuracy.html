@@ -10,7 +10,7 @@
 <meta name="author" content="FPL Apex">
 <link rel="canonical" href="https://fplapex.com/accuracy.html">
 <meta name="robots" content="index, follow">
-<!-- Open Graph (Facebook / WhatsApp / LinkedIn / Discord) -->
+
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="FPL Apex">
 <meta property="og:title" content="Accuracy &mdash; FPL Apex">
@@ -18,7 +18,7 @@
 <meta property="og:url" content="https://fplapex.com/accuracy.html">
 <meta property="og:image" content="https://fplapex.com/og-image.png">
 <meta property="og:image:alt" content="FPL Apex &mdash; model accuracy record">
-<!-- Twitter Card -->
+
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Accuracy &mdash; FPL Apex">
 <meta name="twitter:description" content="How the FPL Apex model actually performs &mdash; point-in-time, wins and losses both published.">
@@ -51,7 +51,7 @@
     flex-direction: column;
   }
 
-  /* Header — cream strip, compact wordmark */
+  
   .header {
     background: var(--cream);
     border-bottom: 1px solid var(--border);
@@ -71,7 +71,7 @@
   }
   .logo-tagline .tag-over { border-bottom: 2px solid var(--teal); padding-bottom: 1px; }
 
-  /* Tab nav — sibling of solver.html */
+  
   .tab-nav {
     display: flex;
     justify-content: center;
@@ -97,7 +97,7 @@
 
   main { flex: 1; width: 100%; max-width: 960px; margin: 0 auto; padding: 48px 24px 64px; }
 
-  /* Hero */
+  
   .eyebrow {
     font-family: 'JetBrains Mono', ui-monospace, monospace;
     font-size: 12px;
@@ -121,7 +121,7 @@
   h3 { font-size: 17px; font-weight: 700; color: var(--ink); margin-bottom: 6px; }
   .section-intro { font-size: 15.5px; color: var(--muted); font-weight: 500; max-width: 760px; margin-bottom: 22px; }
 
-  /* Benchmark cards */
+  
   .bench-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 16px; }
   .bench-card {
     background: var(--card);
@@ -161,7 +161,7 @@
     color: var(--muted);
   }
 
-  /* 25/26 season tracker */
+  
   .summary-strip { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 18px; }
   .sum-card {
     background: var(--card);
@@ -187,7 +187,7 @@
   .mw-val { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 15px; font-weight: 600; color: var(--ink); }
   .table-foot { font-size: 12.5px; color: var(--muted); font-weight: 500; margin-top: 14px; }
 
-  /* Forward test table */
+  
   .table-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
   .ft-table { width: 100%; border-collapse: collapse; }
   .ft-table th {
@@ -217,7 +217,7 @@
     padding: 22px 18px;
   }
 
-  /* How to read this */
+  
   .read-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
   .read-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 20px 22px; }
   .read-card p { font-size: 14px; font-weight: 500; color: var(--muted); line-height: 1.6; }
@@ -262,7 +262,7 @@
 </div>
 <main>
 
-  <!-- Hero -->
+  
   <div class="eyebrow">THE RECEIPTS</div>
   <h1>Model accuracy, published in the open.</h1>
   <p class="lede">
@@ -272,12 +272,7 @@
     Wins and losses both published.
   </p>
 
-  <!-- APEX_BENCHMARK_RETIRE_v1 (2026-08-25, Marcus): the 2025/26 player benchmark
-       cards are retired to a statement with no figures. The numbers measured the
-       June engine on stand-in minutes over six late-season gameweeks, replayed
-       against Tool A's genuine point-in-time files. compute_benchmarks() still
-       derives them from the source CSVs for internal use; the page does not
-       print them. The forward test below is the record. -->
+  
   <section id="benchmarks">
     <h2>Last season, against the paid tools</h2>
     <p class="section-intro">
@@ -291,7 +286,7 @@
     </p>
   </section>
 
-  <!-- 2025/26 season tracker — generated from outputs/accuracy_history.json -->
+  
   <section id="season-2526">
     <h2>2025/26 — match prediction accuracy</h2>
     <p class="section-intro">
@@ -361,7 +356,7 @@
     </p>
   </section>
 
-  <!-- Live forward test — 2026/27 -->
+  
   <section id="forward-test">
     <h2>Live forward test &mdash; 2026/27</h2>
     <p class="section-intro">
@@ -383,11 +378,11 @@
           </tr>
         </thead>
         <tbody>
-<!-- APEX-FT-ROWS-START -->
+
           <tr><td>GW1</td><td>2.63</td><td>2.56</td><td>2.63</td><td>Tool A</td></tr>
           <tr><td>GW2</td><td>2.76</td><td>2.87</td><td>2.76</td><td>Apex</td></tr>
           <tr><td>GW3</td><td>2.35</td><td>2.36</td><td>2.40</td><td>Apex</td></tr>
-<!-- APEX-FT-ROWS-END -->
+
         </tbody>
       </table>
     </div>
@@ -401,7 +396,7 @@
     </p>
   </section>
 
-  <!-- How to read this -->
+  
   <section id="how-to-read">
     <h2>How to read this page</h2>
     <div class="read-grid">
@@ -437,7 +432,7 @@
 
 </main>
 <footer>fplapex.com &middot; data-driven football analytics</footer>
-<!-- Cloudflare Web Analytics - APEX_ANALYTICS_OPTOUT_v1 -->
+
 <script>
 (function(){var K="apex_notrack";try{var q=window.location.search||"";
 if(q.indexOf("notrack=1")>-1){localStorage.setItem(K,"1");}
@@ -448,6 +443,6 @@ s.src="https://static.cloudflareinsights.com/beacon.min.js";
 s.setAttribute("data-cf-beacon",'{"token": "890700f621df42909deca8500a0df182"}');
 (document.head||document.documentElement).appendChild(s);})();
 </script>
-<!-- End Cloudflare Web Analytics -->
+
 </body>
 </html>

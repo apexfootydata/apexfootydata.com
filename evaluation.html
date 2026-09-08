@@ -6,11 +6,8 @@
 <title>FPL Apex — Evaluation</title>
 <meta name="robots" content="noindex">
 <link rel="canonical" href="https://fplapex.com/evaluation.html">
-<!-- APEX_SOCIAL_META_v1 (2026-09-01). This page had none, so every shared link
-     rendered as a bare blue URL. og:image is the accuracy card, redrawn by
-     forward_log.py eval on every bake and published by push_site.py, so the
-     preview carries the LIVE numbers rather than a fixed graphic. -->
-<!-- Open Graph (Facebook / WhatsApp / LinkedIn / Discord) -->
+
+
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="FPL Apex">
 <meta property="og:title" content="Model Evaluation &mdash; FPL Apex">
@@ -20,7 +17,7 @@
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="FPL Apex projection accuracy: average points miss per pick, Apex against Tool A and Tool B">
-<!-- Twitter Card -->
+
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Model Evaluation &mdash; FPL Apex">
 <meta name="twitter:description" content="Projections locked pre-deadline, scored in public. Apex against the two leading paid tools.">
@@ -91,8 +88,7 @@
   <nav>
     <a href="/" class="home">&larr; FPL Apex</a>
     <a href="/solver_app.html" class="nav-solver" data-view="team">My Squad</a>
-    <!-- APEX_NAV_STATIC_TRUTH_v1: Chip Planner link removed (recommendation
-         surface is off site-wide; the solver gates its own copy). -->
+    
     <a href="/solver_app.html" class="nav-solver" data-view="league">Mini-League</a>
     <a href="#" class="active">Model Evaluation</a>
   </nav>
@@ -105,11 +101,11 @@
         <h1>How accurate is Apex?</h1>
         <p class="lede" id="eval-lede">We score Apex against the leading paid tools every gameweek, in the open —
           same players, same metric, no cherry-picking. Live tracking begins 2026/27.</p>
-        <!-- APEX_ACCURACY_NAMING_v1: twin of the pointer on /accuracy.html. -->
+        
         <p style="margin:-10px 0 18px;font-size:14px;color:#6b6b7b;">
           This page is the <b>live record</b> for this season. Last season&rsquo;s match-level
           backtest and the per-gameweek table are on
-          <a href="/accuracy.html">Accuracy</a>. <!-- APEX_BENCHMARK_RETIRE_v1 -->
+          <a href="/accuracy.html">Accuracy</a>. 
         </p>
 
         <div class="explain">
@@ -183,11 +179,8 @@
   </main>
 
 <script>
-  /* Nav deep-links: carry the user's FPL Team ID into the solver so My Squad /
-     Mini-League open the right view directly — no Team ID box.
-     ID comes from ?id= in the URL, else the persisted apex_fpl_id (set whenever
-     the solver loads a team). If we have no ID, links fall back to the solver
-     entry, which will ask for one. */
+  
+
   (function(){
     var id='';
     try{ id=(new URLSearchParams(location.search)).get('id')||''; }catch(_){}
@@ -198,13 +191,11 @@
       });
     }
   })();
-  /* Season running total — baked by forward_log.py `eval` from the live
-     forward-test log. null until the first 26/27 GW is scored. The static markup is rendered
-     server-side by _render_static() to match, so the file never claims a state
-     it is not in — with or without JS. */
-  /* APEX-EVAL-DATA-START */
-var EVAL_DATA = {"weeks": 3, "owned_thr": 5.0, "n": 206, "n_all": 1390, "apex": 2.57, "tool_a": 2.59, "bench_b": 2.59, "bench_b_n": 206, "bench_b_common": true, "form": ["toolA", "apex", "apex"], "verdict": "Too early to separate them: 206 shared picks over 3 gameweeks is not enough to call a winner, and we will not pretend otherwise.", "updated_utc": "2026-09-08T08:56:44Z"};
-/* APEX-EVAL-DATA-END */
+  
+
+   
+var EVAL_DATA = {"weeks": 3, "owned_thr": 5.0, "n": 206, "n_all": 1390, "apex": 2.57, "tool_a": 2.59, "bench_b": 2.59, "bench_b_n": 206, "bench_b_common": true, "form": ["toolA", "apex", "apex"], "verdict": "Too early to separate them: 206 shared picks over 3 gameweeks is not enough to call a winner, and we will not pretend otherwise.", "updated_utc": "2026-09-08T11:42:48Z"};
+ 
   (function(){
     var COL={apex:'#1D9E75',toolA:'#3f4d47',toolB:'#b8c2bc',level:'#cfd6d2'};
     var host=document.getElementById('form');
@@ -212,28 +203,26 @@ var EVAL_DATA = {"weeks": 3, "owned_thr": 5.0, "n": 206, "n_all": 1390, "apex": 
 
     var live = EVAL_DATA && EVAL_DATA.weeks > 0;
     if(!live){
-      // APEX_NAV_STATIC_TRUTH_v1: no mock form strip. An invented run of
-      // "weeks closest" is exactly the kind of thing a reader takes as a record.
+       
+       
       return;
     }
 
-    // ── Live: fill tiles, verdict, badge, form from the real numbers ──
+     
     function fmt(v){return (v==null)?'—':Number(v).toFixed(2);}
     document.getElementById('eval-apex').textContent  = fmt(EVAL_DATA.apex);
     document.getElementById('eval-toolA').textContent = fmt(EVAL_DATA.tool_a);
     var bEl=document.getElementById('eval-toolB');
-    /* APEX_ACCURACY_TRUTH_v1: "frozen before that deadline" — the rival books are
-       captured minutes to a couple of hours ahead of it; "at" overstated it.
-       APEX_EVAL_LIVE_v1: dagger only when Tool B was scored on a SAMPLE, not the
-       same players as Apex / Tool A (EVAL_DATA.bench_b_common === false). */
+    
+
     bEl.innerHTML = (EVAL_DATA.bench_b==null) ? '—'
                     : (fmt(EVAL_DATA.bench_b)+(EVAL_DATA.bench_b_common===false?'<span style="font-size:14px;">&dagger;</span>':''));
 
     var head=document.getElementById('eval-heading');
     if(head){
-      // Show the sample size alongside the gameweek count (hostile-audit fix #3):
-      // 'N gameweeks · M player-projections scored'. Falls back to the old label
-      // if an older payload without EVAL_DATA.n is baked.
+       
+       
+       
       var nTxt=(EVAL_DATA.n!=null)
         ? (' · '+EVAL_DATA.n+' player-projection'+(EVAL_DATA.n===1?'':'s')+' scored')
         : ' scored';
@@ -251,7 +240,7 @@ var EVAL_DATA = {"weeks": 3, "owned_thr": 5.0, "n": 206, "n_all": 1390, "apex": 
 
     (EVAL_DATA.form||[]).forEach(function(k){bar(k,true);});
 
-    /* APEX-EVAL-FULLFLIP-v1: the bars card, lede and caveat must flip too. */
+     
     function setTxt(id,t){var e=document.getElementById(id);if(e)e.textContent=t;}
     setTxt('eval-ttl','PROJECTION ACCURACY (widely-owned players) · SEASON TO DATE');
     setTxt('eval-readline','Measured live — season running total, updated after every scored gameweek.');
@@ -274,12 +263,12 @@ var EVAL_DATA = {"weeks": 3, "owned_thr": 5.0, "n": 206, "n_all": 1390, "apex": 
       if(!v||!f) return;
       if(p[1]==null){ var row=v.closest('.barrow'); if(row) row.style.display='none'; return; }
       v.textContent=Number(p[1]).toFixed(2);
-      /* lower miss = closer = wider bar; best gets 96% */
+       
       f.style.width=(best?Math.max(30,Math.round(96*best/p[1])):50)+'%';
     });
   })();
 </script>
-<!-- Cloudflare Web Analytics - APEX_ANALYTICS_OPTOUT_v1 -->
+
 <script>
 (function(){var K="apex_notrack";try{var q=window.location.search||"";
 if(q.indexOf("notrack=1")>-1){localStorage.setItem(K,"1");}
@@ -290,6 +279,6 @@ s.src="https://static.cloudflareinsights.com/beacon.min.js";
 s.setAttribute("data-cf-beacon",'{"token": "890700f621df42909deca8500a0df182"}');
 (document.head||document.documentElement).appendChild(s);})();
 </script>
-<!-- End Cloudflare Web Analytics -->
+
 </body>
 </html>

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<!-- static landing: no apex-gw stamp by design - page is FRESHNESS_EXEMPT in push_site.py (2026-08-02 note there); stamp removed 2026-08-17, it was frozen at GW32 -->
+
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=4">
 <link rel="shortcut icon" type="image/x-icon" href="favicon.ico?v=4">
 <title>Free FPL Solver — Transfers, Chips &amp; Rank Predictor | FPL Apex</title>
@@ -18,13 +18,11 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <script>
-/* 2026-07-10: returning-visitor fast path decided BEFORE first paint, so the
-   ID entry form never flashes and then vanishes on the way to the solver. */
+
+
 (function () {
-  /* APEX_NO_STUB_LANDING_v1 (2026-08-21): this standalone ID-entry page is
-     retired -- the solver app renders its own landing now. This shell only
-     forwards old links/bookmarks: with a remembered id straight into the
-     app, otherwise to the app's landing (?change=1 preserved). */
+  
+
   try {
     document.documentElement.style.visibility = 'hidden';
     var stay = /[?&]change=1\b/.test(location.search);
@@ -33,7 +31,7 @@
     if (!stay && saved && /^\d+$/.test(saved)) {
       window.location.replace('/solver_app.html?id=' + saved);
     } else {
-      window.location.replace('/');   // THE HOMEPAGE IS THE LANDING PAGE
+      window.location.replace('/');    
     }
   } catch (_) { window.location.replace('/'); }
 })();
@@ -163,16 +161,12 @@
   .hint a { color: #1D9E75; text-decoration: none; }
   footer { padding: 20px 40px; text-align: center; color: #4a4a55; font-size: 11px; border-top: 1px solid #2a2a35; }
 
-  /* ═══════════════════════════════════════════════════════════════════
-   * SOLVER LANDING — LIGHT THEME + PLUS JAKARTA SANS (2026-06-01)
-   * Same treatment as the public website. Pitch carve-out not needed
-   * here (no pitch on the landing page).
-   * ═══════════════════════════════════════════════════════════════════ */
+  
 
   html, body, body *:not(code):not(pre):not(svg):not(svg *) {
     font-family: 'Plus Jakarta Sans', sans-serif !important;
   }
-  body { background: #FAF7F1 !important; color: #0f172a !important; font-size: 15px !important; }  /* banner cream, committed 2026-06-10 */
+  body { background: #FAF7F1 !important; color: #0f172a !important; font-size: 15px !important; }  
   .header { background: #FAF7F1 !important; border-bottom: 1px solid #E6E1D7 !important; padding: 24px 40px 20px !important; position: relative !important; overflow: hidden !important; max-width: 100% !important; margin: 0 !important; }
   .logo-brand { font-size: 32px !important; font-weight: 800 !important; letter-spacing: -0.02em !important; }
   .logo-brand .apex { color: #1D9E75 !important; font-weight: 800 !important; }
@@ -190,7 +184,7 @@
   }
   .tab-button.active, .tab a.active, .nav a.active { color: #1D9E75 !important; border-bottom-color: #1D9E75 !important; }
 
-  /* Entry panel card */
+  
   .card, .entry-card, main > div, .panel {
     background: #ffffff !important;
     border: 1px solid #e5e7eb !important;
@@ -198,7 +192,7 @@
     color: #0f172a !important;
   }
 
-  /* Big "FPL Solver" title */
+  
   h1, h2, .title {
     font-family: 'Plus Jakarta Sans', sans-serif !important;
     font-weight: 800 !important;
@@ -209,7 +203,7 @@
   }
   h2, .subtitle { font-size: 22px !important; font-weight: 700 !important; }
 
-  /* "Enter your FPL Team ID" prompt */
+  
   p, .prompt, label {
     font-family: 'Plus Jakarta Sans', sans-serif !important;
     font-size: 17px !important;
@@ -218,7 +212,7 @@
     font-weight: 500 !important;
   }
 
-  /* Input — big, white, dark text */
+  
   input {
     background: #ffffff !important;
     border: 1px solid #e5e7eb !important;
@@ -232,7 +226,7 @@
   }
   input:focus { outline: 2px solid #1D9E75 !important; }
 
-  /* SOLVE MY TEAM button */
+  
   button {
     background: #1D9E75 !important;
     color: #ffffff !important;
@@ -248,14 +242,14 @@
   button:hover { background: #17855F !important; }
   button:disabled { opacity: 0.4 !important; }
 
-  /* Status / building text */
+  
   .status, .building, [class*="status"] {
     color: #1D9E75 !important;
     font-weight: 700 !important;
     font-size: 15px !important;
   }
 
-  /* Hint / footer instructions — dark on white */
+  
   .hint { color: #475569 !important; font-size: 14px !important; line-height: 1.7 !important; }
   .hint a { color: #1D9E75 !important; font-weight: 600 !important; }
   .err { color: #dc2626 !important; font-size: 14px !important; }
@@ -268,7 +262,7 @@
     padding: 24px 40px !important;
   }
 
-  /* Defensive dim-text rescue */
+  
   [style*="color: #f5f5f7"], [style*="color:#f5f5f7"],
   [style*="color: #e8e8f0"], [style*="color:#e8e8f0"],
   [style*="color: #c8c8d0"], [style*="color:#c8c8d0"] { color: #0f172a !important; }
@@ -291,11 +285,7 @@
   </a>
 </div>
 <div class="tab-nav">
-  <!-- APEX_LANDING_NAV_v1 (2026-08-21): this static landing kept the
-       pre-redesign tab bar (#tab0-4 anchors that no longer exist) long after
-       the rest of the site moved on - visitors only reach this page via the
-       logo / Back-to-solver / error routes, so nobody noticed until the GW1
-       post-deadline lockout bounced everyone here. Mirror index.html's nav. -->
+  
   <a class="tab-button" href="/solver.html">Solver</a>
   <a class="tab-button" href="/#leaders">Apex Insights</a>
   <a class="tab-button" href="/evaluation.html">Model Evaluation</a>
@@ -341,9 +331,9 @@
   }
   try {
     var _saved = localStorage.getItem('apex_fpl_id');
-    // Returning visitor: if we already know a valid Team ID, skip the entry box
-    // and go straight to their solver. New visitors (no saved ID) still see it.
-    // Escape hatch: /solver.html?change=1 stays on the box to enter a different ID.
+     
+     
+     
     var _stay = /[?&]change=1\b/.test(location.search);
     if (_saved && /^\d+$/.test(_saved)) {
       if (_stay) { input.value = _saved; }
@@ -353,30 +343,14 @@
 </script>
 
 <style>
-/* ============================================================================
- * apex_mobile.css — universal mobile fixes for apexfootydata.com
- *
- * Loaded by: outputs/index.html, outputs/solver.html, outputs/solver_app.html,
- * outputs/rank_milestones.html. Generated outputs include this via the
- * generators (generate_solver_html.py); index.html and solver.html include it
- * as a static reference.
- *
- * Design intent — "quick responsive pass":
- *   - Stop horizontal overflow at the body level (the killer that forces
- *     mobile browsers to zoom out and make everything tiny).
- *   - Containerise wide tables into horizontal scroll rather than letting
- *     them push the page.
- *   - Bump tap targets to 44px min on the most-used controls.
- *
- * Breakpoint: <= 600px is the primary mobile pass.
- * ========================================================================== */
 
-/* Universal — applies at every width to prevent silent breaks */
+
+
 .apex-table-scroll {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     max-width: 100%;
-    /* fade-out hint that there's more horizontal content */
+    
     background:
         linear-gradient(to right, transparent 0, transparent 30px),
         linear-gradient(to left,  transparent 0, transparent 30px);
@@ -385,18 +359,16 @@
     min-width: max-content;
 }
 
-/* ───────────────────────────────────────────────────────────────────────────
- * <= 600px — phone breakpoint
- * ──────────────────────────────────────────────────────────────────────── */
+
 @media (max-width: 600px) {
 
-    /* Stop the body from being pushed wider than the viewport. */
+    
     html, body {
         max-width: 100vw;
         overflow-x: hidden;
     }
 
-    /* Header / tab-nav: respect parent width, allow internal scroll */
+    
     .header,
     .tab-nav {
         width: 100% !important;
@@ -409,46 +381,45 @@
         -webkit-overflow-scrolling: touch;
         scrollbar-width: thin;
         justify-content: flex-start !important;
-        /* visual cue that there's more to the right */
+        
         mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent);
         -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent);
     }
     .tab-nav::-webkit-scrollbar { height: 3px; }
     .tab-nav::-webkit-scrollbar-thumb { background: #2a2a35; border-radius: 2px; }
 
-    /* Tap target floor for primary nav */
+    
     .tab-button {
         min-height: 44px;
         padding-top: 12px !important;
         padding-bottom: 12px !important;
     }
 
-    /* Auto-wrapped tables (set by apex_mobile.js) */
+    
     .apex-table-scroll {
         margin-left: -8px;
         margin-right: -8px;
         padding-left: 8px;
         padding-right: 8px;
-        /* gradient affordance: subtle right-edge fade */
+        
         -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 18px), rgba(0,0,0,.5));
                 mask-image: linear-gradient(to right, #000 calc(100% - 18px), rgba(0,0,0,.5));
     }
-    /* When user has scrolled to the end, drop the fade */
+    
     .apex-table-scroll.is-scrolled-end,
     .apex-table-scroll.is-fits {
         -webkit-mask-image: none;
                 mask-image: none;
     }
 
-    /* Tighter cell padding so tables feel less hostile on narrow screens */
+    
     .apex-table-scroll table th,
     .apex-table-scroll table td {
         padding-left: 8px !important;
         padding-right: 8px !important;
     }
 
-    /* Cookie banner — already fixed-bottom by inline JS. Just make the buttons
-       full-width on tiny screens so they don't crash into each other. */
+    
     #apex-cookie-banner {
         flex-wrap: wrap !important;
         gap: 10px !important;
@@ -462,16 +433,14 @@
         min-height: 40px;
     }
 
-    /* Footer — keep readable on narrow screens */
+    
     footer {
         padding-left: 16px !important;
         padding-right: 16px !important;
     }
 }
 
-/* ───────────────────────────────────────────────────────────────────────────
- * <= 380px — extra-narrow tightening
- * ──────────────────────────────────────────────────────────────────────── */
+
 @media (max-width: 380px) {
     .tab-button {
         font-size: 12.5px !important;
@@ -486,11 +455,7 @@
     }
 }
 
-/* ============================================================================
- * Solver pitch — shrink shirts to fit 5-per-row in a 390px viewport.
- * Default sizes (.shirt=130, .shirt-wrap=96, gap=14) overflow on mobile.
- * Target row width with 5 shirts: 5*64 + 4*4 = 336px (+ pitch padding) <= 360px.
- * ========================================================================== */
+
 @media (max-width: 480px) {
     .pitch { padding: 22px 8px 14px !important; }
     .pitch-row { gap: 4px !important; margin-bottom: 12px !important; }
@@ -516,12 +481,12 @@
         bottom: 2px !important; left: -2px !important;
     }
 
-    /* Pitch markings — scale down so they don't dominate the smaller pitch */
+    
     .pitch-goal-top   { width: 38px !important; height: 8px !important; }
     .pitch-penalty-top { width: 90px !important; height: 38px !important; }
     .pitch-centre-circle { transform: translateX(-50%) scale(0.7) !important; }
 
-    /* Cost badge can wrap into 2 cols on mobile to stay readable */
+    
     .pitch-cost-badge { min-width: 0 !important; padding: 7px 10px !important; }
     .pcb-row { gap: 8px !important; }
     .pcb-label { font-size: 0.62rem !important; }
@@ -529,7 +494,7 @@
 }
 
 @media (max-width: 360px) {
-    /* Extra-narrow phones — shrink one more notch for 5-shirt rows */
+    
     .shirt { width: 60px !important; }
     .shirt-wrap, .svg-shirt, .shirt-fallback { width: 50px !important; }
     .svg-shirt, .shirt-fallback { height: 50px !important; }
@@ -537,11 +502,7 @@
     .shirt-xp { font-size: 0.86rem !important; }
 }
 
-/* ============================================================================
- * Site footer — injected on every page by apex_mobile.js (idempotent).
- * Two rows: brand + tagline/moat-stat | utility links. Collapses to single
- * column on mobile.
- * ========================================================================== */
+
 .apex-footer {
     border-top: 1px solid #2a2a35;
     background: #0c0c0f;
@@ -605,31 +566,17 @@
     .apex-footer-tagline { font-size: 0.7rem; }
     .apex-footer-links { gap: 16px; }
 }
-/* ============================================================================
- * 2026-05-09: Marcus paused Form Trends sub-tab.
- * 2026-05-15 note retired 2026-06-10: the Pinnacle moat claim was debunked
- * (unsound formula) and is BANNED from all copy — see accuracy.html for the
- * honest receipts (workbook parity + bootstrap CI).
- * ========================================================================== */
+
 .subtab-button[onclick*="showSub(0, 1)"] { display: none !important; }
 
-/* ============================================================================
- * Public tools offline (2026-05-13): hide all nav links to /rank-milestones
- * and /solver/solver_app across solver/site until Marcus re-enables. Removing
- * this block restores the links without code changes.
- * ========================================================================== */
-/* Rank Predictor stays hidden (scrap). Solver links restored 2026-05-14. */
+
+
 a[href*="rank-milestones"],
 a[href*="rank_milestones"] {
     display: none !important;
 }
 
-/* ============================================================================
- * Team Ratings table — fit cleanly in 390px viewport.
- * Scoped to .data-table only (Player Predictions uses .player-table, Matchweek
- * uses .matchweek-table, Team Predictions uses .heatmap-table / .nextgw-table,
- * Final Table uses .final-table — all left untouched here).
- * ========================================================================== */
+
 @media (max-width: 480px) {
     .data-table {
         table-layout: fixed !important;
@@ -731,11 +678,7 @@ a[href*="rank_milestones"] {
     }
 }
 
-/* ============================================================================
- * Wide tables (Player Predictions, Matchweek, Team Predictions, Final Table) —
- * force natural width on mobile so they overflow their container and the
- * auto-wrap JS triggers horizontal scroll instead of squashing columns.
- * ========================================================================== */
+
 @media (max-width: 480px) {
     .player-table,
     .nextgw-table,
@@ -746,7 +689,7 @@ a[href*="rank_milestones"] {
         min-width: 100% !important;
         table-layout: auto !important;
     }
-    /* Tighter cell padding for these wide tables on mobile */
+    
     .player-table th, .player-table td,
     .nextgw-table th, .nextgw-table td,
     .matchweek-table th, .matchweek-table td,
@@ -755,40 +698,24 @@ a[href*="rank_milestones"] {
         font-size: 12px !important;
         white-space: nowrap !important;
     }
-    /* Heatmap cells stay compact */
+    
     .heatmap-table th, .heatmap-table td {
         padding: 8px 6px !important;
         font-size: 11px !important;
     }
 }
 </style>
-<!-- APEX_PATCH_E4_2026-08-03: truncated orphan apex_mobile.js copy removed (its unclosed script tag swallowed the appended APEX_MOBILE_FIX block) -->
-<!-- ## APEX_MOBILE_FIX:START ## -->
-<style>
-/* ============================================================================
- * apex_mobile.css — universal mobile fixes for fplapex.com
- *
- * Loaded by: outputs/index.html, outputs/solver.html, outputs/solver_app.html,
- * outputs/rank_milestones.html. Generated outputs include this via the
- * generators (generate_solver_html.py); index.html and solver.html include it
- * as a static reference.
- *
- * Design intent — "quick responsive pass":
- *   - Stop horizontal overflow at the body level (the killer that forces
- *     mobile browsers to zoom out and make everything tiny).
- *   - Containerise wide tables into horizontal scroll rather than letting
- *     them push the page.
- *   - Bump tap targets to 44px min on the most-used controls.
- *
- * Breakpoint: <= 600px is the primary mobile pass.
- * ========================================================================== */
 
-/* Universal — applies at every width to prevent silent breaks */
+
+<style>
+
+
+
 .apex-table-scroll {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     max-width: 100%;
-    /* fade-out hint that there's more horizontal content */
+    
     background:
         transparent,
         transparent;
@@ -797,18 +724,16 @@ a[href*="rank_milestones"] {
     min-width: max-content;
 }
 
-/* ───────────────────────────────────────────────────────────────────────────
- * <= 600px — phone breakpoint
- * ──────────────────────────────────────────────────────────────────────── */
+
 @media (max-width: 600px) {
 
-    /* Stop the body from being pushed wider than the viewport. */
+    
     html, body {
         max-width: 100vw;
         overflow-x: hidden;
     }
 
-    /* Header / tab-nav: respect parent width, allow internal scroll */
+    
     .header,
     .tab-nav {
         width: 100% !important;
@@ -821,46 +746,45 @@ a[href*="rank_milestones"] {
         -webkit-overflow-scrolling: touch;
         scrollbar-width: thin;
         justify-content: flex-start !important;
-        /* visual cue that there's more to the right */
+        
         mask-image: #000;
         -webkit-mask-image: #000;
     }
     .tab-nav::-webkit-scrollbar { height: 3px; }
     .tab-nav::-webkit-scrollbar-thumb { background: #2a2a35; border-radius: 2px; }
 
-    /* Tap target floor for primary nav */
+    
     .tab-button {
         min-height: 44px;
         padding-top: 12px !important;
         padding-bottom: 12px !important;
     }
 
-    /* Auto-wrapped tables (set by apex_mobile.js) */
+    
     .apex-table-scroll {
         margin-left: -8px;
         margin-right: -8px;
         padding-left: 8px;
         padding-right: 8px;
-        /* gradient affordance: subtle right-edge fade */
+        
         -webkit-mask-image: #000;
                 mask-image: #000;
     }
-    /* When user has scrolled to the end, drop the fade */
+    
     .apex-table-scroll.is-scrolled-end,
     .apex-table-scroll.is-fits {
         -webkit-mask-image: none;
                 mask-image: none;
     }
 
-    /* Tighter cell padding so tables feel less hostile on narrow screens */
+    
     .apex-table-scroll table th,
     .apex-table-scroll table td {
         padding-left: 8px !important;
         padding-right: 8px !important;
     }
 
-    /* Cookie banner — already fixed-bottom by inline JS. Just make the buttons
-       full-width on tiny screens so they don't crash into each other. */
+    
     #apex-cookie-banner {
         flex-wrap: wrap !important;
         gap: 10px !important;
@@ -874,16 +798,14 @@ a[href*="rank_milestones"] {
         min-height: 40px;
     }
 
-    /* Footer — keep readable on narrow screens */
+    
     footer {
         padding-left: 16px !important;
         padding-right: 16px !important;
     }
 }
 
-/* ───────────────────────────────────────────────────────────────────────────
- * <= 380px — extra-narrow tightening
- * ──────────────────────────────────────────────────────────────────────── */
+
 @media (max-width: 380px) {
     .tab-button {
         font-size: 12.5px !important;
@@ -898,30 +820,18 @@ a[href*="rank_milestones"] {
     }
 }
 
-/* ============================================================================
- * Solver pitch — shrink shirts to fit 5-per-row in a 390px viewport.
- * Default sizes (.shirt=130, .shirt-wrap=96, gap=14) overflow on mobile.
- * Target row width with 5 shirts: 5*64 + 4*4 = 336px (+ pitch padding) <= 360px.
- * ========================================================================== */
+
 @media (max-width: 480px) {
-    /* 2026-06-06: top padding clears the absolute cost badge so it no longer
-       overlaps the GK; was 22px. */
-    /* 2026-06-10: side padding 8→14px — the absolute ⊗/controls hang
-       outside the kits and were clipping at both screen edges on 5-man rows. */
+    
+    
     .pitch { padding: 94px 16px 14px !important; }
-    /* 2026-06-19: the clock button is pinned right:-6px so it pokes past
-       every shirt; on the outermost players (5-man row) that clips at the
-       screen edge. Tuck both edge controls inside the shirt on phones. */
+    
     .pitch .pp-xmins-btn.pp-xmins-btn, .bench-row .pp-xmins-btn.pp-xmins-btn { right: 1px !important; }
     .pitch .pp-remove-btn.pp-remove-btn, .bench-row .pp-remove-btn.pp-remove-btn { left: 1px !important; }
     .pitch-row { gap: 3px !important; margin-bottom: 10px !important; }
 
-    /* doubled-class selectors out-rank the desktop XL rules
-       (.pitch .shirt 140px !important + min-width) on phones */
-    /* 2026-06-19: size shirts to the viewport so 5-per-row + the absolute
-       ⊗/controls ALWAYS fit — fixed 66px overflowed ~375px phones (SE/mini).
-       (100vw − 60px)/5 reserves 60px for pitch padding + control overhang.
-       Capped 72px so big phones don't balloon. */
+    
+    
     .pitch .shirt.shirt, .bench-row .shirt.shirt, .shirt {
         width: calc((100vw - 105px) / 5) !important; min-width: 0 !important; max-width: 60px !important; }
     .pitch .shirt-wrap.shirt-wrap, .bench-row .shirt-wrap.shirt-wrap,
@@ -939,17 +849,13 @@ a[href*="rank_milestones"] {
     .shirt-fix {
         max-width: 66px !important;
         font-size: 0.6rem !important;
-        /* 2026-06-06: wrap to two lines so the xMins ("· 85'") isn't
-           swallowed by the ellipsis on phones. */
+        
         white-space: normal !important;
         line-height: 1.15 !important;
         text-align: center !important;
     }
     .shirt-xp { font-size: 0.92rem !important; margin-top: 2px !important; }
-    /* 2026-06-10: the June-08 "polished xPts" block (.pitch .shirt-xp 26px
-       !important, specificity 0,2,0) beats the single-class rule above —
-       that's the huge numbers on phones. Doubled classes out-rank it.
-       Fixture pill + name pill get the same armour. */
+    
     .pitch .shirt-xp.shirt-xp, .bench-row .shirt-xp.shirt-xp,
     .pitch-bench .shirt-xp.shirt-xp {
         font-size: 0.9rem !important; font-weight: 800 !important; }
@@ -964,12 +870,12 @@ a[href*="rank_milestones"] {
         bottom: 2px !important; left: -2px !important;
     }
 
-    /* Pitch markings — scale down so they don't dominate the smaller pitch */
+    
     .pitch-goal-top   { width: 38px !important; height: 8px !important; }
     .pitch-penalty-top { width: 90px !important; height: 38px !important; }
     .pitch-centre-circle { transform: translate(-50%, -50%) scale(0.7) !important; }
 
-    /* Cost badge can wrap into 2 cols on mobile to stay readable */
+    
     .pitch-cost-badge { min-width: 0 !important; padding: 7px 10px !important; }
     .pcb-row { gap: 8px !important; }
     .pcb-label { font-size: 0.62rem !important; }
@@ -977,7 +883,7 @@ a[href*="rank_milestones"] {
 }
 
 @media (max-width: 360px) {
-    /* Extra-narrow phones — shrink one more notch for 5-shirt rows */
+    
     .pitch .shirt.shirt, .bench-row .shirt.shirt, .shirt {
         width: calc((100vw - 95px) / 5) !important; min-width: 0 !important; max-width: 52px !important; }
     .pitch .shirt-wrap.shirt-wrap, .bench-row .shirt-wrap.shirt-wrap,
@@ -990,14 +896,7 @@ a[href*="rank_milestones"] {
     .shirt-xp { font-size: 0.86rem !important; }
 }
 
-/* ============================================================================
- * Tap-to-reveal shirt actions (touch only) — 2026-07-06.
- * The ✕ remove + ⏱ minutes buttons are hover-revealed on desktop but were
- * forced always-on for touch, so on the shrunk mobile shirts they sat on top
- * of the xPts number (Gabriel ".6", Haaland ".7"). Now they're hidden by
- * default — pitch reads clean — and a tap on a shirt adds .pp-revealed (JS in
- * _onShirtClick) to show that one player's buttons.
- * ========================================================================== */
+
 @media (hover: none) {
     .shirt .pp-remove-btn.pp-remove-btn,
     .shirt .pp-xmins-btn.pp-xmins-btn {
@@ -1011,46 +910,33 @@ a[href*="rank_milestones"] {
     }
 }
 
-/* ============================================================================
- * Solver top-nav swipe fix — 2026-07-06.
- * The solver header nav uses <nav class="nav"> / <a class="nav-link">, NOT the
- * .tab-nav/.tab-button the earlier mobile rules targeted — so it never became
- * scrollable and tabs past the edge (Evaluation) were unreachable, while the
- * labels wrapped to two lines. Make it a single-line horizontal-scroll strip.
- * ========================================================================== */
+
 @media (max-width: 760px) {
-    header.topbar { flex-wrap: wrap; }          /* logo row, then nav on its own row */
+    header.topbar { flex-wrap: wrap; }          
     header.topbar .nav {
         position: static;
         transform: none;
         flex: 1 1 100%;
-        min-width: 0;                            /* allow the flex item to shrink so overflow scrolls */
+        min-width: 0;                            
         max-width: 100%;
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
         flex-wrap: nowrap;
         justify-content: flex-start;
         scrollbar-width: thin;
-        /* fade cue that there's more to the right */
+        
         -webkit-mask-image: #000;
                 mask-image: #000;
     }
     header.topbar .nav .nav-link {
-        white-space: nowrap;                     /* stops "My / Squad" wrapping to two lines */
+        white-space: nowrap;                     
         flex: 0 0 auto;
     }
     header.topbar .nav::-webkit-scrollbar { height: 3px; }
     header.topbar .nav::-webkit-scrollbar-thumb { background: #EFF2EF; border-radius: 2px; }
 }
 
-/* ============================================================================
- * Shirt controls — neat right-hand column on mobile, like desktop. 2026-07-06.
- * The old mobile rules scattered them (⏱ shoved mid-right, ✕ pushed left and
- * lost). Stack all three down the right edge, same size, scaled to fit the
- * small shirt: status badge on top (always on), ⏱ below, ✕ at the bottom
- * (⏱/✕ revealed on tap via .pp-revealed). Also hide the halfway markings,
- * which cut through the middle row's fixture labels on the compressed pitch.
- * ========================================================================== */
+
 @media (max-width: 480px) {
     .pitch .prof-badge, .bench-row .prof-badge,
     .pitch .pp-xmins-btn.pp-xmins-btn, .bench-row .pp-xmins-btn.pp-xmins-btn,
@@ -1067,17 +953,11 @@ a[href*="rank_milestones"] {
     .pitch .pp-xmins-btn.pp-xmins-btn, .bench-row .pp-xmins-btn.pp-xmins-btn { top: 13px !important; }
     .pitch .pp-remove-btn.pp-remove-btn, .bench-row .pp-remove-btn.pp-remove-btn { top: 29px !important; }
 
-    /* Only the solid halfway LINE cut through the middle row's fixture text —
-       hide just that. Keep the centre circle + dot (a faint ring under text
-       reads fine, and the pitch looks bare without it). */
+    
     .pitch-halfway { display: none !important; }
 }
 
-/* ============================================================================
- * Site footer — injected on every page by apex_mobile.js (idempotent).
- * Two rows: brand + tagline/moat-stat | utility links. Collapses to single
- * column on mobile.
- * ========================================================================== */
+
 .apex-footer {
     border-top: 1px solid #E4E8E4;
     background: #F4F5F3;
@@ -1105,7 +985,7 @@ a[href*="rank_milestones"] {
 .apex-footer-apex { color: #0F6E56; font-weight: 500; }
 .apex-footer-rest { color: #16211D; font-weight: 700; }
 .apex-footer-tagline {
-    color: #6B7671;   /* 2026-07-25: #8a8a95 was 2.97:1 on the cream footer */
+    color: #6B7671;   
     font-size: 0.74rem;
     font-family: 'JetBrains Mono', ui-monospace, monospace;
 }
@@ -1115,7 +995,7 @@ a[href*="rank_milestones"] {
 }
 .apex-footer-links { display: flex; gap: 18px; align-items: center; }
 .apex-footer-links a {
-    color: #6B7671;   /* 2026-07-25: 2.97:1 -> 7.0:1 */
+    color: #6B7671;   
     text-decoration: none;
     font-weight: 500;
     transition: color 0.15s;
@@ -1141,29 +1021,17 @@ a[href*="rank_milestones"] {
     .apex-footer-tagline { font-size: 0.7rem; }
     .apex-footer-links { gap: 16px; }
 }
-/* ============================================================================
- * 2026-05-09: Marcus paused Form Trends sub-tab.
- * 2026-05-15: Hero stat card restored — Pinnacle moat now 29/35 weeks · +0.074.
- * ========================================================================== */
+
 .subtab-button[onclick*="showSub(0, 1)"] { display: none !important; }
 
-/* ============================================================================
- * Public tools offline (2026-05-13): hide all nav links to /rank-milestones
- * and /solver/solver_app across solver/site until Marcus re-enables. Removing
- * this block restores the links without code changes.
- * ========================================================================== */
-/* Rank Predictor stays hidden (scrap). Solver links restored 2026-05-14. */
+
+
 a[href*="rank-milestones"],
 a[href*="rank_milestones"] {
     display: none !important;
 }
 
-/* ============================================================================
- * Team Ratings table — fit cleanly in 390px viewport.
- * Scoped to .data-table only (Player Predictions uses .player-table, Matchweek
- * uses .matchweek-table, Team Predictions uses .heatmap-table / .nextgw-table,
- * Final Table uses .final-table — all left untouched here).
- * ========================================================================== */
+
 @media (max-width: 480px) {
     .data-table {
         table-layout: fixed !important;
@@ -1265,11 +1133,7 @@ a[href*="rank_milestones"] {
     }
 }
 
-/* ============================================================================
- * Wide tables (Player Predictions, Matchweek, Team Predictions, Final Table) —
- * force natural width on mobile so they overflow their container and the
- * auto-wrap JS triggers horizontal scroll instead of squashing columns.
- * ========================================================================== */
+
 @media (max-width: 480px) {
     .player-table,
     .nextgw-table,
@@ -1280,7 +1144,7 @@ a[href*="rank_milestones"] {
         min-width: 100% !important;
         table-layout: auto !important;
     }
-    /* Tighter cell padding for these wide tables on mobile */
+    
     .player-table th, .player-table td,
     .nextgw-table th, .nextgw-table td,
     .matchweek-table th, .matchweek-table td,
@@ -1289,7 +1153,7 @@ a[href*="rank_milestones"] {
         font-size: 12px !important;
         white-space: nowrap !important;
     }
-    /* Heatmap cells stay compact */
+    
     .heatmap-table th, .heatmap-table td {
         padding: 8px 6px !important;
         font-size: 11px !important;
@@ -1297,15 +1161,8 @@ a[href*="rank_milestones"] {
 }
 </style>
 <script>
-/* ============================================================================
- * apex_mobile.js -- runtime mobile fixes for fplapex.com
- *
- * Wraps any <table> wider than its parent in a .apex-table-scroll div so it
- * scrolls horizontally inside the page rather than pushing the body wider
- * (which would force mobile browsers to zoom out).
- *
- * Idempotent. Re-runs on tab/data renders via MutationObserver.
- * ========================================================================== */
+
+
 (function () {
     'use strict';
     var WRAP_CLASS = 'apex-table-scroll';
@@ -1383,10 +1240,10 @@ a[href*="rank_milestones"] {
     window.__apexMobileRewrap = wrapAll;
 })();
 
-// ── Site footer injection (idempotent) ────────────────────────────────────
-// Builds and inserts a brand-stat-utility footer at the END of <body>.
-// Pulls the moat stat from the hero card's data-stat spans if present;
-// falls back to the static tagline otherwise. Re-runs are no-ops.
+ 
+ 
+ 
+ 
 (function () {
     'use strict';
     var FOOTER_ID = 'apex-site-footer';
@@ -1395,7 +1252,7 @@ a[href*="rank_milestones"] {
         if (document.getElementById(FOOTER_ID)) return;
         if (!document.body) return;
 
-        // 2026-05-09: moat claim hidden -- static tagline only.
+         
         var moatHTML = 'data-driven football analytics';
 
         var f = document.createElement('footer');
@@ -1413,8 +1270,8 @@ a[href*="rank_milestones"] {
                 '<div class="apex-footer-links">' +
                     '<a href="/evaluation.html">Model Evaluation</a>' +
                     '<a href="https://x.com/FPLApexHQ" target="_blank" rel="noopener">X / Twitter</a>' +
-                    // 2026-07-02: contact moved to the live domain (ImprovMX forward).
-                    // The old apexfootydata.com inbox dies with the O365 cancellation.
+                     
+                     
                     '<a href="mailto:contact@fplapex.com">Email</a>' +
                 '</div>' +
             '</div>' +
@@ -1423,8 +1280,8 @@ a[href*="rank_milestones"] {
                 '<span class="apex-footer-legal">' +
                     '<a href="mailto:contact@fplapex.com">Contact</a>' +
                     '<span class="apex-footer-legal-sep">&middot;</span>' +
-                    // 2026-07-02: real privacy page replaces the alert() popup
-                    // (looked broken/dev-mode; not linkable; blocked by some browsers).
+                     
+                     
                     '<a href="/privacy.html">Privacy</a>' +
                 '</span>' +
             '</div>';
@@ -1436,15 +1293,15 @@ a[href*="rank_milestones"] {
     } else {
         makeFooter();
     }
-    // Also run after a tick — moat-stat spans may be filled in by inject scripts after DCL.
+     
     setTimeout(makeFooter, 600);
-    // 2026-05-09: deferred moat-stat update disabled (claim hidden).
+     
 })();
 
-// ── Mobile: abbreviate Team Ratings headers (2026-05-14) ──────────────────
-// CSS pseudo-element trick was unreliable (OVR going missing). Rewrite the
-// actual th text on narrow viewports. Idempotent — keeps original in data-*
-// so it can be restored if window widens.
+ 
+ 
+ 
+ 
 (function () {
     'use strict';
     var ABBREV = { 'ATTACK': 'ATT', 'DEFENCE': 'DEF', 'DEFENSE': 'DEF', 'OVERALL': 'OVR' };
@@ -1498,8 +1355,8 @@ a[href*="rank_milestones"] {
     }
 })();
 </script>
-<!-- ## APEX_MOBILE_FIX:END ## -->
-<!-- Cloudflare Web Analytics - APEX_ANALYTICS_OPTOUT_v1 -->
+
+
 <script>
 (function(){var K="apex_notrack";try{var q=window.location.search||"";
 if(q.indexOf("notrack=1")>-1){localStorage.setItem(K,"1");}
@@ -1510,6 +1367,6 @@ s.src="https://static.cloudflareinsights.com/beacon.min.js";
 s.setAttribute("data-cf-beacon",'{"token": "890700f621df42909deca8500a0df182"}');
 (document.head||document.documentElement).appendChild(s);})();
 </script>
-<!-- End Cloudflare Web Analytics -->
+
 </body>
 </html>

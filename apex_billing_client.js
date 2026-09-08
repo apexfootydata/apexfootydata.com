@@ -1,32 +1,9 @@
-/* apex_billing_client.js — accounts + Stripe checkout wiring (2026-07-07)
- *
- * Client side of cloudflare_worker/apex_billing.js. Populates the entitlement
- * seam (assets/apex_entitlements.js): on success it sets
- *     window.APEX_USER = { tier: 'free'|'season' }
- *     window.APEX_ENTITLEMENT_READY = true
- * and the seam does the rest. On ANY failure it sets NOTHING, which by the
- * seam's own fail-open rule keeps a possibly-paying user unlocked. This file
- * never decides tier rules — it only reports identity.
- *
- * MASTER FLAG:  window.APEX_BILLING_LIVE === true   (deliberately NOT reusing
- * APEX_TIERS — accounts-live and gates-on are separate decisions). Default is
- * absent/false: this file then does NOTHING observable — no network, no DOM,
- * no storage reads beyond feature detection. Live behaviour is byte-identical
- * until the August flip (scripts/billing_flip.py --live).
- *
- * Storage:  localStorage apex_session_v1  (90-day HMAC session token)
- *           localStorage apex_email_hint  (display only — what the user typed)
- * Login flow: email -> POST /magic -> user clicks emailed link, which lands on
- * LOGIN_URL#apex_magic=<token> -> this file swaps it via POST /session for the
- * session token -> GET /entitlement resolves tier.
- *
- * Accepted risk (pricing playbook 2026-07-03): everything here is client-side
- * and bypassable. We gate identity + convenience, not secrets.
- */
+
+
 (function () {
   "use strict";
 
-  // Never let billing wiring break the solver, whatever happens below.
+   
   try {
 
     var WORKER_URL = (typeof window.APEX_BILLING_URL === 'string' && window.APEX_BILLING_URL)
@@ -60,12 +37,12 @@
       try { renderMount(); } catch (e) {}
     }
 
-    // ── entitlement refresh ─────────────────────────────────────────────────
+     
     function refresh() {
       if (!live()) return Promise.resolve(null);
       var session = lsGet(SESSION_KEY);
       if (!session) {
-        // Logged out is a KNOWN state: free, resolved.
+         
         window.APEX_USER = { tier: 'free' };
         window.APEX_ENTITLEMENT_READY = true;
         announce();
@@ -75,27 +52,27 @@
         headers: { 'Authorization': 'Bearer ' + session },
       }).then(function (r) { return r.json(); }).then(function (d) {
         if (!d || d.ready !== true) {
-          // Worker could not resolve (KV read error -> {ready:false}) or spoke
-          // garbage. Set NOTHING: the seam stays fail-open and a paying member
-          // keeps access. Do NOT mark ready.
+           
+           
+           
           return null;
         }
-        if (d.authed === false) lsDel(SESSION_KEY);   // stale/expired token
+        if (d.authed === false) lsDel(SESSION_KEY);    
         window.APEX_USER = { tier: d.tier === 'season' ? 'season' : 'free' };
         window.APEX_ENTITLEMENT_READY = true;
         announce();
         return window.APEX_USER;
-      }).catch(function () { return null; });          // network down: seam fail-open
+      }).catch(function () { return null; });           
     }
 
-    // ── magic-link landing (#apex_magic=... in the URL fragment) ────────────
+     
     function consumeMagicFromHash() {
       if (!live()) return Promise.resolve(false);
       var m = null;
       try { m = String(window.location.hash || '').match(/apex_magic=([^&]+)/); } catch (e) {}
       if (!m) return Promise.resolve(false);
-      // Strip the token from the URL immediately (before any await) so it never
-      // lingers in the address bar / gets copied around.
+       
+       
       try { window.history.replaceState(null, '', window.location.pathname + window.location.search); } catch (e) {}
       return post('/session', { token: m[1] }).then(function (d) {
         if (d && d.session) {
@@ -108,7 +85,7 @@
       }).catch(function () { toast('Could not reach the sign-in service.'); return false; });
     }
 
-    // ── public API ──────────────────────────────────────────────────────────
+     
     function subscribe(plan) {
       if (!live()) return Promise.resolve({ error: 'billing not live' });
       plan = PLANS[plan] ? plan : 'season';
@@ -156,7 +133,7 @@
       };
     }
 
-    // ── minimal UI (brand: teal #0F6E56, cream, Plus Jakarta Sans) ──────────
+     
     var _mount = null;
 
     function toast(msg) {
@@ -272,8 +249,8 @@
       } catch (e) {}
     }
 
-    // Renders the account chip into a container. GATED: does nothing at all
-    // unless window.APEX_BILLING_LIVE === true, so no UI can appear pre-flip.
+     
+     
     function mountUI(containerOrSelector) {
       if (!live()) return false;
       try {
@@ -286,10 +263,10 @@
       } catch (e) { return false; }
     }
 
-    // Zero-wiring fallback so the August flip needs NO further page edits:
-    // when live, if nothing has mounted the UI explicitly, float an account
-    // chip top-right. Opt out with window.APEX_BILLING_NO_AUTOMOUNT = true
-    // and call apexBilling.mountUI('#your-container') for a proper placement.
+     
+     
+     
+     
     function autoMount() {
       if (!live() || window.APEX_BILLING_NO_AUTOMOUNT === true || _mount) return;
       try {
@@ -322,10 +299,10 @@
       status: status,
       refresh: refresh,
       mountUI: mountUI,
-      openModal: openModal,   // homepage pricing band opens the same modal (2026-07-07)
+      openModal: openModal,    
     };
 
-    // ── boot (network + DOM only when live) ─────────────────────────────────
+     
     if (live()) {
       consumeMagicFromHash()
         .then(function () { return refresh(); })
@@ -338,7 +315,7 @@
     }
 
   } catch (e) {
-    // Absolute last line of defence: billing must never break the solver.
+     
     try { window.apexBilling = window.apexBilling || { status: function () { return { live: false, error: String(e) }; } }; } catch (_) {}
   }
 })();
