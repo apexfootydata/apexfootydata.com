@@ -59,11 +59,6 @@
   .rule{ height:1px; background:rgba(26,46,40,.12); margin:18px 0 18px; }
   .ttl{ font-size:15px; font-weight:700; color:#5c6b65; letter-spacing:.4px; }
   .sub{ font-size:14px; color:var(--muted); margin-top:4px; }
-  .bars{ margin-top:22px; display:flex; flex-direction:column; gap:16px; }
-  .barrow .lab{ display:flex; justify-content:space-between; font-size:18px; margin-bottom:7px; }
-  .barrow .lab .v{ font-weight:800; }
-  .track{ height:18px; background:#e7e3d8; border-radius:9px; overflow:hidden; }
-  .fill{ height:100%; border-radius:9px; }
   .readline{ font-size:16px; font-weight:700; margin-top:22px; }
   .season{ margin-top:26px; background:var(--cream); border-radius:16px; padding:20px 22px; position:relative; }
   .exbadge{ position:absolute; top:16px; right:18px; font-size:10px; font-weight:800; letter-spacing:1px;
@@ -147,21 +142,6 @@
         <div class="ttl" id="eval-ttl">PROJECTION ACCURACY (widely-owned players) &middot; SEASON TO DATE</div>
         <div class="sub">Average miss per pick · <b style="color:var(--ink)">lower = closer</b></div>
 
-        <div class="bars">
-          <div class="barrow">
-            <div class="lab"><span style="font-weight:700;">Apex</span><span class="v" style="color:var(--teal)" id="exbar-apex-v">2.62</span></div>
-            <div class="track"><div class="fill" style="width:96%;background:#1D9E75" id="exbar-apex-f"></div></div>
-          </div>
-          <div class="barrow">
-            <div class="lab"><span>Tool A <span style="font-size:12px;font-weight:700;color:var(--muted)" id="exbar-a-tag"></span></span><span class="v" id="exbar-a-v">2.63</span></div>
-            <div class="track"><div class="fill" style="width:96%;background:#3f4d47" id="exbar-a-f"></div></div>
-          </div>
-          <div class="barrow">
-            <div class="lab"><span>Tool B</span><span class="v" id="exbar-b-v">2.62</span></div>
-            <div class="track"><div class="fill" style="width:96%;background:#b8c2bc" id="exbar-b-f"></div></div>
-          </div>
-        </div>
-
         <div class="readline" id="eval-readline">Measured live &mdash; season running total, updated after every scored gameweek.</div>
 
         <div class="season">
@@ -215,7 +195,7 @@
   
 
    
-var EVAL_DATA = {"weeks": 4, "owned_thr": 5.0, "n": 278, "n_all": 1877, "apex": 2.62, "tool_a": 2.63, "bench_b": 2.62, "bench_b_n": 278, "bench_b_common": true, "form": ["level", "level", "level", "level"], "weekly": [{"gw": 1, "n": 66, "apex": 2.63, "tool_a": 2.56, "bench_b": 2.63, "call": "level"}, {"gw": 2, "n": 68, "apex": 2.76, "tool_a": 2.87, "bench_b": 2.76, "call": "level"}, {"gw": 3, "n": 72, "apex": 2.35, "tool_a": 2.36, "bench_b": 2.4, "call": "level"}, {"gw": 4, "n": 72, "apex": 2.76, "tool_a": 2.73, "bench_b": 2.7, "call": "level"}], "set_aside": 3, "verdict": "Too early to separate them: 278 shared picks over 4 gameweeks is not enough to call a winner, and we will not pretend otherwise.", "updated_utc": "2026-09-15T09:29:10Z"};
+var EVAL_DATA = {"weeks": 4, "owned_thr": 5.0, "n": 278, "n_all": 1877, "apex": 2.62, "tool_a": 2.63, "bench_b": 2.62, "bench_b_n": 278, "bench_b_common": true, "form": ["level", "level", "level", "level"], "weekly": [{"gw": 1, "n": 66, "apex": 2.63, "tool_a": 2.56, "bench_b": 2.63, "call": "level"}, {"gw": 2, "n": 68, "apex": 2.76, "tool_a": 2.87, "bench_b": 2.76, "call": "level"}, {"gw": 3, "n": 72, "apex": 2.35, "tool_a": 2.36, "bench_b": 2.4, "call": "level"}, {"gw": 4, "n": 72, "apex": 2.76, "tool_a": 2.73, "bench_b": 2.7, "call": "level"}], "set_aside": 3, "verdict": "Too early to separate them: 278 shared picks over 4 gameweeks is not enough to call a winner, and we will not pretend otherwise.", "updated_utc": "2026-09-15T12:41:39Z"};
  
   (function(){
     var COL={apex:'#1D9E75',toolA:'#3f4d47',toolB:'#b8c2bc',level:'#cfd6d2'};
@@ -294,18 +274,6 @@ var EVAL_DATA = {"weeks": 4, "owned_thr": 5.0, "n": 278, "n_all": 1877, "apex": 
       ' \u2014 every tool\u2019s projection frozen before that deadline, scored on the same '+(EVAL_DATA.n!=null?EVAL_DATA.n+' ':'')+'player-gameweeks'+
       (EVAL_DATA.bench_b_common===false?' (\u2020 Tool B on a sample of '+EVAL_DATA.bench_b_n+')':'')+'. Rivals shown as Tool A / Tool B. '+
       'Only aggregate accuracy is ever shown — never any tool\u2019s individual projections.';
-    var aTag=document.getElementById('exbar-a-tag'); if(aTag) aTag.textContent='';
-    var vals=[['apex',EVAL_DATA.apex],['a',EVAL_DATA.tool_a],['b',EVAL_DATA.bench_b]];
-    var best=null;
-    vals.forEach(function(p){ if(p[1]!=null&&(best==null||p[1]<best)) best=p[1]; });
-    vals.forEach(function(p){
-      var v=document.getElementById('exbar-'+p[0]+'-v'), f=document.getElementById('exbar-'+p[0]+'-f');
-      if(!v||!f) return;
-      if(p[1]==null){ var row=v.closest('.barrow'); if(row) row.style.display='none'; return; }
-      v.textContent=Number(p[1]).toFixed(2);
-       
-      f.style.width=(best?Math.max(30,Math.round(96*best/p[1])):50)+'%';
-    });
   })();
 </script>
 
