@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="6" data-built-at="2026-09-22T20:38:52">
+<meta name="apex-gw" content="6" data-built-at="2026-09-22T23:00:01">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script> try{if(/iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1)){var _vpm=document.querySelector('meta[name=viewport]');if(_vpm)_vpm.setAttribute('content','width=device-width, initial-scale=1.0, maximum-scale=1.0');}}catch(_eVp){}</script>
 <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
 <script>
 
@@ -30,7 +31,7 @@
 })();
 </script>
 <meta http-equiv="Pragma" content="no-cache">
-<meta name="apex-build" content="20260922-203851">
+<meta name="apex-build" content="20260922-230001">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — FPL Apex</title>
 <meta name="description" content="Plan FPL transfers, chips, and Free Hit squads. Live xG-based projections, a rival head-to-head simulator, and a mini-league table. Free FPL tool.">
@@ -401,6 +402,7 @@ body {
   pointer-events: none;
   z-index: 2;
   min-width: 210px;
+  -webkit-backdrop-filter: blur(4px);
   backdrop-filter: blur(4px);
   border: 1px solid rgba(0,0,0,0.06);
 }
@@ -416,6 +418,7 @@ body {
   border-radius: 10px;
   padding: 6px 8px;
   z-index: 3;
+  -webkit-backdrop-filter: blur(4px);
   backdrop-filter: blur(4px);
 }
 .pgn-btn {
@@ -1806,6 +1809,7 @@ body {
   inset: 0;
   z-index: 9999;
   background: rgba(15, 23, 42, 0.92);
+  -webkit-backdrop-filter: blur(6px);
   backdrop-filter: blur(6px);
   display: flex;
   align-items: center;
@@ -2848,6 +2852,7 @@ body.compare-alt .va-card-hero::before {
   gap: 16px;
   padding: 14px 28px;
   background: rgba(250, 249, 243, 0.92);
+  -webkit-backdrop-filter: saturate(140%) blur(12px);
   backdrop-filter: saturate(140%) blur(12px);
   -webkit-backdrop-filter: saturate(140%) blur(12px);
   border-bottom: 1px solid var(--border);
@@ -3886,6 +3891,7 @@ button.secondary, .btn-secondary, .va-btn-secondary {
 .pitch-cost-badge {
   background: rgba(0,0,0,0.35) !important;
   border: 1px solid rgba(255,255,255,0.25) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
   backdrop-filter: blur(8px) !important;
   -webkit-backdrop-filter: blur(8px) !important;
 }
@@ -4906,15 +4912,22 @@ body, html {
 
 
 
-.va-chip-card:has(select option:checked:not([value="0"])),
+
 .va-chip-card.has-selection,
 .va-chip-card.active-pill {
   background: #ffffff !important;
   box-shadow:none;
 }
-.va-chip-card:has(select option:checked:not([value="0"])) .va-chip-card-tag,
+.va-chip-card:has(select option:checked:not([value="0"])) {
+  background: #ffffff !important;
+  box-shadow:none;
+}
 .va-chip-card.has-selection .va-chip-card-tag,
 .va-chip-card.active-pill .va-chip-card-tag {
+  color: #16211D !important;
+  font-weight: 800 !important;
+}
+.va-chip-card:has(select option:checked:not([value="0"])) .va-chip-card-tag {
   color: #16211D !important;
   font-weight: 800 !important;
 }
@@ -6425,6 +6438,21 @@ html.apex-offseason #view-landing .hero-sub::after {
               ep.style.display = 'block';
             }
           }
+           
+           
+           
+           
+          try {
+            var _mode = (window._apexAppliedCardMeta) ? 'applied' : 'empty';
+            if (box._apexEmptyHtml == null && !box.dataset.mode) box._apexEmptyHtml = box.innerHTML;
+            if (box.dataset.mode !== _mode) {
+              box.dataset.mode = _mode;
+              box.innerHTML = (_mode === 'applied')
+                ? '<b>Your plan is applied</b><span>It is on the pitch and in the YOUR PLAN strip. '
+                  + 'Press Solve to review or change it.</span>'
+                : (box._apexEmptyHtml || box.innerHTML);
+            }
+          } catch (_eMode) {}
           box.classList.toggle('on', !live);
         } catch (_eRe) {}
       }
@@ -7441,6 +7469,12 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
 
     
     <div class="section-title" style="margin-top:2rem">Per-GW Chip Value</div>
+    
+    <div id="chip-ev-basis" class="opt-footnote" style="margin:0 0 8px;">
+      Priced on the squad you hold after your planned transfers. The chip boxes on My Squad
+      price the squad on the pitch for the week you are viewing, so Bench Boost and Triple
+      Captain values can differ between the two.
+    </div>
     <table class="opt-ref-table" id="chip-ev-table">
       <thead id="chip-ev-thead">
       </thead>
@@ -14745,10 +14779,40 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
     } catch (e) {}
     return _pool;
   }
+   
+   
+   
+   
+  var _bs = null, _bsP = null;
+  var _POS = { 1: 'GK', 2: 'DEF', 3: 'MID', 4: 'FWD' };
+  function _bootstrap() {
+    if (_bsP) return _bsP;
+    var px = _proxy();
+    if (!px) { _bsP = Promise.resolve(null); return _bsP; }
+    _bsP = Promise.resolve().then(function () { return fetch(px + '/bootstrap-static/'); })
+      .then(function (r) { return (r && r.ok) ? r.json() : null; })
+      .then(function (j) {
+        if (!j || !j.events || !j.elements || !j.events.forEach || !j.elements.forEach) return null;
+        var els = {}, dl = {};
+        j.elements.forEach(function (e) { els[e.id] = e; });
+        j.events.forEach(function (e) { var t = Date.parse(e.deadline_time); if (isFinite(t)) dl[e.id] = t; });
+        _bs = { els: els, deadline: dl };
+        return _bs;
+      })['catch'](function () { return null; });
+    return _bsP;
+  }
+   
+   
+  function _deadlineAhead(g) { return !!(_bs && _bs.deadline[g] && _bs.deadline[g] > Date.now()); }
   function info(id) {
     var m = poolMap(); if (m[id]) return m[id];
+     
+     
+    var e = _bs && _bs.els[id];
+    if (e) return { name: (e.web_name || ('#' + id)) + ' (not in our pool)', et: e.element_type || 3, pos: _POS[e.element_type] || '',
+                    team: '', cost: (+e.now_cost || 0) / 10, xp0: 0, sd0: 2.0 };
     var nm = (window.PLAYER_NAMES && PLAYER_NAMES[id]) ? PLAYER_NAMES[id] : ('#' + id);
-    return { name: nm, et: 3, pos: '', team: '', cost: 0, xp0: 0, sd0: 2.0 };
+    return { name: nm + ' (not in our pool)', et: 3, pos: '', team: '', cost: 0, xp0: 0, sd0: 2.0 };
   }
   function bank() { try { return (window.TEAM_META && +TEAM_META.bank) || 0; } catch (e) { return 0; } }
    
@@ -14777,6 +14841,8 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
   function _proxy() { return (typeof FPL_CORS_PROXY === 'string' && FPL_CORS_PROXY) ? FPL_CORS_PROXY : ''; }
   async function _fetchStandings(leagueId) {
     var data = await fetch(_proxy() + '/leagues-classic/' + leagueId + '/standings/', { cache: 'no-store' }).then(function (r) { return r.json(); });
+     
+    window._rivalLeagueStart = +((data && data.league && data.league.start_event) || 1) || 1;
     return (data && data.standings && data.standings.results) || [];
   }
   function _applyStandings(results) {
@@ -14925,14 +14991,41 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
     } catch (e) { if (status) status.textContent = 'Could not load your league — type a rival Team ID instead.'; }
   };
 
+   
+   
+   
+   
+   
+   
   async function fetchPicks(entryId) {
-    var proxy = (typeof FPL_CORS_PROXY === 'string' && FPL_CORS_PROXY) ? FPL_CORS_PROXY : '';
+    var proxy = _proxy();
     if (!proxy) throw new Error('FPL proxy not configured');
-    var gw = curGw();
-    for (var g = gw; g >= gw - 1 && g >= 1; g--) {
-      try { var r = await fetch(proxy + '/entry/' + entryId + '/event/' + g + '/picks/', { cache: 'no-store' }); if (r.ok) { var j = await r.json(); if (j && j.picks && j.picks.length) return { picks: j.picks, chip: (j.active_chip || null), gw: g }; } } catch (e) {}
+    var gw = curGw(), fhPd = null;
+    await _bootstrap();
+    for (var g = gw; g >= 1 && g >= gw - 6 && (g >= gw - 1 || fhPd); g--) {
+      if (_deadlineAhead(g)) continue;
+      var j = null;
+      try { var r = await fetch(proxy + '/entry/' + entryId + '/event/' + g + '/picks/', { cache: 'no-store' }); if (r && r.ok) j = await r.json(); } catch (e) { j = null; }
+      if (!j || !j.picks || !j.picks.length) { if (fhPd) break; continue; }
+      var pd = { picks: j.picks, chip: (j.active_chip || null), gw: g, borrowed: g < gw };
+      if (pd.borrowed && String(pd.chip || '').toLowerCase() === 'freehit') { if (!fhPd) fhPd = pd; continue; }
+      if (fhPd) pd.fhGw = fhPd.gw;
+      return pd;
     }
-    throw new Error('Could not load that team’s picks');
+    if (fhPd) { fhPd.fhStuck = true; return fhPd; }
+    throw new Error(await _noPicksReason(proxy, entryId));
+  }
+  async function _noPicksReason(proxy, entryId) {
+    var base = 'Could not load that team’s picks';
+    try {
+      var r = await fetch(proxy + '/entry/' + entryId + '/', { cache: 'no-store' });
+      if (r && r.status === 404) return 'Could not load that team — no FPL team with that ID (' + entryId + ').';
+      if (r && r.ok) {
+        var e = await r.json(), se = e ? +e.started_event : 0;
+        if (se && se >= curGw()) return base + ' — this team joined in GW' + se + ' and has no picks until the deadline.';
+      }
+    } catch (e2) {}
+    return base;
   }
 
   function bestXiFrom(list) {
@@ -14968,10 +15061,18 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
   function rivalXi(pd) {
     var picks = (pd && pd.picks) || pd || [];
      
-    var s = picks.filter(function (p) { return (p.multiplier || 0) > 0; });
+     
+     
+     
+    var borrowed = !!(pd && !Array.isArray(pd) && (pd.borrowed === true || (pd.gw && pd.gw < curGw())));
+     
+    var s = borrowed ? [] : picks.filter(function (p) { return (p.multiplier || 0) > 0; });
     if (!s.length) s = picks.filter(function (p) { return p.position <= 11; });
     if (!s.length) s = picks.slice(0, 11);
-    var xi = s.map(function (p) { return { id: p.element, mult: (p.multiplier && p.multiplier > 0) ? p.multiplier : (p.is_captain ? 2 : 1), cap: ((p.multiplier || 0) >= 2) || !!p.is_captain, vc: !!p.is_vice_captain }; });
+    var xi = s.map(function (p) {
+      if (borrowed) return { id: p.element, mult: p.is_captain ? 2 : 1, cap: !!p.is_captain, vc: !!p.is_vice_captain };
+      return { id: p.element, mult: (p.multiplier && p.multiplier > 0) ? p.multiplier : (p.is_captain ? 2 : 1), cap: ((p.multiplier || 0) >= 2) || !!p.is_captain, vc: !!p.is_vice_captain };
+    });
      
     var c = xi.filter(function (p) { return p.mult >= 2; })[0];
     if (c && info(c.id).xp0 <= 0.01) {
@@ -14987,7 +15088,11 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
     var keys = Object.keys(ids).map(Number), diffs = new Float64Array(SIMS);
     for (var s = 0; s < SIMS; s++) {
       var draw = {};
-      for (var k = 0; k < keys.length; k++) { var d = info(keys[k]); var v = d.xp0 + d.sd0 * gauss(); draw[keys[k]] = v > 0 ? v : 0; }
+       
+       
+       
+       
+      for (var k = 0; k < keys.length; k++) { var d = info(keys[k]); draw[keys[k]] = d.xp0 + d.sd0 * gauss(); }
       var yt = 0; for (var i = 0; i < mine.length; i++) yt += draw[mine[i].id] * wOf(mine[i]);
       var rt = 0; for (var j = 0; j < theirs.length; j++) rt += draw[theirs[j].id] * wOf(theirs[j]);
       diffs[s] = yt - rt;
@@ -15049,7 +15154,10 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
     var rows = xi.map(function (p) { var w = wOf(p); return { p: p, w: w, shared: ow[p.id] === w }; });
     rows.sort(function (a, b) { return (a.shared - b.shared) || (info(b.p.id).xp0 * b.w - info(a.p.id).xp0 * a.w); });
     var nDiff = rows.filter(function (r) { return !r.shared; }).length;
-    el.innerHTML = '<div style="font-size:.72rem;color:var(--muted);margin:2px 0 4px">' + nDiff + ' difference' + (nDiff === 1 ? '' : 's') + ' decide the gap</div>'
+     
+     
+    var tot = rows.reduce(function (a, r) { return a + info(r.p.id).xp0 * r.w; }, 0);
+    el.innerHTML = '<div style="font-size:.72rem;color:var(--muted);margin:2px 0 4px">' + nDiff + ' difference' + (nDiff === 1 ? '' : 's') + ' decide the gap · expected total <b class="rival-xi-total">' + tot.toFixed(1) + '</b> pts (captain counted twice)</div>'
       + rows.map(function (r) { var d = info(r.p.id), w = r.w;
       var badge = w >= 3 ? ' <b style="color:var(--accent,#0F6E56)">(TC)</b>' : (w >= 2 ? ' <b style="color:var(--accent,#0F6E56)">(C)</b>' : '');
       var capDiff = (!r.shared && ow[r.p.id] && ow[r.p.id] !== w) ? ' <span style="font-size:.7rem;color:#f0b03a">armband differs</span>' : '';
@@ -15058,15 +15166,21 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
       return '<div title="Likely range this week: ' + lo.toFixed(0) + ' to ' + hi.toFixed(0) + ' pts" style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:.85rem' + (r.shared ? ';opacity:.45' : '') + '"><span>' + d.name + badge + ' <span style="color:var(--muted)">' + d.pos + '</span>' + capDiff + tag + '</span><span style="font-variant-numeric:tabular-nums;color:var(--muted)">' + d.xp0.toFixed(1) + ' pts</span></div>';
     }).join('');
   }
-  function renderResult(d, stance, margin) {
+  function renderResult(d, stance, margin, meanExact, gapUnknown) {
     var prob = stance === 'lead' ? d.pGt(-margin) : d.pGt(margin), v = $('rival-verdict'), a;
+     
+     
+    var mHead = isFinite(meanExact) ? meanExact : d.m;
     if (stance === 'lead') a = prob >= 0.85 ? ["You're in great shape", "Protect the lead - match their key players, don't take risks.", "#0F6E56"] : prob >= 0.65 ? ["Solid, but not safe", "Cover their main differential to tighten it up.", "#f0b03a"] : ["Your lead is under threat", "Cover their differentials - a quiet week could cost you.", "#f87171"];
     else a = prob >= 0.35 ? ["Live chance", "Take some risks - a differential captain swings it your way.", "#0F6E56"] : prob >= 0.15 ? ["Long shot", "You'll need differentials and a bit of luck.", "#f0b03a"] : ["Very unlikely this week", "Swing for the fences - you've little to lose.", "#f87171"];
     if (v) { v.style.borderColor = a[2]; v.innerHTML = '<span style="font-size:1.15rem;font-weight:800;color:' + a[2] + '">' + a[0] + '</span><span style="color:var(--muted);font-weight:600"> - ' + a[1] + '</span>'; }
     function row(k, val, col) { return '<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.06)"><span style="color:var(--muted)">' + k + '</span><span style="font-variant-numeric:tabular-nums;font-weight:700' + (col ? ';color:' + col : '') + '">' + val + '</span></div>'; }
-    var swing = Math.abs(d.m) < 0.5 ? 'about level' : (d.m > 0 ? '+' + d.m.toFixed(1) + ' ahead' : Math.abs(d.m).toFixed(1) + ' behind');
+    var swing = Math.abs(mHead) < 0.05 ? 'about level' : (mHead > 0 ? '+' + mHead.toFixed(1) + ' ahead' : Math.abs(mHead).toFixed(1) + ' behind');
+     
+    var firstLab = gapUnknown ? 'League gap unknown — chance you beat them this week'
+      : (stance === 'lead' ? 'You keep your ' + margin + '-point lead' : 'You close the ' + margin + '-point gap');
     var mEl = $('rival-metrics');
-    if (mEl) mEl.innerHTML = row((stance === 'lead' ? 'You keep your ' + margin + '-point lead' : 'You close the ' + margin + '-point gap'), (prob * 100).toFixed(0) + '%', a[2]) + row('Typical week vs them', swing, d.m >= 0 ? '#0F6E56' : '#f87171') + row('How swingy the week could be', d.s.toFixed(1)) + row('Chance you beat them this week', (d.pGt(0) * 100).toFixed(0) + '%') + row('Chance you gain 15+ on them', (d.pGt(15) * 100).toFixed(0) + '%', '#0F6E56') + row('Chance you lose 15+ to them', ((1 - d.pGt(-15)) * 100).toFixed(0) + '%', '#f87171');
+    if (mEl) mEl.innerHTML = row(firstLab, (prob * 100).toFixed(0) + '%', a[2]) + row('Typical week vs them', swing, mHead >= 0 ? '#0F6E56' : '#f87171') + row('How swingy the week could be', d.s.toFixed(1)) + row('Chance you beat them this week', (d.pGt(0) * 100).toFixed(0) + '%') + row('Chance you gain 15+ on them', (d.pGt(15) * 100).toFixed(0) + '%', '#0F6E56') + row('Chance you lose 15+ to them', ((1 - d.pGt(-15)) * 100).toFixed(0) + '%', '#f87171');
   }
 
    
@@ -15161,21 +15275,60 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
     var arr = simulate(mine, theirs);
     var d = stats(arr);
     drawCurve(arr, stance === 'lead' ? -margin : margin);
-    renderResult(d, stance, margin);
+    renderResult(d, stance, margin, moments(mine, theirs).mean, !!_state.gapUnknown);
     renderSuggestions(mine, theirs, stance, margin);
     $('rival-results').style.display = 'block';
   }
 
-  window.rivalAutofill = function () {
+   
+   
+   
+   
+   
+   
+  async function _leagueTotal(entryId, startEv) {
+    var px = _proxy(); if (!px) return null;
+    var r = await fetch(px + '/entry/' + entryId + '/', { cache: 'no-store' });
+    if (!r || !r.ok) return null;
+    var e = await r.json();
+    if (!e || e.summary_overall_points == null || !isFinite(+e.summary_overall_points)) return null;
+    var t = +e.summary_overall_points;
+    if (startEv > 1) {
+      var h = await fetch(px + '/entry/' + entryId + '/history/', { cache: 'no-store' });
+      if (!h || !h.ok) return null;
+      var hj = await h.json(), cur = hj && hj.current, off = 0;
+      if (!cur || !cur.forEach) return null;
+      cur.forEach(function (row) { if (+row.event < startEv) off = +(row.total_points || 0); });
+      t -= off;
+    }
+    return t;
+  }
+  function _standingsTotal(id) {
+    var st = window._rivalStandings || (window._leagueData && _leagueData.standings) || [];
+    var row = st.filter(function (m) { return String(m.entry_id) === String(id); })[0];
+    return (row && isFinite(+row.current_total)) ? +row.current_total : null;
+  }
+  var _gapP = null;
+  window.rivalAutofill = function () { _gapP = _autofillGap(); return _gapP; };
+  async function _autofillGap() {
     try {
       var sel = $('rival-select'); if (!sel || !sel.value) return;
-      var st = window._rivalStandings || (window._leagueData && _leagueData.standings) || []; if (!st.length) return;
-      var me = meId();
-      var mine = st.filter(function (m) { return me && String(m.entry_id) === String(me); })[0];
-      var them = st.filter(function (m) { return String(m.entry_id) === String(sel.value); })[0];
-      if (!mine || !them) return;
-      var gap = (mine.current_total || 0) - (them.current_total || 0), lead = gap >= 0;
-      var mEl = $('rival-margin'); if (mEl) mEl.value = Math.abs(gap);
+      var rid = sel.value, me = meId(); if (!me) return;
+      var start = +(window._rivalLeagueStart || (window._leagueData && _leagueData.league_start_event) || 1) || 1;
+      var mine = null, them = null;
+      try { mine = await _leagueTotal(me, start); } catch (e1) { mine = null; }
+      try { them = await _leagueTotal(rid, start); } catch (e2) { them = null; }
+      if (mine == null) mine = _standingsTotal(me);
+      if (them == null) them = _standingsTotal(rid);
+      if (sel.value !== rid || String(meId()) !== String(me)) return;
+      var mEl = $('rival-margin'), status = $('rival-status');
+      if (mine == null || them == null) {
+        if (mEl) mEl.value = '';
+        if (status) status.textContent = 'Could not find both league totals, so no lead or gap is filled in. Type it yourself, or compare this week head-to-head.';
+        return;
+      }
+      var gap = mine - them, lead = gap >= 0;
+      if (mEl) mEl.value = Math.abs(gap);
       [].forEach.call(document.querySelectorAll('#rival-stance button'), function (b) {
         var on = (b.getAttribute('data-v') === 'lead') === lead;
         b.classList.toggle('on', on);
@@ -15184,7 +15337,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
       });
       var lab = $('rival-margin-lab'); if (lab) lab.textContent = lead ? 'Lead (pts)' : 'Gap (pts)';
     } catch (e) {}
-  };
+  }
 
   window.rivalStance = function (btn) {
     var wrap = $('rival-stance'); if (!wrap) return;
@@ -15199,17 +15352,24 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
     var status = $('rival-status');
     if (_busy) return;    
     _busy = true;
+     
+     
+     
+    _state = null;
+    var _res = $('rival-results'); if (_res) _res.style.display = 'none';
     try {
       var sel = $('rival-select'), manual = $('rival-manual');
       var entryId = (sel && sel.value) || (manual && manual.value.trim());
       if (!entryId || !/^\d+$/.test(String(entryId))) { if (status) status.textContent = 'Pick a rival or type a valid Team ID.'; return; }
       if (typeof SQUAD_DATA === 'undefined' || !SQUAD_DATA || !SQUAD_DATA.length) { if (status) status.textContent = 'Your squad did not load — open My Squad first.'; return; }
       if (status) status.textContent = 'Loading rival…';
+      if (_gapP) { try { await _gapP; } catch (eGap) {} }
       var pd = await fetchPicks(entryId);
       var mine = myXi(), theirs = rivalXi(pd);
       if (!mine.length || !theirs.length) { if (status) status.textContent = 'Your XI: ' + mine.length + ' players, rival XI: ' + theirs.length + '. ' + (!mine.length ? 'Your squad did not load.' : 'Rival picks came back empty.'); return; }
       var stanceEl = document.querySelector('#rival-stance .on');
-      _state = { mine: mine, theirs: theirs, stance: stanceEl ? stanceEl.getAttribute('data-v') : 'lead', margin: Math.max(0, parseInt(($('rival-margin') || {}).value, 10) || 0) };
+      var _mRaw = String((($('rival-margin') || {}).value == null ? '' : $('rival-margin').value)).trim();
+      _state = { mine: mine, theirs: theirs, stance: stanceEl ? stanceEl.getAttribute('data-v') : 'lead', margin: Math.max(0, parseInt(_mRaw, 10) || 0), gapUnknown: _mRaw === '' };
       runAndRender();
        
        
@@ -15217,14 +15377,29 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
        
       var _gwNote = (pd && pd.gw && pd.gw < curGw())
         ? ("Using their GW" + pd.gw + " team — this week's picks aren't out yet.") : '';
+       
+      if (pd && pd.fhGw) _gwNote += ' They played a Free Hit in GW' + pd.fhGw + ', so their squad goes back to this one.';
+      if (pd && pd.fhStuck) _gwNote += ' That was a Free Hit and the squad it goes back to is not published, so this is the Free Hit team.';
       var _chipNote = _rivalChipNote(pd);
-      if (status) status.textContent = (_gwNote && _chipNote)
-        ? (_gwNote + ' ' + _chipNote) : (_gwNote || _chipNote);
-    } catch (e) { if (status) status.textContent = (e && e.message) ? e.message : 'Something went wrong.'; }
+      if (_chipNote && pd && pd.gw < curGw() && /^(3xc|bboost)$/i.test(String(pd.chip || ''))) _chipNote += ' Scored here as a normal week: captain doubled, bench not counted.';
+      var _gapNote = _state.gapUnknown ? 'No league gap entered, so this is this week head-to-head only.' : '';
+      var _parts = [_gwNote, _chipNote, _gapNote].filter(function (x) { return !!x; });
+      if (status) status.textContent = _parts.join(' ');
+    } catch (e) {
+      _state = null;
+      var _r2 = $('rival-results'); if (_r2) _r2.style.display = 'none';
+      if (status) status.textContent = (e && e.message) ? e.message : 'Something went wrong.';
+    }
     finally { _busy = false; }
   };
 
   document.addEventListener('DOMContentLoaded', function () {
+     
+     
+    try {
+      var _mb = $('rival-margin');
+      if (_mb && String(_mb.value) === '10' && _mb.getAttribute('value') === '10') { _mb.value = ''; _mb.setAttribute('placeholder', 'gap'); }
+    } catch (eMb) {}
     try {
        
        
@@ -16611,6 +16786,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
     counts: {},         
     labels: {},         
     order: [],          
+    outCounts: {},      
     unjittered: null,   
     finished: false,
   };
@@ -16626,6 +16802,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
     _state.counts = {};
     _state.labels = {};
     _state.order = [];
+    _state.outCounts = {};
     _state.unjittered = null;
     _state.finished = false;
   }
@@ -16638,6 +16815,8 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
       _state.order.push(mv.key);
     }
     _state.counts[mv.key] += 1;
+    var ok = String(mv.out_id);
+    _state.outCounts[ok] = (_state.outCounts[ok] || 0) + 1;
   }
 
   function _verdict(pct) {
@@ -16727,8 +16906,25 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
         pct: valid > 0 ? ((_state.counts[k0] || 0) / valid) : 0,
       };
     }
+     
+     
+     
+     
+     
+    var sell = null, replace = null;
+    if (pick) {
+      var so = _state.outCounts[String(_state.unjittered.out_id)] || 0;
+      sell = { out_name: pick.out_name, survived: so, total: valid,
+               pct: valid > 0 ? so / valid : 0 };
+      sell.verdict = _verdict(sell.pct);
+      replace = { in_name: pick.in_name, survived: pick.survived, total: so,
+                  pct: so > 0 ? pick.survived / so : 0 };
+      replace.verdict = _verdict(replace.pct);
+    }
     return {
       locked: false,
+      sell: sell,
+      replace: replace,
       nRuns: _state.nRuns,
       done: _state.done,
       errors: _state.errors,
@@ -16792,7 +16988,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
       return;
     }
 
-    var v = res.verdict;
+    var v = res.sell ? res.sell.verdict : res.verdict;
     var pick = res.pick;
     var rows = res.moves.map(function (m) {
       var isPick = m.key === pick.key;
@@ -16814,6 +17010,16 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
     var plain = 'In ' + pick.survived + ' of ' + pick.total +
       ' slightly-different versions of the projections, the model still picked ' +
       _esc(pick.out_name) + ' → ' + _esc(pick.in_name) + ' (≈' + pickPct + '%).';
+     
+     
+    if (res.sell && res.replace) {
+      var rv = res.replace.verdict;
+      plain = 'Selling ' + _esc(res.sell.out_name) + ': chosen in ' + res.sell.survived + ' of ' +
+        res.sell.total + ' versions of the projections (≈' + Math.round(res.sell.pct * 100) + '%). ' +
+        'Replacement ' + _esc(res.replace.in_name) + ': picked in ' + res.replace.survived + ' of the ' +
+        res.replace.total + ' that sell him (≈' + Math.round(res.replace.pct * 100) + '%, ' +
+        '<span style="color:' + rv.color + ';font-weight:800;">' + rv.label.toLowerCase() + '</span>).';
+    }
 
      
     var challenger = '';
@@ -16831,7 +17037,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
       'border-bottom:1px solid var(--border,#e5e2da);">' +
       '<span style="font-weight:800;font-size:.9rem;">Stress test</span>' +
       '<span style="background:' + v.color + ';color:#fff;font-weight:800;font-size:.72rem;' +
-      'padding:3px 9px;border-radius:999px;letter-spacing:.04em;">' + v.label + '</span>' +
+      'padding:3px 9px;border-radius:999px;letter-spacing:.04em;">' + (res.sell ? 'SELL ' : '') + v.label + '</span>' +
       '<span style="color:var(--muted,#7a8783);font-size:.78rem;">' + plain + '</span>' +
       '</div>' +
       '<table style="width:100%;border-collapse:collapse;font-size:.8rem;">' +
@@ -16976,11 +17182,13 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
   }
 
    
+   
+   
+   
   function _norm(s) {
-    return String(s == null ? '' : s)
-      .normalize ? String(s).normalize('NFD').replace(/[̀-ͯ]/g, '')
-        .toLowerCase().replace(/\s+/g, ' ').trim()
-      : String(s).toLowerCase().replace(/\s+/g, ' ').trim();
+    var t = (s == null) ? '' : String(s);
+    if (typeof t.normalize === 'function') t = t.normalize('NFD').replace(/[̀-ͯ]/g, '');
+    return t.toLowerCase().replace(/\s+/g, ' ').trim();
   }
 
    
@@ -18060,7 +18268,10 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
         okLabel: 'Load plan',
       });
       if (!okGo) return;
-      localStorage.setItem(_planKey(), JSON.stringify(blob));
+       
+       
+      try { localStorage.setItem(_planKey(), JSON.stringify(blob)); }
+      catch (eSt) { await _dlg({ title: 'Could not load the plan', message: 'Your browser refused to store it (private browsing or full storage).', okLabel: 'OK' }); return; }
        
        
        
@@ -18213,6 +18424,10 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
       '<span style="flex:1;"></span>' +
       '</div>' +
       '<div style="font-size:.66rem;color:#7a8783;margin:0 0 6px;">Projected points (xPts) per gameweek, hits deducted · = best plan · ~ = can’t score that week · FH? = Free Hit week not planned yet</div>' +
+       
+       
+       
+      '<div data-drafts-cover-note="1" style="font-size:.66rem;color:#7a8783;margin:0 0 6px;">Totals here include bench cover (what your bench adds when a starter misses out), so they read a few points higher than the plan card, which counts your starting XI and captain only.</div>' +
       '<div style="overflow-x:auto;"><table style="border-collapse:collapse;font-size:.82rem;min-width:520px;background:#fff;border:1px solid #E4E8E4;border-radius:12px;overflow:hidden;">' +
       '<thead>' + head + '</thead><tbody>' + body + '</tbody></table></div>' +
       rankedNote +
@@ -18328,7 +18543,14 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
   function _availChips() {
     var live = (typeof _activeChips === 'object' && _activeChips) ? _activeChips : null;
     var cp = _chipPlanner();
+     
+     
+    function inPlay(k) {
+      try { return (typeof window._apexChipInPlay === 'function') ? !!window._apexChipInPlay(k) : true; }
+      catch (e) { return true; }
+    }
     function has(k, cpKey) {
+      if (!inPlay(k)) return false;
       if (live && typeof live[k] === 'boolean') return live[k];
       if (cp && typeof cp[cpKey] === 'boolean') return cp[cpKey];
       return false;
@@ -18470,10 +18692,19 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
         var el = document.getElementById('sel-' + k);
         if (el) { el.value = ''; el.dispatchEvent(new Event('change', { bubbles: true })); }
       });
+       
+       
+       
       (breakdown || []).forEach(function (e) {
         var k = String(e.chip || '').toLowerCase();
         var el = document.getElementById('sel-' + k);
-        if (el) { el.value = String(e.gw); el.dispatchEvent(new Event('change', { bubbles: true })); }
+        if (!el) return;
+        var want = String(e.gw), ok = !el.options;
+        for (var i = 0; el.options && i < el.options.length; i++) {
+          if (el.options[i].value === want && !el.options[i].disabled) { ok = true; break; }
+        }
+        if (!ok) return;
+        el.value = want; el.dispatchEvent(new Event('change', { bubbles: true }));
       });
     } catch (e) {}
     finally { try { window._apexApplyingSeq = false; } catch (e2) {} }
@@ -18527,28 +18758,49 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
     }
 
     var baseline = (typeof r.baseline_total_xp === 'number') ? r.baseline_total_xp : 0;
-     
-    var _covArr = [], _covAll = 0;
-    try {
-      var _sq15c = _squad();
-      var _gwrC = (_meta() && _meta().gw_range) || [];
-      for (var _ci = 0; _ci < _gwrC.length; _ci++) {
-        var _cv = (typeof window._apexCoverForSquadAtGw === 'function') ? (window._apexCoverForSquadAtGw(_sq15c, _ci) || 0) : 0;
-        _covArr.push(_cv); _covAll += _cv;
-      }
-    } catch (_eCvT) { _covArr = []; _covAll = 0; }
-    function _covOfBb(s) {
-      try {
-        var _bb = (s.breakdown || []).filter(function (e) { return /^bb$/i.test(String(e.chip || '')); })[0];
-        if (!_bb) return 0;
-        var _gwr2 = (_meta() && _meta().gw_range) || [];
-        var _bi = _gwr2.indexOf(+_bb.gw);
-        return (_bi >= 0 && _covArr[_bi] != null) ? _covArr[_bi] : 0;
-      } catch (_eB) { return 0; }
-    }
     var seqs = Array.isArray(r.sequences) ? r.sequences.slice() : [];
      
-    seqs.sort(function (a, b) { return (b.total_xp || 0) - (a.total_xp || 0); });
+     
+     
+     
+     
+     
+     
+     
+    var _gwrD = (_meta() && _meta().gw_range) || [];
+    var _covFn = (typeof window._apexCoverForSquadAtGw === 'function') ? window._apexCoverForSquadAtGw : null;
+    function _chipSquad(kind, gw) {
+      var key = String(gw);
+      var fromRun = r[kind + '_squads_json'];
+      if (fromRun && Array.isArray(fromRun[key]) && fromRun[key].length === 15) return fromRun[key];
+      var glob = null;
+      try { glob = (kind === 'wc') ? (typeof WC_SQUADS !== 'undefined' ? WC_SQUADS : null)
+                                   : (typeof FH_SQUADS !== 'undefined' ? FH_SQUADS : null); } catch (eG) {}
+      return (glob && Array.isArray(glob[key]) && glob[key].length === 15) ? glob[key] : null;
+    }
+    function _seqCover(bd) {
+      if (!_covFn) return 0;
+      var at = {};
+      (bd || []).forEach(function (e) { at[String(e.chip || '').toUpperCase()] = +e.gw; });
+      var cur = _squad(), t = 0;
+      for (var i = 0; i < _gwrD.length; i++) {
+        var gw = _gwrD[i];
+        if (at.WC === gw) cur = _chipSquad('wc', gw) || cur;
+        if (at.BB === gw) continue;
+        var sq = (at.FH === gw) ? (_chipSquad('fh', gw) || cur) : cur;
+        try { t += (+_covFn(sq, i) || 0); } catch (eC) {}
+      }
+      return t;
+    }
+    var _baseDisp = Math.round((baseline + _seqCover([])) * 10) / 10;
+    seqs.forEach(function (s) {
+      s._shown = Math.round(((s.total_xp || 0) + _seqCover(s.breakdown)) * 10) / 10;
+    });
+    seqs.sort(function (a, b) { return (b._shown || 0) - (a._shown || 0); });
+    if (seqs.length) {
+      var _lead = seqs[0]._shown || 0;
+      seqs.forEach(function (s) { s.tied_with_best = (_lead - (s._shown || 0)) < 0.5; });
+    }
      
      
      
@@ -18569,7 +18821,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
     rows +=
       '<tr style="border-top:1px solid #E4E8E4;">' +
       '<td style="padding:9px 10px;font-weight:700;color:#7a8783;">No chips (baseline)</td>' +
-      '<td style="padding:9px 10px;text-align:right;font-family:\'JetBrains Mono\',monospace;font-weight:800;">' + _fmt(baseline + _covAll) + '</td>' +
+      '<td style="padding:9px 10px;text-align:right;font-family:\'JetBrains Mono\',monospace;font-weight:800;">' + _fmt(_baseDisp) + '</td>' +
       '<td style="padding:9px 10px;text-align:right;color:#7a8783;">—</td>' +
       '<td style="padding:9px 10px;"></td></tr>';
 
@@ -18606,10 +18858,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
              held.join(' · ') + '</span>' : '') + '</div>';
     }
     top.forEach(function (s, i) {
-       
-      var _dTot = Math.round(((s.total_xp || 0) + _covAll - _covOfBb(s)) * 10) / 10;
-      var _dBase = Math.round((baseline + _covAll) * 10) / 10;
-      var gain = Math.round((_dTot - _dBase) * 10) / 10;
+      var gain = Math.round(((s._shown || 0) - _baseDisp) * 10) / 10;
       var gainStr = (gain >= 0 ? '+' : '') + _fmt(gain);
        
       var best = (i === 0) && !_tiedMany;
@@ -18620,7 +18869,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
         '<tr style="border-top:1px solid #E4E8E4;' + (best ? 'background:rgba(15,110,86,.08);' : (tiedHere ? 'background:rgba(15,110,86,.035);' : '')) + '">' +
         '<td style="padding:9px 10px;font-weight:' + (best ? '800' : '600') + ';">' +
           _lead + _seqLabel(s.breakdown) + _margLine(s) + '</td>' +
-        '<td style="padding:9px 10px;text-align:right;font-family:\'JetBrains Mono\',monospace;font-weight:800;">' + _fmt((s.total_xp || 0) + _covAll - _covOfBb(s)) + '</td>' +
+        '<td style="padding:9px 10px;text-align:right;font-family:\'JetBrains Mono\',monospace;font-weight:800;">' + _fmt(s._shown) + '</td>' +
         '<td style="padding:9px 10px;text-align:right;font-weight:700;color:' + (gain >= 0 ? '#0F6E56' : '#c0392b') + ';">' + gainStr + '</td>' +
         '<td style="padding:9px 10px;text-align:right;">' +
           '<button onclick="_apexChipTimingApply(' + i + ')" ' +
@@ -18635,7 +18884,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
 
      
     var tieNote = '';
-    if (top.length >= 2 && ((top[0].total_xp || 0) - (top[1].total_xp || 0)) < 0.5) {
+    if (top.length >= 2 && ((top[0]._shown || 0) - (top[1]._shown || 0)) < 0.5) {
        
        
        
@@ -18902,7 +19151,14 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
       var old = host.querySelector('.px-dl-pill');
       var n = _dlNudge();
       var bits = [];
-      if (_dlDeadline) {
+      if (_dlDeadline && _dlDeadline.t - Date.now() <= 0) {
+         
+         
+        bits.push('GW' + _dlDeadline.gw + ' locked');
+        _dlDeadline = undefined;
+        setTimeout(_dlFetch, 60000);
+        try { if (typeof _apexStalePoolCheck === 'function') _apexStalePoolCheck(); } catch (eSc) {}
+      } else if (_dlDeadline) {
         var ms = _dlDeadline.t - Date.now();
         var d = Math.floor(ms / 86400000), h = Math.floor(ms % 86400000 / 3600000), m = Math.floor(ms % 3600000 / 60000);
         bits.push('GW' + _dlDeadline.gw + ' · ' + (d > 0 ? (d + 'd ' + h + 'h') : (h + 'h ' + String(m).padStart(2, '0') + 'm')));
@@ -19625,7 +19881,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
  
  
  
-const BUILD_VERSION = "1790105931-GW6-3de8c09a";
+const BUILD_VERSION = "1790114401-GW6-cf77794c";
 window.APEX_BUILD = BUILD_VERSION;
  
  
@@ -19682,7 +19938,7 @@ window.APEX_SQUAD_ROLLBACK = false;
 let FPL_ID = null;
 let SQUAD_DATA = [];
 </script>
-<script src="/apex_pool.js?v=1790105931-GW6-3de8c09a"></script>
+<script src="/apex_pool.js?v=1790114401-GW6-cf77794c"></script>
 <script>
 const PLAYER_NAMES = {"1": "Raya", "2": "Arrizabalaga", "3": "Meslier", "4": "Gabriel", "5": "J.Timber", "6": "Saliba", "7": "Lewis-Skelly", "8": "Calafiori", "9": "Hincapie", "10": "White", "11": "Mosquera", "12": "Saka", "13": "Rice", "14": "Eze", "15": "\u00d8degaard", "16": "Madueke", "17": "Merino", "18": "Martinelli", "19": "Zubimendi", "20": "Dowman", "22": "Nwaneri", "23": "F\u00e1bio Vieira", "24": "Nelson", "25": "Gy\u00f6keres", "26": "Havertz", "27": "G.Jesus", "31": "Konsa", "452": "Bruno G.", "557": "Tzolis", "29": "M.Bizot", "30": "Digne", "32": "Cash", "33": "Mings", "34": "Pau", "35": "Bogarde", "36": "Maatsen", "37": "Lindel\u00f6f", "38": "A.Garc\u00eda", "39": "Nedeljkovic", "41": "Buend\u00eda", "44": "Bailey", "45": "McGinn", "46": "Barkley", "47": "Kamara", "48": "Onana", "49": "Iling Jr", "50": "Burrowes", "51": "George Hemmings", "52": "Alysson", "53": "Manzambi", "54": "Gomes", "55": "Watkins", "56": "Abraham", "160": "Garnacho", "166": "N.Jackson", "582": "Madjo", "596": "Ruggeri", "597": "Suzuki", "606": "Rowe", "607": "Lynch", "611": "Wan-Bissaka", "618": "Goretzka", "630": "Harwood-Bellis", "631": "Mbaye", "667": "Wright", "57": "Petrovi\u0107", "58": "Forster", "59": "Dennis", "60": "Hill", "61": "Truffert", "62": "Diakit\u00e9", "63": "Milosavljevi\u0107", "64": "Smith", "65": "J.Araujo", "66": "Soler", "67": "Rayan", "68": "Tavernier", "69": "Scott", "70": "Kluivert", "71": "Cook", "72": "Gannon-Doak", "73": "Adams", "74": "Brooks", "75": "Christie", "76": "T\u00f3th.A", "77": "Adli", "78": "Kroupi.Jr", "79": "Evanilson", "80": "Enes \u00dcnal", "81": "Rodr\u00edguez", "566": "Silva", "573": "Sanchez", "608": "Jebbison", "615": "Di Gregorio", "82": "Kelleher", "83": "Valdimarsson", "84": "Collins", "85": "Van den Berg", "86": "Lewis-Potter", "87": "Ajer", "88": "Kayode", "89": "Henry", "90": "Hickey", "92": "Ji-soo", "93": "Schuster", "94": "Schade", "95": "O.Dango", "96": "Damsgaard", "97": "Jensen", "98": "Janelt", "99": "Milambo", "100": "Carvalho", "102": "Yarmoliuk", "103": "Dasilva", "105": "Anthony", "106": "Thiago", "107": "Furo", "108": "Wilson", "565": "M.Sangar\u00e9", "620": "Diouf", "657": "Nunes", "660": "Fredrick", "661": "Balcombe", "109": "Verbruggen", "111": "Steele", "113": "F.Kad\u0131o\u011flu", "114": "Boscagli", "115": "De Cuyper", "116": "Dunk", "117": "Coppola", "118": "Igor", "119": "Costinha", "120": "Svoboda", "121": "Mitoma", "122": "Minteh", "123": "Hinshelwood", "124": "Gro\u00df", "125": "Georginio", "126": "O'Riley", "127": "Gomez", "128": "Buonanotte", "129": "Ayari", "130": "Wieffer", "132": "Howell", "133": "Watson", "134": "Oriola", "135": "Yohanna", "137": "Tzimas", "138": "Kostoulas", "139": "Ferguson", "328": "Struijk", "504": "Vuskovic", "594": "David", "600": "Osman", "605": "Yalcouy\u00e9", "614": "Hadjam", "624": "Cozier-Duberry", "639": "Andr\u00e9s", "652": "Azeez", "658": "Ibrahim", "28": "Martinez", "40": "Rogers", "101": "Henderson", "136": "Welbeck", "140": "S\u00e1nchez", "141": "J\u00f6rgensen", "142": "James", "143": "Chalobah", "144": "Gusto", "145": "Fofana", "146": "B.Badiashile", "148": "Hato", "149": "Colwill", "150": "M.Sarr", "151": "Acheampong", "152": "Palestra", "154": "Palmer", "156": "Neto", "157": "Est\u00eav\u00e3o", "158": "Gittens", "159": "Caicedo", "161": "Lavia", "163": "D.Essugo", "164": "Quenda", "165": "Jo\u00e3o Pedro", "168": "Marc Guiu", "169": "Mheuka", "170": "Emegha", "200": "Lacroix", "560": "Penders", "561": "Anselmino", "568": "Barco", "583": "Chavarria", "662": "Nicoll-Jazuli", "91": "Pinnock", "104": "Onyeka", "110": "Rushworth", "171": "Dovin", "172": "Wilson", "173": "Thomas", "174": "Kitching", "175": "van Ewijk", "176": "Dasilva", "177": "Kesler-Hayden", "178": "Bidwell", "179": "Latibeaudiere", "180": "Woolfenden", "181": "Brau", "182": "Amenda", "183": "Rudoni", "184": "Grimes", "185": "Sakamoto", "186": "Mason-Clark", "187": "Eccles", "188": "Torp", "189": "Shepherd", "190": "Tchaouna", "191": "Borges Rodrigues", "192": "Andrews", "193": "Wright", "194": "Thomas-Asante", "195": "Simms", "196": "Markelo", "197": "Bassette", "492": "Awoniyi", "575": "Yirenkyi", "584": "Hamer", "599": "Cherif", "623": "Bentley", "655": "Gboho", "656": "Mfuni", "42": "Guessand", "153": "Disasi", "198": "Henderson", "199": "Benitez", "202": "Richards", "203": "Canvot", "204": "Mitchell", "205": "Sosa", "206": "Chadi Riad", "207": "Mingueza", "208": "Sarr", "210": "Wharton", "211": "Yeremy", "212": "Hughes", "213": "Lerma", "214": "Kamada", "215": "Devenny", "216": "Esse", "217": "M.Fran\u00e7a", "218": "Doucour\u00e9", "219": "J.Rak-Sakyi", "220": "Cardines", "221": "Drakes-Thomas", "222": "Strand Larsen", "223": "Mateta", "224": "Nketiah", "225": "Uche", "241": "McNeil", "555": "Matthews", "577": "Tomiyasu", "588": "Khalaili", "595": "Gozo", "633": "Ahanor", "643": "Chilwell", "644": "Timber", "647": "Osorio", "21": "N\u00f8rgaard", "209": "Johnson", "226": "Pickford", "227": "Travers", "228": "King", "229": "Tarkowski", "230": "Branthwaite", "231": "Keane", "232": "O'Brien", "233": "Mykolenko", "234": "Patterson", "235": "Aznou", "236": "Dewsbury-Hall", "238": "Grealish", "239": "Garner", "242": "George", "243": "Alcaraz", "244": "Armstrong", "245": "Dibling", "246": "R\u00f6hl", "247": "Hackney", "248": "Beto", "249": "Barry", "649": "Maitland-Niles", "654": "Graham", "250": "Leno", "251": "Lecomte", "252": "McNally", "253": "Andersen", "254": "Robinson", "255": "J.Cuenca", "256": "Tete", "257": "Bassey", "258": "Castagne", "261": "Iwobi", "262": "Smith Rowe", "263": "Kevin", "264": "Bobb", "265": "Berge", "266": "Cairney", "268": "King", "269": "Sessegnon", "270": "Reed", "271": "Muniz", "272": "Kusi-Asare", "569": "Gonzalo", "570": "Palacios", "580": "Charles", "610": "De Fougerolles", "626": "Zepa", "635": "Larsson", "636": "\u00c1ngel", "650": "Affengruber", "240": "Iroegbunam", "273": "Phillips", "274": "Butland", "275": "Cartwright", "276": "Lo-Tutala", "277": "Egan", "278": "Hughes", "279": "Ajayi", "280": "Coyle", "281": "Drameh", "282": "Giles", "283": "Jacob", "284": "McCarthy", "285": "McNair", "286": "Belloumi", "287": "Millar", "288": "Dowell", "289": "Crooks", "290": "Slater", "291": "Matazo", "292": "\u00d6m\u00fcr", "293": "Kamara", "294": "Zambrano", "295": "McBurnie", "296": "Akintola", "297": "Gyabi", "298": "Destan", "299": "Burstow", "340": "Gelhardt", "556": "Targett", "563": "Morita", "572": "Tzolakis", "574": "Hjert\u00f8-Dahl", "576": "Stroud", "585": "Herrington", "586": "Mendy", "589": "Gourna-Douath", "617": "Cho", "632": "Ansah", "637": "Vaz", "638": "Norton-Cuffy", "642": "Thomas", "645": "Mouzakitis", "259": "Diop", "267": "Luki\u0107", "300": "Walton", "301": "Palmer", "302": "Button", "303": "Kipr\u00e9", "304": "O'Shea", "305": "Davis", "306": "Greaves", "307": "Johnson", "308": "Furlong", "309": "N\u00fa\u00f1ez", "310": "Matusiwa", "311": "Burns", "312": "Taylor", "313": "Clarke", "314": "Ogbene", "315": "Fatawu", "316": "Emersonn", "317": "Hirst", "318": "Philogene", "319": "Szmodics", "320": "Akpom", "321": "Walle Egeli", "322": "Al-Hamadi", "323": "McAteer", "324": "Mehmeti", "554": "Van Oevelen", "562": "Maeda", "564": "Scherpen", "571": "Florentino", "591": "Enciso", "592": "Ouattara", "602": "Humphreys", "619": "Palacios", "640": "Flemming", "260": "Wilson", "326": "Perri", "327": "Bijol", "329": "Rodon", "330": "Bogle", "331": "Gudmundsson", "332": "Justin", "333": "Bornauw", "334": "Muharemovi\u0107", "335": "Stach", "336": "Okafor", "337": "Aaronson", "338": "Ampadu", "339": "Longstaff", "341": "Gnonto", "342": "Harrison", "343": "James", "344": "Gruev", "345": "Tanaka", "346": "Calvert-Lewin", "347": "Nmecha", "348": "Piroe", "349": "Mateo Joseph", "385": "Trafford", "598": "Elvedi", "603": "Lienou", "604": "Cresswell", "625": "Cairns", "629": "Zetterer", "641": "Bard", "648": "Bahoya", "350": "A.Becker", "351": "Mamardashvili", "352": "Woodman", "353": "Pecsi", "354": "Jaros", "355": "Davies", "356": "Virgil", "357": "Frimpong", "358": "Kerkez", "359": "Gomez", "360": "Bradley", "361": "Lucky", "362": "Jacquet", "363": "Leoni", "364": "Tsimikas", "365": "Ramsay", "366": "Wirtz", "367": "Gakpo", "368": "Szoboszlai", "369": "Ngumoha", "370": "Chiesa", "371": "Gravenberch", "372": "Mac Allister", "373": "C.Jones", "374": "Endo", "375": "Nyoni", "376": "Bajcetic", "377": "Munoz", "378": "McConnell", "379": "Isak", "380": "Ekitik\u00e9", "381": "Koumas", "382": "Danns", "383": "Elliott", "579": "Araujo", "627": "Barcola", "155": "Enzo", "237": "Ndiaye", "384": "Donnarumma", "386": "Bettinelli", "387": "O'Reilly", "388": "Gu\u00e9hi", "389": "Matheus N.", "390": "R\u00faben", "391": "Gvardiol", "392": "A\u00eft-Nouri", "393": "Khusanov", "394": "Alleyne", "395": "Lewis", "396": "Vitor Reis", "397": "Semenyo", "398": "Foden", "399": "Cherki", "400": "Doku", "402": "Rodrigo", "404": "Reijnders", "406": "Kova\u010di\u0107", "407": "Echeverri", "408": "Phillips", "409": "Mukasa", "410": "Monga", "411": "Haaland", "481": "Anderson", "587": "Rulli", "616": "Bouaddi", "621": "McAidoo", "622": "Braithwaite", "628": "Allan", "653": "Samba", "43": "Tielemans", "131": "Baleba", "162": "Andrey Santos", "325": "Darlow", "412": "Lammens", "413": "Bayindir", "414": "Heaton", "415": "Dorgu", "416": "De Ligt", "417": "Dalot", "418": "Maguire", "419": "Martinez", "420": "Yoro", "421": "Heaven", "422": "Mazraoui", "423": "Shaw", "424": "Amass", "425": "Fredricson", "426": "B.Fernandes", "427": "Mbeumo", "428": "Cunha", "429": "Rashford", "430": "Mount", "431": "Amad", "432": "Mainoo", "433": "Ugarte", "434": "J.Fletcher", "435": "Lacey", "436": "Collyer", "437": "Bendito Mantato", "438": "Fletcher", "439": "\u0160e\u0161ko", "440": "Zirkzee", "441": "Obi", "405": "N.Gonzalez", "442": "Pope", "443": "Gillespie", "444": "Jaouen", "445": "Thiaw", "446": "Sch\u00e4r", "447": "Botman", "448": "Burn", "449": "Hall", "450": "Livramento", "451": "A.Murphy", "453": "Barnes", "454": "Elanga", "456": "J.Ramsey", "457": "J.Murphy", "458": "Joelinton", "459": "L.Miley", "460": "Willock", "461": "Tour\u00e9", "462": "Steur", "463": "Woltemade", "464": "Wissa", "465": "Osula", "466": "Neave", "559": "Bamba", "567": "Horn\u00ed\u010dek", "593": "Dedi\u0107", "609": "Shahar", "634": "Fernandez-Pardo", "659": "Miley", "663": "Pivas", "664": "Salia", "665": "Mills", "666": "Thompson", "167": "Delap", "201": "Mu\u00f1oz", "467": "Sels", "468": "John", "469": "N.Williams", "470": "Morato", "471": "Milenkovi\u0107", "472": "Murillo", "473": "Aina", "474": "Jair Cunha", "475": "Savona", "476": "O.Richards", "477": "Abbott", "478": "Netz", "479": "Bindon", "480": "Gibbs-White", "482": "Hudson-Odoi", "483": "Ndoye", "484": "Hutchinson", "485": "Bakwa", "486": "McAtee", "487": "Dominguez", "488": "I.Sangar\u00e9", "489": "Yates", "490": "Wood", "491": "Igor Jesus", "493": "Kalimuendo", "558": "Schlager", "581": "Diomande", "590": "Benda", "112": "Van Hecke", "147": "Tosin", "401": "Marmoush", "403": "S\u00e1vio", "455": "Tonali", "494": "Vicario", "495": "Austin", "496": "Kinsky", "497": "Dubravka", "498": "Senesi", "499": "Pedro Porro", "500": "Romero", "502": "Robertson", "503": "Van de Ven", "505": "Spence", "506": "Udogie", "507": "Phillips", "508": "Davies", "509": "Byfield", "510": "Rowswell", "511": "Souza", "512": "Kudus", "513": "Xavi", "514": "Tel", "515": "Maddison", "516": "Bentancur", "517": "Odobert", "518": "P.M.Sarr", "519": "Gallagher", "520": "Bergvall", "521": "Kulusevski", "522": "Gray", "523": "Moore", "524": "Olusesi", "525": "Fernandes", "526": "Solanke", "527": "Richarlison", "528": "Scarlett", "578": "Mudryk", "601": "Williams-Barnett", "501": "Danso", "529": "Roefs", "530": "Patterson", "531": "Ellborg", "532": "Ballard", "533": "Mukiele", "534": "Hume", "535": "Alderete", "536": "Reinildo", "537": "Seelt", "538": "Hjelde", "539": "O'Nien", "540": "Masuaku", "541": "Meunier", "542": "E.Le F\u00e9e", "543": "Diarra", "544": "Xhaka", "545": "Sadiki", "546": "Adingra", "547": "Mundle", "548": "Rigg", "549": "Talbi", "550": "Jocelin.T", "551": "N.Angulo", "552": "Brobbey", "553": "Isidor", "612": "Methalie", "613": "Ahoka", "646": "Fofana", "651": "J.Angulo"};
 const TRANSFER_RECS = [];
@@ -19877,7 +20133,7 @@ const INFLIGHT_GW = 0;
  
  
  
-const APEX_FR_SCALE = 1.0282084661805102;
+const APEX_FR_SCALE = 1.028205156493055;
 const INFLIGHT_XP_BY_ID = {};
  
  
@@ -19886,7 +20142,7 @@ const COMPARE_XP_LOOKUP = {};
  
  
 const FIXTURES_BY_GW_TEAM = {"1": {"Arsenal": "COV (H)", "Coventry": "ARS (A)", "Hull": "MUN (H)", "Manchester United": "HUL (A)", "Everton": "CRY (H)", "Crystal Palace": "EVE (A)", "Ipswich": "SUN (H)", "Sunderland": "IPS (A)", "Nottingham Forest": "LEE (H)", "Leeds": "NFO (A)", "Brentford": "TOT (H)", "Tottenham": "BRE (A)", "Brighton": "AVL (H)", "Aston Villa": "BHA (A)", "Manchester City": "BOU (H)", "Bournemouth": "MCI (A)", "Newcastle United": "LIV (H)", "Liverpool": "NEW (A)", "Fulham": "CHE (H)", "Chelsea": "FUL (A)"}, "2": {"Crystal Palace": "MCI (H)", "Manchester City": "CRY (A)", "Liverpool": "NFO (H)", "Nottingham Forest": "LIV (A)", "Bournemouth": "EVE (H)", "Everton": "BOU (A)", "Coventry": "HUL (H)", "Hull": "COV (A)", "Tottenham": "NEW (H)", "Newcastle United": "TOT (A)", "Chelsea": "BHA (H)", "Brighton": "CHE (A)", "Leeds": "BRE (H)", "Brentford": "LEE (A)", "Sunderland": "FUL (H)", "Fulham": "SUN (A)", "Manchester United": "IPS (H)", "Ipswich": "MUN (A)", "Aston Villa": "ARS (H)", "Arsenal": "AVL (A)"}, "3": {"Ipswich": "LIV (H)", "Liverpool": "IPS (A)", "Newcastle United": "BOU (H)", "Bournemouth": "NEW (A)", "Brentford": "SUN (H)", "Sunderland": "BRE (A)", "Brighton": "LEE (H)", "Leeds": "BHA (A)", "Fulham": "CRY (H)", "Crystal Palace": "FUL (A)", "Manchester City": "COV (H)", "Coventry": "MCI (A)", "Nottingham Forest": "TOT (H)", "Tottenham": "NFO (A)", "Hull": "AVL (H)", "Aston Villa": "HUL (A)", "Everton": "MUN (H)", "Manchester United": "EVE (A)", "Arsenal": "CHE (H)", "Chelsea": "ARS (A)"}, "4": {"Aston Villa": "NFO (H)", "Nottingham Forest": "AVL (A)", "Bournemouth": "BRE (H)", "Brentford": "BOU (A)", "Chelsea": "HUL (H)", "Hull": "CHE (A)", "Crystal Palace": "IPS (H)", "Ipswich": "CRY (A)", "Liverpool": "FUL (H)", "Fulham": "LIV (A)", "Tottenham": "EVE (H)", "Everton": "TOT (A)", "Sunderland": "ARS (H)", "Arsenal": "SUN (A)", "Coventry": "BHA (H)", "Brighton": "COV (A)", "Manchester United": "MCI (H)", "Manchester City": "MUN (A)", "Leeds": "NEW (H)", "Newcastle United": "LEE (A)"}, "5": {"Brentford": "CHE (H)", "Chelsea": "BRE (A)", "Tottenham": "AVL (H)", "Aston Villa": "TOT (A)", "Brighton": "ARS (H)", "Arsenal": "BHA (A)", "Everton": "IPS (H)", "Ipswich": "EVE (A)", "Newcastle United": "HUL (H)", "Hull": "NEW (A)", "Nottingham Forest": "COV (H)", "Coventry": "NFO (A)", "Bournemouth": "LIV (H)", "Liverpool": "BOU (A)", "Leeds": "CRY (H)", "Crystal Palace": "LEE (A)", "Manchester City": "SUN (H)", "Sunderland": "MCI (A)", "Fulham": "MUN (H)", "Manchester United": "FUL (A)"}, "6": {"Arsenal": "LEE (H)", "Leeds": "ARS (A)", "Aston Villa": "BRE (H)", "Brentford": "AVL (A)", "Chelsea": "BOU (H)", "Bournemouth": "CHE (A)", "Ipswich": "FUL (H)", "Fulham": "IPS (A)", "Sunderland": "BHA (H)", "Brighton": "SUN (A)", "Manchester United": "TOT (H)", "Tottenham": "MUN (A)", "Crystal Palace": "NFO (H)", "Nottingham Forest": "CRY (A)", "Hull": "EVE (H)", "Everton": "HUL (A)", "Liverpool": "MCI (H)", "Manchester City": "LIV (A)", "Coventry": "NEW (H)", "Newcastle United": "COV (A)"}, "7": {"Everton": "CHE (H)", "Chelsea": "EVE (A)", "Brentford": "LIV (H)", "Liverpool": "BRE (A)", "Fulham": "HUL (H)", "Hull": "FUL (A)", "Manchester City": "IPS (H)", "Ipswich": "MCI (A)", "Newcastle United": "AVL (H)", "Aston Villa": "NEW (A)", "Bournemouth": "SUN (H)", "Sunderland": "BOU (A)", "Brighton": "CRY (H)", "Crystal Palace": "BHA (A)", "Leeds": "MUN (H)", "Manchester United": "LEE (A)", "Nottingham Forest": "ARS (H)", "Arsenal": "NFO (A)", "Tottenham": "COV (H)", "Coventry": "TOT (A)"}, "8": {"Ipswich": "NFO (H)", "Nottingham Forest": "IPS (A)", "Aston Villa": "MCI (H)", "Manchester City": "AVL (A)", "Arsenal": "EVE (H)", "Everton": "ARS (A)", "Coventry": "FUL (H)", "Fulham": "COV (A)", "Chelsea": "TOT (H)", "Tottenham": "CHE (A)", "Crystal Palace": "NEW (H)", "Newcastle United": "CRY (A)", "Hull": "BRE (H)", "Brentford": "HUL (A)", "Liverpool": "BHA (H)", "Brighton": "LIV (A)", "Manchester United": "BOU (H)", "Bournemouth": "MUN (A)", "Sunderland": "LEE (H)", "Leeds": "SUN (A)"}, "9": {"Chelsea": "MUN (H)", "Manchester United": "CHE (A)", "Bournemouth": "LEE (H)", "Leeds": "BOU (A)", "Brentford": "NFO (H)", "Nottingham Forest": "BRE (A)", "Coventry": "SUN (H)", "Sunderland": "COV (A)", "Hull": "IPS (H)", "Ipswich": "HUL (A)", "Manchester City": "BHA (H)", "Brighton": "MCI (A)", "Tottenham": "CRY (H)", "Crystal Palace": "TOT (A)", "Aston Villa": "FUL (H)", "Fulham": "AVL (A)", "Liverpool": "ARS (H)", "Arsenal": "LIV (A)", "Newcastle United": "EVE (H)", "Everton": "NEW (A)"}, "10": {"Everton": "COV (H)", "Coventry": "EVE (A)", "Leeds": "TOT (H)", "Tottenham": "LEE (A)", "Arsenal": "HUL (H)", "Hull": "ARS (A)", "Fulham": "NEW (H)", "Newcastle United": "FUL (A)", "Nottingham Forest": "MCI (H)", "Manchester City": "NFO (A)", "Brighton": "BRE (H)", "Brentford": "BHA (A)", "Crystal Palace": "LIV (H)", "Liverpool": "CRY (A)", "Ipswich": "BOU (H)", "Bournemouth": "IPS (A)", "Sunderland": "CHE (H)", "Chelsea": "SUN (A)", "Manchester United": "AVL (H)", "Aston Villa": "MUN (A)"}, "11": {"Manchester City": "FUL (H)", "Fulham": "MCI (A)", "Aston Villa": "SUN (H)", "Sunderland": "AVL (A)", "Bournemouth": "NFO (H)", "Nottingham Forest": "BOU (A)", "Chelsea": "LEE (H)", "Leeds": "CHE (A)", "Coventry": "CRY (H)", "Crystal Palace": "COV (A)", "Tottenham": "IPS (H)", "Ipswich": "TOT (A)", "Newcastle United": "ARS (H)", "Arsenal": "NEW (A)", "Hull": "BHA (H)", "Brighton": "HUL (A)", "Liverpool": "MUN (H)", "Manchester United": "LIV (A)", "Brentford": "EVE (H)", "Everton": "BRE (A)"}, "12": {"Nottingham Forest": "CHE (H)", "Chelsea": "NFO (A)", "Leeds": "COV (H)", "Coventry": "LEE (A)", "Manchester United": "BRE (H)", "Brentford": "MUN (A)", "Ipswich": "AVL (H)", "Aston Villa": "IPS (A)", "Everton": "LIV (H)", "Liverpool": "EVE (A)", "Brighton": "NEW (H)", "Newcastle United": "BHA (A)", "Crystal Palace": "HUL (H)", "Hull": "CRY (A)", "Fulham": "BOU (H)", "Bournemouth": "FUL (A)", "Sunderland": "TOT (H)", "Tottenham": "SUN (A)", "Arsenal": "MCI (H)", "Manchester City": "ARS (A)"}, "13": {"Aston Villa": "EVE (H)", "Everton": "AVL (A)", "Bournemouth": "BHA (H)", "Brighton": "BOU (A)", "Brentford": "ARS (H)", "Arsenal": "BRE (A)", "Chelsea": "CRY (H)", "Crystal Palace": "CHE (A)", "Coventry": "IPS (H)", "Ipswich": "COV (A)", "Hull": "NFO (H)", "Nottingham Forest": "HUL (A)", "Liverpool": "SUN (H)", "Sunderland": "LIV (A)", "Manchester City": "LEE (H)", "Leeds": "MCI (A)", "Newcastle United": "MUN (H)", "Manchester United": "NEW (A)", "Tottenham": "FUL (H)", "Fulham": "TOT (A)"}, "14": {"Aston Villa": "CRY (H)", "Crystal Palace": "AVL (A)", "Bournemouth": "HUL (H)", "Hull": "BOU (A)", "Brentford": "MCI (H)", "Manchester City": "BRE (A)", "Chelsea": "LIV (H)", "Liverpool": "CHE (A)", "Everton": "FUL (H)", "Fulham": "EVE (A)", "Leeds": "IPS (H)", "Ipswich": "LEE (A)", "Manchester United": "COV (H)", "Coventry": "MUN (A)", "Newcastle United": "SUN (H)", "Sunderland": "NEW (A)", "Nottingham Forest": "BHA (H)", "Brighton": "NFO (A)", "Tottenham": "ARS (H)", "Arsenal": "TOT (A)"}, "15": {"Arsenal": "BOU (H)", "Bournemouth": "ARS (A)", "Brighton": "EVE (H)", "Everton": "BHA (A)", "Coventry": "AVL (H)", "Aston Villa": "COV (A)", "Crystal Palace": "MUN (H)", "Manchester United": "CRY (A)", "Fulham": "BRE (H)", "Brentford": "FUL (A)", "Hull": "TOT (H)", "Tottenham": "HUL (A)", "Ipswich": "NEW (H)", "Newcastle United": "IPS (A)", "Liverpool": "LEE (H)", "Leeds": "LIV (A)", "Manchester City": "CHE (H)", "Chelsea": "MCI (A)", "Sunderland": "NFO (H)", "Nottingham Forest": "SUN (A)"}, "16": {"Arsenal": "MUN (H)", "Manchester United": "ARS (A)", "Bournemouth": "COV (H)", "Coventry": "BOU (A)", "Brentford": "NEW (H)", "Newcastle United": "BRE (A)", "Brighton": "IPS (H)", "Ipswich": "BHA (A)", "Chelsea": "AVL (H)", "Aston Villa": "CHE (A)", "Leeds": "FUL (H)", "Fulham": "LEE (A)", "Liverpool": "TOT (H)", "Tottenham": "LIV (A)", "Manchester City": "HUL (H)", "Hull": "MCI (A)", "Nottingham Forest": "EVE (H)", "Everton": "NFO (A)", "Sunderland": "CRY (H)", "Crystal Palace": "SUN (A)"}, "17": {"Aston Villa": "LEE (H)", "Leeds": "AVL (A)", "Everton": "SUN (H)", "Sunderland": "EVE (A)", "Fulham": "BHA (H)", "Brighton": "FUL (A)", "Ipswich": "BRE (H)", "Brentford": "IPS (A)", "Tottenham": "BOU (H)", "Bournemouth": "TOT (A)", "Hull": "LIV (H)", "Liverpool": "HUL (A)", "Newcastle United": "MCI (H)", "Manchester City": "NEW (A)", "Coventry": "CHE (H)", "Chelsea": "COV (A)", "Manchester United": "NFO (H)", "Nottingham Forest": "MUN (A)", "Crystal Palace": "ARS (H)", "Arsenal": "CRY (A)"}, "18": {"Hull": "LEE (H)", "Leeds": "HUL (A)", "Tottenham": "BHA (H)", "Brighton": "TOT (A)", "Everton": "MCI (H)", "Manchester City": "EVE (A)", "Coventry": "BRE (H)", "Brentford": "COV (A)", "Crystal Palace": "BOU (H)", "Bournemouth": "CRY (A)", "Fulham": "ARS (H)", "Arsenal": "FUL (A)", "Manchester United": "SUN (H)", "Sunderland": "MUN (A)", "Newcastle United": "NFO (H)", "Nottingham Forest": "NEW (A)", "Aston Villa": "LIV (H)", "Liverpool": "AVL (A)", "Ipswich": "CHE (H)", "Chelsea": "IPS (A)"}, "19": {"Leeds": "EVE (H)", "Everton": "LEE (A)", "Brighton": "MUN (H)", "Manchester United": "BHA (A)", "Arsenal": "IPS (H)", "Ipswich": "ARS (A)", "Brentford": "CRY (H)", "Crystal Palace": "BRE (A)", "Liverpool": "COV (H)", "Coventry": "LIV (A)", "Nottingham Forest": "FUL (H)", "Fulham": "NFO (A)", "Sunderland": "HUL (H)", "Hull": "SUN (A)", "Bournemouth": "AVL (H)", "Aston Villa": "BOU (A)", "Chelsea": "NEW (H)", "Newcastle United": "CHE (A)", "Manchester City": "TOT (H)", "Tottenham": "MCI (A)"}, "20": {"Arsenal": "BRE (H)", "Brentford": "ARS (A)", "Brighton": "BOU (H)", "Bournemouth": "BHA (A)", "Everton": "AVL (H)", "Aston Villa": "EVE (A)", "Nottingham Forest": "HUL (H)", "Hull": "NFO (A)", "Sunderland": "LIV (H)", "Liverpool": "SUN (A)", "Crystal Palace": "CHE (H)", "Chelsea": "CRY (A)", "Fulham": "TOT (H)", "Tottenham": "FUL (A)", "Ipswich": "COV (H)", "Coventry": "IPS (A)", "Leeds": "MCI (H)", "Manchester City": "LEE (A)", "Manchester United": "NEW (H)", "Newcastle United": "MUN (A)"}, "21": {"Aston Villa": "MUN (H)", "Manchester United": "AVL (A)", "Bournemouth": "IPS (H)", "Ipswich": "BOU (A)", "Brentford": "BHA (H)", "Brighton": "BRE (A)", "Chelsea": "SUN (H)", "Sunderland": "CHE (A)", "Coventry": "EVE (H)", "Everton": "COV (A)", "Hull": "ARS (H)", "Arsenal": "HUL (A)", "Liverpool": "CRY (H)", "Crystal Palace": "LIV (A)", "Manchester City": "NFO (H)", "Nottingham Forest": "MCI (A)", "Newcastle United": "FUL (H)", "Fulham": "NEW (A)", "Tottenham": "LEE (H)", "Leeds": "TOT (A)"}, "22": {"Arsenal": "NEW (H)", "Newcastle United": "ARS (A)", "Brighton": "MCI (H)", "Manchester City": "BHA (A)", "Crystal Palace": "TOT (H)", "Tottenham": "CRY (A)", "Everton": "BRE (H)", "Brentford": "EVE (A)", "Fulham": "AVL (H)", "Aston Villa": "FUL (A)", "Ipswich": "HUL (H)", "Hull": "IPS (A)", "Leeds": "CHE (H)", "Chelsea": "LEE (A)", "Manchester United": "LIV (H)", "Liverpool": "MUN (A)", "Nottingham Forest": "BOU (H)", "Bournemouth": "NFO (A)", "Sunderland": "COV (H)", "Coventry": "SUN (A)"}, "23": {"Aston Villa": "IPS (H)", "Ipswich": "AVL (A)", "Bournemouth": "FUL (H)", "Fulham": "BOU (A)", "Brentford": "MUN (H)", "Manchester United": "BRE (A)", "Chelsea": "NFO (H)", "Nottingham Forest": "CHE (A)", "Coventry": "LEE (H)", "Leeds": "COV (A)", "Hull": "CRY (H)", "Crystal Palace": "HUL (A)", "Liverpool": "EVE (H)", "Everton": "LIV (A)", "Manchester City": "ARS (H)", "Arsenal": "MCI (A)", "Newcastle United": "BHA (H)", "Brighton": "NEW (A)", "Tottenham": "SUN (H)", "Sunderland": "TOT (A)"}, "24": {"Arsenal": "LIV (H)", "Liverpool": "ARS (A)", "Brighton": "HUL (H)", "Hull": "BHA (A)", "Crystal Palace": "COV (H)", "Coventry": "CRY (A)", "Everton": "NEW (H)", "Newcastle United": "EVE (A)", "Fulham": "MCI (H)", "Manchester City": "FUL (A)", "Ipswich": "TOT (H)", "Tottenham": "IPS (A)", "Leeds": "BOU (H)", "Bournemouth": "LEE (A)", "Manchester United": "CHE (H)", "Chelsea": "MUN (A)", "Nottingham Forest": "BRE (H)", "Brentford": "NFO (A)", "Sunderland": "AVL (H)", "Aston Villa": "SUN (A)"}, "25": {"Aston Villa": "BOU (H)", "Bournemouth": "AVL (A)", "Coventry": "LIV (H)", "Liverpool": "COV (A)", "Crystal Palace": "BRE (H)", "Brentford": "CRY (A)", "Everton": "LEE (H)", "Leeds": "EVE (A)", "Fulham": "NFO (H)", "Nottingham Forest": "FUL (A)", "Hull": "SUN (H)", "Sunderland": "HUL (A)", "Ipswich": "ARS (H)", "Arsenal": "IPS (A)", "Manchester United": "BHA (H)", "Brighton": "MUN (A)", "Newcastle United": "CHE (H)", "Chelsea": "NEW (A)", "Tottenham": "MCI (H)", "Manchester City": "TOT (A)"}, "26": {"Arsenal": "FUL (H)", "Fulham": "ARS (A)", "Bournemouth": "CRY (H)", "Crystal Palace": "BOU (A)", "Brentford": "COV (H)", "Coventry": "BRE (A)", "Brighton": "TOT (H)", "Tottenham": "BHA (A)", "Chelsea": "IPS (H)", "Ipswich": "CHE (A)", "Leeds": "AVL (H)", "Aston Villa": "LEE (A)", "Liverpool": "HUL (H)", "Hull": "LIV (A)", "Manchester City": "NEW (H)", "Newcastle United": "MCI (A)", "Nottingham Forest": "MUN (H)", "Manchester United": "NFO (A)", "Sunderland": "EVE (H)", "Everton": "SUN (A)"}, "27": {"Aston Villa": "CHE (H)", "Chelsea": "AVL (A)", "Coventry": "BOU (H)", "Bournemouth": "COV (A)", "Crystal Palace": "SUN (H)", "Sunderland": "CRY (A)", "Everton": "NFO (H)", "Nottingham Forest": "EVE (A)", "Fulham": "LEE (H)", "Leeds": "FUL (A)", "Hull": "MCI (H)", "Manchester City": "HUL (A)", "Ipswich": "BHA (H)", "Brighton": "IPS (A)", "Manchester United": "ARS (H)", "Arsenal": "MUN (A)", "Newcastle United": "BRE (H)", "Brentford": "NEW (A)", "Tottenham": "LIV (H)", "Liverpool": "TOT (A)"}, "28": {"Arsenal": "CRY (H)", "Crystal Palace": "ARS (A)", "Bournemouth": "TOT (H)", "Tottenham": "BOU (A)", "Brentford": "IPS (H)", "Ipswich": "BRE (A)", "Brighton": "FUL (H)", "Fulham": "BHA (A)", "Chelsea": "COV (H)", "Coventry": "CHE (A)", "Leeds": "HUL (H)", "Hull": "LEE (A)", "Liverpool": "AVL (H)", "Aston Villa": "LIV (A)", "Manchester City": "EVE (H)", "Everton": "MCI (A)", "Nottingham Forest": "NEW (H)", "Newcastle United": "NFO (A)", "Sunderland": "MUN (H)", "Manchester United": "SUN (A)"}, "29": {"Aston Villa": "HUL (H)", "Hull": "AVL (A)", "Bournemouth": "NEW (H)", "Newcastle United": "BOU (A)", "Chelsea": "ARS (H)", "Arsenal": "CHE (A)", "Coventry": "MCI (H)", "Manchester City": "COV (A)", "Crystal Palace": "FUL (H)", "Fulham": "CRY (A)", "Leeds": "BHA (H)", "Brighton": "LEE (A)", "Liverpool": "IPS (H)", "Ipswich": "LIV (A)", "Manchester United": "EVE (H)", "Everton": "MUN (A)", "Tottenham": "NFO (H)", "Nottingham Forest": "TOT (A)", "Sunderland": "BRE (H)", "Brentford": "SUN (A)"}, "30": {"Arsenal": "SUN (H)", "Sunderland": "ARS (A)", "Brentford": "BOU (H)", "Bournemouth": "BRE (A)", "Brighton": "COV (H)", "Coventry": "BHA (A)", "Everton": "TOT (H)", "Tottenham": "EVE (A)", "Fulham": "LIV (H)", "Liverpool": "FUL (A)", "Hull": "CHE (H)", "Chelsea": "HUL (A)", "Ipswich": "CRY (H)", "Crystal Palace": "IPS (A)", "Manchester City": "MUN (H)", "Manchester United": "MCI (A)", "Newcastle United": "LEE (H)", "Leeds": "NEW (A)", "Nottingham Forest": "AVL (H)", "Aston Villa": "NFO (A)"}, "31": {"Aston Villa": "BHA (H)", "Brighton": "AVL (A)", "Bournemouth": "MCI (H)", "Manchester City": "BOU (A)", "Chelsea": "FUL (H)", "Fulham": "CHE (A)", "Coventry": "ARS (H)", "Arsenal": "COV (A)", "Crystal Palace": "EVE (H)", "Everton": "CRY (A)", "Leeds": "NFO (H)", "Nottingham Forest": "LEE (A)", "Liverpool": "NEW (H)", "Newcastle United": "LIV (A)", "Manchester United": "HUL (H)", "Hull": "MUN (A)", "Tottenham": "BRE (H)", "Brentford": "TOT (A)", "Sunderland": "IPS (H)", "Ipswich": "SUN (A)"}, "32": {"Arsenal": "AVL (H)", "Aston Villa": "ARS (A)", "Brentford": "LEE (H)", "Leeds": "BRE (A)", "Brighton": "CHE (H)", "Chelsea": "BHA (A)", "Everton": "BOU (H)", "Bournemouth": "EVE (A)", "Fulham": "SUN (H)", "Sunderland": "FUL (A)", "Hull": "COV (H)", "Coventry": "HUL (A)", "Ipswich": "MUN (H)", "Manchester United": "IPS (A)", "Manchester City": "CRY (H)", "Crystal Palace": "MCI (A)", "Newcastle United": "TOT (H)", "Tottenham": "NEW (A)", "Nottingham Forest": "LIV (H)", "Liverpool": "NFO (A)"}, "33": {"Aston Villa": "COV (H)", "Coventry": "AVL (A)", "Bournemouth": "ARS (H)", "Arsenal": "BOU (A)", "Brentford": "FUL (H)", "Fulham": "BRE (A)", "Chelsea": "MCI (H)", "Manchester City": "CHE (A)", "Everton": "BHA (H)", "Brighton": "EVE (A)", "Leeds": "LIV (H)", "Liverpool": "LEE (A)", "Manchester United": "CRY (H)", "Crystal Palace": "MUN (A)", "Newcastle United": "IPS (H)", "Ipswich": "NEW (A)", "Nottingham Forest": "SUN (H)", "Sunderland": "NFO (A)", "Tottenham": "HUL (H)", "Hull": "TOT (A)"}, "34": {"Arsenal": "TOT (H)", "Tottenham": "ARS (A)", "Brighton": "NFO (H)", "Nottingham Forest": "BHA (A)", "Coventry": "MUN (H)", "Manchester United": "COV (A)", "Crystal Palace": "AVL (H)", "Aston Villa": "CRY (A)", "Fulham": "EVE (H)", "Everton": "FUL (A)", "Hull": "BOU (H)", "Bournemouth": "HUL (A)", "Ipswich": "LEE (H)", "Leeds": "IPS (A)", "Liverpool": "CHE (H)", "Chelsea": "LIV (A)", "Manchester City": "BRE (H)", "Brentford": "MCI (A)", "Sunderland": "NEW (H)", "Newcastle United": "SUN (A)"}, "35": {"Bournemouth": "MUN (H)", "Manchester United": "BOU (A)", "Brentford": "AVL (H)", "Aston Villa": "BRE (A)", "Brighton": "SUN (H)", "Sunderland": "BHA (A)", "Everton": "HUL (H)", "Hull": "EVE (A)", "Fulham": "IPS (H)", "Ipswich": "FUL (A)", "Leeds": "ARS (H)", "Arsenal": "LEE (A)", "Manchester City": "LIV (H)", "Liverpool": "MCI (A)", "Newcastle United": "COV (H)", "Coventry": "NEW (A)", "Nottingham Forest": "CRY (H)", "Crystal Palace": "NFO (A)", "Tottenham": "CHE (H)", "Chelsea": "TOT (A)"}, "36": {"Arsenal": "NFO (H)", "Nottingham Forest": "ARS (A)", "Aston Villa": "NEW (H)", "Newcastle United": "AVL (A)", "Chelsea": "EVE (H)", "Everton": "CHE (A)", "Coventry": "TOT (H)", "Tottenham": "COV (A)", "Crystal Palace": "BHA (H)", "Brighton": "CRY (A)", "Hull": "FUL (H)", "Fulham": "HUL (A)", "Ipswich": "MCI (H)", "Manchester City": "IPS (A)", "Liverpool": "BRE (H)", "Brentford": "LIV (A)", "Manchester United": "LEE (H)", "Leeds": "MUN (A)", "Sunderland": "BOU (H)", "Bournemouth": "SUN (A)"}, "37": {"Bournemouth": "CHE (H)", "Chelsea": "BOU (A)", "Brentford": "HUL (H)", "Hull": "BRE (A)", "Brighton": "LIV (H)", "Liverpool": "BHA (A)", "Everton": "ARS (H)", "Arsenal": "EVE (A)", "Fulham": "COV (H)", "Coventry": "FUL (A)", "Leeds": "SUN (H)", "Sunderland": "LEE (A)", "Manchester City": "AVL (H)", "Aston Villa": "MCI (A)", "Newcastle United": "CRY (H)", "Crystal Palace": "NEW (A)", "Nottingham Forest": "IPS (H)", "Ipswich": "NFO (A)", "Tottenham": "MUN (H)", "Manchester United": "TOT (A)"}, "38": {"Arsenal": "BHA (H)", "Brighton": "ARS (A)", "Aston Villa": "TOT (H)", "Tottenham": "AVL (A)", "Chelsea": "BRE (H)", "Brentford": "CHE (A)", "Coventry": "NFO (H)", "Nottingham Forest": "COV (A)", "Crystal Palace": "LEE (H)", "Leeds": "CRY (A)", "Hull": "NEW (H)", "Newcastle United": "HUL (A)", "Ipswich": "EVE (H)", "Everton": "IPS (A)", "Liverpool": "BOU (H)", "Bournemouth": "LIV (A)", "Manchester United": "FUL (H)", "Fulham": "MUN (A)", "Sunderland": "MCI (H)", "Manchester City": "SUN (A)"}};
-const FIXTURE_XG = {"6": {"Arsenal": {"f": 2.137, "a": 0.737, "cs": 0.469}, "Aston Villa": {"f": 1.447, "a": 1.462, "cs": 0.219}, "Bournemouth": {"f": 1.35, "a": 2.034, "cs": 0.122}, "Brentford": {"f": 1.462, "a": 1.447, "cs": 0.222}, "Brighton": {"f": 1.376, "a": 1.333, "cs": 0.249}, "Chelsea": {"f": 2.034, "a": 1.35, "cs": 0.251}, "Coventry": {"f": 1.272, "a": 1.623, "cs": 0.184}, "Crystal Palace": {"f": 1.271, "a": 1.259, "cs": 0.268}, "Everton": {"f": 1.439, "a": 1.011, "cs": 0.348}, "Fulham": {"f": 1.439, "a": 1.396, "cs": 0.234}, "Hull": {"f": 1.011, "a": 1.439, "cs": 0.22}, "Ipswich": {"f": 1.396, "a": 1.439, "cs": 0.224}, "Leeds": {"f": 0.737, "a": 2.137, "cs": 0.106}, "Liverpool": {"f": 1.492, "a": 1.568, "cs": 0.197}, "Manchester City": {"f": 1.568, "a": 1.492, "cs": 0.213}, "Manchester United": {"f": 2.022, "a": 1.202, "cs": 0.291}, "Newcastle United": {"f": 1.623, "a": 1.272, "cs": 0.268}, "Nottingham Forest": {"f": 1.259, "a": 1.271, "cs": 0.264}, "Sunderland": {"f": 1.333, "a": 1.376, "cs": 0.238}, "Tottenham": {"f": 1.202, "a": 2.022, "cs": 0.122}}, "7": {"Arsenal": {"f": 1.77, "a": 0.856, "cs": 0.412}, "Aston Villa": {"f": 1.332, "a": 1.7, "cs": 0.171}, "Bournemouth": {"f": 1.616, "a": 1.129, "cs": 0.31}, "Brentford": {"f": 1.502, "a": 1.62, "cs": 0.187}, "Brighton": {"f": 2.101, "a": 1.027, "cs": 0.349}, "Chelsea": {"f": 1.584, "a": 1.421, "cs": 0.229}, "Coventry": {"f": 0.972, "a": 2.114, "cs": 0.11}, "Crystal Palace": {"f": 1.027, "a": 2.101, "cs": 0.112}, "Everton": {"f": 1.421, "a": 1.584, "cs": 0.193}, "Fulham": {"f": 1.903, "a": 1.059, "cs": 0.336}, "Hull": {"f": 1.059, "a": 1.903, "cs": 0.137}, "Ipswich": {"f": 0.822, "a": 2.742, "cs": 0.057}, "Leeds": {"f": 1.423, "a": 1.539, "cs": 0.202}, "Liverpool": {"f": 1.62, "a": 1.502, "cs": 0.212}, "Manchester City": {"f": 2.742, "a": 0.822, "cs": 0.435}, "Manchester United": {"f": 1.539, "a": 1.423, "cs": 0.229}, "Newcastle United": {"f": 1.7, "a": 1.332, "cs": 0.252}, "Nottingham Forest": {"f": 0.856, "a": 1.77, "cs": 0.155}, "Sunderland": {"f": 1.129, "a": 1.616, "cs": 0.184}, "Tottenham": {"f": 2.114, "a": 0.972, "cs": 0.369}}, "8": {"Arsenal": {"f": 2.105, "a": 0.795, "cs": 0.441}, "Aston Villa": {"f": 1.236, "a": 1.76, "cs": 0.16}, "Bournemouth": {"f": 1.224, "a": 1.981, "cs": 0.127}, "Brentford": {"f": 1.695, "a": 1.189, "cs": 0.292}, "Brighton": {"f": 1.189, "a": 1.95, "cs": 0.131}, "Chelsea": {"f": 1.966, "a": 1.158, "cs": 0.304}, "Coventry": {"f": 1.335, "a": 1.469, "cs": 0.216}, "Crystal Palace": {"f": 1.415, "a": 1.492, "cs": 0.212}, "Everton": {"f": 0.795, "a": 2.105, "cs": 0.11}, "Fulham": {"f": 1.469, "a": 1.335, "cs": 0.25}, "Hull": {"f": 1.189, "a": 1.695, "cs": 0.17}, "Ipswich": {"f": 1.352, "a": 1.46, "cs": 0.218}, "Leeds": {"f": 1.342, "a": 1.411, "cs": 0.23}, "Liverpool": {"f": 1.95, "a": 1.189, "cs": 0.295}, "Manchester City": {"f": 1.76, "a": 1.236, "cs": 0.279}, "Manchester United": {"f": 1.981, "a": 1.224, "cs": 0.284}, "Newcastle United": {"f": 1.492, "a": 1.415, "cs": 0.23}, "Nottingham Forest": {"f": 1.46, "a": 1.352, "cs": 0.245}, "Sunderland": {"f": 1.411, "a": 1.342, "cs": 0.247}, "Tottenham": {"f": 1.158, "a": 1.966, "cs": 0.129}}, "9": {"Arsenal": {"f": 1.57, "a": 1.433, "cs": 0.227}, "Aston Villa": {"f": 1.707, "a": 1.173, "cs": 0.297}, "Bournemouth": {"f": 1.735, "a": 1.292, "cs": 0.263}, "Brentford": {"f": 1.72, "a": 1.2, "cs": 0.289}, "Brighton": {"f": 1.07, "a": 2.05, "cs": 0.118}, "Chelsea": {"f": 1.891, "a": 1.37, "cs": 0.244}, "Coventry": {"f": 1.376, "a": 1.304, "cs": 0.256}, "Crystal Palace": {"f": 1.187, "a": 1.716, "cs": 0.167}, "Everton": {"f": 1.162, "a": 1.669, "cs": 0.175}, "Fulham": {"f": 1.173, "a": 1.707, "cs": 0.168}, "Hull": {"f": 1.447, "a": 1.333, "cs": 0.25}, "Ipswich": {"f": 1.333, "a": 1.447, "cs": 0.221}, "Leeds": {"f": 1.292, "a": 1.735, "cs": 0.164}, "Liverpool": {"f": 1.433, "a": 1.57, "cs": 0.196}, "Manchester City": {"f": 2.05, "a": 1.07, "cs": 0.333}, "Manchester United": {"f": 1.37, "a": 1.891, "cs": 0.141}, "Newcastle United": {"f": 1.669, "a": 1.162, "cs": 0.3}, "Nottingham Forest": {"f": 1.2, "a": 1.72, "cs": 0.166}, "Sunderland": {"f": 1.304, "a": 1.376, "cs": 0.238}, "Tottenham": {"f": 1.716, "a": 1.187, "cs": 0.293}}, "10": {"Arsenal": {"f": 2.534, "a": 0.596, "cs": 0.545}, "Aston Villa": {"f": 1.228, "a": 1.844, "cs": 0.147}, "Bournemouth": {"f": 1.578, "a": 1.374, "cs": 0.241}, "Brentford": {"f": 1.283, "a": 1.734, "cs": 0.164}, "Brighton": {"f": 1.734, "a": 1.283, "cs": 0.266}, "Chelsea": {"f": 1.768, "a": 1.149, "cs": 0.305}, "Coventry": {"f": 0.978, "a": 1.798, "cs": 0.152}, "Crystal Palace": {"f": 1.242, "a": 1.792, "cs": 0.155}, "Everton": {"f": 1.798, "a": 0.978, "cs": 0.363}, "Fulham": {"f": 1.41, "a": 1.487, "cs": 0.213}, "Hull": {"f": 0.596, "a": 2.534, "cs": 0.07}, "Ipswich": {"f": 1.374, "a": 1.578, "cs": 0.194}, "Leeds": {"f": 1.494, "a": 1.424, "cs": 0.228}, "Liverpool": {"f": 1.792, "a": 1.242, "cs": 0.278}, "Manchester City": {"f": 1.845, "a": 1.131, "cs": 0.311}, "Manchester United": {"f": 1.844, "a": 1.228, "cs": 0.282}, "Newcastle United": {"f": 1.487, "a": 1.41, "cs": 0.231}, "Nottingham Forest": {"f": 1.131, "a": 1.845, "cs": 0.146}, "Sunderland": {"f": 1.149, "a": 1.768, "cs": 0.158}, "Tottenham": {"f": 1.424, "a": 1.494, "cs": 0.212}}, "11": {"Arsenal": {"f": 1.756, "a": 1.171, "cs": 0.298}, "Aston Villa": {"f": 1.74, "a": 1.03, "cs": 0.344}, "Bournemouth": {"f": 1.674, "a": 1.282, "cs": 0.265}, "Brentford": {"f": 1.626, "a": 1.214, "cs": 0.284}, "Brighton": {"f": 1.771, "a": 1.129, "cs": 0.311}, "Chelsea": {"f": 2.112, "a": 1.063, "cs": 0.336}, "Coventry": {"f": 1.339, "a": 1.474, "cs": 0.215}, "Crystal Palace": {"f": 1.474, "a": 1.339, "cs": 0.249}, "Everton": {"f": 1.214, "a": 1.626, "cs": 0.183}, "Fulham": {"f": 0.876, "a": 2.23, "cs": 0.097}, "Hull": {"f": 1.129, "a": 1.771, "cs": 0.157}, "Ipswich": {"f": 1.024, "a": 1.899, "cs": 0.137}, "Leeds": {"f": 1.063, "a": 2.112, "cs": 0.111}, "Liverpool": {"f": 1.945, "a": 1.294, "cs": 0.265}, "Manchester City": {"f": 2.23, "a": 0.876, "cs": 0.408}, "Manchester United": {"f": 1.294, "a": 1.945, "cs": 0.133}, "Newcastle United": {"f": 1.171, "a": 1.756, "cs": 0.16}, "Nottingham Forest": {"f": 1.282, "a": 1.674, "cs": 0.175}, "Sunderland": {"f": 1.03, "a": 1.74, "cs": 0.161}, "Tottenham": {"f": 1.899, "a": 1.024, "cs": 0.348}}, "12": {"Arsenal": {"f": 1.742, "a": 1.232, "cs": 0.28}, "Aston Villa": {"f": 1.578, "a": 1.275, "cs": 0.266}, "Bournemouth": {"f": 1.399, "a": 1.562, "cs": 0.197}, "Brentford": {"f": 1.268, "a": 1.869, "cs": 0.143}, "Brighton": {"f": 1.668, "a": 1.324, "cs": 0.254}, "Chelsea": {"f": 1.699, "a": 1.325, "cs": 0.254}, "Coventry": {"f": 1.083, "a": 1.808, "cs": 0.151}, "Crystal Palace": {"f": 1.825, "a": 1.024, "cs": 0.347}, "Everton": {"f": 1.266, "a": 1.651, "cs": 0.179}, "Fulham": {"f": 1.562, "a": 1.399, "cs": 0.234}, "Hull": {"f": 1.024, "a": 1.825, "cs": 0.148}, "Ipswich": {"f": 1.275, "a": 1.578, "cs": 0.193}, "Leeds": {"f": 1.808, "a": 1.083, "cs": 0.327}, "Liverpool": {"f": 1.651, "a": 1.266, "cs": 0.269}, "Manchester City": {"f": 1.232, "a": 1.742, "cs": 0.163}, "Manchester United": {"f": 1.869, "a": 1.268, "cs": 0.271}, "Newcastle United": {"f": 1.324, "a": 1.668, "cs": 0.176}, "Nottingham Forest": {"f": 1.325, "a": 1.699, "cs": 0.171}, "Sunderland": {"f": 1.298, "a": 1.445, "cs": 0.221}, "Tottenham": {"f": 1.445, "a": 1.298, "cs": 0.259}}, "13": {"Arsenal": {"f": 1.823, "a": 1.133, "cs": 0.311}, "Aston Villa": {"f": 1.581, "a": 1.203, "cs": 0.287}, "Bournemouth": {"f": 1.537, "a": 1.512, "cs": 0.209}, "Brentford": {"f": 1.133, "a": 1.823, "cs": 0.149}, "Brighton": {"f": 1.512, "a": 1.537, "cs": 0.203}, "Chelsea": {"f": 2.087, "a": 1.044, "cs": 0.342}, "Coventry": {"f": 1.505, "a": 1.292, "cs": 0.261}, "Crystal Palace": {"f": 1.044, "a": 2.087, "cs": 0.113}, "Everton": {"f": 1.203, "a": 1.581, "cs": 0.192}, "Fulham": {"f": 1.182, "a": 1.71, "cs": 0.168}, "Hull": {"f": 1.251, "a": 1.529, "cs": 0.203}, "Ipswich": {"f": 1.292, "a": 1.505, "cs": 0.208}, "Leeds": {"f": 0.896, "a": 2.265, "cs": 0.094}, "Liverpool": {"f": 2.151, "a": 0.85, "cs": 0.418}, "Manchester City": {"f": 2.265, "a": 0.896, "cs": 0.4}, "Manchester United": {"f": 1.473, "a": 1.616, "cs": 0.187}, "Newcastle United": {"f": 1.616, "a": 1.473, "cs": 0.218}, "Nottingham Forest": {"f": 1.529, "a": 1.251, "cs": 0.272}, "Sunderland": {"f": 0.85, "a": 2.151, "cs": 0.105}, "Tottenham": {"f": 1.71, "a": 1.182, "cs": 0.294}}, "14": {"Arsenal": {"f": 1.815, "a": 1.1, "cs": 0.321}, "Aston Villa": {"f": 1.712, "a": 1.177, "cs": 0.296}, "Bournemouth": {"f": 1.976, "a": 1.009, "cs": 0.354}, "Brentford": {"f": 1.275, "a": 1.782, "cs": 0.157}, "Brighton": {"f": 1.483, "a": 1.419, "cs": 0.229}, "Chelsea": {"f": 1.707, "a": 1.514, "cs": 0.21}, "Coventry": {"f": 0.916, "a": 2.204, "cs": 0.1}, "Crystal Palace": {"f": 1.177, "a": 1.712, "cs": 0.167}, "Everton": {"f": 1.594, "a": 1.173, "cs": 0.296}, "Fulham": {"f": 1.173, "a": 1.594, "cs": 0.189}, "Hull": {"f": 1.009, "a": 1.976, "cs": 0.127}, "Ipswich": {"f": 1.125, "a": 1.782, "cs": 0.155}, "Leeds": {"f": 1.782, "a": 1.125, "cs": 0.313}, "Liverpool": {"f": 1.514, "a": 1.707, "cs": 0.171}, "Manchester City": {"f": 1.782, "a": 1.275, "cs": 0.268}, "Manchester United": {"f": 2.204, "a": 0.916, "cs": 0.391}, "Newcastle United": {"f": 1.831, "a": 0.992, "cs": 0.359}, "Nottingham Forest": {"f": 1.419, "a": 1.483, "cs": 0.214}, "Sunderland": {"f": 0.992, "a": 1.831, "cs": 0.147}, "Tottenham": {"f": 1.1, "a": 1.815, "cs": 0.15}}, "15": {"Arsenal": {"f": 2.279, "a": 0.855, "cs": 0.417}, "Aston Villa": {"f": 1.604, "a": 1.23, "cs": 0.279}, "Bournemouth": {"f": 0.855, "a": 2.279, "cs": 0.092}, "Brentford": {"f": 1.444, "a": 1.47, "cs": 0.217}, "Brighton": {"f": 1.7, "a": 1.154, "cs": 0.303}, "Chelsea": {"f": 1.25, "a": 1.953, "cs": 0.131}, "Coventry": {"f": 1.23, "a": 1.604, "cs": 0.187}, "Crystal Palace": {"f": 1.392, "a": 1.641, "cs": 0.182}, "Everton": {"f": 1.154, "a": 1.7, "cs": 0.169}, "Fulham": {"f": 1.47, "a": 1.444, "cs": 0.223}, "Hull": {"f": 1.187, "a": 1.651, "cs": 0.178}, "Ipswich": {"f": 1.233, "a": 1.668, "cs": 0.176}, "Leeds": {"f": 1.0, "a": 2.165, "cs": 0.104}, "Liverpool": {"f": 2.165, "a": 1.0, "cs": 0.359}, "Manchester City": {"f": 1.953, "a": 1.25, "cs": 0.277}, "Manchester United": {"f": 1.641, "a": 1.392, "cs": 0.237}, "Newcastle United": {"f": 1.668, "a": 1.233, "cs": 0.279}, "Nottingham Forest": {"f": 1.334, "a": 1.364, "cs": 0.241}, "Sunderland": {"f": 1.364, "a": 1.334, "cs": 0.249}, "Tottenham": {"f": 1.651, "a": 1.187, "cs": 0.292}}};    
+const FIXTURE_XG = {"6": {"Arsenal": {"f": 2.137, "a": 0.737, "cs": 0.469}, "Aston Villa": {"f": 1.447, "a": 1.462, "cs": 0.219}, "Bournemouth": {"f": 1.35, "a": 2.034, "cs": 0.122}, "Brentford": {"f": 1.462, "a": 1.447, "cs": 0.222}, "Brighton": {"f": 1.383, "a": 1.341, "cs": 0.247}, "Chelsea": {"f": 2.034, "a": 1.35, "cs": 0.251}, "Coventry": {"f": 1.272, "a": 1.623, "cs": 0.184}, "Crystal Palace": {"f": 1.271, "a": 1.259, "cs": 0.268}, "Everton": {"f": 1.439, "a": 1.011, "cs": 0.348}, "Fulham": {"f": 1.439, "a": 1.396, "cs": 0.234}, "Hull": {"f": 1.011, "a": 1.439, "cs": 0.22}, "Ipswich": {"f": 1.396, "a": 1.439, "cs": 0.224}, "Leeds": {"f": 0.737, "a": 2.137, "cs": 0.106}, "Liverpool": {"f": 1.492, "a": 1.568, "cs": 0.197}, "Manchester City": {"f": 1.568, "a": 1.492, "cs": 0.213}, "Manchester United": {"f": 2.022, "a": 1.202, "cs": 0.291}, "Newcastle United": {"f": 1.623, "a": 1.272, "cs": 0.268}, "Nottingham Forest": {"f": 1.259, "a": 1.271, "cs": 0.264}, "Sunderland": {"f": 1.341, "a": 1.383, "cs": 0.236}, "Tottenham": {"f": 1.202, "a": 2.022, "cs": 0.122}}, "7": {"Arsenal": {"f": 1.77, "a": 0.856, "cs": 0.412}, "Aston Villa": {"f": 1.332, "a": 1.7, "cs": 0.171}, "Bournemouth": {"f": 1.616, "a": 1.129, "cs": 0.31}, "Brentford": {"f": 1.502, "a": 1.62, "cs": 0.187}, "Brighton": {"f": 2.101, "a": 1.027, "cs": 0.349}, "Chelsea": {"f": 1.584, "a": 1.421, "cs": 0.229}, "Coventry": {"f": 0.972, "a": 2.114, "cs": 0.11}, "Crystal Palace": {"f": 1.027, "a": 2.101, "cs": 0.112}, "Everton": {"f": 1.421, "a": 1.584, "cs": 0.193}, "Fulham": {"f": 1.903, "a": 1.059, "cs": 0.336}, "Hull": {"f": 1.059, "a": 1.903, "cs": 0.137}, "Ipswich": {"f": 0.822, "a": 2.742, "cs": 0.057}, "Leeds": {"f": 1.423, "a": 1.539, "cs": 0.202}, "Liverpool": {"f": 1.62, "a": 1.502, "cs": 0.212}, "Manchester City": {"f": 2.742, "a": 0.822, "cs": 0.435}, "Manchester United": {"f": 1.539, "a": 1.423, "cs": 0.229}, "Newcastle United": {"f": 1.7, "a": 1.332, "cs": 0.252}, "Nottingham Forest": {"f": 0.856, "a": 1.77, "cs": 0.155}, "Sunderland": {"f": 1.129, "a": 1.616, "cs": 0.184}, "Tottenham": {"f": 2.114, "a": 0.972, "cs": 0.369}}, "8": {"Arsenal": {"f": 2.106, "a": 0.796, "cs": 0.441}, "Aston Villa": {"f": 1.236, "a": 1.76, "cs": 0.16}, "Bournemouth": {"f": 1.224, "a": 1.981, "cs": 0.127}, "Brentford": {"f": 1.696, "a": 1.19, "cs": 0.292}, "Brighton": {"f": 1.19, "a": 1.951, "cs": 0.131}, "Chelsea": {"f": 1.966, "a": 1.158, "cs": 0.304}, "Coventry": {"f": 1.335, "a": 1.469, "cs": 0.216}, "Crystal Palace": {"f": 1.415, "a": 1.492, "cs": 0.212}, "Everton": {"f": 0.796, "a": 2.106, "cs": 0.109}, "Fulham": {"f": 1.469, "a": 1.335, "cs": 0.249}, "Hull": {"f": 1.19, "a": 1.696, "cs": 0.17}, "Ipswich": {"f": 1.352, "a": 1.46, "cs": 0.218}, "Leeds": {"f": 1.342, "a": 1.412, "cs": 0.229}, "Liverpool": {"f": 1.951, "a": 1.19, "cs": 0.294}, "Manchester City": {"f": 1.76, "a": 1.236, "cs": 0.279}, "Manchester United": {"f": 1.981, "a": 1.224, "cs": 0.284}, "Newcastle United": {"f": 1.492, "a": 1.415, "cs": 0.23}, "Nottingham Forest": {"f": 1.46, "a": 1.352, "cs": 0.245}, "Sunderland": {"f": 1.412, "a": 1.342, "cs": 0.247}, "Tottenham": {"f": 1.158, "a": 1.966, "cs": 0.129}}, "9": {"Arsenal": {"f": 1.57, "a": 1.433, "cs": 0.226}, "Aston Villa": {"f": 1.707, "a": 1.173, "cs": 0.297}, "Bournemouth": {"f": 1.735, "a": 1.292, "cs": 0.263}, "Brentford": {"f": 1.721, "a": 1.201, "cs": 0.289}, "Brighton": {"f": 1.071, "a": 2.051, "cs": 0.118}, "Chelsea": {"f": 1.891, "a": 1.371, "cs": 0.244}, "Coventry": {"f": 1.377, "a": 1.306, "cs": 0.256}, "Crystal Palace": {"f": 1.187, "a": 1.716, "cs": 0.167}, "Everton": {"f": 1.162, "a": 1.669, "cs": 0.175}, "Fulham": {"f": 1.173, "a": 1.707, "cs": 0.168}, "Hull": {"f": 1.447, "a": 1.333, "cs": 0.25}, "Ipswich": {"f": 1.333, "a": 1.447, "cs": 0.221}, "Leeds": {"f": 1.292, "a": 1.735, "cs": 0.164}, "Liverpool": {"f": 1.433, "a": 1.57, "cs": 0.196}, "Manchester City": {"f": 2.051, "a": 1.071, "cs": 0.333}, "Manchester United": {"f": 1.371, "a": 1.891, "cs": 0.141}, "Newcastle United": {"f": 1.669, "a": 1.162, "cs": 0.3}, "Nottingham Forest": {"f": 1.201, "a": 1.721, "cs": 0.166}, "Sunderland": {"f": 1.306, "a": 1.377, "cs": 0.237}, "Tottenham": {"f": 1.716, "a": 1.187, "cs": 0.293}}, "10": {"Arsenal": {"f": 2.534, "a": 0.596, "cs": 0.544}, "Aston Villa": {"f": 1.228, "a": 1.845, "cs": 0.147}, "Bournemouth": {"f": 1.578, "a": 1.374, "cs": 0.241}, "Brentford": {"f": 1.284, "a": 1.736, "cs": 0.164}, "Brighton": {"f": 1.736, "a": 1.284, "cs": 0.265}, "Chelsea": {"f": 1.769, "a": 1.15, "cs": 0.305}, "Coventry": {"f": 0.978, "a": 1.798, "cs": 0.152}, "Crystal Palace": {"f": 1.242, "a": 1.792, "cs": 0.155}, "Everton": {"f": 1.798, "a": 0.978, "cs": 0.363}, "Fulham": {"f": 1.41, "a": 1.487, "cs": 0.213}, "Hull": {"f": 0.596, "a": 2.534, "cs": 0.07}, "Ipswich": {"f": 1.374, "a": 1.578, "cs": 0.194}, "Leeds": {"f": 1.495, "a": 1.425, "cs": 0.228}, "Liverpool": {"f": 1.792, "a": 1.242, "cs": 0.278}, "Manchester City": {"f": 1.845, "a": 1.132, "cs": 0.311}, "Manchester United": {"f": 1.845, "a": 1.228, "cs": 0.282}, "Newcastle United": {"f": 1.487, "a": 1.41, "cs": 0.231}, "Nottingham Forest": {"f": 1.132, "a": 1.845, "cs": 0.146}, "Sunderland": {"f": 1.15, "a": 1.769, "cs": 0.158}, "Tottenham": {"f": 1.425, "a": 1.495, "cs": 0.211}}, "11": {"Arsenal": {"f": 1.757, "a": 1.171, "cs": 0.298}, "Aston Villa": {"f": 1.741, "a": 1.031, "cs": 0.344}, "Bournemouth": {"f": 1.674, "a": 1.282, "cs": 0.265}, "Brentford": {"f": 1.626, "a": 1.214, "cs": 0.284}, "Brighton": {"f": 1.772, "a": 1.13, "cs": 0.311}, "Chelsea": {"f": 2.113, "a": 1.063, "cs": 0.336}, "Coventry": {"f": 1.339, "a": 1.474, "cs": 0.215}, "Crystal Palace": {"f": 1.474, "a": 1.339, "cs": 0.249}, "Everton": {"f": 1.214, "a": 1.626, "cs": 0.183}, "Fulham": {"f": 0.877, "a": 2.23, "cs": 0.097}, "Hull": {"f": 1.13, "a": 1.772, "cs": 0.157}, "Ipswich": {"f": 1.024, "a": 1.9, "cs": 0.137}, "Leeds": {"f": 1.063, "a": 2.113, "cs": 0.11}, "Liverpool": {"f": 1.945, "a": 1.294, "cs": 0.265}, "Manchester City": {"f": 2.23, "a": 0.877, "cs": 0.407}, "Manchester United": {"f": 1.294, "a": 1.945, "cs": 0.133}, "Newcastle United": {"f": 1.171, "a": 1.757, "cs": 0.16}, "Nottingham Forest": {"f": 1.282, "a": 1.674, "cs": 0.175}, "Sunderland": {"f": 1.031, "a": 1.741, "cs": 0.161}, "Tottenham": {"f": 1.9, "a": 1.024, "cs": 0.348}}, "12": {"Arsenal": {"f": 1.743, "a": 1.232, "cs": 0.28}, "Aston Villa": {"f": 1.578, "a": 1.276, "cs": 0.266}, "Bournemouth": {"f": 1.399, "a": 1.562, "cs": 0.197}, "Brentford": {"f": 1.268, "a": 1.87, "cs": 0.143}, "Brighton": {"f": 1.669, "a": 1.325, "cs": 0.254}, "Chelsea": {"f": 1.699, "a": 1.326, "cs": 0.254}, "Coventry": {"f": 1.083, "a": 1.809, "cs": 0.151}, "Crystal Palace": {"f": 1.825, "a": 1.024, "cs": 0.347}, "Everton": {"f": 1.266, "a": 1.652, "cs": 0.179}, "Fulham": {"f": 1.562, "a": 1.399, "cs": 0.234}, "Hull": {"f": 1.024, "a": 1.825, "cs": 0.148}, "Ipswich": {"f": 1.276, "a": 1.578, "cs": 0.193}, "Leeds": {"f": 1.809, "a": 1.083, "cs": 0.327}, "Liverpool": {"f": 1.652, "a": 1.266, "cs": 0.269}, "Manchester City": {"f": 1.232, "a": 1.743, "cs": 0.163}, "Manchester United": {"f": 1.87, "a": 1.268, "cs": 0.271}, "Newcastle United": {"f": 1.325, "a": 1.669, "cs": 0.176}, "Nottingham Forest": {"f": 1.326, "a": 1.699, "cs": 0.171}, "Sunderland": {"f": 1.299, "a": 1.446, "cs": 0.221}, "Tottenham": {"f": 1.446, "a": 1.299, "cs": 0.259}}, "13": {"Arsenal": {"f": 1.824, "a": 1.133, "cs": 0.31}, "Aston Villa": {"f": 1.581, "a": 1.203, "cs": 0.287}, "Bournemouth": {"f": 1.538, "a": 1.513, "cs": 0.209}, "Brentford": {"f": 1.133, "a": 1.824, "cs": 0.149}, "Brighton": {"f": 1.513, "a": 1.538, "cs": 0.203}, "Chelsea": {"f": 2.087, "a": 1.044, "cs": 0.342}, "Coventry": {"f": 1.505, "a": 1.292, "cs": 0.261}, "Crystal Palace": {"f": 1.044, "a": 2.087, "cs": 0.113}, "Everton": {"f": 1.203, "a": 1.581, "cs": 0.192}, "Fulham": {"f": 1.183, "a": 1.711, "cs": 0.168}, "Hull": {"f": 1.252, "a": 1.529, "cs": 0.203}, "Ipswich": {"f": 1.292, "a": 1.505, "cs": 0.208}, "Leeds": {"f": 0.896, "a": 2.266, "cs": 0.094}, "Liverpool": {"f": 2.152, "a": 0.851, "cs": 0.417}, "Manchester City": {"f": 2.266, "a": 0.896, "cs": 0.4}, "Manchester United": {"f": 1.473, "a": 1.617, "cs": 0.187}, "Newcastle United": {"f": 1.617, "a": 1.473, "cs": 0.218}, "Nottingham Forest": {"f": 1.529, "a": 1.252, "cs": 0.272}, "Sunderland": {"f": 0.851, "a": 2.152, "cs": 0.105}, "Tottenham": {"f": 1.711, "a": 1.183, "cs": 0.294}}, "14": {"Arsenal": {"f": 1.815, "a": 1.1, "cs": 0.321}, "Aston Villa": {"f": 1.712, "a": 1.177, "cs": 0.296}, "Bournemouth": {"f": 1.976, "a": 1.009, "cs": 0.354}, "Brentford": {"f": 1.275, "a": 1.783, "cs": 0.156}, "Brighton": {"f": 1.484, "a": 1.42, "cs": 0.229}, "Chelsea": {"f": 1.707, "a": 1.514, "cs": 0.21}, "Coventry": {"f": 0.916, "a": 2.204, "cs": 0.1}, "Crystal Palace": {"f": 1.177, "a": 1.712, "cs": 0.167}, "Everton": {"f": 1.595, "a": 1.173, "cs": 0.296}, "Fulham": {"f": 1.173, "a": 1.595, "cs": 0.189}, "Hull": {"f": 1.009, "a": 1.976, "cs": 0.127}, "Ipswich": {"f": 1.125, "a": 1.783, "cs": 0.155}, "Leeds": {"f": 1.783, "a": 1.125, "cs": 0.313}, "Liverpool": {"f": 1.514, "a": 1.707, "cs": 0.171}, "Manchester City": {"f": 1.783, "a": 1.275, "cs": 0.268}, "Manchester United": {"f": 2.204, "a": 0.916, "cs": 0.391}, "Newcastle United": {"f": 1.832, "a": 0.993, "cs": 0.358}, "Nottingham Forest": {"f": 1.42, "a": 1.484, "cs": 0.214}, "Sunderland": {"f": 0.993, "a": 1.832, "cs": 0.147}, "Tottenham": {"f": 1.1, "a": 1.815, "cs": 0.15}}, "15": {"Arsenal": {"f": 2.279, "a": 0.856, "cs": 0.417}, "Aston Villa": {"f": 1.604, "a": 1.23, "cs": 0.279}, "Bournemouth": {"f": 0.856, "a": 2.279, "cs": 0.092}, "Brentford": {"f": 1.445, "a": 1.47, "cs": 0.217}, "Brighton": {"f": 1.701, "a": 1.154, "cs": 0.303}, "Chelsea": {"f": 1.25, "a": 1.953, "cs": 0.131}, "Coventry": {"f": 1.23, "a": 1.604, "cs": 0.187}, "Crystal Palace": {"f": 1.392, "a": 1.642, "cs": 0.182}, "Everton": {"f": 1.154, "a": 1.701, "cs": 0.169}, "Fulham": {"f": 1.47, "a": 1.445, "cs": 0.223}, "Hull": {"f": 1.188, "a": 1.652, "cs": 0.178}, "Ipswich": {"f": 1.234, "a": 1.668, "cs": 0.176}, "Leeds": {"f": 1.0, "a": 2.165, "cs": 0.104}, "Liverpool": {"f": 2.165, "a": 1.0, "cs": 0.359}, "Manchester City": {"f": 1.953, "a": 1.25, "cs": 0.277}, "Manchester United": {"f": 1.642, "a": 1.392, "cs": 0.237}, "Newcastle United": {"f": 1.668, "a": 1.234, "cs": 0.279}, "Nottingham Forest": {"f": 1.334, "a": 1.365, "cs": 0.241}, "Sunderland": {"f": 1.365, "a": 1.334, "cs": 0.249}, "Tottenham": {"f": 1.652, "a": 1.188, "cs": 0.292}}};    
 const FIXTURE_TEAM_SHORT = {"Arsenal": "ARS", "Aston Villa": "AVL", "Bournemouth": "BOU", "Brentford": "BRE", "Brighton": "BHA", "Chelsea": "CHE", "Coventry": "COV", "Crystal Palace": "CRY", "Everton": "EVE", "Fulham": "FUL", "Hull": "HUL", "Ipswich": "IPS", "Leeds": "LEE", "Liverpool": "LIV", "Manchester City": "MCI", "Manchester United": "MUN", "Newcastle United": "NEW", "Nottingham Forest": "NFO", "Tottenham": "TOT", "Sunderland": "SUN"};
 const BACKEND_URL = (window.location.protocol === 'file:' || window.location.hostname === '')
   ? 'http://localhost:5001'
@@ -19965,6 +20221,30 @@ function _apexBuildGo(liveBuild) {
     location.replace(u.toString());
   } catch (e) { try { location.reload(); } catch (e2) {} }
 }
+ 
+ 
+function _apexBannerOffset() {
+  try {
+    var h = 0;
+    ['apex-stale-banner', 'apex-build-banner'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el && el.offsetParent !== null) h += el.offsetHeight;
+    });
+    var top = document.getElementById('topbar');
+    if (top) top.style.marginTop = h ? (h + 'px') : '';
+  } catch (_eBo) {}
+}
+window.addEventListener('resize', _apexBannerOffset);
+ 
+ 
+function _apexBakedGwLocked() {
+  try {
+    if (typeof window !== 'undefined' && window.APEX_ARCHIVE) return false;
+    var g = TEAM_META && TEAM_META.start_gw;
+    var dl = +(((TEAM_META && TEAM_META.deadlines_by_gw) || {})[g] || 0);
+    return dl > 0 && Date.now() >= dl * 1000;
+  } catch (_eBl) { return false; }
+}
 async function _apexBuildFreshCheck(isBoot) {
   try {
      
@@ -19984,7 +20264,9 @@ async function _apexBuildFreshCheck(isBoot) {
      
     if (_apexBuildBannerUp) return;
     if (location.protocol === 'file:') return;
-    if (document.getElementById('apex-stale-banner')) return;   
+     
+     
+     
     const r = await fetch('/apex_build.json?t=' + Date.now(), { cache: 'no-store' });
     if (!r.ok) return;
     const j = await r.json();
@@ -20030,11 +20312,11 @@ async function _apexBuildFreshCheck(isBoot) {
       '<button onclick="_apexBuildGo(' + liveTs + ')" style="margin-left:12px;background:#fff;color:#0E6B4F;' +
       'border:none;padding:6px 14px;border-radius:6px;font-weight:700;cursor:pointer;">Refresh</button>';
     if (!document.body) return;                  
+    try { var _oldStale = document.getElementById('apex-stale-banner'); if (_oldStale) _oldStale.remove(); } catch (_eOs) {}
     document.body.appendChild(banner);
     if (!document.getElementById('apex-build-banner')) return;    
     _apexBuildBannerUp = true;                   
-    const top = document.getElementById('topbar');
-    if (top) top.style.marginTop = '44px';
+    _apexBannerOffset();
   } catch (e) {}
 }
 document.addEventListener('visibilitychange', function () {
@@ -20156,6 +20438,8 @@ async function _apexStalePoolCheck() {
     }
     if (!liveGw) return;
     if (liveGw > 38) liveGw = 38;   
+     
+    if (liveGw === bakedGw && _apexBakedGwLocked()) liveGw = Math.min(38, bakedGw + 1);
     window.APEX_STALE = {
       stale: (liveGw !== bakedGw),
       live_gw: liveGw,
@@ -20164,7 +20448,9 @@ async function _apexStalePoolCheck() {
     };
     if (liveGw !== bakedGw) {
       console.warn('[APEX STALE POOL]', { baked: bakedGw, live: liveGw, build: BUILD_VERSION });
-      const banner = document.createElement('div');
+       
+      if (_apexBuildBannerUp) return;
+      const banner = document.getElementById('apex-stale-banner') || document.createElement('div');
       banner.id = 'apex-stale-banner';
       banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999;' +
         'background:#b91c1c;color:#fff;padding:11px 18px;text-align:center;' +
@@ -20193,13 +20479,12 @@ async function _apexStalePoolCheck() {
         }
       } catch (_eUn) {}
       banner.innerHTML = 'GW' + bakedGw + ' is locked — fresh GW' + liveGw +
-        ' numbers are on their way.' + _updNote + ' Check back in a few minutes. ' +
+        ' numbers are on their way.' + _updNote + ' This page will tell you the moment they are published. ' +
         '<button onclick="location.reload(true)" style="margin-left:12px;background:#fff;color:#0E6B4F;' +
         'border:none;padding:6px 14px;border-radius:6px;font-weight:700;cursor:pointer;">Reload</button>';
-      document.body && document.body.appendChild(banner);
-       
-      const top = document.getElementById('topbar');
-      if (top) top.style.marginTop = '44px';
+      if (!banner.parentNode && document.body) document.body.appendChild(banner);
+      _apexBannerOffset();
+      try { if (typeof _apexBuildFreshCheck === 'function') _apexBuildFreshCheck(); } catch (_eBf) {}
     } else {
       console.log('[APEX] pool fresh — baked GW' + bakedGw + ' matches live GW' + liveGw + ' (build ' + BUILD_VERSION + ')');
     }
@@ -20213,6 +20498,19 @@ if (document.readyState === 'loading') {
 } else {
   _apexStalePoolCheck();
 }
+ 
+ 
+ 
+(function () {
+  try {
+    var g = TEAM_META && TEAM_META.start_gw;
+    var dl = +(((TEAM_META && TEAM_META.deadlines_by_gw) || {})[g] || 0) * 1000;
+    var wait = dl - Date.now();
+    if (dl > 0 && wait > 0 && wait < 2147000000) setTimeout(_apexStalePoolCheck, wait + 5000);
+  } catch (_eSr) {}
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) _apexStalePoolCheck(); });
+  setInterval(function () { if (_apexBakedGwLocked()) _apexStalePoolCheck(); }, 300000);
+})();
 
  
  
@@ -21213,8 +21511,8 @@ async function runLeagueSim() {
      
      
     errDiv.textContent = 'GW' + window.APEX_STALE.baked_gw + ' is locked — fresh GW'
-       + window.APEX_STALE.live_gw + ' numbers are on their way. Reload in a few minutes '
-       + 'to run the simulation on them.';
+       + window.APEX_STALE.live_gw + ' numbers are on their way. The page will tell you when '
+       + 'they land, then the simulation runs on them.';
     errDiv.style.display = 'block';
     return;
   }
@@ -21350,13 +21648,50 @@ async function runLeagueSim() {
  
 let _activeChips = { wc: true, fh: true, bb: true, tc: true };
 
+ 
+ 
+ 
+ 
+ 
+const _APEX_CHIP_HIST_NAME = { wc: 'wildcard', fh: 'freehit', bb: 'bboost', tc: '3xc' };
+function _apexChipSpentAt(c, gw) {
+  try {
+    const SPLIT = 20;                      
+    const g = (gw != null) ? +gw : +((TEAM_META && TEAM_META.gw_range) || [0])[0];
+    const half = (x) => (+x < SPLIT) ? 1 : 2;
+    const played = window._apexChipsPlayed || [];
+    for (const p of played) {
+      if (p && p.name === _APEX_CHIP_HIST_NAME[c] && p.event && half(p.event) === half(g)) return +p.event;
+    }
+  } catch (_eSp) {}
+  return 0;
+}
+window._apexChipSpentAt = _apexChipSpentAt;
+function _apexChipInPlay(c) { return !_apexChipSpentAt(c); }
+window._apexChipInPlay = _apexChipInPlay;
+
 function initChipSelectView() {
+   
    
   ['wc','fh','bb','tc'].forEach(c => {
     const chk = document.getElementById(`chk-${c}`);
-    if (chk && !_chipSelectInitialised) {
-      chk.checked = true;
+    if (!chk) return;
+    const spent = _apexChipSpentAt(c);
+    if (spent) {
+      chk.checked = false;
+      chk.disabled = true;
       toggleChipLabel(c);
+      try {
+        const st = document.querySelector(`#lbl-${c} .cs-card-state`);
+        if (st) st.textContent = 'Used GW' + spent;
+      } catch (_eSt) {}
+      _activeChips[c] = false;
+    } else {
+      chk.disabled = false;
+      if (!_chipSelectInitialised) {
+        chk.checked = true;
+        toggleChipLabel(c);
+      }
     }
   });
   _chipSelectInitialised = true;
@@ -21408,7 +21743,7 @@ function toggleChipLabel(chip) {
 function applyChipSelection() {
   ['wc','fh','bb','tc'].forEach(c => {
     const chk = document.getElementById(`chk-${c}`);
-    _activeChips[c] = chk ? chk.checked : true;
+    _activeChips[c] = (chk ? chk.checked : true) && _apexChipInPlay(c);    
   });
    
    
@@ -27253,6 +27588,62 @@ window._apexPlanReprice = function () {
 function _clearPlanState() {
   try { localStorage.removeItem(_planKey()); } catch (_e) {}
 }
+
+ 
+ 
+function _apexPlanMissingIds(plan, byId) {
+  const miss = [];
+  const sq = (plan && plan.squads) || {};
+  for (const k of Object.keys(sq)) {
+    const s = sq[k] || {};
+    for (const id of [...(s.xi || []), ...(s.bench || [])]) {
+      if (!byId(+id) && miss.indexOf(+id) < 0) miss.push(+id);
+    }
+  }
+  return miss;
+}
+window._apexPlanMissingIds = _apexPlanMissingIds;
+
+ 
+ 
+function _apexPlanBrokenText(ids) {
+  const nm = (ids || []).map(function (id) {
+    const n = (typeof PLAYER_NAMES !== 'undefined' && PLAYER_NAMES) ? PLAYER_NAMES[id] : null;
+    return n ? String(n) : null;
+  }).filter(Boolean);
+  const who = nm.length ? ' (' + nm.join(', ') + ')' : '';
+  return 'A player in your saved plan' + who + ' has left the league, so the plan '
+    + 'can no longer be followed and has been set aside. Its transfers and points '
+    + 'no longer apply - press Solve to re-plan.';
+}
+
+function _apexMarkPlanBroken(ids) {
+  const txt = _apexPlanBrokenText(ids);
+  window._apexPlanBroken = { ids: (ids || []).slice(), text: txt };
+  try { console.warn('[plan] ' + txt); } catch (_eW) {}
+  try {
+    const host = document.getElementById('engine-picks');
+    if (host && host.parentNode && !document.getElementById('apex-plan-broken')) {
+      const d = document.createElement('div');
+      d.id = 'apex-plan-broken';
+      d.setAttribute('role', 'alert');
+      d.style.cssText = 'margin:0 0 8px;padding:8px 12px;border-radius:8px;'
+        + 'background:rgba(217,119,6,.12);color:#B45309;font-size:.82rem;font-weight:600;';
+      d.textContent = '⚠ ' + txt;
+      host.parentNode.insertBefore(d, host);
+    }
+  } catch (_eD) {}
+}
+window._apexMarkPlanBroken = _apexMarkPlanBroken;
+
+ 
+function _apexClearPlanBroken() {
+  window._apexPlanBroken = null;
+  try {
+    const d = document.getElementById('apex-plan-broken');
+    if (d && d.parentNode) d.parentNode.removeChild(d);
+  } catch (_eC) {}
+}
 let _planRestoreTries = 0;
  
  
@@ -27419,6 +27810,20 @@ function _sanitizePlanBlob(plan) {
     return out;
   } catch (_eSan) { return null; }
 }
+ 
+ 
+ 
+function _apexKeptPlanReason(f) {
+  f = f || {};
+  if (!f.autoOn) return 'automatic re-pricing is switched off';
+  if (!(isFinite(f.deadline) && f.deadline > 0)) return 'the deadline for this gameweek is not known';
+  if (f.now >= f.deadline) return 'the deadline for this gameweek has passed';
+  if (f.explicitLoad) return 'you loaded it on purpose';
+  if (f.appliedMoves) return 'it holds transfers you applied';
+  return 'of an unknown reason';
+}
+window._apexKeptPlanReason = _apexKeptPlanReason;
+
 function _restorePlanState() {
   if (_planRestoreDone) return;
    
@@ -27590,11 +27995,23 @@ function _restorePlanState() {
           }
         } catch (_eAR) {}
         if (!_repriced) {
-          try { console.warn('[stale-plan] applied plan was priced on '
-            + (_st.saved || 'a pre-stamp build')
-            + ' - current build is ' + _st.current
-            + '. Deadline passed (or auto-reprice off), so it is KEPT as saved;'
-            + ' the tree and the plan card both say so.'); } catch (_eW2) {}
+           
+           
+           
+          try {
+            const _why = _apexKeptPlanReason({
+              autoOn: !(window.APEX_PLAN_AUTO_REPRICE === false),
+              deadline: +((TEAM_META.deadlines_by_gw || {})[String(TEAM_META.gw_range[0])]),
+              now: Math.floor(Date.now() / 1000),
+              explicitLoad: _explicitLoad, appliedMoves: _hasAppliedMoves,
+            });
+            window._apexPlanKeptWhy = _why;
+            console.warn('[stale-plan] applied plan was priced on '
+              + (_st.saved || 'a pre-stamp build')
+              + ' - current build is ' + _st.current
+              + '. Kept as saved because ' + _why
+              + '; the plan card, the Transfers tab and the tree all say it is on older numbers.');
+          } catch (_eW2) {}
         }
       }
     } catch (_eBk) {}
@@ -27619,8 +28036,24 @@ function _restorePlanState() {
      
      
      
+     
+     
+     
+     
+     
     const byId = (id) => (POOL_DATA.find(p => p.id === id)
-      || (typeof SQUAD_DATA !== 'undefined' ? SQUAD_DATA.find(p => p.id === id) : null));
+      || (typeof SQUAD_DATA !== 'undefined' ? SQUAD_DATA.find(p => p.id === id) : null)
+      || full.find(p => p && p.id === id) || null);
+    const _missingIds = _apexPlanMissingIds(plan, byId);
+    if (_missingIds.length) {
+      _apexMarkPlanBroken(_missingIds);
+      _clearPlanState();
+      window._apexAppliedCardMeta = null;
+      _planRestoreDone = true;
+      try { renderTransfers(computeTransfers(activeGwIdx)); } catch (_eRB) {}
+      try { if (typeof _renderRecoPreview === 'function') _renderRecoPreview(); } catch (_eRB2) {}
+      return;
+    }
     for (const [i, s] of Object.entries(plan.squads || {})) {
       const squad = [...(s.xi || []), ...(s.bench || [])].map(byId);
        
@@ -28427,6 +28860,15 @@ function runSolve() {
 
    
   if (_apexDeadlineLockActive()) { if (banner) banner.style.display = 'none'; _apexRenderDeadlineLock(section, status); return; }
+   
+   
+  if (_apexBakedGwLocked() || (window.APEX_STALE && window.APEX_STALE.stale && !window.APEX_STALE.offseason && !window.APEX_STALE.archive)) {
+    if (banner) banner.style.display = 'none';
+    if (status) status.textContent = 'GW' + TEAM_META.start_gw + ' is locked, so its transfers can no longer be made. '
+      + 'Fresh numbers for the next gameweek are on their way and this page will tell you when they land.';
+    try { _apexStalePoolCheck(); } catch (_eSl) {}
+    return;
+  }
 
   banner.style.display = 'none';
   section.style.display = 'none';
@@ -28608,7 +29050,7 @@ function _showChipSquadPanel(chipType, gw, squad, gwIdx, alreadyApplied, targetI
   const _budgetCap = TEAM_META.budget || (TEAM_META.squad_value + TEAM_META.bank);
   const _bankLeftRaw = _budgetCap - _squadCost;
    
-  const _bankLeft  = Math.abs(_bankLeftRaw) < 0.15 ? 0 : Math.max(0, _bankLeftRaw);
+  const _bankLeft  = Math.max(0, _apexBankTenths(_bankLeftRaw));   
 
   let html = `
     <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-top:8px;">
@@ -28712,7 +29154,7 @@ function _openChipReview(chipType, gw, squad, gwIdx) {
   const _squadCost   = squad.reduce((s, p) => s + _eff(p), 0);
   const _budgetCap   = (TEAM_META && (TEAM_META.budget || ((TEAM_META.squad_value || 0) + (TEAM_META.bank || 0)))) || 0;
   const _bankRaw     = _budgetCap - _squadCost;
-  const _bankLeft    = Math.abs(_bankRaw) < 0.15 ? 0 : Math.max(0, _bankRaw);
+  const _bankLeft    = Math.max(0, _apexBankTenths(_bankRaw));   
 
   const _titleEl    = document.getElementById('cr-title');
   const _costEl     = document.getElementById('cr-squad-cost');
@@ -29020,6 +29462,15 @@ function _applyFullSquad(squad, gwIdx, opts) {
  
  
  
+function _apexBankTenths(x) {
+  const r = Math.round((Number(x) || 0) * 10) / 10;
+  return (r > -0.05 && r < 0.05) ? 0 : r;
+}
+
+ 
+ 
+ 
+ 
  
  
  
@@ -29167,6 +29618,12 @@ const _pathPlanner = {
 };
 
  
+ 
+ 
+function _ppLeftLeague(p) {
+  return !!(p && p._left_league === true);
+}
+
 function _ppEffCost(p) {
   if (!p) return 0;
   const sp = (TEAM_META && TEAM_META.selling_prices || {})[String(p.id)];
@@ -30887,7 +31344,7 @@ async function _ppApplyUnlimitedEdit(gwIdx, opt) {
     }
     const spend = newSquad.reduce((sum, p) => sum + _ppEffCost(p), 0);
     const raw   = _ppUnlimitedBudget() - spend;
-    newBank = Math.abs(raw) < 0.05 ? 0 : Math.max(0, raw);
+    newBank = Math.max(0, _apexBankTenths(raw));    
   } else {
     if (!opt.newSquad) return false;
     newSquad = opt.newSquad;
@@ -32327,7 +32784,9 @@ async function _ppComputeOptions(workingSquad, gwIdx, bank, workingFt) {
      
      
      
-    if (out._no_apex_rating) continue;
+     
+     
+    if (out._no_apex_rating && !_ppLeftLeague(out)) continue;
     const outSell = _ppEffCost(out);
     const outHorizon = _ppHorizonXp(out, gwIdx);
     const samePos = (POOL_DATA || []).filter(p =>
@@ -33003,7 +33462,7 @@ function _ppComputeOptionsLocal(workingSquad, gwIdx, bank, workingFt) {
   const candidates = [];
   for (const out of workingSquad) {
     if (_ppIsLocked(out.id)) continue;           
-    if (out._no_apex_rating) continue;           
+    if (out._no_apex_rating && !_ppLeftLeague(out)) continue;    
     const outSell = _ppEffCost(out);
     const outHorizon = _ppHorizonXp(out, gwIdx);
     const samePos = (POOL_DATA || []).filter(p =>
@@ -33150,7 +33609,7 @@ async function _openPathPlanner(chipType, chipGw, chipSquad, chipGwIdx) {
   const chipCost = chipSquad.reduce((s, p) => s + _ppEffCost(p), 0);
   const budgetCap = (TEAM_META && (TEAM_META.budget || ((TEAM_META.squad_value || 0) + (TEAM_META.bank || 0)))) || 0;
   const bankRaw = budgetCap - chipCost;
-  _pathPlanner.workingBank = Math.abs(bankRaw) < 0.15 ? 0 : Math.max(0, bankRaw);
+  _pathPlanner.workingBank = Math.max(0, _apexBankTenths(bankRaw));   
 
    
    
@@ -33425,7 +33884,7 @@ function _ppRestoreFromSaved(startGwIdx) {
         const _uXp = _ppBestXiTotal(step.squad, step.gwIdx).total;
         const _spend = step.squad.reduce((t, p) => t + _ppEffCost(p), 0);
         const _raw = _ppUnlimitedBudget() - _spend;
-        bank = Math.abs(_raw) < 0.05 ? 0 : Math.max(0, _raw);
+        bank = Math.max(0, _apexBankTenths(_raw));    
         selections.push({
           gwIdx: step.gwIdx, gw: TEAM_META.gw_range[step.gwIdx],
           type: 'none', out: null, in: null,
@@ -35336,7 +35795,7 @@ async function _ppTakeWildcardInWalk(gwIdx, wcSquad) {
       || ((TEAM_META.squad_value || 0) + (TEAM_META.bank || 0)))) || 0;
     const wcCost = wcSquad.reduce((t, p) => t + _ppEffCost(p), 0);
     const bankRaw = budgetCap - wcCost;
-    const bankAfter = Math.abs(bankRaw) < 0.15 ? 0 : Math.max(0, bankRaw);
+    const bankAfter = Math.max(0, _apexBankTenths(bankRaw));   
      
      
      
@@ -35348,7 +35807,11 @@ async function _ppTakeWildcardInWalk(gwIdx, wcSquad) {
      
      
      
-    const _wcFtAfter = _ppNextFt(gwIdx, _pathPlanner.workingFt, 0);
+     
+     
+     
+     
+    const _wcFtAfter = _ppFtAfterSquadChip(gwIdx, _pathPlanner.workingFt);
     _pathPlanner.selections.push({
       gwIdx,
       gw: TEAM_META.gw_range[gwIdx],
@@ -35819,6 +36282,13 @@ function _apexRenderAppliedPicksCard(meta) {
    
    
    
+  try {
+    if (typeof window._apexPlanStale === 'function' && window._apexPlanStale().stale
+        && typeof window._apexPlanStaleHtml === 'function') _h += window._apexPlanStaleHtml('squad');
+  } catch (_eStN) {}
+   
+   
+   
    
   const _moves = meta.moves || [];
   if (_moves.length) {
@@ -36219,6 +36689,9 @@ function confirmPathPlan() {
       })(),
     };
     window._apexAppliedCardMeta = _meta;
+     
+     
+    if (typeof _apexClearPlanBroken === 'function') _apexClearPlanBroken();
     _apexRenderAppliedPicksCard(_meta);
   } catch (e) {   }
 
@@ -38742,7 +39215,7 @@ function _renderPitchFromState() {
     } catch (_diagErr) {}
   }
   const _pitchBankRaw = _budgetTotal - _pitchCost;
-  const _pitchBank   = Math.abs(_pitchBankRaw) < 0.15 ? 0 : _pitchBankRaw;
+  const _pitchBank   = _apexBankTenths(_pitchBankRaw);   
   const _bankColor   = _pitchBank < -0.05 ? '#ef4444' : 'inherit';
    
    
@@ -40133,6 +40606,39 @@ function _renderChipPlannerLoading() {
   if (recWrap) recWrap.innerHTML = '';
 }
 
+ 
+ 
+ 
+ 
+ 
+function _apexRehydrateChipSquad(arr) {
+  if (!Array.isArray(arr) || typeof POOL_DATA === 'undefined') return arr;
+  const hz = (TEAM_META && TEAM_META.gw_range) ? TEAM_META.gw_range.length : 0;
+  for (const e of arr) {
+    if (!e) continue;
+    const p = POOL_DATA.find(q => q && q.id === e.id);
+    if (!p) continue;
+    for (const k of Object.keys(p)) {
+      if (k === 'xp' || k === 'rolling_xp' || /_per_gw$/.test(k) || k === 'dgw_gw_idxs') {
+        const v = p[k];
+        e[k] = Array.isArray(v) ? (/_per_gw$/.test(k) && hz ? v.slice(0, hz) : v.slice()) : v;
+      }
+    }
+    if (Array.isArray(e.xp_per_gw)) e.rolling_xp = e.xp_per_gw.reduce((a, b) => a + (+b || 0), 0);
+  }
+  return arr;
+}
+function _apexRehydrateChipSquads() {
+  try {
+    for (const m of [(typeof WC_SQUADS !== 'undefined') ? WC_SQUADS : null,
+                     (typeof FH_SQUADS !== 'undefined') ? FH_SQUADS : null]) {
+      if (!m) continue;
+      for (const k of Object.keys(m)) _apexRehydrateChipSquad(m[k]);
+    }
+  } catch (_eRh) {}
+}
+window._apexRehydrateChipSquads = _apexRehydrateChipSquads;
+
 function _applyChipPlannerData(data) {
    
   CHIP_PLANNER.sequences = data.sequences || [];
@@ -40205,6 +40711,7 @@ function _applyChipPlannerData(data) {
   try { _apexChipUnavailableNote(); } catch (_eCu) {}
   if (data.wc_squads_json) Object.assign(WC_SQUADS, data.wc_squads_json);
   if (data.fh_squads_json) Object.assign(FH_SQUADS, data.fh_squads_json);
+  _apexRehydrateChipSquads();    
   _chipPlannerLoaded = true;
    
    
@@ -40346,10 +40853,10 @@ async function _runChipPlannerJS() {
     mySquad: (typeof _apexPlannerSquad === 'function') ? _apexPlannerSquad() : SQUAD_DATA,
     startGw: TEAM_META.start_gw,
     gwRange: TEAM_META.gw_range,
-    hasWc: !!_activeChips.wc,
-    hasFh: !!_activeChips.fh,
-    hasBb: !!_activeChips.bb,
-    hasTc: !!_activeChips.tc,
+    hasWc: !!_activeChips.wc && _apexChipInPlay('wc'),    
+    hasFh: !!_activeChips.fh && _apexChipInPlay('fh'),
+    hasBb: !!_activeChips.bb && _apexChipInPlay('bb'),
+    hasTc: !!_activeChips.tc && _apexChipInPlay('tc'),
     budget: TEAM_META.budget,
     dgwTeamsByGw: TEAM_META.dgw_teams_by_gw || {},
     bgwTeamsByGw: TEAM_META.bgw_teams_by_gw || {},
@@ -41341,9 +41848,8 @@ function initPoolView() {
       if (!window._apexCpWired) {
         window._apexCpWired = true;
         window.apexCustomProj.onRecompute(function () {
-          try { if (typeof renderPoolTable === 'function') renderPoolTable(); } catch (_e1) {}
-          try { if (typeof computeTransfers === 'function' && typeof renderTransfers === 'function'
-                    && typeof activeGwIdx === 'number') renderTransfers(computeTransfers(activeGwIdx)); } catch (_e2) {}
+           
+          try { _apexFullRecompute(); } catch (_e1) {}
         });
       }
     }
@@ -42284,6 +42790,13 @@ function _xmGw() {
   return (typeof TEAM_META !== 'undefined' && TEAM_META && +TEAM_META.start_gw) || 0;
 }
 function _xmId() {
+   
+   
+   
+  try {
+    const u = new URLSearchParams(window.location.search).get('id');
+    if (u && /^\d+$/.test(u)) return u;
+  } catch (_eU) {}
   try {
     const v = localStorage.getItem('apex_fpl_id');
     if (v && /^\d+$/.test(v)) return v;
@@ -42347,10 +42860,30 @@ function _saveXminsOverrides() {
  
  
  
+ 
+ 
+ 
+ 
+ 
+ 
+function _xmOwnId() {
+  try {
+    const v = localStorage.getItem('apex_my_team_v1');
+    if (v && /^\d+$/.test(v)) return v;
+  } catch (_eO) {}
+  return null;
+}
+function _xmIsOwnTeam(id) {
+  const own = _xmOwnId();
+  return !!(own && id != null && String(id) === own);
+}
+window._xmIsOwnTeam = _xmIsOwnTeam;
+
 let _xmPushTimer = null;
 function _syncPushDebounced() {
   if (typeof APEX_SYNC_URL === 'undefined' || !APEX_SYNC_URL) return;
   if (!_xmLoadedFor || _xmLoadedFor === 'anon') return;    
+  if (!_xmIsOwnTeam(_xmLoadedFor)) return;                
   if (_xmPushTimer) clearTimeout(_xmPushTimer);
   _xmPushTimer = setTimeout(function () {
     _xmPushTimer = null;
@@ -42364,24 +42897,75 @@ function _syncPushDebounced() {
   }, 800);
 }
 
+ 
+ 
+ 
+ 
+function _xmReconcileAction(localOv, localTs, remote) {
+  const lk = Object.keys(localOv || {});
+  const haveLocal = lk.length > 0;
+  const rov = (remote && remote.ov && typeof remote.ov === 'object') ? remote.ov : null;
+  const rts = remote ? (+remote.ts || 0) : 0;
+  if (rov && Object.keys(rov).length && rts > (localTs || 0)) {
+    if (!haveLocal) return 'adopt';
+    const same = lk.length === Object.keys(rov).length
+      && lk.every(function (k) { return +rov[k] === +localOv[k]; });
+    return same ? 'none' : 'ask';
+  }
+  return haveLocal ? 'push' : 'none';
+}
+window._xmReconcileAction = _xmReconcileAction;
+
+function _xmAdoptRemote(remote) {
+  _xminsOverrides = Object.assign({}, remote.ov || {});
+  _xmLocalTs = +remote.ts || 0;
+  _writeXminsBucket(_xmLocalTs);
+  if (typeof _applyXminsOverridesAndRender === 'function') _applyXminsOverridesAndRender();
+}
+
+function _xmAskRemote(remote) {
+  try {
+    const old = document.getElementById('apex-xm-sync-ask');
+    if (old) old.remove();
+    const n = Object.keys(remote.ov || {}).length;
+    const d = document.createElement('div');
+    d.id = 'apex-xm-sync-ask';
+    d.setAttribute('role', 'alert');
+    d.style.cssText = 'position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:10001;'
+      + 'max-width:min(92vw,460px);background:#fff;color:#16211D;border:1px solid #E4E8E4;'
+      + 'border-radius:12px;padding:12px 14px;font-size:.84rem;font-family:inherit;';
+    const t = document.createElement('div');
+    t.style.cssText = 'margin-bottom:8px;font-weight:600;';
+    t.textContent = 'Your team has newer minutes edits saved from another device ('
+      + n + ' player' + (n === 1 ? '' : 's') + '). This browser has different ones.';
+    const b1 = document.createElement('button');
+    b1.textContent = 'Use the other device’s';
+    b1.style.cssText = 'background:#0F6E56;color:#fff;border:0;border-radius:8px;padding:7px 12px;font-weight:700;cursor:pointer;margin-right:8px;font-family:inherit;';
+    const b2 = document.createElement('button');
+    b2.textContent = 'Keep this browser’s';
+    b2.style.cssText = 'background:#fff;color:#16211D;border:1px solid #E4E8E4;border-radius:8px;padding:7px 12px;font-weight:700;cursor:pointer;font-family:inherit;';
+    b1.onclick = function () { d.remove(); _xmAdoptRemote(remote); };
+    b2.onclick = function () { d.remove(); _saveXminsOverrides(); };
+    d.appendChild(t); d.appendChild(b1); d.appendChild(b2);
+    document.body.appendChild(d);
+  } catch (_eAsk) {}
+}
+
 function _syncPullThenReconcile(id) {
   if (typeof APEX_SYNC_URL === 'undefined' || !APEX_SYNC_URL) return;
   if (!id || id === 'anon') return;
+  if (!_xmIsOwnTeam(id)) return;    
   try {
     fetch(APEX_SYNC_URL + '/edits?id=' + id + '&gw=' + _xmGw())
       .then(function (r) { return (r && r.ok) ? r.json() : null; })
       .then(function (remote) {
-        const haveLocal = Object.keys(_xminsOverrides).length > 0;
-        if (remote && remote.ov && (+remote.ts || 0) > (_xmLocalTs || 0)) {
-           
-          _xminsOverrides = remote.ov || {};
-          _xmLocalTs = +remote.ts || 0;
-          _writeXminsBucket(_xmLocalTs);
-          if (Object.keys(_xminsOverrides).length > 0 &&
-              typeof _applyXminsOverridesAndRender === 'function') {
-            _applyXminsOverridesAndRender();
-          }
-        } else if (haveLocal) {
+        if (String(_xmLoadedFor) !== String(id)) return;    
+        const act = _xmReconcileAction(_xminsOverrides, _xmLocalTs, remote);
+        if (act === 'adopt') {
+          _xmAdoptRemote(remote);
+        } else if (act === 'ask') {
+          _xmAskRemote(remote);
+        } else if (act === 'push') {
            
           _syncPushDebounced();
         }
@@ -42398,6 +42982,9 @@ function _syncPullThenReconcile(id) {
  
 function _xminsAdoptId(id) {
   id = String(id);
+   
+   
+  const _hadEdits = Object.keys(_xminsOverrides || {}).length > 0;
   try {
     const idB    = _loadXminsBucketFor(id);
     const anonB  = _loadXminsBucketFor('anon');
@@ -42410,7 +42997,7 @@ function _xminsAdoptId(id) {
     _xmLoadedFor = id;
     try { localStorage.removeItem(_xmKey('anon')); } catch (_) {}
     _writeXminsBucket(_xmLocalTs);
-    if (Object.keys(_xminsOverrides).length > 0 &&
+    if ((_hadEdits || Object.keys(_xminsOverrides).length > 0) &&
         typeof _applyXminsOverridesAndRender === 'function') {
       _applyXminsOverridesAndRender();
     }
@@ -42564,6 +43151,41 @@ function _recomputeXpForNewXmins(pid, newXmins) {
  
  
  
+function _apexSyncCopiesFromPool() {
+  if (typeof POOL_DATA === 'undefined' || !Array.isArray(POOL_DATA)) return;
+  const byId = new Map(POOL_DATA.map(pp => [pp.id, pp]));
+  const sync = (o) => {
+    if (!o || typeof o !== 'object') return;
+    const pp = byId.get(o.id);
+    if (!pp || pp === o) return;
+    for (const k of Object.keys(pp)) {
+      if (k === 'xp' || k === 'total_xp' || k === 'xmins' || /_per_gw$/.test(k)) {
+        const v = pp[k];
+        o[k] = Array.isArray(v) ? v.slice() : v;
+      }
+    }
+    delete o._xp_base; delete o._cmp_base; delete o._cp_base;
+  };
+  const lists = [];
+  if (typeof SQUAD_DATA !== 'undefined' && Array.isArray(SQUAD_DATA)) lists.push(SQUAD_DATA);
+  if (typeof _xiPlayers !== 'undefined' && Array.isArray(_xiPlayers)) lists.push(_xiPlayers);
+  if (typeof _benchPlayers !== 'undefined' && Array.isArray(_benchPlayers)) lists.push(_benchPlayers);
+  try {
+    if (typeof _savedGwSquads !== 'undefined' && _savedGwSquads) {
+      for (const k of Object.keys(_savedGwSquads)) {
+        const s = _savedGwSquads[k];
+        if (s && Array.isArray(s.xi)) lists.push(s.xi);
+        if (s && Array.isArray(s.bench)) lists.push(s.bench);
+      }
+    }
+  } catch (_eSg) {}
+  for (const l of lists) l.forEach(sync);
+  if (typeof _apexRehydrateChipSquads === 'function') _apexRehydrateChipSquads();
+}
+
+ 
+ 
+ 
 function _applyXminsOverridesAndRender() {
   if (typeof SQUAD_DATA === 'undefined' || !Array.isArray(SQUAD_DATA)) return;
    
@@ -42647,18 +43269,11 @@ function _applyXminsOverridesAndRender() {
   }
    
    
-  SQUAD_DATA.forEach(p => {
-    const ov = _xminsOverrides[String(p.id)];
-    if (ov == null) return;
-    const pp = (typeof POOL_DATA !== 'undefined') ? POOL_DATA.find(x => x.id === p.id) : null;
-    const arr = pp ? _xmRecomputePerGw(pp, ov) : null;
-    if (!arr || !arr.length) return;
-    p.xp = arr[0];
-    if (Array.isArray(p.xp_per_gw) && p.xp_per_gw.length > 0) {
-      for (let i = 0; i < p.xp_per_gw.length && i < arr.length; i++) p.xp_per_gw[i] = arr[i];
-    }
-    p.xmins = +ov;
-  });
+   
+   
+   
+   
+  _apexSyncCopiesFromPool();
    
    
    
@@ -42703,7 +43318,48 @@ function _applyXminsOverridesAndRender() {
    
    
   if (typeof renderPoolTable === 'function') renderPoolTable();
+   
+   
+  try {
+    if (typeof renderTransfers === 'function' && typeof computeTransfers === 'function') {
+      renderTransfers(computeTransfers(activeGwIdx || 0));
+    }
+  } catch (_eRt) {}
+  try { if (typeof _renderRecoPreview === 'function') _renderRecoPreview(); } catch (_eRp) {}
 }
+ 
+ 
+ 
+function _apexFullRecompute() {
+  if (typeof _applyXminsOverridesAndRender === 'function') _applyXminsOverridesAndRender();
+}
+window._apexFullRecompute = _apexFullRecompute;
+try {
+  if (window.apexCustomProj && typeof window.apexCustomProj.onRecompute === 'function'
+      && !window._apexCpWired) {
+    window._apexCpWired = true;
+    window.apexCustomProj.onRecompute(_apexFullRecompute);
+     
+     
+    if (typeof window.apexCustomProj.rehydrate === 'function') window.apexCustomProj.rehydrate();
+  }
+} catch (_eCpW) {}
+
+ 
+ 
+ 
+ 
+function _xmParseMinutes(raw) {
+  const s = String(raw == null ? '' : raw).trim().replace(',', '.');
+  if (s === '') return { ok: false, empty: true };
+  if (!/^\d+(\.\d*)?$|^\.\d+$/.test(s)) {
+    return { ok: false, err: 'Enter the minutes as a number from 0 to 90.' };
+  }
+  const n = parseFloat(s);
+  if (!isFinite(n)) return { ok: false, err: 'Enter the minutes as a number from 0 to 90.' };
+  return { ok: true, v: Math.round(Math.max(0, Math.min(90, n)) * 10) / 10 };
+}
+window._xmParseMinutes = _xmParseMinutes;
 
  
 function _openXminsEditor(pid) {
@@ -42757,10 +43413,11 @@ function _openXminsEditor(pid) {
         <label style="font-size:12px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:#6B7671;">Predicted minutes</label>
       </div>
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;">
-        <input id="xmins-input" type="number" min="0" max="90" step="1" value="${Math.round(cur)}"
+        <input id="xmins-input" type="text" inputmode="decimal" autocomplete="off" value="${Math.round(cur)}"
           style="font-family:'Plus Jakarta Sans',sans-serif;font-size:28px;font-weight:800;color:#16211D;border:2px solid #E4E8E4;border-radius:10px;padding:10px 14px;width:100px;text-align:center;outline:none;" />
         <span style="font-size:18px;color:#6B7671;font-weight:600;">/ 90 min</span>
       </div>
+      <div id="xmins-err" role="alert" style="display:none;color:#B4453A;font-size:13px;font-weight:700;margin:-10px 0 12px;"></div>
       <input id="xmins-slider" type="range" min="0" max="90" step="1" value="${Math.round(cur)}"
         style="width:100%;accent-color:#0F6E56;margin-bottom:10px;" />
       <div style="display:flex;justify-content:space-between;font-size:11px;color:#9AA39E;font-weight:600;margin-bottom:18px;">
@@ -42791,7 +43448,10 @@ function _openXminsEditor(pid) {
   input.select();
 
    
-  input.addEventListener('input',  () => { slider.value = input.value; });
+  input.addEventListener('input',  () => {
+    const _pv = _xmParseMinutes(input.value);
+    if (_pv.ok) slider.value = String(_pv.v);
+  });
   slider.addEventListener('input', () => { input.value  = slider.value; });
 
   function close() { overlay.remove(); }
@@ -42810,7 +43470,16 @@ function _openXminsEditor(pid) {
     close();
   };
   document.getElementById('xmins-save').onclick = () => {
-    const v = Math.max(0, Math.min(90, parseInt(input.value, 10) || 0));
+     
+     
+    const _pv = _xmParseMinutes(input.value);
+    if (_pv.empty) { close(); return; }
+    if (!_pv.ok) {
+      const _er = document.getElementById('xmins-err');
+      if (_er) { _er.textContent = _pv.err; _er.style.display = 'block'; }
+      return;
+    }
+    const v = _pv.v;
     _xminsOverrides[String(pid)] = v;
     _saveXminsOverrides();
     _applyXminsOverridesAndRender();
@@ -42829,7 +43498,9 @@ window._openXminsEditor = _openXminsEditor;
  
  
 setTimeout(() => {
-  if (Object.keys(_xminsOverrides).length > 0) {
+  let _cpN = 0;
+  try { _cpN = (window.apexCustomProj && typeof window.apexCustomProj.count === 'function') ? window.apexCustomProj.count() : 0; } catch (_eCn) {}
+  if (Object.keys(_xminsOverrides).length > 0 || _cpN > 0) {
     _applyXminsOverridesAndRender();
   }
 }, 1500);
@@ -42868,7 +43539,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW6</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1790105931-GW6-3de8c09a</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1790114401-GW6-cf77794c</span>
 </footer>
 
 
@@ -43256,7 +43927,22 @@ s.setAttribute("data-cf-beacon",'{"token": "890700f621df42909deca8500a0df182"}')
           try { localStorage.removeItem('apex_fpl_id'); } catch (_eBadId) {}
           _human = 'We couldn\u2019t find a team with that ID. Double-check it on the FPL site (Points page \u2192 the number in the URL) and try again.';
         } else if (_apexInPostDeadlineWindow()) {
-          _human = 'FPL is updating the game after the deadline \u2014 teams are locked while they process the gameweek. Your squad will load automatically once FPL reopens, usually within an hour or two.';
+          _human = 'FPL is updating the game after the deadline \u2014 teams are locked while they process the gameweek. This page checks every 90 seconds and loads your squad as soon as FPL reopens.';
+           
+           
+          (function _apexUpdRetry() {
+            setTimeout(function () {
+              if (!_apexInPostDeadlineWindow()) {
+                var _s2 = document.getElementById('apex-status');
+                if (_s2) _s2.textContent = 'FPL is taking longer than usual to reopen. Refresh this page in a little while.';
+                return;
+              }
+              var _base = (typeof FPL_CORS_PROXY !== 'undefined' && FPL_CORS_PROXY) ? FPL_CORS_PROXY : 'https://fantasy.premierleague.com/api';
+              fetch(_base + '/entry/' + fplId + '/', { cache: 'no-store' })
+                .then(function (r) { if (r.ok) { location.reload(); } else { _apexUpdRetry(); } })
+                .catch(function () { _apexUpdRetry(); });
+            }, 90000);
+          })();
         } else if (_m.indexOf('Failed to fetch') !== -1 || _m.indexOf('NetworkError') !== -1 || _m.indexOf('timeout') !== -1) {
           _human = 'The FPL servers didn\u2019t answer \u2014 they wobble around deadlines. Give it a minute and refresh.';
         } else {
@@ -43379,6 +44065,12 @@ s.setAttribute("data-cf-beacon",'{"token": "890700f621df42909deca8500a0df182"}')
      
      
     try { localStorage.setItem('apex_fpl_id', String(id)); } catch (_ePersist) {}
+     
+     
+     
+    try {
+      if (!localStorage.getItem('apex_my_team_v1')) localStorage.setItem('apex_my_team_v1', String(id));
+    } catch (_eOwn) {}
      
      
      
@@ -43712,8 +44404,8 @@ s.setAttribute("data-cf-beacon",'{"token": "890700f621df42909deca8500a0df182"}')
              
              
              
-            xp: (_baked && _baked.xp != null) ? _baked.xp : 0,
-            xp_per_gw: (_baked && _baked.xp_per_gw && _baked.xp_per_gw.length)
+            xp: (el.status !== 'u' && _baked && _baked.xp != null) ? _baked.xp : 0,
+            xp_per_gw: (el.status !== 'u' && _baked && _baked.xp_per_gw && _baked.xp_per_gw.length)
                          ? _baked.xp_per_gw.slice(0, _horizon)
                          : new Array(_horizon).fill(0),
             total_xp: 0,
@@ -43726,7 +44418,12 @@ s.setAttribute("data-cf-beacon",'{"token": "890700f621df42909deca8500a0df182"}')
              
              
              
-            _no_apex_rating: !(_baked && _baked.xp_per_gw && _baked.xp_per_gw.length)
+             
+             
+             
+             
+            _left_league: el.status === 'u',
+            _no_apex_rating: (el.status !== 'u') && !(_baked && _baked.xp_per_gw && _baked.xp_per_gw.length)
           });
         });
         console.log('[hydrate] Added ' + _missingPickIds.length +
