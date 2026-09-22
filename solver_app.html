@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="6" data-built-at="2026-09-22T17:59:51">
+<meta name="apex-gw" content="6" data-built-at="2026-09-22T20:38:52">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
@@ -30,7 +30,7 @@
 })();
 </script>
 <meta http-equiv="Pragma" content="no-cache">
-<meta name="apex-build" content="20260922-175950">
+<meta name="apex-build" content="20260922-203851">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — FPL Apex</title>
 <meta name="description" content="Plan FPL transfers, chips, and Free Hit squads. Live xG-based projections, a rival head-to-head simulator, and a mini-league table. Free FPL tool.">
@@ -5526,6 +5526,22 @@ html body .va-twopane-rail #apex-ctl-card {
 html body .va-twopane-rail .apex-plain-strip { height: 56px !important; }
 html body .va-twopane-rail .apex-plain-themlab { top: 43px !important; }
 
+
+@media (min-width: 761px) and (max-width: 1024px) {
+  header.topbar { flex-wrap: wrap; }
+  header.topbar .nav { position: static !important; transform: none !important; left: auto !important;
+    flex: 1 1 100%; order: 3; min-width: 0; overflow-x: auto; flex-wrap: nowrap; justify-content: flex-start; }
+  header.topbar .nav .nav-link { white-space: nowrap; flex: 0 0 auto; }
+}
+@media (max-width: 760px) {
+  body .va-twopane-rail #apex-ctl-card .va-chip-grid { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 8px !important; width: 100% !important; }
+  body .va-twopane-rail #apex-ctl-card .va-chip-grid .va-chip-card { width: auto !important; min-width: 0 !important; min-height: 40px !important; }
+  body .va-twopane-rail #apex-ctl-card .va-chip-grid .va-chip-card select { flex: 1 1 auto !important; min-width: 0 !important; width: 100% !important; }
+  .lg-swipe-hint { display: block !important; }
+}
+
+.va-tab:not(.va-tab-active) { color: #66706B; }
+
 @media (max-width: 344px) {
   .va-tabs { overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
   .va-tabs::-webkit-scrollbar { display: none; }
@@ -6292,7 +6308,7 @@ html.apex-offseason #view-landing .hero-sub::after {
     
     <div id="apex-firstrun-hint" style="display:none;position:fixed;bottom:22px;left:50%;transform:translateX(-50%);z-index:9000;background:#fff;border:1px solid var(--accent,#0F6E56);border-radius:12px;padding:10px 16px;font-size:.82rem;color:var(--text,#16201C);box-shadow:none;max-width:92vw;text-align:center;">
       New here? Tap <b style="color:var(--accent,#0F6E56);">Solve</b> — it maps your best path, gameweek by gameweek. Everything else can wait.
-      <a href="#" onclick="try{localStorage.setItem('apex_firstrun_done','1');}catch(e){}document.getElementById('apex-firstrun-hint').style.display='none';return false;" style="color:var(--muted);text-decoration:none;margin-left:8px;font-weight:700;" title="Dismiss"></a>
+      <a href="#" onclick="try{localStorage.setItem('apex_firstrun_done','1');}catch(e){}document.getElementById('apex-firstrun-hint').style.display='none';return false;" style="display:inline-flex;align-items:center;justify-content:center;min-width:44px;min-height:44px;margin:-10px -12px -10px 4px;color:var(--muted);text-decoration:none;font-size:1.2rem;font-weight:700;" title="Dismiss" aria-label="Dismiss this hint">&times;</a>
     </div>
     <script>
       try {
@@ -7645,7 +7661,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
           </div>
           <div style="text-align:center;">
             <div id="league-hero-pct-indep" style="font-size:1.6rem;font-weight:700;color:#9ca3af;letter-spacing:-.01em;text-transform:none;"></div>
-            <div style="font-size:.7rem;margin-top:2px;">Independent (Copilot)</div>
+            <div style="font-size:.7rem;margin-top:2px;">Independent managers</div>
           </div>
         </div>
         <div id="league-hero-altcompare-gap" style="margin-top:10px;font-size:.7rem;color:var(--muted);text-transform:none;letter-spacing:0;"></div>
@@ -7655,9 +7671,10 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
     
     
     <div id="league-chip-watch" style="display:none;background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px 18px;margin-bottom:14px;font-size:.85rem;line-height:1.55;"></div>
+    <div id="league-cap-note" style="display:none;background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:10px 16px;margin-bottom:14px;font-size:.82rem;line-height:1.5;color:var(--muted);"></div>
     <div id="league-template" style="display:none;background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px 18px;margin-bottom:14px;font-size:.85rem;line-height:1.55;"></div>
     <div id="league-table-wrap" style="display:none;background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:16px;">
-      <div style="padding:16px 20px 10px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border,#E6E1D7);">
+      <div style="padding:16px 20px 10px;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border,#E6E1D7);">
         <div style="display:flex;gap:6px;align-items:center;" id="league-toggle-wrap">
           <button class="lg-toggle lg-toggle-active" id="lg-toggle-current" onclick="toggleLeagueView('current')">Current</button>
           <button class="lg-toggle" id="lg-toggle-projected" onclick="toggleLeagueView('projected')">Projected</button>
@@ -7669,7 +7686,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
           
           <span id="league-live-note" style="display:none;margin-left:14px;font-size:.75rem;font-weight:500;color:var(--muted);"></span>
         </div>
-        <div style="display:flex;gap:8px;align-items:center;">
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
         <button id="league-history-btn" onclick="downloadLeagueHistory()" title="Download every saved simulation as a spreadsheet (CSV)"
           style="background:none;border:1px solid var(--border);border-radius:6px;color:var(--muted);padding:8px 14px;font-size:.85rem;font-weight:600;cursor:pointer;font-family:inherit;">History</button>
         <button id="league-share-btn" onclick="shareLeagueTable()" title="Copy to clipboard"
@@ -7679,6 +7696,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
         </button>
         </div>
       </div>
+      <div class="lg-swipe-hint" style="display:none;padding:8px 20px 0;font-size:.75rem;color:var(--muted);">Swipe the table sideways for the win chances &rarr;</div>
       <div style="overflow-x:auto;">
         <table id="league-table" style="width:100%;border-collapse:collapse;font-size:1rem;min-width:820px;">
           <thead>
@@ -12081,8 +12099,15 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
 
   async function fetchLeagueMembers(leagueId, maxPages = 3) {
     const members = [];
+     
+     
+     
+    members.start_event = 1;
+    members.capped = false;
     for (let page = 1; page <= maxPages; page++) {
       const d = await _fetchFpl(`/leagues-classic/${leagueId}/standings/?page_standings=${page}`);
+      if (page === 1) members.start_event = +((d.league || {}).start_event || 1) || 1;
+      if (page === maxPages && (d.standings || {}).has_next) members.capped = true;
       const results = ((d.standings || {}).results) || [];
       for (const r of results) {
         members.push({
@@ -12226,10 +12251,22 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
    
    
    
-  function usableLeagues(classics) {
+   
+   
+   
+   
+   
+   
+  function _seasonStarted() {
+    try { return typeof TEAM_META !== 'undefined' && TEAM_META && (TEAM_META.gw_range || [])[0] > 1; }
+    catch (_e) { return false; }
+  }
+  function usableLeagues(classics, seasonStarted) {
+    const started = (seasonStarted != null) ? !!seasonStarted : _seasonStarted();
     return (classics || [])
       .filter(l => l && l.league_type !== 's'
-        && (+l.rank_count || 0) > 1 && (+l.rank_count || 0) < 200000)
+        && ((l.rank_count == null && started)
+            || ((+l.rank_count || 0) > 1 && (+l.rank_count || 0) < 200000)))
       .sort((a, b) => (+a.rank_count || 1e9) - (+b.rank_count || 1e9));
   }
   function _ordinal(n) {
@@ -12244,6 +12281,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
     const r = +(l && (l.entry_rank != null ? l.entry_rank : l.rank)) || 0;
     const bits = [];
     if (n) bits.push(n.toLocaleString('en-GB') + ' teams');
+    else if (l && l.rank_count == null) bits.push('new league');
     if (r) bits.push("you're " + _ordinal(r));
     return bits.length ? nm + ' (' + bits.join(' · ') + ')' : nm;
   }
@@ -12264,7 +12302,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
   }
 
    
-  async function loadManagerState(entryId, currentGw) {
+  async function loadManagerState(entryId, currentGw, leagueStartEvent) {
     const hist = await fetchEntryHistory(entryId);
     const chipsRemaining = chipsRemainingAt(hist.chips || [], currentGw);
 
@@ -12294,6 +12332,14 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
        
        
       inflightHitCost = +(cur[cur.length - 1].event_transfers_cost || 0);
+    }
+     
+     
+     
+    let leagueOffset = 0;
+    const _lse = +leagueStartEvent || 1;
+    if (_lse > 1) {
+      for (const r of cur) if (+r.event < _lse) leagueOffset = +(r.total_points || 0);
     }
 
     let picks = [];
@@ -12339,6 +12385,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
       inflight_hit_cost: inflightHitCost,
       picks,
       picks_gw: picksGw,    
+      league_offset: leagueOffset,    
       chips_remaining: chipsRemaining,
     };
   }
@@ -13006,7 +13053,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
   const _LT_THREAT_MIN = 0.3;     
   const _LT_PAGE_CAP = 150;       
 
-  function leaguePicks(managers, nMembers) {
+  function leaguePicks(managers, nMembers, cappedFlag) {
     const by = {};
     let gw = null;
     for (const m of (managers || [])) {
@@ -13016,7 +13063,9 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
       if (m.picks_gw && (gw == null || +m.picks_gw > gw)) gw = +m.picks_gw;
     }
     return { gw, by_entry: by, n_members: +nMembers || Object.keys(by).length,
-             capped: (+nMembers || 0) >= _LT_PAGE_CAP };
+              
+              
+             capped: (cappedFlag != null) ? !!cappedFlag : (+nMembers || 0) > _LT_PAGE_CAP };
   }
 
   function leagueTemplate(leaguePicksObj, myId) {
@@ -13117,6 +13166,16 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
      
     _prog('fetching-league', 42);
     const members = await fetchLeagueMembers(leagueId);
+     
+     
+     
+     
+    const _meId = +(args.myEntryId || 0);
+    let _meAdded = false;
+    if (_meId && members.capped && !members.some(m => +m.entry_id === _meId)) {
+      members.push({ entry_id: _meId, player_name: args.myName || 'You', entry_name: args.myTeam || '', total: null, _added: true });
+      _meAdded = true;
+    }
     _prog('fetched-league', 45, { count: members.length });
 
      
@@ -13124,7 +13183,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
     for (let i = 0; i < members.length; i++) {
       const m = members[i];
       try {
-        const st = await loadManagerState(m.entry_id, startGw);
+        const st = await loadManagerState(m.entry_id, startGw, members.start_event);
         managerStates.push({ ...m, state: st });
       } catch (_) {   }
       _prog('loading-managers', 45 + Math.floor(40 * (i + 1) / Math.max(1, members.length)),
@@ -13227,9 +13286,13 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
        
        
        
-      const _frozenPre = +(ms.state.frozen_pre_inflight_total || _mgrTotal);
+       
+       
+       
+      const _lOff = +(ms.state.league_offset || 0);
+      const _frozenPre = +(ms.state.frozen_pre_inflight_total || _mgrTotal) - _lOff;
       const _hitCost = +(ms.state.inflight_hit_cost || 0);
-      const _displayedTotal = inflightGw ? (_frozenPre + liveNow - _hitCost) : _mgrTotal;
+      const _displayedTotal = inflightGw ? (_frozenPre + liveNow - _hitCost) : (_mgrTotal - _lOff);
 
       managersOut.push({
         entry_id: ms.entry_id,
@@ -13237,7 +13300,8 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
         entry_name:  ms.entry_name,
         overall_rank: ms.state.overall_rank || 0,
         total: _displayedTotal,
-        total_lagged: _mgrTotal,
+        total_lagged: _mgrTotal - _lOff,
+        added_outside_cap: !!ms._added,    
         frozen_pre_inflight_total: _frozenPre,
         inflight_hit_cost: _hitCost,
         live_now: liveNow,
@@ -13343,7 +13407,10 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
       league_id: leagueId,
       start_gw: startGw,
       horizon_gws: horizonLen,
-      league_picks: leaguePicks(managersOut, members.length),    
+      league_picks: leaguePicks(managersOut, members.length, members.capped),    
+      league_start_event: members.start_event,    
+      members_capped: !!members.capped,
+      me_added: _meAdded,
       season_params: seasonParams,            
       n_sims: nSims,
       cv,
@@ -13454,6 +13521,9 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
       start_gw: startGw,
       horizon_gws: prev.horizon_gws,
       league_picks: prev.league_picks || null,    
+      league_start_event: prev.league_start_event || 1,    
+      members_capped: !!prev.members_capped,
+      me_added: !!prev.me_added,
       season_params: prev.season_params || null,
       n_sims: nSims,
       cv,
@@ -14699,7 +14769,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
       o.textContent = (m.name || 'Manager') + ' - ' + (m.team || ''); sel.appendChild(o); n++;
     });
     var status = $('rival-status');
-    if (status) status.textContent = n ? (n + ' rivals loaded. Pick one — lead/gap fills in automatically.') : 'No rivals found — type a Team ID below.';
+    if (status) status.textContent = n ? (n + (n === 1 ? ' rival' : ' rivals') + ' loaded. Pick one — lead/gap fills in automatically.') : 'No rivals found — type a Team ID below.';
     return n;
   }
   var _rivalsFor = null;     
@@ -19555,7 +19625,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
  
  
  
-const BUILD_VERSION = "1790096390-GW6-fd7cf4c9";
+const BUILD_VERSION = "1790105931-GW6-3de8c09a";
 window.APEX_BUILD = BUILD_VERSION;
  
  
@@ -19612,7 +19682,7 @@ window.APEX_SQUAD_ROLLBACK = false;
 let FPL_ID = null;
 let SQUAD_DATA = [];
 </script>
-<script src="/apex_pool.js?v=1790096390-GW6-fd7cf4c9"></script>
+<script src="/apex_pool.js?v=1790105931-GW6-3de8c09a"></script>
 <script>
 const PLAYER_NAMES = {"1": "Raya", "2": "Arrizabalaga", "3": "Meslier", "4": "Gabriel", "5": "J.Timber", "6": "Saliba", "7": "Lewis-Skelly", "8": "Calafiori", "9": "Hincapie", "10": "White", "11": "Mosquera", "12": "Saka", "13": "Rice", "14": "Eze", "15": "\u00d8degaard", "16": "Madueke", "17": "Merino", "18": "Martinelli", "19": "Zubimendi", "20": "Dowman", "22": "Nwaneri", "23": "F\u00e1bio Vieira", "24": "Nelson", "25": "Gy\u00f6keres", "26": "Havertz", "27": "G.Jesus", "31": "Konsa", "452": "Bruno G.", "557": "Tzolis", "29": "M.Bizot", "30": "Digne", "32": "Cash", "33": "Mings", "34": "Pau", "35": "Bogarde", "36": "Maatsen", "37": "Lindel\u00f6f", "38": "A.Garc\u00eda", "39": "Nedeljkovic", "41": "Buend\u00eda", "44": "Bailey", "45": "McGinn", "46": "Barkley", "47": "Kamara", "48": "Onana", "49": "Iling Jr", "50": "Burrowes", "51": "George Hemmings", "52": "Alysson", "53": "Manzambi", "54": "Gomes", "55": "Watkins", "56": "Abraham", "160": "Garnacho", "166": "N.Jackson", "582": "Madjo", "596": "Ruggeri", "597": "Suzuki", "606": "Rowe", "607": "Lynch", "611": "Wan-Bissaka", "618": "Goretzka", "630": "Harwood-Bellis", "631": "Mbaye", "667": "Wright", "57": "Petrovi\u0107", "58": "Forster", "59": "Dennis", "60": "Hill", "61": "Truffert", "62": "Diakit\u00e9", "63": "Milosavljevi\u0107", "64": "Smith", "65": "J.Araujo", "66": "Soler", "67": "Rayan", "68": "Tavernier", "69": "Scott", "70": "Kluivert", "71": "Cook", "72": "Gannon-Doak", "73": "Adams", "74": "Brooks", "75": "Christie", "76": "T\u00f3th.A", "77": "Adli", "78": "Kroupi.Jr", "79": "Evanilson", "80": "Enes \u00dcnal", "81": "Rodr\u00edguez", "566": "Silva", "573": "Sanchez", "608": "Jebbison", "615": "Di Gregorio", "82": "Kelleher", "83": "Valdimarsson", "84": "Collins", "85": "Van den Berg", "86": "Lewis-Potter", "87": "Ajer", "88": "Kayode", "89": "Henry", "90": "Hickey", "92": "Ji-soo", "93": "Schuster", "94": "Schade", "95": "O.Dango", "96": "Damsgaard", "97": "Jensen", "98": "Janelt", "99": "Milambo", "100": "Carvalho", "102": "Yarmoliuk", "103": "Dasilva", "105": "Anthony", "106": "Thiago", "107": "Furo", "108": "Wilson", "565": "M.Sangar\u00e9", "620": "Diouf", "657": "Nunes", "660": "Fredrick", "661": "Balcombe", "109": "Verbruggen", "111": "Steele", "113": "F.Kad\u0131o\u011flu", "114": "Boscagli", "115": "De Cuyper", "116": "Dunk", "117": "Coppola", "118": "Igor", "119": "Costinha", "120": "Svoboda", "121": "Mitoma", "122": "Minteh", "123": "Hinshelwood", "124": "Gro\u00df", "125": "Georginio", "126": "O'Riley", "127": "Gomez", "128": "Buonanotte", "129": "Ayari", "130": "Wieffer", "132": "Howell", "133": "Watson", "134": "Oriola", "135": "Yohanna", "137": "Tzimas", "138": "Kostoulas", "139": "Ferguson", "328": "Struijk", "504": "Vuskovic", "594": "David", "600": "Osman", "605": "Yalcouy\u00e9", "614": "Hadjam", "624": "Cozier-Duberry", "639": "Andr\u00e9s", "652": "Azeez", "658": "Ibrahim", "28": "Martinez", "40": "Rogers", "101": "Henderson", "136": "Welbeck", "140": "S\u00e1nchez", "141": "J\u00f6rgensen", "142": "James", "143": "Chalobah", "144": "Gusto", "145": "Fofana", "146": "B.Badiashile", "148": "Hato", "149": "Colwill", "150": "M.Sarr", "151": "Acheampong", "152": "Palestra", "154": "Palmer", "156": "Neto", "157": "Est\u00eav\u00e3o", "158": "Gittens", "159": "Caicedo", "161": "Lavia", "163": "D.Essugo", "164": "Quenda", "165": "Jo\u00e3o Pedro", "168": "Marc Guiu", "169": "Mheuka", "170": "Emegha", "200": "Lacroix", "560": "Penders", "561": "Anselmino", "568": "Barco", "583": "Chavarria", "662": "Nicoll-Jazuli", "91": "Pinnock", "104": "Onyeka", "110": "Rushworth", "171": "Dovin", "172": "Wilson", "173": "Thomas", "174": "Kitching", "175": "van Ewijk", "176": "Dasilva", "177": "Kesler-Hayden", "178": "Bidwell", "179": "Latibeaudiere", "180": "Woolfenden", "181": "Brau", "182": "Amenda", "183": "Rudoni", "184": "Grimes", "185": "Sakamoto", "186": "Mason-Clark", "187": "Eccles", "188": "Torp", "189": "Shepherd", "190": "Tchaouna", "191": "Borges Rodrigues", "192": "Andrews", "193": "Wright", "194": "Thomas-Asante", "195": "Simms", "196": "Markelo", "197": "Bassette", "492": "Awoniyi", "575": "Yirenkyi", "584": "Hamer", "599": "Cherif", "623": "Bentley", "655": "Gboho", "656": "Mfuni", "42": "Guessand", "153": "Disasi", "198": "Henderson", "199": "Benitez", "202": "Richards", "203": "Canvot", "204": "Mitchell", "205": "Sosa", "206": "Chadi Riad", "207": "Mingueza", "208": "Sarr", "210": "Wharton", "211": "Yeremy", "212": "Hughes", "213": "Lerma", "214": "Kamada", "215": "Devenny", "216": "Esse", "217": "M.Fran\u00e7a", "218": "Doucour\u00e9", "219": "J.Rak-Sakyi", "220": "Cardines", "221": "Drakes-Thomas", "222": "Strand Larsen", "223": "Mateta", "224": "Nketiah", "225": "Uche", "241": "McNeil", "555": "Matthews", "577": "Tomiyasu", "588": "Khalaili", "595": "Gozo", "633": "Ahanor", "643": "Chilwell", "644": "Timber", "647": "Osorio", "21": "N\u00f8rgaard", "209": "Johnson", "226": "Pickford", "227": "Travers", "228": "King", "229": "Tarkowski", "230": "Branthwaite", "231": "Keane", "232": "O'Brien", "233": "Mykolenko", "234": "Patterson", "235": "Aznou", "236": "Dewsbury-Hall", "238": "Grealish", "239": "Garner", "242": "George", "243": "Alcaraz", "244": "Armstrong", "245": "Dibling", "246": "R\u00f6hl", "247": "Hackney", "248": "Beto", "249": "Barry", "649": "Maitland-Niles", "654": "Graham", "250": "Leno", "251": "Lecomte", "252": "McNally", "253": "Andersen", "254": "Robinson", "255": "J.Cuenca", "256": "Tete", "257": "Bassey", "258": "Castagne", "261": "Iwobi", "262": "Smith Rowe", "263": "Kevin", "264": "Bobb", "265": "Berge", "266": "Cairney", "268": "King", "269": "Sessegnon", "270": "Reed", "271": "Muniz", "272": "Kusi-Asare", "569": "Gonzalo", "570": "Palacios", "580": "Charles", "610": "De Fougerolles", "626": "Zepa", "635": "Larsson", "636": "\u00c1ngel", "650": "Affengruber", "240": "Iroegbunam", "273": "Phillips", "274": "Butland", "275": "Cartwright", "276": "Lo-Tutala", "277": "Egan", "278": "Hughes", "279": "Ajayi", "280": "Coyle", "281": "Drameh", "282": "Giles", "283": "Jacob", "284": "McCarthy", "285": "McNair", "286": "Belloumi", "287": "Millar", "288": "Dowell", "289": "Crooks", "290": "Slater", "291": "Matazo", "292": "\u00d6m\u00fcr", "293": "Kamara", "294": "Zambrano", "295": "McBurnie", "296": "Akintola", "297": "Gyabi", "298": "Destan", "299": "Burstow", "340": "Gelhardt", "556": "Targett", "563": "Morita", "572": "Tzolakis", "574": "Hjert\u00f8-Dahl", "576": "Stroud", "585": "Herrington", "586": "Mendy", "589": "Gourna-Douath", "617": "Cho", "632": "Ansah", "637": "Vaz", "638": "Norton-Cuffy", "642": "Thomas", "645": "Mouzakitis", "259": "Diop", "267": "Luki\u0107", "300": "Walton", "301": "Palmer", "302": "Button", "303": "Kipr\u00e9", "304": "O'Shea", "305": "Davis", "306": "Greaves", "307": "Johnson", "308": "Furlong", "309": "N\u00fa\u00f1ez", "310": "Matusiwa", "311": "Burns", "312": "Taylor", "313": "Clarke", "314": "Ogbene", "315": "Fatawu", "316": "Emersonn", "317": "Hirst", "318": "Philogene", "319": "Szmodics", "320": "Akpom", "321": "Walle Egeli", "322": "Al-Hamadi", "323": "McAteer", "324": "Mehmeti", "554": "Van Oevelen", "562": "Maeda", "564": "Scherpen", "571": "Florentino", "591": "Enciso", "592": "Ouattara", "602": "Humphreys", "619": "Palacios", "640": "Flemming", "260": "Wilson", "326": "Perri", "327": "Bijol", "329": "Rodon", "330": "Bogle", "331": "Gudmundsson", "332": "Justin", "333": "Bornauw", "334": "Muharemovi\u0107", "335": "Stach", "336": "Okafor", "337": "Aaronson", "338": "Ampadu", "339": "Longstaff", "341": "Gnonto", "342": "Harrison", "343": "James", "344": "Gruev", "345": "Tanaka", "346": "Calvert-Lewin", "347": "Nmecha", "348": "Piroe", "349": "Mateo Joseph", "385": "Trafford", "598": "Elvedi", "603": "Lienou", "604": "Cresswell", "625": "Cairns", "629": "Zetterer", "641": "Bard", "648": "Bahoya", "350": "A.Becker", "351": "Mamardashvili", "352": "Woodman", "353": "Pecsi", "354": "Jaros", "355": "Davies", "356": "Virgil", "357": "Frimpong", "358": "Kerkez", "359": "Gomez", "360": "Bradley", "361": "Lucky", "362": "Jacquet", "363": "Leoni", "364": "Tsimikas", "365": "Ramsay", "366": "Wirtz", "367": "Gakpo", "368": "Szoboszlai", "369": "Ngumoha", "370": "Chiesa", "371": "Gravenberch", "372": "Mac Allister", "373": "C.Jones", "374": "Endo", "375": "Nyoni", "376": "Bajcetic", "377": "Munoz", "378": "McConnell", "379": "Isak", "380": "Ekitik\u00e9", "381": "Koumas", "382": "Danns", "383": "Elliott", "579": "Araujo", "627": "Barcola", "155": "Enzo", "237": "Ndiaye", "384": "Donnarumma", "386": "Bettinelli", "387": "O'Reilly", "388": "Gu\u00e9hi", "389": "Matheus N.", "390": "R\u00faben", "391": "Gvardiol", "392": "A\u00eft-Nouri", "393": "Khusanov", "394": "Alleyne", "395": "Lewis", "396": "Vitor Reis", "397": "Semenyo", "398": "Foden", "399": "Cherki", "400": "Doku", "402": "Rodrigo", "404": "Reijnders", "406": "Kova\u010di\u0107", "407": "Echeverri", "408": "Phillips", "409": "Mukasa", "410": "Monga", "411": "Haaland", "481": "Anderson", "587": "Rulli", "616": "Bouaddi", "621": "McAidoo", "622": "Braithwaite", "628": "Allan", "653": "Samba", "43": "Tielemans", "131": "Baleba", "162": "Andrey Santos", "325": "Darlow", "412": "Lammens", "413": "Bayindir", "414": "Heaton", "415": "Dorgu", "416": "De Ligt", "417": "Dalot", "418": "Maguire", "419": "Martinez", "420": "Yoro", "421": "Heaven", "422": "Mazraoui", "423": "Shaw", "424": "Amass", "425": "Fredricson", "426": "B.Fernandes", "427": "Mbeumo", "428": "Cunha", "429": "Rashford", "430": "Mount", "431": "Amad", "432": "Mainoo", "433": "Ugarte", "434": "J.Fletcher", "435": "Lacey", "436": "Collyer", "437": "Bendito Mantato", "438": "Fletcher", "439": "\u0160e\u0161ko", "440": "Zirkzee", "441": "Obi", "405": "N.Gonzalez", "442": "Pope", "443": "Gillespie", "444": "Jaouen", "445": "Thiaw", "446": "Sch\u00e4r", "447": "Botman", "448": "Burn", "449": "Hall", "450": "Livramento", "451": "A.Murphy", "453": "Barnes", "454": "Elanga", "456": "J.Ramsey", "457": "J.Murphy", "458": "Joelinton", "459": "L.Miley", "460": "Willock", "461": "Tour\u00e9", "462": "Steur", "463": "Woltemade", "464": "Wissa", "465": "Osula", "466": "Neave", "559": "Bamba", "567": "Horn\u00ed\u010dek", "593": "Dedi\u0107", "609": "Shahar", "634": "Fernandez-Pardo", "659": "Miley", "663": "Pivas", "664": "Salia", "665": "Mills", "666": "Thompson", "167": "Delap", "201": "Mu\u00f1oz", "467": "Sels", "468": "John", "469": "N.Williams", "470": "Morato", "471": "Milenkovi\u0107", "472": "Murillo", "473": "Aina", "474": "Jair Cunha", "475": "Savona", "476": "O.Richards", "477": "Abbott", "478": "Netz", "479": "Bindon", "480": "Gibbs-White", "482": "Hudson-Odoi", "483": "Ndoye", "484": "Hutchinson", "485": "Bakwa", "486": "McAtee", "487": "Dominguez", "488": "I.Sangar\u00e9", "489": "Yates", "490": "Wood", "491": "Igor Jesus", "493": "Kalimuendo", "558": "Schlager", "581": "Diomande", "590": "Benda", "112": "Van Hecke", "147": "Tosin", "401": "Marmoush", "403": "S\u00e1vio", "455": "Tonali", "494": "Vicario", "495": "Austin", "496": "Kinsky", "497": "Dubravka", "498": "Senesi", "499": "Pedro Porro", "500": "Romero", "502": "Robertson", "503": "Van de Ven", "505": "Spence", "506": "Udogie", "507": "Phillips", "508": "Davies", "509": "Byfield", "510": "Rowswell", "511": "Souza", "512": "Kudus", "513": "Xavi", "514": "Tel", "515": "Maddison", "516": "Bentancur", "517": "Odobert", "518": "P.M.Sarr", "519": "Gallagher", "520": "Bergvall", "521": "Kulusevski", "522": "Gray", "523": "Moore", "524": "Olusesi", "525": "Fernandes", "526": "Solanke", "527": "Richarlison", "528": "Scarlett", "578": "Mudryk", "601": "Williams-Barnett", "501": "Danso", "529": "Roefs", "530": "Patterson", "531": "Ellborg", "532": "Ballard", "533": "Mukiele", "534": "Hume", "535": "Alderete", "536": "Reinildo", "537": "Seelt", "538": "Hjelde", "539": "O'Nien", "540": "Masuaku", "541": "Meunier", "542": "E.Le F\u00e9e", "543": "Diarra", "544": "Xhaka", "545": "Sadiki", "546": "Adingra", "547": "Mundle", "548": "Rigg", "549": "Talbi", "550": "Jocelin.T", "551": "N.Angulo", "552": "Brobbey", "553": "Isidor", "612": "Methalie", "613": "Ahoka", "646": "Fofana", "651": "J.Angulo"};
 const TRANSFER_RECS = [];
@@ -20614,7 +20684,7 @@ async function initLeagueView() {
       const leagues = await window.ApexSolver.listUserLeagues(FPL_ID);
       _leagueUserLeagues = leagues.map(l => ({ id: l.id, name: l.name, rank: l.entry_rank, entry_count: l.rank_count || null }));
       if (_leagueUserLeagues.length === 0) {
-        select.innerHTML = '<option value="">No classic leagues found</option>';
+        select.innerHTML = '<option value="">No mini-leagues found</option>';
         status.textContent = 'No eligible mini-leagues found for your FPL ID.';
         return;
       }
@@ -20644,7 +20714,7 @@ async function initLeagueView() {
     _leagueUserLeagues = data.leagues || [];
 
     if (_leagueUserLeagues.length === 0) {
-      select.innerHTML = '<option value="">No classic leagues found</option>';
+      select.innerHTML = '<option value="">No mini-leagues found</option>';
       status.textContent = 'No eligible mini-leagues found for your FPL ID.';
       return;
     }
@@ -20736,7 +20806,7 @@ const _LG_CW_WINDOW = 3;
 function _lgChipWatchItems(standings, startGw, myId) {
   if (typeof _apexChipAdvice !== 'function' || !startGw) return null;
   const KEY = { wildcard: 'WC', freehit: 'FH', bboost: 'BB', '3xc': 'TC' };
-  const last = startGw + _LG_CW_WINDOW - 1;
+  const last = Math.min(38, startGw + _LG_CW_WINDOW - 1);
   const items = [];
   for (const m of (standings || [])) {
     if (myId && m.entry_id === myId) continue;
@@ -20766,7 +20836,7 @@ function _lgChipWatch(data) {
   const items = _lgChipWatchItems(data.standings, sg, (typeof FPL_ID !== 'undefined') ? FPL_ID : null);
   if (items == null) { el.style.display = 'none'; return; }
   const NAMES = { WC: 'Wildcard', FH: 'Free Hit', BB: 'Bench Boost', TC: 'Triple Captain' };
-  const last = sg + _LG_CW_WINDOW - 1;
+  const last = Math.min(38, sg + _LG_CW_WINDOW - 1);
   let html = `<div style="font-weight:800;margin-bottom:6px;">Chip watch · GW${sg}–GW${last}</div>`;
   if (!items.length) {
     html += `<div style="color:var(--muted);">No rival has a chip week that clearly stands out in the next ${_LG_CW_WINDOW} gameweeks.</div>`;
@@ -20820,7 +20890,7 @@ function _lgTemplate(data) {
     const sh = m.captain.shared;
     h += `<div>You captain ${nm(m.captain.id)}${m.captain.mult >= 3 ? ' (triple)' : ''}: `
       + (sh === 0 ? 'no rival does, so his points swing the league your way or against you.'
-                  : `${of(sh)} rival${sh === 1 ? '' : 's'} do too.`) + `</div>`;
+                  : `${of(sh)} rival${n === 1 ? '' : 's'} ${sh === 1 ? 'does' : 'do'} too.`) + `</div>`;
   }
   if (t.template.length) {
     const mine = m ? new Set((data.league_picks.by_entry[String(myId)] || []).map(p => +p.element)) : null;
@@ -20901,7 +20971,7 @@ function renderLeagueTable(data) {
         if (gapEl) {
           const sign = gap >= 0 ? '+' : '';
           gapEl.innerHTML = `Δ correlation effect: <strong style="color:var(--fg);">${sign}${gap.toFixed(1)} pp</strong>`
-                          + ` &nbsp;·&nbsp; Apex models squad overlap (×0.85). Copilot assumes managers are independent.`;
+                          + ` &nbsp;·&nbsp; Apex models squad overlap (×0.85). The alternative treats managers as independent.`;
         }
         altWrap.style.display = 'block';
       } else {
@@ -20930,7 +21000,12 @@ function renderLeagueTable(data) {
       const ca = m.chip_assignments || {};
       const assignment = ca[label];
       const gwNote = assignment && assignment.gw ? ` GW${assignment.gw}` : '';
-      const tooltip = assignment ? `${label}${gwNote}: +${assignment.value} xP` : label;
+       
+       
+       
+      const tooltip = (assignment && assignment.gw)
+        ? `${label} best in GW${assignment.gw}: about +${(+assignment.value).toFixed(1)} xP`
+        : (assignment ? `${label} held: counted at a typical +${Math.round(+assignment.value)} over the rest of the season (no standout week yet)` : `${label} held`);
       return `<span class="lg-chip ${_chipClass(label)}" title="${tooltip}">${label}</span>`;
     }).join('') || '<span class="lg-chip-none">—</span>';
 
@@ -20974,6 +21049,18 @@ function renderLeagueTable(data) {
 
   try { _lgChipWatch(data); } catch (_eCw) {}    
   try { _lgTemplate(data); } catch (_eLt) {}     
+   
+  try {
+    const _cn = document.getElementById('league-cap-note');
+    if (_cn) {
+      if (data.members_capped) {
+        const _n = (data.standings || []).length;
+        _cn.textContent = 'This league is bigger than we read. We simulate the top ' + (data.me_added ? (_n - 1) + ' teams plus you' : _n + ' teams')
+          + ', so chances are within that group, not the whole league.';
+        _cn.style.display = 'block';
+      } else { _cn.style.display = 'none'; }
+    }
+  } catch (_eCn) {}
 
    
   const chipBody = document.getElementById('league-chip-detail-body');
@@ -21189,6 +21276,8 @@ async function runLeagueSim() {
         data = await window.ApexSolver.runLeagueSim({
           leagueId: +leagueId, pool: POOL_DATA, startGw,
           nSims: 10000, cv: 0.33, seed: 42, ceilings,
+          myEntryId: (typeof FPL_ID !== 'undefined' && FPL_ID) ? +FPL_ID : 0,    
+          myName: (TEAM_META && TEAM_META.manager) || 'You', myTeam: (TEAM_META && TEAM_META.team_name) || '',
           corrScale: _primaryCorr,
           onProgress: (stage, pct, detail) => {
             const el = document.getElementById('league-loading-text');
@@ -21206,6 +21295,8 @@ async function runLeagueSim() {
             const altData = await window.ApexSolver.runLeagueSim({
               leagueId: +leagueId, pool: POOL_DATA, startGw,
               nSims: 10000, cv: 0.33, seed: 42, ceilings,
+          myEntryId: (typeof FPL_ID !== 'undefined' && FPL_ID) ? +FPL_ID : 0,    
+          myName: (TEAM_META && TEAM_META.manager) || 'You', myTeam: (TEAM_META && TEAM_META.team_name) || '',
               corrScale: _altCorr,
               onProgress: (stage, pct, detail) => {
                 const el = document.getElementById('league-loading-text');
@@ -25354,7 +25445,7 @@ function computeTransfers(gwIdx) {
       const realGw0 = _simXiDelta(outP, bestIn);
       transfers.push({
         out_id: outP.id, out_name: outP.web_name || '?', out_team: outP.team || '',
-        out_pos: POS_NAMES[pos] || '?', out_cost: outP.cost || 0,
+        out_pos: POS_NAMES[pos] || '?', out_cost: outP.cost || 0, out_sell: outCost,    
         out_xp: Math.round(outTotal * 10) / 10,
         in_id: bestIn.id, in_name: bestIn.web_name || '?', in_team: bestIn.team || '',
         in_pos: POS_NAMES[pos] || '?', in_cost: bestIn.cost || 0,
@@ -25441,7 +25532,7 @@ function computeTransfers(gwIdx) {
         if (realGw0 < 0.3) continue;
         transfers.push({
           out_id: outP.id, out_name: outP.web_name || '?', out_team: outP.team || '',
-          out_pos: POS_NAMES[pos] || '?', out_cost: outP.cost || 0,
+          out_pos: POS_NAMES[pos] || '?', out_cost: outP.cost || 0, out_sell: outCost,    
           out_xp: Math.round(outTotal * 10) / 10,
           in_id: c.inP.id, in_name: c.inP.web_name || '?', in_team: c.inP.team || '',
           in_pos: POS_NAMES[pos] || '?', in_cost: c.inP.cost || 0,
@@ -29106,9 +29197,23 @@ const _PP_DGW_PREMIUM = 1.0;
  
  
 const _PP_UNLIMITED_GW = 1;
+ 
+ 
+ 
+function _apexNewEntryFirstWeek() {
+  try {
+    const gwR = (TEAM_META && TEAM_META.gw_range) || [];
+    const se = +(window._apexEntryStarted || 0);
+    if (!window._apexSeedHydrated || !se || !gwR.length || se < gwR[0]) return false;
+    const dls = (TEAM_META && TEAM_META.deadlines_by_gw) || {};
+    const dl = +(dls[gwR[0]] || dls[String(gwR[0])] || 0);
+    return !dl || Math.floor(Date.now() / 1000) < dl;
+  } catch (_e) { return false; }
+}
 function _ppUnlimitedGw(gwIdx) {
   try {
     const gwR = (TEAM_META && TEAM_META.gw_range) || [];
+    if (gwIdx === 0 && gwR[0] !== _PP_UNLIMITED_GW && _apexNewEntryFirstWeek()) return true;
     if (gwR[gwIdx] !== _PP_UNLIMITED_GW) return false;
     const dls = (TEAM_META && TEAM_META.deadlines_by_gw) || {};
     const dl  = +(dls[_PP_UNLIMITED_GW] || dls[String(_PP_UNLIMITED_GW)] || 0);
@@ -31200,6 +31305,17 @@ function _apexChipAdvice(t, gwr, played, margins) {
       seenTo: seenTo, lastLegal: lastLegal, unseen: seenTo < lastLegal,
     };
   });
+   
+   
+   
+  var byGw = {};
+  Object.keys(out).forEach(function (c) { var a = out[c]; if (a && a.state === 'best') (byGw[a.gw] = byGw[a.gw] || []).push(c); });
+  Object.keys(byGw).forEach(function (g) {
+    var cs = byGw[g];
+    if (cs.length < 2) return;
+    cs.sort(function (x, y) { return out[y].value - out[x].value; });
+    for (var k = 1; k < cs.length; k++) { out[cs[k]].state = 'hold'; out[cs[k]].clash = cs[0]; }
+  });
   return out;
 }
 
@@ -31222,6 +31338,11 @@ function _apexChipAdviceWords(a) {
     ? 'The best week (GW' + a.gw + ', ' + f(a.value) + ') beats the next (GW' + a.second.gw + ', ' + f(a.second.v)
       + ') by ' + a.lead.toFixed(1) + ', less than the ' + a.margin.toFixed(1) + ' two good models typically disagree by.'
     : 'Only one week can be priced so far.';
+  if (a.clash) {
+    var _nm = { WC: 'Wildcard', FH: 'Free Hit', BB: 'Bench Boost', TC: 'Triple Captain' };
+    return { label: '— hold', title: 'GW' + a.gw + ' also stands out for this chip (' + f(a.value) + '), but it is the '
+      + (_nm[a.clash] || a.clash) + "'s best week and is worth more there. Only one chip can be played per gameweek." + unseen };
+  }
   return { label: '— hold', title: 'No week stands out yet. ' + why + unseen };
 }
 
@@ -36251,27 +36372,34 @@ function _apexTickerRows(fxg, fbgt, gws, mode, n) {
   fxg = fxg || {}; fbgt = fbgt || {};
   var teams = {};
   gws.forEach(function (g) { Object.keys(fxg[g] || {}).forEach(function (t) { teams[t] = 1; }); });
+   
+   
+   
+   
+   
+   
   var key = mode === 'def' ? 'a' : 'f';
   var rows = Object.keys(teams).map(function (t) {
     var total = 0, counted = 0;
     var cells = gws.map(function (g, i) {
       var opp = (fbgt[g] || {})[t] || '';
       var rec = (fxg[g] || {})[t];
+      var games = opp ? opp.split(' / ').length : 0;
       var v = (rec && opp) ? +rec[key] : null;           
-      if (i < n && v != null) { total += v; counted++; }
-      return { gw: +g, opp: opp, v: v };
+      var perGame = (v != null && games) ? v / games : null;
+      if (i < n && rec && opp) { total += (mode === 'def' ? +(rec.cs || 0) : v); counted++; }
+      return { gw: +g, opp: opp, v: v, perGame: perGame, games: games };
     });
     return { team: t, cells: cells, total: total, counted: counted };
   });
   rows.sort(function (a, b) {
-    var d = mode === 'def' ? (a.total - b.total) : (b.total - a.total);
-    return d || (a.team < b.team ? -1 : a.team > b.team ? 1 : 0);
+    return (b.total - a.total) || (a.team < b.team ? -1 : a.team > b.team ? 1 : 0);
   });
   return rows;
 }
 function _apexTickerCell(mode, c) {
   if (!c.opp) return '<td style="padding:3px;"><div style="height:44px;border-radius:8px;background:#F4F5F3;color:#6B7671;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;">blank</div></td>';
-  var col = _apexTickerColour(mode, c.v);
+  var col = _apexTickerColour(mode, c.perGame != null ? c.perGame : c.v);
   var parts = c.opp.split(' / ').map(function (s) {
     var m = s.match(/^(\S+)\s*\((H|A)\)/);
     return m ? (m[2] === 'H' ? m[1] : m[1].toLowerCase()) : s;
@@ -36291,6 +36419,12 @@ function _apexTickerRender() {
   var fbgt = (typeof FIXTURES_BY_GW_TEAM !== 'undefined') ? FIXTURES_BY_GW_TEAM : {};
   var shortOf = (typeof FIXTURE_TEAM_SHORT !== 'undefined') ? FIXTURE_TEAM_SHORT : {};
   var gws = Object.keys(fxg).map(Number).sort(function (a, b) { return a - b; });
+   
+   
+  try {
+    var _gr = (typeof TEAM_META !== 'undefined' && TEAM_META && TEAM_META.gw_range) || [];
+    if (gws.length && _gr.length) gws = _gr.filter(function (g) { return g >= gws[0]; }).map(Number);
+  } catch (_eGr) {}
   if (!gws.length) {
     host.innerHTML = '<div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:22px;color:var(--muted);">The fixture ticker is baked with the site build and this build carries none. It will appear after the next full build.</div>';
     return;
@@ -36317,7 +36451,7 @@ function _apexTickerRender() {
   }).join('');
   var what = mode === 'att'
     ? 'Attack: goals each team is expected to score. Greener is better for their attackers.'
-    : 'Defence: goals each team is expected to concede. Greener is a better clean sheet chance.';
+    : 'Defence: goals each team is expected to concede per game. Sorted by expected clean sheets over the next ' + n + ' (the last column).';
   host.innerHTML =
     '<div style="display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:14px;">' +
       '<div><h1 style="margin:0;font-size:' + (phone ? 24 : 30) + 'px;font-weight:800;">Fixture ticker</h1>' +
@@ -36331,7 +36465,7 @@ function _apexTickerRender() {
     '<div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:' + (phone ? '10px 8px' : '18px 22px') + ';overflow-x:auto;">' +
       '<table style="width:100%;border-collapse:separate;border-spacing:0;' + (phone ? 'table-layout:fixed;' : '') + '"><thead><tr>' +
       '<th scope="col" style="text-align:left;padding:0 10px 8px 0;font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--muted);' + (phone ? 'width:44px;' : '') + '">TEAM</th>' + th +
-      '<th scope="col" style="padding:0 0 8px 10px;text-align:right;font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--muted);' + (phone ? 'width:40px;' : '') + '">NEXT ' + n + '</th></tr></thead><tbody>' + body + '</tbody></table></div>';
+      '<th scope="col" style="padding:0 0 8px 10px;text-align:right;font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--muted);' + (phone ? 'width:44px;' : '') + '">' + (mode === 'def' ? 'CS, ' : 'NEXT ') + n + '</th></tr></thead><tbody>' + body + '</tbody></table></div>';
 }
 function _apexTickerInit() { _apexTickerRender(); }
 
@@ -36359,11 +36493,15 @@ function _apexPlanAnalysisData(ctx) {
   var xi = (ctx.xi || []).map(P), bench = (ctx.bench || []).map(P);
   var xp = function (p, i) { return _apexPaAt(p, 'xp_per_gw', i == null ? gi : i); };
   var cap = xi.filter(function (p) { return p.id === ctx.capId; })[0] || null;
-  var mult = function (p) { return p === cap ? 2 : 1; };
-  var total = xi.reduce(function (s, p) { return s + mult(p) * xp(p); }, 0);
+   
+   
+  var capM = ctx.tc ? 3 : 2;
+  var mult = function (p) { return p === cap ? capM : 1; };
+  var counted = ctx.bb ? xi.concat(bench) : xi;
+  var total = counted.reduce(function (s, p) { return s + mult(p) * xp(p); }, 0);
    
   var parts = _APEX_PA_PARTS.map(function (d) {
-    return { label: d[0], v: xi.reduce(function (s, p) { return s + mult(p) * _apexPaAt(p, d[1], gi); }, 0) };
+    return { label: d[0], v: counted.reduce(function (s, p) { return s + mult(p) * _apexPaAt(p, d[1], gi); }, 0) };
   });
   var partSum = parts.reduce(function (s, r) { return s + r.v; }, 0);
   if (Math.abs(total - partSum) >= 0.05) parts.push({ label: 'Other', v: total - partSum });
@@ -36379,17 +36517,22 @@ function _apexPlanAnalysisData(ctx) {
   }).sort(function (a, b) { return a.swing - b.swing; }).slice(0, 5);
    
   var floor = ctx.floor || 0.9;
-  var weak = (ctx.recs || []).slice(0, 4).map(function (r) {
+   
+  var weak = (ctx.recs || []).filter(function (r) { return (+r.gain || 0) > 0; }).slice(0, 4).map(function (r) {
     return { out_id: r.out_id, out: r.out_name, in_id: r.in_id, inn: r.in_name, in_team: r.in_team, out_team: r.out_team,
-             gain: +r.gain || 0, money: (+r.out_cost || 0) - (+r.in_cost || 0), coin: (+r.gain || 0) < floor };
+             gain: +r.gain || 0, money: (+(r.out_sell != null ? r.out_sell : r.out_cost) || 0) - (+r.in_cost || 0), coin: (+r.gain || 0) < floor };    
   });
    
-  var nGw = Math.min(6, Math.max(0, ((xi[0] && xi[0].xp_per_gw) || []).length - gi));
+   
+  var nGw = (ctx.nGw != null) ? ctx.nGw : Math.min(6, Math.max(0, ((xi[0] && xi[0].xp_per_gw) || []).length - gi));
   var risk = xi.concat(bench).map(function (p, k) {
     var miss = [];
+     
+     
+    var gone = !byId[p.id];
     for (var j = 0; j < nGw; j++) {
       var pa = p.p_any_per_gw && p.p_any_per_gw[gi + j];
-      miss.push((pa == null || !isFinite(+pa)) ? null : Math.max(0, 1 - (+pa)));
+      miss.push(gone ? 1 : ((pa == null || !isFinite(+pa)) ? null : Math.max(0, 1 - (+pa))));
     }
     return { id: p.id, name: p.web_name, role: k < xi.length ? 'starter' : ('sub ' + (k - xi.length + 1)), miss: miss };
   }).filter(function (r) { return r.miss.some(function (m) { return m != null && m >= 0.10; }); });
@@ -36398,15 +36541,16 @@ function _apexPlanAnalysisData(ctx) {
   try {
     if (typeof ctx.bestXi === 'function') {
       var b = ctx.bestXi(xi.concat(bench), gi);
-      var bt = (b.xi || []).reduce(function (s, p) { return s + xp(P(p)); }, 0) + (b.cap ? xp(P(b.cap)) : 0);
+      var bt = (ctx.bb ? xi.concat(bench) : (b.xi || [])).reduce(function (s, p) { return s + xp(P(p)); }, 0) + (b.cap ? (capM - 1) * xp(P(b.cap)) : 0);
       var liveIds = {}; xi.forEach(function (p) { liveIds[p.id] = 1; });
       var ins = (b.xi || []).filter(function (p) { return !liveIds[p.id]; }).map(P);
       var bestIds = {}; (b.xi || []).forEach(function (p) { bestIds[p.id] = 1; });
       var outs = xi.filter(function (p) { return !bestIds[p.id]; });
-      fix = { gain: bt - total, ins: ins, outs: outs, capChange: b.cap && cap && b.cap.id !== cap.id ? P(b.cap) : null };
+      if (ctx.bb) { ins = []; outs = []; }    
+      fix = { gain: bt - total, ins: ins, outs: outs, capChange: b.cap && cap && b.cap.id !== cap.id ? P(b.cap) : null, capFrom: cap };
     }
   } catch (e) { fix = null; }
-  return { total: total, parts: parts, forYou: forYou, against: against, weak: weak, risk: risk, fix: fix,
+  return { total: total, tc: !!ctx.tc, bb: !!ctx.bb, parts: parts, forYou: forYou, against: against, weak: weak, risk: risk, fix: fix,
            nGw: nGw, floor: floor, bench: bench.map(function (p) { return { id: p.id, name: p.web_name, team: p.team, xp: xp(p) }; }) };
 }
 function _apexPlanAnalysis() {
@@ -36419,7 +36563,10 @@ function _apexPlanAnalysis() {
     var gw = (TEAM_META.gw_range || [])[gi];
     var recs = [];
     try { recs = (typeof computeTransfers === 'function') ? (computeTransfers(gi) || []) : []; } catch (eR) { recs = []; }
+    var _selGw = function (id) { try { var v = parseInt((document.getElementById(id) || {}).value || 0, 10); return v === gw; } catch (e) { return false; } };
     var d = _apexPlanAnalysisData({ xi: _xiPlayers, bench: _benchPlayers, capId: (typeof _capId !== 'undefined') ? _capId : null,
+      tc: _selGw('sel-tc'), bb: _selGw('sel-bb'),
+      nGw: Math.min(6, Math.max(0, (TEAM_META.gw_range || []).length - gi)),
       gwIdx: gi, pool: POOL_DATA, recs: recs, floor: (typeof _PP_DECISION_FLOOR !== 'undefined') ? _PP_DECISION_FLOOR : 0.9,
       bestXi: (typeof pickBestXi === 'function') ? pickBestXi : null });
     var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
@@ -36438,13 +36585,18 @@ function _apexPlanAnalysis() {
         '<div style="font-size:1.7rem;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.15;' + (col ? 'color:' + col + ';' : '') + '">' + val + '</div>' +
         '<div style="font-size:.74rem;' + (dark ? 'color:#C9D3CE;' : 'color:var(--muted);') + '">' + note + '</div></div>';
     };
-    var fixTxt = (d.fix && d.fix.gain > 0.05 && d.fix.ins.length)
-      ? ('Start ' + d.fix.ins.map(function (p) { return esc(p.web_name); }).join(', ') + ' for ' + d.fix.outs.map(function (p) { return esc(p.web_name); }).join(', '))
-      : 'Your XI is already the best eleven';
+     
+     
+    var _fx = [];
+    if (d.fix && d.fix.gain > 0.05) {
+      if (d.fix.ins.length) _fx.push('Start ' + d.fix.ins.map(function (p) { return esc(p.web_name); }).join(', ') + ' for ' + d.fix.outs.map(function (p) { return esc(p.web_name); }).join(', '));
+      if (d.fix.capChange) _fx.push('captain ' + esc(d.fix.capChange.web_name) + (d.fix.capFrom ? ' instead of ' + esc(d.fix.capFrom.web_name) : ''));
+    }
+    var fixTxt = _fx.length ? (_fx.join('; ').replace(/^c/, 'C')) : 'Your XI and captain are already the best choice';
     var html = '<div style="font-size:1.15rem;font-weight:800;margin:18px 0 2px;">Plan analysis · GW' + gw + '</div>' +
       '<div style="font-size:.8rem;color:var(--muted);">Your squad as it stands on the pitch, read by the same engines as the rest of the page.</div>' +
       '<div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;">' +
-        tile('YOUR GW' + gw + ' PROJECTION', f1(d.total), 'XI plus captain', true) +
+        tile('YOUR GW' + gw + ' PROJECTION', f1(d.total), (d.bb ? 'all 15 (Bench Boost)' : 'XI') + (d.tc ? ' plus triple captain' : ' plus captain'), true) +
         tile('AVERAGE MANAGER', crowd != null ? f1(crowd) : '&mdash;', crowd != null ? 'all FPL managers, projected' : 'projected for the next gameweek only') +
         tile('QUICK FIX', (d.fix && d.fix.gain > 0.05) ? '+' + f1(d.fix.gain) : '0.0', fixTxt, false, (d.fix && d.fix.gain > 0.05) ? '#0F6E56' : null) +
         tile('BIGGEST RISK', riskTop ? Math.round(riskTop.m * 100) + '%' : '&mdash;', riskTop ? 'chance ' + esc(riskTop.name) + ' gets no minutes in GW' + riskTop.gw : 'everyone 90%+ likely to play', false, riskTop ? '#B4453A' : null) +
@@ -42716,7 +42868,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW6</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1790096390-GW6-fd7cf4c9</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1790105931-GW6-3de8c09a</span>
 </footer>
 
 
@@ -43227,6 +43379,12 @@ s.setAttribute("data-cf-beacon",'{"token": "890700f621df42909deca8500a0df182"}')
      
      
     try { localStorage.setItem('apex_fpl_id', String(id)); } catch (_ePersist) {}
+     
+     
+     
+     
+     
+    try { window._apexEntryStarted = +(entry && entry.started_event) || 0; } catch (_eSe) {}
 
      
      
@@ -43594,13 +43752,16 @@ s.setAttribute("data-cf-beacon",'{"token": "890700f621df42909deca8500a0df182"}')
     var AFCON_TOPUP_ON = false;   
     var AFCON_TOPUP_GW = 16;
     var pastGws = (history.current || []).filter(function (g) { return g.event <= startGw; });
+     
+     
+    var _firstEv = (history.current || []).reduce(function (m, g) { return (g.event > 0 && g.event < m) ? g.event : m; }, 99);
     for (var gi = 0; gi < pastGws.length; gi++) {
       var g = pastGws[gi];
        
        
        
        
-      if (g.event === 1) continue;
+      if (g.event === 1 || g.event === _firstEv) continue;
       var made = g.event_transfers || 0;
       var cost = g.event_transfers_cost || 0;
       var chip = chipMap[g.event] || '';
@@ -43656,6 +43817,14 @@ s.setAttribute("data-cf-beacon",'{"token": "890700f621df42909deca8500a0df182"}')
         return String(a.time || '').localeCompare(String(b.time || ''));
       });
       var _purchaseMap = {};
+       
+       
+       
+       
+       
+      var _fhEvents = {};
+      try { Object.keys(chipMap || {}).forEach(function (ev) { if (chipMap[ev] === 'freehit') _fhEvents[+ev] = 1; }); } catch (_eFh) {}
+      _xferChrono = _xferChrono.filter(function (t) { return !_fhEvents[+t.event]; });
       _xferChrono.forEach(function (t) {
         _purchaseMap[t.element_in] = t.element_in_cost;
         delete _purchaseMap[t.element_out];
@@ -43809,7 +43978,8 @@ s.setAttribute("data-cf-beacon",'{"token": "890700f621df42909deca8500a0df182"}')
       bank: bankVal,
       free_transfers: ft,
       squad_value: Math.round(sellingValue * 10) / 10,
-      budget: Math.round((sellingValue + bankVal) * 10) / 10,
+      budget: (window._apexSeedHydrated && typeof _apexNewEntryFirstWeek === 'function' && _apexNewEntryFirstWeek())
+        ? 100.0 : Math.round((sellingValue + bankVal) * 10) / 10,    
        
        
        
