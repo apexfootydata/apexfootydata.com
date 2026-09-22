@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="6" data-built-at="2026-09-22T13:58:28">
+<meta name="apex-gw" content="6" data-built-at="2026-09-22T14:19:25">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
@@ -30,7 +30,7 @@
 })();
 </script>
 <meta http-equiv="Pragma" content="no-cache">
-<meta name="apex-build" content="20260922-135828">
+<meta name="apex-build" content="20260922-141924">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — FPL Apex</title>
 <meta name="description" content="Plan FPL transfers, chips, and Free Hit squads. Live xG-based projections, a rival head-to-head simulator, and a mini-league table. Free FPL tool.">
@@ -7593,7 +7593,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
       <div style="display:flex;gap:16px;align-items:flex-end;flex-wrap:wrap;">
         <div style="flex:1;min-width:280px;">
           <label style="display:block;font-size:.8rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-weight:700;margin-bottom:8px;">Choose a league</label>
-          <select id="league-select"
+          <select id="league-select" onchange="_lgSyncRivalPicker(this.value)"
             style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--fg);padding:13px 16px;font-size:1.05rem;outline:none;font-family:inherit;">
             <option value="">Loading your leagues…</option>
           </select>
@@ -7644,6 +7644,8 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
     </div>
 
     
+    
+    <div id="league-chip-watch" style="display:none;background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px 18px;margin-bottom:14px;font-size:.85rem;line-height:1.55;"></div>
     <div id="league-table-wrap" style="display:none;background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:16px;">
       <div style="padding:16px 20px 10px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border,#E6E1D7);">
         <div style="display:flex;gap:6px;align-items:center;" id="league-toggle-wrap">
@@ -12209,21 +12211,46 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
   }
 
    
+   
+   
+   
+   
+   
+  function usableLeagues(classics) {
+    return (classics || [])
+      .filter(l => l && l.league_type !== 's'
+        && (+l.rank_count || 0) > 1 && (+l.rank_count || 0) < 200000)
+      .sort((a, b) => (+a.rank_count || 1e9) - (+b.rank_count || 1e9));
+  }
+  function _ordinal(n) {
+    n = +n || 0;
+    const t = n % 100, u = n % 10;
+    const sfx = (t >= 11 && t <= 13) ? 'th' : ({ 1: 'st', 2: 'nd', 3: 'rd' }[u] || 'th');
+    return n.toLocaleString('en-GB') + sfx;
+  }
+  function leagueLabel(l) {
+    const nm = (l && (l.name || ('League ' + l.id))) || '';
+    const n = +(l && (l.rank_count != null ? l.rank_count : l.entry_count)) || 0;
+    const r = +(l && (l.entry_rank != null ? l.entry_rank : l.rank)) || 0;
+    const bits = [];
+    if (n) bits.push(n.toLocaleString('en-GB') + ' teams');
+    if (r) bits.push("you're " + _ordinal(r));
+    return bits.length ? nm + ' (' + bits.join(' · ') + ')' : nm;
+  }
+
   async function listUserLeagues(fplId) {
     const entry = await fetchEntry(fplId);
     const classics = ((entry.leagues || {}).classic) || [];
-     
-    return classics
-      .filter(l => l.league_type === 'x' || l.scoring === 'c' || l.id > 0)   
-      .map(l => ({
-        id: l.id,
-        name: l.name,
-        entry_rank: l.entry_rank,
-        entry_last_rank: l.entry_last_rank,
-        created: l.created,
-        admin_entry: l.admin_entry,
-        has_cup: !!l.has_cup,
-      }));
+    return usableLeagues(classics).map(l => ({
+      id: l.id,
+      name: l.name,
+      entry_rank: l.entry_rank,
+      entry_last_rank: l.entry_last_rank,
+      rank_count: l.rank_count,
+      created: l.created,
+      admin_entry: l.admin_entry,
+      has_cup: !!l.has_cup,
+    }));
   }
 
    
@@ -12685,6 +12712,9 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
       baseline_xp: baseline,
       chip_bonus: chipPts,
       chip_assignments: assignments,
+       
+       
+      chip_week_values: perGwChipValues,
       projected_remaining: baseline + chipPts,
       missing_from_pool: missing,
     };
@@ -12931,6 +12961,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
         live_now: Math.round(liveNow * 10) / 10,
         chips_remaining: managers[i].chips_remaining,
         chip_assignments: managers[i].chip_assignments || {},
+        chip_week_by_gw: managers[i].chip_week_by_gw || {},    
         baseline_xp: Math.round(mean1D(bcol) * 10) / 10,
         chip_bonus:  Math.round(mean1D(ccol) * 10) / 10,
         inflight_xp: Math.round(inflightXp[i] * 10) / 10,
@@ -13128,6 +13159,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
         picks: ms.state.picks,
         chips_remaining: ms.state.chips_remaining,
         chip_assignments: proj.chip_assignments,
+        chip_week_values: proj.chip_week_values,
         per_gw: _perGwDamp,
         per_gw_raw: proj.per_gw,
         baseline_xp: Math.round(_baselineDamp * 10) / 10,
@@ -13163,6 +13195,19 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
         }
       }
       m.chip_assignments = caGw;
+       
+      if (m.chip_week_values && !m.chip_week_by_gw) {
+        const byGw = {};
+        for (const [chip, vals] of Object.entries(m.chip_week_values)) {
+          const lab = LABEL[chip] || chip.toUpperCase();
+          byGw[lab] = {};
+          for (const [off, v] of Object.entries(vals || {})) {
+            if (Number.isFinite(+v)) byGw[lab][startGw + (+off)] = Math.round(v * 100) / 100;
+          }
+        }
+        m.chip_week_by_gw = byGw;
+      }
+      delete m.chip_week_values;
     }
 
     _prog('simulating', 90);
@@ -13195,6 +13240,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
         baseline_xp: m.baseline_xp,
         chip_bonus: m.chip_bonus,
         chip_assignments: m.chip_assignments,   
+        chip_week_by_gw: m.chip_week_by_gw,     
         chips_remaining: m.chips_remaining,
         missing_from_pool: m.missing_from_pool,
         projected_remaining: m.projected_remaining,
@@ -13306,6 +13352,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
         chip_bonus: mb.chip_bonus,
         chips_remaining: mb.chips_remaining,
         chip_assignments: mb.chip_assignments,
+        chip_week_by_gw: mb.chip_week_by_gw,    
         inflight_xp,
         inflight_gw: ls.inflight_gw,
          
@@ -14283,6 +14330,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
     loadManagerState,
     chipsRemainingAt,      
     leagueHorizonWords,    
+    usableLeagues, leagueLabel,    
     _simulateLeagueForTest: _simulateLeague,    
     _lsEdgePersistence,
     _lsSeasonParams,
@@ -14594,6 +14642,10 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
     return cl.filter(function (l) { return l.league_type !== 's'; });
   }
   function _usableLeagues(priv) {
+     
+    if (window.ApexSolver && typeof window.ApexSolver.usableLeagues === 'function') {
+      return window.ApexSolver.usableLeagues(priv);
+    }
     return priv.filter(function (l) { return (l.rank_count || 0) > 1 && (l.rank_count || 0) < 200000; });
   }
    
@@ -14633,7 +14685,9 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
       }
       cl.forEach(function (l) {
         var o = document.createElement('option'); o.value = l.id;
-        o.textContent = (l.name || ('League ' + l.id)) + ' (' + (l.rank_count || '?') + ' teams)';
+        o.textContent = (window.ApexSolver && typeof window.ApexSolver.leagueLabel === 'function')
+          ? window.ApexSolver.leagueLabel(l)
+          : (l.name || ('League ' + l.id)) + ' (' + (l.rank_count || '?') + ' teams)';
         lsel.appendChild(o);
       });
       if (status) status.textContent = '';
@@ -14644,6 +14698,11 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
   window.rivalLeagueChanged = async function () {
     var lsel = $('rival-league-select'), sel = $('rival-select');
     if (!lsel || !lsel.value || !sel) return;
+     
+    try {
+      var _ls = document.getElementById('league-select');
+      if (_ls && _ls.value !== lsel.value && [].some.call(_ls.options, function (o) { return o.value === lsel.value; })) _ls.value = lsel.value;
+    } catch (_eSync) {}
     var status = $('rival-status'); if (status) status.textContent = 'Loading league standings…';
     try { _applyStandings(await _fetchStandings(lsel.value)); }
     catch (e) { if (status) status.textContent = 'Could not load that league — type a rival Team ID instead.'; }
@@ -19407,7 +19466,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
  
  
  
-const BUILD_VERSION = "1790081908-GW6-6b962706";
+const BUILD_VERSION = "1790083164-GW6-0e67d978";
 window.APEX_BUILD = BUILD_VERSION;
  
  
@@ -19464,7 +19523,7 @@ window.APEX_SQUAD_ROLLBACK = false;
 let FPL_ID = null;
 let SQUAD_DATA = [];
 </script>
-<script src="/apex_pool.js?v=1790081908-GW6-6b962706"></script>
+<script src="/apex_pool.js?v=1790083164-GW6-0e67d978"></script>
 <script>
 const PLAYER_NAMES = {"1": "Raya", "2": "Arrizabalaga", "3": "Meslier", "4": "Gabriel", "5": "J.Timber", "6": "Saliba", "7": "Lewis-Skelly", "8": "Calafiori", "9": "Hincapie", "10": "White", "11": "Mosquera", "12": "Saka", "13": "Rice", "14": "Eze", "15": "\u00d8degaard", "16": "Madueke", "17": "Merino", "18": "Martinelli", "19": "Zubimendi", "20": "Dowman", "22": "Nwaneri", "23": "F\u00e1bio Vieira", "24": "Nelson", "25": "Gy\u00f6keres", "26": "Havertz", "27": "G.Jesus", "31": "Konsa", "452": "Bruno G.", "557": "Tzolis", "29": "M.Bizot", "30": "Digne", "32": "Cash", "33": "Mings", "34": "Pau", "35": "Bogarde", "36": "Maatsen", "37": "Lindel\u00f6f", "38": "A.Garc\u00eda", "39": "Nedeljkovic", "41": "Buend\u00eda", "44": "Bailey", "45": "McGinn", "46": "Barkley", "47": "Kamara", "48": "Onana", "49": "Iling Jr", "50": "Burrowes", "51": "George Hemmings", "52": "Alysson", "53": "Manzambi", "54": "Gomes", "55": "Watkins", "56": "Abraham", "160": "Garnacho", "166": "N.Jackson", "582": "Madjo", "596": "Ruggeri", "597": "Suzuki", "606": "Rowe", "607": "Lynch", "611": "Wan-Bissaka", "618": "Goretzka", "630": "Harwood-Bellis", "631": "Mbaye", "667": "Wright", "57": "Petrovi\u0107", "58": "Forster", "59": "Dennis", "60": "Hill", "61": "Truffert", "62": "Diakit\u00e9", "63": "Milosavljevi\u0107", "64": "Smith", "65": "J.Araujo", "66": "Soler", "67": "Rayan", "68": "Tavernier", "69": "Scott", "70": "Kluivert", "71": "Cook", "72": "Gannon-Doak", "73": "Adams", "74": "Brooks", "75": "Christie", "76": "T\u00f3th.A", "77": "Adli", "78": "Kroupi.Jr", "79": "Evanilson", "80": "Enes \u00dcnal", "81": "Rodr\u00edguez", "566": "Silva", "573": "Sanchez", "608": "Jebbison", "615": "Di Gregorio", "82": "Kelleher", "83": "Valdimarsson", "84": "Collins", "85": "Van den Berg", "86": "Lewis-Potter", "87": "Ajer", "88": "Kayode", "89": "Henry", "90": "Hickey", "92": "Ji-soo", "93": "Schuster", "94": "Schade", "95": "O.Dango", "96": "Damsgaard", "97": "Jensen", "98": "Janelt", "99": "Milambo", "100": "Carvalho", "102": "Yarmoliuk", "103": "Dasilva", "105": "Anthony", "106": "Thiago", "107": "Furo", "108": "Wilson", "565": "M.Sangar\u00e9", "620": "Diouf", "657": "Nunes", "660": "Fredrick", "661": "Balcombe", "109": "Verbruggen", "111": "Steele", "113": "F.Kad\u0131o\u011flu", "114": "Boscagli", "115": "De Cuyper", "116": "Dunk", "117": "Coppola", "118": "Igor", "119": "Costinha", "120": "Svoboda", "121": "Mitoma", "122": "Minteh", "123": "Hinshelwood", "124": "Gro\u00df", "125": "Georginio", "126": "O'Riley", "127": "Gomez", "128": "Buonanotte", "129": "Ayari", "130": "Wieffer", "132": "Howell", "133": "Watson", "134": "Oriola", "135": "Yohanna", "137": "Tzimas", "138": "Kostoulas", "139": "Ferguson", "328": "Struijk", "504": "Vuskovic", "594": "David", "600": "Osman", "605": "Yalcouy\u00e9", "614": "Hadjam", "624": "Cozier-Duberry", "639": "Andr\u00e9s", "652": "Azeez", "658": "Ibrahim", "28": "Martinez", "40": "Rogers", "101": "Henderson", "136": "Welbeck", "140": "S\u00e1nchez", "141": "J\u00f6rgensen", "142": "James", "143": "Chalobah", "144": "Gusto", "145": "Fofana", "146": "B.Badiashile", "148": "Hato", "149": "Colwill", "150": "M.Sarr", "151": "Acheampong", "152": "Palestra", "154": "Palmer", "156": "Neto", "157": "Est\u00eav\u00e3o", "158": "Gittens", "159": "Caicedo", "161": "Lavia", "163": "D.Essugo", "164": "Quenda", "165": "Jo\u00e3o Pedro", "168": "Marc Guiu", "169": "Mheuka", "170": "Emegha", "200": "Lacroix", "560": "Penders", "561": "Anselmino", "568": "Barco", "583": "Chavarria", "662": "Nicoll-Jazuli", "91": "Pinnock", "104": "Onyeka", "110": "Rushworth", "171": "Dovin", "172": "Wilson", "173": "Thomas", "174": "Kitching", "175": "van Ewijk", "176": "Dasilva", "177": "Kesler-Hayden", "178": "Bidwell", "179": "Latibeaudiere", "180": "Woolfenden", "181": "Brau", "182": "Amenda", "183": "Rudoni", "184": "Grimes", "185": "Sakamoto", "186": "Mason-Clark", "187": "Eccles", "188": "Torp", "189": "Shepherd", "190": "Tchaouna", "191": "Borges Rodrigues", "192": "Andrews", "193": "Wright", "194": "Thomas-Asante", "195": "Simms", "196": "Markelo", "197": "Bassette", "492": "Awoniyi", "575": "Yirenkyi", "584": "Hamer", "599": "Cherif", "623": "Bentley", "655": "Gboho", "656": "Mfuni", "42": "Guessand", "153": "Disasi", "198": "Henderson", "199": "Benitez", "202": "Richards", "203": "Canvot", "204": "Mitchell", "205": "Sosa", "206": "Chadi Riad", "207": "Mingueza", "208": "Sarr", "210": "Wharton", "211": "Yeremy", "212": "Hughes", "213": "Lerma", "214": "Kamada", "215": "Devenny", "216": "Esse", "217": "M.Fran\u00e7a", "218": "Doucour\u00e9", "219": "J.Rak-Sakyi", "220": "Cardines", "221": "Drakes-Thomas", "222": "Strand Larsen", "223": "Mateta", "224": "Nketiah", "225": "Uche", "241": "McNeil", "555": "Matthews", "577": "Tomiyasu", "588": "Khalaili", "595": "Gozo", "633": "Ahanor", "643": "Chilwell", "644": "Timber", "647": "Osorio", "21": "N\u00f8rgaard", "209": "Johnson", "226": "Pickford", "227": "Travers", "228": "King", "229": "Tarkowski", "230": "Branthwaite", "231": "Keane", "232": "O'Brien", "233": "Mykolenko", "234": "Patterson", "235": "Aznou", "236": "Dewsbury-Hall", "238": "Grealish", "239": "Garner", "242": "George", "243": "Alcaraz", "244": "Armstrong", "245": "Dibling", "246": "R\u00f6hl", "247": "Hackney", "248": "Beto", "249": "Barry", "649": "Maitland-Niles", "654": "Graham", "250": "Leno", "251": "Lecomte", "252": "McNally", "253": "Andersen", "254": "Robinson", "255": "J.Cuenca", "256": "Tete", "257": "Bassey", "258": "Castagne", "261": "Iwobi", "262": "Smith Rowe", "263": "Kevin", "264": "Bobb", "265": "Berge", "266": "Cairney", "268": "King", "269": "Sessegnon", "270": "Reed", "271": "Muniz", "272": "Kusi-Asare", "569": "Gonzalo", "570": "Palacios", "580": "Charles", "610": "De Fougerolles", "626": "Zepa", "635": "Larsson", "636": "\u00c1ngel", "650": "Affengruber", "240": "Iroegbunam", "273": "Phillips", "274": "Butland", "275": "Cartwright", "276": "Lo-Tutala", "277": "Egan", "278": "Hughes", "279": "Ajayi", "280": "Coyle", "281": "Drameh", "282": "Giles", "283": "Jacob", "284": "McCarthy", "285": "McNair", "286": "Belloumi", "287": "Millar", "288": "Dowell", "289": "Crooks", "290": "Slater", "291": "Matazo", "292": "\u00d6m\u00fcr", "293": "Kamara", "294": "Zambrano", "295": "McBurnie", "296": "Akintola", "297": "Gyabi", "298": "Destan", "299": "Burstow", "340": "Gelhardt", "556": "Targett", "563": "Morita", "572": "Tzolakis", "574": "Hjert\u00f8-Dahl", "576": "Stroud", "585": "Herrington", "586": "Mendy", "589": "Gourna-Douath", "617": "Cho", "632": "Ansah", "637": "Vaz", "638": "Norton-Cuffy", "642": "Thomas", "645": "Mouzakitis", "259": "Diop", "267": "Luki\u0107", "300": "Walton", "301": "Palmer", "302": "Button", "303": "Kipr\u00e9", "304": "O'Shea", "305": "Davis", "306": "Greaves", "307": "Johnson", "308": "Furlong", "309": "N\u00fa\u00f1ez", "310": "Matusiwa", "311": "Burns", "312": "Taylor", "313": "Clarke", "314": "Ogbene", "315": "Fatawu", "316": "Emersonn", "317": "Hirst", "318": "Philogene", "319": "Szmodics", "320": "Akpom", "321": "Walle Egeli", "322": "Al-Hamadi", "323": "McAteer", "324": "Mehmeti", "554": "Van Oevelen", "562": "Maeda", "564": "Scherpen", "571": "Florentino", "591": "Enciso", "592": "Ouattara", "602": "Humphreys", "619": "Palacios", "640": "Flemming", "260": "Wilson", "326": "Perri", "327": "Bijol", "329": "Rodon", "330": "Bogle", "331": "Gudmundsson", "332": "Justin", "333": "Bornauw", "334": "Muharemovi\u0107", "335": "Stach", "336": "Okafor", "337": "Aaronson", "338": "Ampadu", "339": "Longstaff", "341": "Gnonto", "342": "Harrison", "343": "James", "344": "Gruev", "345": "Tanaka", "346": "Calvert-Lewin", "347": "Nmecha", "348": "Piroe", "349": "Mateo Joseph", "385": "Trafford", "598": "Elvedi", "603": "Lienou", "604": "Cresswell", "625": "Cairns", "629": "Zetterer", "641": "Bard", "648": "Bahoya", "350": "A.Becker", "351": "Mamardashvili", "352": "Woodman", "353": "Pecsi", "354": "Jaros", "355": "Davies", "356": "Virgil", "357": "Frimpong", "358": "Kerkez", "359": "Gomez", "360": "Bradley", "361": "Lucky", "362": "Jacquet", "363": "Leoni", "364": "Tsimikas", "365": "Ramsay", "366": "Wirtz", "367": "Gakpo", "368": "Szoboszlai", "369": "Ngumoha", "370": "Chiesa", "371": "Gravenberch", "372": "Mac Allister", "373": "C.Jones", "374": "Endo", "375": "Nyoni", "376": "Bajcetic", "377": "Munoz", "378": "McConnell", "379": "Isak", "380": "Ekitik\u00e9", "381": "Koumas", "382": "Danns", "383": "Elliott", "579": "Araujo", "627": "Barcola", "155": "Enzo", "237": "Ndiaye", "384": "Donnarumma", "386": "Bettinelli", "387": "O'Reilly", "388": "Gu\u00e9hi", "389": "Matheus N.", "390": "R\u00faben", "391": "Gvardiol", "392": "A\u00eft-Nouri", "393": "Khusanov", "394": "Alleyne", "395": "Lewis", "396": "Vitor Reis", "397": "Semenyo", "398": "Foden", "399": "Cherki", "400": "Doku", "402": "Rodrigo", "404": "Reijnders", "406": "Kova\u010di\u0107", "407": "Echeverri", "408": "Phillips", "409": "Mukasa", "410": "Monga", "411": "Haaland", "481": "Anderson", "587": "Rulli", "616": "Bouaddi", "621": "McAidoo", "622": "Braithwaite", "628": "Allan", "653": "Samba", "43": "Tielemans", "131": "Baleba", "162": "Andrey Santos", "325": "Darlow", "412": "Lammens", "413": "Bayindir", "414": "Heaton", "415": "Dorgu", "416": "De Ligt", "417": "Dalot", "418": "Maguire", "419": "Martinez", "420": "Yoro", "421": "Heaven", "422": "Mazraoui", "423": "Shaw", "424": "Amass", "425": "Fredricson", "426": "B.Fernandes", "427": "Mbeumo", "428": "Cunha", "429": "Rashford", "430": "Mount", "431": "Amad", "432": "Mainoo", "433": "Ugarte", "434": "J.Fletcher", "435": "Lacey", "436": "Collyer", "437": "Bendito Mantato", "438": "Fletcher", "439": "\u0160e\u0161ko", "440": "Zirkzee", "441": "Obi", "405": "N.Gonzalez", "442": "Pope", "443": "Gillespie", "444": "Jaouen", "445": "Thiaw", "446": "Sch\u00e4r", "447": "Botman", "448": "Burn", "449": "Hall", "450": "Livramento", "451": "A.Murphy", "453": "Barnes", "454": "Elanga", "456": "J.Ramsey", "457": "J.Murphy", "458": "Joelinton", "459": "L.Miley", "460": "Willock", "461": "Tour\u00e9", "462": "Steur", "463": "Woltemade", "464": "Wissa", "465": "Osula", "466": "Neave", "559": "Bamba", "567": "Horn\u00ed\u010dek", "593": "Dedi\u0107", "609": "Shahar", "634": "Fernandez-Pardo", "659": "Miley", "663": "Pivas", "664": "Salia", "665": "Mills", "666": "Thompson", "167": "Delap", "201": "Mu\u00f1oz", "467": "Sels", "468": "John", "469": "N.Williams", "470": "Morato", "471": "Milenkovi\u0107", "472": "Murillo", "473": "Aina", "474": "Jair Cunha", "475": "Savona", "476": "O.Richards", "477": "Abbott", "478": "Netz", "479": "Bindon", "480": "Gibbs-White", "482": "Hudson-Odoi", "483": "Ndoye", "484": "Hutchinson", "485": "Bakwa", "486": "McAtee", "487": "Dominguez", "488": "I.Sangar\u00e9", "489": "Yates", "490": "Wood", "491": "Igor Jesus", "493": "Kalimuendo", "558": "Schlager", "581": "Diomande", "590": "Benda", "112": "Van Hecke", "147": "Tosin", "401": "Marmoush", "403": "S\u00e1vio", "455": "Tonali", "494": "Vicario", "495": "Austin", "496": "Kinsky", "497": "Dubravka", "498": "Senesi", "499": "Pedro Porro", "500": "Romero", "502": "Robertson", "503": "Van de Ven", "505": "Spence", "506": "Udogie", "507": "Phillips", "508": "Davies", "509": "Byfield", "510": "Rowswell", "511": "Souza", "512": "Kudus", "513": "Xavi", "514": "Tel", "515": "Maddison", "516": "Bentancur", "517": "Odobert", "518": "P.M.Sarr", "519": "Gallagher", "520": "Bergvall", "521": "Kulusevski", "522": "Gray", "523": "Moore", "524": "Olusesi", "525": "Fernandes", "526": "Solanke", "527": "Richarlison", "528": "Scarlett", "578": "Mudryk", "601": "Williams-Barnett", "501": "Danso", "529": "Roefs", "530": "Patterson", "531": "Ellborg", "532": "Ballard", "533": "Mukiele", "534": "Hume", "535": "Alderete", "536": "Reinildo", "537": "Seelt", "538": "Hjelde", "539": "O'Nien", "540": "Masuaku", "541": "Meunier", "542": "E.Le F\u00e9e", "543": "Diarra", "544": "Xhaka", "545": "Sadiki", "546": "Adingra", "547": "Mundle", "548": "Rigg", "549": "Talbi", "550": "Jocelin.T", "551": "N.Angulo", "552": "Brobbey", "553": "Isidor", "612": "Methalie", "613": "Ahoka", "646": "Fofana", "651": "J.Angulo"};
 const TRANSFER_RECS = [];
@@ -20410,6 +20469,27 @@ function _installFplFetcher() {
   });
 }
 
+ 
+function _lgPickLabel(l) {
+  try {
+    if (window.ApexSolver && typeof window.ApexSolver.leagueLabel === 'function') {
+      return window.ApexSolver.leagueLabel({ id: l.id, name: l.name, rank_count: l.entry_count, entry_rank: l.rank });
+    }
+  } catch (_e) {}
+  return l.name || ('League ' + l.id);
+}
+ 
+function _lgSyncRivalPicker(id) {
+  try {
+    const r = document.getElementById('rival-league-select');
+    if (!r || !id || r.value === String(id)) return;
+    if ([].some.call(r.options, o => o.value === String(id))) {
+      r.value = String(id);
+      if (typeof window.rivalLeagueChanged === 'function') window.rivalLeagueChanged();
+    }
+  } catch (_e) {}
+}
+
 async function initLeagueView() {
   if (_leagueInitialised) return;
   _leagueInitialised = true;
@@ -20439,14 +20519,14 @@ async function initLeagueView() {
       });
 
       const leagues = await window.ApexSolver.listUserLeagues(FPL_ID);
-      _leagueUserLeagues = leagues.map(l => ({ id: l.id, name: l.name, rank: l.entry_rank, entry_count: null }));
+      _leagueUserLeagues = leagues.map(l => ({ id: l.id, name: l.name, rank: l.entry_rank, entry_count: l.rank_count || null }));
       if (_leagueUserLeagues.length === 0) {
         select.innerHTML = '<option value="">No classic leagues found</option>';
         status.textContent = 'No eligible mini-leagues found for your FPL ID.';
         return;
       }
       select.innerHTML = _leagueUserLeagues
-        .map(l => `<option value="${l.id}">${_lgEsc(l.name)} ${_lgRankTag(l.rank)}</option>`)
+        .map(l => `<option value="${l.id}">${_lgEsc(_lgPickLabel(l))}</option>`)    
         .join('');
       btn.disabled = false;
       btn.style.opacity = '1';
@@ -20477,7 +20557,7 @@ async function initLeagueView() {
     }
 
     select.innerHTML = _leagueUserLeagues
-      .map(l => `<option value="${l.id}">${_lgEsc(l.name)} ${_lgRankTag(l.rank, l.entry_count)}</option>`)
+      .map(l => `<option value="${l.id}">${_lgEsc(_lgPickLabel(l))}</option>`)    
       .join('');
     btn.disabled = false;
     btn.style.opacity = '1';
@@ -20552,6 +20632,61 @@ function _lgProj(m, s38) {
   return s38 ? [m.season_final_mean, m.season_final_p10, m.season_final_p90]
              : [m.projected_final_mean, m.projected_final_p10, m.projected_final_p90];
 }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+const _LG_CW_WINDOW = 3;
+function _lgChipWatchItems(standings, startGw, myId) {
+  if (typeof _apexChipAdvice !== 'function' || !startGw) return null;
+  const KEY = { wildcard: 'WC', freehit: 'FH', bboost: 'BB', '3xc': 'TC' };
+  const last = startGw + _LG_CW_WINDOW - 1;
+  const items = [];
+  for (const m of (standings || [])) {
+    if (myId && m.entry_id === myId) continue;
+    const byGw = m.chip_week_by_gw || {};
+    const held = new Set((m.chips_remaining || []).map(c => KEY[c] || c));
+    const gws = new Set();
+    Object.values(byGw).forEach(o => Object.keys(o || {}).forEach(g => gws.add(+g)));
+    const gwr = [...gws].sort((a, b) => a - b);
+    if (!gwr.length) continue;
+    const t = {};
+    for (const c of ['WC', 'FH', 'BB', 'TC']) {
+      t[c] = (held.has(c) && byGw[c]) ? gwr.map(g => (byGw[c][g] != null ? byGw[c][g] : null)) : [];
+    }
+    const adv = _apexChipAdvice(t, gwr, []);
+    for (const c of ['TC', 'BB', 'FH', 'WC']) {
+      const a = adv[c];
+      if (a && a.state === 'best' && a.gw <= last) items.push({ m, c, a });
+    }
+  }
+  items.sort((x, y) => x.a.gw - y.a.gw || y.a.value - x.a.value);
+  return items;
+}
+function _lgChipWatch(data) {
+  const el = document.getElementById('league-chip-watch');
+  if (!el) return;
+  const sg = +data.start_gw || 0;
+  const items = _lgChipWatchItems(data.standings, sg, (typeof FPL_ID !== 'undefined') ? FPL_ID : null);
+  if (items == null) { el.style.display = 'none'; return; }
+  const NAMES = { WC: 'Wildcard', FH: 'Free Hit', BB: 'Bench Boost', TC: 'Triple Captain' };
+  const last = sg + _LG_CW_WINDOW - 1;
+  let html = `<div style="font-weight:800;margin-bottom:6px;">Chip watch · GW${sg}–GW${last}</div>`;
+  if (!items.length) {
+    html += `<div style="color:var(--muted);">No rival has a chip week that clearly stands out in the next ${_LG_CW_WINDOW} gameweeks.</div>`;
+  } else {
+    html += items.slice(0, 6).map(it => `<div>⚠ <strong>${_lgEsc(it.m.player_name)}</strong> holds the ${NAMES[it.c]}: `
+      + `GW${it.a.gw} clearly stands out for their team (about +${(+it.a.value).toFixed(1)}, `
+      + `${(+it.a.lead).toFixed(1)} clear of their next best week).</div>`).join('');
+  }
+  html += `<div style="color:var(--muted);font-size:.75rem;margin-top:6px;">From their current team. A warning of what they could do, not a prediction that they will.</div>`;
+  el.innerHTML = html;
+  el.style.display = 'block';
+}
+
 function renderLeagueTable(data) {
   _lgLogBadge();
   const standings = data.standings || [];
@@ -20677,6 +20812,8 @@ function renderLeagueTable(data) {
     `;
     tbody.appendChild(tr);
   });
+
+  try { _lgChipWatch(data); } catch (_eCw) {}    
 
    
   const chipBody = document.getElementById('league-chip-detail-body');
@@ -42132,7 +42269,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW6</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1790081908-GW6-6b962706</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1790083164-GW6-0e67d978</span>
 </footer>
 
 
