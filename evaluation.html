@@ -61,9 +61,6 @@
   .tile[data-k="apex"] .n{ font-size:104px; line-height:.92; font-weight:800; letter-spacing:-.04em; color:var(--mint); }
   .tile[data-k="apex"] .t{ font-size:22px; color:var(--cream); }
 
-  .verdict{ background:var(--deep); border-radius:18px; padding:30px 36px; display:flex; gap:22px; align-items:flex-start; }
-  .verdict svg{ flex-shrink:0; margin-top:3px; }
-  .verdict p{ margin:0; font-size:20px; line-height:1.5; font-weight:500; color:#F3EFE7; max-width:880px; }
 
   .sect{ font-size:13px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--faint); margin-bottom:6px; }
   
@@ -100,8 +97,6 @@
     .tile .n{ font-size:40px; }
     .tile[data-k="apex"]{ grid-column:1 / -1; padding:26px 24px; }
     .tile[data-k="apex"] .n{ font-size:76px; }
-    .verdict{ padding:22px 20px; gap:14px; }
-    .verdict p{ font-size:17px; }
     .wk{ grid-template-columns:1.3fr 1fr 1fr 1fr .9fr; gap:4px; padding:12px 0; }
     .wk .g{ font-size:14px; } .wk .g i{ display:block; margin:0; font-size:12px; } .wk .g i:before{ content:""; }
     .wk .n{ font-size:14px; } .wk .call{ font-size:10px; letter-spacing:.02em; }
@@ -138,10 +133,6 @@
       </div>
     </section>
 
-    <div class="verdict" role="note">
-      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#57D9A3" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v5"></path><path d="M12 16.5h.01"></path></svg>
-      <p id="eval-verdict">Too early to separate them: 352 shared picks over 5 gameweeks is not enough to call a winner, and we will not pretend otherwise.</p>
-    </div>
 
     <section aria-label="Week by week">
       <div class="sect">Week by week &middot; average miss per pick</div>
@@ -178,7 +169,7 @@
   
 
    
-var EVAL_DATA = {"weeks": 5, "owned_thr": 5.0, "n": 352, "n_all": 2342, "apex": 2.68, "tool_a": 2.68, "bench_b": 2.69, "bench_b_n": 352, "bench_b_common": true, "form": ["level", "level", "level", "level", "level"], "weekly": [{"gw": 1, "n": 66, "apex": 2.63, "tool_a": 2.56, "bench_b": 2.63, "call": "level"}, {"gw": 2, "n": 68, "apex": 2.76, "tool_a": 2.87, "bench_b": 2.76, "call": "level"}, {"gw": 3, "n": 72, "apex": 2.35, "tool_a": 2.36, "bench_b": 2.4, "call": "level"}, {"gw": 4, "n": 72, "apex": 2.76, "tool_a": 2.73, "bench_b": 2.7, "call": "level"}, {"gw": 5, "n": 74, "apex": 2.91, "tool_a": 2.9, "bench_b": 2.95, "call": "level"}], "set_aside": 4, "verdict": "Too early to separate them: 352 shared picks over 5 gameweeks is not enough to call a winner, and we will not pretend otherwise.", "updated_utc": "2026-09-22T14:53:42Z"};
+var EVAL_DATA = {"weeks": 5, "owned_thr": 5.0, "n": 352, "n_all": 2342, "apex": 2.68, "tool_a": 2.68, "bench_b": 2.69, "bench_b_n": 352, "bench_b_common": true, "form": ["level", "level", "level", "level", "level"], "weekly": [{"gw": 1, "n": 66, "apex": 2.63, "tool_a": 2.56, "bench_b": 2.63, "call": "level"}, {"gw": 2, "n": 68, "apex": 2.76, "tool_a": 2.87, "bench_b": 2.76, "call": "level"}, {"gw": 3, "n": 72, "apex": 2.35, "tool_a": 2.36, "bench_b": 2.4, "call": "level"}, {"gw": 4, "n": 72, "apex": 2.76, "tool_a": 2.73, "bench_b": 2.7, "call": "level"}, {"gw": 5, "n": 74, "apex": 2.91, "tool_a": 2.9, "bench_b": 2.95, "call": "level"}], "set_aside": 4, "verdict": "Too early to separate them: 352 shared picks over 5 gameweeks is not enough to call a winner, and we will not pretend otherwise.", "updated_utc": "2026-09-22T15:25:52Z"};
  
   (function(){
     var COL={apex:'#1D9E75',toolA:'#3f4d47',toolB:'#b8c2bc',level:'#cfd6d2'};
@@ -220,8 +211,7 @@ var EVAL_DATA = {"weeks": 5, "owned_thr": 5.0, "n": 352, "n_all": 2342, "apex": 
     var pv=document.querySelector('.preview');
     if(pv) pv.textContent='LIVE · '+EVAL_DATA.weeks+' GAMEWEEK'+(EVAL_DATA.weeks===1?'':'S');
 
-    var vEl=document.getElementById('eval-verdict');
-    if(vEl && EVAL_DATA.verdict){vEl.innerHTML=EVAL_DATA.verdict;vEl.style.display='block';}
+     
 
     (EVAL_DATA.form||[]).forEach(function(k){bar(k,true);});
 
