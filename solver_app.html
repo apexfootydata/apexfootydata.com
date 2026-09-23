@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="apex-gw" content="6" data-built-at="2026-09-23T18:13:44Z">
+<meta name="apex-gw" content="6" data-built-at="2026-09-23T21:08:24Z">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script> try{if(/iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1)){var _vpm=document.querySelector('meta[name=viewport]');if(_vpm)_vpm.setAttribute('content','width=device-width, initial-scale=1.0, maximum-scale=1.0');}}catch(_eVp){}</script>
@@ -37,7 +37,7 @@
 })();
 </script>
 <meta http-equiv="Pragma" content="no-cache">
-<meta name="apex-build" content="20260923-181343Z">
+<meta name="apex-build" content="20260923-210824Z">
 <script> window.APEX_FT_VALUE = 1.5;</script>
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — FPL Apex</title>
@@ -10354,12 +10354,25 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
     return { squad, kept, newTotal, incTotal, reason, callerScored: _callerScored };
   }
 
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
   function _benchUplift(squad, gwIdx) {
-     
-     
-    const gks = squad.filter(p => p.element_type === 1).map(p => _xpAt(p, gwIdx)).sort((a,b) => a - b);
-    const oth = squad.filter(p => p.element_type !== 1).map(p => _xpAt(p, gwIdx)).sort((a,b) => a - b);
-    return (gks[0] || 0) + oth.slice(0, 3).reduce((s, v) => s + v, 0);
+    if (!Array.isArray(squad) || squad.length < 11) return 0;
+    const r = pickOptimalXI(squad, gwIdx);
+    if (!r || !r.formation || !Array.isArray(r.xi) || r.xi.length !== 11) return 0;
+    let all = 0, xi = 0;
+    for (const p of squad) all += _xpAt(p, gwIdx);
+    for (const p of r.xi) xi += _xpAt(p, gwIdx);
+    return Math.max(0, all - xi);
   }
 
   function _seqBbXp(squad, gwIdx) {
@@ -10430,7 +10443,15 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
    
    
    
-  function _trajBestSwap(ctx, squad, bank, idx) {
+   
+   
+   
+   
+  function _trajSellAt(sell, p) {
+    if (sell && p && sell.has(p.id)) return +sell.get(p.id) || 0;
+    return +((p && p.cost) || 0);
+  }
+  function _trajBestSwap(ctx, squad, bank, idx, sell) {
     if (!ctx.live || !squad || squad.length !== FPL_RULES.SQUAD_SIZE) return null;
     const counts = new Map();
     for (const p of squad) counts.set(p.team, (counts.get(p.team) || 0) + 1);
@@ -10438,7 +10459,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
     const cands = [];
     for (let oi = 0; oi < squad.length; oi++) {
       const out = squad[oi];
-      const spendCap = bank + (+out.cost || 0);
+      const spendCap = bank + _trajSellAt(sell, out);    
       const outSuf = ctx.suffix.get(out.id);
       const outRem = outSuf ? outSuf[idx] : 0;
       const list = ctx.byPos[out.element_type] || [];
@@ -10472,17 +10493,23 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
    
    
    
-  function _trajBuild(ctx, squad, startIdx, bank, ft0) {
-    const squads = [], xi = [], bb = [], tc = [];
+   
+   
+   
+  function _trajBuild(ctx, squad, startIdx, bank, ft0, sell0) {
+    const squads = [], xi = [], bb = [], tc = [], ftIn = [];
     let cur = (squad || []).slice();
     let b = bank, f = Math.max(0, ft0 | 0);
+    const sell = (sell0 instanceof Map) ? new Map(sell0) : null;
     for (let idx = startIdx; idx < ctx.hlen; idx++) {
+      if (idx > startIdx) ftIn[idx] = f;
       if (idx > startIdx && f > 0) {
         let used = 0;
         for (let t = 0; t < f; t++) {
-          const sw = _trajBestSwap(ctx, cur, b, idx);
+          const sw = _trajBestSwap(ctx, cur, b, idx, sell);
           if (!sw) break;
-          b = Math.round((b + (+sw.out.cost || 0) - (+sw.inp.cost || 0)) * 10) / 10;
+          b = Math.round((b + _trajSellAt(sell, sw.out) - (+sw.inp.cost || 0)) * 10) / 10;
+          if (sell) sell.delete(sw.out.id);
           cur = cur.slice();
           cur[sw.oi] = sw.inp;
           used++;
@@ -10494,7 +10521,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
       bb[idx] = _seqBbXp(cur, idx);
       tc[idx] = _seqTcXp(cur, idx);
     }
-    return { squads, xi, bb, tc, startIdx };
+    return { squads, xi, bb, tc, startIdx, ftIn };
   }
 
   function _trajSquadAt(traj, idx) {
@@ -10758,13 +10785,76 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
                        && Array.isArray(args.pool)
                        && args.pool.length >= FPL_RULES.SQUAD_SIZE;
     const _trajCtx   = _trajContext(_ftOn ? args.pool : [], _hLen);
-    const _startFt   = (args.freeTransfers != null) ? Math.max(0, +args.freeTransfers | 0) : 1;
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+    const _ftNowKnown = (args.freeTransfersNow != null && isFinite(+args.freeTransfersNow));
+    const _ftNow      = _ftNowKnown ? Math.max(0, Math.min(_FT_CAP, +args.freeTransfersNow | 0)) : null;
+    const _startFt   = (args.freeTransfers != null) ? Math.max(0, +args.freeTransfers | 0)
+                     : (_ftNowKnown ? (args.unlimitedFirstGw ? 1 : Math.min(_FT_CAP, _ftNow + 1)) : 1);
     const _bankFor   = (sq) => Math.max(0, Math.round(
       (_seqBudget - (sq || []).reduce((s, p) => s + (+p.cost || 0), 0)) * 10) / 10);
     const _seqSquad  = _baseSquad || [];
+    const _baseIsHeld = (_seqSquad === mySquad);
+    const _sellMap = new Map();
+    if (_baseIsHeld && args.sellingPrices && typeof args.sellingPrices === 'object') {
+      for (const p of _seqSquad) {
+        const v = args.sellingPrices[p && p.id] != null ? args.sellingPrices[p.id] : args.sellingPrices[String(p && p.id)];
+        if (v != null && isFinite(+v) && +v > 0) _sellMap.set(p.id, +v);
+      }
+    }
+    const _baseBank = (_baseIsHeld && args.bank != null && isFinite(+args.bank))
+      ? Math.max(0, Math.round(+args.bank * 10) / 10) : _bankFor(_seqSquad);
     const _trajs = {
-      base: _trajBuild(_trajCtx, _seqSquad, 0, _bankFor(_seqSquad), _ftOn ? _startFt : 0),
+      base: _trajBuild(_trajCtx, _seqSquad, 0, _baseBank, _ftOn ? _startFt : 0,
+                       _sellMap.size ? _sellMap : null),
       wc: {},
+    };
+     
+     
+     
+     
+    const _wcFtFor = (idx) => {
+      if (!_ftOn) return 0;
+      if (!_ftNowKnown) return 1;
+      if (idx <= 0) return _ftNow;
+      const v = _trajs.base.ftIn[idx];
+      return (v != null) ? v : 1;
+    };
+    const _wcStart = (sq, idx) => {
+      const held = new Set(((_trajSquadAt(_trajs.base, idx)) || []).map(p => p && p.id));
+      const keep = new Map();
+      let spend = 0;
+      for (const p of (sq || [])) {
+        if (_sellMap.has(p.id) && held.has(p.id)) { keep.set(p.id, _sellMap.get(p.id)); spend += _sellMap.get(p.id); }
+        else spend += (+p.cost || 0);
+      }
+      return { bank: Math.max(0, Math.round((_seqBudget - spend) * 10) / 10), sell: keep.size ? keep : null };
+    };
+     
+    const _trajIdsOut = () => {
+      const ids = (tr) => {
+        const out = [];
+        for (let i = 0; i < _hLen; i++) {
+          const sq = _trajSquadAt(tr, i);
+          out.push(sq ? sq.map(p => p && p.id) : null);
+        }
+        return out;
+      };
+      const o = { base: ids(_trajs.base), wc: {} };
+      for (const k of Object.keys(_trajs.wc)) if (_trajs.wc[k]) o.wc[k] = ids(_trajs.wc[k]);
+      return o;
     };
     const baselineRaw   = gwRange.reduce(
       (s, gw) => s + ((_trajs.base.xi[gw - startGw]) || 0), 0);
@@ -10870,7 +10960,8 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
          
          
         if (_sameSquad(sq, _heldAt(gw - startGw), gw - startGw)) { _trajs.wc[gw] = _trajs.base; continue; }
-        _trajs.wc[gw] = _trajBuild(_trajCtx, sq, gw - startGw, _bankFor(sq), _ftOn ? 1 : 0);
+        const _ws = _wcStart(sq, gw - startGw);    
+        _trajs.wc[gw] = _trajBuild(_trajCtx, sq, gw - startGw, _ws.bank, _wcFtFor(gw - startGw), _ws.sell);
       }
     }
      
@@ -11288,7 +11379,13 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
       return (a.length % 2) ? a[h] : (a[h - 1] + a[h]) / 2;
     };
     const _horizonEndGw = gwRange.length ? gwRange[gwRange.length - 1] : startGw;
-    const _termLegalBeyond = _CHIP_TERMINAL_ON && (_CHIP_SET1_LAST_GW > _horizonEndGw);
+     
+     
+     
+     
+     
+    const _chipSetLastGw = (startGw > _CHIP_SET1_LAST_GW) ? 38 : _CHIP_SET1_LAST_GW;
+    const _termLegalBeyond = _CHIP_TERMINAL_ON && (_chipSetLastGw > _horizonEndGw);
      
      
     let _baseKeyRaw = baselineRaw;
@@ -11424,6 +11521,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
         on: !!_CHIP_TERMINAL_ON,
         applied: !!_termLegalBeyond,
         set1_last_gw: _CHIP_SET1_LAST_GW,
+        chip_set_last_gw: _chipSetLastGw,    
         horizon_end_gw: _horizonEndGw,
         fraction: _CHIP_TERMINAL_FRACTION,
         assumed_floor: _CHIP_TERMINAL_FLOOR,
@@ -11453,6 +11551,12 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
        
        
       chip_negative_ev: _chipNegEv,
+       
+       
+       
+       
+       
+      traj_squad_ids: _trajIdsOut(),
     };
   }
 
@@ -11768,11 +11872,21 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
    
    
 
+   
+   
+   
+   
+   
+   
+   
   function _squadToJson(squad, gwOffset, horizon) {
     return squad.map(p => {
       const trimmed = [];
       const arr = Array.isArray(p.xp_per_gw) ? p.xp_per_gw : [];
-      for (let g = 0; g < horizon; g++) trimmed.push(round1(+arr[gwOffset + g] || 0));
+      const n = Math.max(horizon, arr.length - gwOffset);
+      for (let g = 0; g < n; g++) trimmed.push(round1(+arr[gwOffset + g] || 0));
+      let roll = 0;
+      for (let g = 0; g < horizon && g < trimmed.length; g++) roll += trimmed[g];
       return {
         id: p.id,
         web_name: p.web_name || p.name || '?',
@@ -11781,7 +11895,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
         cost: round1(+p.cost || 0),
         xp: round1(+p.xp || 0),
         xp_per_gw: trimmed,
-        rolling_xp: round1(trimmed.reduce((a, b) => a + b, 0)),
+        rolling_xp: round1(roll),
       };
     });
   }
@@ -12023,6 +12137,14 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
       rankAware: !!args.rankAware,
       riskMode: args.riskMode,
       pool,
+       
+       
+       
+      budget,
+      bank: args.bank,
+      sellingPrices: args.sellingPrices,
+      freeTransfersNow: args.freeTransfersNow,
+      freeTransfers: args.freeTransfers,
     });
 
      
@@ -12078,6 +12200,9 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
        
        
       chip_negative_ev: enumR.chip_negative_ev,
+       
+       
+      traj_squad_ids: enumR.traj_squad_ids,
       wc_squads_json,
       fh_squads_json,
        
@@ -12113,6 +12238,19 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
   const H2_START_GW = 20;
   const CHIP_VALUE_FLAT = { wildcard: 18.0, freehit: 22.0, bboost: 18.0, '3xc': 10.0 };
   const CHIP_NOISE_CV = 0.45;
+  
+
+  const LS_CV_DEFAULT = 0.2467;
+  const LS_RATE_CV_DEFAULT = 0.0550;
+  function _lsNoise(cv, rateCv) {
+    let m = null;
+    try { m = (typeof LEAGUE_SIM_META !== 'undefined' && LEAGUE_SIM_META) ? LEAGUE_SIM_META : null; } catch (_e) { m = null; }
+    const c = (cv != null && Number.isFinite(+cv)) ? +cv
+      : (m && Number.isFinite(+m.cv) && +m.cv > 0 ? +m.cv : LS_CV_DEFAULT);
+    const r = (rateCv != null && Number.isFinite(+rateCv)) ? +rateCv
+      : (m && Number.isFinite(+m.rate_cv) && +m.rate_cv >= 0 ? +m.rate_cv : LS_RATE_CV_DEFAULT);
+    return { cv: c, rate_cv: r };
+  }
   const CHIP_API_TO_KEY = { wildcard: 'wildcard', freehit: 'freehit', bboost: 'bboost', '3xc': '3xc' };
   const ALL_H2_CHIPS = ['wildcard', 'freehit', 'bboost', '3xc'];
 
@@ -12454,6 +12592,13 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
      
      
      
+     
+     
+     
+     
+     
+     
+    const weekPicks = picks;
     if (activeChip === 'freehit' && picksGw && picksGw > 1) {
       try {
         const _preFh = await fetchPicks(entryId, picksGw - 1);
@@ -12472,6 +12617,8 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
       frozen_pre_inflight_total: frozenPreInflightTotal,
       inflight_hit_cost: inflightHitCost,
       picks,
+      week_picks: weekPicks,    
+      active_chip: activeChip,
       picks_gw: picksGw,    
       league_offset: leagueOffset,    
       chips_remaining: chipsRemaining,
@@ -12697,7 +12844,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
 
   function _computeManagerRealismFactor(userCurrentPts, lastFinishedGw,
                                           remainingMean, remainingGwsCount,
-                                          chipBonusRemaining) {
+                                          chipBonusRemaining, inflight) {
      
      
      
@@ -12708,7 +12855,12 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
     if (lastFinishedGw < 5 || remainingGwsCount < 1 || remainingMean <= 0) {
       return { factor: _LS_REALISM_FACTOR_FALLBACK, method: 'fallback_too_early' };
     }
-    const effectiveGws = lastFinishedGw + 0.5;   
+     
+     
+     
+     
+     
+    const effectiveGws = lastFinishedGw + (inflight ? 0.5 : 0);
     const userHistPace = userCurrentPts / effectiveGws;
     const apexFwdBasePace = remainingMean / remainingGwsCount;
     if (apexFwdBasePace <= 0) {
@@ -12750,29 +12902,43 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
     const baseline = perGw.reduce((s, v) => s + v, 0);
 
      
+     
+     
+     
+     
+     
+     
+     
+    const _sg = (args.startGw != null && Number.isFinite(+args.startGw)) ? +args.startGw : null;
+    const slots = chipSlotsForWindow(chipsRemaining, _sg, remainingOffsets);
     const perGwChipValues = {};    
+    const slotChip = {}, slotFloorOk = {};
     let flatChipPts = 0.0;
+    const _lastOff = remainingOffsets.length ? Math.max(...remainingOffsets) : null;
 
-    for (const c of chipsRemaining) {
+    for (const [slot, c, allowed, halfEnd] of slots) {
+      slotChip[slot] = c;
+      slotFloorOk[slot] = (halfEnd == null || _sg == null || _lastOff == null || (_sg + _lastOff) < halfEnd);
+      if (!allowed.length) continue;    
       if (c === 'freehit') {
         const vals = {};
-        for (const off of remainingOffsets) {
+        for (const off of allowed) {
           const ceil = (fhByGw && fhByGw[off] != null) ? fhByGw[off] : _optimalPoolXiXpForGw(poolById, off);
           vals[off] = ceil - projectManagerGw(picks, poolById, off);
         }
-        perGwChipValues[c] = vals;
+        perGwChipValues[slot] = vals;
       } else if (c === 'bboost') {
         const vals = {};
-        for (const off of remainingOffsets) vals[off] = benchXpForGw(picks, poolById, off);
-        perGwChipValues[c] = vals;
+        for (const off of allowed) vals[off] = benchXpForGw(picks, poolById, off);
+        perGwChipValues[slot] = vals;
       } else if (c === '3xc') {
         const vals = {};
-        for (const off of remainingOffsets) vals[off] = captainXpForGw(picks, poolById, off);
-        perGwChipValues[c] = vals;
+        for (const off of allowed) vals[off] = captainXpForGw(picks, poolById, off);
+        perGwChipValues[slot] = vals;
       } else if (c === 'wildcard') {
         if (wcByGw) {
           const vals = {};
-          for (const off of remainingOffsets) {
+          for (const off of allowed) {
             if (wcByGw[off] == null) continue;
             const i0 = remainingOffsets.indexOf(off);
             if (i0 < 0) continue;
@@ -12784,7 +12950,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
             const myWindow = perGwRaw.slice(i0, windowEnd).reduce((s, v) => s + v, 0);
             vals[off] = ceil - myWindow;
           }
-          if (Object.keys(vals).length > 0) perGwChipValues[c] = vals;
+          if (Object.keys(vals).length > 0) perGwChipValues[slot] = vals;
           else flatChipPts += CHIP_VALUE_FLAT[c] || 0;
         } else {
           flatChipPts += CHIP_VALUE_FLAT[c] || 0;
@@ -12813,26 +12979,28 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
     const remainingChips = Object.assign({}, perGwChipValues);
 
     while (Object.keys(remainingChips).length > 0) {
-      let bestVal = -Infinity, bestChip = null, bestGw = null;
-      for (const [chip, vals] of Object.entries(remainingChips)) {
+      let bestVal = -Infinity, bestSlot = null, bestGw = null;
+      for (const [slot, vals] of Object.entries(remainingChips)) {
         for (const [gwKey, v] of Object.entries(vals)) {
           const gw = +gwKey;
           if (assignedGws.has(gw)) continue;
-          if (v > bestVal) { bestVal = v; bestChip = chip; bestGw = gw; }
+          if (v > bestVal) { bestVal = v; bestSlot = slot; bestGw = gw; }
         }
       }
-      if (bestChip == null) {
+      if (bestSlot == null) {
          
-        for (const chip of Object.keys(remainingChips)) {
-          const fallback = liveOffsets.size
-            ? (CHIP_FLOORS[chip] != null ? CHIP_FLOORS[chip] : (CHIP_VALUE_FLAT[chip] || 0))
+        for (const slot of Object.keys(remainingChips)) {
+          const c = slotChip[slot] || slot;
+          const fallback = (liveOffsets.size && slotFloorOk[slot] !== false)
+            ? (CHIP_FLOORS[c] != null ? CHIP_FLOORS[c] : (CHIP_VALUE_FLAT[c] || 0))
             : 0;
           chipPts += fallback;
-          assignments[chip] = [null, fallback];
+          assignments[slot] = [null, fallback];
         }
         break;
       }
-      const floor = (liveOffsets.has(bestGw) && CHIP_FLOORS[bestChip] != null) ? CHIP_FLOORS[bestChip] : 0;
+      const c = slotChip[bestSlot] || bestSlot;
+      const floor = (liveOffsets.has(bestGw) && slotFloorOk[bestSlot] !== false && CHIP_FLOORS[c] != null) ? CHIP_FLOORS[c] : 0;
       const val = Math.max(bestVal, floor);
       chipPts += val;
        
@@ -12840,11 +13008,11 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
        
       if (bestVal >= floor) {
         assignedGws.add(bestGw);
-        assignments[bestChip] = [bestGw, val];
+        assignments[bestSlot] = [bestGw, val];
       } else {
-        assignments[bestChip] = [null, val];
+        assignments[bestSlot] = [null, val];
       }
-      delete remainingChips[bestChip];
+      delete remainingChips[bestSlot];
     }
 
     if (!liveOffsets.size) {
@@ -12864,6 +13032,21 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
       projected_remaining: baseline + chipPts,
       missing_from_pool: missing,
     };
+  }
+
+  
+
+  function chipSlotsForWindow(chipsRemaining, startGw, offsets) {
+    const offs = (offsets || []).slice();
+    const held = (chipsRemaining || []).slice();
+    if (startGw == null) return held.map(c => [c, c, offs, null]);
+    const sg = +startGw;
+    if (sg >= H2_START_GW) return held.map(c => [c, c, offs, SEASON_TOTAL_GWS]);
+    const set1 = offs.filter(o => sg + o <= H2_START_GW - 1);
+    const out = held.map(c => [c, c, set1, H2_START_GW - 1]);
+    const set2 = offs.filter(o => sg + o >= H2_START_GW);
+    if (set2.length) for (const c of ALL_H2_CHIPS) out.push([c + '_2', c, set2, SEASON_TOTAL_GWS]);
+    return out;
   }
 
    
@@ -12952,8 +13135,12 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
     };
   }
 
-  function _simulateLeague(managers, nSims, cv, seed, corrScale, season) {
+  function _simulateLeague(managers, nSims, cv, seed, corrScale, season, rateCv) {
     const rng = _mulberry32(seed);
+     
+    const _nz = _lsNoise(cv, rateCv);
+    cv = _nz.cv;
+    const _rateCv = _nz.rate_cv;
     const M = managers.length;
     if (M === 0) return [];
     let G = 0;
@@ -12994,10 +13181,20 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
     const z     = new Float64Array(M);   
     const zCorr = new Float64Array(M);   
 
+     
+     
+     
+     
+    const mgrLevel = mean.map(row => {
+      let s = 0; for (let g = 0; g < row.length; g++) s += row[g];
+      return Math.max(row.length ? s / row.length : 0, 1.0);
+    });
     for (let s = 0; s < nSims; s++) {
       const fs = finals[s];
       const bs = baselineSums[s];
       const cs = chipSamples[s];
+      const rateDraw = new Float64Array(M);
+      if (_rateCv > 0 && G > 0) for (let i = 0; i < M; i++) rateDraw[i] = _normal01(rng) * _rateCv * mgrLevel[i];
        
       for (let g = 0; g < G; g++) {
         for (let i = 0; i < M; i++) z[i] = _normal01(rng);
@@ -13011,7 +13208,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
         for (let i = 0; i < M; i++) {
           const mu = mean[i][g];
           const sigma = cv * Math.max(mu, 1.0);
-          const sample = Math.max(0, mu + sigma * zCorr[i]);
+          const sample = Math.max(0, mu + sigma * zCorr[i] + rateDraw[i]);
           bs[i] += sample;
         }
       }
@@ -13145,7 +13342,9 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
     const by = {};
     let gw = null;
     for (const m of (managers || [])) {
-      const pk = (m.picks || []).map(p => ({ element: +p.element, multiplier: +(p.multiplier || 0) }));
+       
+       
+      const pk = (m.week_picks || m.picks || []).map(p => ({ element: +p.element, multiplier: +(p.multiplier || 0) }));
       if (!pk.length) continue;
       by[String(m.entry_id)] = pk;
       if (m.picks_gw && (gw == null || +m.picks_gw > gw)) gw = +m.picks_gw;
@@ -13206,15 +13405,31 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
              template, captains, mine };
   }
 
+  
+
+  function _lsInflightPlan(candidate, startGw) {
+    const c = +candidate || 0, sg = +startGw || 0;
+    if (c && c === sg - 1) return { inflight_gw: c, first_offset: 0, counts_gw: sg };
+    if (c && c === sg) return { inflight_gw: c, first_offset: 1, counts_gw: c };
+    return { inflight_gw: 0, first_offset: 0, counts_gw: sg };
+  }
+  const _LS_CHIP_LABEL = { wildcard: 'WC', freehit: 'FH', bboost: 'BB', '3xc': 'TC' };
+  function _lsSlotLabel(slot) {
+    const s = String(slot), i = s.indexOf('_');
+    const base = i < 0 ? s : s.slice(0, i), tail = i < 0 ? '' : s.slice(i + 1);
+    return (_LS_CHIP_LABEL[base] || base.toUpperCase()) + (tail === '2' ? '2' : '');
+  }
+
   async function runLeagueSim(args) {
     const leagueId = +args.leagueId;
     const pool     = args.pool;
     const startGw  = +args.startGw;
     const nSims    = args.nSims || 5000;
-    const cv       = (args.cv != null) ? +args.cv : 0.33;   
+     
+    const _noise   = _lsNoise(args.cv, args.rateCv);
+    const cv       = _noise.cv;
+    const rateCv   = _noise.rate_cv;
     const seed     = (args.seed != null) ? +args.seed : 42;
-     
-     
      
      
      
@@ -13226,8 +13441,46 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
     const poolById = new Map(pool.map(p => [+p.id, p]));
     const xpLen = pool.length ? (pool[0].xp_per_gw || []).length : 0;
     const horizonLen = Math.min(Math.max(0, SEASON_TOTAL_GWS - startGw + 1), xpLen || 38);   
+
+     
+     
+    _prog('checking-inflight', 2);
+    let inflightGw = 0, firstOffset = 0, countsGw = startGw;
+    let inflightLive = new Map();
+    let elementsById = new Map();
+    let nTotalByTeam = new Map();
+    let nFinishedByTeam = new Map();
+    let nTotalByTeamNextGw = new Map();
+    try {
+      const bs = (args._bootstrap) || await fetchBootstrap();
+      const plan = _lsInflightPlan(detectInflightGw(bs), startGw);
+      if (plan.inflight_gw) {
+        for (const el of (bs.elements || [])) {
+          const pid = +el.id;
+          if (Number.isFinite(pid)) elementsById.set(pid, el);
+        }
+        const fx = await fetchFixturesForGw(plan.inflight_gw);
+        const counts = _teamFixtureCountsForGw(fx, plan.inflight_gw);
+        nTotalByTeam = counts.nTotal;
+        nFinishedByTeam = counts.nFinished;
+        if (plan.counts_gw === plan.inflight_gw) {
+          nTotalByTeamNextGw = new Map(counts.nTotal);
+        } else {
+          try {
+            const fxNext = await fetchFixturesForGw(plan.counts_gw);
+            nTotalByTeamNextGw = _teamFixtureCountsForGw(fxNext, plan.counts_gw).nTotal;
+          } catch (_) { nTotalByTeamNextGw = new Map(); }
+        }
+        inflightLive = await fetchEventLive(plan.inflight_gw);
+        inflightGw = plan.inflight_gw;
+        firstOffset = plan.first_offset;
+        countsGw = plan.counts_gw;
+      }
+    } catch (_) { inflightGw = 0; firstOffset = 0; countsGw = startGw; }
+
     const remainingOffsets = [];
-    for (let i = 0; i < horizonLen; i++) remainingOffsets.push(i);
+    for (let i = Math.min(firstOffset, horizonLen); i < horizonLen; i++) remainingOffsets.push(i);
+    const simStartGw = startGw + firstOffset;
 
      
     const wcHorizon = 3;
@@ -13267,82 +13520,53 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
     _prog('fetched-league', 45, { count: members.length });
 
      
+     
+     
+     
     const managerStates = [];
+    const failedManagers = [];
     for (let i = 0; i < members.length; i++) {
       const m = members[i];
-      try {
-        const st = await loadManagerState(m.entry_id, startGw, members.start_event);
-        managerStates.push({ ...m, state: st });
-      } catch (_) {   }
+      let st = null;
+      for (let attempt = 0; attempt < 2 && !st; attempt++) {
+        try { st = await loadManagerState(m.entry_id, simStartGw, members.start_event); }
+        catch (_) { st = null; }
+      }
+      if (st) managerStates.push({ ...m, state: st });
+      else failedManagers.push({ entry_id: m.entry_id, player_name: m.player_name || '', entry_name: m.entry_name || '', total: m.total });
       _prog('loading-managers', 45 + Math.floor(40 * (i + 1) / Math.max(1, members.length)),
             { i: i + 1, total: members.length });
     }
 
      
      
-    const anyWc = managerStates.some(m => m.state.chips_remaining.includes('wildcard'));
+    const _reachesH2 = startGw < H2_START_GW && remainingOffsets.some(o => startGw + o >= H2_START_GW);
+    const anyWc = _reachesH2 || managerStates.some(m => m.state.chips_remaining.includes('wildcard'));
     if (!anyWc) optimalWcByGw = null;
 
      
-     
-     
-    _prog('checking-inflight', 85);
-    let inflightGw = 0;
-    let inflightLive = new Map();
-    let elementsById = new Map();
-    let nTotalByTeam = new Map();
-    let nFinishedByTeam = new Map();
-    let nTotalByTeamNextGw = new Map();
-    try {
-      const bs = await fetchBootstrap();
-      const candidate = detectInflightGw(bs);
-      if (candidate && candidate === startGw - 1) {
-        inflightGw = candidate;
-        for (const el of (bs.elements || [])) {
-          const pid = +el.id;
-          if (Number.isFinite(pid)) elementsById.set(pid, el);
-        }
-        const fx = await fetchFixturesForGw(inflightGw);
-        const counts = _teamFixtureCountsForGw(fx, inflightGw);
-        nTotalByTeam = counts.nTotal;
-        nFinishedByTeam = counts.nFinished;
-         
-         
-        try {
-          const fxNext = await fetchFixturesForGw(startGw);
-          const countsNext = _teamFixtureCountsForGw(fxNext, startGw);
-          nTotalByTeamNextGw = countsNext.nTotal;
-        } catch (_) { nTotalByTeamNextGw = new Map(); }
-        inflightLive = await fetchEventLive(inflightGw);
-      }
-    } catch (_) {   }
-
-     
-     
-     
-    const lastFinishedGwForRealism = inflightGw ? (startGw - 2) : (startGw - 1);
+    const lastFinishedGwForRealism = inflightGw ? (inflightGw - 1) : (startGw - 1);
     const remainingGwsCount = remainingOffsets.length;
 
-     
-     
     _prog('projecting', 86);
     const managersOut = [];
     const inflightPicksByEntry = new Map();
     for (const ms of managerStates) {
       const proj = projectManagerTotal(ms.state.picks, poolById, remainingOffsets, ms.state.chips_remaining, {
-        optimalFhByGw, optimalWcByGw, wcHorizon,
+        optimalFhByGw, optimalWcByGw, wcHorizon, startGw,
       });
 
-       
-       
       let inflightXp = 0.0;
       let liveNow = 0.0;
-      let inflightPicks = ms.state.picks || [];
+      let inflightPicks = (+ms.state.picks_gw === inflightGw && (ms.state.week_picks || []).length)
+        ? ms.state.week_picks : (ms.state.picks || []);
       if (inflightGw) {
-        try {
-          const pd = await fetchPicks(ms.entry_id, inflightGw);
-          if (pd && Array.isArray(pd.picks) && pd.picks.length) inflightPicks = pd.picks;
-        } catch (_) {   }
+        if (+ms.state.picks_gw !== inflightGw) {
+          try {
+            const pd = await fetchPicks(ms.entry_id, inflightGw);
+            if (pd && Array.isArray(pd.picks) && pd.picks.length) inflightPicks = pd.picks;
+          } catch (_) {   }
+        }
         inflightPicksByEntry.set(+ms.entry_id, inflightPicks);
         inflightXp = projectManagerInflightGw(
           inflightPicks, elementsById, inflightLive, nTotalByTeam, nFinishedByTeam,
@@ -13352,15 +13576,12 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
       }
 
        
-       
-       
-       
       const _mgrTotal = ms.state.total || ms.total || 0;
       const _baselineRaw = +proj.baseline_xp || 0;
       const _chipRaw = +proj.chip_bonus || 0;
       const _realism = _computeManagerRealismFactor(
         _mgrTotal, lastFinishedGwForRealism,
-        _baselineRaw, remainingGwsCount, _chipRaw,
+        _baselineRaw, remainingGwsCount, _chipRaw, !!inflightGw,
       );
       const _factor = _realism.factor;
       const _baselineDamp = _baselineRaw * _factor;
@@ -13368,12 +13589,6 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
       const _projRemDamp = _baselineDamp + _chipDamp;
       const _perGwDamp = (proj.per_gw || []).map(v => v * _factor);
 
-       
-       
-       
-       
-       
-       
        
        
        
@@ -13394,6 +13609,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
         inflight_hit_cost: _hitCost,
         live_now: liveNow,
         picks: ms.state.picks,
+        week_picks: ms.state.week_picks || ms.state.picks,    
         picks_gw: ms.state.picks_gw || null,    
         chips_remaining: ms.state.chips_remaining,
         chip_assignments: proj.chip_assignments,
@@ -13417,27 +13633,24 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
      
      
      
-     
-     
-    const LABEL = { wildcard: 'WC', freehit: 'FH', bboost: 'BB', '3xc': 'TC' };
     for (const m of managersOut) {
       const ca = m.chip_assignments || {};
       const caGw = {};
-      for (const [chip, pair] of Object.entries(ca)) {
+      for (const [slot, pair] of Object.entries(ca)) {
         if (Array.isArray(pair)) {
           const off = pair[0]; const val = pair[1];
           const gw = (off != null) ? (startGw + off) : null;
-          caGw[LABEL[chip] || chip.toUpperCase()] = { gw, value: Math.round(val * 10) / 10 };
+          caGw[_lsSlotLabel(slot)] = { gw, value: Math.round(val * 10) / 10 };
         } else {
-          caGw[chip] = pair;   
+          caGw[slot] = pair;   
         }
       }
       m.chip_assignments = caGw;
        
       if (m.chip_week_values && !m.chip_week_by_gw) {
         const byGw = {};
-        for (const [chip, vals] of Object.entries(m.chip_week_values)) {
-          const lab = LABEL[chip] || chip.toUpperCase();
+        for (const [slot, vals] of Object.entries(m.chip_week_values)) {
+          const lab = _lsSlotLabel(slot);
           byGw[lab] = {};
           for (const [off, v] of Object.entries(vals || {})) {
             if (Number.isFinite(+v)) byGw[lab][startGw + (+off)] = Math.round(v * 100) / 100;
@@ -13449,28 +13662,21 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
     }
 
     _prog('simulating', 90);
-    const seasonParams = _lsSeasonParams(startGw, horizonLen, managersOut, lastFinishedGwForRealism);
-    const ranked = _simulateLeague(managersOut, nSims, cv, seed, corrScale, seasonParams);
+    const seasonParams = _lsSeasonParams(simStartGw, remainingOffsets.length, managersOut, lastFinishedGwForRealism);
+    const ranked = _simulateLeague(managersOut, nSims, cv, seed, corrScale, seasonParams, rateCv);
 
-     
-     
-     
-     
     const _liveState = inflightGw ? {
       inflight_gw: inflightGw,
-       
+      counts_gw: countsGw,    
       inflight_picks: Object.fromEntries(
         Array.from(inflightPicksByEntry.entries()).map(([k, v]) => [String(k), v])
       ),
-       
       manager_base: managersOut.map(m => ({
         entry_id: m.entry_id,
         player_name: m.player_name,
         entry_name: m.entry_name,
         overall_rank: m.overall_rank,
         total: m.total,
-         
-         
         frozen_pre_inflight_total: m.frozen_pre_inflight_total,
         inflight_hit_cost: m.inflight_hit_cost,
         per_gw: m.per_gw,
@@ -13483,9 +13689,6 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
         missing_from_pool: m.missing_from_pool,
         projected_remaining: m.projected_remaining,
          
-         
-         
-         
         picks: (m.picks || []).map(p => ({ element: +p.element })),
       })),
     } : null;
@@ -13493,15 +13696,19 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
     _prog('done', 100);
     return {
       league_id: leagueId,
-      start_gw: startGw,
-      horizon_gws: horizonLen,
+      start_gw: simStartGw,
+      horizon_gws: remainingOffsets.length,
       league_picks: leaguePicks(managersOut, members.length, members.capped),    
       league_start_event: members.start_event,    
       members_capped: !!members.capped,
       me_added: _meAdded,
+      n_members: members.length,                
+      failed_managers: failedManagers,
+      inflight_gw: inflightGw,
       season_params: seasonParams,            
       n_sims: nSims,
       cv,
+      rate_cv: rateCv,
       corr_scale: corrScale,
       standings: ranked,
       _elapsed_s: Math.round((Date.now() - t0) / 100) / 10,
@@ -13519,7 +13726,10 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
     const pool = args.pool;
     const startGw = +prev.start_gw;
     const nSims = args.nSims || prev.n_sims || 5000;
-    const cv = (args.cv != null) ? +args.cv : (prev.cv || 0.33);
+     
+    const _noiseR = _lsNoise(args.cv != null ? args.cv : prev.cv, args.rateCv != null ? args.rateCv : prev.rate_cv);
+    const cv = _noiseR.cv;
+    const rateCv = _noiseR.rate_cv;
     const seed = (args.seed != null) ? +args.seed : 42;
      
      
@@ -13537,8 +13747,12 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
     const liveData = await fetchEventLive(ls.inflight_gw);
     const fx = await fetchFixturesForGw(ls.inflight_gw);
     const counts = _teamFixtureCountsForGw(fx, ls.inflight_gw);
-    const fxNext = await fetchFixturesForGw(startGw);
-    const countsNext = _teamFixtureCountsForGw(fxNext, startGw);
+     
+     
+     
+    const _cGw = +(ls.counts_gw || startGw);
+    const countsNext = (_cGw === +ls.inflight_gw) ? counts
+      : _teamFixtureCountsForGw(await fetchFixturesForGw(_cGw), _cGw);
     const poolById = new Map(pool.map(p => [+p.id, p]));
 
      
@@ -13586,6 +13800,10 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
         entry_id: mb.entry_id,
         player_name: mb.player_name,
         entry_name: mb.entry_name,
+         
+         
+         
+        overall_rank: mb.overall_rank || 0,
         total: liveTotal,
         live_now,
         per_gw: mb.per_gw,
@@ -13602,7 +13820,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
       };
     });
 
-    const ranked = _simulateLeague(managersOut, nSims, cv, seed, corrScale, prev.season_params || null);
+    const ranked = _simulateLeague(managersOut, nSims, cv, seed, corrScale, prev.season_params || null, rateCv);
 
     return {
       league_id: prev.league_id,
@@ -13612,9 +13830,13 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
       league_start_event: prev.league_start_event || 1,    
       members_capped: !!prev.members_capped,
       me_added: !!prev.me_added,
+      n_members: prev.n_members,                           
+      failed_managers: prev.failed_managers || [],
+      inflight_gw: prev.inflight_gw,
       season_params: prev.season_params || null,
       n_sims: nSims,
       cv,
+      rate_cv: rateCv,
       corr_scale: corrScale,
       standings: ranked,
       _elapsed_s: prev._elapsed_s,
@@ -14619,6 +14841,10 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
     _simulateLeagueForTest: _simulateLeague,    
     _lsEdgePersistence,
     _lsSeasonParams,
+    _lsInflightPlan,           
+    _lsNoise,                  
+    _computeManagerRealismFactor,    
+    chipSlotsForWindow,        
     precomputeCeilings,
     projectManagerGw,
     projectManagerTotal,
@@ -15134,20 +15360,94 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
     });
     return best;
   }
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+  function _playing(id) { return info(id).xp0 > 0.01; }
+  function _autosub(xi, bench) {
+    var out = xi.slice(), spare = bench.slice();
+    for (var i = 0; i < out.length; i++) {
+       
+      if (_playing(out[i].id) || !poolMap()[out[i].id]) continue;
+      var pet = info(out[i].id).et;
+      for (var j = 0; j < spare.length; j++) {
+        var b = spare[j];
+        if (!b || !_playing(b.id)) continue;
+        var bet = info(b.id).et;
+        if ((pet === 1) !== (bet === 1)) continue;
+        var cnt = { 1: 0, 2: 0, 3: 0, 4: 0 };
+        for (var k = 0; k < out.length; k++) { var e = (k === i) ? bet : info(out[k].id).et; cnt[e] = (cnt[e] || 0) + 1; }
+        if (cnt[2] < 3 || cnt[3] < 2 || cnt[4] < 1) continue;
+        out[i] = b; spare[j] = null; break;
+      }
+    }
+    return out;
+  }
+   
+  function _sideXi(rows, capMult, benchBoost) {
+    var known = rows.filter(function (r) { return r.starter === true || r.starter === false; }).length === rows.length;
+    var starters = rows.filter(function (r) { return r.starter === true; });
+    var bench = rows.filter(function (r) { return r.starter === false; }).sort(function (a, b) { return (a.order || 99) - (b.order || 99); });
+    var xi;
+    if (benchBoost) {
+       
+       
+       
+       
+      xi = rows.slice();
+    } else if (known && starters.length === 11) {
+      xi = _autosub(starters, bench);
+    } else {
+      var byId = {}; rows.forEach(function (r) { byId[r.id] = r; });
+      xi = bestXiFrom(rows.map(function (r) { return { id: r.id, element_type: info(r.id).et, xp0: info(r.id).xp0 }; }))
+        .map(function (p) { return byId[p.id]; });
+    }
+    var inXi = {}; xi.forEach(function (p) { inXi[p.id] = 1; });
+    var capR = rows.filter(function (r) { return r.cap; })[0] || null;
+    var vcR = rows.filter(function (r) { return r.vc; })[0] || null;
+     
+     
+     
+     
+     
+    var cap = null;
+    if (capR && inXi[capR.id] && _playing(capR.id)) cap = capR.id;
+    else if (vcR && inXi[vcR.id] && _playing(vcR.id)) cap = vcR.id;
+    return xi.map(function (p) {
+      return { id: p.id, mult: p.id === cap ? capMult : 1, cap: p.id === cap, vc: !!(vcR && p.id === vcR.id) };
+    });
+  }
+   
+   
+  function _myChipWeek(selId) {
+    try {
+      var g = parseInt((document.getElementById(selId) || {}).value || 0, 10);
+      return !!(g && g === +curGw());
+    } catch (e) { return false; }
+  }
   function myXi() {
     try {
       if (typeof SQUAD_DATA === 'undefined' || !SQUAD_DATA || !SQUAD_DATA.length) return [];
-      var list = SQUAD_DATA.map(function (p) { return { id: p.id, element_type: p.element_type, xp0: info(p.id).xp0 }; });
-      var xi = bestXiFrom(list);
        
-      var realCap = null, realVc = null;
-      SQUAD_DATA.forEach(function (p) { if (p.my_captain) realCap = p.id; if (p.my_vc) realVc = p.id; });
-      var inXi = {}; xi.forEach(function (p) { inXi[p.id] = 1; });
-      var playing = function (id) { return info(id).xp0 > 0.01; };
-      var cap = (realCap && inXi[realCap]) ? realCap : null;
-      if (cap && !playing(cap)) cap = (realVc && inXi[realVc] && playing(realVc)) ? realVc : null;    
-      if (!cap) { var bx = -1; xi.forEach(function (p) { if (p.xp0 > bx) { bx = p.xp0; cap = p.id; } }); }
-      return xi.map(function (p) { return { id: p.id, cap: p.id === cap }; });
+       
+       
+       
+      var pick = function (a, b) { return (a === true || a === false) ? a : ((b === true || b === false) ? b : undefined); };
+      var rows = SQUAD_DATA.map(function (p) {
+        var st = pick(p.my_starter, p.own_starter);
+        var bo = (p.my_bench_order != null) ? +p.my_bench_order : (+p.own_bench_order || 0);
+        return { id: p.id, starter: st, order: st ? 0 : bo + 11,
+                 cap: !!(p.my_captain || p.own_captain), vc: !!(p.my_vc || p.own_vc) };
+      });
+      return _sideXi(rows, _myChipWeek('sel-tc') ? 3 : 2, _myChipWeek('sel-bb'));
     } catch (e) { return []; }
   }
   function rivalXi(pd) {
@@ -15155,23 +15455,19 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
      
      
      
-     
     var borrowed = !!(pd && !Array.isArray(pd) && (pd.borrowed === true || (pd.gw && pd.gw < curGw())));
-     
-    var s = borrowed ? [] : picks.filter(function (p) { return (p.multiplier || 0) > 0; });
-    if (!s.length) s = picks.filter(function (p) { return p.position <= 11; });
-    if (!s.length) s = picks.slice(0, 11);
-    var xi = s.map(function (p) {
-      if (borrowed) return { id: p.element, mult: p.is_captain ? 2 : 1, cap: !!p.is_captain, vc: !!p.is_vice_captain };
-      return { id: p.element, mult: (p.multiplier && p.multiplier > 0) ? p.multiplier : (p.is_captain ? 2 : 1), cap: ((p.multiplier || 0) >= 2) || !!p.is_captain, vc: !!p.is_vice_captain };
+    var hasPos = picks.length && picks.every(function (p) { return p.position != null; });
+    var rows = picks.map(function (p, i) {
+      var pos = hasPos ? +p.position : i + 1;
+      return { id: p.element, starter: pos <= 11, order: pos,
+               cap: borrowed ? !!p.is_captain : (((p.multiplier || 0) >= 2) || !!p.is_captain), vc: !!p.is_vice_captain };
     });
-     
-    var c = xi.filter(function (p) { return p.mult >= 2; })[0];
-    if (c && info(c.id).xp0 <= 0.01) {
-      var v = xi.filter(function (p) { return p.vc; })[0];
-      if (v && info(v.id).xp0 > 0.01) { v.mult = c.mult; v.cap = true; c.mult = 1; c.cap = false; }
+    var capMult = 2, bb = false;
+    if (!borrowed) {
+      picks.forEach(function (p) { if ((p.multiplier || 0) >= 3) capMult = 3; });
+      bb = picks.some(function (p, i) { var pos = hasPos ? +p.position : i + 1; return pos > 11 && (p.multiplier || 0) > 0; });
     }
-    return xi;
+    return _sideXi(rows, capMult, bb);
   }
   function wOf(p) { return (p.mult && p.mult > 0) ? p.mult : (p.cap ? 2 : 1); }
 
@@ -15282,9 +15578,12 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
     var theirIds = {}; theirs.forEach(function (p) { theirIds[p.id] = 1; });
     var curCap = (mine.find(function (p) { return p.cap; }) || {}).id;
      
+     
+    var capMult = Math.max.apply(null, [2].concat(mine.map(function (q) { return q.cap ? wOf(q) : 0; })));
+     
     mine.forEach(function (p) {
       if (p.id === curCap) return;
-      var nm = mine.map(function (q) { return { id: q.id, cap: q.id === p.id }; });
+      var nm = mine.map(function (q) { return { id: q.id, cap: q.id === p.id, mult: q.id === p.id ? capMult : 1 }; });
       var m = moments(nm, theirs), obj = objFromMoments(m.mean, m.sd, stance, margin);
       out.push({ label: 'Captain ' + info(p.id).name, sub: 'instead of ' + info(curCap).name, obj: obj, mine: nm });
     });
@@ -15324,7 +15623,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
       var sell = (spMap[outCand.id] > 0) ? +spMap[outCand.id] : A.cost;   
       if (B.d.cost - sell > bank() + 0.05) continue;    
       considered++;
-      var nm2 = mine.map(function (q) { return q.id === outCand.id ? { id: B.id, cap: false } : { id: q.id, cap: q.cap }; });
+      var nm2 = mine.map(function (q) { return q.id === outCand.id ? { id: B.id, cap: false, mult: 1 } : { id: q.id, cap: q.cap, mult: q.mult }; });
       var mm = moments(nm2, theirs), obj2 = objFromMoments(mm.mean, mm.sd, stance, margin);
       out.push({ label: B.d.name + ' in', sub: 'for ' + A.name + (wcNow ? ' (free — wildcard week)' : ' (1 free transfer)'), obj: obj2, mine: nm2 });
     }
@@ -15401,7 +15700,10 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
     return (row && isFinite(+row.current_total)) ? +row.current_total : null;
   }
   var _gapP = null;
-  window.rivalAutofill = function () { _gapP = _autofillGap(); return _gapP; };
+  window.rivalAutofill = function () {
+    try { var _s = $('rival-select'), _mn = $('rival-manual'); if (_s && _s.value && _mn) _mn.value = ''; } catch (eMn) {}    
+    _gapP = _autofillGap(); return _gapP;
+  };
   async function _autofillGap() {
     try {
       var sel = $('rival-select'); if (!sel || !sel.value) return;
@@ -15452,7 +15754,12 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
     var _res = $('rival-results'); if (_res) _res.style.display = 'none';
     try {
       var sel = $('rival-select'), manual = $('rival-manual');
-      var entryId = (sel && sel.value) || (manual && manual.value.trim());
+       
+       
+       
+       
+      var _typed = manual ? String(manual.value || '').trim() : '';
+      var entryId = _typed || (sel && sel.value);
       if (!entryId || !/^\d+$/.test(String(entryId))) { if (status) status.textContent = 'Pick a rival or type a valid Team ID.'; return; }
       if (typeof SQUAD_DATA === 'undefined' || !SQUAD_DATA || !SQUAD_DATA.length) { if (status) status.textContent = 'Your squad did not load — open My Squad first.'; return; }
       if (status) status.textContent = 'Loading rival…';
@@ -18627,7 +18934,50 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
    
   function _meta()  { return (typeof TEAM_META !== 'undefined' && TEAM_META) ? TEAM_META : null; }
   function _pool()  { return (typeof POOL_DATA !== 'undefined' && Array.isArray(POOL_DATA)) ? POOL_DATA : []; }
-  function _squad() { return (typeof SQUAD_DATA !== 'undefined' && Array.isArray(SQUAD_DATA)) ? SQUAD_DATA : []; }
+   
+   
+   
+  function _squad() {
+    try {
+      if (typeof window._apexPlannerSquad === 'function') {
+        var s = window._apexPlannerSquad();
+        if (Array.isArray(s) && s.length === 15) return s;
+      }
+    } catch (e) {}
+    return (typeof SQUAD_DATA !== 'undefined' && Array.isArray(SQUAD_DATA)) ? SQUAD_DATA : [];
+  }
+   
+   
+   
+   
+   
+   
+   
+   
+   
+  function _plannerArgs() {
+    try {
+      if (typeof window._apexChipPlannerArgs === 'function') {
+        var a = window._apexChipPlannerArgs();
+        if (a && typeof a === 'object') { a._shared = true; return a; }
+      }
+    } catch (e) {}
+    var meta = _meta() || {};
+    var gwRange = Array.isArray(meta.gw_range) ? meta.gw_range : [];
+    var chips = _availChips();
+    return {
+      pool: _pool(), mySquad: _squad(),
+      startGw: meta.start_gw ? meta.start_gw : (gwRange[0] || 1),
+      gwRange: gwRange,
+      hasWc: chips.wc, hasFh: chips.fh, hasBb: chips.bb, hasTc: chips.tc,
+      budget: (meta.budget != null) ? meta.budget : 100.0,
+      dgwTeamsByGw: meta.dgw_teams_by_gw || {},
+      bgwTeamsByGw: meta.bgw_teams_by_gw || {},
+      rotationRisk: (_chipPlanner() && _chipPlanner().rotation_risk) || {},
+      lockWcIds: _lockedSquadIds(),
+      lockFhIds: _lockedSquadIds(),
+    };
+  }
   function _chipPlanner() { return (typeof CHIP_PLANNER !== 'undefined' && CHIP_PLANNER) ? CHIP_PLANNER : null; }
   function _solver() { return (typeof window !== 'undefined' && window.ApexSolver) ? window.ApexSolver : null; }
 
@@ -18706,11 +19056,9 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
 
     var meta = _meta();
     var solver = _solver();
-    var gwRange = meta && Array.isArray(meta.gw_range) ? meta.gw_range : [];
-    var startGw = meta && meta.start_gw ? meta.start_gw : (gwRange[0] || 1);
-    var pool = _pool();
-    var mySquad = _squad();
-    var chips = _availChips();
+    var args = _plannerArgs();    
+    var gwRange = Array.isArray(args.gwRange) ? args.gwRange : [];
+    var chips = { wc: !!args.hasWc, fh: !!args.hasFh, bb: !!args.hasBb, tc: !!args.hasTc };
 
     var nChips = (chips.wc ? 1 : 0) + (chips.fh ? 1 : 0) + (chips.bb ? 1 : 0) + (chips.tc ? 1 : 0);
     var combos = _comboEstimate(nChips, gwRange.length);
@@ -18729,21 +19077,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
 
      
     if (solver && typeof solver.computeChipPlanner === 'function') {
-      var args = {
-        pool: pool,
-        mySquad: mySquad,
-        startGw: startGw,
-        gwRange: gwRange,
-        hasWc: chips.wc, hasFh: chips.fh, hasBb: chips.bb, hasTc: chips.tc,
-        budget: (meta.budget != null) ? meta.budget : 100.0,
-        dgwTeamsByGw: meta.dgw_teams_by_gw || {},
-        bgwTeamsByGw: meta.bgw_teams_by_gw || {},
-        rotationRisk: (_chipPlanner() && _chipPlanner().rotation_risk) || {},
-         
-        lockWcIds: _lockedSquadIds(),
-        lockFhIds: _lockedSquadIds(),
-        onProgress: chunked ? function (stage, pct) { prog(stage, pct); } : null,
-      };
+      args.onProgress = chunked ? function (stage, pct) { prog(stage, pct); } : null;
       _running = Promise.resolve()
         .then(function () { return solver.computeChipPlanner(args); })
         .then(function (data) {
@@ -18755,7 +19089,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
         })
         .catch(function (err) {
            
-          try { return _runDirect(chips, gwRange, startGw, pool, mySquad); }
+          try { return _runDirect(chips, args); }
           catch (e) { _lastResult = { sequences: [], best_sequence: null, baseline_total_xp: 0, _availChips: chips, _error: (err && err.message) || String(err) }; return _lastResult; }
         })
         .then(function (r) { _running = null; return r; }, function (e) { _running = null; throw e; });
@@ -18764,7 +19098,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
 
      
     _running = Promise.resolve()
-      .then(function () { return _runDirect(chips, gwRange, startGw, pool, mySquad); })
+      .then(function () { return _runDirect(chips, args); })
       .then(function (r) { _running = null; prog('Done', 100); return r; },
             function (e) { _running = null; throw e; });
     return _running;
@@ -18773,17 +19107,23 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
    
    
    
-  function _runDirect(chips, gwRange, startGw, pool, mySquad) {
+  function _runDirect(chips, a) {
     var solver = _solver();
     if (!solver || typeof solver.enumerateChipSequences !== 'function') {
       _lastResult = { sequences: [], best_sequence: null, baseline_total_xp: 0, _availChips: chips, _error: 'enumerator unavailable' };
       return _lastResult;
     }
+     
+     
     var r = solver.enumerateChipSequences({
-      mySquad: mySquad, wcSquads: {}, fhSquads: {},
-      gwRange: gwRange, startGw: startGw,
+      mySquad: a.mySquad, wcSquads: {}, fhSquads: {},
+      gwRange: a.gwRange, startGw: a.startGw,
       hasWc: chips.wc, hasFh: chips.fh, hasBb: chips.bb, hasTc: chips.tc,
-      topN: 40, pool: pool,
+      topN: 40, pool: a.pool,
+      unlimitedFirstGw: !!a.unlimitedFirstGw,
+      budget: a.budget, bank: a.bank, sellingPrices: a.sellingPrices,
+      freeTransfersNow: a.freeTransfersNow,
+      rankAware: !!a.rankAware, riskMode: a.riskMode,
     }) || {};
     r._availChips = chips;
     r._direct = true;
@@ -18794,6 +19134,18 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
   function lastResult() { return _lastResult; }
 
    
+   
+  function _noneValue(el) {
+    try {
+      var opts = el && el.options;
+      for (var i = 0; opts && i < opts.length; i++) {
+        var v = String(opts[i].value);
+        if (!(parseInt(v, 10) > 0)) return v;
+      }
+    } catch (e) {}
+    return '0';
+  }
+   
   function _applySeq(breakdown) {
     try {
        
@@ -18802,9 +19154,13 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
       window._apexApplyingSeq = true;
        
        
+       
+       
+       
+       
       ['wc', 'fh', 'bb', 'tc'].forEach(function (k) {
         var el = document.getElementById('sel-' + k);
-        if (el) { el.value = ''; el.dispatchEvent(new Event('change', { bubbles: true })); }
+        if (el) { el.value = _noneValue(el); el.dispatchEvent(new Event('change', { bubbles: true })); }
       });
        
        
@@ -18892,16 +19248,39 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
                                    : (typeof FH_SQUADS !== 'undefined' ? FH_SQUADS : null); } catch (eG) {}
       return (glob && Array.isArray(glob[key]) && glob[key].length === 15) ? glob[key] : null;
     }
+     
+     
+     
+     
+     
+     
+     
+     
+    var _trajIds = (r.traj_squad_ids && typeof r.traj_squad_ids === 'object') ? r.traj_squad_ids : null;
+    var _byId = null;
+    function _idSquad(ids) {
+      if (!Array.isArray(ids) || ids.length !== 15) return null;
+      if (!_byId) { _byId = {}; _pool().forEach(function (p) { if (p && p.id != null) _byId[p.id] = p; }); }
+      var out = [];
+      for (var k = 0; k < ids.length; k++) { var p = _byId[ids[k]]; if (!p) return null; out.push(p); }
+      return out;
+    }
+    function _trajSquad(wcGw, i) {
+      if (!_trajIds) return null;
+      var tr = (wcGw != null && _trajIds.wc && _trajIds.wc[String(wcGw)]) ? _trajIds.wc[String(wcGw)] : _trajIds.base;
+      return (Array.isArray(tr)) ? _idSquad(tr[i]) : null;
+    }
     function _seqCover(bd) {
       if (!_covFn) return 0;
       var at = {};
       (bd || []).forEach(function (e) { at[String(e.chip || '').toUpperCase()] = +e.gw; });
-      var cur = _squad(), t = 0;
+      var cur = _squad(), t = 0, wcAt = null;
       for (var i = 0; i < _gwrD.length; i++) {
         var gw = _gwrD[i];
-        if (at.WC === gw) cur = _chipSquad('wc', gw) || cur;
+        if (at.WC === gw) { wcAt = gw; cur = _chipSquad('wc', gw) || cur; }
         if (at.BB === gw) continue;
-        var sq = (at.FH === gw) ? (_chipSquad('fh', gw) || cur) : cur;
+        var held = _trajSquad((wcAt != null && gw >= wcAt) ? wcAt : null, i) || cur;
+        var sq = (at.FH === gw) ? (_chipSquad('fh', gw) || held) : held;
         try { t += (+_covFn(sq, i) || 0); } catch (eC) {}
       }
       return t;
@@ -19082,11 +19461,13 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
         var bits = [];
         if (Array.isArray(rad.later_dgws) && rad.later_dgws.length) {
           var picks = rad.later_dgws.slice(0, 2).map(function (d) { return 'GW' + d.gw; });
+           
           bits.push('Double gameweek' + (rad.later_dgws.length > 1 ? 's' : '') + ' at ' + picks.join(' and ') +
-                    ' — beyond this window. Holding TC/BB for a double often beats playing them now.');
+                    ' — beyond this window. Holding ' + (rad.second_half_unlock ? 'the second-half TC/BB' : 'TC/BB') +
+                    ' for a double often beats playing them now.');
         }
         if (Array.isArray(rad.later_blanks) && rad.later_blanks.length) {
-          bits.push('Blank gameweek at GW' + rad.later_blanks[0].gw + ' ahead — a Free Hit there may beat these options.');
+          bits.push('Blank gameweek at GW' + rad.later_blanks[0].gw + ' ahead — a ' + (rad.second_half_unlock ? 'second-half ' : '') + 'Free Hit there may beat these options.');
         }
         if (rad.second_half_unlock) {
           bits.push('A second set of chips unlocks at GW20 — not modelled in this window.');
@@ -20000,7 +20381,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
  
  
  
-const BUILD_VERSION = "1790187223-GW6-e94f7172";
+const BUILD_VERSION = "1790197704-GW6-cff84c27";
 window.APEX_BUILD = BUILD_VERSION;
  
  
@@ -20057,7 +20438,7 @@ window.APEX_SQUAD_ROLLBACK = false;
 let FPL_ID = null;
 let SQUAD_DATA = [];
 </script>
-<script src="/apex_pool.js?v=1790187223-GW6-e94f7172"></script>
+<script src="/apex_pool.js?v=1790197704-GW6-cff84c27"></script>
 <script>
 const PLAYER_NAMES = {"1": "Raya", "2": "Arrizabalaga", "3": "Meslier", "4": "Gabriel", "5": "J.Timber", "6": "Saliba", "7": "Lewis-Skelly", "8": "Calafiori", "9": "Hincapie", "10": "White", "11": "Mosquera", "12": "Saka", "13": "Rice", "14": "Eze", "15": "\u00d8degaard", "16": "Madueke", "17": "Merino", "18": "Martinelli", "19": "Zubimendi", "20": "Dowman", "22": "Nwaneri", "23": "F\u00e1bio Vieira", "24": "Nelson", "25": "Gy\u00f6keres", "26": "Havertz", "27": "G.Jesus", "31": "Konsa", "452": "Bruno G.", "557": "Tzolis", "29": "M.Bizot", "30": "Digne", "32": "Cash", "33": "Mings", "34": "Pau", "35": "Bogarde", "36": "Maatsen", "37": "Lindel\u00f6f", "38": "A.Garc\u00eda", "39": "Nedeljkovic", "41": "Buend\u00eda", "44": "Bailey", "45": "McGinn", "46": "Barkley", "47": "Kamara", "48": "Onana", "49": "Iling Jr", "50": "Burrowes", "51": "George Hemmings", "52": "Alysson", "53": "Manzambi", "54": "Gomes", "55": "Watkins", "56": "Abraham", "160": "Garnacho", "166": "N.Jackson", "582": "Madjo", "596": "Ruggeri", "597": "Suzuki", "606": "Rowe", "607": "Lynch", "611": "Wan-Bissaka", "618": "Goretzka", "630": "Harwood-Bellis", "631": "Mbaye", "667": "Wright", "57": "Petrovi\u0107", "58": "Forster", "59": "Dennis", "60": "Hill", "61": "Truffert", "62": "Diakit\u00e9", "63": "Milosavljevi\u0107", "64": "Smith", "65": "J.Araujo", "66": "Soler", "67": "Rayan", "68": "Tavernier", "69": "Scott", "70": "Kluivert", "71": "Cook", "72": "Gannon-Doak", "73": "Adams", "74": "Brooks", "75": "Christie", "76": "T\u00f3th.A", "77": "Adli", "78": "Kroupi.Jr", "79": "Evanilson", "80": "Enes \u00dcnal", "81": "Rodr\u00edguez", "566": "Silva", "573": "Sanchez", "608": "Jebbison", "615": "Di Gregorio", "82": "Kelleher", "83": "Valdimarsson", "84": "Collins", "85": "Van den Berg", "86": "Lewis-Potter", "87": "Ajer", "88": "Kayode", "89": "Henry", "90": "Hickey", "92": "Ji-soo", "93": "Schuster", "94": "Schade", "95": "O.Dango", "96": "Damsgaard", "97": "Jensen", "98": "Janelt", "99": "Milambo", "100": "Carvalho", "102": "Yarmoliuk", "103": "Dasilva", "105": "Anthony", "106": "Thiago", "107": "Furo", "108": "Wilson", "565": "M.Sangar\u00e9", "620": "Diouf", "657": "Nunes", "660": "Fredrick", "661": "Balcombe", "109": "Verbruggen", "111": "Steele", "113": "F.Kad\u0131o\u011flu", "114": "Boscagli", "115": "De Cuyper", "116": "Dunk", "117": "Coppola", "118": "Igor", "119": "Costinha", "120": "Svoboda", "121": "Mitoma", "122": "Minteh", "123": "Hinshelwood", "124": "Gro\u00df", "125": "Georginio", "126": "O'Riley", "127": "Gomez", "128": "Buonanotte", "129": "Ayari", "130": "Wieffer", "132": "Howell", "133": "Watson", "134": "Oriola", "135": "Yohanna", "137": "Tzimas", "138": "Kostoulas", "139": "Ferguson", "328": "Struijk", "504": "Vuskovic", "594": "David", "600": "Osman", "605": "Yalcouy\u00e9", "614": "Hadjam", "624": "Cozier-Duberry", "639": "Andr\u00e9s", "652": "Azeez", "658": "Ibrahim", "28": "Martinez", "40": "Rogers", "101": "Henderson", "136": "Welbeck", "140": "S\u00e1nchez", "141": "J\u00f6rgensen", "142": "James", "143": "Chalobah", "144": "Gusto", "145": "Fofana", "146": "B.Badiashile", "148": "Hato", "149": "Colwill", "150": "M.Sarr", "151": "Acheampong", "152": "Palestra", "154": "Palmer", "156": "Neto", "157": "Est\u00eav\u00e3o", "158": "Gittens", "159": "Caicedo", "161": "Lavia", "163": "D.Essugo", "164": "Quenda", "165": "Jo\u00e3o Pedro", "168": "Marc Guiu", "169": "Mheuka", "170": "Emegha", "200": "Lacroix", "560": "Penders", "561": "Anselmino", "568": "Barco", "583": "Chavarria", "662": "Nicoll-Jazuli", "91": "Pinnock", "104": "Onyeka", "110": "Rushworth", "171": "Dovin", "172": "Wilson", "173": "Thomas", "174": "Kitching", "175": "van Ewijk", "176": "Dasilva", "177": "Kesler-Hayden", "178": "Bidwell", "179": "Latibeaudiere", "180": "Woolfenden", "181": "Brau", "182": "Amenda", "183": "Rudoni", "184": "Grimes", "185": "Sakamoto", "186": "Mason-Clark", "187": "Eccles", "188": "Torp", "189": "Shepherd", "190": "Tchaouna", "191": "Borges Rodrigues", "192": "Andrews", "193": "Wright", "194": "Thomas-Asante", "195": "Simms", "196": "Markelo", "197": "Bassette", "492": "Awoniyi", "575": "Yirenkyi", "584": "Hamer", "599": "Cherif", "623": "Bentley", "655": "Gboho", "656": "Mfuni", "42": "Guessand", "153": "Disasi", "198": "Henderson", "199": "Benitez", "202": "Richards", "203": "Canvot", "204": "Mitchell", "205": "Sosa", "206": "Chadi Riad", "207": "Mingueza", "208": "Sarr", "210": "Wharton", "211": "Yeremy", "212": "Hughes", "213": "Lerma", "214": "Kamada", "215": "Devenny", "216": "Esse", "217": "M.Fran\u00e7a", "218": "Doucour\u00e9", "219": "J.Rak-Sakyi", "220": "Cardines", "221": "Drakes-Thomas", "222": "Strand Larsen", "223": "Mateta", "224": "Nketiah", "225": "Uche", "241": "McNeil", "555": "Matthews", "577": "Tomiyasu", "588": "Khalaili", "595": "Gozo", "633": "Ahanor", "643": "Chilwell", "644": "Timber", "647": "Osorio", "21": "N\u00f8rgaard", "209": "Johnson", "226": "Pickford", "227": "Travers", "228": "King", "229": "Tarkowski", "230": "Branthwaite", "231": "Keane", "232": "O'Brien", "233": "Mykolenko", "234": "Patterson", "235": "Aznou", "236": "Dewsbury-Hall", "238": "Grealish", "239": "Garner", "242": "George", "243": "Alcaraz", "244": "Armstrong", "245": "Dibling", "246": "R\u00f6hl", "247": "Hackney", "248": "Beto", "249": "Barry", "649": "Maitland-Niles", "654": "Graham", "250": "Leno", "251": "Lecomte", "252": "McNally", "253": "Andersen", "254": "Robinson", "255": "J.Cuenca", "256": "Tete", "257": "Bassey", "258": "Castagne", "261": "Iwobi", "262": "Smith Rowe", "263": "Kevin", "264": "Bobb", "265": "Berge", "266": "Cairney", "268": "King", "269": "Sessegnon", "270": "Reed", "271": "Muniz", "272": "Kusi-Asare", "569": "Gonzalo", "570": "Palacios", "580": "Charles", "610": "De Fougerolles", "626": "Zepa", "635": "Larsson", "636": "\u00c1ngel", "650": "Affengruber", "240": "Iroegbunam", "273": "Phillips", "274": "Butland", "275": "Cartwright", "276": "Lo-Tutala", "277": "Egan", "278": "Hughes", "279": "Ajayi", "280": "Coyle", "281": "Drameh", "282": "Giles", "283": "Jacob", "284": "McCarthy", "285": "McNair", "286": "Belloumi", "287": "Millar", "288": "Dowell", "289": "Crooks", "290": "Slater", "291": "Matazo", "292": "\u00d6m\u00fcr", "293": "Kamara", "294": "Zambrano", "295": "McBurnie", "296": "Akintola", "297": "Gyabi", "298": "Destan", "299": "Burstow", "340": "Gelhardt", "556": "Targett", "563": "Morita", "572": "Tzolakis", "574": "Hjert\u00f8-Dahl", "576": "Stroud", "585": "Herrington", "586": "Mendy", "589": "Gourna-Douath", "617": "Cho", "632": "Ansah", "637": "Vaz", "638": "Norton-Cuffy", "642": "Thomas", "645": "Mouzakitis", "259": "Diop", "267": "Luki\u0107", "300": "Walton", "301": "Palmer", "302": "Button", "303": "Kipr\u00e9", "304": "O'Shea", "305": "Davis", "306": "Greaves", "307": "Johnson", "308": "Furlong", "309": "N\u00fa\u00f1ez", "310": "Matusiwa", "311": "Burns", "312": "Taylor", "313": "Clarke", "314": "Ogbene", "315": "Fatawu", "316": "Emersonn", "317": "Hirst", "318": "Philogene", "319": "Szmodics", "320": "Akpom", "321": "Walle Egeli", "322": "Al-Hamadi", "323": "McAteer", "324": "Mehmeti", "554": "Van Oevelen", "562": "Maeda", "564": "Scherpen", "571": "Florentino", "591": "Enciso", "592": "Ouattara", "602": "Humphreys", "619": "Palacios", "640": "Flemming", "260": "Wilson", "326": "Perri", "327": "Bijol", "329": "Rodon", "330": "Bogle", "331": "Gudmundsson", "332": "Justin", "333": "Bornauw", "334": "Muharemovi\u0107", "335": "Stach", "336": "Okafor", "337": "Aaronson", "338": "Ampadu", "339": "Longstaff", "341": "Gnonto", "342": "Harrison", "343": "James", "344": "Gruev", "345": "Tanaka", "346": "Calvert-Lewin", "347": "Nmecha", "348": "Piroe", "349": "Mateo Joseph", "385": "Trafford", "598": "Elvedi", "603": "Lienou", "604": "Cresswell", "625": "Cairns", "629": "Zetterer", "641": "Bard", "648": "Bahoya", "350": "A.Becker", "351": "Mamardashvili", "352": "Woodman", "353": "Pecsi", "354": "Jaros", "355": "Davies", "356": "Virgil", "357": "Frimpong", "358": "Kerkez", "359": "Gomez", "360": "Bradley", "361": "Lucky", "362": "Jacquet", "363": "Leoni", "364": "Tsimikas", "365": "Ramsay", "366": "Wirtz", "367": "Gakpo", "368": "Szoboszlai", "369": "Ngumoha", "370": "Chiesa", "371": "Gravenberch", "372": "Mac Allister", "373": "C.Jones", "374": "Endo", "375": "Nyoni", "376": "Bajcetic", "377": "Munoz", "378": "McConnell", "379": "Isak", "380": "Ekitik\u00e9", "381": "Koumas", "382": "Danns", "383": "Elliott", "579": "Araujo", "627": "Barcola", "155": "Enzo", "237": "Ndiaye", "384": "Donnarumma", "386": "Bettinelli", "387": "O'Reilly", "388": "Gu\u00e9hi", "389": "Matheus N.", "390": "R\u00faben", "391": "Gvardiol", "392": "A\u00eft-Nouri", "393": "Khusanov", "394": "Alleyne", "395": "Lewis", "396": "Vitor Reis", "397": "Semenyo", "398": "Foden", "399": "Cherki", "400": "Doku", "402": "Rodrigo", "404": "Reijnders", "406": "Kova\u010di\u0107", "407": "Echeverri", "408": "Phillips", "409": "Mukasa", "410": "Monga", "411": "Haaland", "481": "Anderson", "587": "Rulli", "616": "Bouaddi", "621": "McAidoo", "622": "Braithwaite", "628": "Allan", "653": "Samba", "43": "Tielemans", "131": "Baleba", "162": "Andrey Santos", "325": "Darlow", "412": "Lammens", "413": "Bayindir", "414": "Heaton", "415": "Dorgu", "416": "De Ligt", "417": "Dalot", "418": "Maguire", "419": "Martinez", "420": "Yoro", "421": "Heaven", "422": "Mazraoui", "423": "Shaw", "424": "Amass", "425": "Fredricson", "426": "B.Fernandes", "427": "Mbeumo", "428": "Cunha", "429": "Rashford", "430": "Mount", "431": "Amad", "432": "Mainoo", "433": "Ugarte", "434": "J.Fletcher", "435": "Lacey", "436": "Collyer", "437": "Bendito Mantato", "438": "Fletcher", "439": "\u0160e\u0161ko", "440": "Zirkzee", "441": "Obi", "405": "N.Gonzalez", "442": "Pope", "443": "Gillespie", "444": "Jaouen", "445": "Thiaw", "446": "Sch\u00e4r", "447": "Botman", "448": "Burn", "449": "Hall", "450": "Livramento", "451": "A.Murphy", "453": "Barnes", "454": "Elanga", "456": "J.Ramsey", "457": "J.Murphy", "458": "Joelinton", "459": "L.Miley", "460": "Willock", "461": "Tour\u00e9", "462": "Steur", "463": "Woltemade", "464": "Wissa", "465": "Osula", "466": "Neave", "559": "Bamba", "567": "Horn\u00ed\u010dek", "593": "Dedi\u0107", "609": "Shahar", "634": "Fernandez-Pardo", "659": "Miley", "663": "Pivas", "664": "Salia", "665": "Mills", "666": "Thompson", "167": "Delap", "201": "Mu\u00f1oz", "467": "Sels", "468": "John", "469": "N.Williams", "470": "Morato", "471": "Milenkovi\u0107", "472": "Murillo", "473": "Aina", "474": "Jair Cunha", "475": "Savona", "476": "O.Richards", "477": "Abbott", "478": "Netz", "479": "Bindon", "480": "Gibbs-White", "482": "Hudson-Odoi", "483": "Ndoye", "484": "Hutchinson", "485": "Bakwa", "486": "McAtee", "487": "Dominguez", "488": "I.Sangar\u00e9", "489": "Yates", "490": "Wood", "491": "Igor Jesus", "493": "Kalimuendo", "558": "Schlager", "581": "Diomande", "590": "Benda", "112": "Van Hecke", "147": "Tosin", "401": "Marmoush", "403": "S\u00e1vio", "455": "Tonali", "494": "Vicario", "495": "Austin", "496": "Kinsky", "497": "Dubravka", "498": "Senesi", "499": "Pedro Porro", "500": "Romero", "502": "Robertson", "503": "Van de Ven", "505": "Spence", "506": "Udogie", "507": "Phillips", "508": "Davies", "509": "Byfield", "510": "Rowswell", "511": "Souza", "512": "Kudus", "513": "Xavi", "514": "Tel", "515": "Maddison", "516": "Bentancur", "517": "Odobert", "518": "P.M.Sarr", "519": "Gallagher", "520": "Bergvall", "521": "Kulusevski", "522": "Gray", "523": "Moore", "524": "Olusesi", "525": "Fernandes", "526": "Solanke", "527": "Richarlison", "528": "Scarlett", "578": "Mudryk", "601": "Williams-Barnett", "501": "Danso", "529": "Roefs", "530": "Patterson", "531": "Ellborg", "532": "Ballard", "533": "Mukiele", "534": "Hume", "535": "Alderete", "536": "Reinildo", "537": "Seelt", "538": "Hjelde", "539": "O'Nien", "540": "Masuaku", "541": "Meunier", "542": "E.Le F\u00e9e", "543": "Diarra", "544": "Xhaka", "545": "Sadiki", "546": "Adingra", "547": "Mundle", "548": "Rigg", "549": "Talbi", "550": "Jocelin.T", "551": "N.Angulo", "552": "Brobbey", "553": "Isidor", "612": "Methalie", "613": "Ahoka", "646": "Fofana", "651": "J.Angulo"};
 const TRANSFER_RECS = [];
@@ -20070,12 +20451,12 @@ const _APEX_WC_SQUADS_BACKUP = JSON.parse(JSON.stringify(WC_SQUADS));
 const _APEX_FH_SQUADS_BACKUP = JSON.parse(JSON.stringify(FH_SQUADS));
 const COMPARE_WC_SQUADS = {};
 const COMPARE_FH_SQUADS = {};
-let TEAM_META = {"team_name": "", "manager": "", "overall_rank": 0, "bank": 0.0, "free_transfers": 1, "squad_value": 0.0, "budget": 100.0, "start_gw": 6, "gw_range": [6, 7, 8, 9, 10, 11, 12, 13, 14, 15], "gw_labels": ["GW6", "GW7", "GW8", "GW9", "GW10", "GW11", "GW12", "GW13", "GW14", "GW15"], "dgw_teams_by_gw": {}, "bgw_teams_by_gw": {}, "anchor_by_gw": {"6": {"n": 10, "of": 10}, "7": {"n": 10, "of": 10}, "8": {"n": 0, "of": 10}, "9": {"n": 0, "of": 10}, "10": {"n": 0, "of": 10}, "11": {"n": 0, "of": 10}, "12": {"n": 0, "of": 10}, "13": {"n": 0, "of": 10}, "14": {"n": 0, "of": 10}, "15": {"n": 0, "of": 10}}, "xmins_modelled_gws": 10, "xmins_book": {"source": "Tool A (raw) (declared by APEX_XMINS_SOURCE)", "book_sha": "02acbf34", "drop_sha": "f9bb79db", "modelled_gws": 10, "book_start_gw": 6, "pre_round": false, "weeks_played_dropped": 0}, "deadlines_by_gw": {"1": 1787333400, "2": 1787938200, "3": 1788543000, "4": 1789216200, "5": 1789752600, "6": 1791626400, "7": 1792231200, "8": 1792776600, "9": 1793444400, "10": 1793989800, "11": 1795258800, "12": 1795804200, "13": 1796236200, "14": 1796477400, "15": 1797082200, "16": 1797687000, "17": 1798282800, "18": 1798567200, "19": 1798828200, "20": 1799172000, "21": 1800106200, "22": 1800711000, "23": 1801315800, "24": 1801920600, "25": 1802284200, "26": 1803130200, "27": 1803735000, "28": 1804098600, "29": 1804944600, "30": 1805549400, "31": 1807360200, "32": 1807965000, "33": 1808569800, "34": 1809174600, "35": 1809779400, "36": 1810384200, "37": 1811075400, "38": 1811683800}, "season": "2026/27"};
+let TEAM_META = {"team_name": "", "manager": "", "overall_rank": 0, "bank": 0.0, "free_transfers": 1, "squad_value": 0.0, "budget": 100.0, "start_gw": 6, "gw_range": [6, 7, 8, 9, 10, 11, 12, 13, 14, 15], "gw_labels": ["GW6", "GW7", "GW8", "GW9", "GW10", "GW11", "GW12", "GW13", "GW14", "GW15"], "dgw_teams_by_gw": {}, "bgw_teams_by_gw": {}, "anchor_by_gw": {"6": {"n": 10, "of": 10}, "7": {"n": 10, "of": 10}, "8": {"n": 0, "of": 10}, "9": {"n": 0, "of": 10}, "10": {"n": 0, "of": 10}, "11": {"n": 0, "of": 10}, "12": {"n": 0, "of": 10}, "13": {"n": 0, "of": 10}, "14": {"n": 0, "of": 10}, "15": {"n": 0, "of": 10}}, "xmins_modelled_gws": 10, "xmins_book": {"source": "Tool A (raw) (declared by APEX_XMINS_SOURCE)", "book_sha": "02acbf34", "drop_sha": "f2b6416e", "modelled_gws": 10, "book_start_gw": 6, "pre_round": false, "weeks_played_dropped": 0}, "deadlines_by_gw": {"1": 1787333400, "2": 1787938200, "3": 1788543000, "4": 1789216200, "5": 1789752600, "6": 1791626400, "7": 1792231200, "8": 1792776600, "9": 1793444400, "10": 1793989800, "11": 1795258800, "12": 1795804200, "13": 1796236200, "14": 1796477400, "15": 1797082200, "16": 1797687000, "17": 1798282800, "18": 1798567200, "19": 1798828200, "20": 1799172000, "21": 1800106200, "22": 1800711000, "23": 1801315800, "24": 1801920600, "25": 1802284200, "26": 1803130200, "27": 1803735000, "28": 1804098600, "29": 1804944600, "30": 1805549400, "31": 1807360200, "32": 1807965000, "33": 1808569800, "34": 1809174600, "35": 1809779400, "36": 1810384200, "37": 1811075400, "38": 1811683800}, "season": "2026/27"};
  
  
  
  
-const APEX_CROWD_AVG = {"score": 53.7, "label": "GW6 proj", "n": 145, "projected": true, "hist_score": 59.8, "hist_label": "GW1-5"};
+const APEX_CROWD_AVG = {"score": 53.6, "label": "GW6 proj", "n": 145, "projected": true, "hist_score": 59.8, "hist_label": "GW1-5"};
 const APEX_EO_META = {"gw": 5, "n_teams": 200};    
  
  
@@ -20230,7 +20611,7 @@ try {
     }
   }
 } catch (_hzE) {}
-let CHIP_PLANNER = {"has_wc": true, "has_fh": true, "has_bb": true, "has_tc": true, "sequences": [], "best_sequence": null, "baseline_total_xp": 0, "bb_ev": {}, "tc_ev": {}, "wc_ev": {}, "fh_ev": {}, "rotation_risk": {}, "radar": {"window_end": 15, "later_dgws": [], "later_blanks": [], "second_half_unlock": false}, "_lazy": true};
+let CHIP_PLANNER = {"has_wc": true, "has_fh": true, "has_bb": true, "has_tc": true, "sequences": [], "best_sequence": null, "baseline_total_xp": 0, "bb_ev": {}, "tc_ev": {}, "wc_ev": {}, "fh_ev": {}, "rotation_risk": {}, "radar": {"window_end": 15, "later_dgws": [], "later_blanks": [], "second_half_unlock": false, "chip_last_gw": 19}, "_lazy": true};
 const APEX_LEAGUE_DATA = {"ratings": [], "fixtures": [], "final_table": []};
 const APEX_MOST_CAPTAINED = 0;
 const APEX_EO = {};
@@ -20239,8 +20620,8 @@ const APEX_EO = {};
  
  
  
-const MINUTES_PROBS_KNOTS = {"knots": [0.0, 8.0, 22.0, 37.0, 52.0, 65.0, 75.0, 85.0, 90.0], "p_any": [0.0, 0.4182, 0.612, 0.7317, 0.8318, 0.9537, 0.9537, 0.9716, 0.9795], "p_60": [0.0, 0.0503, 0.1202, 0.3008, 0.5047, 0.7222, 0.8085, 0.922, 0.9678], "cap": {"min_cameo_minutes": 15.0}};
-let LEAGUE_SIM_META = {"start_gw": 6, "horizon_gws": 10, "fpl_id": 0};
+const MINUTES_PROBS_KNOTS = {"knots": [0.0, 8.0, 22.0, 37.0, 52.0, 65.0, 75.0, 85.0, 90.0], "p_any": [0.0, 0.4182, 0.612, 0.7317, 0.8318, 0.9537, 0.9537, 0.9716, 0.9795], "p_60": [0.0, 0.0503, 0.1202, 0.3008, 0.5047, 0.7222, 0.8085, 0.922, 0.9678], "by_pos": {"1": {"p_any": [0.0, 0.4182, 0.612, 0.7317, 0.8318, 0.9537, 0.9537, 0.9716, 0.9795], "p_60": [0.0, 0.0503, 0.1202, 0.3008, 0.5047, 0.7222, 0.8085, 0.922, 0.9678]}, "2": {"p_any": [0.0, 0.3874, 0.612, 0.7317, 0.8318, 0.9537, 0.9537, 0.9714, 0.9795], "p_60": [0.0, 0.0991, 0.1202, 0.3008, 0.5047, 0.7222, 0.8642, 0.9167, 0.9678]}, "3": {"p_any": [0.0, 0.4167, 0.6471, 0.7671, 0.871, 0.9538, 0.9538, 0.9712, 0.9795], "p_60": [0.0, 0.0321, 0.1471, 0.2603, 0.5161, 0.6923, 0.7812, 0.9423, 0.9678]}, "4": {"p_any": [0.0, 0.4182, 0.612, 0.7317, 0.8318, 0.9537, 0.9537, 0.9716, 0.9795], "p_60": [0.0, 0.0503, 0.1202, 0.3008, 0.5047, 0.7222, 0.8085, 0.922, 0.9678]}}, "cap": {"min_cameo_minutes": 15.0}, "gk_start_minutes": 88.7};
+let LEAGUE_SIM_META = {"start_gw": 6, "horizon_gws": 10, "fpl_id": 0, "cv": 0.2467, "rate_cv": 0.055};
  
  
  
@@ -20252,7 +20633,7 @@ const INFLIGHT_GW = 0;
  
  
  
-const APEX_FR_SCALE = 1.0213783745021667;
+const APEX_FR_SCALE = 1.021153315755215;
 const INFLIGHT_XP_BY_ID = {};
  
  
@@ -20261,9 +20642,9 @@ const COMPARE_XP_LOOKUP = {};
  
  
 const FIXTURES_BY_GW_TEAM = {"1": {"Arsenal": "COV (H)", "Coventry": "ARS (A)", "Hull": "MUN (H)", "Manchester United": "HUL (A)", "Everton": "CRY (H)", "Crystal Palace": "EVE (A)", "Ipswich": "SUN (H)", "Sunderland": "IPS (A)", "Nottingham Forest": "LEE (H)", "Leeds": "NFO (A)", "Brentford": "TOT (H)", "Tottenham": "BRE (A)", "Brighton": "AVL (H)", "Aston Villa": "BHA (A)", "Manchester City": "BOU (H)", "Bournemouth": "MCI (A)", "Newcastle United": "LIV (H)", "Liverpool": "NEW (A)", "Fulham": "CHE (H)", "Chelsea": "FUL (A)"}, "2": {"Crystal Palace": "MCI (H)", "Manchester City": "CRY (A)", "Liverpool": "NFO (H)", "Nottingham Forest": "LIV (A)", "Bournemouth": "EVE (H)", "Everton": "BOU (A)", "Coventry": "HUL (H)", "Hull": "COV (A)", "Tottenham": "NEW (H)", "Newcastle United": "TOT (A)", "Chelsea": "BHA (H)", "Brighton": "CHE (A)", "Leeds": "BRE (H)", "Brentford": "LEE (A)", "Sunderland": "FUL (H)", "Fulham": "SUN (A)", "Manchester United": "IPS (H)", "Ipswich": "MUN (A)", "Aston Villa": "ARS (H)", "Arsenal": "AVL (A)"}, "3": {"Ipswich": "LIV (H)", "Liverpool": "IPS (A)", "Newcastle United": "BOU (H)", "Bournemouth": "NEW (A)", "Brentford": "SUN (H)", "Sunderland": "BRE (A)", "Brighton": "LEE (H)", "Leeds": "BHA (A)", "Fulham": "CRY (H)", "Crystal Palace": "FUL (A)", "Manchester City": "COV (H)", "Coventry": "MCI (A)", "Nottingham Forest": "TOT (H)", "Tottenham": "NFO (A)", "Hull": "AVL (H)", "Aston Villa": "HUL (A)", "Everton": "MUN (H)", "Manchester United": "EVE (A)", "Arsenal": "CHE (H)", "Chelsea": "ARS (A)"}, "4": {"Aston Villa": "NFO (H)", "Nottingham Forest": "AVL (A)", "Bournemouth": "BRE (H)", "Brentford": "BOU (A)", "Chelsea": "HUL (H)", "Hull": "CHE (A)", "Crystal Palace": "IPS (H)", "Ipswich": "CRY (A)", "Liverpool": "FUL (H)", "Fulham": "LIV (A)", "Tottenham": "EVE (H)", "Everton": "TOT (A)", "Sunderland": "ARS (H)", "Arsenal": "SUN (A)", "Coventry": "BHA (H)", "Brighton": "COV (A)", "Manchester United": "MCI (H)", "Manchester City": "MUN (A)", "Leeds": "NEW (H)", "Newcastle United": "LEE (A)"}, "5": {"Brentford": "CHE (H)", "Chelsea": "BRE (A)", "Tottenham": "AVL (H)", "Aston Villa": "TOT (A)", "Brighton": "ARS (H)", "Arsenal": "BHA (A)", "Everton": "IPS (H)", "Ipswich": "EVE (A)", "Newcastle United": "HUL (H)", "Hull": "NEW (A)", "Nottingham Forest": "COV (H)", "Coventry": "NFO (A)", "Bournemouth": "LIV (H)", "Liverpool": "BOU (A)", "Leeds": "CRY (H)", "Crystal Palace": "LEE (A)", "Manchester City": "SUN (H)", "Sunderland": "MCI (A)", "Fulham": "MUN (H)", "Manchester United": "FUL (A)"}, "6": {"Arsenal": "LEE (H)", "Leeds": "ARS (A)", "Aston Villa": "BRE (H)", "Brentford": "AVL (A)", "Chelsea": "BOU (H)", "Bournemouth": "CHE (A)", "Ipswich": "FUL (H)", "Fulham": "IPS (A)", "Sunderland": "BHA (H)", "Brighton": "SUN (A)", "Manchester United": "TOT (H)", "Tottenham": "MUN (A)", "Crystal Palace": "NFO (H)", "Nottingham Forest": "CRY (A)", "Hull": "EVE (H)", "Everton": "HUL (A)", "Liverpool": "MCI (H)", "Manchester City": "LIV (A)", "Coventry": "NEW (H)", "Newcastle United": "COV (A)"}, "7": {"Everton": "CHE (H)", "Chelsea": "EVE (A)", "Brentford": "LIV (H)", "Liverpool": "BRE (A)", "Fulham": "HUL (H)", "Hull": "FUL (A)", "Manchester City": "IPS (H)", "Ipswich": "MCI (A)", "Newcastle United": "AVL (H)", "Aston Villa": "NEW (A)", "Bournemouth": "SUN (H)", "Sunderland": "BOU (A)", "Brighton": "CRY (H)", "Crystal Palace": "BHA (A)", "Leeds": "MUN (H)", "Manchester United": "LEE (A)", "Nottingham Forest": "ARS (H)", "Arsenal": "NFO (A)", "Tottenham": "COV (H)", "Coventry": "TOT (A)"}, "8": {"Ipswich": "NFO (H)", "Nottingham Forest": "IPS (A)", "Aston Villa": "MCI (H)", "Manchester City": "AVL (A)", "Arsenal": "EVE (H)", "Everton": "ARS (A)", "Coventry": "FUL (H)", "Fulham": "COV (A)", "Chelsea": "TOT (H)", "Tottenham": "CHE (A)", "Crystal Palace": "NEW (H)", "Newcastle United": "CRY (A)", "Hull": "BRE (H)", "Brentford": "HUL (A)", "Liverpool": "BHA (H)", "Brighton": "LIV (A)", "Manchester United": "BOU (H)", "Bournemouth": "MUN (A)", "Sunderland": "LEE (H)", "Leeds": "SUN (A)"}, "9": {"Chelsea": "MUN (H)", "Manchester United": "CHE (A)", "Bournemouth": "LEE (H)", "Leeds": "BOU (A)", "Brentford": "NFO (H)", "Nottingham Forest": "BRE (A)", "Coventry": "SUN (H)", "Sunderland": "COV (A)", "Hull": "IPS (H)", "Ipswich": "HUL (A)", "Manchester City": "BHA (H)", "Brighton": "MCI (A)", "Tottenham": "CRY (H)", "Crystal Palace": "TOT (A)", "Aston Villa": "FUL (H)", "Fulham": "AVL (A)", "Liverpool": "ARS (H)", "Arsenal": "LIV (A)", "Newcastle United": "EVE (H)", "Everton": "NEW (A)"}, "10": {"Everton": "COV (H)", "Coventry": "EVE (A)", "Leeds": "TOT (H)", "Tottenham": "LEE (A)", "Arsenal": "HUL (H)", "Hull": "ARS (A)", "Fulham": "NEW (H)", "Newcastle United": "FUL (A)", "Nottingham Forest": "MCI (H)", "Manchester City": "NFO (A)", "Brighton": "BRE (H)", "Brentford": "BHA (A)", "Crystal Palace": "LIV (H)", "Liverpool": "CRY (A)", "Ipswich": "BOU (H)", "Bournemouth": "IPS (A)", "Sunderland": "CHE (H)", "Chelsea": "SUN (A)", "Manchester United": "AVL (H)", "Aston Villa": "MUN (A)"}, "11": {"Manchester City": "FUL (H)", "Fulham": "MCI (A)", "Aston Villa": "SUN (H)", "Sunderland": "AVL (A)", "Bournemouth": "NFO (H)", "Nottingham Forest": "BOU (A)", "Chelsea": "LEE (H)", "Leeds": "CHE (A)", "Coventry": "CRY (H)", "Crystal Palace": "COV (A)", "Tottenham": "IPS (H)", "Ipswich": "TOT (A)", "Newcastle United": "ARS (H)", "Arsenal": "NEW (A)", "Hull": "BHA (H)", "Brighton": "HUL (A)", "Liverpool": "MUN (H)", "Manchester United": "LIV (A)", "Brentford": "EVE (H)", "Everton": "BRE (A)"}, "12": {"Nottingham Forest": "CHE (H)", "Chelsea": "NFO (A)", "Leeds": "COV (H)", "Coventry": "LEE (A)", "Manchester United": "BRE (H)", "Brentford": "MUN (A)", "Ipswich": "AVL (H)", "Aston Villa": "IPS (A)", "Everton": "LIV (H)", "Liverpool": "EVE (A)", "Brighton": "NEW (H)", "Newcastle United": "BHA (A)", "Crystal Palace": "HUL (H)", "Hull": "CRY (A)", "Fulham": "BOU (H)", "Bournemouth": "FUL (A)", "Sunderland": "TOT (H)", "Tottenham": "SUN (A)", "Arsenal": "MCI (H)", "Manchester City": "ARS (A)"}, "13": {"Aston Villa": "EVE (H)", "Everton": "AVL (A)", "Bournemouth": "BHA (H)", "Brighton": "BOU (A)", "Brentford": "ARS (H)", "Arsenal": "BRE (A)", "Chelsea": "CRY (H)", "Crystal Palace": "CHE (A)", "Coventry": "IPS (H)", "Ipswich": "COV (A)", "Hull": "NFO (H)", "Nottingham Forest": "HUL (A)", "Liverpool": "SUN (H)", "Sunderland": "LIV (A)", "Manchester City": "LEE (H)", "Leeds": "MCI (A)", "Newcastle United": "MUN (H)", "Manchester United": "NEW (A)", "Tottenham": "FUL (H)", "Fulham": "TOT (A)"}, "14": {"Aston Villa": "CRY (H)", "Crystal Palace": "AVL (A)", "Bournemouth": "HUL (H)", "Hull": "BOU (A)", "Brentford": "MCI (H)", "Manchester City": "BRE (A)", "Chelsea": "LIV (H)", "Liverpool": "CHE (A)", "Everton": "FUL (H)", "Fulham": "EVE (A)", "Leeds": "IPS (H)", "Ipswich": "LEE (A)", "Manchester United": "COV (H)", "Coventry": "MUN (A)", "Newcastle United": "SUN (H)", "Sunderland": "NEW (A)", "Nottingham Forest": "BHA (H)", "Brighton": "NFO (A)", "Tottenham": "ARS (H)", "Arsenal": "TOT (A)"}, "15": {"Arsenal": "BOU (H)", "Bournemouth": "ARS (A)", "Brighton": "EVE (H)", "Everton": "BHA (A)", "Coventry": "AVL (H)", "Aston Villa": "COV (A)", "Crystal Palace": "MUN (H)", "Manchester United": "CRY (A)", "Fulham": "BRE (H)", "Brentford": "FUL (A)", "Hull": "TOT (H)", "Tottenham": "HUL (A)", "Ipswich": "NEW (H)", "Newcastle United": "IPS (A)", "Liverpool": "LEE (H)", "Leeds": "LIV (A)", "Manchester City": "CHE (H)", "Chelsea": "MCI (A)", "Sunderland": "NFO (H)", "Nottingham Forest": "SUN (A)"}, "16": {"Arsenal": "MUN (H)", "Manchester United": "ARS (A)", "Bournemouth": "COV (H)", "Coventry": "BOU (A)", "Brentford": "NEW (H)", "Newcastle United": "BRE (A)", "Brighton": "IPS (H)", "Ipswich": "BHA (A)", "Chelsea": "AVL (H)", "Aston Villa": "CHE (A)", "Leeds": "FUL (H)", "Fulham": "LEE (A)", "Liverpool": "TOT (H)", "Tottenham": "LIV (A)", "Manchester City": "HUL (H)", "Hull": "MCI (A)", "Nottingham Forest": "EVE (H)", "Everton": "NFO (A)", "Sunderland": "CRY (H)", "Crystal Palace": "SUN (A)"}, "17": {"Aston Villa": "LEE (H)", "Leeds": "AVL (A)", "Everton": "SUN (H)", "Sunderland": "EVE (A)", "Fulham": "BHA (H)", "Brighton": "FUL (A)", "Ipswich": "BRE (H)", "Brentford": "IPS (A)", "Tottenham": "BOU (H)", "Bournemouth": "TOT (A)", "Hull": "LIV (H)", "Liverpool": "HUL (A)", "Newcastle United": "MCI (H)", "Manchester City": "NEW (A)", "Coventry": "CHE (H)", "Chelsea": "COV (A)", "Manchester United": "NFO (H)", "Nottingham Forest": "MUN (A)", "Crystal Palace": "ARS (H)", "Arsenal": "CRY (A)"}, "18": {"Hull": "LEE (H)", "Leeds": "HUL (A)", "Tottenham": "BHA (H)", "Brighton": "TOT (A)", "Everton": "MCI (H)", "Manchester City": "EVE (A)", "Coventry": "BRE (H)", "Brentford": "COV (A)", "Crystal Palace": "BOU (H)", "Bournemouth": "CRY (A)", "Fulham": "ARS (H)", "Arsenal": "FUL (A)", "Manchester United": "SUN (H)", "Sunderland": "MUN (A)", "Newcastle United": "NFO (H)", "Nottingham Forest": "NEW (A)", "Aston Villa": "LIV (H)", "Liverpool": "AVL (A)", "Ipswich": "CHE (H)", "Chelsea": "IPS (A)"}, "19": {"Leeds": "EVE (H)", "Everton": "LEE (A)", "Brighton": "MUN (H)", "Manchester United": "BHA (A)", "Arsenal": "IPS (H)", "Ipswich": "ARS (A)", "Brentford": "CRY (H)", "Crystal Palace": "BRE (A)", "Liverpool": "COV (H)", "Coventry": "LIV (A)", "Nottingham Forest": "FUL (H)", "Fulham": "NFO (A)", "Sunderland": "HUL (H)", "Hull": "SUN (A)", "Bournemouth": "AVL (H)", "Aston Villa": "BOU (A)", "Chelsea": "NEW (H)", "Newcastle United": "CHE (A)", "Manchester City": "TOT (H)", "Tottenham": "MCI (A)"}, "20": {"Arsenal": "BRE (H)", "Brentford": "ARS (A)", "Brighton": "BOU (H)", "Bournemouth": "BHA (A)", "Everton": "AVL (H)", "Aston Villa": "EVE (A)", "Nottingham Forest": "HUL (H)", "Hull": "NFO (A)", "Sunderland": "LIV (H)", "Liverpool": "SUN (A)", "Crystal Palace": "CHE (H)", "Chelsea": "CRY (A)", "Fulham": "TOT (H)", "Tottenham": "FUL (A)", "Ipswich": "COV (H)", "Coventry": "IPS (A)", "Leeds": "MCI (H)", "Manchester City": "LEE (A)", "Manchester United": "NEW (H)", "Newcastle United": "MUN (A)"}, "21": {"Aston Villa": "MUN (H)", "Manchester United": "AVL (A)", "Bournemouth": "IPS (H)", "Ipswich": "BOU (A)", "Brentford": "BHA (H)", "Brighton": "BRE (A)", "Chelsea": "SUN (H)", "Sunderland": "CHE (A)", "Coventry": "EVE (H)", "Everton": "COV (A)", "Hull": "ARS (H)", "Arsenal": "HUL (A)", "Liverpool": "CRY (H)", "Crystal Palace": "LIV (A)", "Manchester City": "NFO (H)", "Nottingham Forest": "MCI (A)", "Newcastle United": "FUL (H)", "Fulham": "NEW (A)", "Tottenham": "LEE (H)", "Leeds": "TOT (A)"}, "22": {"Arsenal": "NEW (H)", "Newcastle United": "ARS (A)", "Brighton": "MCI (H)", "Manchester City": "BHA (A)", "Crystal Palace": "TOT (H)", "Tottenham": "CRY (A)", "Everton": "BRE (H)", "Brentford": "EVE (A)", "Fulham": "AVL (H)", "Aston Villa": "FUL (A)", "Ipswich": "HUL (H)", "Hull": "IPS (A)", "Leeds": "CHE (H)", "Chelsea": "LEE (A)", "Manchester United": "LIV (H)", "Liverpool": "MUN (A)", "Nottingham Forest": "BOU (H)", "Bournemouth": "NFO (A)", "Sunderland": "COV (H)", "Coventry": "SUN (A)"}, "23": {"Aston Villa": "IPS (H)", "Ipswich": "AVL (A)", "Bournemouth": "FUL (H)", "Fulham": "BOU (A)", "Brentford": "MUN (H)", "Manchester United": "BRE (A)", "Chelsea": "NFO (H)", "Nottingham Forest": "CHE (A)", "Coventry": "LEE (H)", "Leeds": "COV (A)", "Hull": "CRY (H)", "Crystal Palace": "HUL (A)", "Liverpool": "EVE (H)", "Everton": "LIV (A)", "Manchester City": "ARS (H)", "Arsenal": "MCI (A)", "Newcastle United": "BHA (H)", "Brighton": "NEW (A)", "Tottenham": "SUN (H)", "Sunderland": "TOT (A)"}, "24": {"Arsenal": "LIV (H)", "Liverpool": "ARS (A)", "Brighton": "HUL (H)", "Hull": "BHA (A)", "Crystal Palace": "COV (H)", "Coventry": "CRY (A)", "Everton": "NEW (H)", "Newcastle United": "EVE (A)", "Fulham": "MCI (H)", "Manchester City": "FUL (A)", "Ipswich": "TOT (H)", "Tottenham": "IPS (A)", "Leeds": "BOU (H)", "Bournemouth": "LEE (A)", "Manchester United": "CHE (H)", "Chelsea": "MUN (A)", "Nottingham Forest": "BRE (H)", "Brentford": "NFO (A)", "Sunderland": "AVL (H)", "Aston Villa": "SUN (A)"}, "25": {"Aston Villa": "BOU (H)", "Bournemouth": "AVL (A)", "Coventry": "LIV (H)", "Liverpool": "COV (A)", "Crystal Palace": "BRE (H)", "Brentford": "CRY (A)", "Everton": "LEE (H)", "Leeds": "EVE (A)", "Fulham": "NFO (H)", "Nottingham Forest": "FUL (A)", "Hull": "SUN (H)", "Sunderland": "HUL (A)", "Ipswich": "ARS (H)", "Arsenal": "IPS (A)", "Manchester United": "BHA (H)", "Brighton": "MUN (A)", "Newcastle United": "CHE (H)", "Chelsea": "NEW (A)", "Tottenham": "MCI (H)", "Manchester City": "TOT (A)"}, "26": {"Arsenal": "FUL (H)", "Fulham": "ARS (A)", "Bournemouth": "CRY (H)", "Crystal Palace": "BOU (A)", "Brentford": "COV (H)", "Coventry": "BRE (A)", "Brighton": "TOT (H)", "Tottenham": "BHA (A)", "Chelsea": "IPS (H)", "Ipswich": "CHE (A)", "Leeds": "AVL (H)", "Aston Villa": "LEE (A)", "Liverpool": "HUL (H)", "Hull": "LIV (A)", "Manchester City": "NEW (H)", "Newcastle United": "MCI (A)", "Nottingham Forest": "MUN (H)", "Manchester United": "NFO (A)", "Sunderland": "EVE (H)", "Everton": "SUN (A)"}, "27": {"Aston Villa": "CHE (H)", "Chelsea": "AVL (A)", "Coventry": "BOU (H)", "Bournemouth": "COV (A)", "Crystal Palace": "SUN (H)", "Sunderland": "CRY (A)", "Everton": "NFO (H)", "Nottingham Forest": "EVE (A)", "Fulham": "LEE (H)", "Leeds": "FUL (A)", "Hull": "MCI (H)", "Manchester City": "HUL (A)", "Ipswich": "BHA (H)", "Brighton": "IPS (A)", "Manchester United": "ARS (H)", "Arsenal": "MUN (A)", "Newcastle United": "BRE (H)", "Brentford": "NEW (A)", "Tottenham": "LIV (H)", "Liverpool": "TOT (A)"}, "28": {"Arsenal": "CRY (H)", "Crystal Palace": "ARS (A)", "Bournemouth": "TOT (H)", "Tottenham": "BOU (A)", "Brentford": "IPS (H)", "Ipswich": "BRE (A)", "Brighton": "FUL (H)", "Fulham": "BHA (A)", "Chelsea": "COV (H)", "Coventry": "CHE (A)", "Leeds": "HUL (H)", "Hull": "LEE (A)", "Liverpool": "AVL (H)", "Aston Villa": "LIV (A)", "Manchester City": "EVE (H)", "Everton": "MCI (A)", "Nottingham Forest": "NEW (H)", "Newcastle United": "NFO (A)", "Sunderland": "MUN (H)", "Manchester United": "SUN (A)"}, "29": {"Aston Villa": "HUL (H)", "Hull": "AVL (A)", "Bournemouth": "NEW (H)", "Newcastle United": "BOU (A)", "Chelsea": "ARS (H)", "Arsenal": "CHE (A)", "Coventry": "MCI (H)", "Manchester City": "COV (A)", "Crystal Palace": "FUL (H)", "Fulham": "CRY (A)", "Leeds": "BHA (H)", "Brighton": "LEE (A)", "Liverpool": "IPS (H)", "Ipswich": "LIV (A)", "Manchester United": "EVE (H)", "Everton": "MUN (A)", "Tottenham": "NFO (H)", "Nottingham Forest": "TOT (A)", "Sunderland": "BRE (H)", "Brentford": "SUN (A)"}, "30": {"Arsenal": "SUN (H)", "Sunderland": "ARS (A)", "Brentford": "BOU (H)", "Bournemouth": "BRE (A)", "Brighton": "COV (H)", "Coventry": "BHA (A)", "Everton": "TOT (H)", "Tottenham": "EVE (A)", "Fulham": "LIV (H)", "Liverpool": "FUL (A)", "Hull": "CHE (H)", "Chelsea": "HUL (A)", "Ipswich": "CRY (H)", "Crystal Palace": "IPS (A)", "Manchester City": "MUN (H)", "Manchester United": "MCI (A)", "Newcastle United": "LEE (H)", "Leeds": "NEW (A)", "Nottingham Forest": "AVL (H)", "Aston Villa": "NFO (A)"}, "31": {"Aston Villa": "BHA (H)", "Brighton": "AVL (A)", "Bournemouth": "MCI (H)", "Manchester City": "BOU (A)", "Chelsea": "FUL (H)", "Fulham": "CHE (A)", "Coventry": "ARS (H)", "Arsenal": "COV (A)", "Crystal Palace": "EVE (H)", "Everton": "CRY (A)", "Leeds": "NFO (H)", "Nottingham Forest": "LEE (A)", "Liverpool": "NEW (H)", "Newcastle United": "LIV (A)", "Manchester United": "HUL (H)", "Hull": "MUN (A)", "Tottenham": "BRE (H)", "Brentford": "TOT (A)", "Sunderland": "IPS (H)", "Ipswich": "SUN (A)"}, "32": {"Arsenal": "AVL (H)", "Aston Villa": "ARS (A)", "Brentford": "LEE (H)", "Leeds": "BRE (A)", "Brighton": "CHE (H)", "Chelsea": "BHA (A)", "Everton": "BOU (H)", "Bournemouth": "EVE (A)", "Fulham": "SUN (H)", "Sunderland": "FUL (A)", "Hull": "COV (H)", "Coventry": "HUL (A)", "Ipswich": "MUN (H)", "Manchester United": "IPS (A)", "Manchester City": "CRY (H)", "Crystal Palace": "MCI (A)", "Newcastle United": "TOT (H)", "Tottenham": "NEW (A)", "Nottingham Forest": "LIV (H)", "Liverpool": "NFO (A)"}, "33": {"Aston Villa": "COV (H)", "Coventry": "AVL (A)", "Bournemouth": "ARS (H)", "Arsenal": "BOU (A)", "Brentford": "FUL (H)", "Fulham": "BRE (A)", "Chelsea": "MCI (H)", "Manchester City": "CHE (A)", "Everton": "BHA (H)", "Brighton": "EVE (A)", "Leeds": "LIV (H)", "Liverpool": "LEE (A)", "Manchester United": "CRY (H)", "Crystal Palace": "MUN (A)", "Newcastle United": "IPS (H)", "Ipswich": "NEW (A)", "Nottingham Forest": "SUN (H)", "Sunderland": "NFO (A)", "Tottenham": "HUL (H)", "Hull": "TOT (A)"}, "34": {"Arsenal": "TOT (H)", "Tottenham": "ARS (A)", "Brighton": "NFO (H)", "Nottingham Forest": "BHA (A)", "Coventry": "MUN (H)", "Manchester United": "COV (A)", "Crystal Palace": "AVL (H)", "Aston Villa": "CRY (A)", "Fulham": "EVE (H)", "Everton": "FUL (A)", "Hull": "BOU (H)", "Bournemouth": "HUL (A)", "Ipswich": "LEE (H)", "Leeds": "IPS (A)", "Liverpool": "CHE (H)", "Chelsea": "LIV (A)", "Manchester City": "BRE (H)", "Brentford": "MCI (A)", "Sunderland": "NEW (H)", "Newcastle United": "SUN (A)"}, "35": {"Bournemouth": "MUN (H)", "Manchester United": "BOU (A)", "Brentford": "AVL (H)", "Aston Villa": "BRE (A)", "Brighton": "SUN (H)", "Sunderland": "BHA (A)", "Everton": "HUL (H)", "Hull": "EVE (A)", "Fulham": "IPS (H)", "Ipswich": "FUL (A)", "Leeds": "ARS (H)", "Arsenal": "LEE (A)", "Manchester City": "LIV (H)", "Liverpool": "MCI (A)", "Newcastle United": "COV (H)", "Coventry": "NEW (A)", "Nottingham Forest": "CRY (H)", "Crystal Palace": "NFO (A)", "Tottenham": "CHE (H)", "Chelsea": "TOT (A)"}, "36": {"Arsenal": "NFO (H)", "Nottingham Forest": "ARS (A)", "Aston Villa": "NEW (H)", "Newcastle United": "AVL (A)", "Chelsea": "EVE (H)", "Everton": "CHE (A)", "Coventry": "TOT (H)", "Tottenham": "COV (A)", "Crystal Palace": "BHA (H)", "Brighton": "CRY (A)", "Hull": "FUL (H)", "Fulham": "HUL (A)", "Ipswich": "MCI (H)", "Manchester City": "IPS (A)", "Liverpool": "BRE (H)", "Brentford": "LIV (A)", "Manchester United": "LEE (H)", "Leeds": "MUN (A)", "Sunderland": "BOU (H)", "Bournemouth": "SUN (A)"}, "37": {"Bournemouth": "CHE (H)", "Chelsea": "BOU (A)", "Brentford": "HUL (H)", "Hull": "BRE (A)", "Brighton": "LIV (H)", "Liverpool": "BHA (A)", "Everton": "ARS (H)", "Arsenal": "EVE (A)", "Fulham": "COV (H)", "Coventry": "FUL (A)", "Leeds": "SUN (H)", "Sunderland": "LEE (A)", "Manchester City": "AVL (H)", "Aston Villa": "MCI (A)", "Newcastle United": "CRY (H)", "Crystal Palace": "NEW (A)", "Nottingham Forest": "IPS (H)", "Ipswich": "NFO (A)", "Tottenham": "MUN (H)", "Manchester United": "TOT (A)"}, "38": {"Arsenal": "BHA (H)", "Brighton": "ARS (A)", "Aston Villa": "TOT (H)", "Tottenham": "AVL (A)", "Chelsea": "BRE (H)", "Brentford": "CHE (A)", "Coventry": "NFO (H)", "Nottingham Forest": "COV (A)", "Crystal Palace": "LEE (H)", "Leeds": "CRY (A)", "Hull": "NEW (H)", "Newcastle United": "HUL (A)", "Ipswich": "EVE (H)", "Everton": "IPS (A)", "Liverpool": "BOU (H)", "Bournemouth": "LIV (A)", "Manchester United": "FUL (H)", "Fulham": "MUN (A)", "Sunderland": "MCI (H)", "Manchester City": "SUN (A)"}};
-const FIXTURE_XG = {"6": {"Arsenal": {"f": 2.138, "a": 0.728, "cs": 0.473}, "Aston Villa": {"f": 1.447, "a": 1.462, "cs": 0.219}, "Bournemouth": {"f": 1.35, "a": 2.034, "cs": 0.122}, "Brentford": {"f": 1.462, "a": 1.447, "cs": 0.222}, "Brighton": {"f": 1.413, "a": 1.326, "cs": 0.251}, "Chelsea": {"f": 2.034, "a": 1.35, "cs": 0.251}, "Coventry": {"f": 1.272, "a": 1.623, "cs": 0.184}, "Crystal Palace": {"f": 1.271, "a": 1.259, "cs": 0.268}, "Everton": {"f": 1.444, "a": 1.015, "cs": 0.346}, "Fulham": {"f": 1.439, "a": 1.396, "cs": 0.234}, "Hull": {"f": 1.015, "a": 1.444, "cs": 0.219}, "Ipswich": {"f": 1.396, "a": 1.439, "cs": 0.224}, "Leeds": {"f": 0.728, "a": 2.138, "cs": 0.105}, "Liverpool": {"f": 1.497, "a": 1.576, "cs": 0.195}, "Manchester City": {"f": 1.576, "a": 1.497, "cs": 0.212}, "Manchester United": {"f": 2.022, "a": 1.202, "cs": 0.291}, "Newcastle United": {"f": 1.623, "a": 1.272, "cs": 0.268}, "Nottingham Forest": {"f": 1.259, "a": 1.271, "cs": 0.264}, "Sunderland": {"f": 1.326, "a": 1.413, "cs": 0.229}, "Tottenham": {"f": 1.202, "a": 2.022, "cs": 0.122}}, "7": {"Arsenal": {"f": 1.77, "a": 0.856, "cs": 0.412}, "Aston Villa": {"f": 1.332, "a": 1.7, "cs": 0.171}, "Bournemouth": {"f": 1.617, "a": 1.13, "cs": 0.309}, "Brentford": {"f": 1.502, "a": 1.62, "cs": 0.187}, "Brighton": {"f": 2.101, "a": 1.027, "cs": 0.349}, "Chelsea": {"f": 1.584, "a": 1.421, "cs": 0.229}, "Coventry": {"f": 0.972, "a": 2.114, "cs": 0.11}, "Crystal Palace": {"f": 1.027, "a": 2.101, "cs": 0.112}, "Everton": {"f": 1.421, "a": 1.584, "cs": 0.193}, "Fulham": {"f": 1.898, "a": 1.055, "cs": 0.337}, "Hull": {"f": 1.055, "a": 1.898, "cs": 0.137}, "Ipswich": {"f": 0.83, "a": 2.755, "cs": 0.057}, "Leeds": {"f": 1.423, "a": 1.539, "cs": 0.202}, "Liverpool": {"f": 1.62, "a": 1.502, "cs": 0.212}, "Manchester City": {"f": 2.755, "a": 0.83, "cs": 0.432}, "Manchester United": {"f": 1.539, "a": 1.423, "cs": 0.229}, "Newcastle United": {"f": 1.7, "a": 1.332, "cs": 0.252}, "Nottingham Forest": {"f": 0.856, "a": 1.77, "cs": 0.155}, "Sunderland": {"f": 1.13, "a": 1.617, "cs": 0.184}, "Tottenham": {"f": 2.114, "a": 0.972, "cs": 0.369}}, "8": {"Arsenal": {"f": 2.117, "a": 0.742, "cs": 0.466}, "Aston Villa": {"f": 1.194, "a": 1.776, "cs": 0.157}, "Bournemouth": {"f": 1.216, "a": 2.006, "cs": 0.124}, "Brentford": {"f": 1.733, "a": 1.18, "cs": 0.295}, "Brighton": {"f": 1.176, "a": 1.949, "cs": 0.131}, "Chelsea": {"f": 1.968, "a": 1.149, "cs": 0.307}, "Coventry": {"f": 1.332, "a": 1.496, "cs": 0.21}, "Crystal Palace": {"f": 1.407, "a": 1.503, "cs": 0.209}, "Everton": {"f": 0.742, "a": 2.117, "cs": 0.108}, "Fulham": {"f": 1.496, "a": 1.332, "cs": 0.25}, "Hull": {"f": 1.18, "a": 1.733, "cs": 0.164}, "Ipswich": {"f": 1.349, "a": 1.487, "cs": 0.212}, "Leeds": {"f": 1.346, "a": 1.422, "cs": 0.227}, "Liverpool": {"f": 1.949, "a": 1.176, "cs": 0.298}, "Manchester City": {"f": 1.776, "a": 1.194, "cs": 0.291}, "Manchester United": {"f": 2.006, "a": 1.216, "cs": 0.287}, "Newcastle United": {"f": 1.503, "a": 1.407, "cs": 0.232}, "Nottingham Forest": {"f": 1.487, "a": 1.349, "cs": 0.246}, "Sunderland": {"f": 1.422, "a": 1.346, "cs": 0.246}, "Tottenham": {"f": 1.149, "a": 1.968, "cs": 0.129}}, "9": {"Arsenal": {"f": 1.58, "a": 1.351, "cs": 0.246}, "Aston Villa": {"f": 1.718, "a": 1.166, "cs": 0.299}, "Bournemouth": {"f": 1.744, "a": 1.305, "cs": 0.26}, "Brentford": {"f": 1.725, "a": 1.202, "cs": 0.288}, "Brighton": {"f": 1.038, "a": 2.059, "cs": 0.117}, "Chelsea": {"f": 1.894, "a": 1.36, "cs": 0.247}, "Coventry": {"f": 1.375, "a": 1.328, "cs": 0.25}, "Crystal Palace": {"f": 1.184, "a": 1.726, "cs": 0.165}, "Everton": {"f": 1.162, "a": 1.658, "cs": 0.177}, "Fulham": {"f": 1.166, "a": 1.718, "cs": 0.166}, "Hull": {"f": 1.463, "a": 1.357, "cs": 0.244}, "Ipswich": {"f": 1.357, "a": 1.463, "cs": 0.218}, "Leeds": {"f": 1.305, "a": 1.744, "cs": 0.163}, "Liverpool": {"f": 1.351, "a": 1.58, "cs": 0.193}, "Manchester City": {"f": 2.059, "a": 1.038, "cs": 0.345}, "Manchester United": {"f": 1.36, "a": 1.894, "cs": 0.14}, "Newcastle United": {"f": 1.658, "a": 1.162, "cs": 0.3}, "Nottingham Forest": {"f": 1.202, "a": 1.725, "cs": 0.165}, "Sunderland": {"f": 1.328, "a": 1.375, "cs": 0.238}, "Tottenham": {"f": 1.726, "a": 1.184, "cs": 0.294}}, "10": {"Arsenal": {"f": 2.604, "a": 0.543, "cs": 0.575}, "Aston Villa": {"f": 1.229, "a": 1.841, "cs": 0.147}, "Bournemouth": {"f": 1.601, "a": 1.385, "cs": 0.238}, "Brentford": {"f": 1.274, "a": 1.748, "cs": 0.162}, "Brighton": {"f": 1.748, "a": 1.274, "cs": 0.268}, "Chelsea": {"f": 1.783, "a": 1.136, "cs": 0.309}, "Coventry": {"f": 0.959, "a": 1.837, "cs": 0.146}, "Crystal Palace": {"f": 1.218, "a": 1.812, "cs": 0.151}, "Everton": {"f": 1.837, "a": 0.959, "cs": 0.371}, "Fulham": {"f": 1.4, "a": 1.499, "cs": 0.21}, "Hull": {"f": 0.543, "a": 2.604, "cs": 0.065}, "Ipswich": {"f": 1.385, "a": 1.601, "cs": 0.189}, "Leeds": {"f": 1.488, "a": 1.441, "cs": 0.224}, "Liverpool": {"f": 1.812, "a": 1.218, "cs": 0.284}, "Manchester City": {"f": 1.87, "a": 1.089, "cs": 0.325}, "Manchester United": {"f": 1.841, "a": 1.229, "cs": 0.282}, "Newcastle United": {"f": 1.499, "a": 1.4, "cs": 0.234}, "Nottingham Forest": {"f": 1.089, "a": 1.87, "cs": 0.142}, "Sunderland": {"f": 1.136, "a": 1.783, "cs": 0.155}, "Tottenham": {"f": 1.441, "a": 1.488, "cs": 0.213}}, "11": {"Arsenal": {"f": 1.782, "a": 1.095, "cs": 0.322}, "Aston Villa": {"f": 1.752, "a": 1.024, "cs": 0.346}, "Bournemouth": {"f": 1.67, "a": 1.298, "cs": 0.261}, "Brentford": {"f": 1.612, "a": 1.223, "cs": 0.281}, "Brighton": {"f": 1.82, "a": 1.11, "cs": 0.318}, "Chelsea": {"f": 2.137, "a": 1.049, "cs": 0.341}, "Coventry": {"f": 1.336, "a": 1.503, "cs": 0.209}, "Crystal Palace": {"f": 1.503, "a": 1.336, "cs": 0.25}, "Everton": {"f": 1.223, "a": 1.612, "cs": 0.186}, "Fulham": {"f": 0.84, "a": 2.26, "cs": 0.094}, "Hull": {"f": 1.11, "a": 1.82, "cs": 0.149}, "Ipswich": {"f": 1.016, "a": 1.934, "cs": 0.132}, "Leeds": {"f": 1.049, "a": 2.137, "cs": 0.108}, "Liverpool": {"f": 1.954, "a": 1.272, "cs": 0.271}, "Manchester City": {"f": 2.26, "a": 0.84, "cs": 0.423}, "Manchester United": {"f": 1.272, "a": 1.954, "cs": 0.131}, "Newcastle United": {"f": 1.095, "a": 1.782, "cs": 0.155}, "Nottingham Forest": {"f": 1.298, "a": 1.67, "cs": 0.176}, "Sunderland": {"f": 1.024, "a": 1.752, "cs": 0.159}, "Tottenham": {"f": 1.934, "a": 1.016, "cs": 0.351}}, "12": {"Arsenal": {"f": 1.722, "a": 1.169, "cs": 0.298}, "Aston Villa": {"f": 1.61, "a": 1.265, "cs": 0.269}, "Bournemouth": {"f": 1.4, "a": 1.578, "cs": 0.194}, "Brentford": {"f": 1.267, "a": 1.874, "cs": 0.143}, "Brighton": {"f": 1.671, "a": 1.318, "cs": 0.256}, "Chelsea": {"f": 1.707, "a": 1.314, "cs": 0.257}, "Coventry": {"f": 1.085, "a": 1.838, "cs": 0.146}, "Crystal Palace": {"f": 1.863, "a": 1.019, "cs": 0.349}, "Everton": {"f": 1.251, "a": 1.648, "cs": 0.179}, "Fulham": {"f": 1.578, "a": 1.4, "cs": 0.234}, "Hull": {"f": 1.019, "a": 1.863, "cs": 0.142}, "Ipswich": {"f": 1.265, "a": 1.61, "cs": 0.187}, "Leeds": {"f": 1.838, "a": 1.085, "cs": 0.326}, "Liverpool": {"f": 1.648, "a": 1.251, "cs": 0.274}, "Manchester City": {"f": 1.169, "a": 1.722, "cs": 0.166}, "Manchester United": {"f": 1.874, "a": 1.267, "cs": 0.271}, "Newcastle United": {"f": 1.318, "a": 1.671, "cs": 0.176}, "Nottingham Forest": {"f": 1.314, "a": 1.707, "cs": 0.169}, "Sunderland": {"f": 1.294, "a": 1.456, "cs": 0.219}, "Tottenham": {"f": 1.456, "a": 1.294, "cs": 0.26}}, "13": {"Arsenal": {"f": 1.859, "a": 1.055, "cs": 0.337}, "Aston Villa": {"f": 1.57, "a": 1.205, "cs": 0.286}, "Bournemouth": {"f": 1.52, "a": 1.541, "cs": 0.202}, "Brentford": {"f": 1.055, "a": 1.859, "cs": 0.143}, "Brighton": {"f": 1.541, "a": 1.52, "cs": 0.207}, "Chelsea": {"f": 2.101, "a": 1.033, "cs": 0.346}, "Coventry": {"f": 1.523, "a": 1.312, "cs": 0.256}, "Crystal Palace": {"f": 1.033, "a": 2.101, "cs": 0.112}, "Everton": {"f": 1.205, "a": 1.57, "cs": 0.194}, "Fulham": {"f": 1.178, "a": 1.721, "cs": 0.166}, "Hull": {"f": 1.243, "a": 1.562, "cs": 0.196}, "Ipswich": {"f": 1.312, "a": 1.523, "cs": 0.204}, "Leeds": {"f": 0.857, "a": 2.305, "cs": 0.09}, "Liverpool": {"f": 2.172, "a": 0.831, "cs": 0.426}, "Manchester City": {"f": 2.305, "a": 0.857, "cs": 0.416}, "Manchester United": {"f": 1.467, "a": 1.619, "cs": 0.187}, "Newcastle United": {"f": 1.619, "a": 1.467, "cs": 0.219}, "Nottingham Forest": {"f": 1.562, "a": 1.243, "cs": 0.275}, "Sunderland": {"f": 0.831, "a": 2.172, "cs": 0.103}, "Tottenham": {"f": 1.721, "a": 1.178, "cs": 0.295}}, "14": {"Arsenal": {"f": 1.846, "a": 1.026, "cs": 0.347}, "Aston Villa": {"f": 1.723, "a": 1.172, "cs": 0.297}, "Bournemouth": {"f": 2.011, "a": 1.012, "cs": 0.353}, "Brentford": {"f": 1.229, "a": 1.807, "cs": 0.152}, "Brighton": {"f": 1.497, "a": 1.409, "cs": 0.231}, "Chelsea": {"f": 1.683, "a": 1.512, "cs": 0.21}, "Coventry": {"f": 0.907, "a": 2.246, "cs": 0.096}, "Crystal Palace": {"f": 1.172, "a": 1.723, "cs": 0.165}, "Everton": {"f": 1.609, "a": 1.158, "cs": 0.3}, "Fulham": {"f": 1.158, "a": 1.609, "cs": 0.186}, "Hull": {"f": 1.012, "a": 2.011, "cs": 0.122}, "Ipswich": {"f": 1.131, "a": 1.811, "cs": 0.151}, "Leeds": {"f": 1.811, "a": 1.131, "cs": 0.311}, "Liverpool": {"f": 1.512, "a": 1.683, "cs": 0.175}, "Manchester City": {"f": 1.807, "a": 1.229, "cs": 0.281}, "Manchester United": {"f": 2.246, "a": 0.907, "cs": 0.395}, "Newcastle United": {"f": 1.845, "a": 0.983, "cs": 0.362}, "Nottingham Forest": {"f": 1.409, "a": 1.497, "cs": 0.211}, "Sunderland": {"f": 0.983, "a": 1.845, "cs": 0.145}, "Tottenham": {"f": 1.026, "a": 1.846, "cs": 0.145}}, "15": {"Arsenal": {"f": 2.332, "a": 0.787, "cs": 0.447}, "Aston Villa": {"f": 1.638, "a": 1.216, "cs": 0.283}, "Bournemouth": {"f": 0.787, "a": 2.332, "cs": 0.087}, "Brentford": {"f": 1.453, "a": 1.469, "cs": 0.217}, "Brighton": {"f": 1.696, "a": 1.151, "cs": 0.303}, "Chelsea": {"f": 1.208, "a": 1.96, "cs": 0.13}, "Coventry": {"f": 1.216, "a": 1.638, "cs": 0.181}, "Crystal Palace": {"f": 1.389, "a": 1.652, "cs": 0.18}, "Everton": {"f": 1.151, "a": 1.696, "cs": 0.17}, "Fulham": {"f": 1.469, "a": 1.453, "cs": 0.221}, "Hull": {"f": 1.175, "a": 1.689, "cs": 0.171}, "Ipswich": {"f": 1.221, "a": 1.702, "cs": 0.169}, "Leeds": {"f": 0.977, "a": 2.195, "cs": 0.101}, "Liverpool": {"f": 2.195, "a": 0.977, "cs": 0.368}, "Manchester City": {"f": 1.96, "a": 1.208, "cs": 0.289}, "Manchester United": {"f": 1.652, "a": 1.389, "cs": 0.238}, "Newcastle United": {"f": 1.702, "a": 1.221, "cs": 0.283}, "Nottingham Forest": {"f": 1.341, "a": 1.364, "cs": 0.241}, "Sunderland": {"f": 1.364, "a": 1.341, "cs": 0.247}, "Tottenham": {"f": 1.689, "a": 1.175, "cs": 0.296}}};    
+const FIXTURE_XG = {"6": {"Arsenal": {"f": 2.138, "a": 0.728, "cs": 0.473}, "Aston Villa": {"f": 1.447, "a": 1.462, "cs": 0.219}, "Bournemouth": {"f": 1.35, "a": 2.034, "cs": 0.122}, "Brentford": {"f": 1.462, "a": 1.447, "cs": 0.222}, "Brighton": {"f": 1.413, "a": 1.326, "cs": 0.251}, "Chelsea": {"f": 2.034, "a": 1.35, "cs": 0.251}, "Coventry": {"f": 1.272, "a": 1.623, "cs": 0.184}, "Crystal Palace": {"f": 1.271, "a": 1.259, "cs": 0.268}, "Everton": {"f": 1.444, "a": 1.015, "cs": 0.346}, "Fulham": {"f": 1.439, "a": 1.396, "cs": 0.234}, "Hull": {"f": 1.015, "a": 1.444, "cs": 0.219}, "Ipswich": {"f": 1.396, "a": 1.439, "cs": 0.224}, "Leeds": {"f": 0.728, "a": 2.138, "cs": 0.105}, "Liverpool": {"f": 1.497, "a": 1.576, "cs": 0.195}, "Manchester City": {"f": 1.576, "a": 1.497, "cs": 0.212}, "Manchester United": {"f": 2.022, "a": 1.202, "cs": 0.291}, "Newcastle United": {"f": 1.623, "a": 1.272, "cs": 0.268}, "Nottingham Forest": {"f": 1.259, "a": 1.271, "cs": 0.264}, "Sunderland": {"f": 1.326, "a": 1.413, "cs": 0.229}, "Tottenham": {"f": 1.202, "a": 2.022, "cs": 0.122}}, "7": {"Arsenal": {"f": 1.77, "a": 0.856, "cs": 0.412}, "Aston Villa": {"f": 1.332, "a": 1.7, "cs": 0.171}, "Bournemouth": {"f": 1.617, "a": 1.13, "cs": 0.309}, "Brentford": {"f": 1.502, "a": 1.62, "cs": 0.187}, "Brighton": {"f": 2.101, "a": 1.027, "cs": 0.349}, "Chelsea": {"f": 1.584, "a": 1.421, "cs": 0.229}, "Coventry": {"f": 0.972, "a": 2.114, "cs": 0.11}, "Crystal Palace": {"f": 1.027, "a": 2.101, "cs": 0.112}, "Everton": {"f": 1.421, "a": 1.584, "cs": 0.193}, "Fulham": {"f": 1.898, "a": 1.055, "cs": 0.337}, "Hull": {"f": 1.055, "a": 1.898, "cs": 0.137}, "Ipswich": {"f": 0.83, "a": 2.755, "cs": 0.057}, "Leeds": {"f": 1.423, "a": 1.539, "cs": 0.202}, "Liverpool": {"f": 1.62, "a": 1.502, "cs": 0.212}, "Manchester City": {"f": 2.755, "a": 0.83, "cs": 0.432}, "Manchester United": {"f": 1.539, "a": 1.423, "cs": 0.229}, "Newcastle United": {"f": 1.7, "a": 1.332, "cs": 0.252}, "Nottingham Forest": {"f": 0.856, "a": 1.77, "cs": 0.155}, "Sunderland": {"f": 1.13, "a": 1.617, "cs": 0.184}, "Tottenham": {"f": 2.114, "a": 0.972, "cs": 0.369}}, "8": {"Arsenal": {"f": 2.182, "a": 0.711, "cs": 0.482}, "Aston Villa": {"f": 1.2, "a": 1.813, "cs": 0.151}, "Bournemouth": {"f": 1.196, "a": 1.976, "cs": 0.128}, "Brentford": {"f": 1.819, "a": 1.133, "cs": 0.31}, "Brighton": {"f": 1.152, "a": 1.961, "cs": 0.13}, "Chelsea": {"f": 1.911, "a": 1.166, "cs": 0.301}, "Coventry": {"f": 1.364, "a": 1.526, "cs": 0.204}, "Crystal Palace": {"f": 1.365, "a": 1.531, "cs": 0.203}, "Everton": {"f": 0.711, "a": 2.182, "cs": 0.101}, "Fulham": {"f": 1.526, "a": 1.364, "cs": 0.243}, "Hull": {"f": 1.133, "a": 1.819, "cs": 0.15}, "Ipswich": {"f": 1.337, "a": 1.511, "cs": 0.207}, "Leeds": {"f": 1.337, "a": 1.396, "cs": 0.233}, "Liverpool": {"f": 1.961, "a": 1.152, "cs": 0.306}, "Manchester City": {"f": 1.813, "a": 1.2, "cs": 0.29}, "Manchester United": {"f": 1.976, "a": 1.196, "cs": 0.293}, "Newcastle United": {"f": 1.531, "a": 1.365, "cs": 0.242}, "Nottingham Forest": {"f": 1.511, "a": 1.337, "cs": 0.249}, "Sunderland": {"f": 1.396, "a": 1.337, "cs": 0.248}, "Tottenham": {"f": 1.166, "a": 1.911, "cs": 0.136}}, "9": {"Arsenal": {"f": 1.551, "a": 1.3, "cs": 0.259}, "Aston Villa": {"f": 1.775, "a": 1.165, "cs": 0.3}, "Bournemouth": {"f": 1.65, "a": 1.29, "cs": 0.263}, "Brentford": {"f": 1.746, "a": 1.165, "cs": 0.3}, "Brighton": {"f": 1.029, "a": 2.135, "cs": 0.108}, "Chelsea": {"f": 1.77, "a": 1.383, "cs": 0.24}, "Coventry": {"f": 1.366, "a": 1.405, "cs": 0.231}, "Crystal Palace": {"f": 1.137, "a": 1.752, "cs": 0.16}, "Everton": {"f": 1.188, "a": 1.71, "cs": 0.168}, "Fulham": {"f": 1.165, "a": 1.775, "cs": 0.157}, "Hull": {"f": 1.476, "a": 1.4, "cs": 0.233}, "Ipswich": {"f": 1.4, "a": 1.476, "cs": 0.215}, "Leeds": {"f": 1.29, "a": 1.65, "cs": 0.179}, "Liverpool": {"f": 1.3, "a": 1.551, "cs": 0.199}, "Manchester City": {"f": 2.135, "a": 1.029, "cs": 0.348}, "Manchester United": {"f": 1.383, "a": 1.77, "cs": 0.159}, "Newcastle United": {"f": 1.71, "a": 1.188, "cs": 0.292}, "Nottingham Forest": {"f": 1.165, "a": 1.746, "cs": 0.162}, "Sunderland": {"f": 1.405, "a": 1.366, "cs": 0.241}, "Tottenham": {"f": 1.752, "a": 1.137, "cs": 0.308}}, "10": {"Arsenal": {"f": 2.63, "a": 0.527, "cs": 0.585}, "Aston Villa": {"f": 1.223, "a": 1.834, "cs": 0.148}, "Bournemouth": {"f": 1.61, "a": 1.395, "cs": 0.236}, "Brentford": {"f": 1.353, "a": 1.687, "cs": 0.173}, "Brighton": {"f": 1.687, "a": 1.353, "cs": 0.247}, "Chelsea": {"f": 1.693, "a": 1.211, "cs": 0.285}, "Coventry": {"f": 0.999, "a": 1.868, "cs": 0.141}, "Crystal Palace": {"f": 1.121, "a": 1.83, "cs": 0.148}, "Everton": {"f": 1.868, "a": 0.999, "cs": 0.356}, "Fulham": {"f": 1.441, "a": 1.523, "cs": 0.205}, "Hull": {"f": 0.527, "a": 2.63, "cs": 0.063}, "Ipswich": {"f": 1.395, "a": 1.61, "cs": 0.188}, "Leeds": {"f": 1.516, "a": 1.349, "cs": 0.246}, "Liverpool": {"f": 1.83, "a": 1.121, "cs": 0.314}, "Manchester City": {"f": 1.865, "a": 1.095, "cs": 0.323}, "Manchester United": {"f": 1.834, "a": 1.223, "cs": 0.283}, "Newcastle United": {"f": 1.523, "a": 1.441, "cs": 0.224}, "Nottingham Forest": {"f": 1.095, "a": 1.865, "cs": 0.143}, "Sunderland": {"f": 1.211, "a": 1.693, "cs": 0.171}, "Tottenham": {"f": 1.349, "a": 1.516, "cs": 0.206}}, "11": {"Arsenal": {"f": 1.828, "a": 1.052, "cs": 0.337}, "Aston Villa": {"f": 1.765, "a": 1.064, "cs": 0.332}, "Bournemouth": {"f": 1.633, "a": 1.301, "cs": 0.26}, "Brentford": {"f": 1.731, "a": 1.162, "cs": 0.301}, "Brighton": {"f": 1.851, "a": 1.136, "cs": 0.31}, "Chelsea": {"f": 1.93, "a": 1.077, "cs": 0.33}, "Coventry": {"f": 1.374, "a": 1.449, "cs": 0.221}, "Crystal Palace": {"f": 1.449, "a": 1.374, "cs": 0.239}, "Everton": {"f": 1.162, "a": 1.731, "cs": 0.164}, "Fulham": {"f": 0.831, "a": 2.35, "cs": 0.086}, "Hull": {"f": 1.136, "a": 1.851, "cs": 0.145}, "Ipswich": {"f": 1.058, "a": 1.935, "cs": 0.132}, "Leeds": {"f": 1.077, "a": 1.93, "cs": 0.133}, "Liverpool": {"f": 1.9, "a": 1.24, "cs": 0.279}, "Manchester City": {"f": 2.35, "a": 0.831, "cs": 0.428}, "Manchester United": {"f": 1.24, "a": 1.9, "cs": 0.139}, "Newcastle United": {"f": 1.052, "a": 1.828, "cs": 0.148}, "Nottingham Forest": {"f": 1.301, "a": 1.633, "cs": 0.183}, "Sunderland": {"f": 1.064, "a": 1.765, "cs": 0.158}, "Tottenham": {"f": 1.935, "a": 1.058, "cs": 0.336}}, "12": {"Arsenal": {"f": 1.713, "a": 1.16, "cs": 0.301}, "Aston Villa": {"f": 1.637, "a": 1.286, "cs": 0.264}, "Bournemouth": {"f": 1.434, "a": 1.564, "cs": 0.197}, "Brentford": {"f": 1.298, "a": 1.797, "cs": 0.154}, "Brighton": {"f": 1.721, "a": 1.334, "cs": 0.252}, "Chelsea": {"f": 1.586, "a": 1.36, "cs": 0.244}, "Coventry": {"f": 1.021, "a": 1.864, "cs": 0.142}, "Crystal Palace": {"f": 1.794, "a": 1.057, "cs": 0.335}, "Everton": {"f": 1.218, "a": 1.691, "cs": 0.171}, "Fulham": {"f": 1.564, "a": 1.434, "cs": 0.226}, "Hull": {"f": 1.057, "a": 1.794, "cs": 0.153}, "Ipswich": {"f": 1.286, "a": 1.637, "cs": 0.182}, "Leeds": {"f": 1.864, "a": 1.021, "cs": 0.348}, "Liverpool": {"f": 1.691, "a": 1.218, "cs": 0.284}, "Manchester City": {"f": 1.16, "a": 1.713, "cs": 0.167}, "Manchester United": {"f": 1.797, "a": 1.298, "cs": 0.262}, "Newcastle United": {"f": 1.334, "a": 1.721, "cs": 0.167}, "Nottingham Forest": {"f": 1.36, "a": 1.586, "cs": 0.192}, "Sunderland": {"f": 1.37, "a": 1.435, "cs": 0.224}, "Tottenham": {"f": 1.435, "a": 1.37, "cs": 0.24}}, "13": {"Arsenal": {"f": 1.794, "a": 1.069, "cs": 0.331}, "Aston Villa": {"f": 1.645, "a": 1.196, "cs": 0.289}, "Bournemouth": {"f": 1.549, "a": 1.528, "cs": 0.205}, "Brentford": {"f": 1.069, "a": 1.794, "cs": 0.153}, "Brighton": {"f": 1.528, "a": 1.549, "cs": 0.201}, "Chelsea": {"f": 2.041, "a": 0.993, "cs": 0.36}, "Coventry": {"f": 1.533, "a": 1.362, "cs": 0.243}, "Crystal Palace": {"f": 0.993, "a": 2.041, "cs": 0.118}, "Everton": {"f": 1.196, "a": 1.645, "cs": 0.179}, "Fulham": {"f": 1.203, "a": 1.747, "cs": 0.162}, "Hull": {"f": 1.217, "a": 1.601, "cs": 0.188}, "Ipswich": {"f": 1.362, "a": 1.533, "cs": 0.203}, "Leeds": {"f": 0.851, "a": 2.227, "cs": 0.097}, "Liverpool": {"f": 2.147, "a": 0.85, "cs": 0.418}, "Manchester City": {"f": 2.227, "a": 0.851, "cs": 0.418}, "Manchester United": {"f": 1.504, "a": 1.583, "cs": 0.194}, "Newcastle United": {"f": 1.583, "a": 1.504, "cs": 0.211}, "Nottingham Forest": {"f": 1.601, "a": 1.217, "cs": 0.283}, "Sunderland": {"f": 0.85, "a": 2.147, "cs": 0.105}, "Tottenham": {"f": 1.747, "a": 1.203, "cs": 0.288}}, "14": {"Arsenal": {"f": 1.878, "a": 0.984, "cs": 0.362}, "Aston Villa": {"f": 1.78, "a": 1.101, "cs": 0.32}, "Bournemouth": {"f": 2.04, "a": 1.006, "cs": 0.356}, "Brentford": {"f": 1.273, "a": 1.776, "cs": 0.158}, "Brighton": {"f": 1.463, "a": 1.451, "cs": 0.221}, "Chelsea": {"f": 1.564, "a": 1.526, "cs": 0.206}, "Coventry": {"f": 0.891, "a": 2.278, "cs": 0.092}, "Crystal Palace": {"f": 1.101, "a": 1.78, "cs": 0.156}, "Everton": {"f": 1.637, "a": 1.203, "cs": 0.287}, "Fulham": {"f": 1.203, "a": 1.637, "cs": 0.181}, "Hull": {"f": 1.006, "a": 2.04, "cs": 0.119}, "Ipswich": {"f": 1.083, "a": 1.811, "cs": 0.15}, "Leeds": {"f": 1.811, "a": 1.083, "cs": 0.327}, "Liverpool": {"f": 1.526, "a": 1.564, "cs": 0.198}, "Manchester City": {"f": 1.776, "a": 1.273, "cs": 0.269}, "Manchester United": {"f": 2.278, "a": 0.891, "cs": 0.402}, "Newcastle United": {"f": 1.833, "a": 1.056, "cs": 0.336}, "Nottingham Forest": {"f": 1.451, "a": 1.463, "cs": 0.219}, "Sunderland": {"f": 1.056, "a": 1.833, "cs": 0.147}, "Tottenham": {"f": 0.984, "a": 1.878, "cs": 0.14}}, "15": {"Arsenal": {"f": 2.304, "a": 0.763, "cs": 0.458}, "Aston Villa": {"f": 1.69, "a": 1.217, "cs": 0.284}, "Bournemouth": {"f": 0.763, "a": 2.304, "cs": 0.089}, "Brentford": {"f": 1.544, "a": 1.41, "cs": 0.232}, "Brighton": {"f": 1.761, "a": 1.164, "cs": 0.3}, "Chelsea": {"f": 1.131, "a": 2.028, "cs": 0.121}, "Coventry": {"f": 1.217, "a": 1.69, "cs": 0.172}, "Crystal Palace": {"f": 1.285, "a": 1.682, "cs": 0.173}, "Everton": {"f": 1.164, "a": 1.761, "cs": 0.159}, "Fulham": {"f": 1.41, "a": 1.544, "cs": 0.201}, "Hull": {"f": 1.206, "a": 1.702, "cs": 0.169}, "Ipswich": {"f": 1.28, "a": 1.703, "cs": 0.17}, "Leeds": {"f": 0.958, "a": 2.057, "cs": 0.116}, "Liverpool": {"f": 2.057, "a": 0.958, "cs": 0.373}, "Manchester City": {"f": 2.028, "a": 1.131, "cs": 0.313}, "Manchester United": {"f": 1.682, "a": 1.285, "cs": 0.264}, "Newcastle United": {"f": 1.703, "a": 1.28, "cs": 0.266}, "Nottingham Forest": {"f": 1.347, "a": 1.381, "cs": 0.237}, "Sunderland": {"f": 1.381, "a": 1.347, "cs": 0.245}, "Tottenham": {"f": 1.702, "a": 1.206, "cs": 0.287}}};    
 const FIXTURE_TEAM_SHORT = {"Arsenal": "ARS", "Aston Villa": "AVL", "Bournemouth": "BOU", "Brentford": "BRE", "Brighton": "BHA", "Chelsea": "CHE", "Coventry": "COV", "Crystal Palace": "CRY", "Everton": "EVE", "Fulham": "FUL", "Hull": "HUL", "Ipswich": "IPS", "Leeds": "LEE", "Liverpool": "LIV", "Manchester City": "MCI", "Manchester United": "MUN", "Newcastle United": "NEW", "Nottingham Forest": "NFO", "Tottenham": "TOT", "Sunderland": "SUN"};
-const TEAM_STRENGTH = {"marker": "APEX_TEAM_STRENGTH_v1", "start_gw": 6, "teams": [{"team": "Arsenal", "short": "ARS", "atk_rating": 1.770927, "dfn_rating": 0.807576, "neutral": {"att": 1.9986, "def": 0.9139, "net": 1.0847}, "home": {"att": 2.2033, "def": 0.8203, "net": 1.383}, "away": {"att": 1.794, "def": 1.0074, "net": 0.7866}}, {"team": "Aston Villa", "short": "AVL", "atk_rating": 1.265684, "dfn_rating": 1.264733, "neutral": {"att": 1.4284, "def": 1.4312, "net": -0.0028}, "home": {"att": 1.5747, "def": 1.2846, "net": 0.2901}, "away": {"att": 1.2822, "def": 1.5777, "net": -0.2955}}, {"team": "Bournemouth", "short": "BOU", "atk_rating": 1.312866, "dfn_rating": 1.444959, "neutral": {"att": 1.4817, "def": 1.6351, "net": -0.1534}, "home": {"att": 1.6334, "def": 1.4677, "net": 0.1657}, "away": {"att": 1.33, "def": 1.8026, "net": -0.4726}}, {"team": "Brentford", "short": "BRE", "atk_rating": 1.334219, "dfn_rating": 1.317055, "neutral": {"att": 1.5058, "def": 1.4904, "net": 0.0154}, "home": {"att": 1.66, "def": 1.3378, "net": 0.3222}, "away": {"att": 1.3516, "def": 1.643, "net": -0.2914}}, {"team": "Brighton", "short": "BHA", "atk_rating": 1.41111, "dfn_rating": 1.246837, "neutral": {"att": 1.5926, "def": 1.4109, "net": 0.1817}, "home": {"att": 1.7556, "def": 1.2665, "net": 0.4891}, "away": {"att": 1.4295, "def": 1.5554, "net": -0.1259}}, {"team": "Chelsea", "short": "CHE", "atk_rating": 1.679882, "dfn_rating": 1.213853, "neutral": {"att": 1.8959, "def": 1.3736, "net": 0.5223}, "home": {"att": 2.09, "def": 1.233, "net": 0.857}, "away": {"att": 1.7018, "def": 1.5143, "net": 0.1875}}, {"team": "Coventry", "short": "COV", "atk_rating": 0.9587, "dfn_rating": 1.584332, "neutral": {"att": 1.082, "def": 1.7929, "net": -0.7109}, "home": {"att": 1.1928, "def": 1.6093, "net": -0.4165}, "away": {"att": 0.9712, "def": 1.9764, "net": -1.0052}}, {"team": "Crystal Palace", "short": "CRY", "atk_rating": 1.15353, "dfn_rating": 1.379954, "neutral": {"att": 1.3019, "def": 1.5616, "net": -0.2597}, "home": {"att": 1.4352, "def": 1.4017, "net": 0.0335}, "away": {"att": 1.1686, "def": 1.7215, "net": -0.5529}}, {"team": "Everton", "short": "EVE", "atk_rating": 1.127341, "dfn_rating": 1.194608, "neutral": {"att": 1.2723, "def": 1.3518, "net": -0.0795}, "home": {"att": 1.4026, "def": 1.2134, "net": 0.1892}, "away": {"att": 1.142, "def": 1.4903, "net": -0.3483}}, {"team": "Fulham", "short": "FUL", "atk_rating": 1.142863, "dfn_rating": 1.369754, "neutral": {"att": 1.2898, "def": 1.55, "net": -0.2602}, "home": {"att": 1.4219, "def": 1.3913, "net": 0.0306}, "away": {"att": 1.1577, "def": 1.7088, "net": -0.5511}}, {"team": "Hull", "short": "HUL", "atk_rating": 0.914788, "dfn_rating": 1.628184, "neutral": {"att": 1.0324, "def": 1.8425, "net": -0.8101}, "home": {"att": 1.1381, "def": 1.6538, "net": -0.5157}, "away": {"att": 0.9267, "def": 2.0311, "net": -1.1044}}, {"team": "Ipswich", "short": "IPS", "atk_rating": 1.00578, "dfn_rating": 1.570954, "neutral": {"att": 1.1351, "def": 1.7777, "net": -0.6426}, "home": {"att": 1.2513, "def": 1.5957, "net": -0.3444}, "away": {"att": 1.0189, "def": 1.9598, "net": -0.9409}}, {"team": "Leeds", "short": "LEE", "atk_rating": 1.189518, "dfn_rating": 1.425021, "neutral": {"att": 1.3425, "def": 1.6126, "net": -0.2701}, "home": {"att": 1.4799, "def": 1.4475, "net": 0.0324}, "away": {"att": 1.205, "def": 1.7777, "net": -0.5727}}, {"team": "Liverpool", "short": "LIV", "atk_rating": 1.719131, "dfn_rating": 1.125855, "neutral": {"att": 1.9402, "def": 1.274, "net": 0.6662}, "home": {"att": 2.1389, "def": 1.1436, "net": 0.9953}, "away": {"att": 1.7415, "def": 1.4045, "net": 0.337}}, {"team": "Manchester City", "short": "MCI", "atk_rating": 1.799676, "dfn_rating": 0.984097, "neutral": {"att": 2.0311, "def": 1.1136, "net": 0.9175}, "home": {"att": 2.2391, "def": 0.9996, "net": 1.2395}, "away": {"att": 1.8231, "def": 1.2277, "net": 0.5954}}, {"team": "Manchester United", "short": "MUN", "atk_rating": 1.572463, "dfn_rating": 1.288465, "neutral": {"att": 1.7747, "def": 1.4581, "net": 0.3166}, "home": {"att": 1.9564, "def": 1.3088, "net": 0.6476}, "away": {"att": 1.5929, "def": 1.6073, "net": -0.0144}}, {"team": "Newcastle United", "short": "NEW", "atk_rating": 1.363986, "dfn_rating": 1.24372, "neutral": {"att": 1.5394, "def": 1.4074, "net": 0.132}, "home": {"att": 1.697, "def": 1.2633, "net": 0.4337}, "away": {"att": 1.3818, "def": 1.5515, "net": -0.1697}}, {"team": "Nottingham Forest", "short": "NFO", "atk_rating": 1.150521, "dfn_rating": 1.326588, "neutral": {"att": 1.2985, "def": 1.5012, "net": -0.2027}, "home": {"att": 1.4314, "def": 1.3475, "net": 0.0839}, "away": {"att": 1.1655, "def": 1.6549, "net": -0.4894}}, {"team": "Sunderland", "short": "SUN", "atk_rating": 0.957639, "dfn_rating": 1.334016, "neutral": {"att": 1.0808, "def": 1.5096, "net": -0.4288}, "home": {"att": 1.1914, "def": 1.355, "net": -0.1636}, "away": {"att": 0.9701, "def": 1.6642, "net": -0.6941}}, {"team": "Tottenham", "short": "TOT", "atk_rating": 1.275375, "dfn_rating": 1.285437, "neutral": {"att": 1.4394, "def": 1.4546, "net": -0.0152}, "home": {"att": 1.5868, "def": 1.3057, "net": 0.2811}, "away": {"att": 1.292, "def": 1.6036, "net": -0.3116}}], "avg": {"neutral": {"att": 1.4731, "def": 1.4731}, "home": {"att": 1.624, "def": 1.3223}, "away": {"att": 1.3223, "def": 1.624}}, "home_adv": 1.228151, "mu": 1.309974, "pace": 0.941294, "level_scale": 1.082961, "pull_on": true, "beta": 0.4792, "anchor": 2.75, "floor": 0.5, "typical_total": 2.978, "market_gws": [6, 7], "market_partial_gws": [], "fixtures": {"6": [["Arsenal", "Leeds", 1, 0], ["Aston Villa", "Brentford", 1, 0], ["Chelsea", "Bournemouth", 1, 0], ["Ipswich", "Fulham", 1, 0], ["Sunderland", "Brighton", 1, 0], ["Manchester United", "Tottenham", 1, 0], ["Crystal Palace", "Nottingham Forest", 1, 0], ["Hull", "Everton", 1, 0], ["Liverpool", "Manchester City", 1, 0], ["Coventry", "Newcastle United", 1, 0]], "7": [["Everton", "Chelsea", 1, 0], ["Brentford", "Liverpool", 1, 0], ["Fulham", "Hull", 1, 0], ["Manchester City", "Ipswich", 1, 0], ["Newcastle United", "Aston Villa", 1, 0], ["Bournemouth", "Sunderland", 1, 0], ["Brighton", "Crystal Palace", 1, 0], ["Leeds", "Manchester United", 1, 0], ["Nottingham Forest", "Arsenal", 1, 0], ["Tottenham", "Coventry", 1, 0]], "8": [["Ipswich", "Nottingham Forest", 0, 1], ["Aston Villa", "Manchester City", 0, 1], ["Arsenal", "Everton", 0, 1], ["Coventry", "Fulham", 0, 1], ["Chelsea", "Tottenham", 0, 1], ["Crystal Palace", "Newcastle United", 0, 1], ["Hull", "Brentford", 0, 1], ["Liverpool", "Brighton", 0, 1], ["Manchester United", "Bournemouth", 0, 1], ["Sunderland", "Leeds", 0, 1]], "9": [["Chelsea", "Manchester United", 0, 1], ["Bournemouth", "Leeds", 0, 1], ["Brentford", "Nottingham Forest", 0, 1], ["Coventry", "Sunderland", 0, 1], ["Hull", "Ipswich", 0, 1], ["Manchester City", "Brighton", 0, 1], ["Tottenham", "Crystal Palace", 0, 1], ["Aston Villa", "Fulham", 0, 1], ["Liverpool", "Arsenal", 0, 1], ["Newcastle United", "Everton", 0, 1]], "10": [["Everton", "Coventry", 0, 1], ["Leeds", "Tottenham", 0, 1], ["Arsenal", "Hull", 0, 1], ["Fulham", "Newcastle United", 0, 1], ["Nottingham Forest", "Manchester City", 0, 1], ["Brighton", "Brentford", 0, 1], ["Crystal Palace", "Liverpool", 0, 1], ["Ipswich", "Bournemouth", 0, 1], ["Sunderland", "Chelsea", 0, 1], ["Manchester United", "Aston Villa", 0, 1]], "11": [["Manchester City", "Fulham", 0, 1], ["Aston Villa", "Sunderland", 0, 1], ["Bournemouth", "Nottingham Forest", 0, 1], ["Chelsea", "Leeds", 0, 1], ["Coventry", "Crystal Palace", 0, 1], ["Tottenham", "Ipswich", 0, 1], ["Newcastle United", "Arsenal", 0, 1], ["Hull", "Brighton", 0, 1], ["Liverpool", "Manchester United", 0, 1], ["Brentford", "Everton", 0, 1]], "12": [["Nottingham Forest", "Chelsea", 0, 1], ["Leeds", "Coventry", 0, 1], ["Manchester United", "Brentford", 0, 1], ["Ipswich", "Aston Villa", 0, 1], ["Everton", "Liverpool", 0, 1], ["Brighton", "Newcastle United", 0, 1], ["Crystal Palace", "Hull", 0, 1], ["Fulham", "Bournemouth", 0, 1], ["Sunderland", "Tottenham", 0, 1], ["Arsenal", "Manchester City", 0, 1]], "13": [["Aston Villa", "Everton", 0, 1], ["Bournemouth", "Brighton", 0, 1], ["Brentford", "Arsenal", 0, 1], ["Chelsea", "Crystal Palace", 0, 1], ["Coventry", "Ipswich", 0, 1], ["Hull", "Nottingham Forest", 0, 1], ["Liverpool", "Sunderland", 0, 1], ["Manchester City", "Leeds", 0, 1], ["Newcastle United", "Manchester United", 0, 1], ["Tottenham", "Fulham", 0, 1]], "14": [["Aston Villa", "Crystal Palace", 0, 1], ["Bournemouth", "Hull", 0, 1], ["Brentford", "Manchester City", 0, 1], ["Chelsea", "Liverpool", 0, 1], ["Everton", "Fulham", 0, 1], ["Leeds", "Ipswich", 0, 1], ["Manchester United", "Coventry", 0, 1], ["Newcastle United", "Sunderland", 0, 1], ["Nottingham Forest", "Brighton", 0, 1], ["Tottenham", "Arsenal", 0, 1]], "15": [["Arsenal", "Bournemouth", 0, 1], ["Brighton", "Everton", 0, 1], ["Coventry", "Aston Villa", 0, 1], ["Crystal Palace", "Manchester United", 0, 1], ["Fulham", "Brentford", 0, 1], ["Hull", "Tottenham", 0, 1], ["Ipswich", "Newcastle United", 0, 1], ["Liverpool", "Leeds", 0, 1], ["Manchester City", "Chelsea", 0, 1], ["Sunderland", "Nottingham Forest", 0, 1]]}, "check": {"n": 160, "first_gw": 8, "last_gw": 15, "mean_gap": 0.0003, "max_gap": 0.0005, "max_fixture": "GW13 CHE v CRY", "max_team": "Crystal Palace"}, "check_nopull": {"n": 160, "first_gw": 8, "last_gw": 15, "mean_gap": 0.0625, "max_gap": 0.1745, "max_fixture": "GW9 CHE v MUN", "max_team": "Chelsea"}};    
+const TEAM_STRENGTH = {"marker": "APEX_TEAM_STRENGTH_v1", "start_gw": 6, "teams": [{"team": "Arsenal", "short": "ARS", "atk_rating": 1.755503, "dfn_rating": 0.776024, "neutral": {"att": 1.9851, "def": 0.8775, "net": 1.1076}, "home": {"att": 2.1884, "def": 0.7877, "net": 1.4007}, "away": {"att": 1.7819, "def": 0.9674, "net": 0.8145}}, {"team": "Aston Villa", "short": "AVL", "atk_rating": 1.29625, "dfn_rating": 1.279264, "neutral": {"att": 1.4658, "def": 1.4466, "net": 0.0192}, "home": {"att": 1.6159, "def": 1.2985, "net": 0.3174}, "away": {"att": 1.3157, "def": 1.5947, "net": -0.279}}, {"team": "Bournemouth", "short": "BOU", "atk_rating": 1.313945, "dfn_rating": 1.428887, "neutral": {"att": 1.4858, "def": 1.6158, "net": -0.13}, "home": {"att": 1.6379, "def": 1.4503, "net": 0.1876}, "away": {"att": 1.3337, "def": 1.7812, "net": -0.4475}}, {"team": "Brentford", "short": "BRE", "atk_rating": 1.392434, "dfn_rating": 1.268455, "neutral": {"att": 1.5746, "def": 1.4344, "net": 0.1402}, "home": {"att": 1.7358, "def": 1.2875, "net": 0.4483}, "away": {"att": 1.4133, "def": 1.5812, "net": -0.1679}}, {"team": "Brighton", "short": "BHA", "atk_rating": 1.434962, "dfn_rating": 1.288015, "neutral": {"att": 1.6227, "def": 1.4565, "net": 0.1662}, "home": {"att": 1.7888, "def": 1.3074, "net": 0.4814}, "away": {"att": 1.4565, "def": 1.6056, "net": -0.1491}}, {"team": "Chelsea", "short": "CHE", "atk_rating": 1.573698, "dfn_rating": 1.221453, "neutral": {"att": 1.7795, "def": 1.3812, "net": 0.3983}, "home": {"att": 1.9618, "def": 1.2398, "net": 0.722}, "away": {"att": 1.5973, "def": 1.5226, "net": 0.0747}}, {"team": "Coventry", "short": "COV", "atk_rating": 0.977477, "dfn_rating": 1.645, "neutral": {"att": 1.1053, "def": 1.8602, "net": -0.7549}, "home": {"att": 1.2185, "def": 1.6697, "net": -0.4512}, "away": {"att": 0.9922, "def": 2.0506, "net": -1.0584}}, {"team": "Crystal Palace", "short": "CRY", "atk_rating": 1.074726, "dfn_rating": 1.396305, "neutral": {"att": 1.2153, "def": 1.5789, "net": -0.3636}, "home": {"att": 1.3397, "def": 1.4173, "net": -0.0776}, "away": {"att": 1.0909, "def": 1.7406, "net": -0.6497}}, {"team": "Everton", "short": "EVE", "atk_rating": 1.149309, "dfn_rating": 1.270022, "neutral": {"att": 1.2996, "def": 1.4361, "net": -0.1365}, "home": {"att": 1.4327, "def": 1.2891, "net": 0.1436}, "away": {"att": 1.1666, "def": 1.5832, "net": -0.4166}}, {"team": "Fulham", "short": "FUL", "atk_rating": 1.163578, "dfn_rating": 1.424952, "neutral": {"att": 1.3158, "def": 1.6113, "net": -0.2955}, "home": {"att": 1.4505, "def": 1.4463, "net": 0.0042}, "away": {"att": 1.181, "def": 1.7763, "net": -0.5953}}, {"team": "Hull", "short": "HUL", "atk_rating": 0.934559, "dfn_rating": 1.678224, "neutral": {"att": 1.0568, "def": 1.8977, "net": -0.8409}, "home": {"att": 1.165, "def": 1.7034, "net": -0.5384}, "away": {"att": 0.9486, "def": 2.0921, "net": -1.1435}}, {"team": "Ipswich", "short": "IPS", "atk_rating": 1.040273, "dfn_rating": 1.604235, "neutral": {"att": 1.1763, "def": 1.8141, "net": -0.6378}, "home": {"att": 1.2968, "def": 1.6283, "net": -0.3315}, "away": {"att": 1.0559, "def": 1.9998, "net": -0.9439}}, {"team": "Leeds", "short": "LEE", "atk_rating": 1.154846, "dfn_rating": 1.307694, "neutral": {"att": 1.3059, "def": 1.4787, "net": -0.1728}, "home": {"att": 1.4396, "def": 1.3273, "net": 0.1123}, "away": {"att": 1.1722, "def": 1.6302, "net": -0.458}}, {"team": "Liverpool", "short": "LIV", "atk_rating": 1.682507, "dfn_rating": 1.089812, "neutral": {"att": 1.9026, "def": 1.2324, "net": 0.6702}, "home": {"att": 2.0974, "def": 1.1062, "net": 0.9912}, "away": {"att": 1.7078, "def": 1.3585, "net": 0.3493}}, {"team": "Manchester City", "short": "MCI", "atk_rating": 1.860433, "dfn_rating": 0.989047, "neutral": {"att": 2.1038, "def": 1.1184, "net": 0.9854}, "home": {"att": 2.3192, "def": 1.0039, "net": 1.3153}, "away": {"att": 1.8884, "def": 1.2329, "net": 0.6555}}, {"team": "Manchester United", "short": "MUN", "atk_rating": 1.556362, "dfn_rating": 1.258044, "neutral": {"att": 1.7599, "def": 1.4226, "net": 0.3373}, "home": {"att": 1.9401, "def": 1.2769, "net": 0.6632}, "away": {"att": 1.5797, "def": 1.5683, "net": 0.0114}}, {"team": "Newcastle United", "short": "NEW", "atk_rating": 1.37922, "dfn_rating": 1.300879, "neutral": {"att": 1.5596, "def": 1.471, "net": 0.0886}, "home": {"att": 1.7193, "def": 1.3204, "net": 0.3989}, "away": {"att": 1.3999, "def": 1.6217, "net": -0.2218}}, {"team": "Nottingham Forest", "short": "NFO", "atk_rating": 1.161125, "dfn_rating": 1.290707, "neutral": {"att": 1.313, "def": 1.4595, "net": -0.1465}, "home": {"att": 1.4474, "def": 1.3101, "net": 0.1373}, "away": {"att": 1.1786, "def": 1.609, "net": -0.4304}}, {"team": "Sunderland", "short": "SUN", "atk_rating": 1.017744, "dfn_rating": 1.356109, "neutral": {"att": 1.1509, "def": 1.5335, "net": -0.3826}, "home": {"att": 1.2687, "def": 1.3765, "net": -0.1078}, "away": {"att": 1.033, "def": 1.6905, "net": -0.6575}}, {"team": "Tottenham", "short": "TOT", "atk_rating": 1.280529, "dfn_rating": 1.326353, "neutral": {"att": 1.448, "def": 1.4998, "net": -0.0518}, "home": {"att": 1.5963, "def": 1.3463, "net": 0.25}, "away": {"att": 1.2998, "def": 1.6534, "net": -0.3536}}], "avg": {"neutral": {"att": 1.4813, "def": 1.4813}, "home": {"att": 1.633, "def": 1.3296}, "away": {"att": 1.3296, "def": 1.633}}, "home_adv": 1.228151, "mu": 1.309974, "pace": 0.941294, "level_scale": 1.078316, "pull_on": true, "beta": 0.4792, "anchor": 2.75, "floor": 0.5, "typical_total": 2.965, "market_gws": [6, 7], "market_partial_gws": [], "fixtures": {"6": [["Arsenal", "Leeds", 1, 0], ["Aston Villa", "Brentford", 1, 0], ["Chelsea", "Bournemouth", 1, 0], ["Ipswich", "Fulham", 1, 0], ["Sunderland", "Brighton", 1, 0], ["Manchester United", "Tottenham", 1, 0], ["Crystal Palace", "Nottingham Forest", 1, 0], ["Hull", "Everton", 1, 0], ["Liverpool", "Manchester City", 1, 0], ["Coventry", "Newcastle United", 1, 0]], "7": [["Everton", "Chelsea", 1, 0], ["Brentford", "Liverpool", 1, 0], ["Fulham", "Hull", 1, 0], ["Manchester City", "Ipswich", 1, 0], ["Newcastle United", "Aston Villa", 1, 0], ["Bournemouth", "Sunderland", 1, 0], ["Brighton", "Crystal Palace", 1, 0], ["Leeds", "Manchester United", 1, 0], ["Nottingham Forest", "Arsenal", 1, 0], ["Tottenham", "Coventry", 1, 0]], "8": [["Ipswich", "Nottingham Forest", 0, 1], ["Aston Villa", "Manchester City", 0, 1], ["Arsenal", "Everton", 0, 1], ["Coventry", "Fulham", 0, 1], ["Chelsea", "Tottenham", 0, 1], ["Crystal Palace", "Newcastle United", 0, 1], ["Hull", "Brentford", 0, 1], ["Liverpool", "Brighton", 0, 1], ["Manchester United", "Bournemouth", 0, 1], ["Sunderland", "Leeds", 0, 1]], "9": [["Chelsea", "Manchester United", 0, 1], ["Bournemouth", "Leeds", 0, 1], ["Brentford", "Nottingham Forest", 0, 1], ["Coventry", "Sunderland", 0, 1], ["Hull", "Ipswich", 0, 1], ["Manchester City", "Brighton", 0, 1], ["Tottenham", "Crystal Palace", 0, 1], ["Aston Villa", "Fulham", 0, 1], ["Liverpool", "Arsenal", 0, 1], ["Newcastle United", "Everton", 0, 1]], "10": [["Everton", "Coventry", 0, 1], ["Leeds", "Tottenham", 0, 1], ["Arsenal", "Hull", 0, 1], ["Fulham", "Newcastle United", 0, 1], ["Nottingham Forest", "Manchester City", 0, 1], ["Brighton", "Brentford", 0, 1], ["Crystal Palace", "Liverpool", 0, 1], ["Ipswich", "Bournemouth", 0, 1], ["Sunderland", "Chelsea", 0, 1], ["Manchester United", "Aston Villa", 0, 1]], "11": [["Manchester City", "Fulham", 0, 1], ["Aston Villa", "Sunderland", 0, 1], ["Bournemouth", "Nottingham Forest", 0, 1], ["Chelsea", "Leeds", 0, 1], ["Coventry", "Crystal Palace", 0, 1], ["Tottenham", "Ipswich", 0, 1], ["Newcastle United", "Arsenal", 0, 1], ["Hull", "Brighton", 0, 1], ["Liverpool", "Manchester United", 0, 1], ["Brentford", "Everton", 0, 1]], "12": [["Nottingham Forest", "Chelsea", 0, 1], ["Leeds", "Coventry", 0, 1], ["Manchester United", "Brentford", 0, 1], ["Ipswich", "Aston Villa", 0, 1], ["Everton", "Liverpool", 0, 1], ["Brighton", "Newcastle United", 0, 1], ["Crystal Palace", "Hull", 0, 1], ["Fulham", "Bournemouth", 0, 1], ["Sunderland", "Tottenham", 0, 1], ["Arsenal", "Manchester City", 0, 1]], "13": [["Aston Villa", "Everton", 0, 1], ["Bournemouth", "Brighton", 0, 1], ["Brentford", "Arsenal", 0, 1], ["Chelsea", "Crystal Palace", 0, 1], ["Coventry", "Ipswich", 0, 1], ["Hull", "Nottingham Forest", 0, 1], ["Liverpool", "Sunderland", 0, 1], ["Manchester City", "Leeds", 0, 1], ["Newcastle United", "Manchester United", 0, 1], ["Tottenham", "Fulham", 0, 1]], "14": [["Aston Villa", "Crystal Palace", 0, 1], ["Bournemouth", "Hull", 0, 1], ["Brentford", "Manchester City", 0, 1], ["Chelsea", "Liverpool", 0, 1], ["Everton", "Fulham", 0, 1], ["Leeds", "Ipswich", 0, 1], ["Manchester United", "Coventry", 0, 1], ["Newcastle United", "Sunderland", 0, 1], ["Nottingham Forest", "Brighton", 0, 1], ["Tottenham", "Arsenal", 0, 1]], "15": [["Arsenal", "Bournemouth", 0, 1], ["Brighton", "Everton", 0, 1], ["Coventry", "Aston Villa", 0, 1], ["Crystal Palace", "Manchester United", 0, 1], ["Fulham", "Brentford", 0, 1], ["Hull", "Tottenham", 0, 1], ["Ipswich", "Newcastle United", 0, 1], ["Liverpool", "Leeds", 0, 1], ["Manchester City", "Chelsea", 0, 1], ["Sunderland", "Nottingham Forest", 0, 1]]}, "check": {"n": 160, "first_gw": 8, "last_gw": 15, "mean_gap": 0.0003, "max_gap": 0.0005, "max_fixture": "GW15 SUN v NFO", "max_team": "Nottingham Forest"}, "check_nopull": {"n": 160, "first_gw": 8, "last_gw": 15, "mean_gap": 0.0493, "max_gap": 0.1736, "max_fixture": "GW10 ARS v HUL", "max_team": "Arsenal"}};    
 const BACKEND_URL = (window.location.protocol === 'file:' || window.location.hostname === '')
   ? 'http://localhost:5001'
   : '';
@@ -20282,7 +20663,7 @@ const FPL_CORS_PROXY = 'https://fpl-proxy.weathered-bird-16f4.workers.dev';
  
  
 const APEX_TEST_ENTRY = false;
-const APEX_TEST_SQUAD = {"picks": [["Gabriel", "Arsenal"], ["Saka", "Arsenal"], ["Suzuki", "Aston Villa"], ["Evanilson", "Bournemouth"], ["Verbruggen", "Brighton"], ["Gro\u00df", "Brighton"], ["Palmer", "Chelsea"], ["Jo\u00e3o Pedro", "Chelsea"], ["Barry", "Everton"], ["Diop", "Ipswich"], ["Szoboszlai", "Liverpool"], ["B.Fernandes", "Manchester United"], ["Thiaw", "Newcastle United"], ["Van Hecke", "Tottenham"], ["Pedro Porro", "Tottenham"]], "captain": "B.Fernandes", "vice": "Palmer"};
+const APEX_TEST_SQUAD = {"picks": [["Gabriel", "Arsenal"], ["Saka", "Arsenal"], ["Suzuki", "Aston Villa"], ["Evanilson", "Bournemouth"], ["Schade", "Brentford"], ["Verbruggen", "Brighton"], ["Palmer", "Chelsea"], ["Barry", "Everton"], ["Diop", "Ipswich"], ["Virgil", "Liverpool"], ["Szoboszlai", "Liverpool"], ["B.Fernandes", "Manchester United"], ["Thiaw", "Newcastle United"], ["Wissa", "Newcastle United"], ["Van Hecke", "Tottenham"]], "captain": "B.Fernandes", "vice": "Palmer"};
 const APEX_BLANK_ENTRY = false;
  
  
@@ -20950,8 +21331,7 @@ async function _leagueLivePollOnce() {
       prevData: _leagueData,
       pool: POOL_DATA,
       nSims: _leagueData.n_sims || 5000,
-      cv: 0.33,
-      seed: 42,
+      seed: 42,    
     });
     if (!fresh) { _leaguePollFails++; return; }    
     _leaguePollFails = 0;    
@@ -20966,7 +21346,6 @@ async function _leagueLivePollOnce() {
           prevData: _leagueDataAlt,
           pool: POOL_DATA,
           nSims: _leagueDataAlt.n_sims || 5000,
-          cv: 0.33,
           seed: 42,
         });
         if (altFresh) _leagueDataAlt = altFresh;
@@ -21182,7 +21561,9 @@ function _winColor(pct) {
 }
 
 function _chipClass(c) {
-  return {'WC': 'lg-chip-wc', 'FH': 'lg-chip-fh', 'BB': 'lg-chip-bb', 'TC': 'lg-chip-tc'}[c] || '';
+   
+  const k = String(c || '').replace(/2$/, '');
+  return {'WC': 'lg-chip-wc', 'FH': 'lg-chip-fh', 'BB': 'lg-chip-bb', 'TC': 'lg-chip-tc'}[k] || '';
 }
 
  
@@ -21469,6 +21850,28 @@ function renderLeagueTable(data) {
   try { _lgChipWatch(data); } catch (_eCw) {}    
   try { _lgTemplate(data); } catch (_eLt) {}     
    
+   
+  try {
+    const _fm = (data.failed_managers || []);
+    let _fn = document.getElementById('league-failed-note');
+    const _anchor = document.getElementById('league-cap-note');
+    if (!_fn && _anchor && _anchor.parentNode) {
+      _fn = document.createElement('div');
+      _fn.id = 'league-failed-note';
+      _fn.style.cssText = 'display:none;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.45);border-radius:12px;padding:10px 16px;margin-bottom:14px;font-size:.85rem;line-height:1.5;';
+      _anchor.parentNode.insertBefore(_fn, _anchor);
+    }
+    if (_fn) {
+      if (_fm.length) {
+        const _names = _fm.slice(0, 6).map(x => _lgEsc(x.player_name || ('Team ' + x.entry_id))).join(', ') + (_fm.length > 6 ? ' and ' + (_fm.length - 6) + ' more' : '');
+        _fn.innerHTML = '<strong>' + _fm.length + ' of ' + (+data.n_members || (_fm.length + (data.standings || []).length)) + ' teams could not be loaded</strong> ('
+          + _names + '). They are left out of this simulation, so every chance here is among the '
+          + (data.standings || []).length + ' teams we loaded, not the whole league. Run it again to retry.';
+        _fn.style.display = 'block';
+      } else { _fn.style.display = 'none'; }
+    }
+  } catch (_eFm) {}
+   
   try {
     const _cn = document.getElementById('league-cap-note');
     if (_cn) {
@@ -21535,8 +21938,14 @@ function _lgLogRecord(leagueId, leagueName, data, nowMs) {
       entry_id: m.entry_id, name: m.player_name || '', team: m.entry_name || '',
       points: m.current_total || 0,
       top_pct: m.win_pct == null ? null : +m.win_pct,
-      win_pct: m.season_win_pct == null ? null : +m.season_win_pct,
+       
+       
+       
+      win_pct: m.season_win_pct != null ? +m.season_win_pct
+        : ((sg && hg && sg + hg - 1 >= 38 && m.win_pct != null) ? +m.win_pct : null),
     })),
+    n_members: (data && data.n_members != null) ? +data.n_members : st.length,    
+    n_failed: ((data && data.failed_managers) || []).length,
   };
 }
 function _lgLogMerge(log, rec) {
@@ -21694,7 +22103,7 @@ async function runLeagueSim() {
         const _primaryCorr = _leaguePrimaryCorrScale();
         data = await window.ApexSolver.runLeagueSim({
           leagueId: +leagueId, pool: POOL_DATA, startGw,
-          nSims: 10000, cv: 0.33, seed: 42, ceilings,
+          nSims: 10000, seed: 42, ceilings,    
           myEntryId: (typeof FPL_ID !== 'undefined' && FPL_ID) ? +FPL_ID : 0,    
           myName: (TEAM_META && TEAM_META.manager) || 'You', myTeam: (TEAM_META && TEAM_META.team_name) || '',
           corrScale: _primaryCorr,
@@ -21713,7 +22122,7 @@ async function runLeagueSim() {
             if (altLoadingEl) altLoadingEl.textContent = `Comparing models (Independent)…`;
             const altData = await window.ApexSolver.runLeagueSim({
               leagueId: +leagueId, pool: POOL_DATA, startGw,
-              nSims: 10000, cv: 0.33, seed: 42, ceilings,
+              nSims: 10000, seed: 42, ceilings,
           myEntryId: (typeof FPL_ID !== 'undefined' && FPL_ID) ? +FPL_ID : 0,    
           myName: (TEAM_META && TEAM_META.manager) || 'You', myTeam: (TEAM_META && TEAM_META.team_name) || '',
               corrScale: _altCorr,
@@ -31198,6 +31607,79 @@ function _apexPlannerSquad() {
 window._apexPlannerSquad = _apexPlannerSquad;
 
  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+function _apexChipPlannerArgs() {
+  const T = (typeof TEAM_META !== 'undefined' && TEAM_META) ? TEAM_META : {};
+  const mySquad = (typeof _apexPlannerSquad === 'function' ? _apexPlannerSquad() : null)
+    || ((typeof SQUAD_DATA !== 'undefined') ? SQUAD_DATA : []);
+  const gwRange = Array.isArray(T.gw_range) ? T.gw_range : [];
+  let ftNow = (typeof T.free_transfers === 'number' && isFinite(T.free_transfers)) ? T.free_transfers : 1;
+  let bank = (typeof T.bank === 'number' && isFinite(T.bank)) ? T.bank : 0;
+  try {
+    const seed = (typeof _apexPlanSeedsAt === 'function') ? _apexPlanSeedsAt(0) : null;
+    if (seed && typeof seed.ft === 'number' && isFinite(seed.ft)) ftNow = seed.ft;
+    if (seed && typeof seed.bank === 'number' && isFinite(seed.bank)) bank = seed.bank;
+  } catch (_eS) {}
+  const sellingPrices = {};
+  for (const p of (mySquad || [])) {
+    if (!p || p.id == null) continue;
+    let v = null;
+    try { if (typeof _apexSellPrice === 'function') v = +_apexSellPrice(p); } catch (_eP) { v = null; }
+    if (!(v > 0)) {
+      const sp = (T.selling_prices || {})[String(p.id)];
+      v = (sp != null && +sp > 0) ? +sp : +(p.cost || 0);
+    }
+    sellingPrices[p.id] = v;
+  }
+  const inPlay = (k) => {
+    try { return (typeof _apexChipInPlay === 'function') ? !!_apexChipInPlay(k) : true; }
+    catch (_eI) { return true; }
+  };
+  const on = (k) => {
+    try { return !!(typeof _activeChips === 'object' && _activeChips && _activeChips[k]) && inPlay(k); }
+    catch (_eA) { return false; }
+  };
+  const cp = (typeof CHIP_PLANNER !== 'undefined' && CHIP_PLANNER) ? CHIP_PLANNER : {};
+  const locks = (typeof _apexLockedChipIds === 'function') ? _apexLockedChipIds() : [];
+  const seedNames = (k) => (typeof _apexSeedLockNames === 'function') ? _apexSeedLockNames(k) : [];
+  return {
+    unlimitedFirstGw: (typeof _ppUnlimitedGw === 'function') ? !!_ppUnlimitedGw(0) : false,
+    pool: (typeof POOL_DATA !== 'undefined') ? POOL_DATA : [],
+    mySquad,
+    startGw: T.start_gw || (gwRange[0] || 1),
+    gwRange,
+    hasWc: on('wc'), hasFh: on('fh'), hasBb: on('bb'), hasTc: on('tc'),
+    budget: (T.budget != null) ? T.budget : 100.0,
+    bank,
+    sellingPrices,
+    freeTransfersNow: ftNow,
+    dgwTeamsByGw: T.dgw_teams_by_gw || {},
+    bgwTeamsByGw: T.bgw_teams_by_gw || {},
+    rotationRisk: cp.rotation_risk || {},
+    lockWcIds: locks.slice(),
+    lockFhIds: locks.slice(),
+    lockWcNames: seedNames('in'),
+    excludeWcNames: seedNames('out'),
+    presetParams: (typeof _presetParamsForSolve === 'function') ? _presetParamsForSolve() : undefined,
+    rankAware: (typeof _apexRankPresetsOn === 'function') ? !!_apexRankPresetsOn() : false,
+    riskMode: (typeof _activePreset !== 'undefined') ? _activePreset : 'balanced',
+  };
+}
+window._apexChipPlannerArgs = _apexChipPlannerArgs;
+
+ 
 function _apexRecordOwnedSquad() {
   try {
     if (_apexLiveIsFreeHit()) return false;           
@@ -32474,12 +32956,18 @@ function _ppChipEvAt(chipType, squad, gwIdx) {
     }
      
      
-    let ev = 0;
+     
+     
+     
+     
+     
+    let ev = null;
     try {
       const m = (typeof CHIP_PLANNER !== 'undefined' && CHIP_PLANNER && CHIP_PLANNER.wc_ev) || {};
       const v = parseFloat(m[String(gw)] != null ? m[String(gw)] : m[gw]);
       if (isFinite(v)) ev = v;
-    } catch (_e) {   }
+    } catch (_e) { ev = null; }
+    if (ev == null) return null;
     return { ev, gwXp: null, linkOut: true, noGain: !(ev > 0) };
   }
   return null;
@@ -32606,7 +33094,17 @@ function _ppInjectChipOptions(options, gwIdx) {
   if (!chipType) return options;
    
   if (_unlimitedWk && (chipType === 'WC' || chipType === 'FH')) return options;
-  const priced = _ppChipEvAt(chipType, _pathPlanner.workingSquad, gwIdx);
+  let priced = _ppChipEvAt(chipType, _pathPlanner.workingSquad, gwIdx);
+   
+   
+   
+   
+   
+   
+   
+  if (!priced && chipType === 'WC') {
+    priced = { ev: null, gwXp: null, linkOut: true, unpriced: true, noGain: true };
+  }
   if (!priced) return options;
   const roll = options.find(o => o.type === 'none');
    
@@ -32632,7 +33130,8 @@ function _ppInjectChipOptions(options, gwIdx) {
      
      
      
-    lookaheadEv: priced.ev + _chipFte + future,
+    lookaheadEv: priced.unpriced ? null : (priced.ev + _chipFte + future),
+    unpriced: !!priced.unpriced,    
     _ftEcon: _chipFte,
     futureEv: future,
     newSquad: _pathPlanner.workingSquad,
@@ -32648,7 +33147,7 @@ function _ppInjectChipOptions(options, gwIdx) {
      
     sameFifteen: !!priced.sameFifteen,
     noGain: (priced.noGain != null) ? !!priced.noGain : !(priced.ev > 0),
-    holdWeek: _ppNextBestChipWeek(chipType, gwIdx),
+    holdWeek: priced.unpriced ? null : _ppNextBestChipWeek(chipType, gwIdx),
   };
   if (chipType === 'WC' || chipType === 'FH') {
     const holdTx = options.find(o => o.type === 'one' && !(o.hitCost > 0));
@@ -35889,7 +36388,9 @@ async function _buildActiveCard(gwIdx) {
     } else if (opt.type === 'chip') {
        
       const _chipNames = { BB: 'Bench Boost', TC: 'Triple Captain', FH: 'Free Hit', WC: 'Wildcard' };
-      const _chipSub = opt.linkOut
+      const _chipSub = opt.unpriced
+        ? 'not priced yet · tap to run the Chip Planner, which prices it'    
+        : opt.linkOut
         ? 'opens the Wildcard review — squad rebuilt from this week'
         : (opt.chipType === 'FH' ? 'one-week squad swap · reverts after this GW'
         : (opt.chipType === 'BB' ? 'all 15 players score this week' : 'captain scores 3× this week'));
@@ -35983,7 +36484,13 @@ async function _buildActiveCard(gwIdx) {
      
     const _txNote = (Math.abs(_txCost) >= 0.05) ? ` \u00b7 transfers ${_signed(-_txCost)}` : '';
     let evDisplay;
-    if (opt.type === 'build') {
+    if (opt.type === 'chip' && opt.unpriced) {
+       
+      evDisplay = `<div class="pp-option-ev pp-ev-neutral">
+           <div class="pp-ev-num">—</div>
+           <div class="pp-ev-label">not priced yet · see the Chip Planner</div>
+         </div>`;
+    } else if (opt.type === 'build') {
       evDisplay = `<div class="pp-option-ev pp-ev-neutral">
            <div class="pp-ev-num">—</div>
            <div class="pp-ev-label">solved when you pick it</div>
@@ -40527,11 +41034,20 @@ function reorderXiBench() {
  
  
  
-function apexMinutesProbs(xm) {
+ 
+ 
+ 
+ 
+ 
+function apexMinutesProbs(xm, pos) {
   var x = Math.max(0, Math.min(+xm || 0, 90));
   var K = (typeof MINUTES_PROBS_KNOTS !== 'undefined' && MINUTES_PROBS_KNOTS) ? MINUTES_PROBS_KNOTS : null;
   var pAny, p60;
+  var _posKey = (pos == null || !isFinite(+pos)) ? null : String(Math.trunc(+pos));
   if (K && K.knots && K.knots.length && K.p_any && K.p_60) {
+    var _bp = (_posKey && K.by_pos && K.by_pos[_posKey]) ? K.by_pos[_posKey] : null;
+    var _pa = (_bp && _bp.p_any) ? _bp.p_any : K.p_any;
+    var _p6 = (_bp && _bp.p_60) ? _bp.p_60 : K.p_60;
     var at = function (vals) {
       var kn = K.knots;
       for (var i = 1; i < kn.length; i++) {
@@ -40543,7 +41059,7 @@ function apexMinutesProbs(xm) {
       }
       return vals[vals.length - 1];
     };
-    pAny = at(K.p_any); p60 = at(K.p_60);
+    pAny = at(_pa); p60 = at(_p6);
     var cap = K.cap && +K.cap.min_cameo_minutes;
     if (cap > 0) {
       var firstKnot = null;
@@ -40556,6 +41072,11 @@ function apexMinutesProbs(xm) {
   } else {
     pAny = x / 90;
     p60 = Math.min(Math.max(0, (x - 30) / 60), pAny);
+  }
+  var _gk = K && +K.gk_start_minutes;
+  if (_posKey === '1' && _gk > 0) {
+    pAny = Math.min(pAny, x / _gk);
+    p60 = Math.min(p60, pAny);
   }
   return { pAny: pAny, p60: p60 };
 }
@@ -41315,13 +41836,19 @@ function _apexRehydrateChipSquad(arr) {
     if (!e) continue;
     const p = POOL_DATA.find(q => q && q.id === e.id);
     if (!p) continue;
+     
+     
+     
+     
+     
+     
     for (const k of Object.keys(p)) {
       if (k === 'xp' || k === 'rolling_xp' || /_per_gw$/.test(k) || k === 'dgw_gw_idxs') {
         const v = p[k];
-        e[k] = Array.isArray(v) ? (/_per_gw$/.test(k) && hz ? v.slice(0, hz) : v.slice()) : v;
+        e[k] = Array.isArray(v) ? v.slice() : v;
       }
     }
-    if (Array.isArray(e.xp_per_gw)) e.rolling_xp = e.xp_per_gw.reduce((a, b) => a + (+b || 0), 0);
+    if (Array.isArray(e.xp_per_gw)) e.rolling_xp = e.xp_per_gw.slice(0, hz || e.xp_per_gw.length).reduce((a, b) => a + (+b || 0), 0);
   }
   return arr;
 }
@@ -41535,47 +42062,17 @@ async function _runChipPlannerJS() {
   if (!window.ApexSolver || typeof window.ApexSolver.computeChipPlanner !== 'function') {
     throw new Error('ApexSolver.computeChipPlanner unavailable');
   }
-  const data = await window.ApexSolver.computeChipPlanner({
-     
-     
-     
-     
-    unlimitedFirstGw: (typeof _ppUnlimitedGw === 'function') ? _ppUnlimitedGw(0) : false,
-    pool: POOL_DATA,
-     
-     
-     
-     
-     
-    mySquad: (typeof _apexPlannerSquad === 'function') ? _apexPlannerSquad() : SQUAD_DATA,
-    startGw: TEAM_META.start_gw,
-    gwRange: TEAM_META.gw_range,
-    hasWc: !!_activeChips.wc && _apexChipInPlay('wc'),    
-    hasFh: !!_activeChips.fh && _apexChipInPlay('fh'),
-    hasBb: !!_activeChips.bb && _apexChipInPlay('bb'),
-    hasTc: !!_activeChips.tc && _apexChipInPlay('tc'),
-    budget: TEAM_META.budget,
-    dgwTeamsByGw: TEAM_META.dgw_teams_by_gw || {},
-    bgwTeamsByGw: TEAM_META.bgw_teams_by_gw || {},
-    rotationRisk: CHIP_PLANNER.rotation_risk || {},
-     
-     
-     
-     
-     
-    lockWcIds: _apexLockedChipIds(),
-    lockFhIds: _apexLockedChipIds(),
-     
-    lockWcNames: _apexSeedLockNames('in'),
-    excludeWcNames: _apexSeedLockNames('out'),
-     
-    presetParams: (typeof _presetParamsForSolve === 'function')
-      ? _presetParamsForSolve() : undefined,
-     
-     
-    rankAware: (typeof _apexRankPresetsOn === 'function') ? _apexRankPresetsOn() : false,
-    riskMode: (typeof _activePreset !== 'undefined') ? _activePreset : 'balanced',
-  });
+   
+   
+   
+   
+   
+   
+   
+  if (typeof _apexChipPlannerArgs !== 'function') {
+    throw new Error('_apexChipPlannerArgs unavailable');
+  }
+  const data = await window.ApexSolver.computeChipPlanner(_apexChipPlannerArgs());
   _applyChipPlannerData(data);
   return data;
 }
@@ -41816,12 +42313,15 @@ function renderBaselineStrip() {
   if (_rad) {
     if (_rad.later_dgws && _rad.later_dgws.length) {
       const picks = _rad.later_dgws.slice(0, 2).map(d => 'GW' + d.gw + ' (' + d.teams.slice(0, 3).join(', ') + (d.teams.length > 3 ? ' +' + (d.teams.length - 3) + ' more' : '') + ')');
-      radarHtml += `<div style="margin-top:9px;font-size:.8rem;color:#f0b03a;font-weight:600;">Season radar: double gameweek${_rad.later_dgws.length > 1 ? 's' : ''} at ${picks.join(' and ')} — beyond this plan's window. Holding TC/BB for a double often beats using them now.</div>`;
-    } else {
-      radarHtml += `<div style="margin-top:9px;font-size:.8rem;color:var(--muted);">Season radar: no double gameweeks after GW${_rad.window_end} — using chips inside this plan is safe.</div>`;
+       
+      const _radWho = _rad.second_half_unlock ? 'the second-half TC/BB' : 'TC/BB';
+      radarHtml += `<div style="margin-top:9px;font-size:.8rem;color:#f0b03a;font-weight:600;">Season radar: double gameweek${_rad.later_dgws.length > 1 ? 's' : ''} at ${picks.join(' and ')} — beyond this plan's window. Holding ${_radWho} for a double often beats using them now.</div>`;
+    } else if (!(_rad.chip_last_gw && _rad.window_end >= _rad.chip_last_gw)) {
+       
+      radarHtml += `<div style="margin-top:9px;font-size:.8rem;color:var(--muted);">Season radar: no double gameweeks after GW${_rad.window_end}${_rad.chip_last_gw ? ' up to GW' + _rad.chip_last_gw + ', when these chips expire' : ''} — using chips inside this plan is safe.</div>`;
     }
     if (_rad.later_blanks && _rad.later_blanks.length) {
-      radarHtml += `<div style="margin-top:5px;font-size:.8rem;color:#f0b03a;">Blank gameweek at GW${_rad.later_blanks[0].gw} (${_rad.later_blanks[0].teams.length}+ teams without a fixture) — a Free Hit candidate beyond this window.</div>`;
+      radarHtml += `<div style="margin-top:5px;font-size:.8rem;color:#f0b03a;">Blank gameweek at GW${_rad.later_blanks[0].gw} (${_rad.later_blanks[0].teams.length}+ teams without a fixture) — a ${_rad.second_half_unlock ? 'second-half ' : ''}Free Hit candidate beyond this window.</div>`;
     }
     if (_rad.second_half_unlock) {
       radarHtml += `<div style="margin-top:5px;font-size:.8rem;color:var(--muted);">ℹ GW20 unlocks the second set of chips — chips used in the first half become available again.</div>`;
@@ -43756,11 +44256,12 @@ function _effectiveXmins(pid) {
  
  
  
-const _XM_SOLVER_PROBS = (m) => {
-  const xm = Math.max(0, Math.min(90, +m || 0));
-  const pAny = xm / 90;
-  return { pAny: pAny, p60: Math.min(Math.max(0, (xm - 30) / 60), pAny) };
-};
+ 
+ 
+ 
+ 
+ 
+const _XM_SOLVER_PROBS = (m, pos) => apexMinutesProbs(Math.max(0, Math.min(90, +m || 0)), pos);
 function _xmGamesInGw(pp, i) {
   try {
     const gw = TEAM_META.gw_range[i];
@@ -43806,9 +44307,11 @@ function _xmRecomputeDetail(pp, xmNew) {
     const m0raw = (i < xmArr.length && xmArr[i] != null) ? +xmArr[i] : baseScalar * games;
     const m0g = Math.max(0, Math.min(90, m0raw / games));
     if (m0g <= 0) return keep();               
-    const P0 = _XM_SOLVER_PROBS(m0g), Pn = _XM_SOLVER_PROBS(mn);
+    const P0 = _XM_SOLVER_PROBS(m0g, et), Pn = _XM_SOLVER_PROBS(mn, et);
     const r   = mn / m0g;
-    const r60 = P0.p60 > 0 ? Pn.p60 / P0.p60 : 0;
+     
+     
+    const r60 = P0.p60 > 0 ? Pn.p60 / P0.p60 : 1;
     const oldSum = app0 + g0 + a0 + cs0 + sv0 + bon0 + dc0 + card0;
     if (oldSum <= 0.005) {                     
       out.per_gw.push(+((xp0 * r).toFixed(2)));
@@ -44236,7 +44739,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW6</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1790187223-GW6-e94f7172</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1790197704-GW6-cff84c27</span>
 </footer>
 
 
