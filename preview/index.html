@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta name="apex-gw" content="6" data-built-at="2026-09-24T19:44:06Z">
+<link rel="icon" type="image/x-icon" href="/favicon.ico?v=4">
+<link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=4">
+<link rel="canonical" href="https://fplapex.com/">
+<meta name="robots" content="noindex,nofollow">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="FPL Apex">
+<meta property="og:url" content="https://fplapex.com/">
+<meta property="og:image" content="https://fplapex.com/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://fplapex.com/og-image.png">
+<script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SportsApplication",
+      "name": "FPL Apex",
+      "url": "https://fplapex.com/",
+      "description": "The FPL solver anchored to the sharp betting market. De-vigged prices converted into projected FPL points — transfers, captain and chip planning over a 10-gameweek horizon, with every projection scored in public.",
+      "applicationCategory": "SportsApplication",
+      "operatingSystem": "Web Browser",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "GBP" },
+      "creator": { "@type": "Organization", "name": "FPL Apex" },
+      "about": [
+        { "@type": "Thing", "name": "Premier League" },
+        { "@type": "Thing", "name": "Fantasy Premier League" },
+        { "@type": "Thing", "name": "Betting Markets" }
+      ]
+    }
+    </script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FPL Apex | Free FPL solver: transfers, captain and chips</title>
+<meta name="description" content="Free FPL solver. Enter your Team ID and get your transfers, captain and chips planned ten gameweeks ahead, from betting odds. Every projection scored in public.">
+<meta property="og:title" content="FPL Apex | Free FPL solver: transfers, captain and chips">
+<meta property="og:description" content="Free FPL solver. Enter your Team ID and get your transfers, captain and chips planned ten gameweeks ahead, from betting odds. Every projection scored in public.">
+<meta property="og:image:alt" content="FPL Apex, the free FPL solver">
+<meta name="twitter:title" content="FPL Apex | Free FPL solver: transfers, captain and chips">
+<meta name="twitter:description" content="Free FPL solver. Enter your Team ID and get your transfers, captain and chips planned ten gameweeks ahead, from betting odds. Every projection scored in public.">
+<meta name="twitter:site" content="@FPLAPEXHQ">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#F4F6F4;color:#0E1B16;font:400 16px/24px 'IBM Plex Sans',system-ui,sans-serif}
+a{color:#17774E}
+.w{max-width:1280px;margin:0 auto;padding:0 32px}
+.hd{background:#FFFFFF;border-bottom:1px solid #DCE2DE}
+.hd .w{height:72px;display:flex;align-items:center;gap:32px}
+.hd nav{display:flex;gap:4px;flex:1}
+.hd nav a{height:44px;padding:0 14px;display:flex;align-items:center;font-size:14px;font-weight:500;color:#0E1B16;text-decoration:none;border-radius:8px}
+.hd nav a:hover{background:#F4F6F4}
+.btn2{height:40px;padding:0 16px;display:inline-flex;align-items:center;border:1px solid #C9D2CD;border-radius:8px;font-size:14px;font-weight:500;color:#0E1B16;text-decoration:none;background:#FFFFFF}
+.lab{font-size:12px;line-height:16px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#5F6B65}
+.lab.g{color:#17774E}
+.hero{padding:80px 0 64px}
+.hero .w{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:56px;align-items:center}
+.hero h1{margin:16px 0 20px;font:700 68px/66px 'Barlow Condensed',sans-serif}
+.lead{margin:0 0 28px;font-size:20px;line-height:30px;color:#46534D;max-width:580px}
+.frm label{display:block;font-size:14px;font-weight:600;margin-bottom:8px}
+.frm .row{display:flex;gap:12px;max-width:540px}
+.frm input{flex:1;height:52px;padding:0 16px;border:1px solid #9AA8A1;border-radius:8px;font:inherit;background:#FFFFFF;min-width:0}
+.frm button{height:52px;padding:0 26px;border:0;border-radius:8px;background:#17774E;color:#FFFFFF;font:600 16px 'IBM Plex Sans',sans-serif;cursor:pointer}
+#apex-hero-err{color:#B42318;font-size:14px;font-weight:600;min-height:22px;margin-top:8px}
+.small{font-size:14px;line-height:20px;color:#5F6B65}
+.card{background:#FFFFFF;border:1px solid #DCE2DE;border-radius:16px}
+.get{padding:8px 24px}
+.get div{display:flex;gap:14px;align-items:flex-start;padding:16px 0;border-top:1px solid #DCE2DE}
+.get div:first-child{border-top:0}
+.get b{display:block;font-size:16px}
+.get span{font-size:14px;line-height:20px;color:#46534D}
+.get svg{flex:none;margin-top:2px}
+.proof{background:#0E1B16;color:#FFFFFF;border-radius:16px;padding:40px 48px;display:grid;grid-template-columns:minmax(0,4fr) minmax(0,7fr);gap:40px;align-items:center}
+.proof .lab{color:#9FB1A8}
+.proof h2{margin:10px 0;font:600 28px/32px 'Barlow Condensed',sans-serif}
+.proof a{color:#7FD6AE;font-size:14px}
+.nums{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}
+.num{font:700 44px/46px 'Barlow Condensed',sans-serif}
+.num.m{color:#C3D0C9}
+.nums span{display:block;font-size:14px;line-height:20px;color:#C3D0C9}
+.sec{padding:64px 0 0}
+.sec h2{margin:0 0 24px;font:600 28px/32px 'Barlow Condensed',sans-serif}
+.steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-top:2px solid #0E1B16}
+.steps div{padding:24px 32px 0 0}
+.steps i{font:normal 700 20px 'Barlow Condensed',sans-serif;color:#17774E}
+.steps b{display:block;font-size:20px;line-height:28px;margin:8px 0}
+.steps p{margin:0;color:#46534D}
+.ml{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:40px;align-items:center}
+.ml h2{font:600 44px/46px 'Barlow Condensed',sans-serif;margin:12px 0 16px}
+.btn{height:48px;padding:0 24px;display:inline-flex;align-items:center;border-radius:8px;background:#17774E;color:#FFFFFF;text-decoration:none;font-weight:600}
+.mlbox{padding:28px;display:flex;flex-direction:column;gap:14px}
+.mlbox div{display:flex;gap:12px;align-items:center;font-size:16px}
+.mlbox svg{flex:none}
+.bandwrap{margin-top:64px}
+.about{margin-top:64px;border-top:1px solid #DCE2DE;padding:40px 0;display:flex;gap:24px;align-items:center;justify-content:space-between}
+.about b{display:block;font-size:20px;line-height:28px}
+.about span{color:#46534D}
+.ft{background:#FFFFFF;border-top:1px solid #DCE2DE}
+.ft .w{padding-top:24px;padding-bottom:24px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:14px;color:#5F6B65}
+.ft a{color:#46534D;margin-left:20px}
+@media (max-width:900px){
+ .w{padding:0 16px}
+ .hd nav{display:none}
+ .hero{padding:32px 0}
+ .hero .w{grid-template-columns:1fr;gap:32px}
+ .hero h1{font-size:44px;line-height:44px}
+ .lead{font-size:16px;line-height:24px}
+ .frm .row{flex-direction:column}
+ .frm input{flex:none;width:100%}
+ .proof{grid-template-columns:1fr;padding:24px;gap:20px}
+ .nums{grid-template-columns:1fr 1fr}
+ .steps,.ml{grid-template-columns:1fr}
+ .steps div{padding:20px 0 0}
+ .ml h2{font-size:28px;line-height:32px}
+ .about{flex-direction:column;align-items:flex-start}
+ .ft a{margin:0 16px 0 0;line-height:44px}
+}
+</style>
+<style id="apex-ui-v2">:root{--apex-ui:v2}body{font-variant-numeric:tabular-nums}h1,h2,.va-team-name{font-family:'Barlow Condensed','IBM Plex Sans',sans-serif !important;letter-spacing:0 !important}:focus-visible{outline:3px solid #F2B632 !important;outline-offset:2px !important}.apex-logo-v2{display:inline-flex;align-items:center;gap:7px;color:#0E1B16;text-decoration:none;white-space:nowrap}.apex-logo-v2-fpl{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:14px;color:#5F6B65;letter-spacing:.06em}.apex-logo-v2-apex{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:22px;letter-spacing:.04em;margin-left:-2px}</style></head>
+<body>
+<header class="hd"><div class="w">
+<a href="/preview/" style="text-decoration:none"><span class="apex-logo-v2" aria-label="FPL Apex"><svg width="24" height="21" viewBox="0 0 30 26" aria-hidden="true"><path d="M1 25 L15 1 L29 25 H20.5 L15 15.5 L9.5 25 Z" fill="#17774E"></path></svg><span class="apex-logo-v2-fpl">FPL</span><span class="apex-logo-v2-apex">APEX</span></span></a>
+<nav aria-label="Main">
+<a href="#solve">Solver</a>
+<a href="/preview/evaluation.html">Model scorecard</a>
+<a href="/preview/leaders.html">Leaders</a>
+</nav>
+<a class="btn2" href="https://x.com/FPLApexHQ" target="_blank" rel="noopener">Follow @FPLAPEXHQ</a>
+</div></header>
+
+<main>
+<section class="hero"><div class="w">
+<div>
+<div class="lab g">Free FPL solver &middot; 2026/27</div>
+<h1>Your transfers, captain and chips, planned ten weeks ahead.</h1>
+<p class="lead">Enter your Team ID. FPL Apex projects every player's points from the betting odds and works out your best moves. No signup, free all season.</p>
+<div class="frm" id="solve">
+<label for="apex-hero-fplid">Your FPL Team ID</label>
+<div class="row">
+<input id="apex-hero-fplid" inputmode="numeric" autocomplete="off" placeholder="e.g. 1234567" aria-label="Your FPL Team ID">
+<button id="apex-hero-go" type="button" onclick="apexHeroSolve()">Solve my team</button>
+</div>
+<div id="apex-hero-err" role="alert"></div>
+<a class="small" href="https://fantasy.premierleague.com/my-team" target="_blank" rel="noopener">Where do I find my Team ID? It is the number in the address of your Points page.</a>
+</div>
+</div>
+<div class="card get" aria-label="What you get">
+<div><svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><circle cx="11" cy="11" r="10" fill="#E6F2EC"></circle><path d="M6.5 11.5 L9.5 14.5 L15.5 8" stroke="#17774E" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg><p style="margin:0"><b>Your transfers, week by week</b><span>The plan with the most points over the next ten gameweeks, plus a safer and a bolder one.</span></p></div>
+<div><svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><circle cx="11" cy="11" r="10" fill="#E6F2EC"></circle><path d="M6.5 11.5 L9.5 14.5 L15.5 8" stroke="#17774E" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg><p style="margin:0"><b>Captain and bench order</b><span>Who to captain, who to start, who sits.</span></p></div>
+<div><svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><circle cx="11" cy="11" r="10" fill="#E6F2EC"></circle><path d="M6.5 11.5 L9.5 14.5 L15.5 8" stroke="#17774E" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg><p style="margin:0"><b>When to play your chips</b><span>Wildcard, Bench Boost, Triple Captain and Free Hit, priced week by week.</span></p></div>
+<div><svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><circle cx="11" cy="11" r="10" fill="#E6F2EC"></circle><path d="M6.5 11.5 L9.5 14.5 L15.5 8" stroke="#17774E" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg><p style="margin:0"><b>Your mini league odds</b><span>Your chance of finishing top, and the players that decide it.</span></p></div>
+</div>
+</div></section>
+
+<div class="w">
+<section class="proof" aria-label="Accuracy">
+<div>
+<div class="lab">Scored in public, every week</div>
+<h2>Every projection saved before the deadline, then scored against what happened.</h2>
+<a href="/preview/evaluation.html">See every gameweek's score</a>
+</div>
+<div class="nums">
+<div><div class="num">2.68</div><span>FPL Apex: average miss per pick, in points</span></div>
+<div><div class="num m">2.68</div><span>Paid tool A, same players, same weeks</span></div>
+<div><div class="num m">2.69</div><span>Tool B, same players, same weeks</span></div>
+</div>
+</section>
+<p class="small" style="margin:12px 0 0">Lower is closer. 352 player projections over 5 gameweeks, players owned by 5% or more of managers.</p>
+
+<section class="sec" aria-labelledby="how">
+<h2 id="how">How it works</h2>
+<div class="steps">
+<div><i>01</i><b>Odds become goals</b><p>Bookmakers already price every match. We take their odds, remove their margin, and read off how many goals each team should score and concede.</p></div>
+<div><i>02</i><b>Goals become player points</b><p>Each team's goals are shared among its players by minutes, shots and chances created, then scored with FPL's own rules, bonus included.</p></div>
+<div><i>03</i><b>Points become your moves</b><p>The solver finds the best legal squad for each of the next ten weeks and shows the plan with the most points, plus a safer and a bolder option.</p></div>
+</div>
+</section>
+
+<section class="sec ml" aria-labelledby="mlh">
+<div>
+<div class="lab g">Only on FPL Apex</div>
+<h2 id="mlh">Your chance of winning your mini league.</h2>
+<p style="margin:0 0 24px;color:#46534D">We play the rest of the season thousands of times for every manager in your league, chips included, and show who is most likely to finish top. Then we show the players that decide it.</p>
+<a class="btn" href="#solve" onclick="var i=document.getElementById('apex-hero-fplid');if(i){i.focus();}">Enter your Team ID to start</a>
+</div>
+<div class="card mlbox">
+<div><svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><circle cx="11" cy="11" r="10" fill="#E6F2EC"></circle><path d="M6.5 11.5 L9.5 14.5 L15.5 8" stroke="#17774E" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg>Chance of being top after each gameweek, and at GW38</div>
+<div><svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><circle cx="11" cy="11" r="10" fill="#E6F2EC"></circle><path d="M6.5 11.5 L9.5 14.5 L15.5 8" stroke="#17774E" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg>Chips each rival still holds</div>
+<div><svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><circle cx="11" cy="11" r="10" fill="#E6F2EC"></circle><path d="M6.5 11.5 L9.5 14.5 L15.5 8" stroke="#17774E" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg>Head to head with one rival: the players that decide it</div>
+</div>
+</section>
+</div>
+
+<div class="bandwrap">
+
+    <section style="background:#F4F6F4;padding:46px 20px 54px;font-family:'IBM Plex Sans',sans-serif;">
+      <div style="max-width:1240px;margin:0 auto;">
+        <div style="display:flex;align-items:center;gap:14px;">
+          <svg width="44" height="38" viewBox="0 0 30 26" aria-hidden="true"><path d="M1 25 L15 1 L29 25 H20.5 L15 15.5 L9.5 25 Z" fill="#17774E"></path></svg>
+          <div>
+            <div style="font-weight:800;color:#0E1B16;font-size:28px;line-height:1.1;">This week's Apex leaders</div>
+            <div style="color:#17774E;font-size:13px;font-weight:700;letter-spacing:1.5px;margin-top:4px;">GW5 &middot; OPTA DATA &middot; UPDATED 24 SEP</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:24px;">
+          <img src="/leaders/gw_xg.png?v=gw5-1790203244" alt="Apex leaders card: top xG" style="width:100%;border-radius:12px;display:block;box-shadow:none;">
+          <img src="/leaders/gw_xa.png?v=gw5-1790203244" alt="Apex leaders card: top creator (xA)" style="width:100%;border-radius:12px;display:block;box-shadow:none;">
+          <img src="/leaders/gw_defcon.png?v=gw5-1790203244" alt="Apex leaders card: top defensive contribution" style="width:100%;border-radius:12px;display:block;box-shadow:none;">
+          <img src="/leaders/gw_gk.png?v=gw5-1790203244" alt="Apex leaders card: top goalkeeper" style="width:100%;border-radius:12px;display:block;box-shadow:none;">
+        </div>
+        <style>
+#apex-leaders-tables{margin-top:26px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(420px,100%),1fr));gap:18px;font-family:'IBM Plex Sans',system-ui,sans-serif}
+#apex-leaders-tables h2{font-size:17px;font-weight:800;color:#0E1B16;margin:0 0 2px}
+#apex-leaders-tables .note{color:#5F6B65;font-size:12px;font-weight:600;margin-bottom:8px}
+#apex-leaders-tables table{width:100%;border-collapse:collapse;background:#fff;border:1px solid #DCE2DE;border-radius:12px;overflow:hidden;font-size:.82rem}
+#apex-leaders-tables th{background:#F4F6F4;color:#5F6B65;text-align:left;padding:7px 9px;font-size:.7rem;letter-spacing:.06em;text-transform:uppercase}
+#apex-leaders-tables td{padding:6px 9px;border-top:1px solid #E9EDEA;color:#0E1B16}
+#apex-leaders-tables td.r{color:#5F6B65;font-weight:700;width:26px}
+#apex-leaders-tables td.n{font-weight:700}
+#apex-leaders-tables td.v{color:#17774E;font-weight:800}
+</style><div id="apex-leaders-tables"><div><h2>Top xG — season</h2><div class="note">GW1–GW5 · all positions</div><table><tr><th></th><th>Player</th><th>xG</th><th>Goals</th></tr><tr><td class="r">1</td><td class="n">Haaland (FWD)</td><td class="v">4.42</td><td>5</td></tr><tr><td class="r">2</td><td class="n">Isak (FWD)</td><td class="v">3.54</td><td>4</td></tr><tr><td class="r">3</td><td class="n">Barry (FWD)</td><td class="v">3.50</td><td>2</td></tr><tr><td class="r">4</td><td class="n">Saka (MID)</td><td class="v">3.22</td><td>3</td></tr><tr><td class="r">5</td><td class="n">Thiago (FWD)</td><td class="v">3.13</td><td>1</td></tr><tr><td class="r">6</td><td class="n">Mbeumo (MID)</td><td class="v">3.07</td><td>2</td></tr><tr><td class="r">7</td><td class="n">Calvert-Lewin (FWD)</td><td class="v">3.00</td><td>2</td></tr><tr><td class="r">8</td><td class="n">Brobbey (FWD)</td><td class="v">2.94</td><td>3</td></tr><tr><td class="r">9</td><td class="n">B.Fernandes (MID)</td><td class="v">2.56</td><td>3</td></tr><tr><td class="r">10</td><td class="n">Wissa (FWD)</td><td class="v">2.35</td><td>1</td></tr></table></div><div><h2>Top creators — season</h2><div class="note">GW1–GW5 · expected assists</div><table><tr><th></th><th>Player</th><th>xA</th><th>Assists</th></tr><tr><td class="r">1</td><td class="n">Gakpo (MID)</td><td class="v">1.71</td><td>3</td></tr><tr><td class="r">2</td><td class="n">Cherki (MID)</td><td class="v">1.54</td><td>2</td></tr><tr><td class="r">3</td><td class="n">Gibbs-White (MID)</td><td class="v">1.42</td><td>2</td></tr><tr><td class="r">4</td><td class="n">E.Le Fée (MID)</td><td class="v">1.34</td><td>1</td></tr><tr><td class="r">5</td><td class="n">Ødegaard (MID)</td><td class="v">1.32</td><td>0</td></tr><tr><td class="r">6</td><td class="n">B.Fernandes (MID)</td><td class="v">1.32</td><td>1</td></tr><tr><td class="r">7</td><td class="n">Xhaka (MID)</td><td class="v">1.32</td><td>1</td></tr><tr><td class="r">8</td><td class="n">Rogers (MID)</td><td class="v">1.23</td><td>1</td></tr><tr><td class="r">9</td><td class="n">Iwobi (MID)</td><td class="v">1.22</td><td>0</td></tr><tr><td class="r">10</td><td class="n">Semenyo (MID)</td><td class="v">1.16</td><td>3</td></tr></table></div><div><h2>Defensive contribution — season</h2><div class="note">GW1–GW5 · all outfielders · defenders: tackles + CBI; others add recoveries</div><table><tr><th></th><th>Player</th><th>DefCon</th><th>Tackles</th></tr><tr><td class="r">1</td><td class="n">Janelt (MID)</td><td class="v">64</td><td>17</td></tr><tr><td class="r">2</td><td class="n">Stach (MID)</td><td class="v">61</td><td>13</td></tr><tr><td class="r">3</td><td class="n">Scott (MID)</td><td class="v">60</td><td>9</td></tr><tr><td class="r">4</td><td class="n">Ampadu (MID)</td><td class="v">60</td><td>12</td></tr><tr><td class="r">5</td><td class="n">Bentancur (MID)</td><td class="v">60</td><td>15</td></tr><tr><td class="r">6</td><td class="n">Egan (DEF)</td><td class="v">59</td><td>9</td></tr><tr><td class="r">7</td><td class="n">Botman (DEF)</td><td class="v">59</td><td>5</td></tr><tr><td class="r">8</td><td class="n">Muharemović (DEF)</td><td class="v">58</td><td>5</td></tr><tr><td class="r">9</td><td class="n">Mainoo (MID)</td><td class="v">56</td><td>6</td></tr><tr><td class="r">10</td><td class="n">Silva (DEF)</td><td class="v">56</td><td>5</td></tr></table></div><div><h2>Goalkeepers — season</h2><div class="note">GW1–GW5 · goals prevented</div><table><tr><th></th><th>Keeper</th><th>Prevented</th><th>Saves</th></tr><tr><td class="r">1</td><td class="n">Pickford (GK)</td><td class="v">3.94</td><td>15</td></tr><tr><td class="r">2</td><td class="n">Verbruggen (GK)</td><td class="v">3.67</td><td>12</td></tr><tr><td class="r">3</td><td class="n">Trafford (GK)</td><td class="v">3.46</td><td>20</td></tr><tr><td class="r">4</td><td class="n">Tzolakis (GK)</td><td class="v">3.40</td><td>17</td></tr><tr><td class="r">5</td><td class="n">Kelleher (GK)</td><td class="v">2.32</td><td>17</td></tr><tr><td class="r">6</td><td class="n">Donnarumma (GK)</td><td class="v">2.25</td><td>14</td></tr><tr><td class="r">7</td><td class="n">A.Becker (GK)</td><td class="v">2.12</td><td>14</td></tr><tr><td class="r">8</td><td class="n">Leno (GK)</td><td class="v">1.11</td><td>16</td></tr><tr><td class="r">9</td><td class="n">Suzuki (GK)</td><td class="v">0.45</td><td>15</td></tr><tr><td class="r">10</td><td class="n">Horníček (GK)</td><td class="v">0.14</td><td>19</td></tr></table></div></div>
+        <div style="margin-top:18px;text-align:right;">
+          <a href="/preview/leaders.html" style="color:#17774E;font-weight:800;font-size:15px;text-decoration:none;">See the full top-20 tables &rarr;</a>
+        </div>
+      </div>
+    </section>
+</div>
+
+<div class="w">
+<section class="about" aria-label="About">
+<div><b>Made by Marcus at Apex Footy Data</b><span>One model, every number scored in public. Weekly scorecard and model notes on X.</span></div>
+<a class="btn2" href="https://x.com/FPLApexHQ" target="_blank" rel="noopener">@FPLAPEXHQ on X</a>
+</section>
+</div>
+</main>
+
+<footer class="ft"><div class="w">
+<span>&copy; 2026 FPL Apex. Not affiliated with the Premier League or FPL.</span>
+<span><a href="/preview/evaluation.html">Model scorecard</a><a href="/preview/privacy.html">Privacy</a><a href="mailto:contact@fplapex.com">Contact</a></span>
+</div></footer>
+
+<div class="tab-nav" style="display:none" aria-hidden="true"></div>
+<script>function showTab() {}</script>
+<script>
+            function apexHeroSolve() {
+                var el = document.getElementById('apex-hero-fplid');
+                var err = document.getElementById('apex-hero-err');
+                var raw = (el.value || '').trim();
+                if (!raw) { err.textContent = 'Enter your FPL Team ID to continue.'; el.focus(); return; }
+                if (!/^\d+$/.test(raw)) { err.textContent = 'Team ID must be numeric.'; el.focus(); return; }
+                var id = parseInt(raw, 10);
+                if (id < 1 || id > 20000000) { err.textContent = 'That doesn\'t look like a valid Team ID.'; el.focus(); return; }
+                window.location.href = 'solver_app.html?id=' + id;
+            }
+            (function () {
+                var el = document.getElementById('apex-hero-fplid');
+                if (!el) return;
+                el.addEventListener('keydown', function (e) { if (e.key === 'Enter') apexHeroSolve(); });
+                el.addEventListener('input', function () { var er = document.getElementById('apex-hero-err'); if (er) er.textContent = ''; });
+            })();
+             
+             
+             
+             
+             
+             
+             
+             
+             
+             
+             
+             
+             
+            (function () {
+                var input = document.getElementById('apex-hero-fplid');
+                if (!input) return;
+                var ids = [];
+                try {
+                    var raw = JSON.parse(localStorage.getItem('apex_recent_ids_v1') || '[]');
+                    if (Array.isArray(raw)) {
+                        raw.forEach(function (r) {
+                            var v = (r && typeof r === 'object') ? r.id : r;
+                            if (/^[0-9]+$/.test(String(v)) && +v >= 1 && +v <= 20000000
+                                && ids.indexOf(String(+v)) < 0) ids.push(String(+v));
+                        });
+                    }
+                } catch (e) { ids = []; }
+                if (!ids.length) return;           
+                var dl = document.createElement('datalist');
+                dl.id = 'apex-recent-list';
+                ids.forEach(function (v) {
+                    var o = document.createElement('option');
+                    o.value = v;
+                    dl.appendChild(o);
+                });
+                document.body.appendChild(dl);
+                input.setAttribute('list', 'apex-recent-list');
+            })();
+            </script>
+<script>
+(function(){var K="apex_notrack";try{var q=window.location.search||"";
+if(q.indexOf("notrack=1")>-1){localStorage.setItem(K,"1");}
+else if(q.indexOf("notrack=0")>-1){localStorage.removeItem(K);}
+if(localStorage.getItem(K)==="1"){return;}}catch(e){}
+var s=document.createElement("script");s.defer=true;
+s.src="https://static.cloudflareinsights.com/beacon.min.js";
+s.setAttribute("data-cf-beacon",'{"token": "890700f621df42909deca8500a0df182"}');
+(document.head||document.documentElement).appendChild(s);})();
+</script>
+<a href="https://fplapex.com/" id="apex-ui-v2-badge" style="position:fixed;left:12px;bottom:12px;z-index:2147483000;background:#0E1B16;color:#FFFFFF;font:600 13px/1 'IBM Plex Sans',sans-serif;padding:10px 14px;border-radius:8px;text-decoration:none;box-shadow:0 6px 18px rgba(0,0,0,.2)">Preview of the new look. Live site unchanged &rarr;</a></body>
+</html>
