@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head><script>document.documentElement.classList.add('apx2')</script>
-<meta name="apex-gw" content="6" data-built-at="2026-09-24T22:30:00Z">
+<meta name="apex-gw" content="6" data-built-at="2026-09-24T22:49:15Z">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script> try{if(/iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1)){var _vpm=document.querySelector('meta[name=viewport]');if(_vpm)_vpm.setAttribute('content','width=device-width, initial-scale=1.0, maximum-scale=1.0');}}catch(_eVp){}</script>
@@ -37,7 +37,7 @@
 })();
 </script>
 <meta http-equiv="Pragma" content="no-cache">
-<meta name="apex-build" content="20260924-222959Z">
+<meta name="apex-build" content="20260924-224914Z">
 <script> window.APEX_FT_VALUE = 1.5;</script>
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — FPL Apex</title>
 <meta name="description" content="Plan FPL transfers, chips, and Free Hit squads. Live xG-based projections, a rival head-to-head simulator, and a mini-league table. Free FPL tool.">
@@ -6445,6 +6445,85 @@ html.apx2 #pp-list-toggle{display:none !important}
 
 html.apx2 #view-league main.container > #apx2-lg-top{background:transparent !important;border:0 !important;box-shadow:none !important;padding:0 !important;align-items:flex-end !important}
 html.apx2 #view-league main.container:has(#apx2-noleague) #league-status{display:none !important}
+
+html.apx2 #view-team.show-transfers > main.container.apx2-tx{display:grid !important;grid-template-columns:repeat(12,minmax(0,1fr)) !important;column-gap:16px !important;row-gap:16px !important;align-items:start !important;padding-top:28px !important;padding-bottom:40px !important;font-family:'IBM Plex Sans',sans-serif}
+html.apx2 .apx2-tx > *{grid-column:1 / -1;margin:0 !important;min-width:0}
+html.apx2 .apx2-tx .apx2-hide{display:none !important}
+#apx2-tx-top{display:flex;justify-content:space-between;align-items:flex-end;gap:16px}
+#apx2-tx-top h1{margin:0;font:600 28px/32px 'Barlow Condensed',sans-serif;color:#0E1B16}
+#apx2-tx-top p{margin:4px 0 0;font-size:14px;color:#46534D}
+#apx2-tx-top .apx2-open{height:44px;padding:0 18px;border:0;border-radius:8px;background:#17774E;color:#FFFFFF;font:600 16px 'IBM Plex Sans',sans-serif;cursor:pointer}
+html.apx2 .apx2-tx #transfer-paths-section,html.apx2 .apx2-tx #transfer-paths-body{background:transparent !important;border:0 !important;padding:0 !important;box-shadow:none !important;margin:0 !important}
+html.apx2 .apx2-tx #transfer-paths-body > .section-title,html.apx2 .apx2-tx #transfer-paths-body > p.muted,html.apx2 .apx2-tx #transfer-paths-body > p:has(.txp-tree-link){display:none !important}
+html.apx2 .apx2-tx .apx2-routes{display:grid !important;grid-template-columns:repeat(3,minmax(0,1fr)) !important;gap:16px !important;margin:0 !important}
+html.apx2 .apx2-tx .apx2-rt{background:#FFFFFF !important;border:1px solid #DCE2DE !important;border-radius:14px !important;padding:20px !important;display:flex !important;flex-direction:column !important;gap:0 !important;box-shadow:none !important;width:auto !important;box-sizing:border-box}
+html.apx2 .apx2-tx .apx2-rt.best{border-color:#17774E !important}
+html.apx2 .apx2-tx .apx2-rt > .apx2-tag{align-self:flex-start;height:26px !important;padding:0 10px !important;border-radius:999px !important;background:#F4F6F4 !important;color:#46534D !important;font:600 12px/26px 'IBM Plex Sans',sans-serif !important;letter-spacing:.06em !important;text-transform:uppercase !important;border:0 !important;margin:0 0 -26px !important}
+html.apx2 .apx2-tx .apx2-rt.best > .apx2-tag{background:#17774E !important;color:#FFFFFF !important}
+html.apx2 .apx2-tx .apx2-rt > .apx2-rsub{align-self:flex-end;font-size:12px;line-height:26px;color:#5F6B65;margin-bottom:12px}
+html.apx2 .apx2-tx .apx2-wk{display:grid !important;grid-template-columns:48px minmax(0,1fr) !important;gap:8px !important;font-size:14px !important;line-height:20px !important;border-top:1px solid #DCE2DE !important;padding:8px 0 !important;margin:0 !important;color:#0E1B16 !important}
+html.apx2 .apx2-tx .apx2-wk > span:first-child{font-weight:700 !important;color:#5F6B65 !important;font-size:14px !important;background:none !important;padding:0 !important;width:auto !important}
+html.apx2 .apx2-tx .apx2-wk b{font-weight:600 !important;color:#0E1B16 !important}
+html.apx2 .apx2-tx .apx2-wk span span{font-size:12px !important;color:#5F6B65 !important}
+html.apx2 .apx2-tx .apx2-tot{display:flex !important;justify-content:space-between !important;align-items:baseline !important;border-top:1px solid #DCE2DE !important;padding:10px 0 4px !important;margin:0 !important}
+html.apx2 .apx2-tx .apx2-tot > span{font:600 12px 'IBM Plex Sans',sans-serif !important;letter-spacing:.08em !important;text-transform:uppercase !important;color:#5F6B65 !important}
+html.apx2 .apx2-tx .apx2-tot > b{font:700 28px/30px 'Barlow Condensed',sans-serif !important;color:#17774E !important}
+html.apx2 .apx2-tx .apx2-note{font-size:12px !important;line-height:16px !important;color:#5F6B65 !important;margin:8px 0 0 !important;padding:0 !important;background:none !important;border:0 !important}
+#apx2-tx-foot{margin:12px 0 0;font-size:12px;line-height:16px;color:#5F6B65}
+html.apx2 #view-team.show-transfers > main.apx2-tx > #transfers-section:not([style*="none"]){display:contents !important}
+html.apx2 .apx2-tx #apex-tree-verdict{grid-column:1 / span 7;grid-row:3}
+html.apx2 .apx2-tx .apx2-planrow{grid-column:1 / span 7;grid-row:4}
+html.apx2 .apx2-tx #sensitivity-section{grid-column:8 / -1;grid-row:3 / span 2;align-self:stretch;background:#FFFFFF;border:1px solid #DCE2DE;border-radius:14px;padding:20px;display:flex;flex-wrap:wrap;align-items:flex-start;gap:10px;box-sizing:border-box}
+html.apx2 .apx2-tx #sensitivity-section:not(:has(#apx2-st-h)){display:none}
+#apx2-st-h{flex:1 1 60%}
+#apx2-st-h h2,#apx2-swaps-h h2{margin:0;font:600 20px/28px 'IBM Plex Sans',sans-serif;color:#0E1B16}
+#apx2-st-h p{margin:10px 0 0;font-size:14px;line-height:20px;color:#46534D}
+html.apx2 #sensitivity-btn{height:36px !important;padding:0 12px !important;border:1px solid #C9D2CD !important;border-radius:8px !important;background:#FFFFFF !important;color:#0E1B16 !important;font:500 14px 'IBM Plex Sans',sans-serif !important;box-shadow:none !important;margin:0 !important}
+html.apx2 #sensitivity-body{flex:1 1 100%;font-size:14px;color:#46534D}
+html.apx2 .apx2-tx #apex-tree-verdict > div{background:#FFFFFF !important;border:1px solid #DCE2DE !important;border-bottom:0 !important;border-radius:14px 14px 0 0 !important;padding:20px 20px 12px !important;box-shadow:none !important;margin:0 !important}
+html.apx2 .apx2-tx #apex-tree-verdict > div > div:first-child{display:grid !important;grid-template-columns:1fr auto;row-gap:10px;align-items:center;margin:0 0 10px !important;font:inherit !important;color:#0E1B16 !important}
+html.apx2 .apx2-tx #apex-tree-verdict .lb{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#5F6B65}
+html.apx2 .apx2-tx #apex-tree-verdict .pill{justify-self:end;height:28px;padding:0 10px;display:inline-flex;align-items:center;border-radius:999px;background:#E6F2EC;color:#0D4A31;font-size:12px;font-weight:600}
+html.apx2 .apx2-tx #apex-tree-verdict b{grid-column:1 / -1;font-size:20px;line-height:28px;font-weight:600}
+html.apx2 .apx2-tx #apex-tree-verdict > div > div:nth-child(2){font-size:16px !important;line-height:24px !important;color:#46534D !important}
+html.apx2 .apx2-tx #apex-tree-verdict > div > div:nth-child(2) strong{color:#0E1B16 !important}
+html.apx2 .apx2-tx .apx2-planrow{background:#FFFFFF !important;border:1px solid #DCE2DE !important;border-top:0 !important;border-radius:0 0 14px 14px !important;margin-top:-16px !important;padding:0 20px 18px !important;display:flex !important;align-items:center !important;gap:28px !important;flex-wrap:wrap !important;box-shadow:none !important;font-size:14px !important;color:#5F6B65 !important}
+html.apx2 .apx2-tx .apx2-planrow::before{content:"";flex:1 0 100%;border-top:1px solid #DCE2DE;margin-bottom:-18px}
+html.apx2 .apx2-tx .apx2-planrow span{background:none !important;border:0 !important;padding:0 !important;color:#5F6B65 !important;font-size:14px !important}
+html.apx2 .apx2-tx .apx2-planrow strong{font:700 20px 'Barlow Condensed',sans-serif !important;color:#0E1B16 !important;margin-left:4px}
+html.apx2 .apx2-tx .apx2-planrow button{margin-left:auto !important;height:36px !important;padding:0 12px !important;border:1px solid #C9D2CD !important;border-radius:8px !important;background:#FFFFFF !important;color:#0E1B16 !important;font:500 14px 'IBM Plex Sans',sans-serif !important;box-shadow:none !important}
+#apx2-swaps-h{display:flex;justify-content:space-between;align-items:baseline;grid-column:1 / -1;margin-top:8px !important}
+#apx2-swaps-h span{font-size:12px;color:#5F6B65}
+html.apx2 .apx2-tx .apx2-swaps{grid-column:1 / -1 !important;background:#FFFFFF !important;border:1px solid #DCE2DE !important;border-radius:14px !important;padding:4px 20px !important;box-shadow:none !important}
+html.apx2 .apx2-tx .apx2-swaps > p{margin:14px 0 !important;font-size:14px !important;color:#46534D !important;text-align:left !important;background:none !important;border:0 !important;padding:0 !important}
+html.apx2 .apx2-tx .apx2-swaps .transfer-row{background:transparent !important;border:0 !important;border-top:1px solid #DCE2DE !important;border-radius:0 !important;box-shadow:none !important;padding:12px 0 !important;margin:0 !important}
+html.apx2 .apx2-tx .apx2-swaps .transfer-row:first-child{border-top:0 !important}
+html.apx2 .apx2-tx .apx2-swaps .name{font:600 16px 'IBM Plex Sans',sans-serif !important;color:#0E1B16 !important}
+html.apx2 .apx2-tx .apx2-swaps .swap-out .name{color:#5F6B65 !important;text-decoration:line-through}
+html.apx2 .apx2-tx .apx2-swaps .gain{font:700 24px 'Barlow Condensed',sans-serif !important;color:#17774E !important;background:none !important}
+html.apx2 .apx2-tx .apx2-swaps .badge{background:#E6F2EC !important;color:#0D4A31 !important;border:0 !important;border-radius:999px !important;font:600 12px 'IBM Plex Sans',sans-serif !important;padding:2px 10px !important}
+html.apx2 .apx2-tx .apx2-swapnote{grid-column:1 / -1;order:99;font-size:12px !important;line-height:16px !important;color:#5F6B65 !important;margin:0 !important}
+html.apx2 .apx2-tx #top-picks-section:empty{display:none !important}
+@media (max-width:900px){
+ html.apx2 #view-team.show-transfers > main.container.apx2-tx{grid-template-columns:minmax(0,1fr) !important;padding-top:16px !important}
+ html.apx2 .apx2-tx .apx2-routes{grid-template-columns:minmax(0,1fr) !important}
+ html.apx2 .apx2-tx #apex-tree-verdict,html.apx2 .apx2-tx .apx2-planrow,html.apx2 .apx2-tx #sensitivity-section{grid-column:1 !important;grid-row:auto !important}
+ #apx2-tx-top{flex-direction:column;align-items:stretch}
+ #apx2-tx-top .apx2-open{width:100%}
+}
+
+html.apx2 .apx2-tx > #apx2-tx-top{grid-row:1}
+html.apx2 .apx2-tx > #transfer-paths-section{grid-row:2}
+html.apx2 .apx2-tx #apx2-swaps-h{grid-row:6}
+html.apx2 .apx2-tx .apx2-swaps{grid-row:7}
+html.apx2 .apx2-tx .apx2-swapnote{grid-row:8}
+html.apx2 .apx2-tx:has(#sensitivity-body:not(:empty)) #apex-tree-verdict,html.apx2 .apx2-tx:has(#sensitivity-body:not(:empty)) .apx2-planrow{grid-column:1 / -1}
+html.apx2 .apx2-tx:has(#sensitivity-body:not(:empty)) > #sensitivity-section{grid-column:1 / -1;grid-row:5}
+@media (max-width:900px){
+ html.apx2 .apx2-tx #apex-tree-verdict{grid-row:3 !important}
+ html.apx2 .apx2-tx .apx2-planrow{grid-row:4 !important}
+ html.apx2 .apx2-tx > #sensitivity-section{grid-row:5 !important}
+}
 
 
 html.apx2{--apx2-cb:0px}
@@ -20771,7 +20850,7 @@ html[data-apex-ctl-card="off"] #apex-ctl-card {
  
  
  
-const BUILD_VERSION = "1790288999-GW6-30416436";
+const BUILD_VERSION = "1790290154-GW6-1ab10923";
 window.APEX_BUILD = BUILD_VERSION;
  
  
@@ -20828,7 +20907,7 @@ window.APEX_SQUAD_ROLLBACK = false;
 let FPL_ID = null;
 let SQUAD_DATA = [];
 </script>
-<script src="/apex_pool.js?v=1790288999-GW6-30416436"></script>
+<script src="/apex_pool.js?v=1790290154-GW6-1ab10923"></script>
 <script>
 const PLAYER_NAMES = {"1": "Raya", "2": "Arrizabalaga", "3": "Meslier", "4": "Gabriel", "5": "J.Timber", "6": "Saliba", "7": "Lewis-Skelly", "8": "Calafiori", "9": "Hincapie", "10": "White", "11": "Mosquera", "12": "Saka", "13": "Rice", "14": "Eze", "15": "\u00d8degaard", "16": "Madueke", "17": "Merino", "18": "Martinelli", "19": "Zubimendi", "20": "Dowman", "22": "Nwaneri", "23": "F\u00e1bio Vieira", "24": "Nelson", "25": "Gy\u00f6keres", "26": "Havertz", "27": "G.Jesus", "31": "Konsa", "452": "Bruno G.", "557": "Tzolis", "29": "M.Bizot", "30": "Digne", "32": "Cash", "33": "Mings", "34": "Pau", "35": "Bogarde", "36": "Maatsen", "37": "Lindel\u00f6f", "38": "A.Garc\u00eda", "39": "Nedeljkovic", "41": "Buend\u00eda", "44": "Bailey", "45": "McGinn", "46": "Barkley", "47": "Kamara", "48": "Onana", "49": "Iling Jr", "50": "Burrowes", "51": "George Hemmings", "52": "Alysson", "53": "Manzambi", "54": "Gomes", "55": "Watkins", "56": "Abraham", "160": "Garnacho", "166": "N.Jackson", "582": "Madjo", "596": "Ruggeri", "597": "Suzuki", "606": "Rowe", "607": "Lynch", "611": "Wan-Bissaka", "618": "Goretzka", "630": "Harwood-Bellis", "631": "Mbaye", "667": "Wright", "57": "Petrovi\u0107", "58": "Forster", "59": "Dennis", "60": "Hill", "61": "Truffert", "62": "Diakit\u00e9", "63": "Milosavljevi\u0107", "64": "Smith", "65": "J.Araujo", "66": "Soler", "67": "Rayan", "68": "Tavernier", "69": "Scott", "70": "Kluivert", "71": "Cook", "72": "Gannon-Doak", "73": "Adams", "74": "Brooks", "75": "Christie", "76": "T\u00f3th.A", "77": "Adli", "78": "Kroupi.Jr", "79": "Evanilson", "80": "Enes \u00dcnal", "81": "Rodr\u00edguez", "566": "Silva", "573": "Sanchez", "608": "Jebbison", "615": "Di Gregorio", "82": "Kelleher", "83": "Valdimarsson", "84": "Collins", "85": "Van den Berg", "86": "Lewis-Potter", "87": "Ajer", "88": "Kayode", "89": "Henry", "90": "Hickey", "92": "Ji-soo", "93": "Schuster", "94": "Schade", "95": "O.Dango", "96": "Damsgaard", "97": "Jensen", "98": "Janelt", "99": "Milambo", "100": "Carvalho", "102": "Yarmoliuk", "103": "Dasilva", "105": "Anthony", "106": "Thiago", "107": "Furo", "108": "Wilson", "565": "M.Sangar\u00e9", "620": "Diouf", "657": "Nunes", "660": "Fredrick", "661": "Balcombe", "109": "Verbruggen", "111": "Steele", "113": "F.Kad\u0131o\u011flu", "114": "Boscagli", "115": "De Cuyper", "116": "Dunk", "117": "Coppola", "118": "Igor", "119": "Costinha", "120": "Svoboda", "121": "Mitoma", "122": "Minteh", "123": "Hinshelwood", "124": "Gro\u00df", "125": "Georginio", "126": "O'Riley", "127": "Gomez", "128": "Buonanotte", "129": "Ayari", "130": "Wieffer", "132": "Howell", "133": "Watson", "134": "Oriola", "135": "Yohanna", "137": "Tzimas", "138": "Kostoulas", "139": "Ferguson", "328": "Struijk", "504": "Vuskovic", "594": "David", "600": "Osman", "605": "Yalcouy\u00e9", "614": "Hadjam", "624": "Cozier-Duberry", "639": "Andr\u00e9s", "652": "Azeez", "658": "Ibrahim", "28": "Martinez", "40": "Rogers", "101": "Henderson", "136": "Welbeck", "140": "S\u00e1nchez", "141": "J\u00f6rgensen", "142": "James", "143": "Chalobah", "144": "Gusto", "145": "Fofana", "146": "B.Badiashile", "148": "Hato", "149": "Colwill", "150": "M.Sarr", "151": "Acheampong", "152": "Palestra", "154": "Palmer", "156": "Neto", "157": "Est\u00eav\u00e3o", "158": "Gittens", "159": "Caicedo", "161": "Lavia", "163": "D.Essugo", "164": "Quenda", "165": "Jo\u00e3o Pedro", "168": "Marc Guiu", "169": "Mheuka", "170": "Emegha", "200": "Lacroix", "560": "Penders", "561": "Anselmino", "568": "Barco", "583": "Chavarria", "662": "Nicoll-Jazuli", "91": "Pinnock", "104": "Onyeka", "110": "Rushworth", "171": "Dovin", "172": "Wilson", "173": "Thomas", "174": "Kitching", "175": "van Ewijk", "176": "Dasilva", "177": "Kesler-Hayden", "178": "Bidwell", "179": "Latibeaudiere", "180": "Woolfenden", "181": "Brau", "182": "Amenda", "183": "Rudoni", "184": "Grimes", "185": "Sakamoto", "186": "Mason-Clark", "187": "Eccles", "188": "Torp", "189": "Shepherd", "190": "Tchaouna", "191": "Borges Rodrigues", "192": "Andrews", "193": "Wright", "194": "Thomas-Asante", "195": "Simms", "196": "Markelo", "197": "Bassette", "492": "Awoniyi", "575": "Yirenkyi", "584": "Hamer", "599": "Cherif", "623": "Bentley", "655": "Gboho", "656": "Mfuni", "42": "Guessand", "153": "Disasi", "198": "Henderson", "199": "Benitez", "202": "Richards", "203": "Canvot", "204": "Mitchell", "205": "Sosa", "206": "Chadi Riad", "207": "Mingueza", "208": "Sarr", "210": "Wharton", "211": "Yeremy", "212": "Hughes", "213": "Lerma", "214": "Kamada", "215": "Devenny", "216": "Esse", "217": "M.Fran\u00e7a", "218": "Doucour\u00e9", "219": "J.Rak-Sakyi", "220": "Cardines", "221": "Drakes-Thomas", "222": "Strand Larsen", "223": "Mateta", "224": "Nketiah", "225": "Uche", "241": "McNeil", "555": "Matthews", "577": "Tomiyasu", "588": "Khalaili", "595": "Gozo", "633": "Ahanor", "643": "Chilwell", "644": "Timber", "647": "Osorio", "21": "N\u00f8rgaard", "209": "Johnson", "226": "Pickford", "227": "Travers", "228": "King", "229": "Tarkowski", "230": "Branthwaite", "231": "Keane", "232": "O'Brien", "233": "Mykolenko", "234": "Patterson", "235": "Aznou", "236": "Dewsbury-Hall", "238": "Grealish", "239": "Garner", "242": "George", "243": "Alcaraz", "244": "Armstrong", "245": "Dibling", "246": "R\u00f6hl", "247": "Hackney", "248": "Beto", "249": "Barry", "649": "Maitland-Niles", "654": "Graham", "250": "Leno", "251": "Lecomte", "252": "McNally", "253": "Andersen", "254": "Robinson", "255": "J.Cuenca", "256": "Tete", "257": "Bassey", "258": "Castagne", "261": "Iwobi", "262": "Smith Rowe", "263": "Kevin", "264": "Bobb", "265": "Berge", "266": "Cairney", "268": "King", "269": "Sessegnon", "270": "Reed", "271": "Muniz", "272": "Kusi-Asare", "569": "Gonzalo", "570": "Palacios", "580": "Charles", "610": "De Fougerolles", "626": "Zepa", "635": "Larsson", "636": "\u00c1ngel", "650": "Affengruber", "240": "Iroegbunam", "273": "Phillips", "274": "Butland", "275": "Cartwright", "276": "Lo-Tutala", "277": "Egan", "278": "Hughes", "279": "Ajayi", "280": "Coyle", "281": "Drameh", "282": "Giles", "283": "Jacob", "284": "McCarthy", "285": "McNair", "286": "Belloumi", "287": "Millar", "288": "Dowell", "289": "Crooks", "290": "Slater", "291": "Matazo", "292": "\u00d6m\u00fcr", "293": "Kamara", "294": "Zambrano", "295": "McBurnie", "296": "Akintola", "297": "Gyabi", "298": "Destan", "299": "Burstow", "340": "Gelhardt", "556": "Targett", "563": "Morita", "572": "Tzolakis", "574": "Hjert\u00f8-Dahl", "576": "Stroud", "585": "Herrington", "586": "Mendy", "589": "Gourna-Douath", "617": "Cho", "632": "Ansah", "637": "Vaz", "638": "Norton-Cuffy", "642": "Thomas", "645": "Mouzakitis", "259": "Diop", "267": "Luki\u0107", "300": "Walton", "301": "Palmer", "302": "Button", "303": "Kipr\u00e9", "304": "O'Shea", "305": "Davis", "306": "Greaves", "307": "Johnson", "308": "Furlong", "309": "N\u00fa\u00f1ez", "310": "Matusiwa", "311": "Burns", "312": "Taylor", "313": "Clarke", "314": "Ogbene", "315": "Fatawu", "316": "Emersonn", "317": "Hirst", "318": "Philogene", "319": "Szmodics", "320": "Akpom", "321": "Walle Egeli", "322": "Al-Hamadi", "323": "McAteer", "324": "Mehmeti", "554": "Van Oevelen", "562": "Maeda", "564": "Scherpen", "571": "Florentino", "591": "Enciso", "592": "Ouattara", "602": "Humphreys", "619": "Palacios", "640": "Flemming", "260": "Wilson", "326": "Perri", "327": "Bijol", "329": "Rodon", "330": "Bogle", "331": "Gudmundsson", "332": "Justin", "333": "Bornauw", "334": "Muharemovi\u0107", "335": "Stach", "336": "Okafor", "337": "Aaronson", "338": "Ampadu", "339": "Longstaff", "341": "Gnonto", "342": "Harrison", "343": "James", "344": "Gruev", "345": "Tanaka", "346": "Calvert-Lewin", "347": "Nmecha", "348": "Piroe", "349": "Mateo Joseph", "385": "Trafford", "598": "Elvedi", "603": "Lienou", "604": "Cresswell", "625": "Cairns", "629": "Zetterer", "641": "Bard", "648": "Bahoya", "350": "A.Becker", "351": "Mamardashvili", "352": "Woodman", "353": "Pecsi", "354": "Jaros", "355": "Davies", "356": "Virgil", "357": "Frimpong", "358": "Kerkez", "359": "Gomez", "360": "Bradley", "361": "Lucky", "362": "Jacquet", "363": "Leoni", "364": "Tsimikas", "365": "Ramsay", "366": "Wirtz", "367": "Gakpo", "368": "Szoboszlai", "369": "Ngumoha", "370": "Chiesa", "371": "Gravenberch", "372": "Mac Allister", "373": "C.Jones", "374": "Endo", "375": "Nyoni", "376": "Bajcetic", "377": "Munoz", "378": "McConnell", "379": "Isak", "380": "Ekitik\u00e9", "381": "Koumas", "382": "Danns", "383": "Elliott", "579": "Araujo", "627": "Barcola", "155": "Enzo", "237": "Ndiaye", "384": "Donnarumma", "386": "Bettinelli", "387": "O'Reilly", "388": "Gu\u00e9hi", "389": "Matheus N.", "390": "R\u00faben", "391": "Gvardiol", "392": "A\u00eft-Nouri", "393": "Khusanov", "394": "Alleyne", "395": "Lewis", "396": "Vitor Reis", "397": "Semenyo", "398": "Foden", "399": "Cherki", "400": "Doku", "402": "Rodrigo", "404": "Reijnders", "406": "Kova\u010di\u0107", "407": "Echeverri", "408": "Phillips", "409": "Mukasa", "410": "Monga", "411": "Haaland", "481": "Anderson", "587": "Rulli", "616": "Bouaddi", "621": "McAidoo", "622": "Braithwaite", "628": "Allan", "653": "Samba", "43": "Tielemans", "131": "Baleba", "162": "Andrey Santos", "325": "Darlow", "412": "Lammens", "413": "Bayindir", "414": "Heaton", "415": "Dorgu", "416": "De Ligt", "417": "Dalot", "418": "Maguire", "419": "Martinez", "420": "Yoro", "421": "Heaven", "422": "Mazraoui", "423": "Shaw", "424": "Amass", "425": "Fredricson", "426": "B.Fernandes", "427": "Mbeumo", "428": "Cunha", "429": "Rashford", "430": "Mount", "431": "Amad", "432": "Mainoo", "433": "Ugarte", "434": "J.Fletcher", "435": "Lacey", "436": "Collyer", "437": "Bendito Mantato", "438": "Fletcher", "439": "\u0160e\u0161ko", "440": "Zirkzee", "441": "Obi", "405": "N.Gonzalez", "442": "Pope", "443": "Gillespie", "444": "Jaouen", "445": "Thiaw", "446": "Sch\u00e4r", "447": "Botman", "448": "Burn", "449": "Hall", "450": "Livramento", "451": "A.Murphy", "453": "Barnes", "454": "Elanga", "456": "J.Ramsey", "457": "J.Murphy", "458": "Joelinton", "459": "L.Miley", "460": "Willock", "461": "Tour\u00e9", "462": "Steur", "463": "Woltemade", "464": "Wissa", "465": "Osula", "466": "Neave", "559": "Bamba", "567": "Horn\u00ed\u010dek", "593": "Dedi\u0107", "609": "Shahar", "634": "Fernandez-Pardo", "659": "Miley", "663": "Pivas", "664": "Salia", "665": "Mills", "666": "Thompson", "167": "Delap", "201": "Mu\u00f1oz", "467": "Sels", "468": "John", "469": "N.Williams", "470": "Morato", "471": "Milenkovi\u0107", "472": "Murillo", "473": "Aina", "474": "Jair Cunha", "475": "Savona", "476": "O.Richards", "477": "Abbott", "478": "Netz", "479": "Bindon", "480": "Gibbs-White", "482": "Hudson-Odoi", "483": "Ndoye", "484": "Hutchinson", "485": "Bakwa", "486": "McAtee", "487": "Dominguez", "488": "I.Sangar\u00e9", "489": "Yates", "490": "Wood", "491": "Igor Jesus", "493": "Kalimuendo", "558": "Schlager", "581": "Diomande", "590": "Benda", "112": "Van Hecke", "147": "Tosin", "401": "Marmoush", "403": "S\u00e1vio", "455": "Tonali", "494": "Vicario", "495": "Austin", "496": "Kinsky", "497": "Dubravka", "498": "Senesi", "499": "Pedro Porro", "500": "Romero", "502": "Robertson", "503": "Van de Ven", "505": "Spence", "506": "Udogie", "507": "Phillips", "508": "Davies", "509": "Byfield", "510": "Rowswell", "511": "Souza", "512": "Kudus", "513": "Xavi", "514": "Tel", "515": "Maddison", "516": "Bentancur", "517": "Odobert", "518": "P.M.Sarr", "519": "Gallagher", "520": "Bergvall", "521": "Kulusevski", "522": "Gray", "523": "Moore", "524": "Olusesi", "525": "Fernandes", "526": "Solanke", "527": "Richarlison", "528": "Scarlett", "578": "Mudryk", "601": "Williams-Barnett", "501": "Danso", "529": "Roefs", "530": "Patterson", "531": "Ellborg", "532": "Ballard", "533": "Mukiele", "534": "Hume", "535": "Alderete", "536": "Reinildo", "537": "Seelt", "538": "Hjelde", "539": "O'Nien", "540": "Masuaku", "541": "Meunier", "542": "E.Le F\u00e9e", "543": "Diarra", "544": "Xhaka", "545": "Sadiki", "546": "Adingra", "547": "Mundle", "548": "Rigg", "549": "Talbi", "550": "Jocelin.T", "551": "N.Angulo", "552": "Brobbey", "553": "Isidor", "612": "Methalie", "613": "Ahoka", "646": "Fofana", "651": "J.Angulo"};
 const TRANSFER_RECS = [];
@@ -45137,7 +45216,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <footer class="footer">
   <span>GW6</span>
-  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1790288999-GW6-30416436</span>
+  <span style="opacity:.4;margin-left:12px;font-size:0.75rem;" title="Build version — the timestamp and pool hash of this HTML">build 1790290154-GW6-1ab10923</span>
 </footer>
 
 
@@ -47517,11 +47596,160 @@ a[href*="rank_milestones"] {
     if (ub && /^↶\s*/.test(txt(ub))) ub.textContent = txt(ub).replace(/^↶\s*/, '');
   }
 
+
+   
+   
+   
+   
+  function wordsTx(el) {
+    if (!el || el.getAttribute('data-apx2w')) return;
+    var w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null), n;
+    while ((n = w.nextNode())) {
+      var t = n.nodeValue, u = t.replace(/\bxPts\b/g, 'points').replace(/\bFTs\b/g, 'free transfers').replace(/\bFT\b/g, 'free transfer')
+        .replace(/Rank swing/g, 'Bold').replace(/the plan-ahead tree/gi, 'the planner');
+      if (u !== t) n.nodeValue = u;
+    }
+    el.setAttribute('data-apx2w', '1');
+  }
+  function transfers() {
+    var view = $('#view-team.show-transfers');
+    if (!view) return;
+    var main = $('#view-team > main.container');
+    var body = $('#transfer-paths-body');
+    if (!main || !body) return;
+    main.classList.add('apx2-tx');
+     
+    var grid = $$(':scope > div', body).filter(function (d) { return d.children.length >= 2 && !d.classList.contains('section-title'); })[0];
+    var gwTo = '';
+    if (grid) {
+      grid.classList.add('apx2-routes');
+      $$(':scope > div', grid).forEach(function (card, i) {
+        card.classList.add('apx2-rt');
+        if (i === 0) card.classList.add('best');
+        var tag = card.firstElementChild;
+        if (tag && !tag.classList.contains('apx2-tag')) {
+          var tt = txt(tag);
+          tag.classList.add('apx2-tag');
+          tag.textContent = /MODEL/i.test(tt) ? 'Model’s pick' : /PATIENT/i.test(tt) ? 'Patient' : /RANK|SWING|BOLD/i.test(tt) ? 'Bold' : tt;
+        }
+        var note = $$(':scope > div', card).filter(function (d) { return !d.querySelector('span') && txt(d).length > 40; })[0];
+        var full = txt(card);
+        var sub = $('.apx2-rsub', card);
+        if (!sub && tag) {
+          var own = full.match(/under (\d+)% owned/i);
+          var lab = txt(tag) === 'Bold' ? (own ? 'players under ' + own[1] + '% owned' : 'low ownership')
+            : txt(tag) === 'Patient' ? (/Bank the free transfer|Save your transfer/.test(full) ? 'save this week' : 'waits for news') : 'no limits';
+          sub = document.createElement('span');
+          sub.className = 'apx2-rsub';
+          sub.textContent = lab;
+          tag.parentNode.insertBefore(sub, tag.nextSibling);
+        }
+        $$(':scope > div', card).forEach(function (d) {
+          var t = txt(d);
+          if (/^The plan-ahead tree decides/.test(t) || /^The planner decides/.test(t)) d.classList.add('apx2-hide');
+          var lab = $('span', d);
+          if (lab && /^TOTAL TO (GW\d+)/i.test(txt(lab))) {
+            d.classList.add('apx2-tot');
+            gwTo = txt(lab).match(/GW\d+/)[0];
+            lab.textContent = 'Gain to ' + gwTo;
+            var v = $('b', d);
+            if (v && / xPts$/.test(txt(v))) v.textContent = txt(v).replace(/ xPts$/, '');
+          } else if (lab && /^GW\d+$/.test(txt(lab))) {
+            d.classList.add('apx2-wk');
+            $$('span', d).forEach(function (sp) { if (txt(sp) === 'Bank the free transfer') sp.textContent = 'Save your transfer'; });
+          }
+        });
+        if (note) { note.classList.add('apx2-note'); wordsTx(note); }
+      });
+    }
+     
+    var intro = $(':scope > p.muted', body);
+    var top = $('#apx2-tx-top');
+    if (!top) {
+      top = document.createElement('div');
+      top.id = 'apx2-tx-top';
+      main.insertBefore(top, main.firstChild);
+    }
+    var k = gwTo;
+    if (top.getAttribute('data-k') !== k) {
+      top.setAttribute('data-k', k);
+      top.innerHTML = '<div><h1>Transfers</h1><p>' + (gwTo ? 'Three routes to ' + gwTo + ', all from the same planner.' : 'Three routes, all from the same planner.') +
+        ' Open the planner to act on one.</p></div><button type="button" class="apx2-open">Open the planner</button>';
+      $('.apx2-open', top).onclick = function () { var a = $('.txp-tree-link'); if (a) a.click(); };
+    }
+    var foot = $('#apx2-tx-foot');
+    var tol = intro ? (txt(intro).match(/within about ([0-9.]+) xPts/) || [])[1] : null;
+    if (!foot && grid) {
+      foot = document.createElement('p');
+      foot.id = 'apx2-tx-foot';
+      grid.parentNode.insertBefore(foot, grid.nextSibling);
+    }
+    if (foot) {
+      var ft = (tol ? 'The planner can only separate routes to within about ' + tol + ' points at this size, so routes closer than that are shown as level, not ranked. ' : '') +
+        'Points are projected points compared with making no transfers, after any hits.';
+      if (foot.textContent !== ft) foot.textContent = ft;
+    }
+     
+    var sec = $('#transfers-section');
+    var tv = $('#apex-tree-verdict');
+    if (tv && tv.firstElementChild) {
+      var inner = tv.firstElementChild, kids = $$(':scope > div', inner);
+      if (kids[0] && /^Tree verdict/.test(txt(kids[0]))) {
+        var what = txt(kids[0]).replace(/^Tree verdict\s*[—-]\s*/, '');
+        var roll = /^Roll/i.test(what);
+        kids[0].setAttribute('data-was', txt(kids[0]));
+        kids[0].innerHTML = '<span class="lb">The planner says</span>' + (roll ? '<span class="pill">Save your transfer</span>' : '') +
+          '<b>' + (roll ? 'Save your transfer this week' : esc(what.replace(/\bFT\b/g, 'free transfer'))) + '</b>';
+      }
+      if (kids[1]) wordsTx(kids[1]);
+    }
+    if (sec) {
+      $$(':scope > *', sec).forEach(function (c) {
+        var t = txt(c);
+        if (c.classList.contains('section-title')) c.classList.add('apx2-hide');
+        else if (/^Transfer Plan:/.test(t)) {
+          c.classList.add('apx2-planrow');
+          $$('span', c).forEach(function (sp) { if (txt(sp) === 'Transfer Plan:') sp.classList.add('apx2-hide'); });
+          $$('span', c).forEach(function (sp) {
+            var f = sp.firstChild;
+            if (f && f.nodeType === 3 && /^\s*FTs available\s*$/.test(f.nodeValue)) f.nodeValue = 'Free transfers ';
+            if (f && f.nodeType === 3 && /^\s*Applied\s*$/.test(f.nodeValue)) f.nodeValue = 'Made ';
+          });
+          $$('button', c).forEach(function (bt) { if (/Roll FT/.test(txt(bt))) bt.textContent = 'Save your transfer'; });
+        } else if (c.tagName === 'P' && /^Ranked by/.test(t)) c.classList.add('apx2-swapnote');
+        else if (c.classList.contains('transfers') || /No individual transfer upgrades/.test(t)) {
+          c.classList.add('apx2-swaps');
+          $$('p', c).forEach(function (p) { if (/^No individual transfer upgrades/.test(txt(p))) p.textContent = 'No single swap is worth it this week. Your squad is in good shape.'; });
+          $$('.gain', c).forEach(function (g) {
+            if (!g.getAttribute('title')) g.setAttribute('title', txt(g));
+            var m = txt(g).match(/^([+\-−][0-9.]+) xPts/);
+            if (m) g.textContent = m[1];
+          });
+        }
+      });
+      if (!$('#apx2-swaps-h', sec) && $('.apx2-swaps', sec)) {
+        var h = document.createElement('div');
+        h.id = 'apx2-swaps-h';
+        h.innerHTML = '<h2>Best single swaps</h2><span>Points gained over the next 3 gameweeks</span>';
+        sec.insertBefore(h, $('.apx2-swaps', sec));
+      }
+    }
+    var st = $('#sensitivity-section');
+    if (st && !$('#apx2-st-h', st)) {
+      var sh = document.createElement('div');
+      sh.id = 'apx2-st-h';
+      sh.innerHTML = '<h2>Stress test</h2><p>Checks the model’s top move against bad luck: injuries, rotation and fixtures going the other way.</p>';
+      st.insertBefore(sh, st.firstChild);
+    }
+    var sb = $('#sensitivity-btn');
+    if (sb && /Stress-test this pick/.test(txt(sb))) sb.textContent = 'Run it';
+  }
+
   var busy = false, timer = null;
   function apply() {
     if (busy) return;
     busy = true;
-    try { header(); stats(); lines(); plan(); verdict(); league(); tree(); } catch (e) { if (window.console) console.warn('[apx2]', e); }
+    try { header(); stats(); lines(); plan(); verdict(); league(); tree(); transfers(); } catch (e) { if (window.console) console.warn('[apx2]', e); }
     busy = false;
   }
   function schedule() { clearTimeout(timer); timer = setTimeout(apply, 60); }
