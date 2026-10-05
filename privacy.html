@@ -226,18 +226,23 @@ html.apx2 .apx2-swipe{display:none}
     <p>If you edit a player's expected minutes, that single edit is saved to our
     hosting provider (Cloudflare) so it can follow you between devices. We store only:
     your FPL Team ID, the gameweek, and the minute values you set, nothing else, no name,
-    no email, no payment data. These records expire automatically after about 45 days. An
+    no email, no payment data, plus a scrambled code made by your browser that shows later
+    changes come from the same browser. Anyone who knows a Team ID can read the minutes saved
+    for it (they are only minute values); only the browser that first saved them can change
+    them. These records expire automatically after about 45 days. An
     FPL Team ID is public but can be linked back to a person via the FPL API, so we treat
     it as personal data; our basis for holding it is that it's needed to deliver a feature
     you chose to use. To have yours removed, email us (below).</p>
 
     <h2>Analytics</h2>
     <p>We count page visits with Cloudflare Web Analytics and our own simple counter. Neither
-    uses cookies or stores anything on your device, and neither is tied to your FPL identity:
-    they record the page or tool used, rough location and device type. This runs for every
-    visitor.</p>
+    uses cookies or stores anything on your device, and neither is tied to your FPL identity.
+    Cloudflare records the page visited, rough location and device type. Our counter keeps
+    daily totals only: which page or tool was used, which link brought visitors, and whether
+    they are new or returning. This runs for every visitor.</p>
     <p>Google Analytics 4 uses cookies, so it only loads if you press Accept on the banner.
-    Press Decline and it never loads. If you accept, our counter also remembers on your device
+    Press Decline and it never loads. Your Team ID is removed from the page address before
+    anything is sent to Google. If you accept, our counter also remembers on your device
     whether you visited in an earlier week and which link brought you here, so we can tell
     new visitors from returning ones.</p>
 
