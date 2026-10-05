@@ -374,7 +374,9 @@ html.apx2 .apx2-swipe{display:none}
     ch.className = 'apx2-mw';
     ch.innerHTML = '<div class="bars">' + pts.map(function (p) {
       return '<span class="b' + (p.v > 1 ? ' hi' : '') + '" style="height:' + (p.v / mx * 100).toFixed(1) + '%" title="' + p.l + ': ' + p.v.toFixed(3) + '"></span>';
-    }).join('') + '</div><div class="ax"><span>' + pts[0].l + '</span><span>Average miss by matchweek, lower is better. Darker bars miss by more than a goal. Hover a bar for its figure.</span><span>' + pts[pts.length - 1].l + '</span></div>';
+    }).join('') + '</div><div class="ax"><span>' + pts[0].l + '</span><span>Average miss by matchweek, lower is better. Darker bars miss by more than a goal. Tap or hover a bar for its figure.</span><span>' + pts[pts.length - 1].l + '</span></div>' + '<div class="tapv" aria-live="polite" style="font-size:13px;min-height:18px;margin-top:4px;color:var(--muted,#5F6B65)"></div>';
+     
+    ch.addEventListener('click', function (e) { var b = e.target && e.target.closest ? e.target.closest('.b') : null; var t = ch.querySelector('.tapv'); if (b && t) t.textContent = b.getAttribute('title') || ''; });
     grid.parentNode.insertBefore(ch, grid);
     grid.classList.add('apx2-hide');
   }
