@@ -279,7 +279,7 @@ html.apx2 .apx2-swipe{display:none}
     if (sub) {
       var gw = (txt(stamp).match(/Data to (GW\d+)/) || [])[1];
       var fin = sNote ? (txt(sNote).match(/(\d+ of \d+ gameweeks final)/) || [])[1] : '';
-      sub.textContent = [gw ? 'Data to ' + gw : '', 'confirmed fixtures only', fin].filter(Boolean).join(' · ');
+      sub.textContent = (fin && !/^(\d+) of \1 /.test(fin)) ? fin : '';    
       sub.classList.add('apx2-meta');
     }
      
