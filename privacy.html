@@ -7,7 +7,7 @@
 <meta name="description" content="What FPL Apex does and doesn't do with your data.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&display=optional" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{ --cream:#F4F6F4; --ink:#0E1B16; --teal:#17774E; --teal-dark:#17774E; --muted:#5F6B65; --line:#E9EDEA; }
   *{ margin:0; box-sizing:border-box; }
@@ -24,7 +24,7 @@
   .card{ background:#fff; border:1px solid var(--line); border-radius:14px; padding:28px 32px; }
   .home{ display:inline-block; margin-bottom:22px; font-size:.88rem; text-decoration:none; }
 </style>
-<style id="apex-ui-v2">:root{--apex-ui:v2}body{font-variant-numeric:tabular-nums}h1,h2,.va-team-name{font-family:'Barlow Condensed','IBM Plex Sans',sans-serif !important;letter-spacing:0 !important}:focus-visible{outline:3px solid #F2B632 !important;outline-offset:2px !important}.apex-logo-v2{display:inline-flex;align-items:center;gap:7px;color:#0E1B16;text-decoration:none;white-space:nowrap}.apex-logo-v2-fpl{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:14px;color:#5F6B65;letter-spacing:.06em}.apex-logo-v2-apex{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:22px;letter-spacing:.04em;margin-left:-2px}</style><link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%277%27 fill=%27%230E1B16%27/%3E%3Cpath d=%27M4 26 L16 5 L28 26 H20.7 L16 17.8 L11.3 26 Z%27 fill=%27%233DBE84%27/%3E%3C/svg%3E"><style id="apx2-css">#apx2-hd{position:sticky;top:0;z-index:900;height:64px;box-sizing:border-box;padding:0 40px;background:#FFFFFF;border-bottom:1px solid #DCE2DE;display:flex;align-items:center;gap:28px;font-family:'IBM Plex Sans',sans-serif}
+<style id="apex-ui-v2">:root{--apex-ui:v2}body{font-variant-numeric:tabular-nums}h1,h2,.va-team-name{font-family:'Barlow Condensed','IBM Plex Sans',sans-serif !important;letter-spacing:0 !important}:focus-visible{outline:3px solid #F2B632 !important;outline-offset:2px !important}.apex-logo-v2{display:inline-flex;align-items:center;gap:7px;color:#0E1B16;text-decoration:none;white-space:nowrap}.apex-logo-v2-fpl{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:14px;color:#5F6B65;letter-spacing:.06em}.apex-logo-v2-apex{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:22px;letter-spacing:.04em;margin-left:-2px}nav[data-more=r]{-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 36px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 36px),transparent)}nav[data-more=l]{-webkit-mask-image:linear-gradient(90deg,transparent,#000 36px);mask-image:linear-gradient(90deg,transparent,#000 36px)}nav[data-more=lr]{-webkit-mask-image:linear-gradient(90deg,transparent,#000 36px,#000 calc(100% - 36px),transparent);mask-image:linear-gradient(90deg,transparent,#000 36px,#000 calc(100% - 36px),transparent)}</style><link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%277%27 fill=%27%230E1B16%27/%3E%3Cpath d=%27M4 26 L16 5 L28 26 H20.7 L16 17.8 L11.3 26 Z%27 fill=%27%233DBE84%27/%3E%3C/svg%3E"><style id="apx2-css">#apx2-hd{position:sticky;top:0;z-index:900;height:64px;box-sizing:border-box;padding:0 40px;background:#FFFFFF;border-bottom:1px solid #DCE2DE;display:flex;align-items:center;gap:28px;font-family:'IBM Plex Sans',sans-serif}
 #apx2-hd .lg{display:flex;align-items:center;gap:10px;text-decoration:none;color:#0E1B16;flex:none}
 #apx2-hd .lg .f{font:600 14px/1 'Barlow Condensed',sans-serif;color:#5F6B65;letter-spacing:.06em}
 #apx2-hd .lg .a{font:700 22px/1 'Barlow Condensed',sans-serif;letter-spacing:.04em;margin-left:-5px;color:#0E1B16}
@@ -98,6 +98,8 @@ html.apx2 body:has(#apex-cookie-banner){padding-bottom:60px !important}
 @media (min-width:901px) and (max-height:820px){
  html.apx2:has(#apex-cookie-banner) #apx2-verdict p{display:none !important}
 }
+
+html.apx2 #apx2-verdict #apx2-help p{display:block !important}
 
 
 html.apx2 .apx2-hide{display:none !important}
@@ -253,7 +255,7 @@ html.apx2 .apx2-swipe{display:none}
     them (they also expire on their own after ~45 days).</p>
   </div>
 </div>
-<script id="apx2-pages">(function () {
+<script>(function(){function u(n){var r=n.scrollWidth-n.clientWidth;if(r<=2){n.removeAttribute('data-more');return;}var v=(n.scrollLeft>2?'l':'')+(n.scrollLeft<r-2?'r':'');if(v){n.setAttribute('data-more',v);}else{n.removeAttribute('data-more');}}function a(){Array.prototype.forEach.call(document.querySelectorAll('nav'),function(n){var s=getComputedStyle(n).overflowX;if(s!=='auto'&&s!=='scroll'){n.removeAttribute('data-more');return;}if(!n.__apxMore){n.__apxMore=1;n.addEventListener('scroll',function(){u(n);},{passive:true});}u(n);});}if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',a);}else{a();}addEventListener('load',a);addEventListener('resize',a);setTimeout(a,1500);setTimeout(a,4000);})();</script><script id="apx2-pages">(function () {
    
    
   function $(s, r) { return (r || document).querySelector(s); }
