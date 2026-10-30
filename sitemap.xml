@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://fplapex.com/</loc>
+    <loc>https://fplapex.com/</loc><lastmod>2026-10-30</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://fplapex.com/solver_app.html</loc>
+    <loc>https://fplapex.com/solver_app.html</loc><lastmod>2026-10-30</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -14,17 +14,17 @@
        visitor on to the solver or the home page, and has no content of its own to list.
        evaluation.html added back: its noindex was dropped once 26/27 results were on it. -->
   <url>
-    <loc>https://fplapex.com/evaluation.html</loc>
+    <loc>https://fplapex.com/evaluation.html</loc><lastmod>2026-10-30</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <!-- defcon_tracker.html removed 2026-07-07 (Marcus: not needed for now;
        may restore later — see push_site.py + RUN.bat [4e] restore notes). -->
   <url>
-    <loc>https://fplapex.com/privacy.html</loc>
+    <loc>https://fplapex.com/privacy.html</loc><lastmod>2026-10-30</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.1</priority>
   </url>
-  <url><loc>https://fplapex.com/leaders.html</loc></url>
-  <url><loc>https://fplapex.com/help.html</loc></url>
+  <url><loc>https://fplapex.com/leaders.html</loc><lastmod>2026-10-30</lastmod></url>
+  <url><loc>https://fplapex.com/help.html</loc><lastmod>2026-10-30</lastmod></url>
 </urlset>
