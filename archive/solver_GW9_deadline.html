@@ -40,7 +40,7 @@
 <script> window.APEX_FT_VALUE = 1.5;</script>
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
 <title>FPL Solver, Chip Planner &amp; Free Hit Optimiser — FPL Apex</title>
-<meta name="description" content="Plan FPL transfers, chips, and Free Hit squads. Live xG-based projections, a rival head-to-head simulator, and a mini-league table. Free FPL tool.">
+<meta name="description" content="Plan FPL transfers, chips, and Free Hit squads. with live xG-based projections. Free FPL tool.">
 <meta name="keywords" content="FPL solver, FPL chip planner, FPL Free Hit, FPL Wildcard, FPL transfer planner, FPL DGW, Fantasy Premier League tools">
 <link rel="canonical" href="https://fplapex.com/solver_app.html">
 <meta name="robots" content="index, follow">
@@ -48,13 +48,13 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="FPL Apex">
 <meta property="og:title" content="Apex FPL Solver — Chip Planner &amp; Free Hit Optimiser">
-<meta property="og:description" content="Plan FPL transfers and chips with live xG projections. Free Hit ILP, Wildcard solver, mini-league simulator.">
+<meta property="og:description" content="Plan FPL transfers and chips with live xG projections. Free Hit ILP and Wildcard solver.">
 <meta property="og:url" content="https://fplapex.com/solver_app.html">
 <meta property="og:image" content="https://fplapex.com/og-image.png">
 
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Apex FPL Solver — Chip Planner &amp; Free Hit Optimiser">
-<meta name="twitter:description" content="Plan FPL transfers + chips with live xG, plus a mini-league simulator.">
+<meta name="twitter:description" content="Plan FPL transfers + chips with live xG projections.">
 <meta name="twitter:image" content="https://fplapex.com/og-image.png">
 
 <script type="application/ld+json">
@@ -63,7 +63,7 @@
   "@type": "WebApplication",
   "name": "Apex FPL Solver",
   "url": "https://fplapex.com/solver_app.html",
-  "description": "Fantasy Premier League solver with chip planner, Free Hit optimiser, transfer recommender, and mini-league simulator. Powered by Dixon-Coles + xG.",
+  "description": "Fantasy Premier League solver with chip planner, Free Hit optimiser, and transfer recommender. Powered by Dixon-Coles + xG.",
   "applicationCategory": "SportsApplication",
   "operatingSystem": "Web Browser",
   "offers": { "@type": "Offer", "price": "0", "priceCurrency": "GBP" }
@@ -6025,7 +6025,7 @@ html body .va-twopane-rail .apex-plain-themlab { top: 43px !important; }
 </style>
 
 <script id="apx-consent">(function(){if(window.apexConsent){return;}var N="apex_notrack";function g(k){try{return localStorage.getItem(k);}catch(e){return null;}}function s(k,v){try{if(v===null){localStorage.removeItem(k);}else{localStorage.setItem(k,v);}}catch(e){}}try{var qs=location.search||"";if(qs.indexOf("notrack=1")>-1){s(N,"1");}else if(qs.indexOf("notrack=0")>-1){s(N,null);}}catch(e){}s("apex_consent",null);s("apx_seen",null);s("apx_ref",null);try{var h=location.hostname||"",ds=["",h,"."+h,"."+h.replace(/^www\./,"")];(document.cookie||"").split(";").forEach(function(c){var n=c.split("=")[0].trim();if(/^_ga/.test(n)){ds.forEach(function(d){document.cookie=n+"=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/"+(d?";domain="+d:"");});}});}catch(e){}function ok(){return false;}function when(f){}function always(f){if(typeof f==="function"&&g(N)!=="1"){try{f();}catch(e){}}}function choice(){return null;}function set(v){}window.apexConsent={ok:ok,when:when,always:always,set:set,choice:choice};})();</script>
-</head>
+<style id="apex-archive-switches">#px-rival-wrap,.apx2-rival,#rival-mode-card{display:none!important}.aps-card[data-preset="high"]{display:none!important}</style></head>
 
 <body data-apex-view="team">
 
@@ -6095,7 +6095,6 @@ html.apex-offseason #view-landing .hero-sub::after {
     <a href="/" class="nav-link">← FPL Apex</a>
     <a href="#" class="nav-link" onclick="switchView('team'); return false;">My Squad</a>
     
-    <a href="#" class="nav-link" onclick="switchView('league'); return false;">Mini-League</a>
     <a href="#" class="nav-link" onclick="switchView('fixtures'); return false;">Fixtures</a>
     <a href="#" class="nav-link" onclick="switchView('decision'); return false;">Decision report</a>
     
@@ -51435,5 +51434,5 @@ document.addEventListener('DOMContentLoaded', () => {
 })();
 </script>
 
-</body>
+<script> (function(){window.APEX_MINI_LEAGUE_ON=false;var f=window.switchView;if(typeof f==='function'){window.switchView=function(v){return f(v==='league'?'team':v);};}if(location.hash==='#league'){try{history.replaceState(null,'',location.pathname+location.search);}catch(e){}}window.APEX_DIFFERENTIAL_ON=false;var g=window.selectPreset;if(typeof g==='function'){window.selectPreset=function(n){if(n==='high')return;return g(n);};}})();</script></body>
 </html>
