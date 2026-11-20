@@ -21,12 +21,12 @@
   <!-- defcon_tracker.html removed 2026-07-07 (Marcus: not needed for now;
        may restore later — see push_site.py + RUN.bat [4e] restore notes). -->
   <url>
-    <loc>https://fplapex.com/privacy.html</loc><lastmod>2026-11-17</lastmod>
+    <loc>https://fplapex.com/privacy.html</loc><lastmod>2026-11-20</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.1</priority>
   </url>
   <url><loc>https://fplapex.com/help.html</loc><lastmod>2026-11-18</lastmod></url>
-  <url><loc>https://fplapex.com/gw/gw9.html</loc><lastmod>2026-10-31</lastmod></url>
-  <url><loc>https://fplapex.com/gw/gw10.html</loc><lastmod>2026-11-06</lastmod></url>
+  <url><loc>https://fplapex.com/gw/gw9.html</loc><lastmod>2026-11-20</lastmod></url>
+  <url><loc>https://fplapex.com/gw/gw10.html</loc><lastmod>2026-11-20</lastmod></url>
   <url><loc>https://fplapex.com/gw/gw11.html</loc><lastmod>2026-11-20</lastmod></url>
 </urlset>
