@@ -21,7 +21,7 @@
   <!-- defcon_tracker.html removed 2026-07-07 (Marcus: not needed for now;
        may restore later — see push_site.py + RUN.bat [4e] restore notes). -->
   <url>
-    <loc>https://fplapex.com/privacy.html</loc><lastmod>2026-11-21</lastmod>
+    <loc>https://fplapex.com/privacy.html</loc><lastmod>2026-11-25</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.1</priority>
   </url>

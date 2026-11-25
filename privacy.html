@@ -412,7 +412,7 @@ html.apx-dark body #apx2-stats .t:not(#apxd-a):not(#apxd-b):not(#apxd-c) > :firs
   <a class="home" href="/">← Back to FPL Apex</a>
   <div class="card">
     <h1>Privacy</h1>
-    <div class="updated">Last updated: 21 November 2026</div>
+    <div class="updated">Last updated: 25 November 2026</div>
 
     <h2>The short version</h2>
     <p>FPL Apex has no accounts and no sign-ups. We don't sell, share, or monetise
@@ -425,7 +425,7 @@ html.apx-dark body #apx2-stats .t:not(#apxd-a):not(#apxd-b):not(#apxd-c) > :firs
     Fantasy Premier League API in your browser, through a small relay we run on Cloudflare
     (FPL does not let a web page ask it directly). Cloudflare keeps a log of the relay's
     requests for about 7 days; each line shows the Team ID asked for, the time and the
-    country and city the request came from. Once a week we save the Team IDs, dates and
+    country and city the request came from. Once a day we save the Team IDs, times and
     places from that log, so they are kept for the same 12 months as the record below. Since
     17 November 2026 the relay also saves each Team ID it loads as it happens, with the date and
     the country and city, on the same 12 month rule. Your
@@ -465,7 +465,9 @@ html.apx-dark body #apx2-stats .t:not(#apxd-a):not(#apxd-b):not(#apxd-c) > :firs
     of which page or tool was used, which parts of the solver were opened, which home page links and boxes were tapped, when a Solve failed
     and why, which link or website brought visitors (the site's name only), and how long the
     solver took, plus the Team ID record described above. None of these totals carries a Team
-    ID. This runs for every visitor.</p>
+    ID. This runs for every visitor. Cloudflare keeps the detail of each page visit for only a few
+    days, so once a day we save a copy: the page, the minute, the country, the device type and browser,
+    and the name of the website you came from. It carries no Team ID and is deleted after 12 months.</p>
     <p>We do not use Google Analytics or any other cookies, so there is no cookie banner.</p>
 
     <h2>Cookies &amp; local storage</h2>
